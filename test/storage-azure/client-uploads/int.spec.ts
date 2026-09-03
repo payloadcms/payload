@@ -1,16 +1,19 @@
 import type { ContainerClient } from '@azure/storage-blob'
 import type { Payload } from 'payload'
 
-import { BlobServiceClient } from '@azure/storage-blob'
+import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob'
 import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import { mediaSlug } from '../shared.js'
+import { mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
+import { mediaHeaderOnlyWithSizesSlug } from './collections/MediaHeaderOnlyWithSizes.js'
+import { mediaNoContentSlug } from './collections/MediaNoContent.js'
 import { mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -83,7 +86,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     expect(blobKey).toBe('duplicate-target-1.png')
 
-    await payload.delete({ collection: mediaSlug, id: seedDoc.id })
+    await payload.delete({ id: seedDoc.id, collection: mediaSlug })
   })
 
   it('preserves a user-defined prefix.defaultValue across the plugin', async () => {
@@ -99,5 +102,124 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       .getBlobClient(`${upload.prefix}/${upload.filename}`)
       .getProperties()
     expect(props.contentLength).toBeGreaterThan(0)
+  })
+
+  describe('content requirement retrieval paths', () => {
+    const createdDocs: Array<{ collection: string; id: number | string }> = []
+
+    afterEach(async () => {
+      for (const doc of createdDocs) {
+        await payload.delete({ id: doc.id, collection: doc.collection })
+      }
+      createdDocs.length = 0
+    })
+
+    const stageAzureClientUpload = async ({
+      collectionSlug,
+      file,
+      filename,
+      mimeType,
+    }: {
+      collectionSlug: string
+      file: Buffer
+      filename: string
+      mimeType: string
+    }) => {
+      const signedResponse = await restClient.POST('/storage-azure-generate-signed-url', {
+        body: JSON.stringify({ collectionSlug, filename, mimeType }),
+      })
+      expect(signedResponse.status).toBe(200)
+
+      const signed: { docPrefix: string; filename?: string; url: string } =
+        await signedResponse.json()
+      const storedFilename = signed.filename || filename
+
+      await new BlockBlobClient(signed.url).uploadData(file, {
+        blobHTTPHeaders: { blobContentType: mimeType },
+      })
+
+      const form = new FormData()
+      form.append(
+        'file',
+        JSON.stringify({
+          clientUploadContext: { prefix: signed.docPrefix },
+          collectionSlug,
+          filename: storedFilename,
+          mimeType,
+          size: file.length,
+        }),
+      )
+
+      return { collectionSlug, form }
+    }
+
+    it('performs no server-side download for a non-image upload needing no bytes', async () => {
+      const fileBuffer = await readFile(path.resolve(dirname, '../../uploads/audio.mp3'))
+      const { collectionSlug, form } = await stageAzureClientUpload({
+        collectionSlug: mediaNoContentSlug,
+        file: fileBuffer,
+        filename: 'no-content-tripwire.mp3',
+        mimeType: 'audio/mpeg',
+      })
+
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+      const res = await restClient.POST(`/${collectionSlug}`, { body: form })
+
+      expect(res.status).toBe(201)
+      const { doc } = await res.json()
+      createdDocs.push({ id: doc.id, collection: collectionSlug })
+
+      expect(doc.filesize).toBe(23_334)
+      expect(doc.mimeType).toBe('audio/mpeg')
+      expect(downloadSpy).not.toHaveBeenCalled()
+      downloadSpy.mockRestore()
+    })
+
+    it('performs one bounded range download for an image needing only dimensions', async () => {
+      const fileBuffer = await readFile(path.resolve(dirname, '../../uploads/2mb.jpg'))
+      const { collectionSlug, form } = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlySlug,
+        file: fileBuffer,
+        filename: 'header-only-tripwire.jpg',
+        mimeType: 'image/jpeg',
+      })
+
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+      const res = await restClient.POST(`/${collectionSlug}`, { body: form })
+
+      expect(res.status).toBe(201)
+      const { doc } = await res.json()
+      createdDocs.push({ id: doc.id, collection: collectionSlug })
+
+      expect(doc.width).toBe(9000)
+      expect(doc.height).toBe(9000)
+      expect(doc.filesize).toBe(2_215_474)
+      expect(downloadSpy).toHaveBeenCalledTimes(1)
+      expect(downloadSpy).toHaveBeenCalledWith(0, 1024 * 1024, expect.anything())
+      downloadSpy.mockRestore()
+    })
+
+    it('performs one full streamed download for an image needing generated sizes', async () => {
+      const fileBuffer = await readFile(path.resolve(dirname, '../../uploads/2mb.jpg'))
+      const { collectionSlug, form } = await stageAzureClientUpload({
+        collectionSlug: mediaHeaderOnlyWithSizesSlug,
+        file: fileBuffer,
+        filename: 'full-content-tripwire.jpg',
+        mimeType: 'image/jpeg',
+      })
+
+      const downloadSpy = vi.spyOn(BlockBlobClient.prototype, 'download')
+      const res = await restClient.POST(`/${collectionSlug}`, { body: form })
+
+      expect(res.status).toBe(201)
+      const { doc } = await res.json()
+      createdDocs.push({ id: doc.id, collection: collectionSlug })
+
+      expect(doc.sizes?.thumbnail?.width).toBe(400)
+      expect(doc.sizes?.thumbnail?.height).toBe(300)
+      expect(downloadSpy).toHaveBeenCalledTimes(1)
+      expect(downloadSpy).toHaveBeenCalledWith(0, undefined, expect.anything())
+      downloadSpy.mockRestore()
+    })
   })
 })

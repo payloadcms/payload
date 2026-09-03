@@ -19,8 +19,12 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   config,
   req,
 }) => {
-  if (config.upload?.useTempFiles && collectionConfig.upload) {
-    const { file } = req
+  const { file } = req
+  const isClientUploadTempFile = Boolean(
+    file?.tempFilePath && Object.prototype.hasOwnProperty.call(file, 'clientUploadContext'),
+  )
+
+  if (collectionConfig.upload && (config.upload?.useTempFiles || isClientUploadTempFile)) {
     const fileArray = [{ file }]
     await mapAsync(fileArray, async ({ file }) => {
       // Still need this check because this will not be populated if using local API
