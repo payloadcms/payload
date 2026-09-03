@@ -594,6 +594,11 @@ export interface Diff {
         [k: string]: unknown;
       }[]
     | null;
+  richtextWithConstrainedRelationship?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
   richtextWithCustomDiff?:
     | {
         [k: string]: unknown;
@@ -625,6 +630,7 @@ export interface Diff {
 export interface Text {
   id: string;
   text: string;
+  owner?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1357,6 +1363,7 @@ export interface DiffSelect<T extends boolean = true> {
   relationshipHasManyPolymorphic2?: T;
   zeroDepthRelationship?: T;
   richtext?: T;
+  richtextWithConstrainedRelationship?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
   textCannotRead?: T;
@@ -1385,6 +1392,7 @@ export interface DiffSelect<T extends boolean = true> {
  */
 export interface TextSelect<T extends boolean = true> {
   text?: T;
+  owner?: T;
   updatedAt?: T;
   createdAt?: T;
 }
