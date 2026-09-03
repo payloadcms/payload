@@ -2383,6 +2383,67 @@ describe('Versions', () => {
       )
     })
 
+    test('should render a replaced block when both block schemas contain unnamed layouts', async () => {
+      await payload.update({
+        id: diffID,
+        collection: diffCollectionSlug,
+        data: {
+          blocks: diffDoc.blocks?.map((block, i) => {
+            if (i === 1) {
+              return {
+                blockType: 'TabsBlock',
+                namedTab1InBlock: {
+                  textInNamedTab1InBlock: 'replacement named tab',
+                },
+                textInRowInUnnamedTab2InBlock: 'replacement row',
+                textInUnnamedTab2InBlock: 'replacement unnamed tab',
+              }
+            }
+
+            return block
+          }),
+        },
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const sourceField = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+      await expect(sourceField.locator('.html-diff__diff-old')).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+
+      const replacementField = page.locator(
+        '[data-field-path="blocks.1.textInRowInUnnamedTab2InBlock"]',
+      )
+      await expect(replacementField.locator('.html-diff__diff-new')).toHaveText('replacement row')
+
+      const blocks = page.locator('[data-field-path="blocks"]')
+      await blocks.locator('.diff-collapser__toggle-button').first().click()
+      await expect(blocks.locator('.diff-collapser__field-change-count').first()).toHaveText(
+        '5 changed fields',
+      )
+
+      await blocks.locator('.diff-collapser__toggle-button').first().click()
+      const changedRow = blocks.locator('.iterable-diff__row', {
+        has: page.getByText('Block 02', { exact: true }),
+      })
+      await changedRow.locator('.diff-collapser__toggle-button').first().click()
+      await expect(changedRow.locator('.diff-collapser__field-change-count')).toHaveText(
+        '5 changed fields',
+      )
+    })
+
     test('correctly renders diff for named tabs within block fields', async () => {
       await navigateToDiffVersionView()
 
