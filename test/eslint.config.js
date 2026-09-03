@@ -47,6 +47,7 @@ export const testEslintConfig = [
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      'payload/no-vitest-scoped-methods': 'error',
       'vitest/no-standalone-expect': [
         'error',
         {
