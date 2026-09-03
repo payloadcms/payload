@@ -13,10 +13,16 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import {
+  getLocalizedUploadProperties,
+  restoreUploadDataFromDocument,
+  sanitizeUploadData,
+} from '../../uploads/sanitizeUploadData.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
@@ -92,7 +98,8 @@ export const restoreVersionOperation = async <
       throw new NotFound(req.t)
     }
 
-    const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersionToRestore
+    const { parent: parentDocID } = rawVersionToRestore
+    let versionToRestoreWithLocales = rawVersionToRestore.version
 
     // /////////////////////////////////////
     // Access
@@ -161,8 +168,15 @@ export const restoreVersionOperation = async <
       showHiddenFields: true,
     })
 
+    if (collectionConfig.upload && !overrideAccess) {
+      versionToRestoreWithLocales = restoreUploadDataFromDocument(
+        sanitizeUploadData(versionToRestoreWithLocales, 'update'),
+        prevDocWithLocales,
+      )
+    }
+
     // Use locale-hoisted version data for validation while preserving all locales in docWithLocales.
-    const prevVersionDoc = await afterRead({
+    let prevVersionDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
       depth: 0,
@@ -176,16 +190,26 @@ export const restoreVersionOperation = async <
       showHiddenFields: true,
     })
 
+    if (collectionConfig.upload && !overrideAccess) {
+      prevVersionDoc = restoreUploadDataFromDocument(
+        sanitizeUploadData(prevVersionDoc, 'update'),
+        prevDocWithLocales,
+        {
+          locale: validationLocale,
+          localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
+        },
+      )
+    }
+
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
     req.context.isRestoringVersion = true
 
-    const reqWithValidationLocale = Object.assign(Object.create(req), req, {
-      fallbackLocale: null,
-      locale: validationLocale,
-    })
+    const reqWithValidationLocale = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
+    reqWithValidationLocale.fallbackLocale = null
+    reqWithValidationLocale.locale = validationLocale
 
     let data = await beforeValidate({
       id: parentDocID,

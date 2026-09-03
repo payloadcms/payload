@@ -7,7 +7,7 @@ import { isURLAllowed } from '../utilities/isURLAllowed.js'
 import { safeFetch } from './safeFetch.js'
 
 type Args = {
-  data: FileData
+  data: Pick<FileData, 'filename' | 'url'>
   req: PayloadRequest
   uploadConfig: UploadConfig
 }
