@@ -21,38 +21,37 @@ import { Video } from './collections/Video/index.js'
 import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'fields-relationship',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      Relationship,
+      RelationshipFilterFalse,
+      RelationshipFilterTrue,
+      Relation1,
+      Relation2,
+      Restricted,
+      RelationWithTitle,
+      RelationshipUpdatedExternally,
+      Collection1,
+      Collection2,
+      Video,
+      Podcast,
+      MixedMedia,
+      Versions,
+    ],
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: ['en'],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    Relationship,
-    RelationshipFilterFalse,
-    RelationshipFilterTrue,
-    Relation1,
-    Relation2,
-    Restricted,
-    RelationWithTitle,
-    RelationshipUpdatedExternally,
-    Collection1,
-    Collection2,
-    Video,
-    Podcast,
-    MixedMedia,
-    Versions,
-  ],
-  localization: {
-    locales: ['en'],
-    defaultLocale: 'en',
-    fallback: true,
-  },
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

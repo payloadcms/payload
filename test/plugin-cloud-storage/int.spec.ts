@@ -9,12 +9,11 @@ import { APIError } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
 import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Config } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
@@ -86,7 +85,7 @@ async function verifyUploads({
 // needs to be here as it imports vitest functions and conflicts with playwright that uses jest
 export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   if (process.env.CI) {
-    return describe
+    return test.describe
   }
 
   // Check that localstack is running
@@ -94,16 +93,16 @@ export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
 
   if (code !== 0) {
     console.warn('Localstack is not running. Skipping test suite.')
-    return describe.skip
+    return test.describe.skip
   }
 
   console.log('Localstack is running. Running test suite.')
 
-  return describe
+  return test.describe
 }
 
-describe('@payloadcms/plugin-cloud-storage', () => {
-  describe('getFilePrefix', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => {
+  test.describe('getFilePrefix', () => {
     const mockReq = {
       payload: {
         find: () => ({ docs: [] }),
@@ -115,8 +114,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       upload: {},
     } as any
 
-    describe('upload reference prefix sanitization', () => {
-      it('should return a valid prefix unchanged', async () => {
+    test.describe('upload reference prefix sanitization', () => {
+      test('should return a valid prefix unchanged', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           uploadReference: { prefix: 'media/images' },
@@ -126,7 +125,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(result).toBe('media/images')
       })
 
-      it('should strip invalid segments from the prefix', async () => {
+      test('should strip invalid segments from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           uploadReference: { prefix: '../other-collection/private' },
@@ -137,7 +136,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(result).not.toContain('..')
       })
 
-      it('should handle deeply nested invalid segments', async () => {
+      test('should handle deeply nested invalid segments', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           uploadReference: { prefix: 'a/../../outside' },
@@ -148,7 +147,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(result).not.toContain('..')
       })
 
-      it('should strip leading slashes from the prefix', async () => {
+      test('should strip leading slashes from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           uploadReference: { prefix: '/absolute/path' },
@@ -159,7 +158,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(result).not.toMatch(/^\//)
       })
 
-      it('should strip dot segments from the prefix', async () => {
+      test('should strip dot segments from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           uploadReference: { prefix: './relative/./path' },
@@ -169,7 +168,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(result).toBe('relative/path')
       })
 
-      it('should normalize backslash separators', async () => {
+      test('should normalize backslash separators', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           uploadReference: { prefix: '..\\..\\outside' },
@@ -179,7 +178,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(result).not.toContain('..')
       })
 
-      it('should strip control characters from the prefix', async () => {
+      test('should strip control characters from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           uploadReference: { prefix: 'media\x00/images' },
@@ -189,7 +188,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(result).toBe('media/images')
       })
 
-      it('should return empty string for a prefix of only invalid segments', async () => {
+      test('should return empty string for a prefix of only invalid segments', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           uploadReference: { prefix: '../../..' },
@@ -200,8 +199,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       })
     })
 
-    describe('fallback to DB lookup', () => {
-      it('should return empty string when there is no upload reference or DB match', async () => {
+    test.describe('fallback to DB lookup', () => {
+      test('should return empty string when there is no upload reference or DB match', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           filename: 'test.png',
@@ -210,7 +209,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(result).toBe('')
       })
 
-      it('should return prefix from DB when doc has a prefix', async () => {
+      test('should return prefix from DB when doc has a prefix', async () => {
         const reqWithDoc = {
           payload: {
             find: () => ({ docs: [{ prefix: 'db-prefix' }] }),
@@ -227,64 +226,55 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     })
   })
 
-  describe('sanitizeFilename', () => {
-    it('should return a simple filename unchanged', () => {
+  test.describe('sanitizeFilename', () => {
+    test('should return a simple filename unchanged', () => {
       expect(sanitizeFilename('image.png')).toBe('image.png')
     })
 
-    it('should return only the base name from a path', () => {
+    test('should return only the base name from a path', () => {
       expect(sanitizeFilename('some/path/to/file.jpg')).toBe('file.jpg')
       expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
     })
 
-    it('should normalize backslash separators', () => {
+    test('should normalize backslash separators', () => {
       expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
     })
 
-    it('should reject standalone dot filenames', () => {
+    test('should reject standalone dot filenames', () => {
       expect(() => sanitizeFilename('.')).toThrow(APIError)
       expect(() => sanitizeFilename('..')).toThrow(APIError)
     })
 
-    it('should reject empty filenames', () => {
+    test('should reject empty filenames', () => {
       expect(() => sanitizeFilename('')).toThrow(APIError)
       expect(() => sanitizeFilename('/')).toThrow(APIError)
       expect(() => sanitizeFilename('//')).toThrow(APIError)
     })
 
-    it('should strip control characters', () => {
+    test('should strip control characters', () => {
       expect(sanitizeFilename('file\x00name\x1f.txt')).toBe('filename.txt')
       expect(sanitizeFilename('file\x80name\x9f.txt')).toBe('filename.txt')
     })
 
-    it('should preserve unicode filenames', () => {
+    test('should preserve unicode filenames', () => {
       expect(sanitizeFilename('résumé.pdf')).toBe('résumé.pdf')
       expect(sanitizeFilename('日本語.txt')).toBe('日本語.txt')
     })
 
-    it('should treat percent-encoded strings as literal filenames', () => {
+    test('should treat percent-encoded strings as literal filenames', () => {
       expect(sanitizeFilename('%2e%2e%2f')).toBe('%2e%2e%2f')
     })
   })
 
-  describe('integration (non-composite prefixes)', () => {
-    let payload: Payload
-    let restClient: NextRESTClient
+  test.describe('integration (non-composite prefixes)', () => {
+    let client: AWS.S3Client
     let TEST_BUCKET: string
 
-    beforeAll(async () => {
-      ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
-      TEST_BUCKET = process.env.S3_BUCKET!
-    })
-
-    afterAll(async () => {
-      await payload.destroy()
-    })
-
-    let client: AWS.S3Client
     describeIfInCIOrHasLocalstack()('plugin-cloud-storage (non-composite prefixes)', () => {
-      describe('S3', () => {
-        beforeAll(async () => {
+      test.describe('S3', () => {
+        test.beforeAll(async () => {
+          TEST_BUCKET = process.env.S3_BUCKET!
+
           client = new AWS.S3({
             credentials: {
               accessKeyId: process.env.S3_ACCESS_KEY_ID!,
@@ -299,11 +289,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           await clearTestBucket(client)
         })
 
-        afterEach(async () => {
+        test.afterEach(async () => {
           await clearTestBucket(client)
         })
 
-        it('can upload', async () => {
+        test('can upload', async ({ payload }) => {
           const upload = await payload.create({
             collection: mediaSlug,
             data: {},
@@ -323,7 +313,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
         })
 
-        it('can upload with prefix', async () => {
+        test('can upload with prefix', async ({ payload }) => {
           const upload = await payload.create({
             collection: mediaWithPrefixSlug,
             data: {},
@@ -345,7 +335,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           )
         })
 
-        it('should not upload to S3 when mimeType validation fails', async () => {
+        test('should not upload to S3 when mimeType validation fails', async ({ payload }) => {
           // Get initial bucket contents
           const listBefore = await client.send(
             new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }),
@@ -368,7 +358,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           expect(fileCountAfter).toBe(fileCountBefore)
         })
 
-        it('should upload to S3 when mimeType validation passes', async () => {
+        test('should upload to S3 when mimeType validation passes', async ({ payload }) => {
           // Upload a valid PNG file
           const upload = await payload.create({
             collection: restrictedMediaSlug,
@@ -394,7 +384,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           expect($metadata.httpStatusCode).toBe(200)
         })
 
-        it('should store correct URLs for sized images', async () => {
+        test('should store correct URLs for sized images', async ({ payload }) => {
           const upload = await payload.create({
             collection: mediaSlug,
             data: {},
@@ -440,7 +430,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           }
         })
 
-        it('should handle collections without imageSizes correctly', async () => {
+        test('should handle collections without imageSizes correctly', async ({ payload }) => {
           const upload = await payload.create({
             collection: mediaWithPrefixSlug,
             data: {},
@@ -470,7 +460,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           expect((rawDbData as any)?.sizes).toBeFalsy()
         })
 
-        it('should use custom generateFileURL in beforeChange when disablePayloadAccessControl is true', async () => {
+        test('should use custom generateFileURL in beforeChange when disablePayloadAccessControl is true', async ({
+          payload,
+        }) => {
           // This test verifies that custom generateFileURL is used in beforeChange hook
           // when disablePayloadAccessControl: true, preventing "undefined" from appearing in URLs
           const upload = await payload.create({
@@ -510,7 +502,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           expect(apiResponse.url).toContain(prefix)
         })
 
-        it('should use custom generateFileURL even without disablePayloadAccessControl', async () => {
+        test('should use custom generateFileURL even without disablePayloadAccessControl', async ({
+          payload,
+        }) => {
           const upload = await payload.create({
             collection: mediaWithGenerateFileURLSlug,
             data: {},
@@ -548,10 +542,10 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       })
     })
 
-    describe('External data persistence', () => {
+    test.describe('External data persistence', () => {
       const createdIDs: (number | string)[] = []
 
-      afterEach(async () => {
+      test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
             await payload.delete({ id, collection: testMetadataSlug })
@@ -562,7 +556,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         createdIDs.length = 0
       })
 
-      it('should automatically persist metadata returned by custom adapters', async () => {
+      test('should automatically persist metadata returned by custom adapters', async ({
+        payload,
+      }) => {
         const upload = await payload.create({
           collection: testMetadataSlug,
           data: {
@@ -598,7 +594,10 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
       })
 
-      it('supports upload instructions when the adapter does not', async () => {
+      test('supports upload instructions when the adapter does not', async ({
+        payload,
+        restClient,
+      }) => {
         await restClient.login({ slug: 'users' })
 
         const file = fs.readFileSync(path.resolve(dirname, '../uploads/image.png'))
@@ -650,7 +649,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(doc.sizes.thumbnail.filename).toBeTruthy()
       })
 
-      it('should persist metadata on update operations', async () => {
+      test('should persist metadata on update operations', async ({ payload }) => {
         const upload = await payload.create({
           collection: testMetadataSlug,
           data: {
@@ -701,10 +700,10 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       })
     })
 
-    describe('User afterChange hook propagation', () => {
+    test.describe('User afterChange hook propagation', () => {
       const createdIDs: (number | string)[] = []
 
-      afterEach(async () => {
+      test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
             await payload.delete({ id, collection: mediaWithThrowingHookSlug })
@@ -715,7 +714,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         createdIDs.length = 0
       })
 
-      it('should surface user afterChange errors that throw during the plugin internal update on create', async () => {
+      test('should surface user afterChange errors that throw during the plugin internal update on create', async ({
+        payload,
+      }) => {
         await expect(
           payload.create({
             collection: mediaWithThrowingHookSlug,
@@ -725,7 +726,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         ).rejects.toThrow('User afterChange hook throws error')
       })
 
-      it('should surface user afterChange errors during reupload and preserve the previous file in S3', async () => {
+      test('should surface user afterChange errors during reupload and preserve the previous file in S3', async ({
+        payload,
+      }) => {
         const imagePath = path.resolve(dirname, '../uploads/image.png')
         const buildFile = (name: string) => ({
           name,
@@ -764,10 +767,10 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       })
     })
 
-    describe('Reupload with overwriteExistingFiles', () => {
+    test.describe('Reupload with overwriteExistingFiles', () => {
       const createdIDs: (number | string)[] = []
 
-      afterEach(async () => {
+      test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
             await payload.delete({ id, collection: mediaWithOverwriteSlug })
@@ -778,7 +781,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         createdIDs.length = 0
       })
 
-      it('should preserve size variants in S3 when reupload reuses the same filename', async () => {
+      test('should preserve size variants in S3 when reupload reuses the same filename', async ({
+        payload,
+      }) => {
         const imagePath = path.resolve(dirname, '../uploads/image.png')
         const buildFile = (name: string) => ({
           name,
@@ -843,16 +848,16 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       })
     })
 
-    describe('Azure', () => {
-      it.todo('can upload')
+    test.describe('Azure', () => {
+      test.todo('can upload')
     })
 
-    describe('GCS', () => {
-      it.todo('can upload')
+    test.describe('GCS', () => {
+      test.todo('can upload')
     })
 
-    describe('R2', () => {
-      it.todo('can upload')
+    test.describe('R2', () => {
+      test.todo('can upload')
     })
   })
 })
