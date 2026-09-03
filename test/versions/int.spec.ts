@@ -765,6 +765,85 @@ describe('Versions', () => {
       })
     })
 
+    describe('Draft read access', () => {
+      const createdDocumentIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdDocumentIDs) {
+          await payload.delete({ id, collection: draftCollectionSlug })
+        }
+        createdDocumentIDs.length = 0
+      })
+
+      it('should evaluate findByID access against the latest draft when the base document is denied', async () => {
+        const document = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'base denied',
+            title: 'Draft access allowed',
+          },
+          draft: true,
+        })
+        createdDocumentIDs.push(document.id)
+
+        await payload.update({
+          id: document.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'draft allowed',
+          },
+          draft: true,
+        })
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'draft allowed',
+          },
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result?.description).toBe('draft allowed')
+      })
+
+      it('should deny findByID access when only the base document matches', async () => {
+        const document = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'base allowed',
+            title: 'Draft access denied',
+          },
+          draft: true,
+        })
+        createdDocumentIDs.push(document.id)
+
+        await payload.update({
+          id: document.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'draft denied',
+          },
+          draft: true,
+        })
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'base allowed',
+          },
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result).toBeNull()
+      })
+    })
+
     describe('Restore', () => {
       afterEach(async () => {
         await cleanupDocuments({
