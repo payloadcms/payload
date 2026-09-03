@@ -48,7 +48,19 @@ export const testEslintConfig = [
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       'payload/no-vitest-scoped-methods': 'error',
-      'vitest/no-standalone-expect': 'error',
+      'vitest/no-standalone-expect': [
+        'error',
+        {
+          additionalTestBlockFunctions: [
+            'it.options',
+            'test.options',
+            'describe.options',
+            'describe.for',
+            'it',
+            'testModern',
+          ],
+        },
+      ],
     },
   },
   {
