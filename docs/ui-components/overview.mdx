@@ -1,0 +1,178 @@
+---
+title: UI Components
+label: Overview
+order: 10
+desc: Use the React components that power the Payload Admin Panel in your own Custom Components.
+keywords: ui, components, react, admin panel, custom components, payload ui
+---
+
+The `@payloadcms/ui` package contains the React components used throughout the Payload Admin Panel. You can use these components to build Custom Components that match the surrounding Admin Panel interface and behavior.
+
+Each component guide includes working examples for the selected version of Payload, common props, accessibility guidance, and any providers or setup the component requires.
+
+## Components
+
+<CardGroup variant="compact">
+  <Card
+    title="AnimateHeight"
+    description="Animate a container as its content changes height."
+    link="/docs/ui-components/animate-height"
+  />
+  <Card
+    title="Banner"
+    description="Display contextual notices, warnings, and errors."
+    link="/docs/ui-components/banner"
+  />
+  <Card
+    title="Button"
+    description="Trigger actions with Payload's standard button styles."
+    link="/docs/ui-components/button"
+  />
+  <Card
+    title="Card"
+    description="Present content in a clickable or navigable card."
+    link="/docs/ui-components/card"
+  />
+  <Card
+    title="CodeEditor"
+    description="Display and edit code with Payload's Monaco-based editor."
+    link="/docs/ui-components/code-editor"
+  />
+  <Card
+    title="Collapsible"
+    description="Show and hide a section beneath a collapsible header."
+    link="/docs/ui-components/collapsible"
+  />
+  <Card
+    title="CopyToClipboard"
+    description="Copy text to the clipboard with built-in feedback."
+    link="/docs/ui-components/copy-to-clipboard"
+  />
+  <Card
+    title="DatePicker"
+    description="Select calendar dates and times."
+    link="/docs/ui-components/date-picker"
+  />
+  <Card
+    title="Dropzone"
+    description="Accept files through drag, drop, and paste interactions."
+    link="/docs/ui-components/dropzone"
+  />
+  <Card
+    title="ErrorPill"
+    description="Show a compact validation or error indicator."
+    link="/docs/ui-components/error-pill"
+  />
+  <Card
+    title="Gutter"
+    description="Align content with the Admin Panel's responsive gutters."
+    link="/docs/ui-components/gutter"
+  />
+  <Card
+    title="Hamburger"
+    description="Render Payload's animated menu toggle."
+    link="/docs/ui-components/hamburger"
+  />
+  <Card
+    title="Link"
+    description="Navigate with Payload's router-aware link."
+    link="/docs/ui-components/link"
+  />
+  <Card
+    title="List and Pagination Controls"
+    description="Add pagination, sorting, and selection to Admin lists."
+    link="/docs/ui-components/list-and-pagination-controls"
+  />
+  <Card
+    title="Modals and Drawers"
+    description="Present focused actions and supporting content in overlays."
+    link="/docs/ui-components/modals-and-drawers"
+  />
+  <Card
+    title="Motion and Loading"
+    description="Communicate loading and animate layout changes."
+    link="/docs/ui-components/motion-and-loading"
+  />
+  <Card
+    title="Navigation Controls"
+    description="Compose Admin menu and step navigation controls."
+    link="/docs/ui-components/navigation-controls"
+  />
+  <Card
+    title="Pill"
+    description="Display compact metadata, statuses, and actions."
+    link="/docs/ui-components/pill"
+  />
+  <Card
+    title="PillSelector"
+    description="Choose from a compact group of pill-shaped options."
+    link="/docs/ui-components/pill-selector"
+  />
+  <Card
+    title="Popup and PopupList"
+    description="Build contextual menus and lists of actions."
+    link="/docs/ui-components/popup"
+  />
+  <Card
+    title="ReactSelect and Select"
+    description="Add select inputs styled for the Payload Admin Panel."
+    link="/docs/ui-components/react-select"
+  />
+  <Card
+    title="SearchBar"
+    description="Filter content with a complete, debounced search control."
+    link="/docs/ui-components/search-filter"
+  />
+  <Card
+    title="ShimmerEffect"
+    description="Show a loading placeholder while content resolves."
+    link="/docs/ui-components/shimmer-effect"
+  />
+  <Card
+    title="Table"
+    description="Display rows with Payload's responsive table styles."
+    link="/docs/ui-components/table"
+  />
+  <Card
+    title="Thumbnail"
+    description="Render media thumbnails with file-type fallbacks."
+    link="/docs/ui-components/thumbnail"
+  />
+  <Card
+    title="TimezonePicker"
+    description="Select from a configured list of timezones."
+    link="/docs/ui-components/timezone-picker"
+  />
+  <Card
+    title="Tooltip"
+    description="Provide contextual labels on hover or focus."
+    link="/docs/ui-components/tooltip"
+  />
+  <Card
+    title="Upload"
+    description="Extend upload-enabled Collection file workflows."
+    link="/docs/ui-components/upload"
+  />
+</CardGroup>
+
+<Banner type="warning">
+  UI component APIs can change between major versions of Payload. Use the
+  version selector to view examples that match the version installed in your
+  project.
+</Banner>
+
+## Using UI components
+
+Inside a Payload Admin Panel Custom Component, import components from `@payloadcms/ui`:
+
+```tsx
+'use client'
+
+import { Button } from '@payloadcms/ui'
+
+export function SaveButton() {
+  return <Button>Save changes</Button>
+}
+```
+
+Some components depend on context provided by the Admin Panel. Each guide calls out those requirements when a component cannot be rendered independently.

@@ -1,0 +1,81 @@
+---
+title: Navigation Controls
+label: Navigation Controls
+order: 180
+desc: Compose Payload Admin navigation controls and step navigation state.
+keywords: ui, components, navigation, nav, menu, group, breadcrumb, step nav
+---
+
+Payload's navigation controls support the Admin Panel's menu, collapsible groups, and step navigation. These components are intended for Custom Components rendered inside the Admin Panel.
+
+## Import
+
+```tsx
+import { Hamburger, NavGroup, NavToggler, SetStepNav } from '@payloadcms/ui'
+```
+
+## Menu state
+
+<ComponentPreview component="Hamburger" example="states" />
+
+`Hamburger` renders the visual open or closed state. `NavToggler` provides the Admin-aware button that opens and closes the navigation and saves the desktop preference.
+
+```tsx
+<NavToggler>
+  <Hamburger />
+</NavToggler>
+```
+
+## Navigation groups
+
+`NavGroup` renders a labeled, collapsible group in the Admin navigation. Its open state is persisted through Payload's preferences provider.
+
+```tsx
+<NavGroup label="Group label">
+  <a href="/admin/example">Navigation item</a>
+</NavGroup>
+```
+
+`label` is required and is used both as the visible group heading and as the key the open state is stored under in preferences. Pass `isOpen` to choose the group's initial state.
+
+## Step navigation
+
+`SetStepNav` updates the Admin Panel's current step navigation and renders no visible element itself.
+
+```tsx
+<SetStepNav
+  nav={[
+    { label: 'Collection', url: '/admin/collections/example' },
+    { label: 'Document' },
+  ]}
+/>
+```
+
+Each item accepts a `label` and an optional `url`. Keep the `nav` array stable when possible so the context is not updated on every render.
+
+## Common props
+
+These are the props most commonly used. See the exported types in `@payloadcms/ui` for the complete list.
+
+### NavGroup
+
+| Prop          | Type        | Default | Description                                |
+| ------------- | ----------- | ------- | ------------------------------------------ |
+| `label` \*    | `string`    | —       | Labels the group and keys its saved state. |
+| `children` \* | `ReactNode` | —       | Renders the navigation items in the group. |
+| `isOpen`      | `boolean`   | —       | Sets the group's initial expanded state.   |
+
+### NavToggler
+
+| Prop        | Type        | Default | Description                                  |
+| ----------- | ----------- | ------- | -------------------------------------------- |
+| `children`  | `ReactNode` | —       | Renders the button contents.                 |
+| `className` | `string`    | —       | Adds a class to the toggle button.           |
+| `id`        | `string`    | —       | Sets the button ID.                          |
+| `tabIndex`  | `number`    | `0`     | Sets the button's keyboard navigation order. |
+
+_\* An asterisk denotes that a prop is required._
+
+## Provider requirements
+
+`NavToggler` and `NavGroup` depend on the navigation, preferences, translation, and window information supplied by the Admin Panel. `SetStepNav` depends on Payload's step navigation context. Use them within Admin Panel Custom Components rather than as standalone website navigation primitives.

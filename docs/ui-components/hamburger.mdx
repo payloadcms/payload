@@ -1,0 +1,30 @@
+---
+title: Hamburger
+label: Hamburger
+order: 130
+desc: Display Payload's open and close navigation icons with the Hamburger component.
+keywords: ui, component, hamburger, navigation, menu, icon
+---
+
+The `Hamburger` component displays the icon used to represent open and closed navigation states in the Payload Admin Panel.
+
+## Import
+
+```tsx
+import { Hamburger } from '@payloadcms/ui'
+```
+
+## States
+
+<ComponentPreview component="Hamburger" example="states" />
+
+`Hamburger` renders the visual state only. Place it inside the button that controls your navigation and manage `isActive` from that control's state.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop        | Type                | Default | Description                                     |
+| ----------- | ------------------- | ------- | ----------------------------------------------- |
+| `isActive`  | `boolean`           | `false` | Switches from the menu icon to a close icon.    |
+| `closeIcon` | `'x' \| 'collapse'` | `'x'`   | Selects the icon displayed in the active state. |

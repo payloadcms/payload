@@ -1,0 +1,38 @@
+---
+title: CodeEditor
+label: CodeEditor
+order: 60
+desc: Display and edit structured text with Payload's CodeEditor component.
+keywords: ui, component, code, editor, monaco, json
+---
+
+The `CodeEditor` component wraps Monaco Editor with Payload's styling and automatic height behavior.
+
+## Import
+
+`CodeEditor` loads Monaco eagerly. Use `CodeEditorLazy` to defer loading the editor until it renders, which keeps Monaco out of the initial bundle of a Client Component.
+
+```tsx
+import { CodeEditor, CodeEditorLazy } from '@payloadcms/ui'
+```
+
+## Read-only usage
+
+<ComponentPreview component="CodeEditor" example="readOnly" />
+
+Set `defaultLanguage` to enable the appropriate syntax highlighting. Use `readOnly` when displaying code that should not be edited.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop                   | Type                       | Default | Description                                     |
+| ---------------------- | -------------------------- | ------- | ----------------------------------------------- |
+| `value`                | `string`                   | —       | Code displayed by the editor.                   |
+| `defaultLanguage`      | `string`                   | —       | Sets the Monaco language used for highlighting. |
+| `onChange`             | `(value?: string) => void` | —       | Runs when editable content changes.             |
+| `readOnly`             | `boolean`                  | `false` | Prevents editing.                               |
+| `minHeight`            | `number`                   | `56`    | Sets the minimum editor height in pixels.       |
+| `maxHeight`            | `number`                   | —       | Caps the automatically calculated height.       |
+| `options`              | `MonacoEditorOptions`      | —       | Overrides supported Monaco Editor options.      |
+| `recalculatedHeightAt` | `number`                   | —       | Triggers height recalculation when increased.   |
