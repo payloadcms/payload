@@ -1,7 +1,6 @@
 import type { NodemailerAdapterArgs } from '@payloadcms/email-nodemailer'
 
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-import { fileURLToPath } from 'url'
 import { expect, type Mock, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -17,7 +16,7 @@ type EmailReturnType = {
 }
 
 test.suite({ config: './config.ts' })('@payloadcms/email-nodemailer', () => {
-  test.beforeEach(async () => {
+  test.beforeEach(() => {
     mockedSendEmail = vi.fn()
   })
 
@@ -25,7 +24,7 @@ test.suite({ config: './config.ts' })('@payloadcms/email-nodemailer', () => {
     test.beforeEach(async ({ payload }) => {
       // Partially mocked transport
       const mockedTransport = {
-        sendMail: async (message) => {
+        sendMail: (message) => {
           mockedSendEmail()
           return message
         },
@@ -58,7 +57,7 @@ test.suite({ config: './config.ts' })('@payloadcms/email-nodemailer', () => {
     test.beforeEach(async ({ payload }) => {
       // Partially mocked transport
       const mockedTransport = {
-        sendMail: async (message) => {
+        sendMail: (message) => {
           mockedSendEmail()
           return message
         },

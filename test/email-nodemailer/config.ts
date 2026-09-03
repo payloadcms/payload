@@ -29,12 +29,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-
-    const email = await payload.sendEmail({
-      subject: 'This was sent while seeding',
-      to: 'test@example.com',
-    })
-
-    payload.logger.info({ email, msg: 'Email sent' })
   },
 })
