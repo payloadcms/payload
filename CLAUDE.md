@@ -360,6 +360,8 @@ const docs = await payload.find({
 
 ### Writing CSS
 
+Refer to `DESIGN.md` at repository root as the Single Source of Truth (SSoT) for the UI visual system (Linear/Vercel aesthetic, color ramps, typography, component metrics, elevations, and agent prompt guide).
+
 Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
 
 **Mobile-first media queries only - never `max-width`:**
@@ -419,7 +421,7 @@ Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`,
 - If a niche value must be precise (not a rounding-friendly case), use `calc()` with a spacer token instead of a raw pixel/rem value, e.g. `calc(var(--spacer-1) * 2.5)` for `10px`.
 - The same principle applies to other token families:
   - **Colors:** use semantic `--color-*` tokens from `colors.css` (e.g. `--color-bg`, `--color-text-brand`, `--color-border`). Never reference raw `--ramp-*` palette tokens directly outside of `colors.css` as they aren't theme-aware.
-  - **Radius:** use `--radius-*` from `radius.css` (`--radius-small` 2px, `--radius-medium` 5px, `--radius-large` 13px, `--radius-full` 9999px) instead of hardcoded values.
+  - **Radius:** use `--radius-*` from `radius.css` (`--radius-small` 4px, `--radius-medium` 6px, `--radius-large` 8px, `--radius-full` 9999px) instead of hardcoded values.
   - **Stroke width:** use `--stroke-width-small` (1px) / `--stroke-width-medium` (2px) from `theme.css`.
   - **Box shadows:** use elevation tokens from `elevations.css` (`--elevation-100-canvas`, `--elevation-300-tooltip`, `--elevation-400-menu-panel`, `--elevation-500-modal-window`) instead of a hardcoded `box-shadow`/`rgba()` value - they also handle light/dark theming.
   - **Typography:** use `--text-*` tokens from `typography.css`.
