@@ -17,6 +17,7 @@ export const jsonFieldsSlug = 'json-fields'
 
 export const numberFieldsSlug = 'number-fields'
 export const pointFieldsSlug = 'point-fields'
+export const pointFieldsOptimizedSlug = 'point-fields-optimized'
 export const radioFieldsSlug = 'radio-fields'
 export const relationshipFieldsSlug = 'relationship-fields'
 export const rowFieldsSlug = 'row-fields'
@@ -50,6 +51,7 @@ export const collectionSlugs = [
   jsonFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
+  pointFieldsOptimizedSlug,
   radioFieldsSlug,
   relationshipFieldsSlug,
   rowFieldsSlug,
