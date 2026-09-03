@@ -6,119 +6,128 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'config',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    cli: {
+      commands: {
+        'start-server': './customScript.ts',
+      },
+    },
+    collections: [
+      {
+        slug: 'pages',
+        access: {
+          create: () => true,
+          delete: () => true,
+          read: () => true,
+          update: () => true,
+        },
+        custom: {
+          externalLink: 'https://foo.bar',
+        },
+        endpoints: [
+          {
+            custom: { examples: [{ type: 'response', value: { message: 'hi' } }] },
+            handler: () => {
+              return Response.json({ message: 'hi' })
+            },
+            method: 'get',
+            path: '/hello',
+          },
+        ],
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            custom: {
+              description: 'The title of this page',
+            },
+          },
+          {
+            name: 'myBlocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'blockOne',
+                custom: {
+                  description: 'The blockOne of this page',
+                },
+                fields: [
+                  {
+                    name: 'blockOneField',
+                    type: 'text',
+                  },
+                  {
+                    name: 'blockTwoField',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+            custom: {
+              description: 'The blocks of this page',
+            },
+          },
+        ],
+        labels: {
+          // Purposefully exclude `singular` to test default inheritance
+          plural: 'Pages',
+        },
+        versions: false,
+      },
+    ],
+    cors: {
+      headers: ['x-custom-header'],
+      origins: '*',
+    },
+    custom: { name: 'Customer portal' },
+    endpoints: [
+      {
+        custom: { description: 'Get the sanitized payload config' },
+        handler: (req) => {
+          return Response.json(req.payload.config)
+        },
+        method: 'get',
+        path: '/config',
+      },
+    ],
+    globals: [
+      {
+        slug: 'my-global',
+        custom: { foo: 'bar' },
+        endpoints: [
+          {
+            custom: { params: [{ name: 'name', type: 'string', in: 'query' }] },
+            handler: (req) => {
+              const sp = new URL(req.url).searchParams
+              return Response.json({ message: `Hi ${sp.get('name')}!` })
+            },
+            method: 'get',
+            path: '/greet',
+          },
+        ],
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            custom: {
+              description: 'The title of my global',
+            },
+          },
+        ],
+        versions: false,
+      },
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    {
-      slug: 'pages',
-      labels: {
-        // Purposefully exclude `singular` to test default inheritance
-        plural: 'Pages',
-      },
-      access: {
-        create: () => true,
-        delete: () => true,
-        read: () => true,
-        update: () => true,
-      },
-      custom: {
-        externalLink: 'https://foo.bar',
-      },
-      endpoints: [
-        {
-          custom: { examples: [{ type: 'response', value: { message: 'hi' } }] },
-          handler: () => {
-            return Response.json({ message: 'hi' })
-          },
-          method: 'get',
-          path: '/hello',
-        },
-      ],
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          custom: {
-            description: 'The title of this page',
-          },
-        },
-        {
-          name: 'myBlocks',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'blockOne',
-              custom: {
-                description: 'The blockOne of this page',
-              },
-              fields: [
-                {
-                  name: 'blockOneField',
-                  type: 'text',
-                },
-                {
-                  name: 'blockTwoField',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-          custom: {
-            description: 'The blocks of this page',
-          },
-        },
-      ],
-      versions: false,
-    },
-  ],
-  custom: { name: 'Customer portal' },
-  endpoints: [
-    {
-      custom: { description: 'Get the sanitized payload config' },
-      handler: (req) => {
-        return Response.json(req.payload.config)
-      },
-      method: 'get',
-      path: '/config',
-    },
-  ],
-  bin: [
-    {
-      scriptPath: path.resolve(dirname, 'customScript.ts'),
-      key: 'start-server',
-    },
-  ],
-  globals: [
-    {
-      slug: 'my-global',
-      custom: { foo: 'bar' },
-      endpoints: [
-        {
-          custom: { params: [{ name: 'name', type: 'string', in: 'query' }] },
-          handler: (req) => {
-            const sp = new URL(req.url).searchParams
-            return Response.json({ message: `Hi ${sp.get('name')}!` })
-          },
-          method: 'get',
-          path: '/greet',
-        },
-      ],
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          custom: {
-            description: 'The title of my global',
-          },
-        },
-      ],
-      versions: false,
-    },
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     const { totalDocs } = await payload.count({ collection: 'users' })
 
     if (totalDocs === 0) {
@@ -130,12 +139,5 @@ export default buildConfigWithDefaults({
         },
       })
     }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  cors: {
-    origins: '*',
-    headers: ['x-custom-header'],
   },
 })

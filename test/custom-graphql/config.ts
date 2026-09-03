@@ -23,45 +23,51 @@ const resolveTransactionId = async (_obj, _args, context) => {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'custom-graphql',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [],
+    globals: [],
+    graphQL: {
+      mutations: (GraphQL) => {
+        return {
+          MutateTransactionID1: {
+            type: GraphQL.GraphQLString,
+            resolve: resolveTransactionId,
+          },
+          MutateTransactionID2: {
+            type: GraphQL.GraphQLString,
+            resolve: resolveTransactionId,
+          },
+        }
+      },
+      queries: (GraphQL) => {
+        return {
+          foo: {
+            type: GraphQLJSON,
+            args: {},
+            resolve: () => 'json test',
+          },
+          TransactionID1: {
+            type: GraphQL.GraphQLString,
+            resolve: resolveTransactionId,
+          },
+          TransactionID2: {
+            type: GraphQL.GraphQLString,
+            resolve: resolveTransactionId,
+          },
+        }
+      },
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [],
-  globals: [],
-  graphQL: {
-    mutations: (GraphQL) => {
-      return {
-        MutateTransactionID1: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
-        },
-        MutateTransactionID2: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
-        },
-      }
-    },
-    queries: (GraphQL) => {
-      return {
-        TransactionID1: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
-        },
-        TransactionID2: {
-          type: GraphQL.GraphQLString,
-          resolve: resolveTransactionId,
-        },
-        foo: {
-          type: GraphQLJSON,
-          args: {},
-          resolve: () => 'json test',
-        },
-      }
-    },
-  },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -69,8 +75,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

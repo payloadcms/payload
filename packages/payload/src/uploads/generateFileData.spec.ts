@@ -1,0 +1,203 @@
+import type { Collection } from '../collections/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { PayloadRequest } from '../types/index.js'
+
+import { randomUUID } from 'node:crypto'
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { generateFileData } from './generateFileData.js'
+
+// A minimal valid 1x1 transparent PNG, so `file-type` can detect `image/png` from it.
+const PNG_SIGNATURE = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
+  'base64',
+)
+
+const createSharpMock = () => {
+  const toBufferMock = vi.fn().mockResolvedValue({
+    data: PNG_SIGNATURE,
+    info: { height: 1, width: 1, size: PNG_SIGNATURE.length },
+  })
+  const metadataMock = vi.fn().mockResolvedValue({ height: 1, width: 1 })
+
+  const chain: any = {
+    metadata: metadataMock,
+    resize: vi.fn(() => chain),
+    rotate: vi.fn(() => chain),
+    toBuffer: toBufferMock,
+    toFormat: vi.fn(() => chain),
+    withMetadata: vi.fn(() => chain),
+  }
+  chain.trim = vi.fn(() => chain)
+
+  const sharp = vi.fn(() => chain)
+
+  return { sharp, toBufferMock }
+}
+
+const createCollection = (uploadOverrides: Record<string, unknown> = {}): Collection =>
+  ({
+    config: {
+      slug: 'media',
+      upload: {
+        disableLocalStorage: true,
+        focalPoint: false,
+        staticDir: os.tmpdir(),
+        ...uploadOverrides,
+      },
+    },
+  }) as unknown as Collection
+
+describe('generateFileData', () => {
+  let tempFilePath: string
+
+  beforeEach(async () => {
+    tempFilePath = path.join(os.tmpdir(), `generate-file-data-test-${randomUUID()}`)
+    await fs.writeFile(tempFilePath, PNG_SIGNATURE)
+  })
+
+  afterEach(async () => {
+    await fs.rm(tempFilePath, { force: true })
+  })
+
+  const createReq = (sharp: unknown): PayloadRequest =>
+    ({
+      file: {
+        data: Buffer.alloc(0),
+        mimetype: 'image/png',
+        name: 'photo.png',
+        size: PNG_SIGNATURE.length,
+        tempFilePath,
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+    }) as unknown as PayloadRequest
+
+  it('does not run full sharp processing on an image with no configured adjustments, even when it arrives via tempFilePath', async () => {
+    const { sharp, toBufferMock } = createSharpMock()
+
+    await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req: createReq(sharp),
+    })
+
+    expect(toBufferMock).not.toHaveBeenCalled()
+  })
+
+  it('still runs sharp processing when resize options are configured', async () => {
+    const { sharp, toBufferMock } = createSharpMock()
+
+    await generateFileData({
+      collection: createCollection({ resizeOptions: { width: 100 } }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req: createReq(sharp),
+    })
+
+    expect(toBufferMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not overwrite req.file with a truncated header-only buffer', async () => {
+    // Mirrors what `getFileFromUploadInstructions` returns for the `'header'` content
+    // requirement: only the first bytes of the file, alongside the real, full declared size.
+    const truncatedBuffer = PNG_SIGNATURE.subarray(0, 4)
+    const fullFileSize = 5_000_000
+    const { sharp } = createSharpMock()
+
+    const req = {
+      file: {
+        data: truncatedBuffer,
+        mimetype: 'image/png',
+        name: 'photo.png',
+        size: fullFileSize,
+        uploadReference: { key: 'media/photo.png' },
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(req.file?.size).toBe(fullFileSize)
+    expect(req.file?.data).toBe(truncatedBuffer)
+  })
+
+  it('copies straight from the temp file instead of reading it into memory when local storage is enabled', async () => {
+    const req = {
+      file: {
+        data: Buffer.alloc(0),
+        mimetype: 'application/pdf',
+        name: 'document.pdf',
+        size: PNG_SIGNATURE.length,
+        tempFilePath,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const { files } = await generateFileData({
+      collection: createCollection({ disableLocalStorage: false }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(files).toEqual([
+      {
+        path: `${os.tmpdir()}/document.pdf`,
+        sourcePath: tempFilePath,
+      },
+    ])
+  })
+
+  it('does not save anything when local storage is disabled and no processing is needed', async () => {
+    const req = {
+      file: {
+        data: Buffer.alloc(0),
+        mimetype: 'application/pdf',
+        name: 'document.pdf',
+        size: PNG_SIGNATURE.length,
+        tempFilePath,
+      },
+      payload: {
+        config: { sharp: undefined },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const { files } = await generateFileData({
+      collection: createCollection({ disableLocalStorage: true }),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(files).toEqual([])
+  })
+})

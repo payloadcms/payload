@@ -1,7 +1,46 @@
-import type { Config } from './types.js'
+import type { CLICommands, Config } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
 import { databaseKVAdapter } from '../kv/adapters/DatabaseKVAdapter.js'
+
+const defaultCLICommands: CLICommands = {
+  build: 'payload/cli/builtin#createBuildCommand',
+  countDocuments: 'payload/cli/builtin#createCountDocumentsCommand',
+  countGlobalVersions: 'payload/cli/builtin#createCountGlobalVersionsCommand',
+  countVersions: 'payload/cli/builtin#createCountVersionsCommand',
+  createDocuments: 'payload/cli/builtin#createCreateDocumentsCommand',
+  deleteDocuments: 'payload/cli/builtin#createDeleteDocumentsCommand',
+  duplicateDocument: 'payload/cli/builtin#createDuplicateDocumentCommand',
+  findDistinct: 'payload/cli/builtin#createFindDistinctCommand',
+  findDocuments: 'payload/cli/builtin#createFindDocumentsCommand',
+  findGlobal: 'payload/cli/builtin#createFindGlobalCommand',
+  findGlobalVersionByID: 'payload/cli/builtin#createFindGlobalVersionByIDCommand',
+  findGlobalVersions: 'payload/cli/builtin#createFindGlobalVersionsCommand',
+  findVersionByID: 'payload/cli/builtin#createFindVersionByIDCommand',
+  findVersions: 'payload/cli/builtin#createFindVersionsCommand',
+  'generate:db-schema': 'payload/cli/builtin#createGenerateDBSchemaCommand',
+  'generate:importmap': 'payload/cli/builtin#createGenerateImportMapCommand',
+  'generate:types': 'payload/cli/builtin#createGenerateTypesCommand',
+  getCollectionSchema: 'payload/cli/builtin#createGetCollectionSchemaCommand',
+  getConfigInfo: 'payload/cli/builtin#createGetConfigInfoCommand',
+  getGlobalSchema: 'payload/cli/builtin#createGetGlobalSchemaCommand',
+  help: 'payload/cli/builtin#createHelpCommand',
+  info: 'payload/cli/builtin#createInfoCommand',
+  'jobs:handle-schedules': 'payload/cli/builtin#createJobsHandleSchedulesCommand',
+  'jobs:run': 'payload/cli/builtin#createJobsRunCommand',
+  migrate: 'payload/cli/builtin#createMigrateCommand',
+  'migrate:create': 'payload/cli/builtin#createMigrateCreateCommand',
+  'migrate:down': 'payload/cli/builtin#createMigrateDownCommand',
+  'migrate:fresh': 'payload/cli/builtin#createMigrateFreshCommand',
+  'migrate:refresh': 'payload/cli/builtin#createMigrateRefreshCommand',
+  'migrate:reset': 'payload/cli/builtin#createMigrateResetCommand',
+  'migrate:status': 'payload/cli/builtin#createMigrateStatusCommand',
+  restoreGlobalVersion: 'payload/cli/builtin#createRestoreGlobalVersionCommand',
+  restoreVersion: 'payload/cli/builtin#createRestoreVersionCommand',
+  run: 'payload/cli/builtin#createRunCommand',
+  updateDocument: 'payload/cli/builtin#createUpdateDocumentCommand',
+  updateGlobal: 'payload/cli/builtin#createUpdateGlobalCommand',
+}
 
 export const addDefaultsToConfig = (config: Config): Config => {
   const admin = config.admin
@@ -38,7 +77,15 @@ export const addDefaultsToConfig = (config: Config): Config => {
     theme: admin?.theme ?? 'all',
   }
 
-  config.bin = config.bin ?? []
+  if (config.cli !== false) {
+    config.cli = {
+      ...config.cli,
+      commands: {
+        ...defaultCLICommands,
+        ...config.cli?.commands,
+      },
+    }
+  }
   config.collections = config.collections ?? []
   config.cookiePrefix = config.cookiePrefix ?? 'payload'
   config.cors = config.cors ?? []

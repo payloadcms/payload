@@ -54,7 +54,6 @@ test.describe('Bulk Edit', () => {
     // await throttleTest({ page, context, delay: 'Fast 3G' })
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'bulkEdit',
     })
     await page.goto(postsUrl.admin)
   })

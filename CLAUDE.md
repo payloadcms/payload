@@ -111,6 +111,10 @@ ComponentName/
 - `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
 - `pnpm run dev:postgres` - Run dev server with Postgres
 
+### Running the Payload CLI
+
+`pnpm payload <directory_name> <command> [...args]` runs the real Payload CLI against a test suite config. The first argument selects the test folder (e.g. `pnpm payload fields generate:types` uses `test/fields/config.ts`); everything after it is forwarded to the CLI unchanged. Run `pnpm payload <directory_name>` with no command to list all commands.
+
 ### Development Environment
 
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`
@@ -161,36 +165,37 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 
 ### Writing Tests - Required Practices
 
-**Tests MUST be self-contained and clean up after themselves:**
+**Integration tests MUST use the shared fixture wrapper:**
 
-- If you create a database record in a test, you MUST delete it before the test completes
-- For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
-- Track created resources (IDs, files, etc.) in a shared array within the `describe` block
-- Do not use conditionals in tests where it can be avoided such as `if else`
-- Do not use `try {} finally {}` in e2e tests; prefer Playwright cleanup hooks (`afterEach`, `afterAll`)
-
-**Example pattern:**
+- Import `test` from `test/__helpers/int/vitest.ts`, not directly from Vitest
+- Wrap Payload-backed tests in one root `test.suite({ config: './config.ts' })`
+- Read `payload`, `restClient`, `sdk`, or `cli` from the test or hook arguments
+- Do not initialize Payload manually or add database reset/seed hooks; the fixture initializes
+  Payload once per file, resets and seeds before each test that uses it, and destroys it afterward
+- Use `test.suite({})` only for integration tests that do not use Payload
 
 ```typescript
-describe('My Feature', () => {
-  const createdIDs: number[] = []
+import { expect } from 'vitest'
 
-  afterEach(async () => {
-    for (const id of createdIDs) {
-      await payload.delete({ collection: 'my-collection', id })
-    }
-    createdIDs.length = 0
-  })
+import { test } from '../__helpers/int/vitest.js'
 
-  it('should create a record', async () => {
-    const id = 123
-    createdIDs.push(id)
+test.suite({ config: './config.ts' })('My Feature', () => {
+  test('should create a record', async ({ payload }) => {
+    const record = await payload.create({
+      collection: 'my-collection',
+      data: { title: 'Test' },
+    })
 
-    await payload.create({ collection: 'my-collection', data: { id, title: 'Test' } })
-    // assertions...
+    expect(record.title).toBe('Test')
   })
 })
 ```
+
+**Tests MUST be self-contained and clean up side effects not handled by their fixtures:**
+
+- Integration-test database records are cleared automatically by the shared fixture
+- Clean up files, external resources, environment changes, and other non-database side effects
+- For multiple tests with similar cleanup needs, use `test.afterEach` to centralize cleanup logic
 
 **Additional test guidelines:**
 
@@ -222,6 +227,32 @@ test/<feature-name>/
 ```
 
 Generate types for a test directory: `pnpm run dev:generate-types <directory_name>`
+
+### Visual Regression Testing
+
+Screenshot comparisons live alongside normal e2e tests and are opt-in via the `visual()` helper,
+which applies the `@visual` tag for you:
+
+```ts
+import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
+import { visual } from '../__helpers/e2e/visual.js'
+
+visual('renders the posts list view', async () => {
+  await page.goto(url.list)
+  await expectScreenshot({ page, name: 'posts-list-view.png' })
+})
+```
+
+- Baselines are committed PNGs next to their spec file (`__snapshots__/<spec-file>/<name>.png`).
+- **Baselines must be generated/updated inside the pinned Playwright Docker image**, never on a
+  bare host — font rendering differs enough between operating systems to fail the comparison on
+  CI even when nothing visually changed. Use `pnpm test:visual:update`.
+- On a PR, CI only runs `@visual` tests when the diff could plausibly change rendered UI — e.g.
+  `.css`/`.scss`/`.tsx`/`.jsx`/`.svg` files, any `e2e.spec.ts`/`__snapshots__/**`, or fixture
+  config the current `@visual` tests render (see `needs_visual` in `.github/workflows/main.yml`
+  for the full path list).
+- If the `visual-regression` CI job fails, reproduce and inspect the diff locally with
+  `pnpm test:visual` — there is no CI-posted comment.
 
 ## Linting & Formatting
 

@@ -48,25 +48,21 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Needs to be a function to prevent object reference issues due to duplicative configs
 export const getConfig: () => Partial<Config> = () => ({
+  admin: {
+    autoLogin: {
+      email: devUser.email,
+      password: devUser.password,
+      prefillOnly: true,
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
   collections: [
     {
       slug: 'posts',
       admin: {
         useAsTitle: 'title',
-      },
-      hooks: {
-        afterChange: [
-          async ({ req, doc, context }) => {
-            await req.payload.jobs.queue({
-              workflow: context.useJSONWorkflow ? 'updatePostJSONWorkflow' : 'updatePost',
-              input: {
-                post: doc.id,
-                message: 'hello',
-              },
-              req,
-            })
-          },
-        ],
       },
       fields: [
         {
@@ -87,6 +83,20 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      hooks: {
+        afterChange: [
+          async ({ context, doc, req }) => {
+            await req.payload.jobs.queue({
+              input: {
+                message: 'hello',
+                post: doc.id,
+              },
+              req,
+              workflow: context.useJSONWorkflow ? 'updatePostJSONWorkflow' : 'updatePost',
+            })
+          },
+        ],
+      },
       versions: false,
     },
     {
@@ -104,16 +114,7 @@ export const getConfig: () => Partial<Config> = () => ({
       versions: false,
     },
   ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    autoLogin: {
-      prefillOnly: true,
-      email: devUser.email,
-      password: devUser.password,
-    },
-  },
+  editor: lexicalEditor(),
   jobs: {
     autoRun: [
       {
@@ -125,7 +126,6 @@ export const getConfig: () => Partial<Config> = () => ({
       },
       // add as many cron jobs as you want
     ],
-    shouldAutoRun: () => true,
     jobsCollectionOverrides: ({ defaultJobsCollection }) => {
       return {
         ...defaultJobsCollection,
@@ -140,6 +140,7 @@ export const getConfig: () => Partial<Config> = () => ({
         lifo: '-createdAt',
       },
     },
+    shouldAutoRun: () => true,
     tasks: [
       UpdatePostTask,
       UpdatePostStep2Task,
@@ -182,13 +183,9 @@ export const getConfig: () => Partial<Config> = () => ({
       throwsInHandlerRetries1Workflow,
     ],
   },
-  editor: lexicalEditor(),
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
+
+export { seed }

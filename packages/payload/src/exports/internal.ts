@@ -2,6 +2,8 @@
  * Modules exported here are not part of the public API and are subject to change without notice and without a major version bump.
  */
 
+export { createCLI } from '../cli/index.js'
+export { getCommandInput } from '../cli/runtime/getCommandInput.js'
 export { getUploadInstructions } from '../uploads/endpoints/uploadInstructions.js'
 export { getExternalFile } from '../uploads/getExternalFile.js'
 export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'

@@ -1,5 +1,7 @@
 import type { DrizzleAdapter } from '../types.js'
 
+import { maxGeneratedIdentifierLength } from './validateIdentifierLength.js'
+
 export const buildIndexName = ({
   name,
   adapter,
@@ -13,9 +15,9 @@ export const buildIndexName = ({
 }): string => {
   let indexName = `${name}${number ? `_${number}` : ''}${appendSuffix ? '_idx' : ''}`
 
-  if (indexName.length > 60) {
+  if (indexName.length > maxGeneratedIdentifierLength) {
     const suffix = `${number ? `_${number}` : ''}${appendSuffix ? '_idx' : ''}`
-    indexName = `${name.slice(0, 60 - suffix.length)}${suffix}`
+    indexName = `${name.slice(0, maxGeneratedIdentifierLength - suffix.length)}${suffix}`
   }
 
   if (!adapter.indexes.has(indexName) && !(indexName in adapter.rawTables)) {

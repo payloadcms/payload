@@ -1,115 +1,228 @@
-import type { SuiteFactory, TestFunction } from 'vitest'
+import type { Payload, SanitizedConfig } from 'payload'
 
-import { describe as vitestDescribe, it as vitestIt } from 'vitest'
+import path from 'node:path'
+import { getPayload } from 'payload'
+import { expect, test as vitestTest } from 'vitest'
 
-import { type DatabaseAdapterType, getCurrentDatabaseAdapter } from '../../dbAdapters.js'
+import type { DatabaseAdapterType } from '../../dbAdapters.js'
+
+import { getCurrentDatabaseAdapter } from '../../dbAdapters.js'
+import { resetAndSeed } from '../shared/clearAndSeed/resetAndSeed.js'
+import { getTestDataConfig } from '../shared/clearAndSeed/testDataConfig.js'
+import { getSDK } from '../shared/getSDK.js'
+import { initPayloadInt } from '../shared/initPayloadInt.js'
 import { mongooseList } from '../shared/isMongoose.js'
+import { NextRESTClient } from '../shared/NextRESTClient.js'
+import { runCLICommand } from '../shared/runCLICommand.js'
 
-type ItOptions = {
-  /**
-   * Specify which database(s) the test should run on.
-   * - 'all': Run on all databases (default)
-   * - 'drizzle': Run only on Drizzle (Postgres/SQLite)
-   * - 'mongo': Run only on MongoDB
-   * - function: Custom function that receives the current adapter type and returns a boolean indicating whether to run the test.
-   */
+type TestOptions = {
+  /** Limits the test or suite to the selected database adapters. */
   db?: 'all' | 'drizzle' | 'mongo' | ((adapterType: DatabaseAdapterType) => boolean)
+}
+
+type TestSuiteOptions = {
+  config?: string
+  cron?: boolean
+} & TestOptions
+
+type IntegrationFixtures = {
+  $file: {
+    config: SanitizedConfig
+    configPath: null | string
+    /** Raw file-scoped instance for suite hooks. Tests should use `payload`. */
+    payloadInstance: Payload
+    /** Config supplied to `test.suite`, imported automatically before file hooks run. */
+    resolvedConfig: null | SanitizedConfig
+    testCron: boolean
+    testDir: string
+    testSuiteConfigured: boolean
+  }
+  $test: {
+    cli: (input: Parameters<typeof runCLICommand>[0]) => ReturnType<typeof runCLICommand>
+    payload: Payload
+    restClient: NextRESTClient
+    sdk: ReturnType<typeof getSDK>
+  }
+}
+
+// Keep all fixtures in one extension so Vitest can trace test calls back to their source lines.
+const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
+  cli: async ({ configPath, payload, testDir }, use) => {
+    // Resolving this dependency initializes Payload and resets and seeds the database first.
+    void payload
+
+    const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
+    // The parent Payload instance already prepared the database. The child CLI process must reuse it.
+    process.env.PAYLOAD_DROP_DATABASE = 'false'
+
+    try {
+      await use((input) =>
+        runCLICommand(input, {
+          configPath: configPath ?? path.resolve(testDir, 'config.ts'),
+          cwd: testDir,
+        }),
+      )
+    } finally {
+      process.env.PAYLOAD_DROP_DATABASE = previousDropDatabase
+    }
+  },
+  config: [
+    async ({ resolvedConfig, testDir, testSuiteConfigured }, use) => {
+      if (!testSuiteConfigured) {
+        const { config } = await initPayloadInt(testDir, undefined, false)
+
+        await use(config)
+        return
+      }
+
+      if (resolvedConfig === null) {
+        throw new Error(
+          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+        )
+      }
+
+      await use(resolvedConfig)
+    },
+    { scope: 'file' },
+  ],
+  configPath: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(null)
+    },
+    { scope: 'file' },
+  ],
+  payload: async ({ payloadInstance, testSuiteConfigured }, use) => {
+    if (testSuiteConfigured) {
+      const testDataConfig = getTestDataConfig(payloadInstance.config)
+
+      if (!testDataConfig) {
+        throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
+      }
+
+      await resetAndSeed({ payload: payloadInstance, ...testDataConfig })
+    }
+
+    await use(payloadInstance)
+  },
+  payloadInstance: [
+    async ({ config, testCron }, use) => {
+      const payload = await getPayload({ config, cron: testCron })
+
+      try {
+        await use(payload)
+      } finally {
+        await payload.destroy()
+      }
+    },
+    { scope: 'file' },
+  ],
+  restClient: async ({ payload }, use) => {
+    await use(new NextRESTClient(payload.config))
+  },
+  resolvedConfig: [
+    async ({ configPath }, use) => {
+      if (configPath === null) {
+        await use(null)
+        return
+      }
+
+      const { default: config } = (await import(configPath)) as {
+        default: Promise<SanitizedConfig> | SanitizedConfig
+      }
+
+      await use(await config)
+    },
+    { auto: true, scope: 'file' },
+  ],
+  sdk: async ({ payload }, use) => {
+    await use(getSDK(payload.config))
+  },
+  testCron: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(true)
+    },
+    { scope: 'file' },
+  ],
+  testDir: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(getTestDirectory())
+    },
+    { scope: 'file' },
+  ],
+  testSuiteConfigured: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(false)
+    },
+    { scope: 'file' },
+  ],
+})
+
+/**
+ * Integration test API with Payload's shared lifecycle and database filtering.
+ *
+ * Payload-backed test files supply their config to one root `test.suite`. The config module is
+ * imported once before file hooks run. Payload is initialized lazily, once per file, and destroyed
+ * afterward. Before every test that uses Payload, REST, or the SDK, the database and upload
+ * directories are reset and the suite's optional seed function is run. REST and SDK clients are
+ * recreated per test. Standalone integration tests use `test.suite({})` and do not initialize
+ * Payload.
+ *
+ * @example
+ * test.suite({ config: './config.ts' })('Posts', () => {
+ *   test('reads posts', async ({ payload }) => {
+ *     await payload.find({ collection: 'posts' })
+ *   })
+ * })
+ */
+export const test = Object.assign(testWithFixtures, {
+  options: (options: TestOptions) => {
+    const shouldRun = matchesDatabase(options)
+
+    return Object.assign(testWithFixtures.runIf(shouldRun), {
+      describe: testWithFixtures.describe.runIf(shouldRun),
+    })
+  },
+  suite(this: typeof testWithFixtures, { config, cron = true, db }: TestSuiteOptions) {
+    this.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
+    this.override('testCron', cron)
+    this.override('testSuiteConfigured', true)
+
+    return this.describe.runIf(matchesDatabase({ db }))
+  },
+})
+
+export const it = test
+
+const getTestDirectory = (): string => {
+  const testPath = expect.getState().testPath
+
+  if (!testPath) {
+    throw new Error('Could not determine the integration test file path.')
+  }
+
+  return path.dirname(testPath)
 }
 
 const isMongo = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
 
-/**
- * Custom `it` wrapper that supports database-specific test execution.
- *
- * @example
- * // Run only on Drizzle (Postgres/SQLite)
- * it('drizzle-specific test', { db: 'drizzle' }, async () => { ... })
- *
- * // Run only on MongoDB
- * it('mongo-specific test', { db: 'mongo' }, async () => { ... })
- *
- * // Run on all databases (default)
- * it('universal test', async () => { ... })
- */
-const itWithOptions = (
-  name: string,
-  optionsOrFn?: ItOptions | TestFunction,
-  fn?: TestFunction,
-): ReturnType<typeof vitestIt> => {
-  // Handle overloads: it(name, fn) or it(name, options, fn)
-  const options: ItOptions | undefined = typeof optionsOrFn === 'object' ? optionsOrFn : undefined
-  const testFn: TestFunction | undefined = typeof optionsOrFn === 'function' ? optionsOrFn : fn
-
-  const db = options?.db ?? 'all'
-
+const matchesDatabase = ({ db = 'all' }: TestOptions = {}): boolean => {
   if (typeof db === 'function') {
-    if (!db(getCurrentDatabaseAdapter())) {
-      return vitestIt.skip(name, testFn)
-    }
-
-    return vitestIt(name, testFn)
+    return db(getCurrentDatabaseAdapter())
   }
 
-  if (db === 'drizzle' && isMongo) {
-    return vitestIt.skip(name, testFn)
+  if (db === 'mongo') {
+    return isMongo
   }
-  if (db === 'mongo' && !isMongo) {
-    return vitestIt.skip(name, testFn)
+
+  if (db === 'drizzle') {
+    return !isMongo
   }
-  return vitestIt(name, testFn)
+
+  return true
 }
 
-// Add skip property for compatibility
-itWithOptions.skip = vitestIt.skip
-
-// Needs to be called `it` for the vitest vs code extension to recognize it as a test function
-export const it = itWithOptions
-
-/**
- * Custom `describe` wrapper that supports database-specific suite execution.
- *
- * @example
- * // Run only on Drizzle (Postgres/SQLite)
- * describe('drizzle-specific suite', { db: 'drizzle' }, () => { ... })
- *
- * // Run only on MongoDB
- * describe('mongo-specific suite', { db: 'mongo' }, () => { ... })
- *
- * // Run on all databases (default)
- * describe('universal suite', () => { ... })
- */
-const describeWithOptions = (
-  name: string,
-  optionsOrFn?: ItOptions | SuiteFactory,
-  fn?: SuiteFactory,
-): ReturnType<typeof vitestDescribe> => {
-  // Handle overloads: describe(name, fn) or describe(name, options, fn)
-  const options: ItOptions | undefined = typeof optionsOrFn === 'object' ? optionsOrFn : undefined
-  const suiteFn: SuiteFactory | undefined = typeof optionsOrFn === 'function' ? optionsOrFn : fn
-
-  const db = options?.db ?? 'all'
-
-  if (typeof db === 'function') {
-    if (!db(getCurrentDatabaseAdapter())) {
-      return vitestDescribe.skip(name, suiteFn)
-    }
-    return vitestDescribe(name, suiteFn)
-  }
-
-  if (db === 'drizzle' && isMongo) {
-    return vitestDescribe.skip(name, suiteFn)
-  }
-  if (db === 'mongo' && !isMongo) {
-    return vitestDescribe.skip(name, suiteFn)
-  }
-  return vitestDescribe(name, suiteFn)
-}
-
-// Add skip property for compatibility
-describeWithOptions.skip = vitestDescribe.skip
-
-// Needs to be called `describe` for the vitest vs code extension to recognize it
-export const describe = describeWithOptions
-
-// Re-export for convenience
 export { isMongo }

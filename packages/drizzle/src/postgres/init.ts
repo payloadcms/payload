@@ -4,6 +4,7 @@ import type { BasePostgresAdapter } from './types.js'
 
 import { buildDrizzleRelations } from '../schema/buildDrizzleRelations.js'
 import { buildRawSchema } from '../schema/buildRawSchema.js'
+import { checkTruncatedIdentifiers } from '../utilities/checkTruncatedIdentifiers.js'
 import { executeSchemaHooks } from '../utilities/executeSchemaHooks.js'
 import { buildDrizzleTable } from './schema/buildDrizzleTable.js'
 import { setColumnID } from './schema/setColumnID.js'
@@ -18,6 +19,9 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
   })
 
   await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
+
+  // Warn on identifiers Postgres will truncate past 63 chars; throw only when two collide.
+  checkTruncatedIdentifiers({ adapter: this, logWarnings: process.env.NODE_ENV !== 'production' })
 
   if (this.payload.config.localization) {
     this.enums.enum__locales = this.pgSchema.enum(

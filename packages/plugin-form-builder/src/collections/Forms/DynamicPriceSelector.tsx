@@ -47,7 +47,7 @@ export const DynamicPriceSelector: TextFieldClientComponent = (props) => {
     return <TextField {...props} />
   }
 
-  const localeCode = typeof locale === 'object' && 'code' in locale ? locale.code : locale
+  const localeCode = locale?.code ?? 'en'
 
   const localLabels = typeof field.label === 'object' ? field.label : { [localeCode]: field.label }
 

@@ -71,7 +71,7 @@ const templateFiles = {
   'src/collections/Media.ts': "export const Media = { slug: 'media' }\n",
   'src/collections/Tags.ts': "export const Tags = { slug: 'tags' }\n",
   'src/collections/Users.ts': "export const Users = { slug: 'users' }\n",
-  'src/payload-foundation.css': '@layer payload-default, payload;\n',
+  'src/payload.css': "@import '@payloadcms/ui/css/app.css';\n",
   'src/payload.config.ts': 'export default { collections: [] }\n',
 }
 
@@ -129,8 +129,8 @@ describe('prepareTanStackInit', () => {
         'src/collections/Media.ts',
         'src/collections/Tags.ts',
         'src/collections/Users.ts',
-        'src/payload-foundation.css',
         'src/payload.config.ts',
+        'src/payload.css',
         'src/router.tsx',
         'src/routes/__root.tsx',
         'src/routes/_payload.tsx',
@@ -263,7 +263,7 @@ describe('applyPreparedWrites', () => {
       },
       {
         content: '@layer payload;\n',
-        filePath: path.join(projectDir, 'src/payload-foundation.css'),
+        filePath: path.join(projectDir, 'src/payload.css'),
       },
     ]
 

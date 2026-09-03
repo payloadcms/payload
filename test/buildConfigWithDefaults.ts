@@ -31,7 +31,15 @@ import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
-import { reInitEndpoint } from './__helpers/shared/clearAndSeed/reInitEndpoint.js'
+import {
+  createReInitEndpoint,
+  reInitEndpoint,
+} from './__helpers/shared/clearAndSeed/reInitEndpoint.js'
+import { createSeedCommand } from './__helpers/shared/clearAndSeed/seedCommand.js'
+import {
+  type SeedFunction,
+  testDataConfigSymbol,
+} from './__helpers/shared/clearAndSeed/testDataConfig.js'
 import { localAPIEndpoint } from './__helpers/shared/sdk/endpoint.js'
 import { databaseAdapter } from './databaseAdapter.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
@@ -40,12 +48,35 @@ import { testEmailAdapter } from './testEmailAdapter.js'
 // process.env.PAYLOAD_DATABASE = 'postgres'
 // process.env.PAYLOAD_DATABASE = 'sqlite'
 
-export async function buildConfigWithDefaults(
+type BuildConfigWithDefaultsArgs = {
+  config: Partial<Config>
+  disableAutoLogin?: boolean
+  seed?: SeedFunction
+  suite: string
+}
+
+type LegacyBuildConfigWithDefaultsOptions = {
+  disableAutoLogin?: boolean
+}
+
+export function buildConfigWithDefaults(args: BuildConfigWithDefaultsArgs): Promise<SanitizedConfig>
+/** @deprecated Use `buildConfigWithDefaults({ config, disableAutoLogin, seed, suite })`. */
+export function buildConfigWithDefaults(
   testConfig?: Partial<Config>,
-  options?: {
-    disableAutoLogin?: boolean
-  },
+  options?: LegacyBuildConfigWithDefaultsOptions,
+): Promise<SanitizedConfig>
+export async function buildConfigWithDefaults(
+  argsOrConfig: BuildConfigWithDefaultsArgs | Partial<Config> = {},
+  legacyOptions: LegacyBuildConfigWithDefaultsOptions = {},
 ): Promise<SanitizedConfig> {
+  const usesTestDataConfig = 'config' in argsOrConfig && 'suite' in argsOrConfig
+  const testConfig = usesTestDataConfig ? argsOrConfig.config : argsOrConfig
+  const disableAutoLogin = usesTestDataConfig
+    ? argsOrConfig.disableAutoLogin
+    : legacyOptions.disableAutoLogin
+  const testDataConfig = usesTestDataConfig
+    ? { seed: argsOrConfig.seed, suite: argsOrConfig.suite }
+    : undefined
   const config: Config = {
     db: databaseAdapter,
     editor: lexicalEditor({
@@ -135,7 +166,11 @@ export async function buildConfigWithDefaults(
     sharp,
     telemetry: false,
     ...testConfig,
-    endpoints: [localAPIEndpoint, reInitEndpoint, ...(testConfig?.endpoints || [])],
+    endpoints: [
+      localAPIEndpoint,
+      testDataConfig ? createReInitEndpoint(testDataConfig) : reInitEndpoint,
+      ...(testConfig?.endpoints || []),
+    ],
     i18n: {
       supportedLanguages: {
         de,
@@ -160,7 +195,7 @@ export async function buildConfigWithDefaults(
 
   if (config.admin.autoLogin === undefined) {
     config.admin.autoLogin =
-      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || options?.disableAutoLogin
+      process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' || disableAutoLogin
         ? false
         : {
             email: 'dev@payloadcms.com',
@@ -181,5 +216,24 @@ export async function buildConfigWithDefaults(
     config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
   }
 
-  return await buildConfig(config)
+  if (config.cli !== false && testDataConfig) {
+    config.cli = {
+      ...config.cli,
+      commands: {
+        ...config.cli?.commands,
+        seed: createSeedCommand(testDataConfig),
+      },
+    }
+  }
+
+  const sanitizedConfig = await buildConfig(config)
+
+  if (testDataConfig) {
+    Object.defineProperty(sanitizedConfig, testDataConfigSymbol, {
+      enumerable: false,
+      value: testDataConfig,
+    })
+  }
+
+  return sanitizedConfig
 }

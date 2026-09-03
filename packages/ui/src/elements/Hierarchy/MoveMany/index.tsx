@@ -59,7 +59,8 @@ export function MoveMany({
   selections,
 }: MoveManyProps) {
   const { i18n, t } = useTranslation()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { openModal } = useModal()
   const {
     config: {

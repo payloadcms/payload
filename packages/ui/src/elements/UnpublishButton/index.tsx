@@ -37,7 +37,9 @@ export function UnpublishButton({
 
   const { config, getEntityConfig } = useConfig()
   const { reset: resetForm } = useForm()
-  const { code: localeCode, label: localeLabel } = useLocale()
+  const locale = useLocale()
+  const localeCode = locale?.code
+  const localeLabel = locale?.label
   const [unpublishAll, setUnpublishAll] = useState(false)
   const unPublishModalSlug = `confirm-un-publish-${id}`
 

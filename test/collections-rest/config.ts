@@ -46,313 +46,319 @@ export const errorOnHookSlug = 'error-on-hooks'
 export const endpointsSlug = 'endpoints'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    {
-      slug: postsSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'description',
-          type: 'text',
-        },
-        {
-          name: 'number',
-          type: 'number',
-        },
-        {
-          name: 'fakeLocalization',
-          type: 'text',
-          // field is localized even though the config localization is not on
-          localized: true,
-        },
-        // Relationship
-        {
-          name: 'relationField',
-          type: 'relationship',
-          relationTo: relationSlug,
-        },
-        // Relation hasMany
-        {
-          name: 'relationHasManyField',
-          type: 'relationship',
-          hasMany: true,
-          relationTo: relationSlug,
-        },
-        // Relation multiple relationTo
-        {
-          name: 'relationMultiRelationTo',
-          type: 'relationship',
-          relationTo: [relationSlug, 'dummy'],
-        },
-        // Relation multiple relationTo hasMany
-        {
-          name: 'relationMultiRelationToHasMany',
-          type: 'relationship',
-          hasMany: true,
-          relationTo: [relationSlug, 'dummy'],
-        },
-        {
-          name: 'restrictedField',
-          type: 'text',
-          access: {
-            read: () => false,
-          },
-        },
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              name: 'D1',
-              fields: [
-                {
-                  name: 'D2',
-                  type: 'group',
-                  fields: [
-                    {
-                      type: 'row',
-                      fields: [
-                        {
-                          type: 'collapsible',
-                          fields: [
-                            {
-                              type: 'tabs',
-                              tabs: [
-                                {
-                                  fields: [
-                                    {
-                                      name: 'D3',
-                                      type: 'group',
-                                      fields: [
-                                        {
-                                          type: 'row',
-                                          fields: [
-                                            {
-                                              type: 'collapsible',
-                                              fields: [
-                                                {
-                                                  name: 'D4',
-                                                  type: 'text',
-                                                },
-                                              ],
-                                              label: 'Collapsible2',
-                                            },
-                                          ],
-                                        },
-                                      ],
-                                    },
-                                  ],
-                                  label: 'Tab1',
-                                },
-                              ],
-                            },
-                          ],
-                          label: 'Collapsible2',
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-              label: 'Tab1',
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: pointSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'point',
-          type: 'point',
-        },
-      ],
-      versions: false,
-    },
-    collectionWithName(relationSlug),
-    {
-      slug: 'dummy',
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          type: 'text',
-          access: {
-            read: () => false,
-          },
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: customIdSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-        {
-          type: 'row',
-          fields: [
-            {
-              name: 'name',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: customIdNumberSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'id',
-          type: 'number',
-        },
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: errorOnHookSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-        },
-        {
-          name: 'errorBeforeChange',
-          type: 'checkbox',
-        },
-        {
-          name: 'errorAfterDelete',
-          type: 'checkbox',
-        },
-      ],
-      hooks: {
-        afterDelete: [
-          ({ doc }) => {
-            if (doc?.errorAfterDelete) {
-              throw new Error('Error After Delete Thrown')
-            }
-          },
-        ],
-        beforeChange: [
-          ({ originalDoc }) => {
-            if (originalDoc?.errorBeforeChange) {
-              throw new Error('Error Before Change Thrown')
-            }
-          },
-        ],
+  suite: 'collections-rest',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      versions: false,
     },
-    {
-      slug: endpointsSlug,
-      fields: [],
-      endpoints: methods.map((method) => ({
-        method,
+    bodyParser: {
+      limits: {
+        fieldSize: 2 * 1024 * 1024, // 2MB
+      },
+    },
+    collections: [
+      {
+        slug: postsSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'description',
+            type: 'text',
+          },
+          {
+            name: 'number',
+            type: 'number',
+          },
+          {
+            name: 'fakeLocalization',
+            type: 'text',
+            // field is localized even though the config localization is not on
+            localized: true,
+          },
+          // Relationship
+          {
+            name: 'relationField',
+            type: 'relationship',
+            relationTo: relationSlug,
+          },
+          // Relation hasMany
+          {
+            name: 'relationHasManyField',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: relationSlug,
+          },
+          // Relation multiple relationTo
+          {
+            name: 'relationMultiRelationTo',
+            type: 'relationship',
+            relationTo: [relationSlug, 'dummy'],
+          },
+          // Relation multiple relationTo hasMany
+          {
+            name: 'relationMultiRelationToHasMany',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: [relationSlug, 'dummy'],
+          },
+          {
+            name: 'restrictedField',
+            type: 'text',
+            access: {
+              read: () => false,
+            },
+          },
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                name: 'D1',
+                fields: [
+                  {
+                    name: 'D2',
+                    type: 'group',
+                    fields: [
+                      {
+                        type: 'row',
+                        fields: [
+                          {
+                            type: 'collapsible',
+                            fields: [
+                              {
+                                type: 'tabs',
+                                tabs: [
+                                  {
+                                    fields: [
+                                      {
+                                        name: 'D3',
+                                        type: 'group',
+                                        fields: [
+                                          {
+                                            type: 'row',
+                                            fields: [
+                                              {
+                                                type: 'collapsible',
+                                                fields: [
+                                                  {
+                                                    name: 'D4',
+                                                    type: 'text',
+                                                  },
+                                                ],
+                                                label: 'Collapsible2',
+                                              },
+                                            ],
+                                          },
+                                        ],
+                                      },
+                                    ],
+                                    label: 'Tab1',
+                                  },
+                                ],
+                              },
+                            ],
+                            label: 'Collapsible2',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+                label: 'Tab1',
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: pointSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'point',
+            type: 'point',
+          },
+        ],
+        versions: false,
+      },
+      collectionWithName(relationSlug),
+      {
+        slug: 'dummy',
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'name',
+            type: 'text',
+            access: {
+              read: () => false,
+            },
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: customIdSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'id',
+            type: 'text',
+          },
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'name',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: customIdNumberSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'id',
+            type: 'number',
+          },
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: errorOnHookSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+          },
+          {
+            name: 'errorBeforeChange',
+            type: 'checkbox',
+          },
+          {
+            name: 'errorAfterDelete',
+            type: 'checkbox',
+          },
+        ],
+        hooks: {
+          afterDelete: [
+            ({ doc }) => {
+              if (doc?.errorAfterDelete) {
+                throw new Error('Error After Delete Thrown')
+              }
+            },
+          ],
+          beforeChange: [
+            ({ originalDoc }) => {
+              if (originalDoc?.errorBeforeChange) {
+                throw new Error('Error Before Change Thrown')
+              }
+            },
+          ],
+        },
+        versions: false,
+      },
+      {
+        slug: endpointsSlug,
+        endpoints: methods.map((method) => ({
+          handler: () => new Response(`${method} response`),
+          method,
+          path: `/${method}-test`,
+        })),
+        fields: [],
+        versions: false,
+      },
+      {
+        slug: 'disabled-bulk-edit-docs',
+        disableBulkEdit: true,
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'disabled-bulk-delete-docs',
+        disableBulkDelete: true,
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      LargeDocuments,
+    ],
+    endpoints: [
+      {
+        handler: async ({ payload }) => {
+          await payload.sendEmail({
+            from: 'dev@payloadcms.com',
+            html: 'This is a test email.',
+            subject: 'Test Email',
+            to: devUser.email,
+            // to recreate a failing email transport, add the following credentials
+            // to the `email` property of `payload.init()` in `../dev.ts`
+            // the app should fail to send the email, but the error should be handled without crashing the app
+            // transportOptions: {
+            //   host: 'smtp.ethereal.email',
+            //   port: 587,
+            // },
+          })
+
+          return Response.json({ message: 'Email sent' })
+        },
+        method: 'get',
+        path: '/send-test-email',
+      },
+      {
+        handler: () => {
+          // Throwing an internal error with potentially sensitive data
+          throw new Error('Lost connection to the Pentagon. Secret data: ******')
+        },
+        method: 'get',
+        path: '/internal-error-here',
+      },
+      {
+        handler: () => {
+          // Throwing an internal error with potentially sensitive data
+          throw new APIError('Connected to the Pentagon. Secret data: ******')
+        },
+        method: 'get',
+        path: '/api-error-here',
+      },
+      ...methods.map((method) => ({
         handler: () => new Response(`${method} response`),
+        method,
         path: `/${method}-test`,
       })),
-      versions: false,
-    },
-    {
-      slug: 'disabled-bulk-edit-docs',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-        },
-      ],
-      disableBulkEdit: true,
-      versions: false,
-    },
-    {
-      slug: 'disabled-bulk-delete-docs',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-        },
-      ],
-      disableBulkDelete: true,
-      versions: false,
-    },
-    LargeDocuments,
-  ],
-  bodyParser: {
-    limits: {
-      fieldSize: 2 * 1024 * 1024, // 2MB
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  endpoints: [
-    {
-      handler: async ({ payload }) => {
-        await payload.sendEmail({
-          from: 'dev@payloadcms.com',
-          html: 'This is a test email.',
-          subject: 'Test Email',
-          to: devUser.email,
-          // to recreate a failing email transport, add the following credentials
-          // to the `email` property of `payload.init()` in `../dev.ts`
-          // the app should fail to send the email, but the error should be handled without crashing the app
-          // transportOptions: {
-          //   host: 'smtp.ethereal.email',
-          //   port: 587,
-          // },
-        })
-
-        return Response.json({ message: 'Email sent' })
-      },
-      method: 'get',
-      path: '/send-test-email',
-    },
-    {
-      handler: () => {
-        // Throwing an internal error with potentially sensitive data
-        throw new Error('Lost connection to the Pentagon. Secret data: ******')
-      },
-      method: 'get',
-      path: '/internal-error-here',
-    },
-    {
-      handler: () => {
-        // Throwing an internal error with potentially sensitive data
-        throw new APIError('Connected to the Pentagon. Secret data: ******')
-      },
-      method: 'get',
-      path: '/api-error-here',
-    },
-    ...methods.map((method) => ({
-      method,
-      handler: () => new Response(`${method} response`),
-      path: `/${method}-test`,
-    })),
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -442,8 +448,5 @@ export default buildConfigWithDefaults({
         name: 'name',
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

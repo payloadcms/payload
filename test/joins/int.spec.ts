@@ -3,13 +3,12 @@ import type { Payload, TypeWithID } from 'payload'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
+import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   categoriesJoinRestrictedSlug,
@@ -22,14 +21,11 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-let payload: Payload
 let token: string
-let restClient: NextRESTClient
 
 const { email, password } = devUser
 
-describe('Joins Field', () => {
+test.suite({ config: './config.ts' })('Joins Field', () => {
   let category: Category
   let otherCategory: Category
   let categoryID
@@ -37,9 +33,7 @@ describe('Joins Field', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+  test.beforeEach(async ({ payload, restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -85,49 +79,48 @@ describe('Joins Field', () => {
       if (i % 2 === 0) {
         categories = [category.id, otherCategory.id]
       }
-      await createPost({
-        title: `test ${i}`,
-        category: category.id,
-        upload: uploadedImage,
-        categories,
-        categoriesLocalized: categories,
-        polymorphic: {
-          relationTo: 'categories',
-          value: category.id,
-        },
-        polymorphics: [
-          {
-            relationTo: 'categories',
-            value: category.id,
-          },
-        ],
-        localizedPolymorphic: {
-          relationTo: 'categories',
-          value: category.id,
-        },
-        localizedPolymorphics: [
-          {
-            relationTo: 'categories',
-            value: category.id,
-          },
-        ],
-        group: {
+      await createPost(
+        { payload },
+        {
+          title: `test ${i}`,
           category: category.id,
-          camelCaseCategory: category.id,
+          upload: uploadedImage,
+          categories,
+          categoriesLocalized: categories,
+          polymorphic: {
+            relationTo: 'categories',
+            value: category.id,
+          },
+          polymorphics: [
+            {
+              relationTo: 'categories',
+              value: category.id,
+            },
+          ],
+          localizedPolymorphic: {
+            relationTo: 'categories',
+            value: category.id,
+          },
+          localizedPolymorphics: [
+            {
+              relationTo: 'categories',
+              value: category.id,
+            },
+          ],
+          group: {
+            category: category.id,
+            camelCaseCategory: category.id,
+          },
+          array: [{ category: category.id }],
+          arrayHasMany: [{ category: [category.id] }],
+          localizedArray: [{ category: category.id }],
+          blocks: [{ blockType: 'block', category: category.id }],
         },
-        array: [{ category: category.id }],
-        arrayHasMany: [{ category: [category.id] }],
-        localizedArray: [{ category: category.id }],
-        blocks: [{ blockType: 'block', category: category.id }],
-      })
+      )
     }
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should populate joins using findByID', async () => {
+  test('should populate joins using findByID', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -144,7 +137,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
   })
 
-  it('should not populate joins if not selected', async () => {
+  test('should not populate joins if not selected', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -159,7 +152,7 @@ describe('Joins Field', () => {
     expect(Object.keys(categoryWithPosts)).toStrictEqual(['id'])
   })
 
-  it('should populate joins if selected', async () => {
+  test('should populate joins if selected', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -186,7 +179,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
   })
 
-  it('should count joins', async () => {
+  test('should count joins', async ({ payload }) => {
     let categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -216,7 +209,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
   })
 
-  it('should count hasMany relationship joins', async () => {
+  test('should count hasMany relationship joins', async ({ payload }) => {
     const res = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -228,7 +221,7 @@ describe('Joins Field', () => {
     expect(res.hasManyPosts?.totalDocs).toBe(15)
   })
 
-  it('should populate relationships in joins', async () => {
+  test('should populate relationships in joins', async ({ payload }) => {
     const { docs } = await payload.find({
       limit: 1,
       collection: postsSlug,
@@ -240,7 +233,7 @@ describe('Joins Field', () => {
     expect(docs[0].category.relatedPosts.docs).toHaveLength(5) // uses defaultLimit
   })
 
-  it('should populate relationships in joins with camelCase names', async () => {
+  test('should populate relationships in joins with camelCase names', async ({ payload }) => {
     const { docs } = await payload.find({
       limit: 1,
       collection: postsSlug,
@@ -251,7 +244,7 @@ describe('Joins Field', () => {
     expect(docs[0].group.camelCaseCategory.group.camelCasePosts.docs).toHaveLength(10)
   })
 
-  it('should populate joins with array relationships', async () => {
+  test('should populate joins with array relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -261,7 +254,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.arrayPosts.docs).toHaveLength(10)
   })
 
-  it('should populate joins with array hasMany relationships', async () => {
+  test('should populate joins with array hasMany relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -271,7 +264,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.arrayHasManyPosts.docs).toHaveLength(10)
   })
 
-  it('should populate joins with localized array relationships', async () => {
+  test('should populate joins with localized array relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -281,7 +274,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.localizedArrayPosts.docs).toHaveLength(10)
   })
 
-  it('should populate joins with blocks relationships', async () => {
+  test('should populate joins with blocks relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -290,7 +283,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.blocksPosts.docs).toBeDefined()
   })
 
-  it('should populate uploads in joins', async () => {
+  test('should populate uploads in joins', async ({ payload }) => {
     const { docs } = await payload.find({
       limit: 1,
       collection: postsSlug,
@@ -300,7 +293,7 @@ describe('Joins Field', () => {
     expect(docs[0].upload.relatedPosts.docs).toHaveLength(10)
   })
 
-  it('should join on polymorphic relationships', async () => {
+  test('should join on polymorphic relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       collection: categoriesSlug,
       id: category.id,
@@ -311,7 +304,9 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.localizedPolymorphics.docs[0]).toHaveProperty('id')
   })
 
-  it('should not throw a path validation error when querying joins with polymorphic relationships', async () => {
+  test('should not throw a path validation error when querying joins with polymorphic relationships', async ({
+    payload,
+  }) => {
     const folderDoc = await payload.create({
       collection: 'folders',
       data: {
@@ -369,7 +364,7 @@ describe('Joins Field', () => {
     expect(result.docs[0]?.children.docs).toHaveLength(1)
   })
 
-  it('should allow join where query on hasMany select fields', async () => {
+  test('should allow join where query on hasMany select fields', async ({ payload }) => {
     const folderDoc = await payload.create({
       collection: 'folders',
       data: {
@@ -419,7 +414,7 @@ describe('Joins Field', () => {
     expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
   })
 
-  it('should query where with exists for hasMany select fields', async () => {
+  test('should query where with exists for hasMany select fields', async ({ payload }) => {
     await payload.delete({ collection: 'folders', where: {} })
     const folderDoc = await payload.create({
       collection: 'folders',
@@ -479,7 +474,7 @@ describe('Joins Field', () => {
     expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
   })
 
-  it('should filter joins using where query', async () => {
+  test('should filter joins using where query', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -499,7 +494,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.relatedPosts.hasNextPage).toStrictEqual(false)
   })
 
-  it('should apply defaultSort when no sort is specified in join query', async () => {
+  test('should apply defaultSort when no sort is specified in join query', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -510,7 +505,7 @@ describe('Joins Field', () => {
     expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 9')
   })
 
-  it('should override defaultSort when sort is specified in join query', async () => {
+  test('should override defaultSort when sort is specified in join query', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -525,7 +520,7 @@ describe('Joins Field', () => {
     expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 0')
   })
 
-  it('should populate joins using find', async () => {
+  test('should populate joins using find', async ({ payload }) => {
     const result = await payload.find({
       collection: categoriesSlug,
       where: {
@@ -540,7 +535,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toBe('test 14')
   })
 
-  it('should populate joins using find with hasMany relationships', async () => {
+  test('should populate joins using find with hasMany relationships', async ({ payload }) => {
     const result = await payload.find({
       collection: categoriesSlug,
       where: {
@@ -565,8 +560,11 @@ describe('Joins Field', () => {
     expect(otherCategoryWithPosts.hasManyPosts.docs[0].title).toBe('test 14')
   })
 
-  it('should populate joins using find with hasMany localized relationships', async () => {
+  test('should populate joins using find with hasMany localized relationships', async ({
+    payload,
+  }) => {
     const post_1 = await createPost(
+      { payload },
       {
         title: `test es localized 1`,
         categoriesLocalized: [category.id],
@@ -579,6 +577,7 @@ describe('Joins Field', () => {
     )
 
     const post_2 = await createPost(
+      { payload },
       {
         title: `test es localized 2`,
         categoriesLocalized: [otherCategory.id],
@@ -648,7 +647,7 @@ describe('Joins Field', () => {
     })
   })
 
-  it('should not error when deleting documents with joins', async () => {
+  test('should not error when deleting documents with joins', async ({ payload }) => {
     const category = await payload.create({
       collection: categoriesSlug,
       data: {
@@ -656,9 +655,12 @@ describe('Joins Field', () => {
       },
     })
 
-    await createPost({
-      category: category.id,
-    })
+    await createPost(
+      { payload },
+      {
+        category: category.id,
+      },
+    )
 
     const result = await payload.delete({
       collection: categoriesSlug,
@@ -671,9 +673,9 @@ describe('Joins Field', () => {
     expect(result.docs[0].id).toStrictEqual(category.id)
   })
 
-  describe('`where` filters', () => {
+  test.describe('`where` filters', () => {
     let categoryWithFilteredPost
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       categoryWithFilteredPost = await payload.create({
         collection: categoriesSlug,
         data: {
@@ -681,17 +683,23 @@ describe('Joins Field', () => {
         },
       })
 
-      await createPost({
-        title: 'filtered post',
-        category: categoryWithFilteredPost.id,
-        isFiltered: true,
-      })
+      await createPost(
+        { payload },
+        {
+          title: 'filtered post',
+          category: categoryWithFilteredPost.id,
+          isFiltered: true,
+        },
+      )
 
-      await createPost({
-        title: 'unfiltered post',
-        category: categoryWithFilteredPost.id,
-        isFiltered: false,
-      })
+      await createPost(
+        { payload },
+        {
+          title: 'unfiltered post',
+          category: categoryWithFilteredPost.id,
+          isFiltered: false,
+        },
+      )
 
       categoryWithFilteredPost = await payload.findByID({
         id: categoryWithFilteredPost.id,
@@ -699,11 +707,13 @@ describe('Joins Field', () => {
       })
     })
 
-    it('should filter joins using where from field config', () => {
+    test('should filter joins using where from field config', () => {
       expect(categoryWithFilteredPost.filtered.docs).toHaveLength(1)
     })
 
-    it('should filter joins using where from field config and the requested filter', async () => {
+    test('should filter joins using where from field config and the requested filter', async ({
+      payload,
+    }) => {
       categoryWithFilteredPost = await payload.findByID({
         id: categoryWithFilteredPost.id,
         collection: categoriesSlug,
@@ -720,10 +730,10 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('Joins with localization', () => {
+  test.describe('Joins with localization', () => {
     let localizedCategory: Category
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       localizedCategory = await payload.create({
         collection: 'localized-categories',
         locale: 'en',
@@ -758,7 +768,9 @@ describe('Joins Field', () => {
       })
     })
 
-    it('should populate joins using findByID with localization on the relationship', async () => {
+    test('should populate joins using findByID with localization on the relationship', async ({
+      payload,
+    }) => {
       const enCategory = await payload.findByID({
         id: localizedCategory.id,
         collection: 'localized-categories',
@@ -774,13 +786,13 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('Joins with versions', () => {
-    afterEach(async () => {
+  test.describe('Joins with versions', () => {
+    test.afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'versions', where: {} })
       await payload.delete({ collection: 'categories-versions', where: {} })
     })
 
-    it('should populate joins when versions on both sides draft false', async () => {
+    test('should populate joins when versions on both sides draft false', async ({ payload }) => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -793,7 +805,9 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
 
-    it('should populate joins with hasMany relationships when versions on both sides draft false', async () => {
+    test('should populate joins with hasMany relationships when versions on both sides draft false', async ({
+      payload,
+    }) => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -806,7 +820,9 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
     })
 
-    it('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async () => {
+    test('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async ({
+      payload,
+    }) => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -822,7 +838,9 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
 
-    it('should populate joins with hasMany when on both sides documents are in draft', async () => {
+    test('should populate joins with hasMany when on both sides documents are in draft', async ({
+      payload,
+    }) => {
       const category = await payload.create({
         collection: 'categories-versions',
         data: { _status: 'draft' },
@@ -851,7 +869,9 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].title).toBe('updated-title')
     })
 
-    it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
+    test('should populate joins when versions on both sides draft true payload.db.queryDrafts', async ({
+      payload,
+    }) => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -868,8 +888,8 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('REST', () => {
-    it('should have simple paginate for joins', async () => {
+  test.describe('REST', () => {
+    test('should have simple paginate for joins', async ({ restClient }) => {
       const query = {
         depth: 1,
         where: {
@@ -896,7 +916,7 @@ describe('Joins Field', () => {
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
-    it('should have simple paginate with page for joins', async () => {
+    test('should have simple paginate with page for joins', async ({ restClient }) => {
       const query = {
         depth: 1,
         where: {
@@ -936,7 +956,7 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should respect access control for join collections', async () => {
+    test('should respect access control for join collections', async ({ payload }) => {
       const { docs } = await payload.find({
         collection: categoriesJoinRestrictedSlug,
         where: {
@@ -952,7 +972,7 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should respect access control for join request `where` queries', async () => {
+    test('should respect access control for join request `where` queries', async ({ payload }) => {
       await expect(
         payload.findByID({
           id: category.id,
@@ -970,20 +990,25 @@ describe('Joins Field', () => {
       ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
-    it('should respect access control of join field configured `where` queries', async () => {
+    test('should respect access control of join field configured `where` queries', async ({
+      payload,
+    }) => {
       const restrictedCategory = await payload.create({
         collection: restrictedCategoriesSlug,
         data: {
           name: 'restricted category',
         },
       })
-      await createPost({
-        collection: restrictedPostsSlug,
-        data: {
-          title: 'restricted post',
-          category: restrictedCategory.id,
+      await createPost(
+        { payload },
+        {
+          collection: restrictedPostsSlug,
+          data: {
+            title: 'restricted post',
+            category: restrictedCategory.id,
+          },
         },
-      })
+      )
       await expect(
         payload.findByID({
           id: category.id,
@@ -994,14 +1019,14 @@ describe('Joins Field', () => {
       ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
-    it('should sort joins', async () => {
+    test('should sort joins', async ({ restClient }) => {
       const response = await restClient
         .GET(`/categories/${category.id}?joins[relatedPosts][sort]=-title`)
         .then((res) => res.json())
       expect(response.relatedPosts.docs[0].title).toStrictEqual('test 9')
     })
 
-    it('should query in on collections with joins', async () => {
+    test('should query in on collections with joins', async ({ restClient }) => {
       const response = await restClient
         .GET(`/categories?where[id][in]=${category.id}`)
         .then((res) => res.json())
@@ -1009,8 +1034,8 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('GraphQL', () => {
-    it('should have simple paginate for joins', async () => {
+  test.describe('GraphQL', () => {
+    test('should have simple paginate for joins', async ({ restClient }) => {
       const queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1068,7 +1093,7 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
-    it('should return totalDocs with count: true', async () => {
+    test('should return totalDocs with count: true', async ({ restClient }) => {
       const queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1099,7 +1124,7 @@ describe('Joins Field', () => {
       expect(pageWithLimit.data.Categories.docs[0].relatedPosts.totalDocs).toStrictEqual(15)
     })
 
-    it('should have simple paginate with page for joins', async () => {
+    test('should have simple paginate with page for joins', async ({ restClient }) => {
       let queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1187,7 +1212,7 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should have simple paginate with page for joins polymorphic', async () => {
+    test('should have simple paginate with page for joins polymorphic', async ({ restClient }) => {
       let queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1275,7 +1300,10 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should populate joins with hasMany when on both sides documents are in draft', async () => {
+    test('should populate joins with hasMany when on both sides documents are in draft', async ({
+      payload,
+      restClient,
+    }) => {
       const category = await payload.create({
         collection: 'categories-versions',
         data: { _status: 'draft' },
@@ -1321,7 +1349,7 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should have simple paginate for joins inside groups', async () => {
+    test('should have simple paginate for joins inside groups', async ({ restClient }) => {
       const queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1386,7 +1414,7 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].group.relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
-    it('should sort joins', async () => {
+    test('should sort joins', async ({ restClient }) => {
       const query = `query {
         Category(id: ${categoryID}) {
           relatedPosts(
@@ -1405,7 +1433,7 @@ describe('Joins Field', () => {
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 9')
     })
 
-    it('should query in on collections with joins', async () => {
+    test('should query in on collections with joins', async ({ restClient }) => {
       const query = `query {
          Category(id: ${categoryID}) {
           relatedPosts(
@@ -1428,7 +1456,7 @@ describe('Joins Field', () => {
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
     })
 
-    it('should respect access control for join collections', async () => {
+    test('should respect access control for join collections', async ({ restClient }) => {
       const query = `query {
         CategoriesJoinRestricteds {
           docs {
@@ -1454,7 +1482,10 @@ describe('Joins Field', () => {
     })
   })
 
-  it('should work id.in command delimited querying with joins', async () => {
+  test('should work id.in command delimited querying with joins', async ({
+    payload,
+    restClient,
+  }) => {
     const allCategories = await payload.find({ collection: categoriesSlug, pagination: false })
 
     const allCategoriesByIds = await restClient
@@ -1472,7 +1503,7 @@ describe('Joins Field', () => {
     expect(allCategories.totalDocs).toBe(allCategoriesByIds.totalDocs)
   })
 
-  it('should join with singular collection name', async () => {
+  test('should join with singular collection name', async ({ payload }) => {
     const {
       docs: [category],
     } = await payload.find({ collection: categoriesSlug, limit: 1, depth: 0 })
@@ -1490,7 +1521,9 @@ describe('Joins Field', () => {
     expect((categoryWithJoins.singulars.docs[0] as Singular).id).toBe(singular.id)
   })
 
-  it('local API should not populate individual join by providing schemaPath=false', async () => {
+  test('local API should not populate individual join by providing schemaPath=false', async ({
+    payload,
+  }) => {
     const {
       docs: [res],
     } = await payload.find({
@@ -1512,7 +1545,9 @@ describe('Joins Field', () => {
     expect(res.group.camelCasePosts.docs).toBeDefined()
   })
 
-  it('rEST API should not populate individual join by providing schemaPath=false', async () => {
+  test('rEST API should not populate individual join by providing schemaPath=false', async ({
+    restClient,
+  }) => {
     const {
       docs: [res],
     } = await restClient
@@ -1537,7 +1572,7 @@ describe('Joins Field', () => {
     expect(res.group.camelCasePosts.docs).toBeDefined()
   })
 
-  it('should have correct totalDocs', async () => {
+  test('should have correct totalDocs', async ({ payload }) => {
     for (let i = 0; i < 50; i++) {
       await payload.create({ collection: categoriesSlug, data: { name: 'totalDocs' } })
     }
@@ -1559,7 +1594,7 @@ describe('Joins Field', () => {
     await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
   })
 
-  it('should self join', async () => {
+  test('should self join', async ({ payload }) => {
     const doc_1 = await payload.create({ collection: 'self-joins', data: {} })
     const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0 })
 
@@ -1568,7 +1603,7 @@ describe('Joins Field', () => {
     expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
   })
 
-  it('should populate joins on depth 2', async () => {
+  test('should populate joins on depth 2', async ({ payload }) => {
     const depthJoin_2 = await payload.create({ collection: 'depth-joins-2', data: {}, depth: 0 })
     const depthJoin_1 = await payload.create({
       collection: 'depth-joins-1',
@@ -1597,8 +1632,8 @@ describe('Joins Field', () => {
     expect(joinedDoc2.id).toBe(depthJoin_3.id)
   })
 
-  describe('Array of collection', () => {
-    it('should join across multiple collections', async () => {
+  test.describe('Array of collection', () => {
+    test('should join across multiple collections', async ({ payload }) => {
       let parent = await payload.create({
         collection: 'multiple-collections-parents',
         depth: 0,
@@ -1795,7 +1830,7 @@ describe('Joins Field', () => {
     })
   })
 
-  it('should support where querying by a top level join field', async () => {
+  test('should support where querying by a top level join field', async ({ payload }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1810,7 +1845,7 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field as ID', async () => {
+  test('should support where querying by a join field as ID', async ({ payload }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     const post = await payload.create({
       collection: 'posts',
@@ -1835,7 +1870,9 @@ describe('Joins Field', () => {
     expect(found_2.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field with hasMany relationship', async () => {
+  test('should support where querying by a join field with hasMany relationship', async ({
+    payload,
+  }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1850,7 +1887,9 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field with relationship nested to a group', async () => {
+  test('should support where querying by a join field with relationship nested to a group', async ({
+    payload,
+  }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1865,7 +1904,9 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field with relationship nested to an array', async () => {
+  test('should support where querying by a join field with relationship nested to an array', async ({
+    payload,
+  }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     const post = await payload.create({
       collection: 'posts',
@@ -1883,7 +1924,7 @@ describe('Joins Field', () => {
     await payload.delete({ collection: 'categories', id: category.id })
   })
 
-  it('should support where querying by a join field multiple times', async () => {
+  test('should support where querying by a join field multiple times', async ({ payload }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1911,7 +1952,9 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field with hasMany relationship multiple times', async () => {
+  test('should support where querying by a join field with hasMany relationship multiple times', async ({
+    payload,
+  }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1938,31 +1981,34 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  describe('Polymorphic join query validation', () => {
+  test.describe('Polymorphic join query validation', () => {
     const isPostgres = process.env.PAYLOAD_DATABASE === 'postgres'
 
-    it.skipIf(!isPostgres)('should reject unknown operators and not delay response', async () => {
-      const startTime = Date.now()
+    test.skipIf(!isPostgres)(
+      'should reject unknown operators and not delay response',
+      async ({ restClient }) => {
+        const startTime = Date.now()
 
-      const response = await restClient.GET('/categories', {
-        query: {
-          limit: 1,
-          joins: {
-            polymorphicJoin: {
-              limit: 1,
-              where: { x: { $raw: 'EXISTS(SELECT 1 FROM pg_sleep(3))' } },
+        const response = await restClient.GET('/categories', {
+          query: {
+            limit: 1,
+            joins: {
+              polymorphicJoin: {
+                limit: 1,
+                where: { x: { $raw: 'EXISTS(SELECT 1 FROM pg_sleep(3))' } },
+              },
             },
           },
-        },
-      })
+        })
 
-      const elapsedSeconds = (Date.now() - startTime) / 1000
+        const elapsedSeconds = (Date.now() - startTime) / 1000
 
-      expect(response.status).toBe(400)
-      expect(elapsedSeconds).toBeLessThan(1)
-    })
+        expect(response.status).toBe(400)
+        expect(elapsedSeconds).toBeLessThan(1)
+      },
+    )
 
-    it('should reject unknown operators in polymorphic join where', async () => {
+    test('should reject unknown operators in polymorphic join where', async ({ restClient }) => {
       const response = await restClient.GET('/categories', {
         query: {
           limit: 1,
@@ -1978,7 +2024,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should allow valid operators in polymorphic join where', async () => {
+    test('should allow valid operators in polymorphic join where', async ({ restClient }) => {
       const response = await restClient.GET('/categories', {
         query: {
           limit: 1,
@@ -1994,7 +2040,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should reject unknown operators regardless of value type', async () => {
+    test('should reject unknown operators regardless of value type', async ({ restClient }) => {
       const payloads = [
         { title: { bogus_operator: 'primitive' } },
         { title: { not_a_real_op: { nested: 'object' } } },
@@ -2018,7 +2064,7 @@ describe('Joins Field', () => {
       }
     })
 
-    it('should reject unknown operators when value is an array', async () => {
+    test('should reject unknown operators when value is an array', async ({ restClient }) => {
       // When qs parses [$raw][0]=value, the value becomes an array.
       // Arrays must be rejected the same as other value types.
       const response = await restClient.GET('/categories', {
@@ -2036,7 +2082,9 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject disallowed characters in polymorphic join where paths', async () => {
+    test('should reject disallowed characters in polymorphic join where paths', async ({
+      restClient,
+    }) => {
       // Polymorphic joins suppress "field not found" errors so that
       // fields unique to one collection are accepted. But paths with
       // disallowed characters must always be rejected.
@@ -2066,7 +2114,7 @@ describe('Joins Field', () => {
       }
     })
 
-    it('should reject $raw in non-polymorphic join where clause', async () => {
+    test('should reject $raw in non-polymorphic join where clause', async ({ restClient }) => {
       // Non-polymorphic joins use the full parseParams pipeline, not
       // buildSQLWhere. The $raw operator must still be rejected.
       const response = await restClient.GET('/categories', {
@@ -2085,8 +2133,10 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('Top-level query validation', () => {
-    it('should reject $raw operator on top-level collection queries via REST', async () => {
+  test.describe('Top-level query validation', () => {
+    test('should reject $raw operator on top-level collection queries via REST', async ({
+      restClient,
+    }) => {
       // $raw is an internal-only operator and must be rejected
       // at the top-level collection query as well as in joins.
       const response = await restClient.GET(`/${postsSlug}`, {
@@ -2099,7 +2149,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject $raw operator via Local API', async () => {
+    test('should reject $raw operator via Local API', async ({ payload }) => {
       // The Local API goes through the same validateQueryPaths pipeline.
       await expect(
         payload.find({
@@ -2110,7 +2160,9 @@ describe('Joins Field', () => {
       ).rejects.toBeTruthy()
     })
 
-    it('should reject unknown operators on top-level collection queries', async () => {
+    test('should reject unknown operators on top-level collection queries', async ({
+      restClient,
+    }) => {
       const response = await restClient.GET(`/${postsSlug}`, {
         query: {
           limit: 1,
@@ -2121,7 +2173,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject $raw nested inside AND combinator', async () => {
+    test('should reject $raw nested inside AND combinator', async ({ restClient }) => {
       // Unrecognized operators inside boolean combinators should
       // also be caught by recursive validation.
       const response = await restClient.GET(`/${postsSlug}`, {
@@ -2136,7 +2188,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject $raw nested inside OR combinator', async () => {
+    test('should reject $raw nested inside OR combinator', async ({ restClient }) => {
       const response = await restClient.GET(`/${postsSlug}`, {
         query: {
           limit: 1,
@@ -2149,7 +2201,9 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject $raw nested inside AND combinator in join where', async () => {
+    test('should reject $raw nested inside AND combinator in join where', async ({
+      restClient,
+    }) => {
       const response = await restClient.GET('/categories', {
         query: {
           limit: 1,
@@ -2169,7 +2223,11 @@ describe('Joins Field', () => {
   })
 })
 
-async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {
+async function createPost(
+  { payload }: { payload: Payload },
+  overrides?: Partial<Post>,
+  locale?: Config['locale'],
+) {
   return payload.create({
     collection: postsSlug,
     locale,

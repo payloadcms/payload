@@ -9,7 +9,10 @@ import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
-import { schedulePublishHandler } from './schedulePublishHandler.js'
+import {
+  getUpcomingScheduledPublishHandler,
+  schedulePublishHandler,
+} from './schedulePublishHandler.js'
 import { slugifyHandler } from './slugify.js'
 import { switchLanguageHandler } from './switchLanguageHandler.js'
 
@@ -32,6 +35,7 @@ export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'form-state': buildFormStateHandler,
   'get-default-layout': getDefaultLayoutHandler,
+  'get-upcoming-scheduled-publish': getUpcomingScheduledPublishHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,

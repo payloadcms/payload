@@ -13,6 +13,7 @@ type Args = {
   id?: DefaultDocumentIDType
   /** Locale to scope the check to, for localized fields. */
   locale?: Locale['code']
+  overrideAccess?: boolean
   req: PayloadRequest
   /**
    * Index the search starts from. `0` (default) tries the bare `value` first, then `value-1`, …
@@ -35,6 +36,7 @@ export const getUniqueFieldValue = async ({
   draftsEnabled,
   field,
   locale,
+  overrideAccess = false,
   req,
   startIndex = 0,
   value,
@@ -48,6 +50,7 @@ export const getUniqueFieldValue = async ({
       draftsEnabled,
       field,
       locale,
+      overrideAccess,
       req,
       value: candidate,
     })

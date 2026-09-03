@@ -30,8 +30,8 @@ const readerPlugin = definePlugin<ReaderPluginOptions>({
     ...config,
     custom: {
       ...(config.custom || {}),
-      readerSawValue: (config.custom?.writerValue as string) ?? null,
       readerItems: options.items.map((i) => i.name),
+      readerSawValue: (config.custom?.writerValue as string) ?? null,
     },
   }),
 })
@@ -60,41 +60,47 @@ const writerPlugin = definePlugin({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'plugins',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      {
+        slug: 'users',
+        auth: true,
+        fields: [],
+        versions: false,
+      },
+    ],
+    plugins: [
+      (config) => ({
+        ...config,
+        collections: [
+          ...(config.collections || []),
+          {
+            slug: pagesSlug,
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+              },
+            ],
+            versions: false,
+          },
+        ],
+      }),
+      // Intentionally listed BEFORE the writer to verify order sorting works
+      readerPlugin({ items: [{ name: 'user-provided' }] }),
+      writerPlugin(),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    {
-      slug: 'users',
-      auth: true,
-      fields: [],
-      versions: false,
-    },
-  ],
-  plugins: [
-    (config) => ({
-      ...config,
-      collections: [
-        ...(config.collections || []),
-        {
-          slug: pagesSlug,
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-            },
-          ],
-          versions: false,
-        },
-      ],
-    }),
-    // Intentionally listed BEFORE the writer to verify order sorting works
-    readerPlugin({ items: [{ name: 'user-provided' }] }),
-    writerPlugin(),
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -102,8 +108,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

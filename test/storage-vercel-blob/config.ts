@@ -33,20 +33,52 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-vercel-blob',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      Media,
+      MediaWithAlwaysInsertFields,
+      MediaWithDirectAccess,
+      MediaWithDynamicPrefix,
+      MediaWithPrefix,
+      Users,
+    ],
+    storage: [
+      vercelBlobStorage({
+        collections: {
+          [mediaSlug]: true,
+          [mediaWithDirectAccessSlug]: {
+            disablePayloadAccessControl: true,
+          },
+          [mediaWithDynamicPrefixSlug]: true,
+          [mediaWithPrefixSlug]: {
+            prefix,
+          },
+        },
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      }),
+      // Test alwaysInsertFields with enabled: false
+      vercelBlobStorage({
+        alwaysInsertFields: true,
+        collections: {
+          [mediaWithAlwaysInsertFieldsSlug]: {
+            prefix: '',
+          },
+        },
+        enabled: false,
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    Media,
-    MediaWithAlwaysInsertFields,
-    MediaWithDirectAccess,
-    MediaWithDynamicPrefix,
-    MediaWithPrefix,
-    Users,
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -54,34 +86,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  storage: [
-    vercelBlobStorage({
-      collections: {
-        [mediaSlug]: true,
-        [mediaWithDirectAccessSlug]: {
-          disablePayloadAccessControl: true,
-        },
-        [mediaWithDynamicPrefixSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    }),
-    // Test alwaysInsertFields with enabled: false
-    vercelBlobStorage({
-      alwaysInsertFields: true,
-      collections: {
-        [mediaWithAlwaysInsertFieldsSlug]: {
-          prefix: '',
-        },
-      },
-      enabled: false,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

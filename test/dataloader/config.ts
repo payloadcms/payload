@@ -10,118 +10,124 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'dataloader',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      {
+        slug: 'posts',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'owner',
+            type: 'relationship',
+            hooks: {
+              beforeChange: [({ req: { user } }) => user?.id],
+            },
+            relationTo: 'users',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'relation-a',
+        fields: [
+          {
+            name: 'relationship',
+            type: 'relationship',
+            relationTo: 'relation-b',
+          },
+          {
+            name: 'richText',
+            type: 'richText',
+            editor: lexicalEditor({}),
+          },
+        ],
+        labels: {
+          plural: 'Relation As',
+          singular: 'Relation A',
+        },
+        versions: false,
+      },
+      {
+        slug: 'relation-b',
+        fields: [
+          {
+            name: 'relationship',
+            type: 'relationship',
+            relationTo: 'relation-a',
+          },
+          {
+            name: 'richText',
+            type: 'richText',
+            editor: lexicalEditor({}),
+          },
+        ],
+        labels: {
+          plural: 'Relation Bs',
+          singular: 'Relation B',
+        },
+        versions: false,
+      },
+      {
+        slug: 'shops',
+        access: { read: () => true },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'items',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'items',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'items',
+        access: { read: () => true },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'itemTags',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'itemTags',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'itemTags',
+        access: { read: () => true },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    {
-      slug: 'posts',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'owner',
-          type: 'relationship',
-          hooks: {
-            beforeChange: [({ req: { user } }) => user?.id],
-          },
-          relationTo: 'users',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'relation-a',
-      fields: [
-        {
-          name: 'relationship',
-          type: 'relationship',
-          relationTo: 'relation-b',
-        },
-        {
-          name: 'richText',
-          type: 'richText',
-          editor: lexicalEditor({}),
-        },
-      ],
-      labels: {
-        plural: 'Relation As',
-        singular: 'Relation A',
-      },
-      versions: false,
-    },
-    {
-      slug: 'relation-b',
-      fields: [
-        {
-          name: 'relationship',
-          type: 'relationship',
-          relationTo: 'relation-a',
-        },
-        {
-          name: 'richText',
-          type: 'richText',
-          editor: lexicalEditor({}),
-        },
-      ],
-      labels: {
-        plural: 'Relation Bs',
-        singular: 'Relation B',
-      },
-      versions: false,
-    },
-    {
-      slug: 'shops',
-      access: { read: () => true },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'items',
-          type: 'relationship',
-          hasMany: true,
-          relationTo: 'items',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'items',
-      access: { read: () => true },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'itemTags',
-          type: 'relationship',
-          hasMany: true,
-          relationTo: 'itemTags',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'itemTags',
-      access: { read: () => true },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     const user = await payload.create({
       collection: 'users',
       data: {
@@ -148,9 +154,6 @@ export default buildConfigWithDefaults({
       collection: 'shops',
       data: { name: 'shop1', items: [item.id] },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 

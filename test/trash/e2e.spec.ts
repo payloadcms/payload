@@ -626,7 +626,11 @@ describe('Trash', () => {
       test('Should collapse breadcrumbs into a popup menu when they do not fit the available width', async ({
         page,
       }) => {
-        await page.setViewportSize({ width: 400, height: 800 })
+        // 320px (not 400px) puts the breadcrumbs unambiguously past the available
+        // width. At 400px the expanded breadcrumbs measure within ~1px of the
+        // available space, making the collapse decision a coin-flip in slower CI
+        // environments (e.g. tanstack-start).
+        await page.setViewportSize({ width: 320, height: 800 })
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const collapsedToggle = page.locator('.step-nav__collapsed-toggle')
@@ -706,6 +710,22 @@ describe('Trash', () => {
         const statusBlock = page.locator('.doc-controls__status')
         await expect(statusBlock).toBeVisible()
         await expect(statusBlock).toContainText('Previously Published')
+      })
+
+      test('Should render rich text fields as read-only, including inside tabs', async ({
+        page,
+      }) => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        for (const fieldPath of ['richText', 'richTextInTab']) {
+          const editor = page.locator(
+            `[data-field-path="${fieldPath}"] .ContentEditable__root[data-lexical-editor="true"]`,
+          )
+
+          await expect(editor).toBeVisible()
+          await expect(editor).toHaveAttribute('contenteditable', 'false')
+          await expect(editor).toHaveAttribute('aria-readonly', 'true')
+        }
       })
 
       test('Should render Permanently Delete and Restore buttons in doc controls', async ({

@@ -1,5 +1,6 @@
 import type { Endpoint } from '../../config/types.js'
 
+import { defaultAccess } from '../../auth/defaultAccess.js'
 import { handleSchedules } from '../operations/handleSchedules/index.js'
 import { configHasJobs } from './run.js'
 
@@ -21,7 +22,7 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
       )
     }
 
-    const accessFn = jobsConfig.access?.run ?? (() => true)
+    const accessFn = jobsConfig.access?.run ?? defaultAccess
 
     const hasAccess = await accessFn({ req })
 

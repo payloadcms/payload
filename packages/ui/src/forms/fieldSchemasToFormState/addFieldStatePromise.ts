@@ -997,6 +997,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       permissions: parentPermissions,
       preferences,
       previousFormState,
+      readOnly,
       renderAllFields,
       renderFieldFn,
       req,

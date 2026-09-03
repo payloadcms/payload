@@ -1,6 +1,9 @@
 import type { JsonObject, Payload } from 'payload'
 
-import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import {
+  getUpcomingScheduledPublishHandler,
+  schedulePublishHandler,
+} from '@payloadcms/ui/utilities/schedulePublishHandler'
 import fs from 'fs'
 import path from 'path'
 import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'
@@ -4026,6 +4029,57 @@ describe('Versions', () => {
         expect(event).toBeDefined()
       })
 
+      it('should get upcoming scheduled publish events without reading the jobs collection', async () => {
+        const req = await createLocalReq({ user }, payload)
+
+        await schedulePublishHandler({
+          type: 'publish',
+          date: new Date(Date.now() + 60_000),
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: String(draftDoc.id),
+          },
+          locale: 'all',
+          req,
+          user,
+        })
+
+        const events = await getUpcomingScheduledPublishHandler({
+          collectionSlug: draftCollectionSlug,
+          id: draftDoc.id,
+          req,
+        })
+
+        expect(events).toHaveLength(1)
+        expect(events[0]).toMatchObject({
+          input: {
+            type: 'publish',
+          },
+        })
+        expect(events[0]).not.toHaveProperty('taskSlug')
+        expect(events[0]?.input).not.toHaveProperty('user')
+      })
+
+      it('should not get scheduled publish events without publish permission', async () => {
+        const req = await createLocalReq({ user }, payload)
+
+        await payload.update({
+          collection: draftCollectionSlug,
+          data: {
+            restrictedToUpdate: true,
+          },
+          id: draftDoc.id,
+        })
+
+        await expect(
+          getUpcomingScheduledPublishHandler({
+            collectionSlug: draftCollectionSlug,
+            id: draftDoc.id,
+            req,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+
       it('should delete using schedule-publish', async () => {
         const currentDate = new Date()
 
@@ -4081,6 +4135,30 @@ describe('Versions', () => {
           collectionSlugs: ['payload-jobs', draftCollectionSlug],
           payload,
         })
+      })
+
+      it('should not delete a job that is not a scheduled publish', async () => {
+        const req = await createLocalReq({ user }, payload)
+        const unrelatedJob = await payload.db.create({
+          collection: 'payload-jobs',
+          data: {
+            input: {},
+            taskSlug: 'inline',
+          },
+        })
+
+        await schedulePublishHandler({
+          deleteID: unrelatedJob.id,
+          req,
+          user,
+        })
+
+        const result = await payload.findByID({
+          collection: 'payload-jobs',
+          id: unrelatedJob.id,
+        })
+
+        expect(result.id).toBe(unrelatedJob.id)
       })
     })
   })

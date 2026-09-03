@@ -1,12 +1,8 @@
-import type { Payload } from 'payload'
-
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -26,26 +22,16 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let restClient: NextRESTClient
-
-let payload: Payload
-
-describe('@payloadcms/storage-s3', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
+  test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()
   })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-  afterEach(async () => {
+  test.afterEach(async () => {
     await clearTestBucket()
   })
 
-  it('can upload', async () => {
+  test('can upload', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
@@ -63,7 +49,7 @@ describe('@payloadcms/storage-s3', () => {
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
   })
 
-  it('can upload with prefix', async () => {
+  test('can upload with prefix', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithPrefixSlug,
       data: {},
@@ -83,7 +69,9 @@ describe('@payloadcms/storage-s3', () => {
     )
   })
 
-  it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
+  test('has prefix field with alwaysInsertFields even when plugin is disabled', async ({
+    payload,
+  }) => {
     // This collection uses a s3Storage plugin with enabled: false but alwaysInsertFields: true
     // The upload will use local storage, but the prefix field should still exist
     const upload = await payload.create({
@@ -99,7 +87,7 @@ describe('@payloadcms/storage-s3', () => {
     expect(upload.prefix).toBe('test')
   })
 
-  it('can download with signed downloads', async () => {
+  test('can download with signed downloads', async ({ payload, restClient }) => {
     await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
@@ -110,13 +98,13 @@ describe('@payloadcms/storage-s3', () => {
     expect(response.status).toBe(302)
     const url = response.headers.get('Location')
     expect(url).toBeDefined()
-    expect(url!).toContain(`/${getTestBucketName()}/image.png`)
-    expect(new URLSearchParams(url!).get('x-id')).toBe('GetObject')
-    const file = await fetch(url!)
+    expect(url).toContain(`/${getTestBucketName()}/image.png`)
+    expect(new URLSearchParams(url).get('x-id')).toBe('GetObject')
+    const file = await fetch(url)
     expect(file.headers.get('Content-Type')).toBe('image/png')
   })
 
-  it('should skip signed download', async () => {
+  test('should skip signed download', async ({ payload, restClient }) => {
     await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
@@ -130,12 +118,15 @@ describe('@payloadcms/storage-s3', () => {
     expect(response.headers.get('Content-Type')).toBe('image/png')
   })
 
-  it('should return 404 when the file is not found', async () => {
+  test('should return 404 when the file is not found', async ({ restClient }) => {
     const response = await restClient.GET(`/${mediaSlug}/file/missing.png`)
     expect(response.status).toBe(404)
   })
 
-  it('should return 304 with empty body when the ETag matches', async () => {
+  test('should return 304 with empty body when the ETag matches', async ({
+    payload,
+    restClient,
+  }) => {
     await payload.create({
       collection: mediaWithSignedDownloadsSlug,
       data: {},
@@ -165,8 +156,10 @@ describe('@payloadcms/storage-s3', () => {
     expect(body).toBe('')
   })
 
-  describe('disablePayloadAccessControl', () => {
-    it('should return direct S3 URL with encoded filename when uploading file with spaces', async () => {
+  test.describe('disablePayloadAccessControl', () => {
+    test('should return direct S3 URL with encoded filename when uploading file with spaces', async ({
+      payload,
+    }) => {
       const upload = await payload.create({
         collection: mediaWithDirectAccessSlug,
         data: {},
@@ -206,7 +199,9 @@ describe('@payloadcms/storage-s3', () => {
       expect(dbDoc.url).not.toMatch(/^\/api\//)
     })
 
-    it('should store full S3 URLs in database for image sizes when disablePayloadAccessControl is true', async () => {
+    test('should store full S3 URLs in database for image sizes when disablePayloadAccessControl is true', async ({
+      payload,
+    }) => {
       const upload = await payload.create({
         collection: mediaWithDirectAccessSlug,
         data: {},
@@ -237,7 +232,9 @@ describe('@payloadcms/storage-s3', () => {
       await payload.delete({ collection: mediaWithDirectAccessSlug, id: upload.id })
     })
 
-    it('should return direct S3 URL without encoding issues for normal filenames', async () => {
+    test('should return direct S3 URL without encoding issues for normal filenames', async ({
+      payload,
+    }) => {
       const upload = await payload.create({
         collection: mediaWithDirectAccessSlug,
         data: {},
@@ -257,8 +254,8 @@ describe('@payloadcms/storage-s3', () => {
     })
   })
 
-  describe('storage config', () => {
-    it('should default storage to an empty array when the key is omitted', () => {
+  test.describe('storage config', () => {
+    test('should default storage to an empty array when the key is omitted', ({ payload }) => {
       // sanitize.ts sets storage = [] when the key is absent from the raw config
       // (packages/payload/src/config/sanitize.ts). Verified here because the sanitized
       // config must always expose a defined array regardless of what the user configured.
@@ -266,7 +263,7 @@ describe('@payloadcms/storage-s3', () => {
       expect(Array.isArray(payload.config.storage)).toBe(true)
     })
 
-    it('should expose adapter name and collections on each storage adapter', () => {
+    test('should expose adapter name and collections on each storage adapter', ({ payload }) => {
       const s3Adapter = payload.config.storage.find((a) => a.name === 's3')
 
       expect(s3Adapter).toBeDefined()
@@ -276,12 +273,12 @@ describe('@payloadcms/storage-s3', () => {
     })
   })
 
-  describe('R2', () => {
-    it.todo('can upload')
+  test.describe('R2', () => {
+    test.todo('can upload')
   })
 
-  describe('prefix collision detection', () => {
-    beforeEach(async () => {
+  test.describe('prefix collision detection', () => {
+    test.beforeEach(async ({ payload }) => {
       // Clear S3 bucket before each test
       await clearTestBucket()
       // Clear database records before each test
@@ -299,7 +296,7 @@ describe('@payloadcms/storage-s3', () => {
       })
     })
 
-    it('detects collision within same prefix', async () => {
+    test('detects collision within same prefix', async ({ payload }) => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       // Upload twice with same prefix
@@ -321,7 +318,7 @@ describe('@payloadcms/storage-s3', () => {
       expect(upload2.prefix).toBe(prefix)
     })
 
-    it('works normally for collections without prefix', async () => {
+    test('works normally for collections without prefix', async ({ payload }) => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       // Upload twice to collection without prefix
@@ -345,7 +342,7 @@ describe('@payloadcms/storage-s3', () => {
       expect(upload2.prefix).toBeUndefined()
     })
 
-    it('allows same filename under different prefixes', async () => {
+    test('allows same filename under different prefixes', async ({ payload }) => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       // Upload with default prefix from config ('test-prefix')
@@ -370,7 +367,7 @@ describe('@payloadcms/storage-s3', () => {
       expect(upload2.prefix).toBe('different-prefix')
     })
 
-    it('supports multi-tenant scenario with dynamic prefix from hook', async () => {
+    test('supports multi-tenant scenario with dynamic prefix from hook', async ({ payload }) => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       // Tenant A uploads logo.png

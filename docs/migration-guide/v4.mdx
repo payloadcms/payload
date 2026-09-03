@@ -26,6 +26,121 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
 
+### Custom bin scripts replaced by native CLI commands
+
+The `config.bin` API has been removed. Custom commands are now registered through `config.cli.commands` and use the same schema-backed CLI API as Payload's built-in commands.
+
+In Payload 3.x, config entries connected a command name to a script path:
+
+```ts
+// payload.config.ts
+export default buildConfig({
+  bin: [
+    {
+      key: 'seed',
+      scriptPath: path.resolve(dirname, 'seed.ts'),
+    },
+  ],
+})
+```
+
+The imported module had to expose a specially named `script` function:
+
+```ts
+// seed.ts
+import type { SanitizedConfig } from 'payload'
+
+import payload from 'payload'
+
+export const script = async (config: SanitizedConfig) => {
+  await payload.init({ config })
+  // Seed the database...
+  process.exit(0)
+}
+```
+
+In Payload 4.0, define a real CLI command instead:
+
+```ts
+// seed.ts
+import { strictObject, z } from 'payload'
+import { defineCLICommand } from 'payload/cli'
+
+export const seedCommand = defineCLICommand({
+  description: 'Seed the database.',
+  input: strictObject({
+    clear: z
+      ._default(z.boolean(), false)
+      .check(z.describe('Delete existing documents first.')),
+  }),
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+
+    if (args.clear) {
+      // Delete existing documents...
+    }
+
+    // Seed the database...
+    payload.logger.info('Successfully seeded!')
+  },
+})
+```
+
+Register the command export in your Payload config:
+
+```ts
+// payload.config.ts
+export default buildConfig({
+  cli: {
+    commands: {
+      seed: './seed.js#seedCommand',
+    },
+  },
+})
+```
+
+When migrating custom scripts:
+
+- Replace `bin` entries with entries in the `cli.commands` map. The map key becomes the command name.
+- Replace the exported `script(config)` function with a schema-backed command created by `defineCLICommand`.
+- Register commands by import path to keep them out of the Payload config's module graph. Paths use the existing `PayloadComponent` syntax, resolve relative to `payload.config.ts`, and support default or named exports. Direct `CLICommand` values are also accepted.
+- Define the handler's semantic input with a Standard Schema implementation such as Zod. Supported top-level properties become options automatically; use `cli` only to mark positional arguments, hide fields, or override unusual shell syntax.
+- Use the provided `getPayload()` function so Payload can shut down database connections after the command finishes.
+- Return an exit code from the handler when needed. Do not call `process.exit()` from the command.
+
+Payload adds built-in command import references to `cli.commands` while sanitizing the config, then applies project entries over those defaults. All built-ins are named exports from `payload/cli/builtin`, and Payload imports a referenced module only once even when it provides several commands. The sanitized map therefore contains the complete local CLI, and built-in and custom commands use the same loader. Custom commands appear in `payload --help` and receive Standard Schema validation and generated shell help. A command with the same map key as a built-in command replaces it, while `false` disables that command. Set `cli: false` to disable the entire Payload CLI. Command names are case-sensitive. Because custom commands must be registered before the CLI parses input, the Payload config is now loaded before displaying root CLI help.
+
+See the [Payload CLI documentation](../configuration/cli) for the complete API.
+
+### `migrateCLI` removed
+
+The undocumented `migrateCLI` export has been removed. It accepted an already-sanitized config, a minimist-shaped `parsedArgs` object, and a special `migrationDir` override. This duplicated migration command registration and kept the old argument format alive after the main CLI moved to Commander.
+
+If application code needs migration behavior rather than command-line parsing, call the database adapter directly through an initialized Payload instance:
+
+```ts
+await payload.db.migrate()
+```
+
+The adapter also exposes the corresponding `migrateDown`, `migrateFresh`, `migrateRefresh`, `migrateReset`, `migrateStatus`, and `createMigration` methods.
+
+If you need to execute the real CLI from JavaScript, use the existing generic `payload.bin()` method. It starts the same CLI process a user would run in a terminal and returns its exit code:
+
+```ts
+import payload from 'payload'
+
+const { code } = await payload.bin({
+  args: ['migrate:create', '--file', migrationPath],
+  cwd: projectDirectory,
+})
+```
+
+The spawned CLI discovers the Payload config from `cwd` or `PAYLOAD_CONFIG_PATH`. Configure a custom migration directory through your database adapter instead of passing it as a programmatic CLI override.
+
+### Generator helpers now return result objects
+
+`generateTypes` now returns `{ types, outputFile, written }` instead of returning the generated source directly when using `returnString: true`. `generateImportMap` now returns `{ outputFile, written }`, and `payload.db.generateSchema()` returns `{ outputFile }`. Code that ignores these return values does not need to change.
+
 ### Default query depth reduced to `1`
 
 Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.
@@ -480,6 +595,36 @@ const Heading: React.FC = () => {
 If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the import entirely. If you used it for other properties as well, leave the original `useDocumentInfo()` call in place and add a separate `useDocumentTitle()` call alongside it.
 
 Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
+
+### `useLocale` returns `null` without an active locale
+
+The return type of `useLocale` is now `Locale | null`. It returns `null` when localization is disabled or configured without any locales. In Payload 3, the hook was typed as `Locale` and returned an empty object when localization was unavailable.
+
+Custom Client Components that read locale properties directly must handle the nullable value:
+
+```diff
+'use client'
+import { useLocale } from '@payloadcms/ui'
+
+const Greeting: React.FC = () => {
+-  const { code } = useLocale()
++  const locale = useLocale()
++
++  if (!locale) {
++    return null
++  }
++
++  const { code } = locale
+
+  return <span>{code}</span>
+}
+```
+
+When a missing locale is already valid for the receiving API, optional chaining is sufficient:
+
+```ts
+const locale = useLocale()?.code
+```
 
 ### RichText adapter `i18n` property removed
 
@@ -988,6 +1133,30 @@ And update any `$ref` pointers you wrote by hand to point at `$defs`:
 
 Do not keep your additions on `definitions` while new ones land on `$defs`.
 
+### Jobs: generic collection access is denied by default
+
+The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations that use `overrideAccess: false`. Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, and `payload.jobs.cancel()` continue to work as before.
+
+If your application intentionally exposes the internal payload-jobs collection, configure only the access it needs through `jobsCollectionOverrides`. For example, the following enables read-only Admin Panel access for trusted administrators:
+
+```ts
+jobs: {
+  jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
+    ...defaultJobsCollection,
+    access: {
+      ...defaultJobsCollection.access,
+      read: ({ req }) => Boolean(req.user?.roles?.includes('admin')),
+    },
+    admin: {
+      ...defaultJobsCollection.admin,
+      hidden: false,
+    },
+  }),
+}
+```
+
+Job documents can contain inputs, outputs, logs, and execution state, so avoid enabling write access unless your application specifically requires it.
+
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 
 The deprecated `jobs.depth` and `jobs.runHooks` config options have been removed. Job operations now always use direct database calls with depth `0`.
@@ -1468,7 +1637,7 @@ createAPIKeyFields({
 
 The MCP plugin was refactored. The public config API, the built-in tool inputs, and API-key authentication changed. Update your plugin config and recreate MCP credentials as user API keys.
 
-**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools. For collections, this includes tools like `getCollectionSchema`, `findDocuments`, `countDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `duplicateDocument`, and `findDistinct`, plus version tools when versions are enabled. For globals, this includes `getGlobalSchema`, `findGlobal`, and `updateGlobal`, plus version tools when versions are enabled. Turn individual operations off via simple config keys like `tools: { create: false }`.
+**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools. For collections, this includes tools like `getCollectionSchema`, `findDocuments`, `countDocuments`, `createDocuments`, `updateDocument`, `deleteDocuments`, `duplicateDocument`, and `findDistinct`, plus version tools when versions are enabled. For globals, this includes `getGlobalSchema`, `findGlobal`, and `updateGlobal`, plus version tools when versions are enabled. Turn individual operations off via simple config keys like `tools: { create: false }`.
 
 ```diff
 mcpPlugin({
@@ -1533,7 +1702,9 @@ const result = await req.payload.find({
 })
 ```
 
-For custom collection and global tools, do not add `collectionSlug` / `globalSlug` yourself. Payload adds the slug input to the MCP schema automatically, and the handler receives the resolved slug as a top-level argument.
+Collection and global tool calls now use `slug` instead of `collectionSlug` or `globalSlug`. Update saved tool inputs and any code that calls these tools directly.
+
+For custom collection and global tools, do not add `slug` yourself. Payload adds it to the MCP schema automatically, and the handler receives the resolved slug as a top-level argument.
 
 ```ts
 defineCollectionTool({
@@ -1541,24 +1712,31 @@ defineCollectionTool({
   input: z.object({
     id: z.string(),
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
-  // collectionSlug is resolved from the tool call
+}).handler(async ({ slug, input, req }) => {
+  // slug is resolved from the tool call
 })
 ```
 
-**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocument` / `updateDocument`. Pass the target collection as `collectionSlug`; document fields live under `data` alongside options like `depth`, `draft` and `locale`. For update and delete calls, pass `id` or `where` as top-level arguments. `_status`, `id`, `createdAt` and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
+**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocuments` / `updateDocument`. Pass the target collection as `slug`. For creates, pass a `documents` array whose items contain `data` and an optional `file`; for updates, pass `data` with an `id` or `where` at the top level. Options such as `depth`, `draft`, and `locale` also remain at the top level. `_status`, `id`, `createdAt`, and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
 
 ```ts
-// arguments to a `createDocument` tool call
+// arguments to a `createDocuments` tool call
 
 // before
 { title: 'Hello', _status: 'draft', draft: true, depth: 2 }
 
 // after
-{ collectionSlug: 'posts', data: { title: 'Hello' }, draft: true, depth: 2 }
+{
+  slug: 'posts',
+  documents: [{ data: { title: 'Hello' } }],
+  draft: true,
+  depth: 2,
+}
 ```
 
-**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per auth collection via its `tools` map, and pass the target auth collection as `collectionSlug`. Like every MCP item, auth tools now use default MCP access unless you provide an `access` callback, so unauthenticated auth tools such as `login` need `access: () => true`.
+`createDocuments` and `updateDocument` now return affected document IDs instead of complete documents by default. Add `returning: true` to preserve the previous response. If the call uses `select`, it must also set `returning: true`.
+
+**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per auth collection via its `tools` map, and pass the target auth collection as `slug`. Like every MCP item, auth tools now use default MCP access unless you provide an `access` callback, so unauthenticated auth tools such as `login` need `access: () => true`.
 
 ```diff
 - mcpPlugin({ experimental: { tools: { auth: { enabled: true } } } })
@@ -1616,7 +1794,7 @@ Because the `payload-mcp-api-keys` collection config was removed, run your norma
 
 By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.
 
-**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4.
+**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`. It no longer depends on Zod directly; its built-in tools use the Zod Mini export from `payload`. If your custom tools use regular Zod, install Zod v4 in your project and import it directly.
 
 ### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
 

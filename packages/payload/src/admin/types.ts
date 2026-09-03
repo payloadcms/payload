@@ -1,7 +1,7 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
-import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type {

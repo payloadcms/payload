@@ -171,7 +171,7 @@ describe('workdir helpers', () => {
       event: {
         name: 'findDocuments',
         type: 'mcp-tool-call',
-        input: { collectionSlug: 'articles' },
+        input: { slug: 'articles' },
         response: { content: [{ type: 'text', text: 'Found it' }] },
       },
       path: auditPath,
@@ -189,7 +189,7 @@ describe('workdir helpers', () => {
       {
         name: 'findDocuments',
         type: 'mcp-tool-call',
-        input: { collectionSlug: 'articles' },
+        input: { slug: 'articles' },
         response: { content: [{ type: 'text', text: 'Found it' }] },
       },
     ])

@@ -258,6 +258,12 @@ const gqlTypeCache: Record<string, GraphQLType> = {}
  * @param field the field for which their valid operators inside a "where" argument is being defined
  * @param parentName the name of the parent field (if any)
  * @returns all the operators (including their types) which can be used as a condition for a given field inside a where
+ *
+ * @example
+ * A has-many relationship accepts a nested query with its relationship operators:
+ * ```graphql
+ * Burgers(where: { ingredients: { not_equals: { isHealthy: { equals: false } } } })
+ * ```
  */
 export const withOperators = (
   field: FieldAffectingData,
@@ -271,6 +277,17 @@ export const withOperators = (
 
   // Get the default operators for the field type which are hard-coded above
   const fieldOperators = [...defaults[field.type].operators]
+
+  // These operators accept a complete `where` query for the one collection targeted by the
+  // relationship. Polymorphic relationships are excluded because they can target multiple schemas.
+  if (
+    (field.type === 'relationship' || field.type === 'upload') &&
+    field.hasMany &&
+    typeof field.relationTo === 'string'
+  ) {
+    // `equals` and `not_equals` already exist for relationship fields.
+    fieldOperators.push({ name: 'contains', type: GraphQLJSON })
+  }
 
   if (!('required' in field) || !field.required) {
     fieldOperators.push({

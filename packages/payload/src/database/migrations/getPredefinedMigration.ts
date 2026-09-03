@@ -44,7 +44,7 @@ export const getPredefinedMigration = async ({
       payload.logger.error({
         msg: `Canned migration ${migrationName} not found.`,
       })
-      process.exit(1)
+      throw new Error(`Canned migration ${migrationName} not found.`)
     }
     cleanPath = cleanPath.replaceAll('\\', '/')
     try {
@@ -61,7 +61,7 @@ export const getPredefinedMigration = async ({
         err,
         msg: `Error loading predefined migration ${migrationName}`,
       })
-      process.exit(1)
+      throw err
     }
   } else if (importPath) {
     // Path 2: Any other package or file path - use dynamic import

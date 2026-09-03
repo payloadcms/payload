@@ -3,7 +3,6 @@ import type { AllOperations, JsonObject, PayloadRequest } from '../../types/inde
 import type { Collection } from '../config/types.js'
 
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizePermissions } from '../../utilities/sanitizePermissions.js'
 
 const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
@@ -43,28 +42,23 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
     collectionOperations.push('readVersions')
   }
 
-  try {
-    const result = await getEntityPermissions({
-      id: id!,
-      blockReferencesPermissions: {},
-      data,
-      entity: config,
-      entityType: 'collection',
-      fetchData: id ? true : (false as true),
-      operations: collectionOperations,
-      req,
-    })
+  const result = await getEntityPermissions({
+    id: id!,
+    blockReferencesPermissions: {},
+    data,
+    entity: config,
+    entityType: 'collection',
+    fetchData: id ? true : (false as true),
+    operations: collectionOperations,
+    req,
+  })
 
-    const sanitizedPermissions = sanitizePermissions({
-      collections: {
-        [config.slug]: result,
-      },
-    })
+  const sanitizedPermissions = sanitizePermissions({
+    collections: {
+      [config.slug]: result,
+    },
+  })
 
-    const collectionPermissions = sanitizedPermissions?.collections?.[config.slug]
-    return collectionPermissions ?? { fields: {} }
-  } catch (e: unknown) {
-    await killTransaction(req)
-    throw e
-  }
+  const collectionPermissions = sanitizedPermissions?.collections?.[config.slug]
+  return collectionPermissions ?? { fields: {} }
 }

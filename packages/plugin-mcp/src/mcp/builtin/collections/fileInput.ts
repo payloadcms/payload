@@ -1,53 +1,61 @@
 import type { CollectionSlug, File, FileData, PayloadRequest } from 'payload'
 
-import { APIError } from 'payload'
+import { APIError, z } from 'payload'
 import { getExternalFile, getFileFromUploadInstructions, isURLAllowed } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
-import { z } from 'zod'
 
 const mimeTypeSchema = z
   .string()
-  .regex(/^[!#$%&'*+.^`|~\w-]+\/[!#$%&'*+.^`|~\w-]+$/, 'MIME type must use the type/subtype format')
+  .check(
+    z.regex(
+      /^[!#$%&'*+.^`|~\w-]+\/[!#$%&'*+.^`|~\w-]+$/,
+      'MIME type must use the type/subtype format',
+    ),
+  )
 
-const uploadFileSchema = z.object({
+const uploadFileSchema = z.strictObject({
   filename: z.string(),
   mimeType: z.string(),
-  size: z.number().int().nonnegative(),
+  size: z.int().check(z.nonnegative()),
   uploadReference: z.record(z.string(), z.unknown()),
 })
 
 export const fileInputSchema = z
   .discriminatedUnion('source', [
-    z.object({
-      name: z.string().min(1).describe('The file name, including its extension'),
-      data: z.string().describe('The base64-encoded file bytes, without a data URL prefix'),
-      mimeType: mimeTypeSchema.describe('The file MIME type, for example image/png'),
+    z.strictObject({
+      name: z.string().check(z.minLength(1), z.describe('The file name, including its extension.')),
+      data: z
+        .string()
+        .check(z.describe('The base64-encoded file bytes, without a data URL prefix.')),
+      mimeType: mimeTypeSchema.check(z.describe('The file MIME type, for example image/png.')),
       source: z.literal('base64'),
     }),
-    z.object({
-      name: z.string().min(1).describe('Optional file name override').optional(),
+    z.strictObject({
+      name: z.optional(z.string().check(z.minLength(1))).check(z.describe('File name override.')),
       source: z.literal('externalURL'),
-      url: z.url().describe('The http or https URL to download'),
+      url: z.url().check(z.describe('The http or https URL to download.')),
     }),
-    z.object({
-      file: uploadFileSchema.describe('getUploadInstructions file field post-upload'),
+    z.strictObject({
+      file: uploadFileSchema.check(z.describe('getUploadInstructions file field post-upload.')),
       source: z.literal('uploadReference'),
     }),
   ])
-  .describe(
-    'A file for an upload collection. Prefer uploadReference after its upload succeeds; use base64 only for small local files or externalURL for an online file.',
+  .check(
+    z.describe(
+      'A file for an upload collection. Prefer uploadReference after its upload succeeds; use base64 only for small local files or externalURL for an online file.',
+    ),
   )
 
 type FileInput = z.infer<typeof fileInputSchema>
 
 export async function resolveFile({
-  collectionSlug,
+  slug,
   input,
   req,
 }: {
-  collectionSlug: CollectionSlug
   input?: FileInput
   req: PayloadRequest
+  slug: CollectionSlug
 }): Promise<File | undefined> {
   if (!input) {
     return undefined
@@ -55,7 +63,7 @@ export async function resolveFile({
 
   if (input.source === 'uploadReference') {
     try {
-      return await getFileFromUploadInstructions({ collectionSlug, file: input.file, req })
+      return await getFileFromUploadInstructions({ collectionSlug: slug, file: input.file, req })
     } catch (error) {
       if (error instanceof Error && error.message === 'Staged upload was not found.') {
         throw new APIError(
@@ -67,10 +75,10 @@ export async function resolveFile({
     }
   }
 
-  const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
+  const uploadConfig = req.payload.collections[slug]?.config.upload
 
   if (!uploadConfig) {
-    throw new APIError(`Collection "${collectionSlug}" does not support file uploads.`, 400)
+    throw new APIError(`Collection "${slug}" does not support file uploads.`, 400)
   }
 
   const maxFileSize = req.payload.config.upload.limits?.fileSize
@@ -87,10 +95,7 @@ export async function resolveFile({
     }
   } else {
     if (uploadConfig.pasteURL === false) {
-      throw new APIError(
-        `Uploading files from URLs is disabled for collection "${collectionSlug}".`,
-        400,
-      )
+      throw new APIError(`Uploading files from URLs is disabled for collection "${slug}".`, 400)
     }
 
     const url = new URL(input.url)

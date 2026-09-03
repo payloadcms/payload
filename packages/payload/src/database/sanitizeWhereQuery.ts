@@ -1,8 +1,11 @@
 import type { FlattenedField } from '../fields/config/types.js'
 import type { Payload, Where } from '../types/index.js'
 
+import { hasManyRelationshipOperators } from '../types/constants.js'
+import { isNestedRelationshipQuery } from './isNestedRelationshipQuery.js'
+
 /**
- * Currently used only for virtual fields linked with relationships
+ * Replaces virtual field names in a `where` query with the database paths they point to.
  */
 export const sanitizeWhereQuery = ({
   fields,
@@ -27,6 +30,7 @@ export const sanitizeWhereQuery = ({
     let pathHasChanged = false
 
     let currentFields = fields
+    let finalField: FlattenedField | undefined
 
     for (let i = 0; i < paths.length; i++) {
       const path = paths[i]!
@@ -35,6 +39,8 @@ export const sanitizeWhereQuery = ({
       if (!field) {
         break
       }
+
+      finalField = field
 
       if ('virtual' in field && field.virtual && typeof field.virtual === 'string') {
         paths[i] = field.virtual
@@ -56,9 +62,62 @@ export const sanitizeWhereQuery = ({
       }
     }
 
+    // Follow relationship fields so virtual fields on related documents are also resolved.
+    sanitizeNestedHasManyRelationshipQueries({ field: finalField, payload, value })
+
     if (pathHasChanged) {
       where[paths.join('.')] = where[key]!
       delete where[key]
+    }
+  }
+}
+
+/**
+ * Resolves virtual field paths inside a nested has-many relationship query.
+ * The nested query uses fields from the related collection, not fields from the parent collection.
+ *
+ * @example
+ * ```ts
+ * {
+ *   ingredients: {
+ *     contains: {
+ *       displayName: { equals: 'Lettuce' }, // `displayName` may be a virtual field
+ *     },
+ *   },
+ * }
+ * ```
+ */
+function sanitizeNestedHasManyRelationshipQueries({
+  field,
+  payload,
+  value,
+}: {
+  field?: FlattenedField
+  payload: Payload
+  value: unknown
+}): void {
+  if (
+    !field ||
+    (field.type !== 'relationship' && field.type !== 'upload') ||
+    !field.hasMany ||
+    typeof field.relationTo !== 'string' ||
+    value === null ||
+    typeof value !== 'object' ||
+    Array.isArray(value)
+  ) {
+    return
+  }
+
+  const relatedFields = payload.collections[field.relationTo]?.config.flattenedFields
+  if (!relatedFields) {
+    return
+  }
+
+  for (const operator of hasManyRelationshipOperators) {
+    const nestedWhere = (value as Record<string, unknown>)[operator]
+
+    if (isNestedRelationshipQuery(nestedWhere)) {
+      sanitizeWhereQuery({ fields: relatedFields, payload, where: nestedWhere })
     }
   }
 }

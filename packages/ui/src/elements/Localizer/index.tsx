@@ -39,7 +39,7 @@ export const Localizer: React.FC<{
   const { i18n, t } = useTranslation()
   const locale = useLocale()
 
-  if (localization) {
+  if (localization && locale) {
     const { locales } = localization
 
     return (
