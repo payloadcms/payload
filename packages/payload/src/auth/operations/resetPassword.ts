@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import { status as httpStatus } from 'http-status'
 
 import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
@@ -91,7 +92,19 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       where,
     })
 
-    if (!user) {
+    const tokenMatches = (() => {
+      if (!user || typeof user.resetPasswordToken !== 'string') {
+        return false
+      }
+      const providedBuffer = Buffer.from(data.token)
+      const storedBuffer = Buffer.from(user.resetPasswordToken)
+      if (providedBuffer.length !== storedBuffer.length) {
+        return false
+      }
+      return crypto.timingSafeEqual(providedBuffer, storedBuffer)
+    })()
+
+    if (!user || !tokenMatches) {
       throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
     }
 
