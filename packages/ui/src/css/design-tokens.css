@@ -66,15 +66,15 @@
     --ramp-pink-900: #5f114c;
     --ramp-pink-1000: #451138;
 
-    /* Grey */
-    --ramp-grey-100: #f5f5f5;
-    --ramp-grey-200: #e6e6e6;
-    --ramp-grey-300: #d9d9d9;
-    --ramp-grey-500: #757575;
-    --ramp-grey-600: #444444;
-    --ramp-grey-700: #383838;
-    --ramp-grey-800: #2c2c2c;
-    --ramp-grey-900: #1e1e1e;
+    /* Grey - Linear/Vercel precision scale */
+    --ramp-grey-100: #f7f8f9;
+    --ramp-grey-200: #e5e7eb;
+    --ramp-grey-300: #d1d5db;
+    --ramp-grey-500: #8a8f98;
+    --ramp-grey-600: #232528;
+    --ramp-grey-700: #18191b;
+    --ramp-grey-800: #101113;
+    --ramp-grey-900: #08090a;
 
     /* Red */
     --ramp-red-100: #fff5f5;

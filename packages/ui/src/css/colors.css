@@ -325,17 +325,17 @@
     --color-bg-danger-tertiary-hover: var(--ramp-pale-red-700);
     --color-bg-danger-tertiary-pressed: var(--ramp-pale-red-600);
 
-    --color-bg: var(--ramp-grey-800);
-    --color-bg-hover: var(--ramp-grey-700);
-    --color-bg-pressed: var(--ramp-grey-600);
-    --color-bg-secondary: var(--ramp-grey-700);
-    --color-bg-secondary-hover: var(--ramp-grey-600);
-    --color-bg-secondary-pressed: var(--ramp-grey-500);
-    --color-bg-tertiary: var(--ramp-grey-600);
+    --color-bg: var(--ramp-grey-900);
+    --color-bg-hover: var(--ramp-grey-800);
+    --color-bg-pressed: var(--ramp-grey-700);
+    --color-bg-secondary: var(--ramp-grey-800);
+    --color-bg-secondary-hover: var(--ramp-grey-700);
+    --color-bg-secondary-pressed: var(--ramp-grey-600);
+    --color-bg-tertiary: var(--ramp-grey-700);
 
-    --color-bg-disabled: var(--ramp-grey-500);
+    --color-bg-disabled: var(--ramp-grey-700);
 
-    --color-bg-elevated: var(--ramp-grey-900);
+    --color-bg-elevated: var(--ramp-grey-800);
 
     --color-bg-inverse: var(--ramp-white-1000);
     --color-bg-inverse-hover: var(--ramp-grey-100);
