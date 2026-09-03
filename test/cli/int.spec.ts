@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { expect } from 'vitest'
 
-import { afterAll, beforeEach, matchesDatabase, suite, test } from '../__helpers/int/vitest.js'
+import { afterAll, beforeEach, suite, test } from '../__helpers/int/vitest.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI_COMMAND_TEST_TIMEOUT = 180_000
@@ -62,7 +62,7 @@ suite('CLI', { config: './config.ts' }, () => {
     await expect(access(importMapFile)).rejects.toThrow()
   })
 
-  test.runIf(matchesDatabase({ db: 'drizzle' }))(
+  test.options({ db: 'drizzle' })(
     'generate:db-schema --no-log --json',
     async ({ cli }) => {
       await expect(access(schemaFile)).rejects.toThrow()
@@ -80,7 +80,7 @@ suite('CLI', { config: './config.ts' }, () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.runIf(matchesDatabase({ db: 'drizzle' }))('generate:db-schema --help', async ({ cli }) => {
+  test.options({ db: 'drizzle' })('generate:db-schema --help', async ({ cli }) => {
     await expect(access(schemaFile)).rejects.toThrow()
 
     const output = await cli('generate:db-schema --help')
@@ -691,7 +691,7 @@ suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.runIf(matchesDatabase({ db: 'drizzle' }))(
+  test.options({ db: 'drizzle' })(
     `updateDocument --slug pages --id <page-id> --data '{"title":"Updated"}' --override-access false --json`,
     async ({ cli, payload }) => {
       const page = await payload.create({
@@ -958,7 +958,7 @@ suite('CLI', { config: './config.ts' }, () => {
     expect(jobsAfter.docs).toHaveLength(0)
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))(
+  test.options({ db: 'mongo' })(
     'jobs:run --all-queues --limit 1 --json',
     async ({ cli, payload }) => {
       await payload.jobs.queue({ input: {}, task: 'noop' } as never)
@@ -988,7 +988,7 @@ suite('CLI', { config: './config.ts' }, () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))('jobs:run --help', async ({ cli, payload }) => {
+  test.options({ db: 'mongo' })('jobs:run --help', async ({ cli, payload }) => {
     await payload.jobs.queue({ input: {}, task: 'noop' } as never)
     const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
       docs: Array<{ title: string }>
@@ -1005,7 +1005,7 @@ suite('CLI', { config: './config.ts' }, () => {
     expect(pagesAfter.docs.map(({ title }) => title)).not.toContain('CLI job ran')
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))('migrate --json', async ({ cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate --json', async ({ cli, payload }) => {
     await cli('migrate:create pending --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
@@ -1031,7 +1031,7 @@ suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))('migrate --help', async ({ cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate --help', async ({ cli, payload }) => {
     await cli('migrate:create pending --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
@@ -1083,7 +1083,7 @@ suite('CLI', { config: './config.ts' }, () => {
     await expect(access(migrationsDirectory)).rejects.toThrow()
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))('migrate:down --json', async ({ cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate:down --json', async ({ cli, payload }) => {
     await cli('migrate:create down --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_down.ts'))!
@@ -1108,7 +1108,7 @@ suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))('migrate:down --help', async ({ cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate:down --help', async ({ cli, payload }) => {
     await cli('migrate:create down --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_down.ts'))!
@@ -1122,7 +1122,7 @@ suite('CLI', { config: './config.ts' }, () => {
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))(
+  test.options({ db: 'mongo' })(
     'migrate:fresh --force-accept-warning --json',
     async ({ cli, payload }) => {
       await cli('migrate:create fresh --force-accept-warning --json')
@@ -1152,7 +1152,7 @@ suite('CLI', { config: './config.ts' }, () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))('migrate:fresh --help', async ({ cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate:fresh --help', async ({ cli, payload }) => {
     await cli('migrate:create fresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_fresh.ts'))!
@@ -1168,65 +1168,59 @@ suite('CLI', { config: './config.ts' }, () => {
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))(
-    'migrate:refresh --json',
-    async ({ cli, payload }) => {
-      await cli('migrate:create refresh --force-accept-warning --json')
-      const migrationName = (await readdir(migrationsDirectory))
-        .find((file) => file.endsWith('_refresh.ts'))!
-        .replace('.ts', '')
-      await cli('migrate --json')
-      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
-      const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
+  test.options({ db: 'mongo' })('migrate:refresh --json', async ({ cli, payload }) => {
+    await cli('migrate:create refresh --force-accept-warning --json')
+    const migrationName = (await readdir(migrationsDirectory))
+      .find((file) => file.endsWith('_refresh.ts'))!
+      .replace('.ts', '')
+    await cli('migrate --json')
+    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
-      expect(migrationBefore).toBeDefined()
+    expect(migrationBefore).toBeDefined()
 
-      const output = await cli('migrate:refresh --json')
-      const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
-      const migrationAfter = migrationsAfter.docs.find(({ name }) => name === migrationName)
+    const output = await cli('migrate:refresh --json')
+    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationAfter = migrationsAfter.docs.find(({ name }) => name === migrationName)
 
-      expect(migrationAfter).toBeDefined()
-      expect(migrationAfter?.id).not.toBe(migrationBefore?.id)
+    expect(migrationAfter).toBeDefined()
+    expect(migrationAfter?.id).not.toBe(migrationBefore?.id)
 
-      expect(JSON.parse(output.stdout)).toMatchObject({
-        command: 'migrate:refresh',
-        result: {
-          migrated: [migrationName],
-          rolledBack: [migrationName],
-        },
-        success: true,
-      })
-    },
-  )
+    expect(JSON.parse(output.stdout)).toMatchObject({
+      command: 'migrate:refresh',
+      result: {
+        migrated: [migrationName],
+        rolledBack: [migrationName],
+      },
+      success: true,
+    })
+  })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))(
-    'migrate:refresh --help',
-    async ({ cli, payload }) => {
-      await cli('migrate:create refresh --force-accept-warning --json')
-      const migrationName = (await readdir(migrationsDirectory))
-        .find((file) => file.endsWith('_refresh.ts'))!
-        .replace('.ts', '')
-      await cli('migrate --json')
-      const migrationsBefore = await payload.find({
-        collection: 'payload-migrations',
-        limit: 100,
-      })
-      const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
+  test.options({ db: 'mongo' })('migrate:refresh --help', async ({ cli, payload }) => {
+    await cli('migrate:create refresh --force-accept-warning --json')
+    const migrationName = (await readdir(migrationsDirectory))
+      .find((file) => file.endsWith('_refresh.ts'))!
+      .replace('.ts', '')
+    await cli('migrate --json')
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+    })
+    const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
-      const output = await cli('migrate:refresh --help')
-      const migrationsAfter = await payload.find({
-        collection: 'payload-migrations',
-        limit: 100,
-      })
+    const output = await cli('migrate:refresh --help')
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+    })
 
-      expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:refresh')
-      expect(migrationsAfter.docs.find(({ name }) => name === migrationName)?.id).toBe(
-        migrationBefore?.id,
-      )
-    },
-  )
+    expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:refresh')
+    expect(migrationsAfter.docs.find(({ name }) => name === migrationName)?.id).toBe(
+      migrationBefore?.id,
+    )
+  })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))('migrate:reset --json', async ({ cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate:reset --json', async ({ cli, payload }) => {
     await cli('migrate:create reset --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_reset.ts'))!
@@ -1251,7 +1245,7 @@ suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))('migrate:reset --help', async ({ cli, payload }) => {
+  test.options({ db: 'mongo' })('migrate:reset --help', async ({ cli, payload }) => {
     await cli('migrate:create reset --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_reset.ts'))!

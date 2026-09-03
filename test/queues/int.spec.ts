@@ -13,15 +13,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  matchesDatabase,
-  suite,
-  test,
-} from '../__helpers/int/vitest.js'
+import { afterAll, afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
@@ -1284,7 +1276,7 @@ suite('Queues - Payload', { config: './config.ts' }, () => {
 
   describe('worker recovery', () => {
     // The child process can share the file-backed SQLite test database.
-    test.runIf(matchesDatabase({ db: (type) => type.startsWith('sqlite') }))(
+    test.options({ db: (type) => type.startsWith('sqlite') })(
       'should recover a job after its worker process is killed',
       async ({ payload }) => {
         _internal_jobSystemGlobals.shouldAutoRun = false

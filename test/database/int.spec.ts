@@ -780,7 +780,7 @@ suite('database', { config: './config.ts' }, () => {
       await noTimestampsTestDB(payload)
     })
 
-    test.runIf(matchesDatabase({ db: 'mongo' }))(
+    test.options({ db: 'mongo' })(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
       async ({ payload }) => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
@@ -790,7 +790,7 @@ suite('database', { config: './config.ts' }, () => {
       },
     )
 
-    test.runIf(matchesDatabase({ db: 'mongo' }))(
+    test.options({ db: 'mongo' })(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
       async ({ payload }) => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
@@ -1906,7 +1906,7 @@ suite('database', { config: './config.ts' }, () => {
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    test.runIf(matchesDatabase({ db: 'mongo' }))('should run migrate:down', async ({ payload }) => {
+    test.options({ db: 'mongo' })('should run migrate:down', async ({ payload }) => {
       // migrate existing if there any
       await payload.db.migrate()
 
@@ -1940,28 +1940,25 @@ suite('database', { config: './config.ts' }, () => {
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    test.runIf(matchesDatabase({ db: 'mongo' }))(
-      'should run migrate:refresh',
-      async ({ payload }) => {
-        let error
-        try {
-          await payload.db.migrateRefresh()
-        } catch (e) {
-          error = e
-        }
+    test.options({ db: 'mongo' })('should run migrate:refresh', async ({ payload }) => {
+      let error
+      try {
+        await payload.db.migrateRefresh()
+      } catch (e) {
+        error = e
+      }
 
-        const migrations = await payload.find({
-          collection: 'payload-migrations',
-        })
+      const migrations = await payload.find({
+        collection: 'payload-migrations',
+      })
 
-        expect(error).toBeUndefined()
-        expect(migrations.docs).toHaveLength(1)
-      },
-    )
+      expect(error).toBeUndefined()
+      expect(migrations.docs).toHaveLength(1)
+    })
   })
 
   // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-  test.runIf(matchesDatabase({ db: 'mongo' }))('should run migrate:reset', async ({ payload }) => {
+  test.options({ db: 'mongo' })('should run migrate:reset', async ({ payload }) => {
     let error
     try {
       await payload.db.migrateReset()
@@ -6104,7 +6101,7 @@ suite('database', { config: './config.ts' }, () => {
     await payload.db.connect()
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))(
+  test.options({ db: 'mongo' })(
     'ensure mongodb query sanitization does not duplicate IDs',
     ({ payload }) => {
       const res: any = sanitizeQueryValue({
@@ -6126,7 +6123,7 @@ suite('database', { config: './config.ts' }, () => {
     },
   )
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))(
+  test.options({ db: 'mongo' })(
     'ensure mongodb respects collation when using collection in the config',
     async ({ payload }) => {
       // Clear any existing documents
@@ -6177,7 +6174,7 @@ suite('database', { config: './config.ts' }, () => {
     },
   )
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))(
+  test.options({ db: 'mongo' })(
     'ensure mongodb collation works with draft pagination without sort',
     async ({ payload }) => {
       // Clear any existing documents

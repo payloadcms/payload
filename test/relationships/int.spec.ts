@@ -15,7 +15,7 @@ import type {
   Relation,
 } from './payload-types.js'
 
-import { beforeEach, describe, matchesDatabase, suite, test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
   chainedRelSlug,
@@ -489,7 +489,7 @@ suite('Relationships', { config: './config.ts' }, () => {
 
       // MongoDB dedupes $in at execution, so the bug is only visible in the
       // filter Payload hands to Mongoose — not in the returned docs.
-      test.runIf(matchesDatabase({ db: 'mongo' }))(
+      test.options({ db: 'mongo' })(
         'should not duplicate IDs in $in when querying through a relationship',
         async ({ payload }) => {
           const movie = await payload.create({
@@ -742,7 +742,7 @@ suite('Relationships', { config: './config.ts' }, () => {
           })
 
           // `near` on a point field is not implemented by the drizzle sqlite adapter
-          test.runIf(matchesDatabase({ db: (adapter) => !adapter.startsWith('sqlite') }))(
+          test.options({ db: (adapter) => !adapter.startsWith('sqlite') })(
             'should support equals with a geospatial nested query',
             async ({ payload }) => {
               const nearbyMovie = await payload.create({
@@ -941,7 +941,7 @@ suite('Relationships', { config: './config.ts' }, () => {
           expect(query2.totalDocs).toStrictEqual(2)
         })
 
-        test.runIf(matchesDatabase({ db: 'mongo' }))(
+        test.options({ db: 'mongo' })(
           'should treat an ObjectId as a relationship ID',
           async ({ payload }) => {
             const movie = await payload.create({ collection: 'movies', data: {} })
@@ -969,7 +969,7 @@ suite('Relationships', { config: './config.ts' }, () => {
         )
 
         // all operator is not supported in Postgres yet for any fields
-        test.runIf(matchesDatabase({ db: 'mongo' }))(
+        test.options({ db: 'mongo' })(
           'should query using "all" by hasMany relationship field',
           async ({ payload }) => {
             const movie1 = await payload.create({
@@ -2122,7 +2122,7 @@ suite('Relationships', { config: './config.ts' }, () => {
     })
 
     // all operator is not supported in Postgres yet for any fields
-    test.runIf(matchesDatabase({ db: 'mongo' }))(
+    test.options({ db: 'mongo' })(
       'should allow REST all querying on polymorphic relationships',
       async ({ payload, restClient }) => {
         const movie = await payload.create({

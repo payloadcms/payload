@@ -3390,107 +3390,101 @@ suite('Fields', { config: './config.ts' }, () => {
       expect((idFields[0].admin?.disabled as { filter?: boolean })?.filter).toBe(true)
     })
 
-    test.runIf(matchesDatabase({ db: 'mongo' }))(
-      'should query exists true',
-      async ({ payload }) => {
-        await payload.delete({ collection: 'array-fields', where: {} })
+    test.options({ db: 'mongo' })('should query exists true', async ({ payload }) => {
+      await payload.delete({ collection: 'array-fields', where: {} })
 
-        const withoutCollapsed = await payload.create({
-          collection: 'array-fields',
-          data: {
-            localized: [
-              {
-                text: 'without-collapsed',
-              },
-            ],
-            items: [
-              {
-                text: 'without-collapsed',
-              },
-            ],
-          },
-        })
-        const withCollapsed = await payload.create({
-          collection: 'array-fields',
-          data: {
-            localized: [
-              {
-                text: 'with-collapsed',
-              },
-            ],
-            collapsedArray: [
-              {
-                text: 'with-collapsed',
-              },
-            ],
-            items: [{ text: 'with-collapsed' }],
-          },
-        })
-
-        const res = await payload.find({
-          collection: 'array-fields',
-          where: {
-            collapsedArray: {
-              exists: true,
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
             },
-          },
-        })
-
-        expect(res.totalDocs).toBe(1)
-        expect(res.docs[0].id).toBe(withCollapsed.id)
-      },
-    )
-
-    test.runIf(matchesDatabase({ db: 'mongo' }))(
-      'should query exists false',
-      async ({ payload }) => {
-        await payload.delete({ collection: 'array-fields', where: {} })
-
-        const withoutCollapsed = await payload.create({
-          collection: 'array-fields',
-          data: {
-            localized: [
-              {
-                text: 'without-collapsed',
-              },
-            ],
-            items: [
-              {
-                text: 'without-collapsed',
-              },
-            ],
-          },
-        })
-        const withCollapsed = await payload.create({
-          collection: 'array-fields',
-          data: {
-            localized: [
-              {
-                text: 'with-collapsed',
-              },
-            ],
-            collapsedArray: [
-              {
-                text: 'with-collapsed',
-              },
-            ],
-            items: [{ text: 'with-collapsed' }],
-          },
-        })
-
-        const res = await payload.find({
-          collection: 'array-fields',
-          where: {
-            collapsedArray: {
-              exists: false,
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
             },
-          },
-        })
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
 
-        expect(res.totalDocs).toBe(1)
-        expect(res.docs[0].id).toBe(withoutCollapsed.id)
-      },
-    )
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withCollapsed.id)
+    })
+
+    test.options({ db: 'mongo' })('should query exists false', async ({ payload }) => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: false,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withoutCollapsed.id)
+    })
 
     test('should properly handle richText inside array', async ({ payload }) => {
       const richTextValue = {
@@ -4159,7 +4153,7 @@ suite('Fields', { config: './config.ts' }, () => {
 
     // TODO: re-enable on sqlite once the drizzle sqlite adapter's createJSONQuery supports
     // lexical's `{root: {children: [...]}}` shape
-    test.runIf(matchesDatabase({ db: (adapter) => adapter.startsWith('sqlite') === false }))(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a block',
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
@@ -4187,7 +4181,7 @@ suite('Fields', { config: './config.ts' }, () => {
     )
 
     // TODO: re-enable on sqlite — see note above.
-    test.runIf(matchesDatabase({ db: (adapter) => adapter.startsWith('sqlite') === false }))(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a localized block, specifying locale',
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
@@ -4215,7 +4209,7 @@ suite('Fields', { config: './config.ts' }, () => {
     )
 
     // TODO: re-enable on sqlite — see note above.
-    test.runIf(matchesDatabase({ db: (adapter) => adapter.startsWith('sqlite') === false }))(
+    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
       'should query based on richtext data within a localized block, without specifying locale',
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
@@ -4982,7 +4976,7 @@ suite('Fields', { config: './config.ts' }, () => {
         ).rejects.toBeTruthy()
       })
 
-      test.runIf(matchesDatabase({ db: 'drizzle' }))(
+      test.options({ db: 'drizzle' })(
         'should disallow unsafe query values',
         async ({ payload }) => {
           await expect(

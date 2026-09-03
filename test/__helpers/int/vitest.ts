@@ -173,7 +173,9 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
  *   })
  * })
  */
-export const test = testWithFixtures
+export const test = Object.assign(testWithFixtures, {
+  options: (options: TestOptions) => testWithFixtures.runIf(matchesDatabase(options)),
+})
 
 export const it = test
 

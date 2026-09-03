@@ -7,7 +7,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { afterEach, beforeEach, matchesDatabase, suite, test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, suite, test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -56,7 +56,7 @@ suite('migrations CLI', { config: './config.ts' }, () => {
     expect(migrationContent).toContain("import { sql } from 'drizzle-orm'")
   })
 
-  test.runIf(matchesDatabase({ db: 'mongo' }))(
+  test.options({ db: 'mongo' })(
     'should create migration from @payloadcms/db-* adapter predefinedMigrations folder',
     async ({ cli }) => {
       // Tests: Path 1 in getPredefinedMigration.ts - @payloadcms/db-* prefix handling

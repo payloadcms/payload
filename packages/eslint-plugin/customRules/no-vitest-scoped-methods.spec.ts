@@ -31,6 +31,7 @@ ruleTester.run('no-vitest-scoped-methods', rule, {
     "test.skip('creates a post', () => {})",
     "test.each([])('creates a post', () => {})",
     "test.runIf(true)('creates a post', () => {})",
+    "test.options({ db: 'mongo' })('creates a post', () => {})",
     "playwrightTest.describe('posts', () => {})",
   ],
   invalid: [
@@ -64,17 +65,8 @@ ruleTester.run('no-vitest-scoped-methods', rule, {
       code: "test.options({ db: 'mongo' }).describe('posts', () => {})",
       errors: [
         {
-          data: { method: 'options', target: 'describe', testIdentifier: 'test' },
-          messageId: 'useRunIf',
-        },
-      ],
-    },
-    {
-      code: "test.options({ db: 'mongo' })('creates a post', () => {})",
-      errors: [
-        {
-          data: { method: 'options', target: 'test', testIdentifier: 'test' },
-          messageId: 'useRunIf',
+          data: { method: 'describe', testIdentifier: 'test' },
+          messageId: 'useStandalone',
         },
       ],
     },
