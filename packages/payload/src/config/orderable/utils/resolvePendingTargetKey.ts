@@ -5,13 +5,14 @@ import type { PayloadHandler } from '../../types.js'
  */
 export async function resolvePendingTargetKey(args: {
   collectionSlug: string
+  draft?: boolean
   orderableFieldName: string
   req: Parameters<PayloadHandler>[0]
   targetDoc: null | Record<string, unknown>
   targetID: string
   targetKey: string
 }): Promise<null | string> {
-  const { collectionSlug, orderableFieldName, req, targetDoc, targetID, targetKey } = args
+  const { collectionSlug, draft, orderableFieldName, req, targetDoc, targetID, targetKey } = args
 
   if (targetKey !== 'pending') {
     return targetKey
@@ -26,6 +27,7 @@ export async function resolvePendingTargetKey(args: {
     id: targetID,
     collection: collectionSlug,
     depth: 0,
+    draft,
     req,
     select: { [orderableFieldName]: true },
   })

@@ -162,9 +162,13 @@ export const addOrderableEndpoint = (
         status: 400,
       })
     }
+    const draftsEnabled = hasDraftsEnabled(collection)
+    const shouldUseDraftOrder =
+      draftsEnabled && collection.orderable === true && orderableFieldName === '_order'
 
     const { joinScopeWhere, targetDoc } = await getJoinScopeContext({
       collectionSlug: collection.slug,
+      draft: shouldUseDraftOrder,
       joinFieldPathsByCollection,
       orderableFieldName,
       req,
@@ -253,6 +257,7 @@ export const addOrderableEndpoint = (
     const targetId = target.id
     const targetKey = await resolvePendingTargetKey({
       collectionSlug: collection.slug,
+      draft: shouldUseDraftOrder,
       orderableFieldName,
       req,
       targetDoc,
@@ -266,6 +271,7 @@ export const addOrderableEndpoint = (
     const adjacentDoc = await req.payload.find({
       collection: collection.slug,
       depth: 0,
+      draft: shouldUseDraftOrder,
       limit: 1,
       pagination: false,
       select: { [orderableFieldName]: true },
@@ -288,13 +294,11 @@ export const addOrderableEndpoint = (
         ? generateNKeysBetween(targetKey, adjacentDocKey, docsToMove.length)
         : generateNKeysBetween(adjacentDocKey, targetKey, docsToMove.length)
 
-    const draftsEnabled = hasDraftsEnabled(collection)
-
     // Update each document with its new order value
     for (const [index, id] of docsToMove.entries()) {
-      let draft: boolean | undefined
+      let draft: boolean | undefined = shouldUseDraftOrder ? true : undefined
 
-      if (draftsEnabled) {
+      if (draftsEnabled && !shouldUseDraftOrder) {
         const latestVersion = await getLatestCollectionVersion({
           id,
           config: collection,
