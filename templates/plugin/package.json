@@ -53,7 +53,7 @@
     "@payloadcms/next": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
     "@payloadcms/ui": "3.82.1",
-    "@playwright/test": "1.59.1",
+    "@playwright/test": "1.62.1",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.6.0",
     "@types/node": "24.12.3",
@@ -77,7 +77,7 @@
     "sort-package-json": "^2.10.0",
     "typescript": "6.0.3",
     "vite-tsconfig-paths": "6.0.5",
-    "vitest": "4.1.6"
+    "vitest": "5.0.0"
   },
   "peerDependencies": {
     "payload": "^3.82.1"

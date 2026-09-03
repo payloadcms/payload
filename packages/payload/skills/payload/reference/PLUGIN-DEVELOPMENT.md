@@ -143,7 +143,7 @@ plugin-<name>/
     "@payloadcms/db-mongodb": "^3.0.0",
     "@payloadcms/next": "^3.0.0",
     "@payloadcms/richtext-lexical": "^3.0.0",
-    "@playwright/test": "^1.40.0",
+    "@playwright/test": "^1.62.0",
     "@swc/cli": "^0.1.62",
     "@swc/core": "^1.3.0",
     "copyfiles": "^2.4.1",
@@ -155,7 +155,7 @@ plugin-<name>/
     "react-dom": "^19.2.1",
     "rimraf": "^5.0.0",
     "typescript": "^6.0.0",
-    "vitest": "4.1.6"
+    "vitest": "4.1.11"
   },
   "peerDependencies": {
     "payload": "^3.0.0"
