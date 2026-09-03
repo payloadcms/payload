@@ -165,7 +165,7 @@ export const generateFileData = async <T>({
     }
 
     return {
-      data: incomingFileData!,
+      data,
       files: [],
     }
   }
@@ -180,7 +180,7 @@ export const generateFileData = async <T>({
     await fs.mkdir(staticPath!, { recursive: true })
   }
 
-  let newData = incomingFileData as T
+  let newData = data
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
   const fileIsAnimatedType = isAnimatedImage(file.mimetype)
