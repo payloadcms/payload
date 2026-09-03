@@ -1,34 +1,14 @@
 import type { KVAdapterResult, Payload } from 'payload'
 
 import { RedisKVAdapter, redisKVAdapter } from '@payloadcms/kv-redis'
-import path from 'path'
 import { inMemoryKVAdapter } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('KV Adapters', () => {
-  // --__--__--__--__--__--__--__--__--__
-  // Boilerplate test setup/teardown
-  // --__--__--__--__--__--__--__--__--__
-  beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
-    ;({ payload } = initialized)
-  })
-
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  const testKVAdapter = async (adapter?: KVAdapterResult) => {
+test.suite({ config: './config.ts' })('KV Adapters', () => {
+  const testKVAdapter = async (payload: Payload, adapter?: KVAdapterResult) => {
     if (adapter) {
       payload.kv = adapter.init({ payload })
     }
@@ -72,16 +52,16 @@ describe('KV Adapters', () => {
     return true
   }
 
-  it('databaseKVAdapter', async () => {
+  test('databaseKVAdapter', async ({ payload }) => {
     // default
-    expect(await testKVAdapter()).toBeTruthy()
+    expect(await testKVAdapter(payload)).toBeTruthy()
   })
 
-  it('inMemoryKVAdapter', async () => {
-    expect(await testKVAdapter(inMemoryKVAdapter())).toBeTruthy()
+  test('inMemoryKVAdapter', async ({ payload }) => {
+    expect(await testKVAdapter(payload, inMemoryKVAdapter())).toBeTruthy()
   })
 
-  it('redisKVAdapter', async () => {
-    expect(await testKVAdapter(redisKVAdapter())).toBeTruthy()
+  test('redisKVAdapter', async ({ payload }) => {
+    expect(await testKVAdapter(payload, redisKVAdapter())).toBeTruthy()
   })
 })

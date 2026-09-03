@@ -1,38 +1,21 @@
 import type { CollectionSlug, Payload } from 'payload'
 
-import path from 'path'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { draftsSlug } from './collections/Drafts/index.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
-let payload: Payload
-let restClient: NextRESTClient
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Sort', () => {
-  beforeAll(async () => {
-    // @ts-expect-error: initPayloadInt does not have a proper type definition
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('Local API', () => {
-    beforeAll(async () => {
-      await createData('posts', [
+test.suite({ config: './config.ts' })('Sort', () => {
+  test.describe('Local API', () => {
+    test.beforeEach(async ({ payload }) => {
+      await createData(payload, 'posts', [
         { text: 'Post 1', number: 1, number2: 10, group: { number: 100 } },
         { text: 'Post 2', number: 2, number2: 10, group: { number: 200 } },
         { text: 'Post 3', number: 3, number2: 5, group: { number: 150 } },
@@ -40,7 +23,7 @@ describe('Sort', () => {
         { text: 'Post 11', number: 11, number2: 20, group: { number: 150 } },
         { text: 'Post 12', number: 12, number2: 20, group: { number: 100 } },
       ])
-      await createData('default-sort', [
+      await createData(payload, 'default-sort', [
         { text: 'Post default-5 b', number: 5 },
         { text: 'Post default-10', number: 10 },
         { text: 'Post default-5 a', number: 5 },
@@ -48,13 +31,8 @@ describe('Sort', () => {
       ])
     })
 
-    afterAll(async () => {
-      await payload.delete({ collection: 'posts', where: {} })
-      await payload.delete({ collection: 'default-sort', where: {} })
-    })
-
-    describe('Default sort', () => {
-      it('should sort posts by default definition in collection', async () => {
+    test.describe('Default sort', () => {
+      test('should sort posts by default definition in collection', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'default-sort', // 'number,-text'
         })
@@ -68,8 +46,8 @@ describe('Sort', () => {
       })
     })
 
-    describe('Single sort field', () => {
-      it('should sort posts by text field', async () => {
+    test.describe('Single sort field', () => {
+      test('should sort posts by text field', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
           sort: 'text',
@@ -85,7 +63,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by text field desc', async () => {
+      test('should sort posts by text field desc', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
           sort: '-text',
@@ -101,7 +79,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by number field', async () => {
+      test('should sort posts by number field', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
           sort: 'number',
@@ -117,7 +95,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by number field desc', async () => {
+      test('should sort posts by number field desc', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
           sort: '-number',
@@ -134,10 +112,10 @@ describe('Sort', () => {
       })
     })
 
-    describe('Non-unique sorting', () => {
+    test.describe('Non-unique sorting', () => {
       // There are situations where the sort order is not guaranteed to be consistent, such as when sorting by a non-unique field in MongoDB which does not keep an internal order of items
       // As a result, every time you fetch, including fetching specific pages, the order of items may change and appear as duplicated to some users.
-      it('should always be consistent when sorting', async () => {
+      test('should always be consistent when sorting', async ({ payload }) => {
         const posts = await payload.find({
           collection: nonUniqueSortSlug,
           sort: 'order',
@@ -165,7 +143,7 @@ describe('Sort', () => {
         expect(fetch3).toEqual(initialMap)
       })
 
-      it('should always be consistent when sorting - with limited pages', async () => {
+      test('should always be consistent when sorting - with limited pages', async ({ payload }) => {
         const posts = await payload.find({
           collection: nonUniqueSortSlug,
           sort: 'order',
@@ -197,7 +175,7 @@ describe('Sort', () => {
         expect(fetch3).toEqual(initialMap)
       })
 
-      it('should sort by createdAt as fallback', async () => {
+      test('should sort by createdAt as fallback', async ({ payload }) => {
         // This is the (reverse - newest first) order that the posts are created in so this should remain consistent as the sort should fallback to '-createdAt'
         const postsInOrder = ['Post 9', 'Post 8', 'Post 7', 'Post 6']
 
@@ -225,7 +203,7 @@ describe('Sort', () => {
         expect(fetch3).toEqual(postsInOrder)
       })
 
-      it('should always be consistent without sort params in the query', async () => {
+      test('should always be consistent without sort params in the query', async ({ payload }) => {
         const posts = await payload.find({
           collection: nonUniqueSortSlug,
         })
@@ -251,7 +229,9 @@ describe('Sort', () => {
         expect(fetch3).toEqual(initialMap)
       })
 
-      it('should always be consistent without sort params in the query - with limited pages', async () => {
+      test('should always be consistent without sort params in the query - with limited pages', async ({
+        payload,
+      }) => {
         const posts = await payload.find({
           collection: nonUniqueSortSlug,
           page: 2,
@@ -282,8 +262,8 @@ describe('Sort', () => {
       })
     })
 
-    describe('Sort by multiple fields', () => {
-      it('should sort posts by multiple fields', async () => {
+    test.describe('Sort by multiple fields', () => {
+      test('should sort posts by multiple fields', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
           sort: ['number2', 'number'],
@@ -299,7 +279,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by multiple fields asc and desc', async () => {
+      test('should sort posts by multiple fields asc and desc', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
           sort: ['number2', '-number'],
@@ -315,7 +295,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by multiple fields with group', async () => {
+      test('should sort posts by multiple fields with group', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
           sort: ['-group.number', '-number'],
@@ -332,8 +312,8 @@ describe('Sort', () => {
       })
     })
 
-    describe('Sort with drafts', () => {
-      beforeAll(async () => {
+    test.describe('Sort with drafts', () => {
+      test.beforeEach(async ({ payload }) => {
         const testData1 = await payload.create({
           collection: 'drafts',
           data: { text: 'Post 1 draft', number: 10 },
@@ -381,7 +361,7 @@ describe('Sort', () => {
         })
       })
 
-      it('should sort latest without draft', async () => {
+      test('should sort latest without draft', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'drafts',
           sort: 'number',
@@ -395,7 +375,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort latest with draft', async () => {
+      test('should sort latest with draft', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'drafts',
           sort: 'number',
@@ -409,7 +389,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort versions', async () => {
+      test('should sort versions', async ({ payload }) => {
         const posts = await payload.findVersions({
           collection: 'drafts',
           sort: 'version.number',
@@ -429,8 +409,8 @@ describe('Sort', () => {
       })
     })
 
-    describe('Localized sort', () => {
-      beforeAll(async () => {
+    test.describe('Localized sort', () => {
+      test.beforeEach(async ({ payload }) => {
         const testData1 = await payload.create({
           collection: 'localized',
           data: { text: 'Post 1 english', number: 10 },
@@ -455,7 +435,7 @@ describe('Sort', () => {
         })
       })
 
-      it('should sort localized field', async () => {
+      test('should sort localized field', async ({ payload }) => {
         const englishPosts = await payload.find({
           collection: 'localized',
           sort: 'number',
@@ -480,12 +460,12 @@ describe('Sort', () => {
       })
     })
 
-    describe('Orderable', () => {
+    test.describe('Orderable', () => {
       let orderable1: Orderable
       let orderable2: Orderable
       let orderableDraft1: Draft
       let orderableDraft2: Draft
-      beforeAll(async () => {
+      test.beforeEach(async ({ payload }) => {
         orderable1 = await payload.create({
           collection: orderableSlug,
           data: {
@@ -514,7 +494,7 @@ describe('Sort', () => {
         })
       })
 
-      it('should set order by default', async () => {
+      test('should set order by default', async ({ payload }) => {
         const ordered = await payload.find({
           collection: orderableSlug,
           where: {
@@ -531,7 +511,7 @@ describe('Sort', () => {
         expect(ordered.docs[1].id).toStrictEqual(orderable2.id)
       })
 
-      it('should allow reordering with REST API', async () => {
+      test('should allow reordering with REST API', async ({ payload, restClient }) => {
         const res = await restClient.POST('/reorder', {
           body: JSON.stringify({
             collectionSlug: orderableSlug,
@@ -561,7 +541,10 @@ describe('Sort', () => {
         )
       })
 
-      it('should allow reordering with REST API with drafts enabled', async () => {
+      test('should allow reordering with REST API with drafts enabled', async ({
+        payload,
+        restClient,
+      }) => {
         const res = await restClient.POST('/reorder', {
           body: JSON.stringify({
             collectionSlug: draftsSlug,
@@ -594,7 +577,10 @@ describe('Sort', () => {
         )
       })
 
-      it('should not unpublish a published document with a newer draft when reordering', async () => {
+      test('should not unpublish a published document with a newer draft when reordering', async ({
+        payload,
+        restClient,
+      }) => {
         const publishedDoc = await payload.create({
           collection: draftsSlug,
           data: {
@@ -663,7 +649,7 @@ describe('Sort', () => {
         expect(published.docs).toHaveLength(1)
       })
 
-      it('should allow to duplicate with reordable', async () => {
+      test('should allow to duplicate with reordable', async ({ payload, restClient }) => {
         const doc = await payload.create({
           collection: 'orderable',
           data: { title: 'new document' },
@@ -675,7 +661,7 @@ describe('Sort', () => {
           data: {},
         })
         expect(docDuplicated.title).toBe('new document')
-        expect(parseInt(doc._order!, 36)).toBeLessThan(parseInt(docDuplicated._order!, 36))
+        expect(parseInt(doc._order, 36)).toBeLessThan(parseInt(docDuplicated._order, 36))
 
         await restClient.POST('/reorder', {
           body: JSON.stringify({
@@ -695,12 +681,12 @@ describe('Sort', () => {
           collection: 'orderable',
           id: docDuplicated.id,
         })
-        expect(parseInt(docAfterReorder._order!, 36)).toBeGreaterThan(
-          parseInt(docDuplicatedAfterReorder._order!, 36),
+        expect(parseInt(docAfterReorder._order, 36)).toBeGreaterThan(
+          parseInt(docDuplicatedAfterReorder._order, 36),
         )
       })
 
-      it('should not break with existing base 62 digits', async () => {
+      test('should not break with existing base 62 digits', async ({ payload, restClient }) => {
         const collection = orderableSlug
         // create seed docs with aa, aA, a0 (legacy base64 chars for backward compatibility)
         const aa = await payload.create({
@@ -771,7 +757,10 @@ describe('Sort', () => {
         expect(orderableIndex).toBeLessThan(a0Index)
       })
 
-      it('should generate case-insensitive-safe keys when moving to first position', async () => {
+      test('should generate case-insensitive-safe keys when moving to first position', async ({
+        payload,
+        restClient,
+      }) => {
         const collection = orderableSlug
 
         const { docs: allDocs } = await payload.find({
@@ -805,10 +794,13 @@ describe('Sort', () => {
         const newDocAfter = await payload.findByID({ collection, id: newDoc.id })
 
         expect(newDocAfter._order).toMatch(/^\d/)
-        expect(parseInt(newDocAfter._order!, 36)).toBeLessThan(parseInt(firstDoc._order!, 36))
+        expect(parseInt(newDocAfter._order, 36)).toBeLessThan(parseInt(firstDoc._order, 36))
       })
 
-      it('should allow multiple reorders to absolute first position', async () => {
+      test('should allow multiple reorders to absolute first position', async ({
+        payload,
+        restClient,
+      }) => {
         const collection = orderableSlug
 
         const { docs: initialDocs } = await payload.find({
@@ -863,10 +855,13 @@ describe('Sort', () => {
         const docBAfter = await payload.findByID({ collection, id: docB.id })
 
         expect(docBAfter._order).toMatch(/^\d/)
-        expect(parseInt(docBAfter._order!, 36)).toBeLessThan(parseInt(docAAfter._order!, 36))
+        expect(parseInt(docBAfter._order, 36)).toBeLessThan(parseInt(docAAfter._order, 36))
       })
 
-      it('should handle moving doc from first position and back', async () => {
+      test('should handle moving doc from first position and back', async ({
+        payload,
+        restClient,
+      }) => {
         const collection = orderableSlug
 
         const { docs: initialDocs } = await payload.find({
@@ -892,7 +887,7 @@ describe('Sort', () => {
         })
 
         const firstDocMoved = await payload.findByID({ collection, id: firstDoc.id })
-        expect(parseInt(firstDocMoved._order!, 36)).toBeGreaterThan(parseInt(secondDoc._order!, 36))
+        expect(parseInt(firstDocMoved._order, 36)).toBeGreaterThan(parseInt(secondDoc._order, 36))
 
         const res = await restClient.POST('/reorder', {
           body: JSON.stringify({
@@ -910,17 +905,17 @@ describe('Sort', () => {
         expect(res.status).toStrictEqual(200)
 
         const firstDocBack = await payload.findByID({ collection, id: firstDoc.id })
-        expect(parseInt(firstDocBack._order!, 36)).toBeLessThan(parseInt(secondDoc._order!, 36))
+        expect(parseInt(firstDocBack._order, 36)).toBeLessThan(parseInt(secondDoc._order, 36))
       })
     })
 
-    describe('Orderable join', () => {
+    test.describe('Orderable join', () => {
       let related: OrderableJoin
       let orderable1: Orderable
       let orderable2: Orderable
       let orderable3: Orderable
 
-      beforeAll(async () => {
+      test.beforeEach(async ({ payload }) => {
         related = await payload.create({
           collection: orderableJoinSlug,
           data: {
@@ -952,11 +947,11 @@ describe('Sort', () => {
         })
       })
 
-      it('should set order by default', () => {
+      test('should set order by default', () => {
         expect(orderable1._orderable_orderableJoinField1_order).toBeDefined()
       })
 
-      it('should allow setting the order with the local API', async () => {
+      test('should allow setting the order with the local API', async ({ payload }) => {
         // create two orderableJoinSlug docs
         orderable2 = await payload.update({
           collection: orderableSlug,
@@ -979,7 +974,7 @@ describe('Sort', () => {
         expect(orderable4._orderable_orderableJoinField1_order).toBe('e2')
       })
 
-      it('should sort join docs in the correct', async () => {
+      test('should sort join docs in the correct', async ({ payload }) => {
         related = await payload.findByID({
           collection: orderableJoinSlug,
           id: related.id,
@@ -992,7 +987,10 @@ describe('Sort', () => {
         expect(orders[1]).toBeLessThan(orders[2])
       })
 
-      it('should scope join reorder keys to the same parent relation', async () => {
+      test('should scope join reorder keys to the same parent relation', async ({
+        payload,
+        restClient,
+      }) => {
         const scopedParent = await payload.create({
           collection: orderableJoinSlug,
           data: {
@@ -1077,7 +1075,10 @@ describe('Sort', () => {
         ).toBe(true)
       })
 
-      it('should scope localized join reorder keys with request locale context', async () => {
+      test('should scope localized join reorder keys with request locale context', async ({
+        payload,
+        restClient,
+      }) => {
         const enParent = await payload.create({
           collection: orderableJoinSlug,
           data: {
@@ -1242,9 +1243,9 @@ describe('Sort', () => {
     })
   })
 
-  describe('REST API', () => {
-    beforeAll(async () => {
-      await createData('posts', [
+  test.describe('REST API', () => {
+    test.beforeEach(async ({ payload }) => {
+      await createData(payload, 'posts', [
         { text: 'Post 1', number: 1, number2: 10 },
         { text: 'Post 2', number: 2, number2: 10 },
         { text: 'Post 3', number: 3, number2: 5 },
@@ -1254,12 +1255,12 @@ describe('Sort', () => {
       ])
     })
 
-    afterAll(async () => {
-      await payload.delete({ collection: 'posts', where: {} })
+    test.afterAll(async ({ payloadInstance }) => {
+      await payloadInstance.delete({ collection: 'posts', where: {} })
     })
 
-    describe('Single sort field', () => {
-      it('should sort posts by text field', async () => {
+    test.describe('Single sort field', () => {
+      test('should sort posts by text field', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts`, {
             query: {
@@ -1278,7 +1279,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by text field desc', async () => {
+      test('should sort posts by text field desc', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts`, {
             query: {
@@ -1297,7 +1298,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by number field', async () => {
+      test('should sort posts by number field', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts`, {
             query: {
@@ -1316,7 +1317,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by number field desc', async () => {
+      test('should sort posts by number field desc', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts`, {
             query: {
@@ -1336,8 +1337,8 @@ describe('Sort', () => {
       })
     })
 
-    describe('Sort by multiple fields', () => {
-      it('should sort posts by multiple fields', async () => {
+    test.describe('Sort by multiple fields', () => {
+      test('should sort posts by multiple fields', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts`, {
             query: {
@@ -1356,7 +1357,7 @@ describe('Sort', () => {
         ])
       })
 
-      it('should sort posts by multiple fields asc and desc', async () => {
+      test('should sort posts by multiple fields asc and desc', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts`, {
             query: {
@@ -1376,8 +1377,10 @@ describe('Sort', () => {
       })
     })
 
-    describe('Sort by multiple fields as array', () => {
-      it('should sort posts by multiple fields using qs-esm array params', async () => {
+    test.describe('Sort by multiple fields as array', () => {
+      test('should sort posts by multiple fields using qs-esm array params', async ({
+        restClient,
+      }) => {
         const query = qs.stringify({ sort: ['number2', '-number'] })
 
         const res = await restClient.GET(`/posts?${query}`).then((res) => res.json())
@@ -1395,7 +1398,11 @@ describe('Sort', () => {
   })
 })
 
-async function createData(collection: CollectionSlug, data: Record<string, any>[]) {
+async function createData(
+  payload: Payload,
+  collection: CollectionSlug,
+  data: Record<string, any>[],
+) {
   for (const item of data) {
     await payload.create({ collection, data: item })
   }
