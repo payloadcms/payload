@@ -583,6 +583,97 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         expect(afterToken).toBeNull()
       })
 
+      test.describe('refresh collection identity', () => {
+        let alternateUserID: number | string | undefined
+
+        test.beforeEach(async ({ payload }) => {
+          payload.db.allowIDOnCreate = true
+          payload.config.db.allowIDOnCreate = true
+
+          const alternateUser = await payload.create({
+            collection: publicUsersSlug,
+            data: {
+              id: loggedInUser!.id,
+              email: 'refresh-collection@example.com',
+              password,
+            },
+          })
+
+          alternateUserID = alternateUser.id
+        })
+
+        test.afterAll(async ({ payloadInstance }) => {
+          if (alternateUserID !== undefined) {
+            await payloadInstance
+              .delete({ id: alternateUserID, collection: publicUsersSlug })
+              .catch(() => {})
+          }
+
+          payloadInstance.db.allowIDOnCreate = false
+          payloadInstance.config.db.allowIDOnCreate = false
+        })
+
+        test('should create the alternate user with the same ID as the logged-in user', () => {
+          expect(alternateUserID).toStrictEqual(loggedInUser!.id)
+        })
+
+        test('should not refresh through a different auth collection via REST', async ({
+          restClient,
+        }) => {
+          const response = await restClient.POST(`/${publicUsersSlug}/refresh-token`, {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          expect(response.status).toBe(403)
+        })
+
+        test('should not refresh through a different auth collection via GraphQL', async ({
+          restClient,
+        }) => {
+          const response = await restClient.GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `mutation {
+                refreshTokenPublicUser {
+                  refreshedToken
+                }
+              }`,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          const result = await response.json()
+
+          expect(result.data.refreshTokenPublicUser).toBeNull()
+          expect(result.errors[0].extensions.statusCode).toBe(403)
+        })
+
+        test('should refresh through the authenticated collection via GraphQL', async ({
+          restClient,
+        }) => {
+          const response = await restClient.GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `mutation {
+                refreshTokenUser {
+                  refreshedToken
+                }
+              }`,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          const result = await response.json()
+
+          expect(result.errors).toBeUndefined()
+          expect(result.data.refreshTokenUser.refreshedToken).toBeDefined()
+        })
+      })
+
       test.describe('User Preferences', () => {
         const key = 'test'
         const property = 'store'

@@ -1,10 +1,12 @@
+import { status as httpStatus } from 'http-status'
+
 import type { Collection } from '../../collections/config/types.js'
 import type { AuthenticatedUser } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
-import { Forbidden } from '../../errors/index.js'
+import { APIError, Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -55,6 +57,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
     if (!args.req.user) {
       throw new Forbidden(args.req.t)
+    }
+    if (args.req.user.collection !== collectionConfig.slug) {
+      throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
     }
 
     const pathname = new URL(args.req.url!).pathname

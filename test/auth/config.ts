@@ -300,6 +300,7 @@ export default buildConfigWithDefaults({
       {
         slug: publicUsersSlug,
         auth: {
+          useSessions: false,
           verify: true,
         },
         fields: [],
