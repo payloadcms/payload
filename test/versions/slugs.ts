@@ -34,6 +34,7 @@ export const errorOnUnpublishSlug = 'error-on-unpublish'
 export const disablePublishGlobalSlug = 'disable-publish-global'
 
 export const textCollectionSlug = 'text'
+export const usersCollectionSlug = 'users'
 
 export const collectionSlugs = [
   autosaveCollectionSlug,

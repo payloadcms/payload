@@ -567,6 +567,7 @@ export interface Diff {
     | null;
   zeroDepthRelationship?: (string | null) | User;
   richtext?: LexicalRichText<LexicalNodes_E98BC274> | null;
+  richtextWithConstrainedRelationship?: LexicalRichText<LexicalNodes_E98BC274> | null;
   richtextWithCustomDiff?: LexicalRichText<LexicalNodes_E98BC274> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
@@ -608,6 +609,7 @@ export interface SingleRelationshipBlock {
 export interface Text {
   id: string;
   text: string;
+  owner?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1336,6 +1338,7 @@ export interface DiffSelect<T extends boolean = true> {
   relationshipHasManyPolymorphic2?: T;
   zeroDepthRelationship?: T;
   richtext?: T;
+  richtextWithConstrainedRelationship?: T;
   richtextWithCustomDiff?: T;
   textInRow?: T;
   textCannotRead?: T;
@@ -1364,6 +1367,7 @@ export interface DiffSelect<T extends boolean = true> {
  */
 export interface TextSelect<T extends boolean = true> {
   text?: T;
+  owner?: T;
   updatedAt?: T;
   createdAt?: T;
 }
