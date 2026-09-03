@@ -80,7 +80,15 @@ export const hierarchyCollectionAfterRead =
       const { slugPath, titlePath } = await computePaths({
         collection,
         doc,
-        draft: doc._status === 'draft',
+        // Prefer the request's draft intent captured in beforeOperation: a
+        // published document read with `draft: true` (e.g. live preview) must
+        // still resolve its ancestors at their draft versions. `doc._status`
+        // only reflects this document's own state, so it is just a fallback
+        // for paths that don't go through a read operation.
+        draft:
+          typeof context?.hierarchyRequestDraft === 'boolean'
+            ? context.hierarchyRequestDraft
+            : doc._status === 'draft',
         locale:
           isTitleLocalized && req.locale === 'all'
             ? 'all'

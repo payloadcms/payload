@@ -1,5 +1,6 @@
 /**
  * beforeOperation Hook Responsibilities:
+ * - Capture the request's draft intent in context so afterRead resolves ancestors at the right version
  * - Detect when path fields (_h_slugPath, _h_titlePath) are selected
  * - Auto-include required fields (parent, title, slugField) for ancestor traversal
  * - Track auto-added fields in context so afterRead can strip them from response
@@ -65,7 +66,7 @@ export const hierarchyCollectionBeforeOperation = <TSlug extends CollectionSlug>
   return (hookArgs) => {
     const { args, context, operation } = hookArgs
 
-    // Only process read operations that have select
+    // Only process read operations
     if (
       operation !== 'find' &&
       operation !== 'findByID' &&
@@ -76,8 +77,17 @@ export const hierarchyCollectionBeforeOperation = <TSlug extends CollectionSlug>
       return
     }
 
-    // Type guard - these operations have select in their args
-    const operationArgs = args as { select?: Record<string, unknown> }
+    // Type guard - these operations have draft and select in their args
+    const operationArgs = args as { draft?: boolean; select?: Record<string, unknown> }
+
+    // Capture the request's draft intent so afterRead can resolve ancestors
+    // against the same draft/published view the request asked for. The
+    // document's own `_status` cannot tell us this - a published document
+    // read with `draft: true` should still walk the draft parent chain.
+    if (typeof operationArgs.draft === 'boolean') {
+      context.hierarchyRequestDraft = operationArgs.draft
+    }
+
     const select = operationArgs.select
 
     // No select means all fields are returned - no augmentation needed
