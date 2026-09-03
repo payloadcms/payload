@@ -1,0 +1,35 @@
+{
+  "name": "payload-example-secure-uploads",
+  "version": "1.0.0",
+  "description": "Payload example demonstrating secure file uploads with Pompelmi security scanning",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+  },
+  "dependencies": {
+    "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/db-sqlite": "^3.76.0",
+    "@payloadcms/next": "latest",
+    "@payloadcms/richtext-lexical": "latest",
+    "@payloadcms/ui": "latest",
+    "cross-env": "^7.0.3",
+    "graphql": "16.8.1",
+    "next": "^15.4.10",
+    "payload": "latest",
+    "pompelmi": "^0.29.1",
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.5",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
+    "typescript": "^5.7.2"
+  }
+}
