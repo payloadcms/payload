@@ -26,8 +26,6 @@ type ProcessMultipart = (args: {
   request: Request
 }) => Promise<FetchAPIFileUploadResponse>
 export const processMultipart: ProcessMultipart = async ({ options, request }) => {
-  let parsingRequest = true
-
   let shouldAbortProccessing = false
   let fileCount = 0
   let filesCompleted = 0
@@ -61,8 +59,6 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   request.headers.forEach((value, name) => {
     headersObject[name] = value
   })
-
-  const reader = request.body?.getReader()
 
   const busboy = Busboy({ ...options, headers: headersObject })
 
@@ -224,16 +220,25 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     },
   )
 
-  while (parsingRequest) {
-    const { done, value } = await reader!.read()
+  if (isCloudflareWorker()) {
+    // workerd stream reader promises can resume in the context where the body was created,
+    // losing a request scope established before multipart parsing begins.
+    busboy.end(new Uint8Array(await request.arrayBuffer()))
+  } else {
+    const reader = request.body?.getReader()
+    let isParsingRequest = true
 
-    if (done) {
-      parsingRequest = false
-      busboy.end()
-    }
+    while (isParsingRequest) {
+      const { done, value } = await reader!.read()
 
-    if (value && !shouldAbortProccessing) {
-      busboy.write(value)
+      if (done) {
+        isParsingRequest = false
+        busboy.end()
+      }
+
+      if (value && !shouldAbortProccessing) {
+        busboy.write(value)
+      }
     }
   }
 
@@ -246,4 +251,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   await busboyFinished
 
   return result
+}
+
+function isCloudflareWorker(): boolean {
+  return typeof navigator !== 'undefined' && navigator.userAgent === 'Cloudflare-Workers'
 }
