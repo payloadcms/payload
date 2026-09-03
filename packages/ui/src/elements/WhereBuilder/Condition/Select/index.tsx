@@ -5,9 +5,15 @@ import React from 'react'
 
 import type { SelectFilterProps as Props } from './types.js'
 
+import { useEffectEvent } from '../../../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
 import { formatOptions } from './formatOptions.js'
+import {
+  isMultiValueOperator,
+  resolveSelectFilterValue,
+  shouldWriteSelectScalar,
+} from './normalizeSelectValue.js'
 
 export const Select: React.FC<Props> = ({
   disabled,
@@ -18,12 +24,15 @@ export const Select: React.FC<Props> = ({
   onChange,
   operator,
   options: optionsFromProps,
-  value,
+  value: valueFromProps,
 }) => {
   const { i18n } = useTranslation()
   const [options, setOptions] = React.useState(formatOptions(optionsFromProps))
 
-  const isMulti = ['in', 'not_in'].includes(operator)
+  const isMulti = isMultiValueOperator(operator)
+  const value = resolveSelectFilterValue(operator, valueFromProps)
+  const lastWrittenRef = React.useRef<unknown>(undefined)
+
   let valueToRender
 
   if (isMulti && Array.isArray(value)) {
@@ -58,6 +67,7 @@ export const Select: React.FC<Props> = ({
         newValue = selectedOption.value
       }
 
+      lastWrittenRef.current = newValue
       onChange(newValue)
     },
     [isMulti, onChange],
@@ -67,11 +77,22 @@ export const Select: React.FC<Props> = ({
     setOptions(formatOptions(optionsFromProps))
   }, [optionsFromProps])
 
-  React.useEffect(() => {
-    if (!isMulti && Array.isArray(value)) {
-      onChange(value[0])
+  // leftover array under a single-value op → write scalar once (avoids update-depth loop)
+  const writeScalarIfNeeded = useEffectEvent(() => {
+    const decision = shouldWriteSelectScalar(operator, valueFromProps, lastWrittenRef.current)
+    if (decision.write) {
+      lastWrittenRef.current = decision.next
+      onChange(decision.next)
+      return
     }
-  }, [isMulti, onChange, value])
+    if (isMulti || !Array.isArray(valueFromProps)) {
+      lastWrittenRef.current = undefined
+    }
+  })
+
+  React.useEffect(() => {
+    writeScalarIfNeeded()
+  }, [operator, valueFromProps])
 
   return (
     <ReactSelect
