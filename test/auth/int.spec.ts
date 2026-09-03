@@ -445,6 +445,9 @@ describe('Auth', () => {
         const alternateUserIDs: (number | string)[] = []
 
         beforeAll(async () => {
+          payload.db.allowIDOnCreate = true
+          payload.config.db.allowIDOnCreate = true
+
           const alternateUser = await payload.create({
             collection: publicUsersSlug,
             data: {
@@ -464,6 +467,13 @@ describe('Auth', () => {
               collection: publicUsersSlug,
             })
           }
+
+          payload.db.allowIDOnCreate = false
+          payload.config.db.allowIDOnCreate = false
+        })
+
+        it('should create the alternate user with the same ID as the logged-in user', () => {
+          expect(alternateUserIDs[0]).toStrictEqual(loggedInUser!.id)
         })
 
         it('should not refresh through a different auth collection via REST', async () => {
