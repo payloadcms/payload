@@ -28,9 +28,11 @@ Use the `error` style when the section contains invalid fields that require atte
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop                     | Type                           | Default     | Description                                            |
 | ------------------------ | ------------------------------ | ----------- | ------------------------------------------------------ |
-| `children`               | `ReactNode`                    | —           | Content displayed inside the collapsible section.      |
+| `children` \*            | `ReactNode`                    | —           | Content displayed inside the collapsible section.      |
 | `header`                 | `ReactNode`                    | —           | Content displayed in the section header.               |
 | `actions`                | `ReactNode`                    | —           | Displays controls on the trailing edge of the header.  |
 | `collapsibleStyle`       | `'default' \| 'error'`         | `'default'` | Sets the visual state.                                 |
@@ -40,3 +42,5 @@ Use the `error` style when the section contains invalid fields that require atte
 | `disableHeaderToggle`    | `boolean`                      | `false`     | Prevents the header from toggling the section.         |
 | `disableToggleIndicator` | `boolean`                      | `false`     | Hides the trailing chevron.                            |
 | `AfterCollapsible`       | `ReactNode`                    | —           | Renders content after the collapsible content wrapper. |
+
+_\* An asterisk denotes that a prop is required._

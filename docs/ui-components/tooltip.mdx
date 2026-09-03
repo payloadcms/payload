@@ -22,9 +22,11 @@ Keep tooltip content brief. Important instructions should remain visible on the 
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop                | Type                            | Default    | Description                                              |
 | ------------------- | ------------------------------- | ---------- | -------------------------------------------------------- |
-| `children`          | `ReactNode`                     | —          | Content displayed inside the tooltip.                    |
+| `children` \*       | `ReactNode`                     | —          | Content displayed inside the tooltip.                    |
 | `show`              | `boolean`                       | `true`     | Controls tooltip visibility.                             |
 | `position`          | `'top' \| 'bottom'`             | Automatic  | Sets the preferred position.                             |
 | `alignCaret`        | `'left' \| 'center' \| 'right'` | `'center'` | Aligns the tooltip caret.                                |
@@ -32,3 +34,5 @@ Keep tooltip content brief. Important instructions should remain visible on the 
 | `staticPositioning` | `boolean`                       | `false`    | Disables automatic position detection.                   |
 | `boundingRef`       | `RefObject<HTMLElement>`        | —          | Sets the boundary used for automatic position detection. |
 | `className`         | `string`                        | —          | Adds a custom class to the tooltip.                      |
+
+_\* An asterisk denotes that a prop is required._

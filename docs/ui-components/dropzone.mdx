@@ -24,11 +24,15 @@ When `multipleFiles` is disabled, dropping more than one file passes only the fi
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop            | Type                        | Default     | Description                                        |
 | --------------- | --------------------------- | ----------- | -------------------------------------------------- |
 | `children`      | `ReactNode`                 | —           | Content and file-selection controls in the target. |
-| `onChange`      | `(files: FileList) => void` | —           | Runs when files are dropped, pasted, or supplied.  |
+| `onChange` \*   | `(files: FileList) => void` | —           | Runs when files are dropped, pasted, or supplied.  |
 | `multipleFiles` | `boolean`                   | `false`     | Allows more than one file to be returned.          |
 | `disabled`      | `boolean`                   | `false`     | Disables drag, drop, and paste listeners.          |
 | `dropzoneStyle` | `'default' \| 'none'`       | `'default'` | Enables or removes Payload's drop-target styles.   |
 | `className`     | `string`                    | —           | Adds a class to the dropzone container.            |
+
+_\* An asterisk denotes that a prop is required._

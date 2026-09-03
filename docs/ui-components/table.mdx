@@ -27,9 +27,13 @@ Keep each column's `renderedCells` array in the same order as `data`. Columns wi
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop          | Type                        | Default     | Description                                          |
 | ------------- | --------------------------- | ----------- | ---------------------------------------------------- |
-| `data`        | `Record<string, unknown>[]` | —           | Rows rendered by the table.                          |
+| `data` \*     | `Record<string, unknown>[]` | —           | Rows rendered by the table.                          |
 | `columns`     | `Column[]`                  | —           | Defines headings, fields, and rendered cell content. |
 | `appearance`  | `'default' \| 'condensed'`  | `'default'` | Selects the table's spacing and border treatment.    |
 | `BeforeTable` | `ReactNode`                 | —           | Renders content immediately before the table.        |
+
+_\* An asterisk denotes that a prop is required._

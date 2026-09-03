@@ -22,9 +22,13 @@ Pass the `i18n` object from `useTranslation`. Add `withMessage` when the count n
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop          | Type         | Default | Description                                      |
 | ------------- | ------------ | ------- | ------------------------------------------------ |
-| `count`       | `number`     | —       | Number of errors. Renders nothing when set to 0. |
-| `i18n`        | `I18nClient` | —       | Supplies localized error labels.                 |
+| `count` \*    | `number`     | —       | Number of errors. Renders nothing when set to 0. |
+| `i18n` \*     | `I18nClient` | —       | Supplies localized error labels.                 |
 | `withMessage` | `boolean`    | `false` | Displays “error” or “errors” after the count.    |
 | `className`   | `string`     | —       | Adds a custom class to the element.              |
+
+_\* An asterisk denotes that a prop is required._

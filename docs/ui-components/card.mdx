@@ -28,11 +28,15 @@ When using `href` or `onClick`, provide `buttonAriaLabel` so the full-card contr
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop              | Type          | Default | Description                                     |
 | ----------------- | ------------- | ------- | ----------------------------------------------- |
-| `title`           | `string`      | —       | Visible card title.                             |
+| `title` \*        | `string`      | —       | Visible card title.                             |
 | `titleAs`         | `ElementType` | `'div'` | Sets the element used for the title.            |
 | `actions`         | `ReactNode`   | —       | Displays controls on the trailing edge.         |
 | `href`            | `string`      | —       | Makes the full card navigate to the given path. |
 | `onClick`         | `() => void`  | —       | Makes the full card perform an action.          |
 | `buttonAriaLabel` | `string`      | —       | Labels the full-card interactive control.       |
+
+_\* An asterisk denotes that a prop is required._

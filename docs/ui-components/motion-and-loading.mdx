@@ -51,6 +51,8 @@ The preview simulates a slower route so the delayed progress indicator remains v
 
 ## Common props
 
+These are the props most commonly used. See the exported types in `@payloadcms/ui` for the complete list.
+
 ### LoadingOverlay
 
 | Prop                | Type      | Default   | Description                                      |
@@ -64,8 +66,8 @@ The preview simulates a slower route so the delayed progress indicator remains v
 
 | Prop          | Type                           | Default        | Description                                   |
 | ------------- | ------------------------------ | -------------- | --------------------------------------------- |
-| `name`        | `string`                       | —              | Identifies this source in the shared overlay. |
-| `show`        | `boolean`                      | —              | Adds or removes this source's loading state.  |
+| `name` \*     | `string`                       | —              | Identifies this source in the shared overlay. |
+| `show` \*     | `boolean`                      | —              | Adds or removes this source's loading state.  |
 | `type`        | `'fullscreen' \| 'withoutNav'` | `'fullscreen'` | Selects the shared overlay layout.            |
 | `loadingText` | `string`                       | —              | Replaces the translated loading label.        |
 
@@ -73,11 +75,13 @@ The preview simulates a slower route so the delayed progress indicator remains v
 
 | Prop           | Type               | Default | Description                                      |
 | -------------- | ------------------ | ------- | ------------------------------------------------ |
-| `count`        | `number`           | —       | Sets the number of shimmer placeholders.         |
+| `count` \*     | `number`           | —       | Sets the number of shimmer placeholders.         |
 | `height`       | `number \| string` | —       | Sets each placeholder's height.                  |
 | `width`        | `number \| string` | —       | Sets each placeholder's width.                   |
 | `renderDelay`  | `number`           | `500`   | Delays rendering to avoid flashing on fast work. |
 | `shimmerDelay` | `number \| string` | `25`    | Staggers the animation between placeholders.     |
+
+_\* An asterisk denotes that a prop is required._
 
 ## Accessibility
 

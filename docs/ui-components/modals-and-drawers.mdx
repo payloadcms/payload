@@ -41,18 +41,21 @@ Use `DrawerToggler` or `openModal` to open a `Drawer`. The trigger and drawer mu
 - Use `ConfirmationModal` to confirm a focused action.
 - Use `Drawer` for supporting content that should remain connected to the current view.
 - Use `Modal` for a custom dialog and `FullscreenModal` when the content needs the full viewport.
-- Use `ItemsDrawer` for Payload's provider-backed document selection workflow rather than a generic drawer.
+- Use `ItemsDrawer` when the user needs to pick from a searchable list of Blocks or Widgets, as Payload does when adding a row to a Blocks field.
+- Use the `useDocumentDrawer` or `useListDrawer` hooks for document selection. Each returns the drawer, its toggler, and the drawer's state.
 
 ## Common props
+
+These are the props most commonly used. See the exported types in `@payloadcms/ui` for the complete list.
 
 ### ConfirmationModal
 
 | Prop              | Type                          | Default | Description                                             |
 | ----------------- | ----------------------------- | ------- | ------------------------------------------------------- |
-| `modalSlug`       | `string`                      | —       | Connects the modal to its trigger.                      |
-| `heading`         | `ReactNode`                   | —       | Displays the modal heading.                             |
-| `body`            | `ReactNode`                   | —       | Displays the confirmation message.                      |
-| `onConfirm`       | `() => Promise<void> \| void` | —       | Runs when the user confirms the action.                 |
+| `modalSlug` \*    | `string`                      | —       | Connects the modal to its trigger.                      |
+| `heading` \*      | `ReactNode`                   | —       | Displays the modal heading.                             |
+| `body` \*         | `ReactNode`                   | —       | Displays the confirmation message.                      |
+| `onConfirm` \*    | `() => Promise<void> \| void` | —       | Runs when the user confirms the action.                 |
 | `onCancel`        | `() => void`                  | —       | Runs after the user cancels the action.                 |
 | `confirmLabel`    | `string`                      | —       | Replaces the translated confirm label.                  |
 | `confirmingLabel` | `string`                      | —       | Replaces the label shown while confirmation is pending. |
@@ -60,14 +63,16 @@ Use `DrawerToggler` or `openModal` to open a `Drawer`. The trigger and drawer mu
 
 ### Drawer#drawer-props
 
-| Prop         | Type        | Default | Description                                         |
-| ------------ | ----------- | ------- | --------------------------------------------------- |
-| `slug`       | `string`    | —       | Connects the drawer to its trigger.                 |
-| `title`      | `string`    | —       | Displays the default drawer heading.                |
-| `children`   | `ReactNode` | —       | Renders the drawer content.                         |
-| `gutter`     | `boolean`   | `true`  | Applies Payload's horizontal gutter to the content. |
-| `Header`     | `ReactNode` | —       | Replaces the default drawer header.                 |
-| `hoverTitle` | `boolean`   | —       | Adds the title as a native tooltip on the heading.  |
+| Prop          | Type        | Default | Description                                         |
+| ------------- | ----------- | ------- | --------------------------------------------------- |
+| `slug` \*     | `string`    | —       | Connects the drawer to its trigger.                 |
+| `title`       | `string`    | —       | Displays the default drawer heading.                |
+| `children` \* | `ReactNode` | —       | Renders the drawer content.                         |
+| `gutter`      | `boolean`   | `true`  | Applies Payload's horizontal gutter to the content. |
+| `Header`      | `ReactNode` | —       | Replaces the default drawer header.                 |
+| `hoverTitle`  | `boolean`   | —       | Adds the title as a native tooltip on the heading.  |
+
+_\* An asterisk denotes that a prop is required._
 
 ## Provider requirements
 

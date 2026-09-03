@@ -22,9 +22,11 @@ Store the selected option object rather than only its value. Use `isMulti` when 
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop           | Type                                  | Default   | Description                                     |
 | -------------- | ------------------------------------- | --------- | ----------------------------------------------- |
-| `options`      | `Option[] \| OptionGroup[]`           | —         | Options displayed in the menu.                  |
+| `options` \*   | `Option[] \| OptionGroup[]`           | —         | Options displayed in the menu.                  |
 | `value`        | `Option \| Option[]`                  | —         | Selected option or options.                     |
 | `onChange`     | `(value: Option \| Option[]) => void` | —         | Runs when the selection changes.                |
 | `placeholder`  | `string \| LabelFunction`             | Localized | Sets the empty-state label.                     |
@@ -35,3 +37,5 @@ Store the selected option object rather than only its value. Use `isMulti` when 
 | `disabled`     | `boolean`                             | `false`   | Prevents interaction.                           |
 | `isLoading`    | `boolean`                             | `false`   | Displays the loading state.                     |
 | `showError`    | `boolean`                             | `false`   | Applies the validation error style.             |
+
+_\* An asterisk denotes that a prop is required._

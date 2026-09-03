@@ -24,11 +24,15 @@ Inside the Admin Panel, Payload provides the translation context used by the lab
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop               | Type                           | Default | Description                                      |
 | ------------------ | ------------------------------ | ------- | ------------------------------------------------ |
-| `id`               | `string`                       | —       | Identifies the underlying select input.          |
-| `options`          | `SelectFieldClient['options']` | —       | Timezones displayed in the select menu.          |
+| `id` \*            | `string`                       | —       | Identifies the underlying select input.          |
+| `options` \*       | `SelectFieldClient['options']` | —       | Timezones displayed in the select menu.          |
 | `selectedTimezone` | `string`                       | —       | Value of the currently selected timezone.        |
 | `onChange`         | `(timezone: string) => void`   | —       | Runs when the selected timezone changes.         |
 | `required`         | `boolean`                      | `false` | Marks the picker as required and prevents clear. |
 | `readOnly`         | `boolean`                      | `false` | Prevents the timezone from being changed.        |
+
+_\* An asterisk denotes that a prop is required._

@@ -22,11 +22,15 @@ Left and right padding are enabled by default. Negative gutters let a child exte
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop            | Type        | Default | Description                           |
 | --------------- | ----------- | ------- | ------------------------------------- |
-| `children`      | `ReactNode` | —       | Content positioned within the gutter. |
+| `children` \*   | `ReactNode` | —       | Content positioned within the gutter. |
 | `left`          | `boolean`   | `true`  | Applies the standard left padding.    |
 | `right`         | `boolean`   | `true`  | Applies the standard right padding.   |
 | `negativeLeft`  | `boolean`   | `false` | Applies a negative left margin.       |
 | `negativeRight` | `boolean`   | `false` | Applies a negative right margin.      |
 | `className`     | `string`    | —       | Adds a custom class to the wrapper.   |
+
+_\* An asterisk denotes that a prop is required._

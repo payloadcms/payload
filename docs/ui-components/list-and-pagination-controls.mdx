@@ -61,6 +61,8 @@ Selection controls require Payload's selection context. `SelectRow` also reads t
 
 ## Common props
 
+These are the props most commonly used. See the exported types in `@payloadcms/ui` for the complete list.
+
 ### Pagination props
 
 | Prop                | Type                     | Default | Description                                     |
@@ -78,10 +80,12 @@ Selection controls require Payload's selection context. `SelectRow` also reads t
 
 | Prop           | Type                      | Default | Description                                      |
 | -------------- | ------------------------- | ------- | ------------------------------------------------ |
-| `limit`        | `number`                  | —       | Sets the selected page size.                     |
-| `limits`       | `number[]`                | —       | Sets the available page sizes.                   |
+| `limit` \*     | `number`                  | —       | Sets the selected page size.                     |
+| `limits` \*    | `number[]`                | —       | Sets the available page sizes.                   |
 | `defaultLimit` | `number`                  | `10`    | Provides a fallback when `limit` is not numeric. |
 | `handleChange` | `(limit: number) => void` | —       | Runs when the user chooses a new page size.      |
+
+_\* An asterisk denotes that a prop is required._
 
 ## Internal list wrappers
 

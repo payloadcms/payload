@@ -6,12 +6,14 @@ desc: Display and edit structured text with Payload's CodeEditor component.
 keywords: ui, component, code, editor, monaco, json
 ---
 
-The `CodeEditor` component wraps Monaco Editor with Payload's styling and automatic height behavior. It loads lazily in Client Components.
+The `CodeEditor` component wraps Monaco Editor with Payload's styling and automatic height behavior.
 
 ## Import
 
+`CodeEditor` loads Monaco eagerly. Use `CodeEditorLazy` to defer loading the editor until it renders, which keeps Monaco out of the initial bundle of a Client Component.
+
 ```tsx
-import { CodeEditor } from '@payloadcms/ui'
+import { CodeEditor, CodeEditorLazy } from '@payloadcms/ui'
 ```
 
 ## Read-only usage
@@ -21,6 +23,8 @@ import { CodeEditor } from '@payloadcms/ui'
 Set `defaultLanguage` to enable the appropriate syntax highlighting. Use `readOnly` when displaying code that should not be edited.
 
 ## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
 
 | Prop                   | Type                       | Default | Description                                     |
 | ---------------------- | -------------------------- | ------- | ----------------------------------------------- |

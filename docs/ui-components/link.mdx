@@ -22,11 +22,15 @@ import { Link } from '@payloadcms/ui'
 
 ## Common props
 
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
 | Prop             | Type                  | Default | Description                                                |
 | ---------------- | --------------------- | ------- | ---------------------------------------------------------- |
-| `href`           | `string \| UrlObject` | —       | Destination passed to the Next.js router.                  |
+| `href` \*        | `string \| UrlObject` | —       | Destination passed to the Next.js router.                  |
 | `replace`        | `boolean`             | `false` | Replaces the current history entry instead of adding one.  |
 | `scroll`         | `boolean`             | `true`  | Controls whether navigation scrolls to the new page.       |
 | `prefetch`       | `boolean`             | —       | Controls Next.js route prefetching.                        |
 | `preventDefault` | `boolean`             | `true`  | Lets Payload manage navigation and route-transition state. |
 | `onClick`        | `MouseEventHandler`   | —       | Runs before navigation begins.                             |
+
+_\* An asterisk denotes that a prop is required._

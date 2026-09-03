@@ -20,7 +20,7 @@ import { Banner } from '@payloadcms/ui'
 
 ## Types
 
-Use `success` to confirm an action, `error` when something failed, and `info` for additional context. Use the default type for neutral messages.
+Use `success` to confirm an action, `error` when something failed, `warning` to flag a risk, and `info` for additional context. Use the default type for neutral messages.
 
 <ComponentPreview component="Banner" example="variants" />
 
@@ -28,11 +28,13 @@ Keep banner copy concise and include the next action when the user must resolve 
 
 ## Common props
 
-| Prop        | Type                                          | Default     | Description                                 |
-| ----------- | --------------------------------------------- | ----------- | ------------------------------------------- |
-| `children`  | `ReactNode`                                   | —           | Message displayed inside the banner.        |
-| `type`      | `'default' \| 'success' \| 'error' \| 'info'` | `'default'` | Sets the message style.                     |
-| `icon`      | `ReactNode`                                   | —           | Displays an icon beside the message.        |
-| `alignIcon` | `'left' \| 'right'`                           | `'right'`   | Positions the icon.                         |
-| `onClick`   | `(event: MouseEvent) => void`                 | —           | Makes the banner actionable.                |
-| `to`        | `string`                                      | —           | Makes the banner navigate to the given URL. |
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop        | Type                                                       | Default     | Description                                 |
+| ----------- | ---------------------------------------------------------- | ----------- | ------------------------------------------- |
+| `children`  | `ReactNode`                                                | —           | Message displayed inside the banner.        |
+| `type`      | `'default' \| 'success' \| 'error' \| 'warning' \| 'info'` | `'default'` | Sets the message style.                     |
+| `icon`      | `ReactNode`                                                | —           | Displays an icon beside the message.        |
+| `alignIcon` | `'left' \| 'right'`                                        | `'right'`   | Positions the icon.                         |
+| `onClick`   | `(event: MouseEvent) => void`                              | —           | Makes the banner actionable.                |
+| `to`        | `string`                                                   | —           | Makes the banner navigate to the given URL. |

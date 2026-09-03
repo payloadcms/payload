@@ -36,7 +36,7 @@ import { Hamburger, NavGroup, NavToggler, SetStepNav } from '@payloadcms/ui'
 </NavGroup>
 ```
 
-Pass `isOpen` to choose the group's initial state. Omitting `label` renders the children without a group wrapper.
+`label` is required and is used both as the visible group heading and as the key the open state is stored under in preferences. Pass `isOpen` to choose the group's initial state.
 
 ## Step navigation
 
@@ -55,13 +55,15 @@ Each item accepts a `label` and an optional `url`. Keep the `nav` array stable w
 
 ## Common props
 
+These are the props most commonly used. See the exported types in `@payloadcms/ui` for the complete list.
+
 ### NavGroup
 
-| Prop       | Type        | Default | Description                                |
-| ---------- | ----------- | ------- | ------------------------------------------ |
-| `label`    | `string`    | —       | Labels the group and keys its saved state. |
-| `children` | `ReactNode` | —       | Renders the navigation items in the group. |
-| `isOpen`   | `boolean`   | —       | Sets the group's initial expanded state.   |
+| Prop          | Type        | Default | Description                                |
+| ------------- | ----------- | ------- | ------------------------------------------ |
+| `label` \*    | `string`    | —       | Labels the group and keys its saved state. |
+| `children` \* | `ReactNode` | —       | Renders the navigation items in the group. |
+| `isOpen`      | `boolean`   | —       | Sets the group's initial expanded state.   |
 
 ### NavToggler
 
@@ -71,6 +73,8 @@ Each item accepts a `label` and an optional `url`. Keep the `nav` array stable w
 | `className` | `string`    | —       | Adds a class to the toggle button.           |
 | `id`        | `string`    | —       | Sets the button ID.                          |
 | `tabIndex`  | `number`    | `0`     | Sets the button's keyboard navigation order. |
+
+_\* An asterisk denotes that a prop is required._
 
 ## Provider requirements
 
