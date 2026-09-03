@@ -1,9 +1,9 @@
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 import { startChildProcess } from './startChildProcess.js'
 
-test.suite({})('Loader', () => {
+suite('Loader', {}, () => {
   test('should load dependencies without extensions', async () => {
     const code = await startChildProcess('./dependency-test.js')
     expect(code).toStrictEqual(0)

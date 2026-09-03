@@ -5,11 +5,11 @@ import { GraphQLNonNull } from 'graphql'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 
-test.suite({ config: './config.ts' })('graphql', () => {
-  test.describe('graphql', () => {
+suite('graphql', { config: './config.ts' }, () => {
+  describe('graphql', () => {
     test('should return 404 when GraphQL is disabled', async ({ payload, restClient }) => {
       const originalDisable = payload.config.graphQL?.disable
 
@@ -284,7 +284,7 @@ query {
       expect(afterDelete.errors).toBeUndefined()
     })
 
-    test.describe('nullable schema types', () => {
+    describe('nullable schema types', () => {
       test('should not mark required virtual fields as non-null in the mutation input type', ({
         payload,
       }) => {

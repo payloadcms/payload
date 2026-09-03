@@ -3,7 +3,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterAll, afterEach, beforeEach, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { timeFreeze, timeTravel, waitUntilAutorunIsDone, withoutAutoRun } from './utilities.js'
 
@@ -14,10 +14,11 @@ const { email, password } = devUser
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: './config.schedules.ts' })(
+suite(
   'Queues - scheduling, without automatic scheduling handling',
+  { config: './config.schedules.ts' },
   () => {
-    test.afterAll(async () => {
+    afterAll(async () => {
       // Ensure no new crons are scheduled
       _internal_jobSystemGlobals.shouldAutoRun = false
       _internal_jobSystemGlobals.shouldAutoSchedule = false
@@ -27,12 +28,12 @@ test.suite({ config: './config.schedules.ts' })(
       _internal_resetJobSystemGlobals()
     })
 
-    test.afterEach(() => {
+    afterEach(() => {
       _internal_jobSystemGlobals.shouldAutoRun = false
       _internal_jobSystemGlobals.shouldAutoSchedule = false
     })
 
-    test.beforeEach(async ({ payload, restClient }) => {
+    beforeEach(async ({ payload, restClient }) => {
       const data = await restClient
         .POST('/users/login', {
           body: JSON.stringify({

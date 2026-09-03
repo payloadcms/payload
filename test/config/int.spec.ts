@@ -5,15 +5,15 @@ import { type BlocksField, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { testFilePath } from './testFilePath.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('Config', () => {
-  test.describe('payload config', () => {
+suite('Config', { config: './config.ts' }, () => {
+  describe('payload config', () => {
     test('allows a custom field at the config root', ({ payload }) => {
       const { config } = payload
       expect(config.custom).toEqual({
@@ -89,7 +89,7 @@ test.suite({ config: './config.ts' })('Config', () => {
     })
   })
 
-  test.describe('collection config', () => {
+  describe('collection config', () => {
     test('allows a custom field in collections', ({ payload }) => {
       const [collection] = payload.config.collections
       expect(collection.custom).toEqual({
@@ -130,7 +130,7 @@ test.suite({ config: './config.ts' })('Config', () => {
     })
   })
 
-  test.describe('global config', () => {
+  describe('global config', () => {
     test('allows a custom field in globals', ({ payload }) => {
       const [global] = payload.config.globals
       expect(global.custom).toEqual({ foo: 'bar' })
@@ -153,14 +153,14 @@ test.suite({ config: './config.ts' })('Config', () => {
     })
   })
 
-  test.describe('cors config', () => {
+  describe('cors config', () => {
     test('includes a custom header in Access-Control-Allow-Headers', async ({ restClient }) => {
       const response = await restClient.GET(`/pages`)
       expect(response.headers.get('Access-Control-Allow-Headers')).toContain('x-custom-header')
     })
   })
 
-  test.describe('bin config', () => {
+  describe('bin config', () => {
     const executeCLI = (command: string) => {
       execSync(`pnpm tsx "${path.resolve(dirname, 'bin.ts')}" ${command}`, {
         env: {

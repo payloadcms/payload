@@ -4,7 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { readCSV, readJSON } from './helpers.js'
 import { postsWithFieldHooksSlug } from './shared.js'
@@ -15,8 +15,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const configPath = './config.ts'
 
-test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-level hooks', () => {
-  test.beforeEach(async ({ payload }) => {
+suite('@payloadcms/plugin-import-export — field-level hooks', { config: configPath }, () => {
+  beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
@@ -25,7 +25,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
     user = loginResult.user!
   })
 
-  test.afterEach(async ({ payload }) => {
+  afterEach(async ({ payload }) => {
     const existing = await payload.find({
       collection: postsWithFieldHooksSlug,
       limit: 1000,
@@ -40,7 +40,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // Field-level export hooks
   // ─────────────────────────────────────────────
 
-  test.describe('field-level export hooks', () => {
+  describe('field-level export hooks', () => {
     test('should transform CSV output using field-level export hook', async ({ payload }) => {
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
@@ -194,7 +194,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // Field-level import hooks
   // ─────────────────────────────────────────────
 
-  test.describe('field-level import hooks', () => {
+  describe('field-level import hooks', () => {
     test('should transform value during CSV import using field-level import hook', async ({
       payload,
     }) => {
@@ -272,7 +272,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // Empty-cell preservation on update import
   // ─────────────────────────────────────────────
 
-  test.describe('synthetic import hooks should not clobber existing data with empty cells', () => {
+  describe('synthetic import hooks should not clobber existing data with empty cells', () => {
     test('should preserve existing number value when CSV update row has a blank count cell', async ({
       payload,
     }) => {
@@ -320,7 +320,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // Execution order: field-level before collection-level
   // ─────────────────────────────────────────────
 
-  test.describe('execution order', () => {
+  describe('execution order', () => {
     test('should run field-level export hooks before collection-level hooks', async ({
       payload,
     }) => {
@@ -361,7 +361,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // Reusable field config
   // ─────────────────────────────────────────────
 
-  test.describe('reusable field configs', () => {
+  describe('reusable field configs', () => {
     test('should apply field-level hooks from a shared field definition', async ({ payload }) => {
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
@@ -395,7 +395,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // Edge cases
   // ─────────────────────────────────────────────
 
-  test.describe('edge cases', () => {
+  describe('edge cases', () => {
     test('should use default flattening when export hook returns undefined', async ({
       payload,
     }) => {
@@ -432,7 +432,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // Field-level hooks inside arrays and blocks
   // ─────────────────────────────────────────────
 
-  test.describe('field-level hooks inside arrays', () => {
+  describe('field-level hooks inside arrays', () => {
     test('should run field-level export hook on array item sub-fields (CSV)', async ({
       payload,
     }) => {
@@ -574,7 +574,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
     })
   })
 
-  test.describe('field-level hooks inside blocks', () => {
+  describe('field-level hooks inside blocks', () => {
     test('should run field-level export hook on block sub-fields (CSV)', async ({ payload }) => {
       const post = await payload.create({
         collection: postsWithFieldHooksSlug,
@@ -715,7 +715,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // Hook receives the top-level document in `data` arg
   // ─────────────────────────────────────────────
 
-  test.describe('field-level import hook receives sibling-level data', () => {
+  describe('field-level import hook receives sibling-level data', () => {
     test('should pass the nested parent object as siblingData to hooks inside a group (JSON)', async ({
       payload,
     }) => {
@@ -768,7 +768,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // must not abort the whole batch.
   // ─────────────────────────────────────────────
 
-  test.describe('field-level hook error isolation', () => {
+  describe('field-level hook error isolation', () => {
     test('should isolate a thrown beforeImport hook to its row during CSV import', async ({
       payload,
     }) => {
@@ -954,7 +954,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
   // so child hooks should still register and fire.
   // ─────────────────────────────────────────────
 
-  test.describe('field-level hooks under unnamed presentational wrappers', () => {
+  describe('field-level hooks under unnamed presentational wrappers', () => {
     test('should fire export hook on a field nested in a row wrapper (CSV)', async ({
       payload,
     }) => {
@@ -1080,7 +1080,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-l
     })
   })
 
-  test.describe('field-level import hook receives top-level data', () => {
+  describe('field-level import hook receives top-level data', () => {
     test('should pass the full top-level doc to hooks on nested fields (JSON)', async ({
       payload,
     }) => {

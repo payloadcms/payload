@@ -63,7 +63,19 @@ ruleTester.run('no-vitest-scoped-methods', rule, {
     {
       code: "test.options({ db: 'mongo' }).describe('posts', () => {})",
       errors: [
-        { data: { method: 'describe', testIdentifier: 'test' }, messageId: 'useStandalone' },
+        {
+          data: { method: 'options', target: 'describe', testIdentifier: 'test' },
+          messageId: 'useRunIf',
+        },
+      ],
+    },
+    {
+      code: "test.options({ db: 'mongo' })('creates a post', () => {})",
+      errors: [
+        {
+          data: { method: 'options', target: 'test', testIdentifier: 'test' },
+          messageId: 'useRunIf',
+        },
       ],
     },
     {

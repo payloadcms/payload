@@ -15,7 +15,7 @@ import { expect, vi } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterAll, afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { cloudStorageDeletedFilenames } from './collections/DraftsWithUploadCloudStorage.js'
 import {
@@ -49,10 +49,10 @@ const dirname = path.dirname(filename)
 const formatGraphQLID = ({ payload }: { payload: Payload }, id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
-test.suite({ config: './config.ts' })('Versions', () => {
+suite('Versions', { config: './config.ts' }, () => {
   let user: JsonObject
 
-  test.beforeEach(async ({ restClient }) => {
+  beforeEach(async ({ restClient }) => {
     const { user: loggedInUser } = await restClient.login({
       slug: 'users',
       credentials: devUser,
@@ -63,15 +63,15 @@ test.suite({ config: './config.ts' })('Versions', () => {
     }
   })
 
-  test.afterEach(async ({ payload }) => {
+  afterEach(async ({ payload }) => {
     await payload.delete({
       collection: 'payload-jobs',
       where: {},
     })
   })
 
-  test.describe('Collections - Local', () => {
-    test.describe('Create', () => {
+  describe('Collections - Local', () => {
+    describe('Create', () => {
       test('should allow creating a draft with missing required field data', async ({
         payload,
       }) => {
@@ -554,7 +554,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Duplicate', () => {
+    describe('Duplicate', () => {
       test('should duplicate a versioned document as a draft', async ({ payload }) => {
         const originalDoc = await payload.create({
           collection: draftCollectionSlug,
@@ -641,7 +641,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Query operations', () => {
+    describe('Query operations', () => {
       test('should paginate versions', async ({ payload }) => {
         const versions = await payload.findVersions({
           collection: draftCollectionSlug,
@@ -721,8 +721,8 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Restore', () => {
-      test.afterEach(async ({ payload }) => {
+    describe('Restore', () => {
+      afterEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
           payload,
@@ -1108,8 +1108,8 @@ test.suite({ config: './config.ts' })('Versions', () => {
       expect(resPaginationFalseLimit0.totalDocs).toBe(101)
     })
 
-    test.describe('Update', () => {
-      test.afterEach(async ({ payload }) => {
+    describe('Update', () => {
+      afterEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug, autosaveCollectionSlug],
           payload,
@@ -1423,8 +1423,8 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Update Many', () => {
-      test.afterEach(async ({ payload }) => {
+    describe('Update Many', () => {
+      afterEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
           payload,
@@ -1484,7 +1484,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Delete', () => {
+    describe('Delete', () => {
       test('should delete drafts', async ({ payload }) => {
         const postToDelete = await payload.create({
           collection: autosaveCollectionSlug,
@@ -1530,8 +1530,8 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Draft Count', () => {
-      test.afterEach(async ({ payload }) => {
+    describe('Draft Count', () => {
+      afterEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
           payload,
@@ -1592,8 +1592,8 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Unpublish', () => {
-      test.afterEach(async ({ payload }) => {
+    describe('Unpublish', () => {
+      afterEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
           payload,
@@ -1741,8 +1741,8 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Draft Types', () => {
-      test.afterEach(async ({ payload }) => {
+    describe('Draft Types', () => {
+      afterEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
           payload,
@@ -1813,7 +1813,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Max Versions', () => {
+    describe('Max Versions', () => {
       // create 2 documents with 3 versions each
       // expect 2 documents with 2 versions each
       test('retains correct versions', async ({ payload }) => {
@@ -1915,7 +1915,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Race conditions', () => {
+    describe('Race conditions', () => {
       test('should keep latest true with parallel writes', async ({ payload }) => {
         const doc = await payload.create({
           collection: draftCollectionSlug,
@@ -2058,11 +2058,11 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Upload Collections with Drafts', () => {
+  describe('Upload Collections with Drafts', () => {
     const uploadedFilenames: string[] = []
     const uploadStaticDir = path.resolve(dirname, './collections/uploads-draft')
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       await cleanupDocuments({
         collectionSlugs: [draftWithUploadCollectionSlug],
         payload,
@@ -2277,8 +2277,8 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Upload Collections with Drafts (cloud storage)', () => {
-    test.afterEach(async ({ payload }) => {
+  describe('Upload Collections with Drafts (cloud storage)', () => {
+    afterEach(async ({ payload }) => {
       await cleanupDocuments({
         collectionSlugs: [draftWithUploadCloudStorageCollectionSlug],
         payload,
@@ -2463,7 +2463,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Querying', () => {
+  describe('Querying', () => {
     const originalTitle = 'original title'
     const updatedTitle1 = 'new title 1'
     const updatedTitle2 = 'new title 2'
@@ -2504,7 +2504,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     }
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       await cleanupDocuments({
         collectionSlugs: [draftCollectionSlug],
         payload,
@@ -2513,7 +2513,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       await createPostWithVersions({ payload })
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       await cleanupDocuments({
         collectionSlugs: [draftCollectionSlug],
         payload,
@@ -2729,7 +2729,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Collections - GraphQL', () => {
+  describe('Collections - GraphQL', () => {
     async function createAutoSavePostHelper(
       { restClient }: { restClient: NextRESTClient },
       {
@@ -2875,7 +2875,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       return result.data.versionsAutosavePost
     }
 
-    test.describe('Create', () => {
+    describe('Create', () => {
       test('should allow a new doc to be created with draft status', async ({ restClient }) => {
         const autosavePost = await createAutoSavePostHelper(
           { restClient },
@@ -2889,11 +2889,11 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Read', () => {
+    describe('Read', () => {
       const updatedTitle2 = 'updated title'
       let localPostID: number | string
 
-      test.beforeEach(async ({ payload, restClient }) => {
+      beforeEach(async ({ payload, restClient }) => {
         const post = await createAutoSavePostHelper(
           { restClient },
           {
@@ -2904,7 +2904,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
         localPostID = post.id
       })
 
-      test.afterAll(async ({ payloadInstance }) => {
+      afterAll(async ({ payloadInstance }) => {
         await cleanupDocuments({
           collectionSlugs: [autosaveCollectionSlug],
           payload: payloadInstance,
@@ -2970,10 +2970,10 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Restore', () => {
+    describe('Restore', () => {
       let postID: number | string
       let versionID: number | string
-      test.beforeEach(async ({ restClient }) => {
+      beforeEach(async ({ restClient }) => {
         const autosavePost = await createAutoSavePostHelper(
           { restClient },
           {
@@ -2984,7 +2984,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
         postID = autosavePost.id
       })
 
-      test.beforeEach(async ({ payload, restClient }) => {
+      beforeEach(async ({ payload, restClient }) => {
         // modify the post to create a new version
         // language=graphQL
         const update = `mutation {
@@ -3019,7 +3019,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
         versionID = data.versionsAutosavePosts.docs[0].id
       })
 
-      test.afterAll(async ({ payloadInstance }) => {
+      afterAll(async ({ payloadInstance }) => {
         await cleanupDocuments({
           collectionSlugs: [autosaveCollectionSlug],
           payload: payloadInstance,
@@ -3067,7 +3067,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Collections - REST', () => {
+  describe('Collections - REST', () => {
     test('sholud query versions', async ({ payload, restClient }) => {
       // Create a post and update it to generate a version
       const autosavePost = await payload.create({
@@ -3177,9 +3177,9 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Globals - Local', () => {
+  describe('Globals - Local', () => {
     let globalVersionID: number | string
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const title2 = 'Here is an updated global title in EN'
       await payload.updateGlobal({
         slug: autoSaveGlobalSlug,
@@ -3201,7 +3201,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
 
       globalVersionID = versions.docs[0]!.id
     })
-    test.describe('Create', () => {
+    describe('Create', () => {
       test('should allow a new version to be created', async ({ payload }) => {
         const title2 = 'Here is an updated global title in EN'
         const updatedGlobal = await payload.findGlobal({
@@ -3330,7 +3330,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       expect(resPaginationFalseLimit0.totalDocs).toBe(100)
     })
 
-    test.describe('Read', () => {
+    describe('Read', () => {
       test('should allow a version to be retrieved by ID', async ({ payload }) => {
         const version = await payload.findGlobalVersionByID({
           id: globalVersionID,
@@ -3355,7 +3355,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Update', () => {
+    describe('Update', () => {
       test('should allow a version to save locales properly', async ({ payload }) => {
         const englishTitle = 'Title in EN'
         const spanishTitle = 'Title in ES'
@@ -3451,7 +3451,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Restore', () => {
+    describe('Restore', () => {
       test('should allow a version to be restored', async ({ payload }) => {
         const title2 = 'Another updated title in EN'
 
@@ -3492,7 +3492,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Patch', () => {
+    describe('Patch', () => {
       test('should allow a draft to be patched', async ({ payload }) => {
         const originalTitle = 'Here is a published global'
 
@@ -3571,7 +3571,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Globals - GraphQL', () => {
+  describe('Globals - GraphQL', () => {
     let autosaveGlobalVersionID: number | string
 
     async function createAndSetVersionID({ restClient }: { restClient: NextRESTClient }) {
@@ -3608,10 +3608,10 @@ test.suite({ config: './config.ts' })('Versions', () => {
       autosaveGlobalVersionID = data.versionsAutosaveGlobal.docs[0].id
     }
 
-    test.beforeEach(async ({ restClient }) => {
+    beforeEach(async ({ restClient }) => {
       await createAndSetVersionID({ restClient })
     })
-    test.describe('Read', () => {
+    describe('Read', () => {
       test('should allow read of versions by version id', async ({ payload, restClient }) => {
         // language=graphql
         const query = `query {
@@ -3659,7 +3659,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Restore', () => {
+    describe('Restore', () => {
       test('should allow a version to be restored', async ({ payload, restClient }) => {
         const updatedTitle = 'Wrong global title'
 
@@ -3701,7 +3701,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Scheduled Publish', () => {
+  describe('Scheduled Publish', () => {
     test('should allow collection scheduled publish', async ({ payload }) => {
       const draft = await payload.create({
         collection: draftCollectionSlug,
@@ -4030,11 +4030,11 @@ test.suite({ config: './config.ts' })('Versions', () => {
       expect(result._status).toBeUndefined()
     })
 
-    test.describe('server functions', () => {
+    describe('server functions', () => {
       let draftDoc
       let event
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         draftDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
@@ -4045,7 +4045,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
         })
       })
 
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: ['payload-jobs', draftCollectionSlug],
           payload,
@@ -4222,12 +4222,12 @@ test.suite({ config: './config.ts' })('Versions', () => {
     })
   })
 
-  test.describe('Publish Individual Locale', () => {
+  describe('Publish Individual Locale', () => {
     const collection = localizedCollectionSlug
     const global = localizedGlobalSlug
 
-    test.describe('Collections', () => {
-      test.beforeEach(async ({ payload }) => {
+    describe('Collections', () => {
+      beforeEach(async ({ payload }) => {
         await cleanupDocuments({
           collectionSlugs: [collection],
           payload,
@@ -4643,8 +4643,8 @@ test.suite({ config: './config.ts' })('Versions', () => {
       })
     })
 
-    test.describe('Globals', () => {
-      test.beforeEach(async ({ payload }) => {
+    describe('Globals', () => {
+      beforeEach(async ({ payload }) => {
         // Clear global data by resetting to empty values
         await cleanupGlobal({
           globalSlug: global,

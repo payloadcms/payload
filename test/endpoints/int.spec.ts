@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 import {
   applicationEndpoint,
   collectionSlug,
@@ -13,8 +13,8 @@ import {
   rootEndpoint,
 } from './shared.js'
 
-test.suite({ config: './config.ts' })('Endpoints', () => {
-  test.describe('Collections', () => {
+suite('Endpoints', { config: './config.ts' }, () => {
+  describe('Collections', () => {
     test('should GET a static endpoint', async ({ restClient }) => {
       const response = await restClient.GET(`/${collectionSlug}/say-hello/joe-bloggs`)
       const data = await response.json()
@@ -47,7 +47,7 @@ test.suite({ config: './config.ts' })('Endpoints', () => {
     })
   })
 
-  test.describe('Globals', () => {
+  describe('Globals', () => {
     test('should call custom endpoint', async ({ restClient }) => {
       const params = { globals: 'response' }
       const response = await restClient.POST(`/globals/${globalSlug}/${globalEndpoint}`, {
@@ -64,7 +64,7 @@ test.suite({ config: './config.ts' })('Endpoints', () => {
     })
   })
 
-  test.describe('API', () => {
+  describe('API', () => {
     test('should call custom endpoint', async ({ restClient }) => {
       const params = { app: 'response' }
       const response = await restClient.POST(`/${applicationEndpoint}`, {
@@ -85,7 +85,7 @@ test.suite({ config: './config.ts' })('Endpoints', () => {
     })
   })
 
-  test.describe('Root', () => {
+  describe('Root', () => {
     test('should call custom root endpoint', async ({ restClient }) => {
       const params = { root: 'response' }
       const response = await restClient.POST(`/${rootEndpoint}`, {

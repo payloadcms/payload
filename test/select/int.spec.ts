@@ -18,21 +18,21 @@ import type {
   VersionedPost,
 } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('Select', () => {
-  test.describe('Local API - Base', () => {
+suite('Select', { config: './config.ts' }, () => {
+  describe('Local API - Base', () => {
     let post: Post
     let postId: number | string
 
     let point: Point
     let pointId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       post = await createPost({ payload })
       postId = post.id
 
@@ -40,7 +40,7 @@ test.suite({ config: './config.ts' })('Select', () => {
       pointId = point.id
     })
 
-    test.describe('Include mode', () => {
+    describe('Include mode', () => {
       test('should select only id as default', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
@@ -438,7 +438,7 @@ test.suite({ config: './config.ts' })('Select', () => {
       })
     })
 
-    test.describe('Exclude mode', () => {
+    describe('Exclude mode', () => {
       test('should exclude only text field', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
@@ -725,16 +725,16 @@ test.suite({ config: './config.ts' })('Select', () => {
     })
   })
 
-  test.describe('Local API - Localization', () => {
+  describe('Local API - Localization', () => {
     let post: LocalizedPost
     let postId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       post = await createLocalizedPost({ payload })
       postId = post.id
     })
 
-    test.describe('Include mode', () => {
+    describe('Include mode', () => {
       test('should select only id as default', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
@@ -1063,7 +1063,7 @@ test.suite({ config: './config.ts' })('Select', () => {
       })
     })
 
-    test.describe('Exclude mode', () => {
+    describe('Exclude mode', () => {
       test('should exclude only text field', async ({ payload }) => {
         const res = await payload.findByID({
           id: postId,
@@ -1369,11 +1369,11 @@ test.suite({ config: './config.ts' })('Select', () => {
     })
   })
 
-  test.describe('Local API - Deep Fields', () => {
+  describe('Local API - Deep Fields', () => {
     let post: DeepPost
     let postId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       post = await createDeepPost({ payload })
       postId = post.id
     })
@@ -1455,11 +1455,11 @@ test.suite({ config: './config.ts' })('Select', () => {
     })
   })
 
-  test.describe('Local API - Versioned Drafts Collection', () => {
+  describe('Local API - Versioned Drafts Collection', () => {
     let post: VersionedPost
     let postId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       post = await createVersionedPost({ payload })
       postId = post.id
     })
@@ -1687,9 +1687,9 @@ test.suite({ config: './config.ts' })('Select', () => {
     })
   })
 
-  test.describe('Local API - Globals', () => {
+  describe('Local API - Globals', () => {
     let globalPost: GlobalPost
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       globalPost = await payload.updateGlobal({
         slug: 'global-post',
         data: {
@@ -1729,7 +1729,7 @@ test.suite({ config: './config.ts' })('Select', () => {
     })
   })
 
-  test.describe('Local API - operations', () => {
+  describe('Local API - operations', () => {
     test('should apply select with create', async ({ payload }) => {
       const res = await payload.create({
         collection: 'posts',
@@ -1838,16 +1838,16 @@ test.suite({ config: './config.ts' })('Select', () => {
     })
   })
 
-  test.describe('REST API - Base', () => {
+  describe('REST API - Base', () => {
     let post: Post
     let postId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       post = await createPost({ payload })
       postId = post.id
     })
 
-    test.describe('Include mode', () => {
+    describe('Include mode', () => {
       test('should select only text', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
@@ -1925,7 +1925,7 @@ test.suite({ config: './config.ts' })('Select', () => {
       })
     })
 
-    test.describe('Exclude mode', () => {
+    describe('Exclude mode', () => {
       test('should exclude only text field', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
@@ -2008,10 +2008,10 @@ test.suite({ config: './config.ts' })('Select', () => {
     })
   })
 
-  test.describe('REST API - Logged in', () => {
+  describe('REST API - Logged in', () => {
     let token: string | undefined
 
-    test.beforeEach(async ({ restClient }) => {
+    beforeEach(async ({ restClient }) => {
       const response = await restClient.POST(`/users/login`, {
         body: JSON.stringify({
           email: devUser.email,
@@ -2064,7 +2064,7 @@ test.suite({ config: './config.ts' })('Select', () => {
     })
   })
 
-  test.describe('populate / defaultPopulate', () => {
+  describe('populate / defaultPopulate', () => {
     let homePage: Page
     let aboutPage: Page
     let expectedHomePage: {
@@ -2085,7 +2085,7 @@ test.suite({ config: './config.ts' })('Select', () => {
       slug: string
     }
     let expectedHomePageOverride: { additional: string; id: number | string }
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       homePage = await payload.create({
         collection: 'pages',
         data: {

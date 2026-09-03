@@ -3,10 +3,10 @@ import { expect } from 'vitest'
 
 import type { Organization } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('Hierarchy', () => {
-  test.describe('Collection Config Property', () => {
+suite('Hierarchy', { config: './config.ts' }, () => {
+  describe('Collection Config Property', () => {
     test('should add virtual path fields to collection', ({ payload }) => {
       const organizationsCollection = payload.collections.organizations.config
 
@@ -62,13 +62,13 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Tree Data Generation', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('Tree Data Generation', () => {
+    beforeEach(async ({ payload }) => {
       // Clear existing data before each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       // Clean up data after each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
@@ -224,12 +224,12 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Circular Reference Prevention', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('Circular Reference Prevention', () => {
+    beforeEach(async ({ payload }) => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
@@ -323,13 +323,13 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Query Patterns', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('Query Patterns', () => {
+    beforeEach(async ({ payload }) => {
       // Clear existing data before each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       // Clean up data after each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
@@ -391,12 +391,12 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Custom Field Names', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('Custom Field Names', () => {
+    beforeEach(async ({ payload }) => {
       await payload.delete({ collection: 'departments', where: {} })
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'departments', where: {} })
     })
 
@@ -424,13 +424,13 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Deep Nesting', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('Deep Nesting', () => {
+    beforeEach(async ({ payload }) => {
       // Clear existing data before each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       // Clean up data after each test
       await payload.delete({ collection: 'organizations', where: {} })
     })
@@ -464,7 +464,7 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Draft Versions', () => {
+  describe('Draft Versions', () => {
     test('should compute paths correctly for published and draft versions', async ({ payload }) => {
       // Create parent and child
       const parent = await payload.create({
@@ -634,7 +634,7 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Localization', () => {
+  describe('Localization', () => {
     test('should generate localized paths for each locale', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
@@ -1139,12 +1139,12 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Ancestor Cache Performance', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('Ancestor Cache Performance', () => {
+    beforeEach(async ({ payload }) => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
@@ -1279,10 +1279,10 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Slug Field Configuration', () => {
+  describe('Slug Field Configuration', () => {
     const createdPageIds: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdPageIds) {
         await payload.delete({ collection: 'pages', id }).catch(() => {})
       }
@@ -1354,10 +1354,10 @@ test.suite({ config: './config.ts' })('Hierarchy', () => {
     })
   })
 
-  test.describe('Select-based Path Computation', () => {
+  describe('Select-based Path Computation', () => {
     const createdOrgIds: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       // Delete in reverse order (children before parents)
       for (const id of [...createdOrgIds].reverse()) {
         try {

@@ -98,9 +98,7 @@ const protocolEras: Array<{ label: string; protocolEra: ProtocolEra }> = [
   { label: '2026 modern', protocolEra: 'modern' },
 ]
 
-export const test = Object.assign(payloadTest, {
-  suite: base.suite,
-})
+export const test = payloadTest
 
 /** Registers every MCP integration test independently against both protocol eras. */
 export function it(name: string, testFunction: McpTestFunction, timeout?: number): void {

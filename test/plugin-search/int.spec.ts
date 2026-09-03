@@ -2,14 +2,14 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { pagesSlug, postsSlug } from './shared.js'
 
 let token: string
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-search', () => {
-  test.beforeEach(async ({ restClient }) => {
+suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
+  beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -22,7 +22,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-search', () => {
     token = data.token
   })
 
-  test.beforeEach(async ({ payload }) => {
+  beforeEach(async ({ payload }) => {
     await payload.delete({
       collection: 'search',
       depth: 0,
@@ -829,7 +829,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-search', () => {
     })
   })
 
-  test.describe('locale filtering', () => {
+  describe('locale filtering', () => {
     test('should filter locales when skipSync excludes them', async ({ payload }) => {
       // Test config has 3 locales: ['en', 'es', 'de']
       // For 'filtered-locales' collection with syncEnglishOnly: true, only 'en' should be indexed

@@ -5,13 +5,13 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 
 const tagsSlug = 'tags'
 const postsSlug = 'posts'
 
-test.suite({ config: './config.ts' })('Tags Helpers', () => {
-  test.describe('createTagsCollection', () => {
+suite('Tags Helpers', { config: './config.ts' }, () => {
+  describe('createTagsCollection', () => {
     test('should create a collection with hierarchy enabled', ({ payload }) => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === tagsSlug)
 
@@ -62,7 +62,7 @@ test.suite({ config: './config.ts' })('Tags Helpers', () => {
     })
   })
 
-  test.describe('createTagField', () => {
+  describe('createTagField', () => {
     test('should add tag relationship field to collection', ({ payload }) => {
       const postsCollection = payload.config.collections.find((c) => c.slug === postsSlug)
       const tagField = postsCollection?.fields.find(
@@ -86,7 +86,7 @@ test.suite({ config: './config.ts' })('Tags Helpers', () => {
       expect((tagField as any)?.hasMany).toBe(true)
     })
   })
-  test.describe('render-tab searchParams precedence', () => {
+  describe('render-tab searchParams precedence', () => {
     const tabSlug = 'precedence-tab'
 
     const getForwardedSearchParams = (

@@ -1,13 +1,13 @@
 import { expect } from 'vitest'
 
-import { test } from './vitest.js'
+import { afterAll, beforeAll, suite, test } from './vitest.js'
 
-test.suite({ config: './configImport.config.ts' })('integration config fixture', () => {
-  test.beforeAll(() => {
+suite('integration config fixture', { config: './configImport.config.ts' }, () => {
+  beforeAll(() => {
     expect(process.env.PAYLOAD_TEST_CONFIG_IMPORTED).toBe('true')
   })
 
-  test.afterAll(() => {
+  afterAll(() => {
     delete process.env.PAYLOAD_TEST_CONFIG_IMPORTED
   })
 

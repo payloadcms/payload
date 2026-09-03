@@ -6,22 +6,23 @@ import { expect, vitest } from 'vitest'
 
 import type { Point, Post } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') })(
+suite(
   'Select - with postgres logs',
+  { config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') },
   () => {
-    test.describe('Local API - Base', () => {
+    describe('Local API - Base', () => {
       let post: Post
       let postId: number | string
 
       let point: Point
       let pointId: number | string
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         post = await createPost({ payload })
         postId = post.id
 
@@ -30,7 +31,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
       })
 
       // Clean up to safely mutate in each test
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         await payload.delete({ id: postId, collection: 'posts' })
         await payload.delete({ id: pointId, collection: 'points' })
       })

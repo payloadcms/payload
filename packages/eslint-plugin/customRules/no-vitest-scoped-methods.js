@@ -6,6 +6,7 @@ const SCOPED_METHODS = new Set([
   'beforeAll',
   'beforeEach',
   'describe',
+  'options',
   'suite',
 ])
 
@@ -53,17 +54,33 @@ function getStaticPropertyName(node) {
   return null
 }
 
+function isTestOptionsCall(node) {
+  if (
+    node.type !== 'CallExpression' ||
+    node.callee.type !== 'MemberExpression' ||
+    getStaticPropertyName(node.callee) !== 'options'
+  ) {
+    return false
+  }
+
+  const rootIdentifier = getRootIdentifier(node.callee.object)
+
+  return Boolean(rootIdentifier && ['it', 'test'].includes(rootIdentifier.name))
+}
+
 /** @type {import('eslint').Rule.RuleModule} */
 export const rule = {
   meta: {
     type: 'problem',
     docs: {
       description:
-        'Require standalone Vitest suite and hook functions so editor test discovery uses the correct test name',
+        'Require parser-friendly Vitest suite, hook, and conditional APIs so editor test discovery uses the correct test name',
       category: 'Possible Errors',
       recommended: false,
     },
     messages: {
+      useRunIf:
+        'Use `{{target}}.runIf(matchesDatabase(...))` instead of `{{testIdentifier}}.options(...)`. Vitest understands `runIf`, so the editor can discover the correct test name.',
       useStandalone:
         'Use the standalone `{{method}}(...)` API instead of `{{testIdentifier}}.{{method}}(...)`. Scoped suite and hook methods can make the VS Code Vitest extension discover the wrong test name.',
     },
@@ -78,6 +95,12 @@ export const rule = {
           return
         }
 
+        // `test.options(...).describe(...)` gets one diagnostic on `options` with the complete
+        // `describe.runIf(...)` replacement instead of a second overlapping `describe` error.
+        if (method !== 'options' && isTestOptionsCall(node.object)) {
+          return
+        }
+
         const rootIdentifier = getRootIdentifier(node.object)
 
         if (!rootIdentifier || !['it', 'test'].includes(rootIdentifier.name)) {
@@ -86,9 +109,14 @@ export const rule = {
 
         context.report({
           node,
-          messageId: 'useStandalone',
+          messageId: method === 'options' ? 'useRunIf' : 'useStandalone',
           data: {
             method,
+            target:
+              node.parent?.type === 'CallExpression' &&
+              node.parent.parent?.type === 'MemberExpression'
+                ? (getStaticPropertyName(node.parent.parent) ?? rootIdentifier.name)
+                : rootIdentifier.name,
             testIdentifier: rootIdentifier.name,
           },
         })

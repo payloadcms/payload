@@ -1,6 +1,6 @@
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -8,11 +8,11 @@ let token: string
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts' })('_Community Tests', () => {
+suite('_Community Tests', { config: './config.ts' }, () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
-  test.beforeEach(async ({ restClient }) => {
+  beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({

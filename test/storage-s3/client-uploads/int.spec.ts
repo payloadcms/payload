@@ -6,7 +6,7 @@ import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../../__helpers/int/vitest.js'
 import { mediaHeaderOnlySlug, mediaHeaderOnlyWithSizesSlug } from '../shared.js'
 import {
   clearTestBucket,
@@ -34,8 +34,8 @@ const signedURLBody = (
     mimeType,
   })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', () => {
-  test.beforeEach(async () => {
+suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, () => {
+  beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()
   })
@@ -198,7 +198,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     expect(uploadResponse.status).toBe(403)
   })
 
-  test.describe('filename handling', () => {
+  describe('filename handling', () => {
     test('should sanitize special characters in filename', async ({ restClient }) => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
@@ -282,10 +282,10 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
    * full round trip end to end is the only way to exercise the real handler for this path, since
    * unit tests mock the handler and never see that crash.
    */
-  test.describe('header-only content requirement (real S3 handler)', () => {
+  describe('header-only content requirement (real S3 handler)', () => {
     const createdIds: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: mediaHeaderOnlySlug })
       }
@@ -339,10 +339,10 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
    * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
    * fetching the full file through the real S3 handler.
    */
-  test.describe('imageSizes with a large upload (real S3 handler)', () => {
+  describe('imageSizes with a large upload (real S3 handler)', () => {
     const createdIds: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
       }
@@ -396,7 +396,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     }, 60000)
   })
 
-  test.afterEach(async () => {
+  afterEach(async () => {
     await clearTestBucket()
   })
 })

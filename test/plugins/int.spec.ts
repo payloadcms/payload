@@ -3,10 +3,10 @@ import { expect } from 'vitest'
 
 import type { ReaderPluginOptions } from './config.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 import { pagesSlug } from './config.js'
 
-test.suite({ config: './config.ts' })('Collections - Plugins', () => {
+suite('Collections - Plugins', { config: './config.ts' }, () => {
   test('created pages collection', async ({ payload }) => {
     const { id } = await payload.create({
       collection: pagesSlug,
@@ -18,7 +18,7 @@ test.suite({ config: './config.ts' })('Collections - Plugins', () => {
     expect(id).toBeDefined()
   })
 
-  test.describe('plugin order, slug, and options', () => {
+  describe('plugin order, slug, and options', () => {
     test('should execute plugins sorted by order regardless of array position', ({ payload }) => {
       // The reader (order 10) is listed BEFORE the writer (order 1) in the array,
       // but order sorting ensures the writer runs first.

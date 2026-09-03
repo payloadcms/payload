@@ -1,4 +1,5 @@
 import type { Payload, SanitizedConfig } from 'payload'
+import type { SuiteCollector, SuiteFactory } from 'vitest'
 
 import path from 'node:path'
 import { getPayload } from 'payload'
@@ -30,7 +31,7 @@ type IntegrationFixtures = {
     configPath: null | string
     /** Raw file-scoped instance for suite hooks. Tests should use `payload`. */
     payloadInstance: Payload
-    /** Config supplied to `test.suite`, imported automatically before file hooks run. */
+    /** Config supplied to `suite`, imported automatically before file hooks run. */
     resolvedConfig: null | SanitizedConfig
     testCron: boolean
     testDir: string
@@ -42,6 +43,8 @@ type IntegrationFixtures = {
     sdk: ReturnType<typeof getSDK>
   }
 }
+
+type IntegrationFixtureContext = IntegrationFixtures['$file'] & IntegrationFixtures['$test']
 
 // Keep all fixtures in one extension so Vitest can trace test calls back to their source lines.
 const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
@@ -61,7 +64,7 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     try {
       if (configPath === null) {
         throw new Error(
-          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+          "This integration test requires Payload. Pass its config path to suite('Name', { config: './config.ts' }, ...).",
         )
       }
 
@@ -79,7 +82,7 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     async ({ resolvedConfig }, use) => {
       if (resolvedConfig === null) {
         throw new Error(
-          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+          "This integration test requires Payload. Pass its config path to suite('Name', { config: './config.ts' }, ...).",
         )
       }
 
@@ -156,37 +159,45 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
 /**
  * Integration test API with Payload's shared lifecycle and database filtering.
  *
- * Payload-backed test files supply their config to one root `test.suite`. The config module is
+ * Payload-backed test files supply their config to one root `suite`. The config module is
  * imported once before file hooks run. Payload is initialized lazily, once per file, and destroyed
  * afterward. Before every test that uses Payload, REST, or the SDK, the database and upload
  * directories are reset and the suite's optional seed function is run. REST and SDK clients are
- * recreated per test. Standalone integration tests use `test.suite({})` and do not initialize
+ * recreated per test. Standalone integration tests use `suite('Name', {}, ...)` and do not initialize
  * Payload.
  *
  * @example
- * test.suite({ config: './config.ts' })('Posts', () => {
+ * suite('Posts', { config: './config.ts' }, () => {
  *   test('reads posts', async ({ payload }) => {
  *     await payload.find({ collection: 'posts' })
  *   })
  * })
  */
-export const test = Object.assign(testWithFixtures, {
-  options: (options: TestOptions) => {
-    const shouldRun = matchesDatabase(options)
-
-    return Object.assign(testWithFixtures.runIf(shouldRun), {
-      describe: testWithFixtures.describe.runIf(shouldRun),
-    })
-  },
-  suite(this: typeof testWithFixtures, { config, cron = true, db }: TestSuiteOptions) {
-    this.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
-    this.override('testCron', cron)
-
-    return this.describe.runIf(matchesDatabase({ db }))
-  },
-})
+export const test = testWithFixtures
 
 export const it = test
+
+// Standalone suite and hook functions keep Vitest's static test discovery aligned with runtime.
+// File hooks use their `this` value to resolve file-scoped fixtures, so retain the fixture API as
+// their receiver when exposing them as standalone functions.
+export const afterAll = testWithFixtures.afterAll.bind(testWithFixtures)
+export const afterEach = testWithFixtures.afterEach
+export const aroundAll = testWithFixtures.aroundAll.bind(testWithFixtures)
+export const aroundEach = testWithFixtures.aroundEach
+export const beforeAll = testWithFixtures.beforeAll.bind(testWithFixtures)
+export const beforeEach = testWithFixtures.beforeEach
+export const describe = testWithFixtures.describe
+
+export const suite = (
+  name: string,
+  { config, cron = true, db }: TestSuiteOptions,
+  factory: SuiteFactory<IntegrationFixtureContext>,
+): SuiteCollector<IntegrationFixtureContext> => {
+  testWithFixtures.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
+  testWithFixtures.override('testCron', cron)
+
+  return testWithFixtures.describe.runIf(matchesDatabase({ db }))(name, factory)
+}
 
 const getTestDirectory = (): string => {
   const testPath = expect.getState().testPath
@@ -200,7 +211,7 @@ const getTestDirectory = (): string => {
 
 const isMongo = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
 
-const matchesDatabase = ({ db = 'all' }: TestOptions = {}): boolean => {
+export const matchesDatabase = ({ db = 'all' }: TestOptions = {}): boolean => {
   if (typeof db === 'function') {
     return db(getCurrentDatabaseAdapter())
   }

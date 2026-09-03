@@ -18,7 +18,7 @@ import { devUser } from '../credentials.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
-import { test } from '../__helpers/int/vitest.js'
+import { afterAll, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
@@ -51,12 +51,12 @@ import {
 const collection = localizedPostsSlug
 const global = 'global-text'
 
-test.suite({ config: './config.ts' })('Localization', () => {
-  test.describe('Localization with fallback true', () => {
+suite('Localization', { config: './config.ts' }, () => {
+  describe('Localization with fallback true', () => {
     let post1: LocalizedPost
     let postWithLocalizedData: LocalizedPost
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       post1 = await payload.create({
         collection,
         data: {
@@ -97,7 +97,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized text', () => {
+    describe('Localized text', () => {
       test('create english', async ({ payload }) => {
         const allDocs = await payload.find({
           collection,
@@ -211,12 +211,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         expect(localizedFallback.title).not.toBeDefined()
       })
 
-      test.describe('fallback locales', () => {
+      describe('fallback locales', () => {
         let englishData
         let spanishData
         let localizedDoc
 
-        test.beforeEach(async ({ payload }) => {
+        beforeEach(async ({ payload }) => {
           englishData = {
             localizedCheckbox: false,
           }
@@ -259,9 +259,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('querying', () => {
+      describe('querying', () => {
         let localizedPost: LocalizedPost
-        test.beforeEach(async ({ payload }) => {
+        beforeEach(async ({ payload }) => {
           const { id } = await payload.create({
             collection,
             data: {
@@ -412,10 +412,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
 
         if (mongooseList.includes(process.env.PAYLOAD_DATABASE)) {
-          test.describe('Localized sorting', () => {
+          describe('Localized sorting', () => {
             let localizedAccentPostOne: LocalizedPost
             let localizedAccentPostTwo: LocalizedPost
-            test.beforeEach(async ({ payload }) => {
+            beforeEach(async ({ payload }) => {
               localizedAccentPostOne = await payload.create({
                 collection,
                 data: {
@@ -474,7 +474,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized date', () => {
+    describe('Localized date', () => {
       test('can create a localized date', async ({ payload }) => {
         const document = await payload.create({
           collection: localizedDateFieldsSlug,
@@ -500,10 +500,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized Sort Count', () => {
+    describe('Localized Sort Count', () => {
       const expectedTotalDocs = 5
       const posts: LocalizedSort[] = []
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         posts.length = 0
 
         for (let i = 1; i <= expectedTotalDocs; i++) {
@@ -674,12 +674,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized Relationship', () => {
+    describe('Localized Relationship', () => {
       let localizedRelation: LocalizedPost
       let localizedRelation2: LocalizedPost
       let withRelationship: WithLocalizedRelationship
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         localizedRelation = await createLocalizedPost(
           { payload },
           {
@@ -716,7 +716,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('regular relationship', () => {
+      describe('regular relationship', () => {
         test('can query localized relationship', async ({ payload }) => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
@@ -774,7 +774,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('relationship - hasMany', () => {
+      describe('relationship - hasMany', () => {
         test('default locale', async ({ payload }) => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
@@ -885,7 +885,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('relationTo multi', () => {
+      describe('relationTo multi', () => {
         test('by id', async ({ payload }) => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
@@ -913,7 +913,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('relationTo multi hasMany', () => {
+      describe('relationTo multi hasMany', () => {
         test('by id', async ({ payload }) => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
@@ -966,7 +966,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized - arrays with nested localized fields', () => {
+    describe('Localized - arrays with nested localized fields', () => {
       test('should allow moving rows and retain existing row locale data', async ({ payload }) => {
         const globalArray: any = await payload.findGlobal({
           slug: 'global-array',
@@ -987,7 +987,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized - required', () => {
+    describe('Localized - required', () => {
       test('should update without passing all required fields', async ({ payload }) => {
         const newDoc = await payload.create({
           collection: withRequiredLocalizedFields,
@@ -1041,10 +1041,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized - GraphQL', () => {
+    describe('Localized - GraphQL', () => {
       let token
 
-      test.beforeEach(async ({ restClient }) => {
+      beforeEach(async ({ restClient }) => {
         const query = `mutation {
           loginUser(email: "dev@payloadcms.com", password: "test") {
             token
@@ -1222,10 +1222,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized - Arrays', () => {
+    describe('Localized - Arrays', () => {
       let docID
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         const englishDoc = await payload.create({
           collection: arrayCollectionSlug,
           data: {
@@ -1329,7 +1329,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized - Field Paths', () => {
+    describe('Localized - Field Paths', () => {
       test('should allow querying by non-localized field names ending in a locale', async ({
         payload,
         restClient,
@@ -1375,7 +1375,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Nested To Array And Block', () => {
+    describe('Nested To Array And Block', () => {
       test('should be equal to the created document', async ({ payload }) => {
         const { id, blocks } = await payload.create({
           collection: nestedToArrayAndBlockCollectionSlug,
@@ -1429,7 +1429,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Duplicate Collection', () => {
+    describe('Duplicate Collection', () => {
       test('should duplicate localized document', async ({ payload }) => {
         const localizedPost = await payload.create({
           collection: localizedPostsSlug,
@@ -1679,7 +1679,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Localized group and tabs', () => {
+    describe('Localized group and tabs', () => {
       test('should properly create/update/read localized group field', async ({ payload }) => {
         const result = await payload.create({
           collection: groupSlug,
@@ -2104,7 +2104,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
     // Nested localized fields do no longer have their localized property stripped in
     // this monorepo, as this is handled at runtime.
-    test.describe('nested localized field sanitization', () => {
+    describe('nested localized field sanitization', () => {
       test('ensure nested localized fields keep localized property in monorepo', ({ payload }) => {
         const collection = payload.collections['localized-within-localized'].config
 
@@ -2115,7 +2115,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('nested blocks', () => {
+    describe('nested blocks', () => {
       let id
       test('should allow creating nested blocks per locale', async ({ payload }) => {
         const doc = await payload.create({
@@ -2202,7 +2202,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('nested arrays', () => {
+    describe('nested arrays', () => {
       test('should not duplicate block rows for blocks within localized array fields', async ({
         payload,
       }) => {
@@ -2386,7 +2386,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('nested fields', () => {
+    describe('nested fields', () => {
       test('should update localized block', async ({ payload }) => {
         const doc = await payload.create({
           collection: 'blocks-fields',
@@ -2945,7 +2945,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('localized with unique', () => {
+    describe('localized with unique', () => {
       test('localized with unique should work for each locale', async ({ payload }) => {
         await payload.create({
           collection: 'localized-posts',
@@ -3059,10 +3059,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Copying To Locale', () => {
+    describe('Copying To Locale', () => {
       let user: User
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         user = (
           await payload.find({
             collection: 'users',
@@ -3486,9 +3486,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('Multiple fallback locales', () => {
-      test.describe('Local API', () => {
-        test.describe('Collections', () => {
+    describe('Multiple fallback locales', () => {
+      describe('Local API', () => {
+        describe('Collections', () => {
           test('should allow fallback locale to be an array', async ({ payload }) => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
@@ -3528,7 +3528,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           })
         })
 
-        test.describe('Globals', () => {
+        describe('Globals', () => {
           test('should allow fallback locale to be an array', async ({ payload }) => {
             const result = await payload.findGlobal({
               slug: global,
@@ -3565,8 +3565,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('REST API', () => {
-        test.describe('Collections', () => {
+      describe('REST API', () => {
+        describe('Collections', () => {
           test('should allow fallback locale to be an array', async ({ restClient }) => {
             const response = await restClient.GET(
               `/${collection}/${postWithLocalizedData.id}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
@@ -3603,7 +3603,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           })
         })
 
-        test.describe('Globals', () => {
+        describe('Globals', () => {
           test('should allow fallback locale to be an array', async ({ restClient }) => {
             const response = await restClient.GET(
               `/globals/${global}?locale=pt&fallbackLocale[]=es&fallbackLocale[]=en`,
@@ -3640,8 +3640,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('GraphQL', () => {
-        test.describe('Collections', () => {
+      describe('GraphQL', () => {
+        describe('Collections', () => {
           test('should allow fallback locale to be an array', async ({ payload, restClient }) => {
             const query = `
       {
@@ -3707,7 +3707,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
           })
         })
 
-        test.describe('Globals', () => {
+        describe('Globals', () => {
           test('should allow fallback locale to be an array', async ({ restClient }) => {
             const query = `query {
               GlobalText {
@@ -3765,11 +3765,11 @@ test.suite({ config: './config.ts' })('Localization', () => {
     })
   })
 
-  test.describe('Localization with fallback false', () => {
+  describe('Localization with fallback false', () => {
     let post1: LocalizedPost
     let postWithLocalizedData: LocalizedPost
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       if (payload.config.localization) {
         payload.config.localization.fallback = false
       }
@@ -3798,7 +3798,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('fallback locale', () => {
+    describe('fallback locale', () => {
       test('create english', async ({ payload }) => {
         const allDocs = await payload.find({
           collection,
@@ -3913,15 +3913,15 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.afterAll(({ payloadInstance }) => {
+    afterAll(({ payloadInstance }) => {
       if (payloadInstance.config.localization) {
         payloadInstance.config.localization.fallback = true
       }
     })
   })
 
-  test.describe('Localized data shape', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('Localized data shape', () => {
+    beforeEach(async ({ payload }) => {
       await payload.delete({
         collection: allFieldsLocalizedSlug,
         where: {
@@ -4032,7 +4032,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     })
   })
 
-  test.describe('Localization like fields', () => {
+  describe('Localization like fields', () => {
     test('should not localize fields that merely resemble localization fields', async ({
       payload,
     }) => {
@@ -4060,9 +4060,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
     })
   })
 
-  test.describe('localize status', () => {
-    test.describe('collections', () => {
-      test.describe('on create', () => {
+  describe('localize status', () => {
+    describe('collections', () => {
+      describe('on create', () => {
         test('should set other locales to draft upon creation', async ({ payload }) => {
           // Only MongoDB initializes all locales to draft on create
           // SQL databases do not do this otherwise all fields get initialized to null
@@ -4109,7 +4109,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('querying', () => {
+      describe('querying', () => {
         test('should return correct data based on draft arg', async ({ payload }) => {
           // NOTE: passes in MongoDB, fails in PG
           // -> fails to query on version._status.[localeCode] in `replaceWithDraftIfAvailable` when locale = 'all'
@@ -4280,7 +4280,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('on update', () => {
+      describe('on update', () => {
         test('should publish and unpublish single locales', async ({ payload }) => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
@@ -4400,8 +4400,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('globals', () => {
-      test.describe('querying', () => {
+    describe('globals', () => {
+      describe('querying', () => {
         test('should return correct data based on draft arg', async ({ payload }) => {
           // NOTE: passes in MongoDB, fails in PG
           // -> fails to query on version._status.[localeCode] in `replaceWithDraftIfAvailable` when locale = 'all'
@@ -4480,7 +4480,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
       })
 
-      test.describe('on update', () => {
+      describe('on update', () => {
         test('should publish and unpublish single locales', async ({ payload }) => {
           const doc = await payload.updateGlobal({
             slug: globalWithDraftsSlug,
@@ -4591,10 +4591,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
       })
     })
 
-    test.describe('fallback behavior', () => {
+    describe('fallback behavior', () => {
       let allFieldsPostWithLocalizedData: any
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         allFieldsPostWithLocalizedData = await payload.create({
           collection: allFieldsLocalizedSlug,
           data: {
@@ -4654,7 +4654,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     })
   })
 
-  test.describe('localized queries', () => {
+  describe('localized queries', () => {
     test('should count versions with query on localized field', async ({ payload }) => {
       await payload.create({
         collection: localizedDraftsSlug,

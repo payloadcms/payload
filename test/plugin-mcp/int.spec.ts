@@ -8,6 +8,7 @@ import { expect, vi } from 'vitest'
 
 import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 
+import { afterEach, describe, suite } from '../__helpers/int/vitest.js'
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import { getToolDoc, getToolText } from './helpers/mcpClient.js'
 import { it, itModern, test } from './helpers/mcpFixtures.js'
@@ -100,8 +101,8 @@ function draft2020Violations(schema: unknown, rootPath: string): string[] {
   walk(schema, rootPath)
   return errors
 }
-test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
-  test.afterEach(() => {
+suite('@payloadcms/plugin-mcp', { config: './config.ts' }, () => {
+  afterEach(() => {
     vi.unstubAllEnvs()
   })
   it('should handle an era-supported basic request', async ({ mcp, protocolEra, getApiKey }) => {
@@ -208,7 +209,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
     )
   })
   /* eslint-enable vitest/no-standalone-expect */
-  test.describe('API Keyed Access', () => {
+  describe('API Keyed Access', () => {
     it('should not allow GET /api/mcp', async ({ getApiKey, restClient }) => {
       const apiKey = await getApiKey()
       const response = await restClient.GET(`/mcp`, {
@@ -261,7 +262,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       )
     })
   })
-  test.describe('List', () => {
+  describe('List', () => {
     it('should list tools', async ({ mcp, getApiKey, payload }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -719,7 +720,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       expect(updateToolSchema.inputSchema.properties.showHiddenFields).toBeUndefined()
     })
   })
-  test.describe('Prompts', () => {
+  describe('Prompts', () => {
     it('should get echo prompt', async ({ mcp, getApiKey, payload, userId }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -754,7 +755,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       expect(modifiedPrompt?.user?.id).toBe(userId)
     })
   })
-  test.describe('Resources', () => {
+  describe('Resources', () => {
     it('should read the data resource', async ({ mcp, getApiKey, payload, userId }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -806,7 +807,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       expect(returnedResource?.user?.id).toBe(userId)
     })
   })
-  test.describe('Custom MCP Tools', () => {
+  describe('Custom MCP Tools', () => {
     it('should call diceRoll', async ({ mcp, getApiKey, payload, userId }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -838,9 +839,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       expect(roll?.user?.id).toBe(userId)
     })
   })
-  test.describe('Collections', () => {
+  describe('Collections', () => {
     const uploadServers: TestFileServer[] = []
-    test.afterEach(async () => {
+    afterEach(async () => {
       await Promise.all(uploadServers.map(({ close }) => close()))
       uploadServers.length = 0
     })
@@ -2111,7 +2112,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       await payload.delete({ id: createdPost.id, collection: 'posts' })
     })
   })
-  test.describe('Blocks fields', () => {
+  describe('Blocks fields', () => {
     const createdPageIds: (number | string)[] = []
     it('should create a page with a block', async ({ mcp, getApiKey }) => {
       const apiKey = await getApiKey()
@@ -2263,7 +2264,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       expect(callResponse.content[0].text).not.toContain('invalid_union')
     })
   })
-  test.describe('Virtual Fields', () => {
+  describe('Virtual Fields', () => {
     it('should not include virtual fields in collection schema', async ({ mcp, getApiKey }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -2330,7 +2331,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       await payload.delete({ id: post.id, collection: 'posts' })
     })
   })
-  test.describe('payloadAPI context', () => {
+  describe('payloadAPI context', () => {
     it('should call operations with the payloadAPI context as MCP', async ({
       mcp,
       getApiKey,
@@ -2572,7 +2573,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       expect(restored.siteName).toContain('Versioned Global')
     })
   })
-  test.describe('Payload access control', () => {
+  describe('Payload access control', () => {
     it('getConfigInfo: should omit entities when Payload access denies read', async ({
       mcp,
       getApiKey,
@@ -2865,7 +2866,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       )
     })
   })
-  test.describe('Minified JSON responses', () => {
+  describe('Minified JSON responses', () => {
     it('should return minified JSON without newlines or indentation in resource responses', async ({
       mcp,
       getApiKey,
@@ -2947,7 +2948,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       expect(jsonPart).not.toContain('\n')
     })
   })
-  test.describe('Localization', () => {
+  describe('Localization', () => {
     it('should include locale parameters in tool schemas', async ({ mcp, getApiKey }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -3139,8 +3140,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       expect(json.content[0].text).toContain('"content":"Hello World."')
     })
   })
-  test.describe('Field Types', () => {
-    test.describe('Schema validation', () => {
+  describe('Field Types', () => {
+    describe('Schema validation', () => {
       const getFieldTypeInputProps = async (mcp: any, apiKey: string) => {
         const client = await mcp.connect(apiKey)
         const schemaResponse = await client.callTool({
@@ -3243,7 +3244,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
         expect(inputProps.arrayField.items.properties.itemNumber).toBeDefined()
       })
     })
-    test.describe('Create + round-trip', () => {
+    describe('Create + round-trip', () => {
       it('should create and find document with atomic data fields (text, textarea, number, email, checkbox)', async ({
         mcp,
         getApiKey,
@@ -3497,7 +3498,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
         expect(callResponse.content[0].text).toContain('"numberField":7')
       })
     })
-    test.describe('Update', () => {
+    describe('Update', () => {
       it('should update document with group field', async ({ mcp, getApiKey, payload }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
@@ -3674,7 +3675,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
         expect(doc.arrayField[2].itemNumber).toBe(30)
       })
     })
-    test.describe('Display field safety', () => {
+    describe('Display field safety', () => {
       it('should create document with ui field present without errors and ui field absent from response', async ({
         mcp,
         getApiKey,

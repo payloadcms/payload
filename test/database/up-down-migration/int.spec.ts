@@ -3,7 +3,7 @@ import path from 'path'
 import { buildConfig, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { suite, test } from '../../__helpers/int/vitest.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -14,7 +14,7 @@ const clearMigrations = () => {
   }
 }
 
-test.suite({ db: (adapter) => adapter === 'postgres' })('SQL migrations', () => {
+suite('SQL migrations', { db: (adapter) => adapter === 'postgres' }, () => {
   // If something fails - an error will be thrown.
   test('should up and down migration successfully', async () => {
     clearMigrations()

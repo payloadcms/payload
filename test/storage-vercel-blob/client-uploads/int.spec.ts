@@ -8,7 +8,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { afterEach, suite, test } from '../../__helpers/int/vitest.js'
 import { prefix } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -35,8 +35,8 @@ const uploadMetadata = (collectionSlug?: string, filesize = 1) => ({
   mimeType: 'image/png',
 })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob clientUploads', () => {
-  test.afterEach(async () => {
+suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.ts' }, () => {
+  afterEach(async () => {
     const { blobs } = await list()
     if (blobs.length > 0) {
       await del(blobs.map((b) => b.url))

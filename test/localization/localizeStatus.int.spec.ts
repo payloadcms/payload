@@ -10,10 +10,10 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, matchesDatabase, suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration', () => {
-  test.beforeEach(async () => {
+suite('localizeStatus migration', { config: './localizeStatus.config.ts' }, () => {
+  beforeEach(async () => {
     if (process.env.PAYLOAD_DATABASE === 'mongodb' || !process.env.PAYLOAD_DATABASE) {
       // Wait for MongoDB to finish building indexes to avoid
       // "Unable to write to collection due to catalog changes" errors
@@ -21,13 +21,13 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     }
   })
 
-  test.options({ db: (adapter) => adapter === 'postgres' }).describe('PostgreSQL', () => {
+  describe.runIf(matchesDatabase({ db: (adapter) => adapter === 'postgres' }))('PostgreSQL', () => {
     // Reset both test collections to their pre-migration database shape before every
     // scenario so each test is self-contained and order-independent. Real users' databases
     // will be in this pre-migration state; the runtime schema (localizeStatus auto-inferred)
     // is reverted here via raw SQL. Each scenario's migration mutates the schema, so this
     // must run before every test rather than once.
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const db = payload.db
 
       // testMigrationPosts: title is NOT localized, so versions have no locales table.
@@ -69,7 +69,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       await db.drizzle.execute(sql`DELETE FROM test_migration_articles`)
     })
 
-    test.describe('Scenario 1: Creating new locales table', () => {
+    describe('Scenario 1: Creating new locales table', () => {
       test('should migrate non-localized _status to localized', async ({ payload }) => {
         const db = payload.db
 
@@ -164,7 +164,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       })
     })
 
-    test.describe('Scenario 2: Adding to existing locales table', () => {
+    describe('Scenario 2: Adding to existing locales table', () => {
       test('should add _status column to existing locales table', async ({ payload }) => {
         const db = payload.db
 
@@ -269,7 +269,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       })
     })
 
-    test.describe('Scenario 3: Demonstrate version history migration', () => {
+    describe('Scenario 3: Demonstrate version history migration', () => {
       test('should show how version rows are transformed', async ({ payload }) => {
         const db = payload.db
 
@@ -364,7 +364,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       })
     })
 
-    test.describe('Scenario 4: Test publishedLocale handling', () => {
+    describe('Scenario 4: Test publishedLocale handling', () => {
       test('should handle publishedLocale correctly', async ({ payload }) => {
         const db = payload.db
 
@@ -529,7 +529,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       })
     })
 
-    test.describe('Scenario 5: Skip collections without versions', () => {
+    describe('Scenario 5: Skip collections without versions', () => {
       test('should skip migration for collections without versions enabled', async ({
         payload,
       }) => {
@@ -565,7 +565,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     })
   })
 
-  test.options({ db: (adapter) => adapter === 'sqlite' }).describe('SQLite', () => {
+  describe.runIf(matchesDatabase({ db: (adapter) => adapter === 'sqlite' }))('SQLite', () => {
     // Mirror the PostgreSQL suite: revert the runtime (post-migration) schema back to its
     // pre-migration shape before every scenario so each test is self-contained. SQLite has no
     // `ADD COLUMN IF NOT EXISTS` / `DROP COLUMN IF EXISTS`, so we guard with pragma_table_info.
@@ -620,7 +620,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       }
     }
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const drizzle = payload.db.drizzle
 
       // testMigrationPosts: title is NOT localized, so versions have no locales table pre-migration.
@@ -673,7 +673,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       await drizzle.run(drizzleSql.raw(`DELETE FROM test_migration_articles`))
     })
 
-    test.describe('Scenario 1: Creating new locales table', () => {
+    describe('Scenario 1: Creating new locales table', () => {
       test('should migrate non-localized _status to localized', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
@@ -730,7 +730,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       })
     })
 
-    test.describe('Scenario 2: Adding to existing locales table', () => {
+    describe('Scenario 2: Adding to existing locales table', () => {
       test('should add version__status column to existing locales table', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
@@ -800,7 +800,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       })
     })
 
-    test.describe('Scenario 3: Test publishedLocale handling', () => {
+    describe('Scenario 3: Test publishedLocale handling', () => {
       test('should handle publishedLocale correctly', async ({ payload }) => {
         const drizzle = payload.db.drizzle
 
@@ -890,7 +890,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       })
     })
 
-    test.describe('Scenario 4: Skip collections without versions', () => {
+    describe('Scenario 4: Skip collections without versions', () => {
       test('should skip migration for collections without versions enabled', async ({
         payload,
       }) => {
@@ -926,13 +926,13 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     }
   })
 
-  test.options({ db: (adapter) => adapter === 'mongodb' }).describe('MongoDB', () => {
+  describe.runIf(matchesDatabase({ db: (adapter) => adapter === 'mongodb' }))('MongoDB', () => {
     // Force collection and index creation to finish before the timed writes below.
     // With autoIndex enabled on a fresh database, the first write to a versions
     // collection kicks off async index builds; a subsequent write can then race
     // with that catalog change and fail with a transient "catalog changes" error.
     // Model.init() resolves once autoCreate and autoIndex have completed.
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const db = payload.db as any
       const slugs = ['testMigrationPosts', 'testMigrationArticles']
 
@@ -942,7 +942,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
       }
     })
 
-    test.describe('MongoDB version status migration', () => {
+    describe('MongoDB version status migration', () => {
       test('should migrate version._status from string to per-locale object', async ({
         payload,
       }) => {
