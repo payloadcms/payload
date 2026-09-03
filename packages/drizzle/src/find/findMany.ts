@@ -183,25 +183,29 @@ export const findMany = async function find({
   }
 
   const findPromise = db.query[tableName].findMany(findManyArgs)
+  const rawDocs = await findPromise
+
+  // sort rawDocs from selectQuery
+  if (Object.keys(orderedIDMap).length > 0) {
+    rawDocs.sort((a, b) => orderedIDMap[a.id] - orderedIDMap[b.id])
+  }
 
   if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
-    totalDocs = await adapter.countDistinct({
-      db,
-      joins,
-      tableName,
-      where,
-    })
+    if (page === 1 && typeof limit === 'number' && limit > 0 && rawDocs.length < limit) {
+      totalDocs = rawDocs.length
+    } else {
+      totalDocs = await adapter.countDistinct({
+        db,
+        joins,
+        tableName,
+        where,
+      })
+    }
 
     totalPages = typeof limit === 'number' && limit !== 0 ? Math.ceil(totalDocs / limit) : 1
     hasPrevPage = page > 1
     hasNextPage = totalPages > page
     pagingCounter = (page - 1) * limit + 1
-  }
-
-  const rawDocs = await findPromise
-  // sort rawDocs from selectQuery
-  if (Object.keys(orderedIDMap).length > 0) {
-    rawDocs.sort((a, b) => orderedIDMap[a.id] - orderedIDMap[b.id])
   }
 
   if (pagination === false || !totalDocs) {
