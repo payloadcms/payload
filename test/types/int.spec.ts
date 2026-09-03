@@ -3,11 +3,11 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-test.suite({})('typescript.postProcess', () => {
+suite('typescript.postProcess', {}, () => {
   test('should apply postProcess functions to generated types', async () => {
     const outputFile = path.resolve(dirname, 'payload-types.ts')
     const content = await fs.readFile(outputFile, 'utf-8')

@@ -6,7 +6,7 @@ import { expect } from 'vitest'
 
 import type { Post } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { emailsSlug } from './collections/Emails.js'
 
@@ -21,8 +21,8 @@ const testUserCredentials = {
   password: '123456',
 }
 
-test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
-  test.beforeEach(async ({ payload }) => {
+suite('@payloadcms/sdk', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload }) => {
     post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 } })
     postTrash = await payload.create({
       collection: 'posts',
@@ -438,8 +438,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
     expect(email).toBe(user.email)
   })
 
-  test.describe('Error Handling', () => {
-    test.afterEach(async ({ payload }) => {
+  describe('Error Handling', () => {
+    afterEach(async ({ payload }) => {
       await payload.db.deleteMany({ collection: 'emails', where: { id: { exists: true } } })
     })
 

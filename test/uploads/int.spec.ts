@@ -19,7 +19,15 @@ import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkF
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
-import { test } from '../__helpers/int/vitest.js'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  suite,
+  test,
+} from '../__helpers/int/vitest.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
@@ -51,13 +59,13 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
 
-test.suite({ config: './config.ts' })('Collections - Uploads', () => {
-  test.beforeEach(async ({ restClient }) => {
+suite('Collections - Uploads', { config: './config.ts' }, () => {
+  beforeEach(async ({ restClient }) => {
     await restClient.login({ slug: usersSlug })
   })
 
-  test.describe('REST API', () => {
-    test.describe('create', () => {
+  describe('REST API', () => {
+    describe('create', () => {
       test('creates from upload instructions', async ({ payload, restClient }) => {
         const file = fs.readFileSync(path.join(dirname, './image.png'))
         const instructionsResponse = await restClient.POST('/upload-instructions', {
@@ -555,7 +563,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
     })
-    test.describe('update', () => {
+    describe('update', () => {
       test('should replace image and delete old files - by ID', async ({ payload, restClient }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
@@ -630,7 +638,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
         expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
       })
     })
-    test.describe('delete', () => {
+    describe('delete', () => {
       test('should remove related files when deleting by ID', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
@@ -687,7 +695,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
         expect(await fileExists(path.join(dirname, doc.filename))).toBe(false)
       })
     })
-    test.describe('read', () => {
+    describe('read', () => {
       test('should serve files with hash characters in filename', async ({
         payload,
         restClient,
@@ -741,8 +749,8 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('Local API', () => {
-    test.describe('create', () => {
+  describe('Local API', () => {
+    describe('create', () => {
       test('should create documents when passing filePath', async ({ payload }) => {
         const expectedPath = path.join(dirname, './svg-only')
 
@@ -846,7 +854,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
       })
     })
 
-    test.describe('update', () => {
+    describe('update', () => {
       test('should remove existing media on re-upload - by ID', async ({ payload }) => {
         // Create temp file
         const filePath = path.resolve(dirname, './temp.png')
@@ -1090,7 +1098,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
       })
     })
 
-    test.describe('cookie filtering', () => {
+    describe('cookie filtering', () => {
       test('should filter out payload cookies when externalFileHeaderFilter is not defined', async ({
         payload,
       }) => {
@@ -1202,7 +1210,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
       })
     })
 
-    test.describe('filters', () => {
+    describe('filters', () => {
       test.for([
         { url: 'http://127.0.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
         { url: 'http://[::1]/file.png', collection: mediaSlug, errorContains: 'unsafe' },
@@ -1357,7 +1365,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
       })
     })
 
-    test.describe('file restrictions', () => {
+    describe('file restrictions', () => {
       const file: File = {
         name: `test-${randomUUID()}.html`,
         data: Buffer.from('<html><script>alert("test")</script></html>'),
@@ -1403,7 +1411,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
         ).resolves.not.toThrow()
       })
 
-      test.describe('useTempFiles MIME type bypass', () => {
+      describe('useTempFiles MIME type bypass', () => {
         const createdTmpFiles: string[] = []
 
         const mockReq = {
@@ -1413,7 +1421,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
           },
         } as unknown as PayloadRequest
 
-        test.afterEach(async () => {
+        afterEach(async () => {
           for (const tmpFile of createdTmpFiles) {
             try {
               await fs.promises.unlink(tmpFile)
@@ -1544,10 +1552,10 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('focal point', () => {
+  describe('focal point', () => {
     let file
 
-    test.beforeAll(async () => {
+    beforeAll(async () => {
       // Create image
       const filePath = path.resolve(dirname, './image.png')
       file = await getFileByPath(filePath)
@@ -1632,7 +1640,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('Image Manipulation', () => {
+  describe('Image Manipulation', () => {
     test('should enlarge images if resize options `withoutEnlargement` is set to false', async ({
       payload,
     }) => {
@@ -1783,7 +1791,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('Required Files', () => {
+  describe('Required Files', () => {
     test('should allow file to be optional if filesRequiredOnCreate is false', async ({
       payload,
     }) => {
@@ -1827,7 +1835,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('Duplicate', () => {
+  describe('Duplicate', () => {
     test('should duplicate upload collection doc', async ({ payload }) => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
@@ -1905,7 +1913,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('serverURL handling', () => {
+  describe('serverURL handling', () => {
     test('should store relative URLs in database even when serverURL is set', async ({
       payload,
     }) => {
@@ -2093,12 +2101,12 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('HTTP Range Requests', () => {
+  describe('HTTP Range Requests', () => {
     let uploadedDoc: Media
     let uploadedFilename: string
     let fileSize: number
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       // Upload a test file for range request testing
       const filePath = path.join(dirname, './audio.mp3')
       const file = await getFileByPath(filePath)
@@ -2203,11 +2211,11 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('SVG Security', () => {
+  describe('SVG Security', () => {
     let xssPayloadDoc: Media
     const docIDs: (number | string)[] = []
 
-    test.afterAll(async ({ payloadInstance }) => {
+    afterAll(async ({ payloadInstance }) => {
       for (const id of docIDs) {
         try {
           await payloadInstance.delete({
@@ -2277,7 +2285,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('External File Upload - Redirect Blocking', () => {
+  describe('External File Upload - Redirect Blocking', () => {
     const validPNG = Buffer.from(
       '89504e470d0a1a0a0000000d494844520000000100000001' +
         '0806000000ifad8300000010494441541865000000018001' +
@@ -2412,7 +2420,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('paste-url endpoint', () => {
+  describe('paste-url endpoint', () => {
     test('should return 400 when pasteURL is not configured', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/paste-url`, {
         query: { src: 'http://example.com/file.png' },
@@ -2473,7 +2481,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('tempFileDir', () => {
+  describe('tempFileDir', () => {
     test.each([
       { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
       { dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp'), description: 'relative path' },
@@ -2486,10 +2494,10 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     })
   })
 
-  test.describe('prefix query parameter', () => {
+  describe('prefix query parameter', () => {
     const docIDs: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of docIDs) {
         try {
           await payload.delete({ collection: prefixMediaSlug, id })
@@ -2595,10 +2603,10 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
    * with a `payload-client-upload-` prefix - this is a regression test for those files leaking
    * on disk when something after the fetch (e.g. a `beforeChange` hook) makes the operation fail.
    */
-  test.describe('client upload temp file cleanup', () => {
+  describe('client upload temp file cleanup', () => {
     const createdIds: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: clientUploadTempFileSlug })
       }
@@ -2661,11 +2669,11 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
    * mime types, so an audio file uploaded there skips all sharp processing and exercises that
    * copy against real disk I/O.
    */
-  test.describe('temp file copy to local storage', () => {
+  describe('temp file copy to local storage', () => {
     const createdIds: (number | string)[] = []
     const tempFilesToClean: string[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: mediaSlug })
       }

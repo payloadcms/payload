@@ -7,7 +7,7 @@ import { expect } from 'vitest'
 
 import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 import { devUser } from '../credentials.js'
 import {
@@ -25,7 +25,7 @@ let token: string
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts' })('Joins Field', () => {
+suite('Joins Field', { config: './config.ts' }, () => {
   let category: Category
   let otherCategory: Category
   let categoryID
@@ -33,7 +33,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
-  test.beforeEach(async ({ payload, restClient }) => {
+  beforeEach(async ({ payload, restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -673,9 +673,9 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
     expect(result.docs[0].id).toStrictEqual(category.id)
   })
 
-  test.describe('`where` filters', () => {
+  describe('`where` filters', () => {
     let categoryWithFilteredPost
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       categoryWithFilteredPost = await payload.create({
         collection: categoriesSlug,
         data: {
@@ -730,10 +730,10 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
     })
   })
 
-  test.describe('Joins with localization', () => {
+  describe('Joins with localization', () => {
     let localizedCategory: Category
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       localizedCategory = await payload.create({
         collection: 'localized-categories',
         locale: 'en',
@@ -786,8 +786,8 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
     })
   })
 
-  test.describe('Joins with versions', () => {
-    test.afterEach(async ({ payload }) => {
+  describe('Joins with versions', () => {
+    afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'versions', where: {} })
       await payload.delete({ collection: 'categories-versions', where: {} })
     })
@@ -888,7 +888,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
     })
   })
 
-  test.describe('REST', () => {
+  describe('REST', () => {
     test('should have simple paginate for joins', async ({ restClient }) => {
       const query = {
         depth: 1,
@@ -1034,7 +1034,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
     })
   })
 
-  test.describe('GraphQL', () => {
+  describe('GraphQL', () => {
     test('should have simple paginate for joins', async ({ restClient }) => {
       const queryWithLimit = `query {
     Categories(where: {
@@ -1632,7 +1632,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
     expect(joinedDoc2.id).toBe(depthJoin_3.id)
   })
 
-  test.describe('Array of collection', () => {
+  describe('Array of collection', () => {
     test('should join across multiple collections', async ({ payload }) => {
       let parent = await payload.create({
         collection: 'multiple-collections-parents',
@@ -1981,7 +1981,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  test.describe('Polymorphic join query validation', () => {
+  describe('Polymorphic join query validation', () => {
     const isPostgres = process.env.PAYLOAD_DATABASE === 'postgres'
 
     test.skipIf(!isPostgres)(
@@ -2133,7 +2133,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
     })
   })
 
-  test.describe('Top-level query validation', () => {
+  describe('Top-level query validation', () => {
     test('should reject $raw operator on top-level collection queries via REST', async ({
       restClient,
     }) => {

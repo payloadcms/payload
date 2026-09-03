@@ -7,20 +7,20 @@ import { expect } from 'vitest'
 
 import type { Post, User } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { menuSlug } from './globals/Menu/index.js'
 import { pagesSlug, postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
-test.suite({ config: './config.ts' })('Locked documents', () => {
+suite('Locked documents', { config: './config.ts' }, () => {
   let post: Post
   let user: any
   let user2: any
   let postConfig: SanitizedCollectionConfig
 
-  test.beforeEach(async ({ payload }) => {
+  beforeEach(async ({ payload }) => {
     postConfig = payload.config.collections.find(
       ({ slug }) => slug === postsSlug,
     ) as SanitizedCollectionConfig
@@ -65,7 +65,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
     })
   })
 
-  test.afterEach(() => {
+  afterEach(() => {
     postConfig.lockDocuments = { duration: 300 }
   })
 

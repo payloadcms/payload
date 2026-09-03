@@ -3,7 +3,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -19,12 +19,12 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated') })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
-  test.beforeEach(async () => {
+suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
+  beforeEach(async () => {
     await clearTestBlobs()
   })
 
-  test.afterEach(async ({ payload }) => {
+  afterEach(async ({ payload }) => {
     await clearTestBlobs()
     await Promise.all([
       payload.delete({ collection: mediaSlug, where: {} }),
@@ -131,7 +131,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
     expect(second.status).toBe(304)
   })
 
-  test.describe('disablePayloadAccessControl', () => {
+  describe('disablePayloadAccessControl', () => {
     test('should return direct blob URL when uploading', async ({ payload }) => {
       const upload = await payload.create({
         collection: mediaWithDirectAccessSlug,
@@ -187,8 +187,8 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
     })
   })
 
-  test.describe('prefix collision detection', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('prefix collision detection', () => {
+    beforeEach(async ({ payload }) => {
       await clearTestBlobs()
       await payload.delete({ collection: mediaWithPrefixSlug, where: {} })
       await payload.delete({ collection: mediaSlug, where: {} })

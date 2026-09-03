@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterAll, beforeEach, suite, test } from '../__helpers/int/vitest.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI_COMMAND_TEST_TIMEOUT = 180_000
@@ -22,13 +22,13 @@ const initialCLIEnvironment = {
   PAYLOAD_TEST_CLI_CONFIG_LOG: process.env.PAYLOAD_TEST_CLI_CONFIG_LOG,
 }
 
-test.suite({ config: './config.ts' })('CLI', () => {
-  test.beforeEach(async () => {
+suite('CLI', { config: './config.ts' }, () => {
+  beforeEach(async () => {
     restoreCLIEnvironment()
     await resetCLIArtifacts()
   })
 
-  test.afterAll(async () => {
+  afterAll(async () => {
     await rm(generatedDirectory, { force: true, recursive: true })
     await rm(migrationsDirectory, { force: true, recursive: true })
     await rm(schemaFile, { force: true })

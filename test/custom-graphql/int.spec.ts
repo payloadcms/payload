@@ -1,15 +1,15 @@
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('Custom GraphQL', () => {
+suite('Custom GraphQL', { config: './config.ts' }, () => {
   if (
     !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
       process.env.PAYLOAD_DATABASE || '',
     )
   ) {
-    test.describe('Isolated Transaction ID', () => {
+    describe('Isolated Transaction ID', () => {
       test('should isolate transaction IDs between queries in the same request', async ({
         restClient,
       }) => {

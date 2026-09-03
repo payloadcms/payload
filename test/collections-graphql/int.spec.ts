@@ -8,7 +8,7 @@ import { expect } from 'vitest'
 
 import type { Post } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './shared.js'
 
@@ -19,12 +19,12 @@ const title = 'title'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('collections-graphql', () => {
-  test.describe('CRUD', () => {
+suite('collections-graphql', { config: './config.ts' }, () => {
+  describe('CRUD', () => {
     let existingDoc: Post
     let existingDocGraphQLID
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       existingDoc = await createPost({ payload })
       existingDocGraphQLID = idToString(existingDoc.id, payload)
     })
@@ -326,8 +326,8 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
     })
   })
 
-  test.describe('Querying', () => {
-    test.describe('nested has-many relationship queries', () => {
+  describe('Querying', () => {
+    describe('nested has-many relationship queries', () => {
       test('should query a nested has-many relationship through GraphQL', async ({
         payload,
         restClient,
@@ -388,11 +388,11 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       })
     })
 
-    test.describe('Operators', () => {
+    describe('Operators', () => {
       let post1: Post
       let post2: Post
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         post1 = await createPost({ payload }, { title: 'post1' })
         post2 = await createPost({ payload }, { title: 'post2' })
       })
@@ -513,11 +513,11 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: post1.id }))
       })
 
-      test.describe('numbers', () => {
+      describe('numbers', () => {
         let numPost1: Post
         let numPost2: Post
 
-        test.beforeEach(async ({ payload }) => {
+        beforeEach(async ({ payload }) => {
           numPost1 = await createPost({ payload }, { number: 1 })
           numPost2 = await createPost({ payload }, { number: 2 })
         })
@@ -663,7 +663,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }))
       })
 
-      test.describe('near', () => {
+      describe('near', () => {
         const point = [10, 20]
         const [lat, lng] = point
 
@@ -772,7 +772,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         })
       })
 
-      test.describe('within', () => {
+      describe('within', () => {
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -851,7 +851,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         })
       })
 
-      test.describe('intersects', () => {
+      describe('intersects', () => {
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -966,7 +966,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       })
     })
 
-    test.describe('relationships', () => {
+    describe('relationships', () => {
       test('should query on relationships with custom IDs', async ({ restClient }) => {
         const query = `query {
           Posts(where: { title: { equals: "has custom ID relation" }}) {
@@ -1344,7 +1344,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
     expect(queriedDoc.media.title).toEqual('example')
   })
 
-  test.describe('Error Handler', () => {
+  describe('Error Handler', () => {
     test('should return have an array of errors when making a bad request', async ({
       restClient,
     }) => {

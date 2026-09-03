@@ -2,7 +2,14 @@ import { AuthenticationError } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  matchesDatabase,
+  suite,
+  test,
+} from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {
@@ -26,8 +33,8 @@ import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
-test.suite({ config: './config.ts' })('Hooks', () => {
-  test.options({ db: 'mongo' }).describe('transform actions', () => {
+suite('Hooks', { config: './config.ts' }, () => {
+  describe.runIf(matchesDatabase({ db: 'mongo' }))('transform actions', () => {
     test('should create and not throw an error', async ({ payload }) => {
       // the collection has hooks that will cause an error if transform actions is not handled properly
       const doc = await payload.create({
@@ -43,7 +50,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     })
   })
 
-  test.describe('hook execution', () => {
+  describe('hook execution', () => {
     let doc
     const data = {
       collectionAfterChange: false,
@@ -56,7 +63,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       fieldBeforeChange: false,
       fieldBeforeValidate: false,
     }
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       doc = await payload.create({
         collection: hooksSlug,
         data,
@@ -460,11 +467,11 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     })
   })
 
-  test.describe('auth collection hooks', () => {
+  describe('auth collection hooks', () => {
     let hookUser
     let hookUserToken
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const email = 'dontrefresh@payloadcms.com'
 
       hookUser = await payload.create({
@@ -582,7 +589,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     })
   })
 
-  test.describe('hook parameter data', () => {
+  describe('hook parameter data', () => {
     test('should pass collection prop to collection hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksCollection = JSON.parse(
@@ -693,7 +700,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     })
   })
 
-  test.describe('config level after error hook', () => {
+  describe('config level after error hook', () => {
     test('should handle error', async ({ restClient }) => {
       const response = await restClient.GET(`/throw-to-after-error`, {})
       const body = await response.json()
@@ -702,7 +709,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     })
   })
 
-  test.describe('beforeValidate', () => {
+  describe('beforeValidate', () => {
     test('should have correct arguments', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeValidateSlug,
@@ -726,8 +733,8 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     })
   })
 
-  test.describe('beforeOperation', () => {
-    test.afterEach(() => {
+  describe('beforeOperation', () => {
+    afterEach(() => {
       clearLastOperation()
     })
 
@@ -965,7 +972,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     })
   })
 
-  test.describe('afterRead', () => {
+  describe('afterRead', () => {
     test('should return same for find and findByID', async ({ payload }) => {
       const createdDoc = await payload.create({
         collection: afterReadSlug,
@@ -996,10 +1003,10 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     })
   })
 
-  test.describe('overrideAccess in hooks', () => {
+  describe('overrideAccess in hooks', () => {
     const createdIDs: string[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
         await payload.delete({ collection: overrideAccessSlug, id })
       }

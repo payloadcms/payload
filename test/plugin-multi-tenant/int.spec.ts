@@ -5,7 +5,7 @@ import { expect } from 'vitest'
 
 import type { Relationship } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
   menuSlug,
@@ -17,8 +17,8 @@ import {
 
 let token: string
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
-  test.beforeEach(async ({ restClient }) => {
+suite('@payloadcms/plugin-multi-tenant', { config: './config.ts' }, () => {
+  beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -31,7 +31,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
     token = data.token
   })
 
-  test.describe('tenants', () => {
+  describe('tenants', () => {
     test('should create a tenant', async ({ payload }) => {
       const tenant1 = await payload.create({
         collection: tenantsSlug,
@@ -44,13 +44,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
       expect(tenant1).toHaveProperty('id')
     })
 
-    test.describe('relationships', () => {
+    describe('relationships', () => {
       let anchorBarRelationships: PaginatedDocs<Relationship>
       let blueDogRelationships: PaginatedDocs<Relationship>
       let anchorBarTenantID: DefaultDocumentIDType
       let blueDogTenantID: DefaultDocumentIDType
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         anchorBarRelationships = await payload.find({
           collection: 'relationships',
           where: {
@@ -135,7 +135,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  test.describe('access control for users with no tenant memberships', () => {
+  describe('access control for users with no tenant memberships', () => {
     test('should return Forbidden error (not 500) for user with no tenants', async ({
       payload,
     }) => {
@@ -245,7 +245,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  test.describe('access control with user object passed directly', () => {
+  describe('access control with user object passed directly', () => {
     test('should enforce tenant access when user object is fetched from database', async ({
       payload,
     }) => {
@@ -300,7 +300,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  test.describe('tenant cleanup on delete', () => {
+  describe('tenant cleanup on delete', () => {
     test('should delete a tenant that has a global collection document without hanging', async ({
       payload,
     }) => {
@@ -327,7 +327,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
     }, 20000)
   })
 
-  test.describe('hasMany tenant field filtering', () => {
+  describe('hasMany tenant field filtering', () => {
     test('should not double-wrap tenant arrays in filterOptions', async ({ payload }) => {
       const tenant1 = await payload.create({
         collection: tenantsSlug,

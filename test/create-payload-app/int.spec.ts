@@ -12,7 +12,7 @@ import { promisify } from 'util'
 import { expect } from 'vitest'
 
 import { configurePayloadConfig } from '../../packages/create-payload-app/src/lib/configure-payload-config.js'
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeAll, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
@@ -46,15 +46,15 @@ const tanStackCreateArgs = [
   '--non-interactive',
 ]
 
-test.suite({})('create-payload-app', () => {
-  test.beforeAll(() => {
+suite('create-payload-app', {}, () => {
+  beforeAll(() => {
     // Runs copyfiles copy app/(payload) -> dist/app/(payload)
     shelljs.exec('pnpm build:create-payload-app')
   })
 
-  test.describe.each(commandKeys)(`--init-next with %s`, (nextCmdKey) => {
+  describe.each(commandKeys)(`--init-next with %s`, (nextCmdKey) => {
     const projectDir = tempy.directory()
-    test.beforeEach(async () => {
+    beforeEach(async () => {
       if (fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
@@ -85,7 +85,7 @@ test.suite({})('create-payload-app', () => {
       await writeFile(tsConfigPath, userTsConfigContent, { encoding: 'utf8' })
     }, 90000)
 
-    test.afterEach(() => {
+    afterEach(() => {
       if (fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
@@ -233,10 +233,10 @@ test.suite({})('create-payload-app', () => {
     })
   })
 
-  test.describe('official TanStack generator', () => {
+  describe('official TanStack generator', () => {
     let projectDir: string
 
-    test.afterEach(() => {
+    afterEach(() => {
       if (projectDir && fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
@@ -361,10 +361,10 @@ test.suite({})('create-payload-app', () => {
     }, 300_000)
   })
 
-  test.describe('adapter replacement', () => {
+  describe('adapter replacement', () => {
     const projectDir = tempy.directory()
 
-    test.beforeEach(async () => {
+    beforeEach(async () => {
       if (fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
@@ -391,7 +391,7 @@ test.suite({})('create-payload-app', () => {
       await writeFile(tsConfigPath, userTsConfigContent, { encoding: 'utf8' })
     })
 
-    test.afterEach(() => {
+    afterEach(() => {
       if (fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }

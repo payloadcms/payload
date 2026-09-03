@@ -5,9 +5,9 @@ import { inMemoryKVAdapter } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('KV Adapters', () => {
+suite('KV Adapters', { config: './config.ts' }, () => {
   const testKVAdapter = async (payload: Payload, adapter?: KVAdapterResult) => {
     if (adapter) {
       payload.kv = adapter.init({ payload })

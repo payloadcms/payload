@@ -1,9 +1,9 @@
 import { expect, vi } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 import { postsSlug } from './config.js'
 
-test.suite({ config: './config.ts' })('Collections REST - bulk delete rollback', () => {
+suite('Collections REST - bulk delete rollback', { config: './config.ts' }, () => {
   test.skipIf(
     process.env.PAYLOAD_DATABASE === 'cosmosdb' || process.env.PAYLOAD_DATABASE === 'documentdb',
   )('should roll back when the batched deleteMany fails', async ({ payload }) => {

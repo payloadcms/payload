@@ -1,11 +1,11 @@
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 import { folderSlug, postSlug } from './shared.js'
 
-test.suite({ config: './config.ts' })('Folders Helpers', () => {
-  test.describe('createFoldersCollection', () => {
+suite('Folders Helpers', { config: './config.ts' }, () => {
+  describe('createFoldersCollection', () => {
     test('should create a collection with hierarchy enabled', ({ payload }) => {
       const foldersCollection = payload.collections[folderSlug].config
 
@@ -73,7 +73,7 @@ test.suite({ config: './config.ts' })('Folders Helpers', () => {
     })
   })
 
-  test.describe('createFolderField', () => {
+  describe('createFolderField', () => {
     test('should add folder relationship field to collection', ({ payload }) => {
       const postsCollection = payload.collections[postSlug].config
       const folderField = postsCollection.fields.find(

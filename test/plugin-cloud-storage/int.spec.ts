@@ -13,7 +13,7 @@ import { expect } from 'vitest'
 
 import type { Config } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeAll, describe, suite, test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
@@ -85,7 +85,7 @@ async function verifyUploads({
 // needs to be here as it imports vitest functions and conflicts with playwright that uses jest
 export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   if (process.env.CI) {
-    return test.describe
+    return describe
   }
 
   // Check that localstack is running
@@ -93,16 +93,16 @@ export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
 
   if (code !== 0) {
     console.warn('Localstack is not running. Skipping test suite.')
-    return test.describe.skip
+    return describe.skip
   }
 
   console.log('Localstack is running. Running test suite.')
 
-  return test.describe
+  return describe
 }
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => {
-  test.describe('getFilePrefix', () => {
+suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => {
+  describe('getFilePrefix', () => {
     const mockReq = {
       payload: {
         find: () => ({ docs: [] }),
@@ -114,7 +114,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       upload: {},
     } as any
 
-    test.describe('upload reference prefix sanitization', () => {
+    describe('upload reference prefix sanitization', () => {
       test('should return a valid prefix unchanged', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
@@ -199,7 +199,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       })
     })
 
-    test.describe('fallback to DB lookup', () => {
+    describe('fallback to DB lookup', () => {
       test('should return empty string when there is no upload reference or DB match', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
@@ -226,7 +226,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
     })
   })
 
-  test.describe('sanitizeFilename', () => {
+  describe('sanitizeFilename', () => {
     test('should return a simple filename unchanged', () => {
       expect(sanitizeFilename('image.png')).toBe('image.png')
     })
@@ -266,13 +266,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
     })
   })
 
-  test.describe('integration (non-composite prefixes)', () => {
+  describe('integration (non-composite prefixes)', () => {
     let client: AWS.S3Client
     let TEST_BUCKET: string
 
     describeIfInCIOrHasLocalstack()('plugin-cloud-storage (non-composite prefixes)', () => {
-      test.describe('S3', () => {
-        test.beforeAll(async () => {
+      describe('S3', () => {
+        beforeAll(async () => {
           TEST_BUCKET = process.env.S3_BUCKET!
 
           client = new AWS.S3({
@@ -289,7 +289,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           await clearTestBucket(client)
         })
 
-        test.afterEach(async () => {
+        afterEach(async () => {
           await clearTestBucket(client)
         })
 
@@ -542,10 +542,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       })
     })
 
-    test.describe('External data persistence', () => {
+    describe('External data persistence', () => {
       const createdIDs: (number | string)[] = []
 
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
             await payload.delete({ id, collection: testMetadataSlug })
@@ -700,10 +700,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       })
     })
 
-    test.describe('User afterChange hook propagation', () => {
+    describe('User afterChange hook propagation', () => {
       const createdIDs: (number | string)[] = []
 
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
             await payload.delete({ id, collection: mediaWithThrowingHookSlug })
@@ -767,10 +767,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       })
     })
 
-    test.describe('Reupload with overwriteExistingFiles', () => {
+    describe('Reupload with overwriteExistingFiles', () => {
       const createdIDs: (number | string)[] = []
 
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
             await payload.delete({ id, collection: mediaWithOverwriteSlug })
@@ -848,15 +848,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       })
     })
 
-    test.describe('Azure', () => {
+    describe('Azure', () => {
       test.todo('can upload')
     })
 
-    test.describe('GCS', () => {
+    describe('GCS', () => {
       test.todo('can upload')
     })
 
-    test.describe('R2', () => {
+    describe('R2', () => {
       test.todo('can upload')
     })
   })

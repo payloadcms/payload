@@ -2,7 +2,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -22,12 +22,12 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
-  test.beforeEach(async () => {
+suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
+  beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()
   })
-  test.afterEach(async () => {
+  afterEach(async () => {
     await clearTestBucket()
   })
 
@@ -156,7 +156,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
     expect(body).toBe('')
   })
 
-  test.describe('disablePayloadAccessControl', () => {
+  describe('disablePayloadAccessControl', () => {
     test('should return direct S3 URL with encoded filename when uploading file with spaces', async ({
       payload,
     }) => {
@@ -254,7 +254,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
     })
   })
 
-  test.describe('storage config', () => {
+  describe('storage config', () => {
     test('should default storage to an empty array when the key is omitted', ({ payload }) => {
       // sanitize.ts sets storage = [] when the key is absent from the raw config
       // (packages/payload/src/config/sanitize.ts). Verified here because the sanitized
@@ -273,12 +273,12 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
     })
   })
 
-  test.describe('R2', () => {
+  describe('R2', () => {
     test.todo('can upload')
   })
 
-  test.describe('prefix collision detection', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('prefix collision detection', () => {
+    beforeEach(async ({ payload }) => {
       // Clear S3 bucket before each test
       await clearTestBucket()
       // Clear database records before each test
