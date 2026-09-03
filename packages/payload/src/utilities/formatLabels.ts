@@ -4,8 +4,8 @@ const { isPlural, singular } = pluralize
 const capitalizeFirstLetter = (string: string): string =>
   string.charAt(0).toUpperCase() + string.slice(1)
 
-const toWords = (inputString: string, joinWords = false): string => {
-  const notNullString = inputString || ''
+const toWords = (inputString: number | string | null | undefined, joinWords = false): string => {
+  const notNullString = typeof inputString === 'string' ? inputString : String(inputString ?? '')
   const trimmedString = notNullString.trim()
   const arrayOfStrings = trimmedString.split(/[\s-]/)
 
