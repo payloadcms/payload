@@ -41,20 +41,18 @@ export default defineConfig({
     },
   },
   test: {
-    ...(shouldWriteEvalReport
-      ? {
-          reporters: [
-            'default',
-            [
-              'html',
-              {
-                outputDir: 'test/evals/eval-results',
-                singleFile: true,
-              },
-            ],
+    reporters: shouldWriteEvalReport
+      ? [
+          'default',
+          [
+            'html',
+            {
+              outputDir: 'test/evals/eval-results',
+              singleFile: true,
+            },
           ],
-        }
-      : {}),
+        ]
+      : ['default'],
     watch: false, // too troublesome especially with the in memory DB setup
     // Retry failed tests up to 2 times in CI to handle flaky tests (e.g. due to timing-sensitive int tests like job queues, installation failures due to temporary network issues)
     retry: process.env.CI ? 2 : 0,
