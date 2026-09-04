@@ -149,16 +149,15 @@ describe('plugin', () => {
       it('should allow setting fromName and fromAddress', async () => {
         const defaultFromName = 'Test'
         const defaultFromAddress = 'test@test.com'
-        const configWithPartialEmail = createConfig({
-          email: await nodemailerAdapter({
+        const plugin = payloadCloudPlugin({
+          email: {
             defaultFromAddress,
             defaultFromName,
             skipVerify,
-          }),
+          },
         })
 
-        const plugin = payloadCloudPlugin()
-        const config = await plugin(configWithPartialEmail)
+        const config = await plugin(createConfig())
         const emailConfig = config.email as Awaited<ReturnType<typeof nodemailerAdapter>>
 
         const initializedEmail = emailConfig({ payload: mockedPayload })
