@@ -40,6 +40,8 @@ type IntegrationFixtures = {
     resolvedConfig: null | SanitizedConfig
     /** Raw file-scoped REST client for suites that intentionally share state across tests. */
     restClientInstance: NextRESTClient
+    /** Prepares shared test data once for suites that disable resets between tests. */
+    seedAtStart: void
     testCron: boolean
     testDir: string
   }
@@ -115,22 +117,10 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
     await use(payloadInstance)
   },
   payloadInstance: [
-    async ({ config, resetBetweenTests, testCron }, use) => {
+    async ({ config, testCron }, use) => {
       const payload = await getPayload({ config, cron: testCron })
 
       try {
-        if (!resetBetweenTests) {
-          const testDataConfig = getTestDataConfig(payload.config)
-
-          if (!testDataConfig) {
-            throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
-          }
-
-          // This state is used for the whole file, so there is no later reset to restore it into.
-          // Skip creating a snapshot that would never be read.
-          await resetAndSeed({ alwaysSeed: true, payload, ...testDataConfig })
-        }
-
         await use(payload)
       } finally {
         await payload.destroy()
@@ -172,6 +162,14 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
   sdk: async ({ payload }, use) => {
     await use(getSDK(payload.config))
   },
+  seedAtStart: [
+    // Overridden by test.suite only when a suite disables resets between tests.
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(undefined)
+    },
+    { auto: true, scope: 'file' },
+  ],
   testCron: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
@@ -221,6 +219,20 @@ export const test = Object.assign(testWithFixtures, {
     this.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
     this.override('resetBetweenTests', resetBetweenTests)
     this.override('testCron', cron)
+
+    if (!resetBetweenTests) {
+      this.override('seedAtStart', async ({ payloadInstance: payload }) => {
+        const testDataConfig = getTestDataConfig(payload.config)
+
+        if (!testDataConfig) {
+          throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
+        }
+
+        // This state is used for the whole file, so there is no later reset to restore it into.
+        // Skip creating a snapshot that would never be read.
+        await resetAndSeed({ alwaysSeed: true, payload, ...testDataConfig })
+      })
+    }
 
     return this.describe.runIf(matchesDatabase({ db }))
   },
