@@ -299,10 +299,11 @@ const processWhereQuery = ({
       }),
     )
   } else {
-    // TODO: 4.0: Investigate defaulting to `false` here, if where query is returned but ignored as we don't
-    // have the document data available. This seems more secure.
-    // Alternatively, we could set permission to a third state, like 'unknown'.
-    // Even after calling sanitizePermissions, the permissions will still be true if the where query is returned but ignored as we don't have the document data available.
-    entityPermissions[operation] = { permission: true, where: accessResult } as Permission
+    // When no document data is available we cannot evaluate the where query
+    // against an actual document, so default to `false` (more secure) rather
+    // than claiming the caller may perform the operation on every document.
+    // The constraint is still returned so clients that opt into re-deriving
+    // access themselves can apply it.
+    entityPermissions[operation] = { permission: false, where: accessResult } as Permission
   }
 }
