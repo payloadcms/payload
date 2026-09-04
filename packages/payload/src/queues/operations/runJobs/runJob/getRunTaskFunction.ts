@@ -146,25 +146,35 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
             }),
           })
         )?.output
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (err instanceof JobCancelledError || err instanceof JobRunAbortedError) {
           // Job run aborts are handled by the top-level runner.
           throw err
         }
-        throw new TaskError({
-          executedAt,
-          input: input!,
-          job,
-          message: err.message || 'Task handler threw an error',
-          output,
-          parent,
-          retriesConfig: finalRetriesConfig,
-          taskConfig,
-          taskID,
-          taskSlug,
-          taskStatus,
-          workflowConfig,
-        })
+        throw new TaskError(
+          {
+            executedAt,
+            input: input!,
+            job,
+            message:
+              typeof err === 'object' &&
+              err !== null &&
+              'message' in err &&
+              typeof err.message === 'string' &&
+              err.message
+                ? err.message
+                : 'Task handler threw an error',
+            output,
+            parent,
+            retriesConfig: finalRetriesConfig,
+            taskConfig,
+            taskID,
+            taskSlug,
+            taskStatus,
+            workflowConfig,
+          },
+          { cause: err },
+        )
       }
 
       if (taskConfig?.onSuccess) {

@@ -25,17 +25,23 @@ export type WorkflowErrorArgs = {
 
 export class TaskError extends Error {
   args: TaskErrorArgs
-  constructor(args: TaskErrorArgs) {
-    super(args.message)
+  constructor(args: TaskErrorArgs, options?: ErrorOptions) {
+    super(args.message, options)
     this.args = args
+    if (options?.cause instanceof Error && typeof options.cause.stack === 'string') {
+      this.stack = options.cause.stack
+    }
   }
 }
 export class WorkflowError extends Error {
   args: WorkflowErrorArgs
 
-  constructor(args: WorkflowErrorArgs) {
-    super(args.message)
+  constructor(args: WorkflowErrorArgs, options?: ErrorOptions) {
+    super(args.message, options)
     this.args = args
+    if (options?.cause instanceof Error && typeof options.cause.stack === 'string') {
+      this.stack = options.cause.stack
+    }
   }
 }
 
