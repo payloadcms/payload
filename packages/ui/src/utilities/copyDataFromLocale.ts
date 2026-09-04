@@ -1,4 +1,3 @@
-import ObjectIdImport from 'bson-objectid'
 import {
   canAccessAdmin,
   type CollectionSlug,
@@ -9,9 +8,12 @@ import {
   type ServerFunction,
   traverseFields,
 } from 'payload'
-import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
+import {
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  generateObjectIdHex,
+  tabHasName,
+} from 'payload/shared'
 
 export type CopyDataFromLocaleArgs = {
   collectionSlug?: CollectionSlug
@@ -51,7 +53,7 @@ function iterateFields(
               if (fromLocaleData[field.name]?.[index]) {
                 // Generate new IDs if the field is localized to prevent errors with relational DBs.
                 if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
-                  toLocaleData[field.name][index].id = new ObjectId().toHexString()
+                  toLocaleData[field.name][index].id = generateObjectIdHex()
                 }
 
                 iterateFields(
@@ -90,7 +92,7 @@ function iterateFields(
 
               // Generate new IDs if the field is localized to prevent errors with relational DBs.
               if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
-                toLocaleData[field.name][index].id = new ObjectId().toHexString()
+                toLocaleData[field.name][index].id = generateObjectIdHex()
               }
 
               if (block?.fields?.length) {

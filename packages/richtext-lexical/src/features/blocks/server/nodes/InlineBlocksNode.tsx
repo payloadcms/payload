@@ -10,8 +10,8 @@ import type React from 'react'
 import type { JSX } from 'react'
 
 import { addClassNamesToElement } from '@lexical/utils'
-import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement, DecoratorNode } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 
 import type { InlineBlockFields, SerializedInlineBlockNode } from '../schema.js'
 
@@ -125,7 +125,7 @@ export function $createServerInlineBlockNode(
     new ServerInlineBlockNode({
       fields: {
         ...fields,
-        id: fields?.id || new ObjectID.default().toHexString(),
+        id: fields?.id || generateObjectIdHex(),
       },
     }),
   )

@@ -1,12 +1,10 @@
 import type { FieldState, FormState, Row } from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
+import { generateObjectIdHex, isValidObjectIdHex } from 'payload/shared'
 
 import type { ClipboardPasteData } from './types.js'
 
 import { flattenRows, separateRows } from '../../forms/Form/rows.js'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 // Strict path-prefix check: matches `prefix` exactly, or any descendant path (`prefix.`).
 // Required because numeric row indices share digit prefixes (`.1` vs `.10`/`.11`), and
@@ -15,7 +13,6 @@ const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectId
 function isStrictPathPrefix(key: string, prefix: string): boolean {
   return key === prefix || key.startsWith(`${prefix}.`)
 }
-
 export function reduceFormStateByPath({
   formState,
   path,
@@ -142,8 +139,8 @@ export function mergeFormStateFromClipboard({
     // If this is an ID field, generate a new ID to prevent duplicates
     if (clipboardPath.endsWith('.id') && dataFromClipboard[clipboardPath]?.value) {
       const oldID = dataFromClipboard[clipboardPath].value as string
-      if (typeof oldID === 'string' && ObjectId.isValid(oldID)) {
-        const newID = new ObjectId().toHexString()
+      if (typeof oldID === 'string' && isValidObjectIdHex(oldID)) {
+        const newID = generateObjectIdHex()
         idReplacements.set(clipboardPath, newID)
 
         formState[newPath] = {
@@ -225,7 +222,7 @@ export function insertRowFromClipboard({
 
   const blockType = clipboardData.data[`${sourceRowPath}.blockType`]?.value as string | undefined
 
-  const newRowID = new ObjectId().toHexString()
+  const newRowID = generateObjectIdHex()
 
   const { remainingFields, rows } = separateRows(path, formState)
 
