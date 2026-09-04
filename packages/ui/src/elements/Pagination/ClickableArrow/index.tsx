@@ -1,7 +1,9 @@
 'use client'
+
 import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.css'
 
 const baseClass = 'clickable-arrow'
@@ -14,6 +16,10 @@ export type ClickableArrowProps = {
 
 export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
   const { direction = 'right', isDisabled = false, updatePage } = props
+  const { t } = useTranslation()
+
+  const ariaLabel =
+    direction === 'left' ? t('general:previous') : t('general:next')
 
   const classes = [
     baseClass,
@@ -25,6 +31,7 @@ export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
 
   return (
     <button
+      aria-label={ariaLabel}
       className={classes}
       disabled={isDisabled}
       onClick={!isDisabled ? updatePage : undefined}
