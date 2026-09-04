@@ -240,7 +240,16 @@ export const createOperation = async <
       operation: 'create',
       overrideAccess,
       req,
-      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
+      skipValidation:
+        (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
+        // When duplicating into a subset of locales that excludes the active one,
+        // `duplicatedFromDoc` is empty at `req.locale` by design: nothing is written
+        // there. `beforeChange` validates that one locale, so required fields would
+        // always fail. The selected locales travel in `docWithLocales`, which
+        // validation never reads.
+        Boolean(
+          duplicateFromID && selectedLocales?.length && locale && !selectedLocales.includes(locale),
+        ),
     })
 
     // When locale='all' or when beforeChange doesn't convert the string (e.g. no locale hook ran),
