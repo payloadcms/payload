@@ -20,8 +20,11 @@ let restrictedUser: any
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => {
-  test.beforeEach(async ({ payload }) => {
+test.suite({
+  config: './config.ts',
+  resetBetweenTests: false,
+})('@payloadcms/plugin-import-export', () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: {
@@ -8586,7 +8589,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       const createdPostIds: (number | string)[] = []
       let userWithDynamicLimit: any
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         // Find the dev user and set their limit to 7
         const devUserDocs = await payload.find({
           collection: 'users',

@@ -51,12 +51,12 @@ import {
 const collection = localizedPostsSlug
 const global = 'global-text'
 
-test.suite({ config: './config.ts' })('Localization', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', () => {
   test.describe('Localization with fallback true', () => {
     let post1: LocalizedPost
     let postWithLocalizedData: LocalizedPost
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       post1 = await payload.create({
         collection,
         data: {
@@ -216,7 +216,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         let spanishData
         let localizedDoc
 
-        test.beforeEach(async ({ payload }) => {
+        test.beforeAll(async ({ payloadInstance: payload }) => {
           englishData = {
             localizedCheckbox: false,
           }
@@ -503,9 +503,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('Localized Sort Count', () => {
       const expectedTotalDocs = 5
       const posts: LocalizedSort[] = []
-      test.beforeEach(async ({ payload }) => {
-        posts.length = 0
-
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         for (let i = 1; i <= expectedTotalDocs; i++) {
           const post = await payload.create({
             collection: localizedSortSlug,
@@ -679,7 +677,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       let localizedRelation2: LocalizedPost
       let withRelationship: WithLocalizedRelationship
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         localizedRelation = await createLocalizedPost(
           { payload },
           {
@@ -1044,15 +1042,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('Localized - GraphQL', () => {
       let token
 
-      test.beforeEach(async ({ restClient }) => {
+      test.beforeAll(async ({ restClientInstance: restClient }) => {
         const query = `mutation {
           loginUser(email: "dev@payloadcms.com", password: "test") {
             token
-            user {
-              relation {
-                title
-              }
-            }
           }
         }`
 
@@ -1225,7 +1218,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('Localized - Arrays', () => {
       let docID
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         const englishDoc = await payload.create({
           collection: arrayCollectionSlug,
           data: {
@@ -3062,7 +3055,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('Copying To Locale', () => {
       let user: User
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         user = (
           await payload.find({
             collection: 'users',
@@ -3769,7 +3762,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     let post1: LocalizedPost
     let postWithLocalizedData: LocalizedPost
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       if (payload.config.localization) {
         payload.config.localization.fallback = false
       }
@@ -4594,7 +4587,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('fallback behavior', () => {
       let allFieldsPostWithLocalizedData: any
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         allFieldsPostWithLocalizedData = await payload.create({
           collection: allFieldsLocalizedSlug,
           data: {

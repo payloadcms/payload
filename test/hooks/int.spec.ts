@@ -26,7 +26,7 @@ import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
-test.suite({ config: './config.ts' })('Hooks', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
   test.options({ db: 'mongo' }).describe('transform actions', () => {
     test('should create and not throw an error', async ({ payload }) => {
       // the collection has hooks that will cause an error if transform actions is not handled properly
@@ -464,7 +464,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     let hookUser
     let hookUserToken
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const email = 'dontrefresh@payloadcms.com'
 
       hookUser = await payload.create({

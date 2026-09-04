@@ -5,7 +5,7 @@ import type { Organization } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('Hierarchy', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () => {
   test.describe('Collection Config Property', () => {
     test('should add virtual path fields to collection', ({ payload }) => {
       const organizationsCollection = payload.collections.organizations.config

@@ -12,9 +12,9 @@ import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
-test.suite({ config: './config.ts' })('Sort', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
   test.describe('Local API', () => {
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       await createData(payload, 'posts', [
         { text: 'Post 1', number: 1, number2: 10, group: { number: 100 } },
         { text: 'Post 2', number: 2, number2: 10, group: { number: 200 } },
@@ -29,6 +29,11 @@ test.suite({ config: './config.ts' })('Sort', () => {
         { text: 'Post default-5 a', number: 5 },
         { text: 'Post default-1', number: 1 },
       ])
+    })
+
+    test.afterAll(async ({ payloadInstance }) => {
+      await payloadInstance.delete({ collection: 'posts', where: {} })
+      await payloadInstance.delete({ collection: 'default-sort', where: {} })
     })
 
     test.describe('Default sort', () => {
@@ -313,7 +318,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
     })
 
     test.describe('Sort with drafts', () => {
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         const testData1 = await payload.create({
           collection: 'drafts',
           data: { text: 'Post 1 draft', number: 10 },
@@ -410,7 +415,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
     })
 
     test.describe('Localized sort', () => {
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         const testData1 = await payload.create({
           collection: 'localized',
           data: { text: 'Post 1 english', number: 10 },
@@ -465,7 +470,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
       let orderable2: Orderable
       let orderableDraft1: Draft
       let orderableDraft2: Draft
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         orderable1 = await payload.create({
           collection: orderableSlug,
           data: {
@@ -915,7 +920,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
       let orderable2: Orderable
       let orderable3: Orderable
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         related = await payload.create({
           collection: orderableJoinSlug,
           data: {
@@ -1244,7 +1249,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
   })
 
   test.describe('REST API', () => {
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       await createData(payload, 'posts', [
         { text: 'Post 1', number: 1, number2: 10 },
         { text: 'Post 2', number: 2, number2: 10 },

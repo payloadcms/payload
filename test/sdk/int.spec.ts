@@ -21,8 +21,8 @@ const testUserCredentials = {
   password: '123456',
 }
 
-test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
-  test.beforeEach(async ({ payload }) => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sdk', () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
     post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 } })
     postTrash = await payload.create({
       collection: 'posts',

@@ -42,8 +42,8 @@ import {
 
 let user: any
 
-test.suite({ config: './config.ts' })('Fields', () => {
-  test.beforeEach(async ({ payload, restClient }) => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => {
+  test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     await restClient.login({
       slug: 'users',
       credentials: devUser,
@@ -2454,7 +2454,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     const definitions: Record<string, IndexDirection> = {}
     const options: Record<string, IndexOptions> = {}
 
-    test.beforeEach(({ payload }) => {
+    test.beforeAll(({ payloadInstance: payload }) => {
       indexes = (payload.db as MongooseAdapter).collections['indexed-fields'].schema.indexes() as [
         Record<string, IndexDirection>,
         IndexOptions,

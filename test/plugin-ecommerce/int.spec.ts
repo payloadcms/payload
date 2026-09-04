@@ -42,7 +42,7 @@ async function createGuestCartWithItems(
   return { cartId, cartSecret }
 }
 
-test.suite({ config: './config.ts' })('ecommerce', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () => {
   test('should add a variants collection', async ({ payload }) => {
     const variants = await payload.find({
       collection: 'variants',
@@ -282,7 +282,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     let productId: string
     let variantId: string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       // Get an existing product and variant from seed data
       const products = await payload.find({
         collection: 'products',
@@ -744,7 +744,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     let productId: string
     let variantId: string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1037,7 +1037,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
   test.describe('authenticated user cart operations', () => {
     let productId: string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1167,7 +1167,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
   test.describe('cart transfer to user', () => {
     let productId: string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
