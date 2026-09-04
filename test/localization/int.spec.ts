@@ -1653,6 +1653,49 @@ describe('Localization', () => {
         expect(allLocales?.title?.es).toBe(spanishTitle)
         expect(allLocales?.description).toBe('keep me')
       })
+
+      it('should duplicate select locales when a required localized field is unselected', async () => {
+        const doc = await payload.create({
+          collection: withRequiredLocalizedFields,
+          data: {
+            nav: {
+              layout: [{ blockType: 'text', text: 'english text' }],
+            },
+            title: 'hello',
+          },
+          locale: defaultLocale,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: withRequiredLocalizedFields,
+          data: {
+            nav: {
+              layout: [{ blockType: 'text', text: 'texto espanol' }],
+            },
+            title: 'hola',
+          },
+          locale: spanishLocale,
+        })
+
+        const duplicated = await payload.duplicate({
+          id: doc.id,
+          collection: withRequiredLocalizedFields,
+          locale: spanishLocale,
+          selectedLocales: [defaultLocale],
+        })
+
+        const allLocales: any = await payload.findByID({
+          id: duplicated.id,
+          collection: withRequiredLocalizedFields,
+          locale: 'all',
+        })
+
+        expect(allLocales.title.en).toBe('hello')
+        expect(allLocales.title.es).toBeUndefined()
+        expect(allLocales.nav.layout.en[0].text).toBe('english text')
+        expect(allLocales.nav.layout.es ?? null).toBeNull()
+      })
     })
 
     describe('Localized group and tabs', () => {
