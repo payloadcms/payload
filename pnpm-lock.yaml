@@ -27,10 +27,10 @@ importers:
     devDependencies:
       '@ai-sdk/anthropic':
         specifier: 3.0.84
-        version: 3.0.84(zod@4.3.6)
+        version: 3.0.84(zod@4.5.4)
       '@ai-sdk/openai':
         specifier: 3.0.71
-        version: 3.0.71(zod@4.3.6)
+        version: 3.0.71(zod@4.5.4)
       '@axe-core/playwright':
         specifier: 4.11.0
         version: 4.11.0(playwright-core@1.59.1)
@@ -102,7 +102,7 @@ importers:
         version: 4.1.6(vitest@4.1.6)
       ai:
         specifier: 6.0.206
-        version: 6.0.206(zod@4.3.6)
+        version: 6.0.206(zod@4.5.4)
       axe-core:
         specifier: 4.11.0
         version: 4.11.0
@@ -233,8 +233,8 @@ importers:
         specifier: ~4.61.1
         version: 4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)
       zod:
-        specifier: 4.3.6
-        version: 4.3.6
+        specifier: 4.5.4
+        version: 4.5.4
 
   packages/admin-bar:
     dependencies:
@@ -910,9 +910,6 @@ importers:
       '@types/busboy':
         specifier: 1.5.4
         version: 1.5.4
-      ajv:
-        specifier: 8.20.0
-        version: 8.20.0
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
@@ -15927,8 +15924,8 @@ packages:
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.5.4:
+    resolution: {integrity: sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA==}
 
   zod@4.5.4:
     resolution: {integrity: sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA==}
@@ -15940,31 +15937,31 @@ snapshots:
 
   '@acemir/cssom@0.9.31': {}
 
-  '@ai-sdk/anthropic@3.0.84(zod@4.3.6)':
+  '@ai-sdk/anthropic@3.0.84(zod@4.5.4)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.3.6)
-      zod: 4.3.6
+      '@ai-sdk/provider-utils': 4.0.29(zod@4.5.4)
+      zod: 4.5.4
 
-  '@ai-sdk/gateway@3.0.132(zod@4.3.6)':
+  '@ai-sdk/gateway@3.0.132(zod@4.5.4)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.29(zod@4.5.4)
       '@vercel/oidc': 3.2.0
-      zod: 4.3.6
+      zod: 4.5.4
 
-  '@ai-sdk/openai@3.0.71(zod@4.3.6)':
+  '@ai-sdk/openai@3.0.71(zod@4.5.4)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.3.6)
-      zod: 4.3.6
+      '@ai-sdk/provider-utils': 4.0.29(zod@4.5.4)
+      zod: 4.5.4
 
-  '@ai-sdk/provider-utils@4.0.29(zod@4.3.6)':
+  '@ai-sdk/provider-utils@4.0.29(zod@4.5.4)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.1.0
-      zod: 4.3.6
+      zod: 4.5.4
 
   '@ai-sdk/provider@3.0.10':
     dependencies:
@@ -18464,7 +18461,7 @@ snapshots:
       '@eslint-react/eff': 1.53.1
       '@typescript-eslint/utils': 8.63.0(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
       ts-pattern: 5.9.0
-      zod: 4.3.6
+      zod: 4.5.4
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -18487,7 +18484,7 @@ snapshots:
       '@eslint-react/kit': 1.53.1(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
       '@typescript-eslint/utils': 8.63.0(@typescript/typescript6@6.0.2)(eslint@9.39.2(jiti@2.7.0))
       ts-pattern: 5.9.0
-      zod: 4.3.6
+      zod: 4.5.4
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -19346,16 +19343,16 @@ snapshots:
       eventsource-parser: 3.1.0
       jose: 6.2.3
       pkce-challenge: 5.0.1
-      zod: 4.3.6
+      zod: 4.5.4
 
   '@modelcontextprotocol/core@2.0.0':
     dependencies:
-      zod: 4.3.6
+      zod: 4.5.4
 
   '@modelcontextprotocol/server@2.0.0':
     dependencies:
       '@modelcontextprotocol/core': 2.0.0
-      zod: 4.3.6
+      zod: 4.5.4
 
   '@monaco-editor/loader@1.7.0':
     dependencies:
@@ -22147,7 +22144,7 @@ snapshots:
       jiti: 2.7.0
       magic-string: 0.30.21
       prettier: 3.5.3
-      zod: 4.4.3
+      zod: 4.5.4
     transitivePeerDependencies:
       - supports-color
 
@@ -22161,7 +22158,7 @@ snapshots:
       '@tanstack/router-utils': 1.162.2
       chokidar: 5.0.0
       unplugin: 3.3.0(@rspack/core@2.0.8(@swc/helpers@0.5.23))(esbuild@0.28.1)(rolldown@1.1.4)(rollup@4.59.0)(vite@8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.108.4(@swc/core@1.15.3(@swc/helpers@0.5.23))(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      zod: 4.4.3
+      zod: 4.5.4
     optionalDependencies:
       '@rsbuild/core': 2.0.2
       '@tanstack/react-router': 1.170.17(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -22187,7 +22184,7 @@ snapshots:
       '@tanstack/router-utils': 1.162.2
       chokidar: 5.0.0
       unplugin: 3.3.0(@rspack/core@2.0.8(@swc/helpers@0.5.23))(esbuild@0.28.1)(rolldown@1.1.4)(rollup@4.59.0)(vite@8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.77.4)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.108.4(@swc/core@1.15.3(@swc/helpers@0.5.23))(esbuild@0.28.1)(lightningcss@1.32.0)(postcss@8.5.23))
-      zod: 4.4.3
+      zod: 4.5.4
     optionalDependencies:
       '@rsbuild/core': 2.0.2
       '@tanstack/react-router': 1.170.17(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -22246,7 +22243,7 @@ snapshots:
       ufo: 1.6.4
       vitefu: 1.1.3(vite@8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))
       xmlbuilder2: 4.0.3
-      zod: 4.4.3
+      zod: 4.5.4
     optionalDependencies:
       '@rsbuild/core': 2.0.2
       vite: 8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
@@ -22285,7 +22282,7 @@ snapshots:
       ufo: 1.6.4
       vitefu: 1.1.3(vite@8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.77.4)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))
       xmlbuilder2: 4.0.3
-      zod: 4.4.3
+      zod: 4.5.4
     optionalDependencies:
       '@rsbuild/core': 2.0.2
       vite: 8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.77.4)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
@@ -23424,13 +23421,13 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@6.0.206(zod@4.3.6):
+  ai@6.0.206(zod@4.5.4):
     dependencies:
-      '@ai-sdk/gateway': 3.0.132(zod@4.3.6)
+      '@ai-sdk/gateway': 3.0.132(zod@4.5.4)
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.3.6)
+      '@ai-sdk/provider-utils': 4.0.29(zod@4.5.4)
       '@opentelemetry/api': 1.9.1
-      zod: 4.3.6
+      zod: 4.5.4
 
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
@@ -25284,8 +25281,8 @@ snapshots:
       '@babel/parser': 7.29.7
       eslint: 9.39.2(jiti@2.7.0)
       hermes-parser: 0.25.1
-      zod: 4.3.6
-      zod-validation-error: 4.0.2(zod@4.3.6)
+      zod: 4.5.4
+      zod-validation-error: 4.0.2(zod@4.5.4)
     transitivePeerDependencies:
       - supports-color
 
@@ -30794,15 +30791,15 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  zod-validation-error@4.0.2(zod@4.3.6):
+  zod-validation-error@4.0.2(zod@4.5.4):
     dependencies:
-      zod: 4.3.6
+      zod: 4.5.4
 
   zod@3.25.76: {}
 
   zod@4.3.6: {}
 
-  zod@4.4.3: {}
+  zod@4.5.4: {}
 
   zod@4.5.4: {}
 

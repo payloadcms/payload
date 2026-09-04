@@ -4,6 +4,7 @@ const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectId
 
 import type { TFunction } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
+import type { core } from 'zod'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -377,16 +378,19 @@ export const json: JSONFieldValidation = async (
     try {
       jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
-      const AjvModule = await import('ajv')
-      // Handle both ESM default export and CJS interop where the module itself is the constructor
-      const AjvClass: any =
-        'default' in AjvModule && typeof AjvModule.default === 'function'
-          ? AjvModule.default
-          : AjvModule
-      const ajv = new AjvClass()
+      const { fromJSONSchema } = await import('zod')
+      // `JSONSchema4` allows any string for `$schema`, while zod narrows it to the three drafts it
+      // supports. zod ignores `$schema` at runtime, so the wider type is safe to pass through.
+      const zodSchema = fromJSONSchema(schema as core.JSONSchema.JSONSchema)
 
-      if (!ajv.validate(schema, value)) {
-        return ajv.errorsText()
+      const result = zodSchema.safeParse(value)
+
+      if (!result.success) {
+        return result.error.issues
+          .map((issue) =>
+            issue.path.length ? `${issue.path.join('.')}: ${issue.message}` : issue.message,
+          )
+          .join(', ')
       }
     } catch (error) {
       return error instanceof Error ? error.message : 'Unknown error'

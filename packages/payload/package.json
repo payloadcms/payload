@@ -120,7 +120,6 @@
     "@payloadcms/translations": "workspace:*",
     "@standard-schema/spec": "1.1.0",
     "@types/busboy": "1.5.4",
-    "ajv": "8.20.0",
     "bson-objectid": "2.0.4",
     "busboy": "^1.6.0",
     "ci-info": "4.4.0",
