@@ -1042,6 +1042,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
     test.describe('Localized - GraphQL', () => {
       let token
 
+      test.beforeAll(async ({ restClientInstance: restClient }) => {
+        const query = `mutation {
+          loginUser(email: "dev@payloadcms.com", password: "test") {
+            token
+          }
+        }`
+
+        const { data } = await restClient
+          .GRAPHQL_POST({
+            body: JSON.stringify({ query }),
+            query: { locale: 'en' },
+          })
+          .then((res) => res.json())
+
+        token = data.loginUser.token
+      })
+
       test('should allow user to login and retrieve populated localized field', async ({
         restClient,
       }) => {
@@ -1066,8 +1083,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
 
         expect(typeof result.token).toStrictEqual('string')
         expect(typeof result.user.relation.title).toStrictEqual('string')
-
-        token = result.token
       })
 
       test('should allow retrieval of populated localized fields within meUser', async ({
