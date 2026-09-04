@@ -8,6 +8,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
+import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
@@ -72,6 +73,14 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     sort,
     versionFields,
   })
+
+  // /////////////////////////////////////
+  // Guard: versions must be enabled
+  // /////////////////////////////////////
+
+  if (!globalConfig.versions) {
+    throw new NotFound(req.t)
+  }
 
   const fullWhere = combineQueries(where!, accessResults)
 

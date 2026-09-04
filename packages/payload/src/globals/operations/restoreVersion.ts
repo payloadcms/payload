@@ -58,6 +58,14 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     }
 
     // /////////////////////////////////////
+    // Guard: versions must be enabled
+    // /////////////////////////////////////
+
+    if (!globalConfig.versions) {
+      throw new NotFound(req.t)
+    }
+
+    // /////////////////////////////////////
     // Retrieve original raw version
     // /////////////////////////////////////
 
