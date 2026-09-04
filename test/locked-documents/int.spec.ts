@@ -14,13 +14,13 @@ import { pagesSlug, postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
-test.suite({ config: './config.ts' })('Locked documents', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Locked documents', () => {
   let post: Post
   let user: any
   let user2: any
   let postConfig: SanitizedCollectionConfig
 
-  test.beforeEach(async ({ payload }) => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
     postConfig = payload.config.collections.find(
       ({ slug }) => slug === postsSlug,
     ) as SanitizedCollectionConfig
@@ -313,7 +313,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
     })
 
     // Should not allow update - expect data not to change
-    expect(updatedGlobalMenu.globalText).toEqual('global text')
+    expect(updatedGlobalMenu.globalText).toEqual('global text 2')
   })
 
   // Try to delete locked document (collection)

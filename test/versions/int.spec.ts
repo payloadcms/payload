@@ -49,10 +49,10 @@ const dirname = path.dirname(filename)
 const formatGraphQLID = ({ payload }: { payload: Payload }, id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
-test.suite({ config: './config.ts' })('Versions', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () => {
   let user: JsonObject
 
-  test.beforeEach(async ({ restClient }) => {
+  test.beforeAll(async ({ restClientInstance: restClient }) => {
     const { user: loggedInUser } = await restClient.login({
       slug: 'users',
       credentials: devUser,
@@ -2505,11 +2505,6 @@ test.suite({ config: './config.ts' })('Versions', () => {
     }
 
     test.beforeEach(async ({ payload }) => {
-      await cleanupDocuments({
-        collectionSlugs: [draftCollectionSlug],
-        payload,
-      })
-
       await createPostWithVersions({ payload })
     })
 
@@ -2893,7 +2888,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
       const updatedTitle2 = 'updated title'
       let localPostID: number | string
 
-      test.beforeEach(async ({ payload, restClient }) => {
+      test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
         const post = await createAutoSavePostHelper(
           { restClient },
           {
@@ -2973,7 +2968,7 @@ test.suite({ config: './config.ts' })('Versions', () => {
     test.describe('Restore', () => {
       let postID: number | string
       let versionID: number | string
-      test.beforeEach(async ({ restClient }) => {
+      test.beforeAll(async ({ restClientInstance: restClient }) => {
         const autosavePost = await createAutoSavePostHelper(
           { restClient },
           {

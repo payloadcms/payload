@@ -13,7 +13,7 @@ import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-azure', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/storage-azure', () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
@@ -23,7 +23,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure', () => {
     }
   }
 
-  test.beforeEach(async () => {
+  test.beforeAll(async () => {
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
 
     const blobServiceClient = BlobServiceClient.fromConnectionString(
