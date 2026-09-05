@@ -1,3 +1,5 @@
+import { status as httpStatus } from 'http-status'
+
 import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
@@ -8,6 +10,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
+import { APIError } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
@@ -58,6 +61,13 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     const accessResults = !overrideAccess
       ? await executeAccess({ req }, globalConfig.access.readVersions)
       : true
+
+    if (!globalConfig.versions) {
+      throw new APIError(
+        `Versions are not enabled for global "${globalConfig.slug}".`,
+        httpStatus.BAD_REQUEST,
+      )
+    }
 
     await validateQueryPaths({
       globalConfig,
