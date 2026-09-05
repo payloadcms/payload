@@ -12,6 +12,15 @@ test.suite({
     vi.useRealTimers()
   })
 
+  /**
+   * Different queues share one stats document. Each scheduler reads it, changes
+   * its own queue's lastScheduledRun, and writes the whole document back.
+   * If two schedulers do this at the same time, the last write can replace the
+   * other queue's new timestamp with its old one.
+   *
+   * That old timestamp can make a replacement job due at 12:15 again, even though
+   * its 12:15 job already finished. Both replacements should wait until 12:30.
+   */
   test("should run each queue's scheduled task only once per cron interval", async ({
     payload,
   }) => {
@@ -94,6 +103,57 @@ test.suite({
     })
 
     expect(completedJobs.totalDocs).toBe(2)
+  })
+
+  /**
+   * Two schedulers can check the same queue before either creates a job.
+   * Both see "no job exists", so both create a job for the same 12:15 run.
+   * Checking for a job and creating it are separate database calls, so the
+   * check alone does not prevent duplicates.
+   *
+   * One scheduler should queue the job and the other should skip it.
+   * The job should run once and then be deleted when it finishes.
+   */
+  test('should queue only one job when two schedulers handle the same queue concurrently', async ({
+    payload,
+  }) => {
+    const deleteJobOnComplete = payload.config.jobs.deleteJobOnComplete
+
+    payload.config.jobs.deleteJobOnComplete = true
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(atTime('12:00'))
+
+    try {
+      const results = await Promise.all([
+        payload.jobs.handleSchedules({ queue: 'default' }),
+        payload.jobs.handleSchedules({ queue: 'default' }),
+      ])
+
+      for (const result of results) {
+        expect(result.errored).toHaveLength(0)
+      }
+
+      const scheduledJobs = await payload.find({ collection: 'payload-jobs' })
+
+      expect(scheduledJobs.totalDocs).toBe(1)
+      expect(scheduledJobs.docs).toMatchObject([
+        { queue: 'default', taskSlug: 'scheduledTask', waitUntil: atTime('12:15') },
+      ])
+      expect(results.flatMap((result) => result.queued)).toHaveLength(1)
+      expect(results.flatMap((result) => result.skipped)).toHaveLength(1)
+
+      vi.setSystemTime(atTime('12:16'))
+
+      const run = await payload.jobs.run({ queue: 'default', silent: true })
+
+      expect(Object.values(run.jobStatus ?? {})).toEqual([{ status: 'success' }])
+
+      const remainingJobs = await payload.find({ collection: 'payload-jobs' })
+
+      expect(remainingJobs.totalDocs).toBe(0)
+    } finally {
+      payload.config.jobs.deleteJobOnComplete = deleteJobOnComplete
+    }
   })
 })
 
