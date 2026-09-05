@@ -44,7 +44,7 @@ export const WatchTenantCollection = () => {
   }, [id, titleField?.initialValue])
 
   React.useEffect(() => {
-    if (operation === 'create' && submitted) {
+    if (operation === 'create' && submitted && id) {
       void syncTenants()
     }
   }, [operation, submitted, syncTenants, id])
