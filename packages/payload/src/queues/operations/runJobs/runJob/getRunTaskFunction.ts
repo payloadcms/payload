@@ -152,6 +152,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           throw err
         }
         throw new TaskError({
+          cause: err,
           executedAt,
           input: input!,
           job,

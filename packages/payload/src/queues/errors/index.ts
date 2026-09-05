@@ -3,6 +3,7 @@ import type { RetryConfig, TaskConfig } from '../config/types/taskTypes.js'
 import type { TaskParent } from '../operations/runJobs/runJob/getRunTaskFunction.js'
 
 export type TaskErrorArgs = {
+  cause?: unknown
   executedAt: Date
   input?: object
   job: Job
@@ -18,6 +19,7 @@ export type TaskErrorArgs = {
 }
 
 export type WorkflowErrorArgs = {
+  cause?: unknown
   job: Job
   message: string
   workflowConfig: WorkflowConfig
@@ -26,7 +28,7 @@ export type WorkflowErrorArgs = {
 export class TaskError extends Error {
   args: TaskErrorArgs
   constructor(args: TaskErrorArgs) {
-    super(args.message)
+    super(args.message, args.cause !== undefined ? { cause: args.cause } : undefined)
     this.args = args
   }
 }
@@ -34,7 +36,7 @@ export class WorkflowError extends Error {
   args: WorkflowErrorArgs
 
   constructor(args: WorkflowErrorArgs) {
-    super(args.message)
+    super(args.message, args.cause !== undefined ? { cause: args.cause } : undefined)
     this.args = args
   }
 }
