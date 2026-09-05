@@ -38,6 +38,16 @@ export const flattenAllFields = ({
     }
   }
 
+  return flattenFields({ fields, hasConditionalParent: false })
+}
+
+const flattenFields = ({
+  fields,
+  hasConditionalParent,
+}: {
+  fields: Field[]
+  hasConditionalParent: boolean
+}): FlattenedField[] => {
   const result: FlattenedField[] = []
 
   for (const field of fields) {
@@ -45,9 +55,23 @@ export const flattenAllFields = ({
       case 'array':
       case 'group': {
         if (fieldAffectsData(field)) {
-          result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
+          result.push(
+            withConditionalParent({
+              field: {
+                ...field,
+                flattenedFields: flattenFields({
+                  fields: field.fields,
+                  hasConditionalParent: false,
+                }),
+              },
+              hasConditionalParent,
+            }),
+          )
         } else {
-          for (const nestedField of flattenAllFields({ fields: field.fields })) {
+          for (const nestedField of flattenFields({
+            fields: field.fields,
+            hasConditionalParent: hasConditionalParent || Boolean(field.admin?.condition),
+          })) {
             result.push(nestedField)
           }
         }
@@ -69,35 +93,53 @@ export const flattenAllFields = ({
           blocks,
         }
 
-        result.push(resultField)
+        result.push(withConditionalParent({ field: resultField, hasConditionalParent }))
         break
       }
 
       case 'collapsible':
       case 'row': {
-        for (const nestedField of flattenAllFields({ fields: field.fields })) {
+        for (const nestedField of flattenFields({
+          fields: field.fields,
+          hasConditionalParent: hasConditionalParent || Boolean(field.admin?.condition),
+        })) {
           result.push(nestedField)
         }
         break
       }
 
       case 'join': {
-        result.push(field as FlattenedJoinField)
+        result.push(
+          withConditionalParent({ field: field as FlattenedJoinField, hasConditionalParent }),
+        )
         break
       }
 
       case 'tabs': {
+        const tabsHaveConditionalParent = hasConditionalParent || Boolean(field.admin?.condition)
+
         for (const tab of field.tabs) {
           if (!tabHasName(tab)) {
-            for (const nestedField of flattenAllFields({ fields: tab.fields })) {
+            for (const nestedField of flattenFields({
+              fields: tab.fields,
+              hasConditionalParent: tabsHaveConditionalParent || Boolean(tab.admin?.condition),
+            })) {
               result.push(nestedField)
             }
           } else {
-            result.push({
-              ...tab,
-              type: 'tab',
-              flattenedFields: flattenAllFields({ fields: tab.fields }),
-            })
+            result.push(
+              withConditionalParent({
+                field: {
+                  ...tab,
+                  type: 'tab',
+                  flattenedFields: flattenFields({
+                    fields: tab.fields,
+                    hasConditionalParent: false,
+                  }),
+                },
+                hasConditionalParent: tabsHaveConditionalParent,
+              }),
+            )
           }
         }
         break
@@ -105,13 +147,29 @@ export const flattenAllFields = ({
 
       default: {
         if (field.type !== 'ui') {
-          result.push(field)
+          result.push(withConditionalParent({ field, hasConditionalParent }))
         }
       }
     }
   }
 
-  flattenedFieldsCache.set(fields, result)
+  if (!hasConditionalParent) {
+    flattenedFieldsCache.set(fields, result)
+  }
 
   return result
+}
+
+const withConditionalParent = <T extends FlattenedField>({
+  field,
+  hasConditionalParent,
+}: {
+  field: T
+  hasConditionalParent: boolean
+}): T => {
+  if (hasConditionalParent) {
+    return { ...field, hasConditionalParent }
+  }
+
+  return field
 }

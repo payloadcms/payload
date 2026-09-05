@@ -25,7 +25,8 @@ const fieldIsInputExcluded = (field: FlattenedField): boolean =>
   field.type === 'join' || fieldIsVirtual(field)
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
-  const isConditional = Boolean(field?.admin && field?.admin?.condition)
+  const isConditional =
+    field.hasConditionalParent || Boolean(field?.admin && field?.admin?.condition)
   if (isConditional) {
     return false
   }
