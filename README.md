@@ -65,6 +65,12 @@ All-in-one on Vercel — one click to deploy Payload with a **Next.js** front en
 
 [![Deploy with Vercel](https://vercel.com/button)](https://dub.sh/payload-vercel)
 
+### Deploy on RepoCloud
+
+One click to deploy Payload on RepoCloud with managed hosting for open-source applications.
+
+[![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploylobe.svg)](https://repocloud.io/details/Payload/)
+
 ## One-click templates
 
 Jumpstart your next project with a ready-to-go template. These are **production-ready, end-to-end solutions** designed to get you to market fast. Build any kind of **website**, **ecommerce store**, **blog**, or **portfolio** — complete with a modern front end built using **React Server Components** and **Tailwind**.
