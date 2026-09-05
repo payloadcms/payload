@@ -45,6 +45,10 @@ test.describe('Folders', () => {
   let OmittedFromBrowseBy: AdminUrlUtil
   let serverURL: string
   let adminRoute: string
+  const createdRecords: {
+    collection: 'media' | 'payload-folders'
+    id: string
+  }[] = []
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -73,6 +77,13 @@ test.describe('Folders', () => {
       serverURL,
       snapshotKey: 'foldersTest',
     })
+  })
+
+  test.afterEach(async () => {
+    for (const { id, collection } of createdRecords.slice().reverse()) {
+      await payload.delete({ id, collection, overrideAccess: true })
+    }
+    createdRecords.length = 0
   })
 
   test.describe('No folders', () => {
@@ -401,6 +412,37 @@ test.describe('Folders', () => {
       await gridViewButton.click()
       const gridView = page.locator('.item-card-grid')
       await expect(gridView).toBeVisible()
+    })
+
+    test('should show image thumbnails in list view', async () => {
+      const folder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Media Folder',
+          folderType: ['media'],
+        },
+        overrideAccess: true,
+      })
+      createdRecords.push({ id: String(folder.id), collection: 'payload-folders' })
+
+      const media = await payload.create({
+        collection: 'media',
+        data: {
+          folder: folder.id,
+        },
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
+      })
+      createdRecords.push({ id: String(media.id), collection: 'media' })
+
+      const mediaURL = new AdminUrlUtil(serverURL, 'media')
+      await page.goto(mediaURL.byFolder)
+      await clickFolderCard({ doubleClick: true, folderName: 'Media Folder', page })
+      await page.locator('.folder-view-toggle-button').nth(1).click()
+
+      const thumbnail = page.locator('.folder-file-table__thumbnail img')
+      await expect(thumbnail).toBeVisible()
+      await expect(thumbnail).toHaveAttribute('src', /image\.png/)
     })
 
     test('should sort folders', async () => {

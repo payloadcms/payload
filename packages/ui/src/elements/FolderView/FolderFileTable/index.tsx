@@ -9,6 +9,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
+import { Thumbnail } from '../../Thumbnail/index.js'
 import { ColoredFolderIcon } from '../ColoredFolderIcon/index.js'
 import { DraggableTableRow } from '../DraggableTableRow/index.js'
 import { SimpleTable, TableHeader } from '../SimpleTable/index.js'
@@ -184,7 +185,16 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
                 if (index === 0) {
                   return (
                     <span className={`${baseClass}__cell-with-icon`} key={`${itemKey}-${name}`}>
-                      <DocumentIcon />
+                      {value.url ? (
+                        <Thumbnail
+                          className={`${baseClass}__thumbnail`}
+                          doc={value}
+                          fileSrc={value.url}
+                          size="none"
+                        />
+                      ) : (
+                        <DocumentIcon />
+                      )}
                       {cellValue}
                     </span>
                   )
