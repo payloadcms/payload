@@ -183,7 +183,10 @@ export function DefaultEditView({
 
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
 
+  const dataSnapshotUpdatedAtRef = useRef(data?.updatedAt)
   const hasCheckedForStaleDataRef = useRef(false)
+  const lastSavedUpdatedAtRef = useRef<null | string>(null)
+  const localeRef = useRef(locale)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
   const saveCounterRef = useRef(0)
   const isSavingRef = useRef(false)
@@ -315,6 +318,7 @@ export function DefaultEditView({
 
       // Update stale data check refs after successful save
       // This allows detecting if another user modifies the document after this save
+      lastSavedUpdatedAtRef.current = updatedAt
       originalUpdatedAtRef.current = updatedAt
       hasCheckedForStaleDataRef.current = false
       isSavingRef.current = false
@@ -474,10 +478,30 @@ export function DefaultEditView({
       const saveCounterAtStart = saveCounterRef.current
       const isSavingAtStart = isSavingRef.current
 
-      // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
-      if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
+      const localeChanged = localeRef.current !== locale
+      const snapshotChanged = dataSnapshotUpdatedAtRef.current !== data?.updatedAt
+
+      if (localeChanged || snapshotChanged) {
+        dataSnapshotUpdatedAtRef.current = data?.updatedAt
+        localeRef.current = locale
+
+        // A locale or server-rendered data change replaces the snapshot being edited. The response
+        // from our own save is already the active baseline, so do not reset it on that rerender.
+        if (localeChanged || data?.updatedAt !== lastSavedUpdatedAtRef.current) {
+          lastSavedUpdatedAtRef.current = null
+          originalUpdatedAtRef.current = data?.updatedAt
+          hasCheckedForStaleDataRef.current = false
+        }
+      }
+
+      // Sync originalUpdatedAt with newer data after a refresh that preserved the same snapshot.
+      if (
+        data?.updatedAt &&
+        data.updatedAt > originalUpdatedAtRef.current &&
+        data.updatedAt !== lastSavedUpdatedAtRef.current
+      ) {
+        lastSavedUpdatedAtRef.current = null
         originalUpdatedAtRef.current = data.updatedAt
-        // Reset check flag so we can detect new stale data
         hasCheckedForStaleDataRef.current = false
       }
 
@@ -504,6 +528,8 @@ export function DefaultEditView({
         hasCheckedForStaleDataRef.current = true
       }
 
+      const originalUpdatedAtAtStart = originalUpdatedAtRef.current
+
       const docPreferences = await getDocPreferences()
 
       const result = await getFormState({
@@ -515,7 +541,7 @@ export function DefaultEditView({
         formState: prevFormState,
         globalSlug,
         operation,
-        originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
+        originalUpdatedAt: checkForStaleData ? originalUpdatedAtAtStart : undefined,
         readOnly: isTrashed || isReadOnlyForIncomingUser,
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
@@ -543,7 +569,17 @@ export function DefaultEditView({
         !isSavingAtStart &&
         saveCounterRef.current === saveCounterAtStart
       ) {
-        setShowStaleDataModal(true)
+        const isOlderSnapshotFromOwnLocalePublish =
+          staleDataState.currentUpdatedAt &&
+          lastSavedUpdatedAtRef.current === originalUpdatedAtAtStart &&
+          originalUpdatedAtRef.current === originalUpdatedAtAtStart &&
+          staleDataState.currentUpdatedAt < originalUpdatedAtAtStart
+
+        if (isOlderSnapshotFromOwnLocalePublish) {
+          originalUpdatedAtRef.current = staleDataState.currentUpdatedAt
+        } else {
+          setShowStaleDataModal(true)
+        }
       }
 
       abortOnChangeRef.current = null
@@ -552,6 +588,7 @@ export function DefaultEditView({
     },
     [
       data?.updatedAt,
+      locale,
       editSessionStartTime,
       isLockingEnabled,
       getDocPreferences,
