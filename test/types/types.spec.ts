@@ -194,8 +194,11 @@ describe('Types testing', () => {
   })
 
   describe('joins', () => {
-    test('join query for pages should have type never as pages does not define any joins', () => {
-      expect<JoinQuery<'pages'>>().type.toBe<never>()
+    test('should allow disabling joins for pages even though it does not define any joins', () => {
+      expect<JoinQuery<'pages'>>().type.toBe<false>()
+      expect(payload.find({ collection: 'pages', joins: false })).type.toBe<
+        Promise<PaginatedDocs<Page>>
+      >()
     })
 
     test('join query for pages-categories should be defined with the relatedPages key', () => {
@@ -1224,6 +1227,13 @@ describe('Types testing', () => {
         | 'posts'
         | 'users'
       >()
+    })
+
+    test('should allow disabling joins for collections without joins', () => {
+      expect<PayloadSDK<LocalConfig>['find']>().type.toBeCallableWith({
+        collection: 'pages',
+        joins: false,
+      })
     })
 
     test('ensure SDK with explicit generic uses has correct data for collection in create', async () => {
