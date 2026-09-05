@@ -194,6 +194,14 @@ type LinkFeatureServerProps = {
       }) => (Field | FieldAffectingData)[])
     | Field[]
   /**
+   * Resolves an internal link node to a URL string
+   * for use in the markdown converter. Internal links
+   * store a doc reference rather than a URL, so without
+   * this the markdown output will have an empty href:
+   * `[link text]()`.
+   */
+  internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
+  /**
    * Sets a maximum population depth for the internal
    * doc default field of link, regardless of the
    * remaining depth when the field is reached.
@@ -227,8 +235,13 @@ LinkFeature({
   enabledCollections: ['pages', 'posts'], // Collections for internal links
   maxDepth: 2, // Population depth for internal links
   disableAutoLinks: false, // Allow auto-conversion of URLs
+  // Resolves internal links when converting to Markdown
+  internalDocToHref: ({ linkNode }) =>
+    `/${(linkNode.fields.doc?.value as { slug: string }).slug}`,
 })
 ```
+
+See [Converting Markdown](/docs/rich-text/converting-markdown#internal-links) for details on `internalDocToHref`.
 
 ### RelationshipFeature
 
