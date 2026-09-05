@@ -1,4 +1,3 @@
-/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test"] }] */
 import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -8,8 +7,14 @@ test.suite({
   cron: false,
   db: (adapter) => adapter === 'postgres',
 })('Queues - concurrent scheduling', () => {
-  test.afterEach(() => {
-    vi.useRealTimers()
+  let deleteJobOnComplete: boolean | undefined
+
+  test.beforeEach(({ payload }) => {
+    deleteJobOnComplete = payload.config.jobs.deleteJobOnComplete
+  })
+
+  test.afterEach(({ payload }) => {
+    payload.config.jobs.deleteJobOnComplete = deleteJobOnComplete
   })
 
   /**
@@ -24,85 +29,71 @@ test.suite({
   test("should run each queue's scheduled task only once per cron interval", async ({
     payload,
   }) => {
-    vi.useFakeTimers({ toFake: ['Date'] })
-    vi.setSystemTime(atTime('12:00'))
+    await withSystemTime('12:00', async () => {
+      // Initialize both queues through the scheduler. Each has one job due at 12:15.
+      const defaultSchedule = await payload.jobs.handleSchedules({ queue: 'default' })
+      const otherSchedule = await payload.jobs.handleSchedules({ queue: 'other' })
 
-    // Initialize both queues through the scheduler. Each has one job due at 12:15.
-    await payload.jobs.handleSchedules({ queue: 'default' })
-    await payload.jobs.handleSchedules({ queue: 'other' })
-
-    const scheduledJobs = await payload.find({
-      collection: 'payload-jobs',
-      sort: 'queue',
+      expect(defaultSchedule.queued).toHaveLength(1)
+      expect(otherSchedule.queued).toHaveLength(1)
+      expect([defaultSchedule.queued[0]?.job, otherSchedule.queued[0]?.job]).toMatchObject([
+        { queue: 'default', waitUntil: atTime('12:15') },
+        { queue: 'other', waitUntil: atTime('12:15') },
+      ])
     })
 
-    expect(scheduledJobs.totalDocs).toBe(2)
-    expect(scheduledJobs.docs).toMatchObject([
-      { queue: 'default', waitUntil: atTime('12:15') },
-      { queue: 'other', waitUntil: atTime('12:15') },
-    ])
+    await withSystemTime('12:15:01', async () => {
+      // The 12:15 jobs already exist, so scheduling must skip both queues.
+      const existingSchedules = await Promise.all([
+        payload.jobs.handleSchedules({ queue: 'default' }),
+        payload.jobs.handleSchedules({ queue: 'other' }),
+      ])
 
-    // The 12:15 jobs already exist, so scheduling must skip both queues.
-    vi.setSystemTime(atTime('12:15:01'))
+      for (const result of existingSchedules) {
+        expect(result.errored).toHaveLength(0)
+        expect(result.queued).toHaveLength(0)
+        expect(result.skipped).toHaveLength(1)
+      }
 
-    const existingSchedules = await Promise.all([
-      payload.jobs.handleSchedules({ queue: 'default' }),
-      payload.jobs.handleSchedules({ queue: 'other' }),
-    ])
+      const firstRun = await payload.jobs.run({ allQueues: true, silent: true })
 
-    for (const result of existingSchedules) {
-      expect(result.errored).toHaveLength(0)
-      expect(result.queued).toHaveLength(0)
-      expect(result.skipped).toHaveLength(1)
-    }
-
-    const firstRun = await payload.jobs.run({ allQueues: true, silent: true })
-
-    expect(Object.values(firstRun.jobStatus ?? {})).toEqual([
-      { status: 'success' },
-      { status: 'success' },
-    ])
-
-    // The previous jobs are complete. Queue their 12:30 replacements, which cannot run yet.
-    vi.setSystemTime(atTime('12:15:02'))
-
-    const nextSchedules = await Promise.all([
-      payload.jobs.handleSchedules({ queue: 'default' }),
-      payload.jobs.handleSchedules({ queue: 'other' }),
-    ])
-
-    for (const result of nextSchedules) {
-      expect(result.errored).toHaveLength(0)
-      expect(result.queued).toHaveLength(1)
-      expect(result.skipped).toHaveLength(0)
-    }
-
-    const nextJobs = await payload.find({
-      collection: 'payload-jobs',
-      sort: 'queue',
-      where: {
-        completedAt: { exists: false },
-      },
+      expect(Object.values(firstRun.jobStatus ?? {})).toEqual([
+        { status: 'success' },
+        { status: 'success' },
+      ])
     })
 
-    expect(nextJobs.totalDocs).toBe(2)
-    expect(nextJobs.docs).toMatchObject([
-      { queue: 'default', waitUntil: atTime('12:30') },
-      { queue: 'other', waitUntil: atTime('12:30') },
-    ])
+    await withSystemTime('12:15:02', async () => {
+      // The previous jobs are complete. Queue their 12:30 replacements, which cannot run yet.
+      const nextSchedules = await Promise.all([
+        payload.jobs.handleSchedules({ queue: 'default' }),
+        payload.jobs.handleSchedules({ queue: 'other' }),
+      ])
 
-    const earlyRun = await payload.jobs.run({ allQueues: true, silent: true })
+      for (const result of nextSchedules) {
+        expect(result.errored).toHaveLength(0)
+        expect(result.queued).toHaveLength(1)
+        expect(result.skipped).toHaveLength(0)
+      }
 
-    expect(earlyRun.jobStatus ?? {}).toEqual({})
+      expect(nextSchedules.map((result) => result.queued[0]?.job)).toMatchObject([
+        { queue: 'default', waitUntil: atTime('12:30') },
+        { queue: 'other', waitUntil: atTime('12:30') },
+      ])
 
-    const completedJobs = await payload.find({
-      collection: 'payload-jobs',
-      where: {
-        completedAt: { exists: true },
-      },
+      const earlyRun = await payload.jobs.run({ allQueues: true, silent: true })
+
+      expect(earlyRun.jobStatus ?? {}).toEqual({})
+
+      const completedJobs = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          completedAt: { exists: true },
+        },
+      })
+
+      expect(completedJobs.totalDocs).toBe(2)
     })
-
-    expect(completedJobs.totalDocs).toBe(2)
   })
 
   /**
@@ -117,13 +108,9 @@ test.suite({
   test('should queue only one job when two schedulers handle the same queue concurrently', async ({
     payload,
   }) => {
-    const deleteJobOnComplete = payload.config.jobs.deleteJobOnComplete
-
     payload.config.jobs.deleteJobOnComplete = true
-    vi.useFakeTimers({ toFake: ['Date'] })
-    vi.setSystemTime(atTime('12:00'))
 
-    try {
+    await withSystemTime('12:00', async () => {
       const results = await Promise.all([
         payload.jobs.handleSchedules({ queue: 'default' }),
         payload.jobs.handleSchedules({ queue: 'default' }),
@@ -133,17 +120,18 @@ test.suite({
         expect(result.errored).toHaveLength(0)
       }
 
-      const scheduledJobs = await payload.find({ collection: 'payload-jobs' })
+      const queued = results.flatMap((result) => result.queued)
 
-      expect(scheduledJobs.totalDocs).toBe(1)
-      expect(scheduledJobs.docs).toMatchObject([
-        { queue: 'default', taskSlug: 'scheduledTask', waitUntil: atTime('12:15') },
-      ])
-      expect(results.flatMap((result) => result.queued)).toHaveLength(1)
+      expect(queued).toHaveLength(1)
+      expect(queued[0]?.job).toMatchObject({
+        queue: 'default',
+        taskSlug: 'scheduledTask',
+        waitUntil: atTime('12:15'),
+      })
       expect(results.flatMap((result) => result.skipped)).toHaveLength(1)
+    })
 
-      vi.setSystemTime(atTime('12:16'))
-
+    await withSystemTime('12:16', async () => {
       const run = await payload.jobs.run({ queue: 'default', silent: true })
 
       expect(Object.values(run.jobStatus ?? {})).toEqual([{ status: 'success' }])
@@ -151,11 +139,120 @@ test.suite({
       const remainingJobs = await payload.find({ collection: 'payload-jobs' })
 
       expect(remainingJobs.totalDocs).toBe(0)
-    } finally {
-      payload.config.jobs.deleteJobOnComplete = deleteJobOnComplete
-    }
+    })
+  })
+
+  /**
+   * Check schedules at 12:00, wait until 12:16, run the job, then immediately
+   * check schedules again. The task should wait until 12:30 to run again.
+   */
+  test('should not run a scheduled task again immediately after it finishes', async ({
+    payload,
+  }) => {
+    payload.config.jobs.deleteJobOnComplete = true
+
+    await withSystemTime('12:00', async () => {
+      const firstSchedule = await payload.jobs.handleSchedules({ queue: 'default' })
+
+      expect(firstSchedule.queued).toHaveLength(1)
+      expect(firstSchedule.queued[0]?.job).toMatchObject({
+        queue: 'default',
+        taskSlug: 'scheduledTask',
+        waitUntil: atTime('12:15'),
+      })
+    })
+
+    await withSystemTime('12:16', async () => {
+      // Run the job due at 12:15.
+      const firstRun = await payload.jobs.run({ queue: 'default', silent: true })
+      const remainingJobs = await payload.find({ collection: 'payload-jobs' })
+
+      expect(Object.values(firstRun.jobStatus ?? {})).toEqual([{ status: 'success' }])
+      expect(remainingJobs.totalDocs).toBe(0)
+
+      // Still 12:16: scheduling again should not make the task run again yet.
+      const nextSchedule = await payload.jobs.handleSchedules({ queue: 'default' })
+
+      expect(nextSchedule.queued).toHaveLength(1)
+      expect(nextSchedule.queued[0]?.job).toMatchObject({
+        queue: 'default',
+        taskSlug: 'scheduledTask',
+        waitUntil: atTime('12:30'),
+      })
+
+      const secondRun = await payload.jobs.run({ queue: 'default', silent: true })
+
+      expect(Object.values(secondRun.jobStatus ?? {})).toEqual([])
+    })
+  })
+
+  /**
+   * autoRun checks schedules before every run. At 12:16, that extra check sees
+   * the waiting job and saves 12:16 as the last check time before the job runs.
+   * Scheduling again after it finishes then queues the next job for 12:30,
+   * so the task does not run twice.
+   */
+  test('should not run a scheduled task twice when checking schedules before every run', async ({
+    payload,
+  }) => {
+    payload.config.jobs.deleteJobOnComplete = true
+
+    await withSystemTime('12:00', async () => {
+      const firstSchedule = await payload.jobs.handleSchedules({ queue: 'default' })
+
+      expect(firstSchedule.queued).toHaveLength(1)
+      expect(firstSchedule.queued[0]?.job).toMatchObject({
+        queue: 'default',
+        taskSlug: 'scheduledTask',
+        waitUntil: atTime('12:15'),
+      })
+
+      const earlyRun = await payload.jobs.run({ queue: 'default', silent: true })
+
+      expect(Object.values(earlyRun.jobStatus ?? {})).toEqual([])
+    })
+
+    await withSystemTime('12:16', async () => {
+      // Check schedules before running the job due at 12:15.
+      const existingSchedule = await payload.jobs.handleSchedules({ queue: 'default' })
+
+      expect(existingSchedule.queued).toHaveLength(0)
+      expect(existingSchedule.skipped).toHaveLength(1)
+
+      const firstRun = await payload.jobs.run({ queue: 'default', silent: true })
+      const remainingJobs = await payload.find({ collection: 'payload-jobs' })
+
+      expect(Object.values(firstRun.jobStatus ?? {})).toEqual([{ status: 'success' }])
+      expect(remainingJobs.totalDocs).toBe(0)
+
+      // Still 12:16: scheduling again should not make the task run again yet.
+      const nextSchedule = await payload.jobs.handleSchedules({ queue: 'default' })
+
+      expect(nextSchedule.queued).toHaveLength(1)
+      expect(nextSchedule.queued[0]?.job).toMatchObject({
+        queue: 'default',
+        taskSlug: 'scheduledTask',
+        waitUntil: atTime('12:30'),
+      })
+
+      const secondRun = await payload.jobs.run({ queue: 'default', silent: true })
+
+      expect(Object.values(secondRun.jobStatus ?? {})).toEqual([])
+    })
   })
 })
+
+/** Freeze Date for this block, then restore real time even if an assertion fails. */
+async function withSystemTime(time: string, run: () => Promise<void>): Promise<void> {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(atTime(time))
+
+  try {
+    await run()
+  } finally {
+    vi.useRealTimers()
+  }
+}
 
 function atTime(time: string): string {
   const [hours, minutes, seconds = '00'] = time.split(':')
