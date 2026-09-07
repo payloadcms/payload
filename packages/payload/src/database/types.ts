@@ -407,13 +407,14 @@ export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   returning?: boolean
   select?: SelectType
   slug: string
+  /**
+   * Returns null without updating if no global matches.
+   */
+  where?: Where
 }
-/**
- * @todo type as Promise<T | null> in 4.0
- */
 export type UpdateGlobal = <T extends Record<string, unknown> = any>(
   args: UpdateGlobalArgs<T>,
-) => Promise<T>
+) => Promise<null | T>
 // export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type FindGlobalVersions = <T = JsonObject>(
