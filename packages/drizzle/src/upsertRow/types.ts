@@ -31,6 +31,7 @@ type CreateArgs = {
   customID?: number | string
   id?: never
   joinQuery?: never
+  limit?: never
   operation: 'create'
   select?: SelectType
   upsertTarget?: never
@@ -41,6 +42,8 @@ type UpdateArgs = {
   customID?: never
   id?: number | string
   joinQuery?: JoinQuery
+  /** Limit a direct update to one row when no ID is supplied. */
+  limit?: 1
   operation: 'update'
   select?: SelectType
   upsertTarget?: GenericColumn
