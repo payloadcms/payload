@@ -266,13 +266,20 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       if (hasMainRowData || where) {
         if (id) {
+          const table = adapter.tables[tableName]
+
+          /**
+           * The caller supplied this ID or found it by looking up the document with `where`.
+           * We should update that document, keeping any fields the caller left out.
+           * The row may have been deleted since the lookup. In that case, UPDATE returns
+           * no match and we stop below, instead of recreating the document with an upsert.
+           */
           rowToInsert.row.id = id
-          ;[insertedRow] = await adapter.insert({
-            db,
-            onConflictDoUpdate: { set: rowToInsert.row, target, where },
-            tableName,
-            values: rowToInsert.row,
-          })
+          ;[insertedRow] = await (db as LibSQLDatabase)
+            .update(table)
+            .set(rowToInsert.row)
+            .where(and(eq(table.id, id), where))
+            .returning({ id: table.id })
         } else {
           ;[insertedRow] = await adapter.insert({
             db,
