@@ -1,22 +1,10 @@
-import type { Field, FieldWithSubFields } from './config/types.js'
+import type { Field, FieldWithSubFields, RadioField, SelectField } from './config/types.js'
 
 import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'
 import { fieldAffectsData, fieldHasSubFields } from './config/types.js'
 
-const shouldOverrideMergedOptions = ({
-  baseField,
-  matchedField,
-}: {
-  baseField: Field
-  matchedField: Field
-}) => {
-  return (
-    (baseField.type === 'radio' || baseField.type === 'select') &&
-    (matchedField.type === 'radio' || matchedField.type === 'select') &&
-    'options' in matchedField &&
-    Array.isArray(matchedField.options)
-  )
-}
+const fieldHasOptions = (field: Field): field is RadioField | SelectField =>
+  (field.type === 'radio' || field.type === 'select') && Array.isArray(field.options)
 
 export const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
   const mergedFields = [...(fields || [])]
@@ -40,8 +28,8 @@ export const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] =
 
         const mergedField = deepMergeWithReactComponents<Field>(baseField, matchCopy)
 
-        if (shouldOverrideMergedOptions({ baseField, matchedField: matchCopy })) {
-          mergedField.options = matchCopy.options
+        if (fieldHasOptions(baseField) && fieldHasOptions(matchCopy)) {
+          ;(mergedField as RadioField | SelectField).options = matchCopy.options
         }
 
         if (fieldHasSubFields(baseField) && fieldHasSubFields(matchCopy)) {
