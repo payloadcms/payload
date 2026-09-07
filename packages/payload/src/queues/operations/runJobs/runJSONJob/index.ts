@@ -87,14 +87,17 @@ export const runJSONJob = async ({
       error:
         error instanceof WorkflowError
           ? error
-          : new WorkflowError({
-              job,
-              message:
-                typeof error === 'object' && error && 'message' in error
-                  ? (error.message as string)
-                  : 'An unhandled error occurred',
-              workflowConfig,
-            }),
+          : new WorkflowError(
+              {
+                job,
+                message:
+                  typeof error === 'object' && error && 'message' in error
+                    ? (error.message as string)
+                    : 'An unhandled error occurred',
+                workflowConfig,
+              },
+              { cause: error },
+            ),
       silent,
 
       req,
