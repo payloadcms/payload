@@ -3,6 +3,8 @@ import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import paginate from 'mongoose-paginate-v2'
 
+import type { MongooseIDType } from './buildSchema.js'
+
 import { getBuildQueryPlugin } from '../queries/getBuildQueryPlugin.js'
 import { buildSchema } from './buildSchema.js'
 
@@ -10,12 +12,14 @@ export const buildCollectionSchema = (
   collection: SanitizedCollectionConfig,
   payload: Payload,
   schemaOptions = {},
+  idType?: MongooseIDType,
 ): Schema => {
   const schema = buildSchema({
     buildSchemaOptions: {
       draftsEnabled: Boolean(
         typeof collection?.versions === 'object' && collection.versions.drafts,
       ),
+      idType,
       indexSortableFields: payload.config.indexSortableFields,
       options: {
         minimize: false,
