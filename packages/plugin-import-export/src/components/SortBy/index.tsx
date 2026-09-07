@@ -10,6 +10,7 @@ import {
   useDocumentInfo,
   useField,
   useListQuery,
+  useTranslation,
 } from '@payloadcms/ui'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -35,6 +36,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
   const { query } = useListQuery()
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
+  const { i18n } = useTranslation()
 
   // ReactSelect's displayed option
   const [displayedValue, setDisplayedValue] = useState<{
@@ -45,8 +47,8 @@ export const SortBy: SelectFieldClientComponent = (props) => {
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
   const fieldOptions = useMemo(
-    () => reduceFields({ excludeUnsortable: true, fields: collectionConfig?.fields }),
-    [collectionConfig?.fields],
+    () => reduceFields({ excludeUnsortable: true, fields: collectionConfig?.fields, i18n }),
+    [collectionConfig?.fields, i18n],
   )
 
   // Normalize the stored value for display (strip the '-') and pick the option

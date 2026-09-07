@@ -14,7 +14,7 @@ import {
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
-import React, { useEffect, useRef, useState, useTransition } from 'react'
+import React, { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 
 import type {
   PluginImportExportTranslationKeys,
@@ -24,6 +24,7 @@ import type { ExportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
 import './index.scss'
+import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'export-preview'
@@ -34,6 +35,7 @@ export const ExportPreview: React.FC = () => {
   const {
     config,
     config: { routes },
+    getEntityConfig,
   } = useConfig()
   const { collectionSlug } = useDocumentInfo()
   const { draft, fields, format, limit, locale, sort, where } = useFormFields(([fields]) => {
@@ -85,6 +87,23 @@ export const ExportPreview: React.FC = () => {
   }, [draft, fields, format, limit, locale, sort, where])
 
   const targetCollectionSlug = typeof collection === 'string' && collection
+
+  const targetCollectionConfig = targetCollectionSlug
+    ? getEntityConfig({ collectionSlug: targetCollectionSlug })
+    : undefined
+
+  // Map column keys (dot paths for JSON, underscore-flattened paths for CSV)
+  // to the translated label of the field they belong to
+  const fieldLabels = useMemo(() => {
+    const labels = new Map<string, string>()
+
+    reduceFields({ fields: targetCollectionConfig?.fields ?? [], i18n }).forEach((option) => {
+      labels.set(option.value, option.fieldLabel)
+      labels.set(option.value.replace(/\./g, '_'), option.fieldLabel)
+    })
+
+    return labels
+  }, [i18n, targetCollectionConfig?.fields])
 
   const isCSV = format === 'csv'
 
@@ -145,7 +164,7 @@ export const ExportPreview: React.FC = () => {
             accessor: key,
             active: true,
             field: { name: key } as ClientField,
-            Heading: getTranslation(key, i18n),
+            Heading: fieldLabels.get(key) ?? getTranslation(key, i18n),
             renderedCells: docs.map((doc: Record<string, unknown>) => {
               const val = doc[key]
 
@@ -196,6 +215,7 @@ export const ExportPreview: React.FC = () => {
       collectionSlug,
       draft,
       fields,
+      fieldLabels,
       format,
       i18n,
       limit,

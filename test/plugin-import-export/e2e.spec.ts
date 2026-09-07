@@ -200,6 +200,66 @@ test.describe('Import Export Plugin', () => {
       await expect(localeField.locator('.rs__single-value')).toHaveText('Spanish')
     })
 
+    test('should show translated field labels in export fields, sort and preview', async () => {
+      const setAdminLanguage = async (language: string) => {
+        await page.goto(`${serverURL}/admin/account`)
+        const languageField = page.locator('.payload-settings__language .react-select')
+        await expect(languageField).toBeVisible()
+        await languageField.click()
+        await page.locator('.rs__option', { hasText: language }).click()
+        await expect(languageField).toContainText(language)
+      }
+
+      const expectTitleLabel = async ({
+        exportButton,
+        label,
+      }: {
+        exportButton: string
+        label: string
+      }) => {
+        await page.goto(postsURL.list)
+        await expect(page.locator('.collection-list')).toBeVisible()
+
+        const listMenuButton = page.locator('#list-menu')
+        await expect(listMenuButton).toBeVisible()
+        await listMenuButton.click()
+
+        const createExportButton = page.locator('.popup__scroll-container button', {
+          hasText: exportButton,
+        })
+        await expect(createExportButton).toBeVisible()
+        await createExportButton.click()
+
+        // Export preview table heading uses the translated label instead of the field name
+        await expect(async () => {
+          await expect(page.locator('.export-preview table')).toBeVisible()
+          await expect(
+            page.locator('.export-preview table thead th', { hasText: label }),
+          ).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        // Fields to export selected values use the translated label
+        await expect(
+          page.locator('.fields-to-export .multi-value-label', { hasText: label }),
+        ).toBeVisible()
+
+        // Sort by options use the translated label
+        await page.locator('.sort-by-fields .rs__control').click()
+        await expect(page.locator('.rs__menu .rs__option', { hasText: label })).toBeVisible()
+        await page.keyboard.press('Escape')
+      }
+
+      // Posts.title is labelled { en: 'Title', es: 'Título', de: 'Titel' }
+      await expectTitleLabel({ exportButton: 'Export Posts', label: 'Title' })
+
+      await setAdminLanguage('Español')
+      try {
+        await expectTitleLabel({ exportButton: 'Exportar Posts', label: 'Título' })
+      } finally {
+        await setAdminLanguage('English')
+      }
+    })
+
     test('should download directly in the browser', async () => {
       await page.goto(exportsURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
@@ -493,16 +553,17 @@ test.describe('Import Export Plugin', () => {
         const uniqueHeaders = new Set(normalizedHeaders)
         expect(uniqueHeaders.size).toBe(normalizedHeaders.length)
 
-        // Verify expected columns are present (id, title, createdAt, updatedAt)
+        // Verify expected columns are present (id, title, createdAt, updatedAt).
+        // Timestamp headings show the translated field label ("Created At") rather than the key.
         expect(normalizedHeaders).toContain('id')
         expect(normalizedHeaders).toContain('title')
-        expect(normalizedHeaders).toContain('createdat')
-        expect(normalizedHeaders).toContain('updatedat')
+        expect(normalizedHeaders).toContain('created at')
+        expect(normalizedHeaders).toContain('updated at')
 
         // Verify we don't have duplicates of these key columns
         const idCount = normalizedHeaders.filter((h) => h === 'id').length
-        const createdAtCount = normalizedHeaders.filter((h) => h === 'createdat').length
-        const updatedAtCount = normalizedHeaders.filter((h) => h === 'updatedat').length
+        const createdAtCount = normalizedHeaders.filter((h) => h === 'created at').length
+        const updatedAtCount = normalizedHeaders.filter((h) => h === 'updated at').length
 
         expect(idCount).toBe(1)
         expect(createdAtCount).toBe(1)

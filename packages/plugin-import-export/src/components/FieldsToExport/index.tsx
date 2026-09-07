@@ -10,6 +10,7 @@ import {
   useDocumentInfo,
   useField,
   useListQuery,
+  useTranslation,
 } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
@@ -25,6 +26,7 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
   const { query } = useListQuery()
+  const { i18n } = useTranslation()
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
 
@@ -34,6 +36,7 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const fieldOptions = reduceFields({
     disabledFields,
     fields: collectionConfig?.fields,
+    i18n,
   })
 
   useEffect(() => {
