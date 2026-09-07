@@ -1,0 +1,53 @@
+import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.js'
+
+export const fiTranslations: PluginDefaultTranslationsObject = {
+  'plugin-import-export': {
+    allLocales: 'Kaikki kielet',
+    collectionRequired: 'Valitse kokoelma nähdäksesi esikatselun',
+    documentsToExport: '{{count}} dokumenttia vietäväksi',
+    documentsToImport: '{{count}} dokumenttia tuotavaksi',
+    exportDocumentLabel: 'Vie {{label}}',
+    exportOptions: 'Vientiasetukset',
+    'field-collectionSlug-label': 'Kokoelma',
+    'field-depth-label': 'Syvyys',
+    'field-drafts-label': 'Sisällytä luonnokset',
+    'field-fields-label': 'Kentät',
+    'field-format-label': 'Vientiformaatti',
+    'field-importMode-create-label': 'Luo uudet dokumentit',
+    'field-importMode-label': 'Tuontitila',
+    'field-importMode-update-label': 'Päivitä olemassa olevat dokumentit',
+    'field-importMode-upsert-label': 'Luo tai päivitä dokumentit',
+    'field-limit-label': 'Maksimimäärä',
+    'field-locale-label': 'Kieli',
+    'field-matchField-description': 'Kenttä, jolla olemassa olevat dokumentit tunnistetaan',
+    'field-matchField-label': 'Tunnistuskenttä',
+    'field-name-label': 'Tiedostonimi',
+    'field-page-label': 'Sivu',
+    'field-selectionToUse-label': 'Käytettävä valinta',
+    'field-sort-label': 'Järjestä',
+    'field-sort-order-label': 'Järjestyssuunta',
+    'field-status-label': 'Tila',
+    'field-summary-label': 'Tuontiyhteenveto',
+    importDocumentLabel: 'Tuo {{label}}',
+    importResults: 'Tuonnin tulokset',
+    limitCapped: 'Rajattu enintään arvoon {{limit}}',
+    limitExceededExport: 'Vienti rajoitettu {{limit}} dokumenttiin',
+    limitExceededImport:
+      'Tuontitiedosto sisältää {{count}} dokumenttia, mutta rajoitus on {{limit}}',
+    matchBy: 'Tunnistustapa',
+    mode: 'Tila',
+    noDataToPreview: 'Ei tietoja esikatseltavaksi',
+    previewPageInfo: '{{start}}-{{end}} / {{total}}',
+    'selectionToUse-allDocuments': 'Käytä kaikkia dokumentteja',
+    'selectionToUse-currentFilters': 'Käytä nykyisiä suodattimia',
+    'selectionToUse-currentSelection': 'Käytä nykyistä valintaa',
+    startImport: 'Aloita tuonti',
+    totalDocumentsCount: '{{count}} dokumenttia yhteensä',
+    uploadFileToSeePreview: 'Lataa tiedosto nähdäksesi esikatselun',
+  },
+}
+
+export const fi: PluginLanguage = {
+  dateFNSKey: 'fi',
+  translations: fiTranslations,
+}

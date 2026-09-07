@@ -41,6 +41,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'پاراگراف',
     label2: 'متن عادی',
   },
+  fi: {
+    label: 'Kappale',
+    label2: 'Normaali teksti',
+  },
   fr: {
     label: 'Paragraphe',
     label2: 'Texte normal',

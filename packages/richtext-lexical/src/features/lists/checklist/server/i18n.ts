@@ -31,6 +31,9 @@ export const i18n: Partial<GenericLanguages> = {
   fa: {
     label: 'لیست بررسی',
   },
+  fi: {
+    label: 'Tarkistuslista',
+  },
   fr: {
     label: 'Liste de contrôle',
   },
