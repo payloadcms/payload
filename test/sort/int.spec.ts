@@ -6,15 +6,15 @@ import { expect } from 'vitest'
 
 import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterAll, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { draftsSlug } from './collections/Drafts/index.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
-test.suite({ config: './config.ts' })('Sort', () => {
-  test.describe('Local API', () => {
-    test.beforeEach(async ({ payload }) => {
+suite('Sort', { config: './config.ts' }, () => {
+  describe('Local API', () => {
+    beforeEach(async ({ payload }) => {
       await createData(payload, 'posts', [
         { text: 'Post 1', number: 1, number2: 10, group: { number: 100 } },
         { text: 'Post 2', number: 2, number2: 10, group: { number: 200 } },
@@ -31,7 +31,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
       ])
     })
 
-    test.describe('Default sort', () => {
+    describe('Default sort', () => {
       test('should sort posts by default definition in collection', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'default-sort', // 'number,-text'
@@ -46,7 +46,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Single sort field', () => {
+    describe('Single sort field', () => {
       test('should sort posts by text field', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
@@ -112,7 +112,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Non-unique sorting', () => {
+    describe('Non-unique sorting', () => {
       // There are situations where the sort order is not guaranteed to be consistent, such as when sorting by a non-unique field in MongoDB which does not keep an internal order of items
       // As a result, every time you fetch, including fetching specific pages, the order of items may change and appear as duplicated to some users.
       test('should always be consistent when sorting', async ({ payload }) => {
@@ -262,7 +262,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Sort by multiple fields', () => {
+    describe('Sort by multiple fields', () => {
       test('should sort posts by multiple fields', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'posts',
@@ -312,8 +312,8 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Sort with drafts', () => {
-      test.beforeEach(async ({ payload }) => {
+    describe('Sort with drafts', () => {
+      beforeEach(async ({ payload }) => {
         const testData1 = await payload.create({
           collection: 'drafts',
           data: { text: 'Post 1 draft', number: 10 },
@@ -409,8 +409,8 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Localized sort', () => {
-      test.beforeEach(async ({ payload }) => {
+    describe('Localized sort', () => {
+      beforeEach(async ({ payload }) => {
         const testData1 = await payload.create({
           collection: 'localized',
           data: { text: 'Post 1 english', number: 10 },
@@ -460,12 +460,12 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Orderable', () => {
+    describe('Orderable', () => {
       let orderable1: Orderable
       let orderable2: Orderable
       let orderableDraft1: Draft
       let orderableDraft2: Draft
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         orderable1 = await payload.create({
           collection: orderableSlug,
           data: {
@@ -909,13 +909,13 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Orderable join', () => {
+    describe('Orderable join', () => {
       let related: OrderableJoin
       let orderable1: Orderable
       let orderable2: Orderable
       let orderable3: Orderable
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         related = await payload.create({
           collection: orderableJoinSlug,
           data: {
@@ -1243,8 +1243,8 @@ test.suite({ config: './config.ts' })('Sort', () => {
     })
   })
 
-  test.describe('REST API', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('REST API', () => {
+    beforeEach(async ({ payload }) => {
       await createData(payload, 'posts', [
         { text: 'Post 1', number: 1, number2: 10 },
         { text: 'Post 2', number: 2, number2: 10 },
@@ -1255,11 +1255,11 @@ test.suite({ config: './config.ts' })('Sort', () => {
       ])
     })
 
-    test.afterAll(async ({ payloadInstance }) => {
+    afterAll(async ({ payloadInstance }) => {
       await payloadInstance.delete({ collection: 'posts', where: {} })
     })
 
-    test.describe('Single sort field', () => {
+    describe('Single sort field', () => {
       test('should sort posts by text field', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts`, {
@@ -1337,7 +1337,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Sort by multiple fields', () => {
+    describe('Sort by multiple fields', () => {
       test('should sort posts by multiple fields', async ({ restClient }) => {
         const res = await restClient
           .GET(`/posts`, {
@@ -1377,7 +1377,7 @@ test.suite({ config: './config.ts' })('Sort', () => {
       })
     })
 
-    test.describe('Sort by multiple fields as array', () => {
+    describe('Sort by multiple fields as array', () => {
       test('should sort posts by multiple fields using qs-esm array params', async ({
         restClient,
       }) => {

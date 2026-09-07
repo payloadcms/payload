@@ -1,9 +1,10 @@
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts', db: (adapter) => adapter.startsWith('sqlite') })(
+suite(
   'database - sqlite bound parameters limit',
+  { config: './config.ts', db: (adapter) => adapter.startsWith('sqlite') },
   () => {
     test('should not use bound parameters for where querying on ID with IN if limitedBoundParameters: true', async ({
       payload,

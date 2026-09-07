@@ -17,9 +17,9 @@ const dirname = path.dirname(filename)
 
 import type { CollectionPopulationRequestHandler } from '../../packages/live-preview/src/types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
+suite('Collections - Live Preview', { config: './config.ts' }, () => {
   const serverURL: string = `http://localhost:${process.env.PORT || 3000}`
 
   let testPost: Post
@@ -34,7 +34,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
   ) => Promise<Record<string, any>> = mergeDataImport as any
   let createPageWithInitialData: (initialData: Partial<Page>) => Promise<Page>
 
-  test.beforeEach(async ({ payload, restClient }) => {
+  beforeEach(async ({ payload, restClient }) => {
     const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
       const url = `/${endpoint}`
       const headers: Record<string, string> = {

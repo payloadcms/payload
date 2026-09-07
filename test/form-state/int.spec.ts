@@ -12,7 +12,7 @@ import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, suite, test } from '../__helpers/int/vitest.js'
 
 let user: User
 
@@ -26,8 +26,8 @@ const DummyReactComponent: React.ReactNode = {
   key: null,
 }
 
-test.suite({ config: './config.ts' })('Form State', () => {
-  test.beforeEach(async ({ restClient }) => {
+suite('Form State', { config: './config.ts' }, () => {
+  beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({

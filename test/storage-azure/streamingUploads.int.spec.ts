@@ -7,17 +7,17 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, suite, test } from '../__helpers/int/vitest.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUploads', () => {
+suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts' }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
-  test.beforeEach(async () => {
+  beforeEach(async () => {
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
 
     const blobServiceClient = BlobServiceClient.fromConnectionString(
@@ -29,7 +29,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUpload
     await clearContainer()
   }, 90000)
 
-  test.afterEach(async () => {
+  afterEach(async () => {
     await clearContainer()
   })
 

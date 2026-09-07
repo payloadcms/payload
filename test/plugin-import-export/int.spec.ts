@@ -7,7 +7,15 @@ import { extractID } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  suite,
+  test,
+} from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
 import { readCSV, readJSON } from './helpers.js'
@@ -20,8 +28,8 @@ let restrictedUser: any
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => {
-  test.beforeEach(async ({ payload }) => {
+suite('@payloadcms/plugin-import-export', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: {
@@ -43,7 +51,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     }
   })
 
-  test.describe('i18n scoping', () => {
+  describe('i18n scoping', () => {
     test('should only merge plugin translations for supportedLanguages', ({ payload }) => {
       const supportedLangKeys = Object.keys(payload.config.i18n.supportedLanguages)
       expect(supportedLangKeys.sort()).toEqual(['en', 'es', 'he'])
@@ -62,7 +70,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('graphql', () => {
+  describe('graphql', () => {
     test('should not break graphql', async ({ restClient }) => {
       const query = `query {
         __schema {
@@ -81,7 +89,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('exports', () => {
+  describe('exports', () => {
     test('should create a file for collection csv from defined fields', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
@@ -1107,7 +1115,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
 
-    test.describe('schema-based column inference', () => {
+    describe('schema-based column inference', () => {
       test('should generate columns from schema without scanning documents', async ({
         payload,
       }) => {
@@ -1240,7 +1248,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('beforeExport derived columns positioning', () => {
+    describe('beforeExport derived columns positioning', () => {
       test('should position derived columns at the base field position and remove the original column', async ({
         payload,
       }) => {
@@ -1528,7 +1536,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('date field export', () => {
+    describe('date field export', () => {
       test('should export date fields as ISO strings', async ({ payload }) => {
         const dateValue = '2026-01-22T00:00:00.000Z'
         const page = await payload.create({
@@ -1670,7 +1678,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('export collection config options', () => {
+    describe('export collection config options', () => {
       test('should apply per-collection overrideCollection to create custom export collection', ({
         payload,
       }) => {
@@ -1709,7 +1717,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('json and richText fields CSV serialization', () => {
+    describe('json and richText fields CSV serialization', () => {
       test('should serialize json and richText fields as JSON strings in single columns', async ({
         payload,
       }) => {
@@ -2390,7 +2398,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('Excel compatibility', () => {
+    describe('Excel compatibility', () => {
       test('should include UTF-8 BOM at the start of CSV files', async ({ payload }) => {
         const page = await payload.create({
           collection: 'pages',
@@ -2666,7 +2674,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('fields', () => {
+    describe('fields', () => {
       test('should export checkbox field as true/false strings', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
@@ -2893,10 +2901,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('custom ID exports', () => {
+    describe('custom ID exports', () => {
       const createdCustomIdPages: string[] = []
 
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         for (const id of createdCustomIdPages) {
           try {
             await payload.delete({
@@ -3020,8 +3028,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('imports', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('imports', () => {
+    beforeEach(async ({ payload }) => {
       await payload.delete({
         collection: 'pages',
         where: {
@@ -4751,7 +4759,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('batch processing', () => {
+    describe('batch processing', () => {
       test('should process large imports in batches', async ({ payload }) => {
         const rows = ['title,excerpt']
         for (let i = 0; i < 250; i++) {
@@ -5188,7 +5196,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('fields', () => {
+    describe('fields', () => {
       test('should import checkbox field from CSV', async ({ payload }) => {
         const csvContent =
           'title,checkbox\n' +
@@ -5703,10 +5711,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('custom ID imports', () => {
+    describe('custom ID imports', () => {
       const createdCustomIdPages: string[] = []
 
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         for (const id of createdCustomIdPages) {
           try {
             await payload.delete({
@@ -6003,7 +6011,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('collection configuration', () => {
+  describe('collection configuration', () => {
     test('should exclude collections with custom export collections from base exports', ({
       payload,
     }) => {
@@ -6056,8 +6064,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('posts-exports-only and posts-imports-only collections', () => {
-    test.describe('posts-exports-only', () => {
+  describe('posts-exports-only and posts-imports-only collections', () => {
+    describe('posts-exports-only', () => {
       test('should export from posts-exports-only collection (no jobs queue)', async ({
         payload,
       }) => {
@@ -6122,7 +6130,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('posts-imports-only', () => {
+    describe('posts-imports-only', () => {
       test('should import to posts-imports-only collection (no jobs queue, synchronous)', async ({
         payload,
       }) => {
@@ -6285,7 +6293,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('access control with jobs queue', () => {
+  describe('access control with jobs queue', () => {
     test('should respect access control when export uses jobs queue', async ({ payload }) => {
       for (let i = 0; i < 3; i++) {
         await payload.create({
@@ -6367,7 +6375,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('preview endpoints', () => {
+  describe('preview endpoints', () => {
     test('should return export preview data for CSV format', async ({ payload, restClient }) => {
       await payload.create({
         collection: 'pages',
@@ -7165,7 +7173,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('rich text field handling', () => {
+  describe('rich text field handling', () => {
     test('should preserve Lexical numeric properties on JSON export/import', async ({
       payload,
     }) => {
@@ -7350,7 +7358,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('error recovery', () => {
+  describe('error recovery', () => {
     test('should continue processing after individual document errors', async ({ payload }) => {
       const csvContent =
         'title\n' +
@@ -7478,7 +7486,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('custom field functions edge cases', () => {
+  describe('custom field functions edge cases', () => {
     test('should handle beforeExport hook that returns undefined', async ({ payload }) => {
       const page = await payload.create({
         collection: 'pages',
@@ -7608,7 +7616,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('disabled fields in complex structures', () => {
+  describe('disabled fields in complex structures', () => {
     test('should exclude disabled fields from export', async ({ payload }) => {
       const page = await payload.create({
         collection: 'pages',
@@ -7656,7 +7664,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('JSON-specific tests', () => {
+  describe('JSON-specific tests', () => {
     test('should import deeply nested JSON objects', async ({ payload }) => {
       const nestedData = [
         {
@@ -7831,7 +7839,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('limit and pagination edge cases', () => {
+  describe('limit and pagination edge cases', () => {
     test('should handle page exceeding total pages', async ({ payload }) => {
       await payload.create({
         collection: 'pages',
@@ -7963,7 +7971,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('streaming export edge cases', () => {
+  describe('streaming export edge cases', () => {
     test('should stream large exports without memory issues', async ({ payload }) => {
       const promises = []
       for (let i = 0; i < 100; i++) {
@@ -8037,7 +8045,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('concurrent operations', () => {
+  describe('concurrent operations', () => {
     test('should handle multiple simultaneous imports', async ({ payload }) => {
       const timestamp = Date.now()
 
@@ -8172,10 +8180,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
     })
   })
 
-  test.describe('max limit enforcement', () => {
+  describe('max limit enforcement', () => {
     const createdPostIds: (number | string)[] = []
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       // Create 10 test documents (more than the limit of 5)
       for (let i = 0; i < 10; i++) {
         const doc = await payload.create({
@@ -8186,7 +8194,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       }
     })
 
-    test.afterAll(async ({ payloadInstance }) => {
+    afterAll(async ({ payloadInstance }) => {
       // Clean up all test documents
       if (createdPostIds.length > 0) {
         for (const id of createdPostIds) {
@@ -8203,7 +8211,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       }
     })
 
-    test.describe('export max limit', () => {
+    describe('export max limit', () => {
       test('should limit export to maxLimit when no user limit specified', async ({ payload }) => {
         const exportDoc = await payload.create({
           collection: 'posts-with-limits-export',
@@ -8363,7 +8371,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
       })
     })
 
-    test.describe('import max limit', () => {
+    describe('import max limit', () => {
       test('should reject import when document count exceeds maxLimit', async ({ payload }) => {
         const csvContent = Array.from({ length: 10 }, (_, i) => `"Exceed Limit Import ${i}"`).join(
           '\n',
@@ -8582,11 +8590,11 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
         })
       })
     })
-    test.describe('dynamic user-based export limits', () => {
+    describe('dynamic user-based export limits', () => {
       const createdPostIds: (number | string)[] = []
       let userWithDynamicLimit: any
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         // Find the dev user and set their limit to 7
         const devUserDocs = await payload.find({
           collection: 'users',
@@ -8615,7 +8623,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
         }
       })
 
-      test.afterAll(async ({ payloadInstance }) => {
+      afterAll(async ({ payloadInstance }) => {
         // Reset the dev user's limit
         const devUserDocs = await payloadInstance.find({
           collection: 'users',
@@ -8655,7 +8663,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
         createdPostIds.length = 0
       })
 
-      test.describe('export with dynamic user limit of 7', () => {
+      describe('export with dynamic user limit of 7', () => {
         test('should export up to 7 documents when user limit is set to 7', async ({ payload }) => {
           const exportDoc = await payload.create({
             collection: 'posts-with-limits-export',
@@ -8816,7 +8824,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
         })
       })
 
-      test.describe('import limit remains static despite user limit change', () => {
+      describe('import limit remains static despite user limit change', () => {
         test('should reject import with 7 documents when static import limit is 5', async ({
           payload,
         }) => {
@@ -8924,15 +8932,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export', () => 
   // The int test environment uses in-process route handlers, but getFileFromDoc uses
   // fetch() which requires a real HTTP server. See e2e.spec.ts for S3 tests that run
   // with a real server.
-  test.describe.skip('S3 storage', () => {
+  describe.skip('S3 storage', () => {
     const createdPostIDs: (number | string)[] = []
 
-    test.beforeAll(async () => {
+    beforeAll(async () => {
       await createTestBucket()
       await clearTestBucket()
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdPostIDs) {
         try {
           await payload.delete({

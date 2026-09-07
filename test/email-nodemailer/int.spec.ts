@@ -3,7 +3,7 @@ import type { NodemailerAdapterArgs } from '@payloadcms/email-nodemailer'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { expect, type Mock, vi } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 
 let mockedSendEmail: Mock
 
@@ -15,13 +15,13 @@ type EmailReturnType = {
   to: string
 }
 
-test.suite({ config: './config.ts' })('@payloadcms/email-nodemailer', () => {
-  test.beforeEach(() => {
+suite('@payloadcms/email-nodemailer', { config: './config.ts' }, () => {
+  beforeEach(() => {
     mockedSendEmail = vi.fn()
   })
 
-  test.describe('without basic config', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('without basic config', () => {
+    beforeEach(async ({ payload }) => {
       // Partially mocked transport
       const mockedTransport = {
         sendMail: (message) => {
@@ -53,8 +53,8 @@ test.suite({ config: './config.ts' })('@payloadcms/email-nodemailer', () => {
     })
   })
 
-  test.describe('with overrideRecipientAddress', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('with overrideRecipientAddress', () => {
+    beforeEach(async ({ payload }) => {
       // Partially mocked transport
       const mockedTransport = {
         sendMail: (message) => {

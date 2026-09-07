@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 import {
   accessControlSlug,
   arraySlug,
@@ -11,8 +11,8 @@ import {
   spanishLocale,
 } from './config.js'
 
-test.suite({ config: './config.ts' })('globals', () => {
-  test.describe('REST', () => {
+suite('globals', { config: './config.ts' }, () => {
+  describe('REST', () => {
     test('should create', async ({ restClient }) => {
       const title = 'update'
       const data = {
@@ -64,7 +64,7 @@ test.suite({ config: './config.ts' })('globals', () => {
     })
   })
 
-  test.describe('local', () => {
+  describe('local', () => {
     test('should save empty json objects', async ({ payload }) => {
       const createdJSON: any = await payload.updateGlobal({
         data: {
@@ -202,7 +202,7 @@ test.suite({ config: './config.ts' })('globals', () => {
     })
   })
 
-  test.describe('graphql', () => {
+  describe('graphql', () => {
     test('should create', async ({ restClient }) => {
       const title = 'graphql-title'
       const query = `mutation {

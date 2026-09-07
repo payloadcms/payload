@@ -46,7 +46,7 @@ import {
 
 // Diff converter
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
@@ -67,8 +67,8 @@ let createdJPGDocID: number | string = null
 let createdTextDocID: number | string = null
 let createdRichTextDocID: number | string = null
 
-test.suite({ config: './config.ts' })('Lexical', () => {
-  test.beforeEach(async ({ payload, restClient }) => {
+suite('Lexical', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload, restClient }) => {
     await restClient.login({
       slug: 'users',
       credentials: devUser,
@@ -123,7 +123,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     ).docs[0].id
   })
 
-  test.describe('basic', () => {
+  describe('basic', () => {
     test('should allow querying on lexical content', async ({ payload }) => {
       const richTextDoc: RichTextField = (
         await payload.find({
@@ -307,7 +307,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     )
   })
 
-  test.describe('upload markdown: Lexical → Markdown (export)', () => {
+  describe('upload markdown: Lexical → Markdown (export)', () => {
     test('exports upload node to markdown placeholder when unpopulated', async ({ payload }) => {
       const newLexicalDoc = await payload.create({
         collection: lexicalFieldsSlug,
@@ -352,7 +352,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     })
   })
 
-  test.describe('advanced - blocks', () => {
+  describe('advanced - blocks', () => {
     test('should not populate relationships in blocks if depth is 0', async ({ payload }) => {
       const lexicalDoc: LexicalField = (
         await payload.find({
@@ -603,7 +603,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     })
   })
 
-  test.describe('Localization', () => {
+  describe('Localization', () => {
     test('ensure localized lexical field is different across locales', async ({ payload }) => {
       const lexicalDocEN = await payload.find({
         collection: 'lexical-localized-fields',
@@ -668,7 +668,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     })
   })
 
-  test.describe('Hooks', () => {
+  describe('Hooks', () => {
     test('ensure hook within number field within lexical block runs', async ({ payload }) => {
       const lexicalDocEN = await payload.create({
         collection: 'lexical-localized-fields',
@@ -701,7 +701,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     })
   })
 
-  test.describe('Autosave', () => {
+  describe('Autosave', () => {
     test('should populate previousValue in afterChange hooks for fields inside lexical', async ({
       payload,
     }) => {
@@ -792,7 +792,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     })
   })
 
-  test.describe('sanitizeUrl', () => {
+  describe('sanitizeUrl', () => {
     test.each([
       ['http://example.com', 'http://example.com'],
       ['https://example.com/page', 'https://example.com/page'],
@@ -859,9 +859,9 @@ test.suite({ config: './config.ts' })('Lexical', () => {
   ] as const
 
   for (const variant of converterVariants) {
-    test.describe(`HTML Converters (${variant.label})`, () => {
+    describe(`HTML Converters (${variant.label})`, () => {
       // ── Text ──
-      test.describe('TextHTMLConverter', () => {
+      describe('TextHTMLConverter', () => {
         test('escapes script tags in text content', async () => {
           const result = await variant.text.text!({
             ...converterBaseArgs,
@@ -903,7 +903,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       })
 
       // ── Link ──
-      test.describe('LinkHTMLConverter', () => {
+      describe('LinkHTMLConverter', () => {
         test('blocks javascript: protocol in autolink', async () => {
           const result = await variant.link.autolink!({
             ...converterBaseArgs,
@@ -976,7 +976,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       })
 
       // ── Upload ──
-      test.describe('UploadHTMLConverter', () => {
+      describe('UploadHTMLConverter', () => {
         const baseUploadNode = {
           fields: {},
           relationTo: 'uploads',
@@ -1064,7 +1064,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       })
 
       // ── Heading ──
-      test.describe('HeadingHTMLConverter', () => {
+      describe('HeadingHTMLConverter', () => {
         test.each(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])('allows valid tag: %s', async (tag) => {
           const result = await variant.heading.heading!({
             ...converterBaseArgs,
@@ -1087,7 +1087,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       })
 
       // ── List ──
-      test.describe('ListHTMLConverter', () => {
+      describe('ListHTMLConverter', () => {
         test.each(['ol', 'ul'])('allows valid list tag: %s', async (tag) => {
           const result = await variant.list.list!({
             ...converterBaseArgs,
@@ -1120,7 +1120,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       })
 
       // ── Table ──
-      test.describe('TableHTMLConverter', () => {
+      describe('TableHTMLConverter', () => {
         test.each([
           ['hex', '#ff0000'],
           ['named', 'steelblue'],
@@ -1178,7 +1178,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     })
   }
 
-  test.describe('UploadHTMLConverter — picture/source path', () => {
+  describe('UploadHTMLConverter — picture/source path', () => {
     test('escapes HTML in source srcset and type attributes', () => {
       const result = UploadHTMLConverter.upload!({
         ...converterBaseArgs,
@@ -1214,7 +1214,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     })
   })
 
-  test.describe('Diff View Link Converter', () => {
+  describe('Diff View Link Converter', () => {
     const diffLinkConverter = LinkDiffHTMLConverterAsync({})
 
     test('blocks disallowed protocols in autolink', async () => {
@@ -1275,7 +1275,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
   })
 })
 
-test.describe('Lexical root editor sanitization', () => {
+describe('Lexical root editor sanitization', () => {
   test('should resolve referenced blocks after their fields are sanitized', () => {
     const config = {
       blocks: [
@@ -1311,7 +1311,7 @@ test.describe('Lexical root editor sanitization', () => {
   })
 })
 
-test.describe('Lexical block interface generation', () => {
+describe('Lexical block interface generation', () => {
   // A lexical block's interface is named after its slug (PascalCase) or its `interfaceName`.
   // When two differently-shaped blocks resolve to the same name, each must get its own
   // interface — the first keeps the clean name, the second gets a content-hash suffix — so
@@ -1357,7 +1357,7 @@ test.describe('Lexical block interface generation', () => {
   })
 })
 
-test.describe('Lexical link fields interface generation', () => {
+describe('Lexical link fields interface generation', () => {
   // The node-union name is a content hash of the editor's nodes. A link node only carries a `$ref`
   // to its `LexicalLinkFields_<hash>` interface, whose *content* lives separately — so two editors
   // with identical nodes but different custom LinkFeature fields must not hash the same, or one
@@ -1402,7 +1402,7 @@ test.describe('Lexical link fields interface generation', () => {
   })
 })
 
-test.describe('Lexical upload node type generation', () => {
+describe('Lexical upload node type generation', () => {
   // The upload node's JSON Schema validates configured extra fields strictly, so the generated
   // TypeScript must expose them too - not erase them to `{ [k: string]: unknown }`.
   test('reflects UploadFeature extra fields in the generated upload node type', async () => {
@@ -1445,7 +1445,7 @@ test.describe('Lexical upload node type generation', () => {
   })
 })
 
-test.describe('Lexical inline block node type generation', () => {
+describe('Lexical inline block node type generation', () => {
   // A `BlocksFeature` with `blocks` but no `inlineBlocks` should not make the generated node union
   // claim the field can contain inline-block nodes - the editor can never produce one.
   test('omits the inline-block node type when no inline blocks are configured', async () => {

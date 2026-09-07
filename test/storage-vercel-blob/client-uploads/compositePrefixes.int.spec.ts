@@ -6,7 +6,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { afterEach, suite, test } from '../../__helpers/int/vitest.js'
 import { collectionPrefix, mediaWithCompositePrefixesSlug } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -16,10 +16,11 @@ dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emu
 
 const createdDocIDs: Array<number | string> = []
 
-test.suite({ config: './config.compositePrefixes.ts' })(
+suite(
   '@payloadcms/storage-vercel-blob clientUploads (composite prefixes)',
+  { config: './config.compositePrefixes.ts' },
   () => {
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdDocIDs) {
         await payload.delete({
           id,

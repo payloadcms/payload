@@ -1,6 +1,7 @@
 import noJsxImportStatements from './customRules/no-jsx-import-statements.js'
 import noNonRetryableAssertions from './customRules/no-non-retryable-assertions.js'
 import noRelativeMonorepoImports from './customRules/no-relative-monorepo-imports.js'
+import noVitestScopedMethods from './customRules/no-vitest-scoped-methods.js'
 import noImportsFromExportsDir from './customRules/no-imports-from-exports-dir.js'
 import noFlakyAssertions from './customRules/no-flaky-assertions.js'
 import noImportsFromSelf from './customRules/no-imports-from-self.js'
@@ -15,6 +16,7 @@ const index = {
   rules: {
     'no-jsx-import-statements': noJsxImportStatements,
     'no-relative-monorepo-imports': noRelativeMonorepoImports,
+    'no-vitest-scoped-methods': noVitestScopedMethods,
     'no-imports-from-exports-dir': noImportsFromExportsDir,
     'no-imports-from-self': noImportsFromSelf,
     'no-conflicting-lexical-markdown-imports': noConflictingLexicalMarkdownImports,

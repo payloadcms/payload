@@ -3,19 +3,19 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, suite, test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
+suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
   let page = null
   let mediaDoc = null
   let mediaDoc2 = null
 
-  test.beforeEach(async ({ payload }) => {
+  beforeEach(async ({ payload }) => {
     const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
 

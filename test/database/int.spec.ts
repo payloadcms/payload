@@ -33,7 +33,16 @@ import { expect } from 'vitest'
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
-import { test } from '../__helpers/int/vitest.js'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  matchesDatabase,
+  suite,
+  test,
+} from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
 import {
@@ -55,8 +64,8 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-test.suite({ config: './config.ts' })('database', () => {
-  test.beforeEach(async ({ payload, restClient }) => {
+suite('database', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload, restClient }) => {
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     await restClient.login({
@@ -76,28 +85,28 @@ test.suite({ config: './config.ts' })('database', () => {
     token = loginResult.token
   })
 
-  test
-    .options({
+  describe.runIf(
+    matchesDatabase({
       db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
+    }),
+  )('connection pool', () => {
+    test('should not leave a client checked out after connecting', async ({ payload }) => {
+      const { pool } = payload.db as unknown as PostgresAdapter
+
+      // Awaiting a query guarantees the pool has been used and that nothing is
+      // in flight while the counts below are read.
+      await payload.count({ collection: 'simple' })
+
+      expect(pool.totalCount).toBeGreaterThan(0)
+
+      // `connect` acquires a client to verify connectivity and to listen for
+      // ECONNRESET. Failing to release it pins that client for the lifetime of
+      // the process, so `pool.end()` never drains after `payload.destroy()`.
+      expect(pool.totalCount - pool.idleCount).toBe(0)
     })
-    .describe('connection pool', () => {
-      test('should not leave a client checked out after connecting', async ({ payload }) => {
-        const { pool } = payload.db as unknown as PostgresAdapter
+  })
 
-        // Awaiting a query guarantees the pool has been used and that nothing is
-        // in flight while the counts below are read.
-        await payload.count({ collection: 'simple' })
-
-        expect(pool.totalCount).toBeGreaterThan(0)
-
-        // `connect` acquires a client to verify connectivity and to listen for
-        // ECONNRESET. Failing to release it pins that client for the lifetime of
-        // the process, so `pool.end()` never drains after `payload.destroy()`.
-        expect(pool.totalCount - pool.idleCount).toBe(0)
-      })
-    })
-
-  test.describe('id type', () => {
+  describe('id type', () => {
     test('should sanitize incoming IDs if ID type is number', async ({ restClient }) => {
       const created = await restClient
         .POST(`/posts`, {
@@ -244,153 +253,155 @@ test.suite({ config: './config.ts' })('database', () => {
       expect(resFind.categoriesCustomID[0]).toBe(9999)
     })
 
-    test
-      .options({ db: (adapter) => adapter === 'postgres-uuidv7' || adapter === 'sqlite-uuidv7' })
-      .describe('uuidv7', () => {
-        const createdRows: { collection: string; id: number | string }[] = []
+    describe.runIf(
+      matchesDatabase({
+        db: (adapter) => adapter === 'postgres-uuidv7' || adapter === 'sqlite-uuidv7',
+      }),
+    )('uuidv7', () => {
+      const createdRows: { collection: string; id: number | string }[] = []
 
-        const track = (collection: string, id: number | string) => {
-          createdRows.push({ collection, id })
+      const track = (collection: string, id: number | string) => {
+        createdRows.push({ collection, id })
+      }
+
+      afterEach(async ({ payload }) => {
+        for (const { collection, id } of [...createdRows].reverse()) {
+          try {
+            await payload.delete({
+              collection: collection as
+                | typeof customIDsSlug
+                | typeof postsSlug
+                | typeof relationASlug
+                | typeof relationBSlug,
+              id,
+            })
+          } catch {
+            // ignore: concurrent cleanup or FK already removed
+          }
         }
 
-        test.afterEach(async ({ payload }) => {
-          for (const { collection, id } of [...createdRows].reverse()) {
-            try {
-              await payload.delete({
-                collection: collection as
-                  | typeof customIDsSlug
-                  | typeof postsSlug
-                  | typeof relationASlug
-                  | typeof relationBSlug,
-                id,
-              })
-            } catch {
-              // ignore: concurrent cleanup or FK already removed
-            }
-          }
-
-          createdRows.length = 0
-        })
-
-        test('should generate valid UUID with version 7', async ({ payload }) => {
-          const doc = await payload.create({
-            collection: postsSlug,
-            data: { title: 'uuidv7 test' },
-          })
-
-          track(postsSlug, doc.id)
-
-          expect(doc.id).toMatch(
-            /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-          )
-
-          expect(String(doc.id).charAt(14)).toBe('7')
-        })
-
-        test('should generate chronologically ordered IDs', async ({ payload }) => {
-          const doc1 = await payload.create({
-            collection: postsSlug,
-            data: { title: 'uuidv7 first' },
-          })
-          const doc2 = await payload.create({
-            collection: postsSlug,
-            data: { title: 'uuidv7 second' },
-          })
-
-          track(postsSlug, doc1.id)
-          track(postsSlug, doc2.id)
-
-          expect(doc2.id > doc1.id).toBe(true)
-        })
-
-        test('should findByID with uuidv7', async ({ payload }) => {
-          const created = await payload.create({
-            collection: postsSlug,
-            data: { title: 'uuidv7 findable' },
-          })
-
-          track(postsSlug, created.id)
-
-          const found = await payload.findByID({
-            collection: postsSlug,
-            id: created.id,
-          })
-
-          expect(found.id).toBe(created.id)
-          expect(found.title).toBe('uuidv7 findable')
-        })
-
-        test('should query with where clause on uuidv7 id', async ({ payload }) => {
-          const created = await payload.create({
-            collection: postsSlug,
-            data: { title: 'uuidv7 queryable' },
-          })
-
-          track(postsSlug, created.id)
-
-          const result = await payload.find({
-            collection: postsSlug,
-            where: { id: { equals: created.id } },
-          })
-
-          expect(result.docs).toHaveLength(1)
-          expect(result.docs[0]!.id).toBe(created.id)
-        })
-
-        test('should handle relationships with uuidv7 IDs', async ({ payload }) => {
-          const relA = await payload.create({
-            collection: relationASlug,
-            data: { title: 'uuidv7 rel A' },
-          })
-          const relB = await payload.create({
-            collection: relationBSlug,
-            data: {
-              title: 'uuidv7 rel B',
-              relationship: relA.id,
-            },
-          })
-
-          track(relationBSlug, relB.id)
-          track(relationASlug, relA.id)
-
-          const found = await payload.findByID({
-            collection: relationBSlug,
-            id: relB.id,
-            depth: 1,
-          })
-
-          expect(found.relationship).toBeDefined()
-        })
-
-        test('should work with versions and uuidv7 adapter', async ({ payload }) => {
-          const doc = await payload.create({
-            collection: customIDsSlug,
-            data: { title: 'v7 versioned' },
-          })
-
-          track(customIDsSlug, doc.id)
-
-          await payload.update({
-            collection: customIDsSlug,
-            id: doc.id,
-            data: { title: 'v7 versioned updated' },
-          })
-
-          const versions = await payload.findVersions({
-            collection: customIDsSlug,
-            where: { parent: { equals: doc.id } },
-          })
-
-          expect(versions.totalDocs).toBeGreaterThanOrEqual(1)
-        })
-
-        test('defaultIDType should be text for uuidv7', ({ payload }) => {
-          expect(payload.db.defaultIDType).toBe('text')
-        })
+        createdRows.length = 0
       })
+
+      test('should generate valid UUID with version 7', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 test' },
+        })
+
+        track(postsSlug, doc.id)
+
+        expect(doc.id).toMatch(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        )
+
+        expect(String(doc.id).charAt(14)).toBe('7')
+      })
+
+      test('should generate chronologically ordered IDs', async ({ payload }) => {
+        const doc1 = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 first' },
+        })
+        const doc2 = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 second' },
+        })
+
+        track(postsSlug, doc1.id)
+        track(postsSlug, doc2.id)
+
+        expect(doc2.id > doc1.id).toBe(true)
+      })
+
+      test('should findByID with uuidv7', async ({ payload }) => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 findable' },
+        })
+
+        track(postsSlug, created.id)
+
+        const found = await payload.findByID({
+          collection: postsSlug,
+          id: created.id,
+        })
+
+        expect(found.id).toBe(created.id)
+        expect(found.title).toBe('uuidv7 findable')
+      })
+
+      test('should query with where clause on uuidv7 id', async ({ payload }) => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 queryable' },
+        })
+
+        track(postsSlug, created.id)
+
+        const result = await payload.find({
+          collection: postsSlug,
+          where: { id: { equals: created.id } },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]!.id).toBe(created.id)
+      })
+
+      test('should handle relationships with uuidv7 IDs', async ({ payload }) => {
+        const relA = await payload.create({
+          collection: relationASlug,
+          data: { title: 'uuidv7 rel A' },
+        })
+        const relB = await payload.create({
+          collection: relationBSlug,
+          data: {
+            title: 'uuidv7 rel B',
+            relationship: relA.id,
+          },
+        })
+
+        track(relationBSlug, relB.id)
+        track(relationASlug, relA.id)
+
+        const found = await payload.findByID({
+          collection: relationBSlug,
+          id: relB.id,
+          depth: 1,
+        })
+
+        expect(found.relationship).toBeDefined()
+      })
+
+      test('should work with versions and uuidv7 adapter', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: customIDsSlug,
+          data: { title: 'v7 versioned' },
+        })
+
+        track(customIDsSlug, doc.id)
+
+        await payload.update({
+          collection: customIDsSlug,
+          id: doc.id,
+          data: { title: 'v7 versioned updated' },
+        })
+
+        const versions = await payload.findVersions({
+          collection: customIDsSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(versions.totalDocs).toBeGreaterThanOrEqual(1)
+      })
+
+      test('defaultIDType should be text for uuidv7', ({ payload }) => {
+        expect(payload.db.defaultIDType).toBe('text')
+      })
+    })
   })
 
-  test.describe('timestamps', () => {
+  describe('timestamps', () => {
     test('should have createdAt and updatedAt timestamps to the millisecond', async ({
       payload,
     }) => {
@@ -791,7 +802,7 @@ test.suite({ config: './config.ts' })('database', () => {
     )
   })
 
-  test.describe('Data strictness', () => {
+  describe('Data strictness', () => {
     test('should not save and leak password, confirm-password from Local API', async ({
       payload,
     }) => {
@@ -892,13 +903,13 @@ test.suite({ config: './config.ts' })('database', () => {
     await payload.delete({ collection: 'select-has-many', id })
   })
 
-  test.describe('allow ID on create', () => {
-    test.beforeEach(({ payload }) => {
+  describe('allow ID on create', () => {
+    beforeEach(({ payload }) => {
       payload.db.allowIDOnCreate = true
       payload.config.db.allowIDOnCreate = true
     })
 
-    test.afterAll(({ payloadInstance }) => {
+    afterAll(({ payloadInstance }) => {
       payloadInstance.db.allowIDOnCreate = false
       payloadInstance.config.db.allowIDOnCreate = false
     })
@@ -1598,11 +1609,11 @@ test.suite({ config: './config.ts' })('database', () => {
     expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
   })
 
-  test.describe('relationship field pagination', () => {
+  describe('relationship field pagination', () => {
     let createdCategoryIds: string[] = []
     let createdPostIds: string[] = []
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       // Create 15 unique categories
       const categoryPromises = Array.from({ length: 15 }).map(async (_, i) => {
         const cat = await payload.create({
@@ -1627,7 +1638,7 @@ test.suite({ config: './config.ts' })('database', () => {
       createdPostIds = await Promise.all(postPromises)
     })
 
-    test.afterAll(async ({ payloadInstance }) => {
+    afterAll(async ({ payloadInstance }) => {
       // Clean up in order: posts first, then categories
       await Promise.all(
         createdPostIds.map((id) =>
@@ -1766,8 +1777,8 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('Compound Indexes', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('Compound Indexes', () => {
+    beforeEach(async ({ payload }) => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
     })
 
@@ -1828,10 +1839,10 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('migrations', () => {
+  describe('migrations', () => {
     let ranFreshTest = false
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       if (
         process.env.PAYLOAD_DROP_DATABASE === 'true' &&
         'drizzle' in payload.db &&
@@ -1963,7 +1974,7 @@ test.suite({ config: './config.ts' })('database', () => {
     expect(migrations.docs).toHaveLength(0)
   })
 
-  test.describe('predefined migrations', () => {
+  describe('predefined migrations', () => {
     test('mongoose - should execute migrateVersionsV1_V2', async ({ payload }) => {
       if (payload.db.name !== 'mongoose') {
         return
@@ -2068,7 +2079,7 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('schema', () => {
+  describe('schema', () => {
     test('should use custom dbNames', ({ payload }) => {
       expect(payload.db).toBeDefined()
 
@@ -2257,8 +2268,8 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('transactions', () => {
-    test.describe('local api', () => {
+  describe('transactions', () => {
+    describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
         !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
@@ -2467,9 +2478,11 @@ test.suite({ config: './config.ts' })('database', () => {
         })
       }
 
-      test.options({
-        db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
-      })(
+      test.runIf(
+        matchesDatabase({
+          db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
+        }),
+      )(
         'should throw error when beginTransaction fails to connect (drizzle)',
         async ({ payload }) => {
           const db = payload.db as unknown as Record<string, unknown>
@@ -2486,10 +2499,12 @@ test.suite({ config: './config.ts' })('database', () => {
         },
       )
 
-      test.options({
-        db: (adapter) =>
-          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
-      })(
+      test.runIf(
+        matchesDatabase({
+          db: (adapter) =>
+            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+        }),
+      )(
         'should throw error when beginTransaction fails to connect (mongo)',
         async ({ payload }) => {
           const db = payload.db as unknown as Record<string, unknown>
@@ -2510,9 +2525,9 @@ test.suite({ config: './config.ts' })('database', () => {
         },
       )
 
-      test.describe('disableTransaction', () => {
+      describe('disableTransaction', () => {
         let disabledTransactionPost
-        test.beforeEach(async ({ payload }) => {
+        beforeEach(async ({ payload }) => {
           disabledTransactionPost = await payload.create({
             collection,
             data: {
@@ -2557,7 +2572,7 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('local API', () => {
+  describe('local API', () => {
     test('should support `limit` arg in bulk updates', async ({ payload }) => {
       for (let i = 0; i < 10; i++) {
         await payload.create({
@@ -3238,7 +3253,7 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('Error Handler', () => {
+  describe('Error Handler', () => {
     test('should return proper top-level field validation errors', async ({ payload }) => {
       let errorMessage: string = ''
 
@@ -3303,7 +3318,7 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('defaultValue', () => {
+  describe('defaultValue', () => {
     test('should set default value from db.create', async ({ payload }) => {
       // call the db adapter create directly to bypass Payload's default value assignment
       const result = await payload.db.create({
@@ -3325,7 +3340,7 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.options({ db: 'drizzle' }).describe('Schema generation', () => {
+  describe.runIf(matchesDatabase({ db: 'drizzle' }))('Schema generation', () => {
     test('should generate Drizzle Postgres schema', async ({ payload }) => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE
       if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
@@ -3382,8 +3397,8 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('drizzle: schema hooks', () => {
-    test.beforeAll(() => {
+  describe('drizzle: schema hooks', () => {
+    beforeAll(() => {
       process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
     })
 
@@ -3609,7 +3624,7 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('virtual fields', () => {
+  describe('virtual fields', () => {
     test('should not save a field with `virtual: true` to the db', async ({ payload }) => {
       const createRes = await payload.create({
         collection: 'fields-persistance',
@@ -4865,7 +4880,7 @@ test.suite({ config: './config.ts' })('database', () => {
     expect(res2.number).toBe(8)
   })
 
-  test.describe('array $push', () => {
+  describe('array $push', () => {
     test('should allow atomic array updates and $inc', async ({ payload }) => {
       const post = await payload.create({
         collection: 'posts',
@@ -5184,7 +5199,7 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('relationship $push', () => {
+  describe('relationship $push', () => {
     test('should allow appending relationships using $push with single value', async ({
       payload,
     }) => {
@@ -5590,7 +5605,7 @@ test.suite({ config: './config.ts' })('database', () => {
     })
   })
 
-  test.describe('relationship $remove', () => {
+  describe('relationship $remove', () => {
     test('should allow removing relationships using $remove with single value', async ({
       payload,
     }) => {

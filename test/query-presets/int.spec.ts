@@ -3,7 +3,7 @@ import type { User } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
 
 const queryPresetsCollectionSlug = 'payload-query-presets'
@@ -11,8 +11,8 @@ let adminUser: User
 let editorUser: User
 let publicUser: User
 
-test.suite({ config: './config.ts' })('Query Presets', () => {
-  test.beforeEach(async ({ payload }) => {
+suite('Query Presets', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload }) => {
     adminUser = await payload
       .login({
         collection: 'users',
@@ -44,7 +44,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
       ?.then((result) => result.user)
   })
 
-  test.describe('default access control', () => {
+  describe('default access control', () => {
     test('should only allow logged in users to perform actions', async ({ payload }) => {
       // create
       try {
@@ -483,7 +483,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
     })
   })
 
-  test.describe('user-defined access control', () => {
+  describe('user-defined access control', () => {
     test('should respect top-level access control overrides', async ({ payload }) => {
       const preset = await payload.create({
         collection: queryPresetsCollectionSlug,
@@ -753,7 +753,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
     }
   })
 
-  test.describe('Where object formatting', () => {
+  describe('Where object formatting', () => {
     test('transforms "where" query objects into the "and" / "or" format', async ({ payload }) => {
       const result = await payload.create({
         collection: queryPresetsCollectionSlug,

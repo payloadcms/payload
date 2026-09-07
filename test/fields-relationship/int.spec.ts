@@ -3,14 +3,14 @@ import { expect } from 'vitest'
 
 import type { Collection1 } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { collection1Slug, versionedRelationshipFieldSlug } from './slugs.js'
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts' })('Relationship Fields', () => {
-  test.beforeEach(async ({ restClient }) => {
+suite('Relationship Fields', { config: './config.ts' }, () => {
+  beforeEach(async ({ restClient }) => {
     await restClient.login({
       slug: 'users',
       credentials: {
@@ -20,10 +20,10 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
     })
   })
 
-  test.describe('Versioned Relationship Field', () => {
+  describe('Versioned Relationship Field', () => {
     let version2ID: string
     const relatedDocName = 'Related Doc'
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const relatedDoc = await payload.create({
         collection: collection1Slug,
         data: {

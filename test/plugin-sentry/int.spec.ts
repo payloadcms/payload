@@ -1,9 +1,9 @@
 import { fileURLToPath } from 'url'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-sentry', () => {
-  test.describe('tests', () => {
+suite('@payloadcms/plugin-sentry', { config: './config.ts' }, () => {
+  describe('tests', () => {
     test.todo('plugin-sentry tests')
   })
 })

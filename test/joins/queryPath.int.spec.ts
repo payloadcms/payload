@@ -3,10 +3,11 @@ import { type MongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig, getPayload } from 'payload'
 import { expect, vi } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' })(
+suite(
   'mongodb read path selection',
+  { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
   () => {
     const createdIDs: (number | string)[] = []
 
@@ -62,7 +63,7 @@ test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atla
       }
     }
 
-    test.afterEach(async () => {
+    afterEach(async () => {
       vi.restoreAllMocks()
 
       const payload = await getPayloadInstance()

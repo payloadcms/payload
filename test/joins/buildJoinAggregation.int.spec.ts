@@ -9,10 +9,11 @@ import { expect } from 'vitest'
 
 import { buildJoinAggregation } from '../../packages/db-mongodb/src/utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from '../../packages/db-mongodb/src/utilities/buildProjectionFromSelect.js'
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' })(
+suite(
   'buildJoinAggregation',
+  { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
   () => {
     const getAdapter = async (): Promise<MongooseAdapter> => {
       const payload = await getPayload({

@@ -1,10 +1,10 @@
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 
-test.suite({ config: './config.ts' })('Login With Username Feature', () => {
+suite('Login With Username Feature', { config: './config.ts' }, () => {
   test('should not allow creation with neither email nor username', async ({ payload }) => {
     let errors = []
     try {

@@ -11,9 +11,9 @@ import type {
   Ticket,
 } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({})('Dashboard Widget Types', () => {
+suite('Dashboard Widget Types', {}, () => {
   test('should add all widgets to Config', () => {
     expectTypeOf<Config['widgets']>().toEqualTypeOf<{
       collections: CollectionsWidget

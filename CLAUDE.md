@@ -167,19 +167,19 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 
 **Integration tests MUST use the shared fixture wrapper:**
 
-- Import `test` from `test/__helpers/int/vitest.ts`, not directly from Vitest
-- Wrap Payload-backed tests in one root `test.suite({ config: './config.ts' })`
+- Import `suite`, `test`, and any hooks from `test/__helpers/int/vitest.ts`, not directly from Vitest
+- Wrap Payload-backed tests in one root `suite('My Feature', { config: './config.ts' }, () => {})`
 - Read `payload`, `restClient`, `sdk`, or `cli` from the test or hook arguments
 - Do not initialize Payload manually or add database reset/seed hooks; the fixture initializes
   Payload once per file, resets and seeds before each test that uses it, and destroys it afterward
-- Use `test.suite({})` only for integration tests that do not use Payload
+- Use `suite('My Feature', {}, () => {})` only for integration tests that do not use Payload
 
 ```typescript
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('My Feature', () => {
+suite('My Feature', { config: './config.ts' }, () => {
   test('should create a record', async ({ payload }) => {
     const record = await payload.create({
       collection: 'my-collection',
@@ -195,7 +195,7 @@ test.suite({ config: './config.ts' })('My Feature', () => {
 
 - Integration-test database records are cleared automatically by the shared fixture
 - Clean up files, external resources, environment changes, and other non-database side effects
-- For multiple tests with similar cleanup needs, use `test.afterEach` to centralize cleanup logic
+- For multiple tests with similar cleanup needs, use standalone `afterEach` to centralize cleanup logic
 
 **Additional test guidelines:**
 

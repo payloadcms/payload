@@ -1,15 +1,15 @@
 import path from 'path'
 import { expect } from 'vitest'
 
-import { test } from '../int/vitest.js'
+import { afterEach, suite, test } from '../int/vitest.js'
 import { getTestSuiteDir } from './getTestSuiteDir.js'
 
-test.suite({})('getTestSuiteDir', () => {
+suite('getTestSuiteDir', {}, () => {
   const fallbackDir = '/repo/test/fields'
   const originalFramework = process.env.PAYLOAD_FRAMEWORK
   const originalRootDir = process.env.ROOT_DIR
 
-  test.afterEach(() => {
+  afterEach(() => {
     process.env.PAYLOAD_FRAMEWORK = originalFramework
     process.env.ROOT_DIR = originalRootDir
   })

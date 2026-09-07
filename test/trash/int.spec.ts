@@ -5,7 +5,7 @@ import { expect } from 'vitest'
 
 import type { DifferentiatedTrashCollection, Post, RestrictedCollection } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 import { devUser, regularUser } from '../credentials.js'
 import { differentiatedTrashCollectionSlug } from './collections/DifferentiatedTrashCollection/index.js'
@@ -17,12 +17,12 @@ import { usersSlug } from './collections/Users/index.js'
 
 let user: any
 
-test.suite({ config: './config.ts' })('trash', () => {
+suite('trash', { config: './config.ts' }, () => {
   let restrictedCollectionDoc: RestrictedCollection
   let postsDocOne: Post
   let postsDocTwo: Post
 
-  test.beforeEach(async ({ payload, restClient }) => {
+  beforeEach(async ({ payload, restClient }) => {
     await restClient.login({
       slug: usersSlug,
       credentials: regularUser,
@@ -59,7 +59,7 @@ test.suite({ config: './config.ts' })('trash', () => {
     })
   })
 
-  test.afterEach(async ({ payload }) => {
+  afterEach(async ({ payload }) => {
     await payload.delete({
       collection: postsSlug,
       trash: true,
@@ -73,7 +73,7 @@ test.suite({ config: './config.ts' })('trash', () => {
 
   // Access control tests use the Pages collection because it has delete access control enabled.
   // The Post collection does not have any access restrictions and is used for general CRUD tests.
-  test.describe('Access control', () => {
+  describe('Access control', () => {
     test('should not allow bulk soft-deleting documents when restricted by delete access', async ({
       payload,
     }) => {
@@ -127,11 +127,11 @@ test.suite({ config: './config.ts' })('trash', () => {
    * - Trashing (soft-delete): Any logged-in user can trash when deletedAt doesn't exist
    * - Permanently deleting: Only admins can permanently delete when deletedAt exists
    */
-  test.describe('Differentiated trash/delete permissions', () => {
+  describe('Differentiated trash/delete permissions', () => {
     let adminUser: any
     const createdDocIds: (number | string)[] = []
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       // Login as admin user
       adminUser = await payload.login({
         collection: usersSlug,
@@ -142,7 +142,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       // Clean up created documents
       for (const id of createdDocIds) {
         try {
@@ -158,7 +158,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       createdDocIds.length = 0
     })
 
-    test.describe('trashing documents (soft delete)', () => {
+    describe('trashing documents (soft delete)', () => {
       test('should allow regular user to trash (soft-delete) a document', async ({ payload }) => {
         // Create a document as admin
         const doc = await payload.create({
@@ -206,7 +206,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('permanently deleting documents', () => {
+    describe('permanently deleting documents', () => {
       test('should NOT allow regular user to permanently delete a trashed document', async ({
         payload,
       }) => {
@@ -269,7 +269,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('bulk operations with differentiated permissions', () => {
+    describe('bulk operations with differentiated permissions', () => {
       test('should allow regular user to bulk trash documents', async ({ payload }) => {
         // Create multiple documents
         const doc1 = await payload.create({
@@ -412,8 +412,8 @@ test.suite({ config: './config.ts' })('trash', () => {
     })
   })
 
-  test.describe('LOCAL API', () => {
-    test.describe('find', () => {
+  describe('LOCAL API', () => {
+    describe('find', () => {
       test('should return all docs including soft-deleted docs in find with trash: true', async ({
         payload,
       }) => {
@@ -478,7 +478,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('findDistinct', () => {
+    describe('findDistinct', () => {
       test('should return all unique values for a field (excluding soft-deleted docs by default)', async ({
         payload,
       }) => {
@@ -545,7 +545,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('findByID operation', () => {
+    describe('findByID operation', () => {
       test('should return a soft-deleted document when trash: true', async ({ payload }) => {
         const trashedPostDoc: Post = await payload.findByID({
           collection: postsSlug,
@@ -579,7 +579,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('findVersions operation', () => {
+    describe('findVersions operation', () => {
       test('should return all versions including soft-deleted docs in findVersions with trash: true', async ({
         payload,
       }) => {
@@ -648,7 +648,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('findVersionByID operation', () => {
+    describe('findVersionByID operation', () => {
       test('should return a soft-deleted version document when trash: true', async ({
         payload,
       }) => {
@@ -712,7 +712,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('updateByID operation', () => {
+    describe('updateByID operation', () => {
       test('should update a single soft-deleted document when trash: true', async ({ payload }) => {
         const updatedPostDoc: Post = await payload.update({
           collection: postsSlug,
@@ -796,7 +796,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('update operation', () => {
+    describe('update operation', () => {
       test('should update only normal document when trash: false', async ({ payload }) => {
         const result = await payload.update({
           collection: postsSlug,
@@ -890,7 +890,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('delete operation', () => {
+    describe('delete operation', () => {
       test('should perma delete all docs including soft-deleted documents when trash: true', async ({
         payload,
       }) => {
@@ -933,7 +933,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('trashing documents with validation issues', () => {
+    describe('trashing documents with validation issues', () => {
       test('should allow trashing documents with empty required fields (draft scenario)', async ({
         payload,
       }) => {
@@ -1060,7 +1060,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('deleteByID operation', () => {
+    describe('deleteByID operation', () => {
       test('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async ({
         payload,
       }) => {
@@ -1097,7 +1097,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('restoreVersion operation', () => {
+    describe('restoreVersion operation', () => {
       test('should throw error when restoring a version of a trashed document', async ({
         payload,
       }) => {
@@ -1126,7 +1126,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('count operation', () => {
+    describe('count operation', () => {
       test('should return total count of non-soft-deleted documents by default (trash: false)', async ({
         payload,
       }) => {
@@ -1240,8 +1240,8 @@ test.suite({ config: './config.ts' })('trash', () => {
     })
   })
 
-  test.describe('REST API', () => {
-    test.describe('find endpoint', () => {
+  describe('REST API', () => {
+    describe('find endpoint', () => {
       test('should return all docs including soft-deleted docs in find with trash=true', async ({
         restClient,
       }) => {
@@ -1286,7 +1286,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('findByID endpoint', () => {
+    describe('findByID endpoint', () => {
       test('should return a soft-deleted doc by ID with trash=true', async ({ restClient }) => {
         const res = await restClient.GET(`/${postsSlug}/${postsDocTwo.id}?trash=true`)
         const data = await res.json()
@@ -1302,7 +1302,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('find versions endpoint', () => {
+    describe('find versions endpoint', () => {
       test('should return all versions including soft-deleted docs in findVersions with trash: true', async ({
         restClient,
       }) => {
@@ -1352,7 +1352,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('findVersionByID endpoint', () => {
+    describe('findVersionByID endpoint', () => {
       test('should return a soft-deleted version document when trash: true', async ({
         restClient,
       }) => {
@@ -1396,7 +1396,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('updateByID endpoint', () => {
+    describe('updateByID endpoint', () => {
       test('should update a single soft-deleted doc when trash=true', async ({ restClient }) => {
         const res = await restClient.PATCH(`/${postsSlug}/${postsDocTwo.id}?trash=true`, {
           body: JSON.stringify({
@@ -1448,7 +1448,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('update endpoint', () => {
+    describe('update endpoint', () => {
       test('should update only normal document when trash: false', async ({ restClient }) => {
         const query = `?trash=false&where[id][equals]=${postsDocOne.id}`
 
@@ -1515,7 +1515,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('delete endpoint', () => {
+    describe('delete endpoint', () => {
       test('should perma delete all docs including soft-deleted documents when trash: true', async ({
         restClient,
       }) => {
@@ -1550,7 +1550,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('deleteByID endpoint', () => {
+    describe('deleteByID endpoint', () => {
       test('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async ({
         restClient,
       }) => {
@@ -1566,7 +1566,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('restoreVersion operation', () => {
+    describe('restoreVersion operation', () => {
       test('should throw error when restoring a version of a trashed document', async ({
         payload,
         restClient,
@@ -1592,7 +1592,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('count endpoint', () => {
+    describe('count endpoint', () => {
       test('should return count of non-soft-deleted docs by default (trash=false)', async ({
         restClient,
       }) => {
@@ -1623,8 +1623,8 @@ test.suite({ config: './config.ts' })('trash', () => {
     })
   })
 
-  test.describe('GRAPHQL API', () => {
-    test.describe('find query', () => {
+  describe('GRAPHQL API', () => {
+    describe('find query', () => {
       test('should return all docs including soft-deleted docs in find with trash=true', async ({
         restClient,
       }) => {
@@ -1728,7 +1728,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('findByID query', () => {
+    describe('findByID query', () => {
       test('should return a soft-deleted doc by ID with trash=true', async ({
         payload,
         restClient,
@@ -1769,7 +1769,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('find versions query', () => {
+    describe('find versions query', () => {
       test('should return all versions including soft-deleted docs in findVersions with trash: true', async ({
         restClient,
       }) => {
@@ -1910,7 +1910,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('findVersionByID endpoint', () => {
+    describe('findVersionByID endpoint', () => {
       test('should return a soft-deleted document when trash: true', async ({
         payload,
         restClient,
@@ -2001,7 +2001,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('updateByID query', () => {
+    describe('updateByID query', () => {
       test('should update a single soft-deleted doc when trash=true', async ({
         payload,
         restClient,
@@ -2103,7 +2103,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe.skip('update endpoint', () => {
+    describe.skip('update endpoint', () => {
       test.todo('should update only normal document when trash: false')
 
       test.todo('should update all documents including soft-deleted documents when trash: true')
@@ -2113,13 +2113,13 @@ test.suite({ config: './config.ts' })('trash', () => {
       )
     })
 
-    test.describe('delete endpoint', () => {
+    describe('delete endpoint', () => {
       test.todo('should perma delete all docs including soft-deleted documents when trash: true')
 
       test.todo('should only perma delete normal docs when trash: false')
     })
 
-    test.describe('deleteByID query', () => {
+    describe('deleteByID query', () => {
       test('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async ({
         payload,
         restClient,
@@ -2156,7 +2156,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('restoreVersion operation', () => {
+    describe('restoreVersion operation', () => {
       test('should throw error when restoring a version of a trashed document', async ({
         payload,
         restClient,
@@ -2219,7 +2219,7 @@ test.suite({ config: './config.ts' })('trash', () => {
       })
     })
 
-    test.describe('count query', () => {
+    describe('count query', () => {
       test('should return count of non-soft-deleted documents by default (trash=false)', async ({
         restClient,
       }) => {
@@ -2273,10 +2273,10 @@ test.suite({ config: './config.ts' })('trash', () => {
     })
   })
 
-  test.describe('Relationship population', () => {
+  describe('Relationship population', () => {
     const createdPageIDs: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdPageIDs) {
         await payload.delete({ collection: pagesSlug, id })
       }
@@ -2374,10 +2374,10 @@ test.suite({ config: './config.ts' })('trash', () => {
     })
   })
 
-  test.describe('Writes referencing a trashed document', () => {
+  describe('Writes referencing a trashed document', () => {
     const createdRegistrationIDs: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdRegistrationIDs) {
         await payload.delete({ id, collection: registrationsSlug })
       }

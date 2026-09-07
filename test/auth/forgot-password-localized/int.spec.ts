@@ -1,11 +1,11 @@
 import { expect } from 'vitest'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { beforeEach, suite, test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
 import { collectionSlug } from './shared.js'
 
-test.suite({ config: './config.ts' })('Forgot password operation with localized fields', () => {
-  test.beforeEach(async ({ payload, restClient }) => {
+suite('Forgot password operation with localized fields', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload, restClient }) => {
     // Register a user with additional localized field
     const res = await restClient?.POST(`/${collectionSlug}/first-register?locale=en`, {
       body: JSON.stringify({

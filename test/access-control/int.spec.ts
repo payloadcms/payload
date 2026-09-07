@@ -13,7 +13,7 @@ import { expect, vitest } from 'vitest'
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
@@ -32,11 +32,11 @@ import {
   slug,
   unrestrictedSlug,
 } from './shared.js'
-test.suite({ config: './config.ts' })('Access Control', () => {
+suite('Access Control', { config: './config.ts' }, () => {
   let post1: Post
   let restricted: FullyRestricted
 
-  test.beforeEach(async ({ payload }) => {
+  beforeEach(async ({ payload }) => {
     post1 = await payload.create({
       collection: slug,
       data: {},
@@ -48,7 +48,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
     })
   })
 
-  test.describe('Fields', () => {
+  describe('Fields', () => {
     test('should not affect hidden fields when patching data', async ({ payload }) => {
       const doc = await payload.create({
         collection: hiddenFieldsSlug,
@@ -249,8 +249,8 @@ test.suite({ config: './config.ts' })('Access Control', () => {
       expect(findDoc2.hiddenWithDefault).toBeUndefined()
     })
   })
-  test.describe('Collections', () => {
-    test.describe('restricted collection', () => {
+  describe('Collections', () => {
+    describe('restricted collection', () => {
       test('field without read access should not show', async ({ payload }) => {
         const { id } = await createDoc({ payload }, { restrictedField: 'restricted' })
 
@@ -412,7 +412,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
     })
-    test.describe('non-enumerated request properties passed to access control', () => {
+    describe('non-enumerated request properties passed to access control', () => {
       test('access control ok when passing request headers', async ({ payload }) => {
         const req = {
           headers: requestHeaders,
@@ -475,8 +475,8 @@ test.suite({ config: './config.ts' })('Access Control', () => {
     })
   })
 
-  test.describe('Override Access', () => {
-    test.describe('Fields', () => {
+  describe('Override Access', () => {
+    describe('Fields', () => {
       test('should allow overrideAccess: false', async ({ payload }) => {
         const req = async () =>
           await payload.update({
@@ -550,7 +550,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
       })
     })
 
-    test.describe('Collections', () => {
+    describe('Collections', () => {
       const updatedName = 'updated'
 
       test('should allow overrideAccess: false', async ({ payload }) => {
@@ -627,7 +627,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
     })
   })
 
-  test.describe('Querying', () => {
+  describe('Querying', () => {
     test('should respect query constraint using hidden field', async ({ payload }) => {
       await payload.create({
         collection: hiddenAccessSlug,
@@ -788,7 +788,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
     })
   })
 
-  test.describe('Auth - Local API', () => {
+  describe('Auth - Local API', () => {
     test('should not allow reset password if forgotPassword expiration token is expired', async ({
       payload,
     }) => {
@@ -827,7 +827,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
     })
   })
 
-  test.describe('async parent permission inheritance', () => {
+  describe('async parent permission inheritance', () => {
     test('should inherit async parent field permissions to nested children', async ({
       payload,
     }) => {
@@ -965,11 +965,11 @@ test.suite({ config: './config.ts' })('Access Control', () => {
     })
   })
 
-  test.describe('Default access - admin auth collection scoping', () => {
+  describe('Default access - admin auth collection scoping', () => {
     let adminUser: Record<string, unknown>
     let publicUser: Record<string, unknown>
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const { docs: adminDocs } = await payload.find({
         collection: 'users',
         limit: 1,

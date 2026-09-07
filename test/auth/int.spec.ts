@@ -17,7 +17,7 @@ import { expect, vitest } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterAll, afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
@@ -34,11 +34,11 @@ import {
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts' })('Auth', () => {
-  test.describe('GraphQL - admin user', () => {
+suite('Auth', { config: './config.ts' }, () => {
+  describe('GraphQL - admin user', () => {
     let token
     let user
-    test.beforeEach(async ({ restClient }) => {
+    beforeEach(async ({ restClient }) => {
       const { data } = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({
@@ -161,7 +161,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('REST - admin user', () => {
+  describe('REST - admin user', () => {
     test('should prevent registering a new first user', async ({ restClient }) => {
       const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
@@ -260,11 +260,11 @@ test.suite({ config: './config.ts' })('Auth', () => {
       })
     })
 
-    test.describe('logged in', () => {
+    describe('logged in', () => {
       let token: string | undefined
       let loggedInUser: undefined | User
 
-      test.beforeEach(async ({ restClient }) => {
+      beforeEach(async ({ restClient }) => {
         const response = await restClient.POST(`/${slug}/login`, {
           body: JSON.stringify({
             email,
@@ -593,12 +593,12 @@ test.suite({ config: './config.ts' })('Auth', () => {
         expect(afterToken).toBeNull()
       })
 
-      test.describe('User Preferences', () => {
+      describe('User Preferences', () => {
         const key = 'test'
         const property = 'store'
         let data
 
-        test.beforeEach(async ({ restClient }) => {
+        beforeEach(async ({ restClient }) => {
           const response = await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property },
@@ -750,14 +750,14 @@ test.suite({ config: './config.ts' })('Auth', () => {
         })
       })
 
-      test.describe('Cross-Collection Preference Isolation', () => {
+      describe('Cross-Collection Preference Isolation', () => {
         const adminKey = 'cross-collection-admin'
         const publicKey = 'cross-collection-public'
         let publicUserToken: string
         let publicUserId: number | string
         const createdIDs: (number | string)[] = []
 
-        test.beforeEach(async ({ payload, restClient }) => {
+        beforeEach(async ({ payload, restClient }) => {
           // Admin creates preference
           const adminPref = await restClient.POST(`/payload-preferences/${adminKey}`, {
             body: JSON.stringify({ value: { data: 'admin-sensitive' } }),
@@ -793,7 +793,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
           createdIDs.push((await publicPref.json()).doc.id)
         })
 
-        test.afterAll(async ({ payloadInstance }) => {
+        afterAll(async ({ payloadInstance }) => {
           await Promise.all(
             createdIDs.map((id) =>
               payloadInstance.delete({ id, collection: 'payload-preferences' }).catch(() => {}),
@@ -854,7 +854,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
         })
       })
 
-      test.describe('Account Locking', () => {
+      describe('Account Locking', () => {
         const userEmail = 'lock@me.com'
 
         const tryLogin = async (
@@ -877,7 +877,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
           return await res.json()
         }
 
-        test.beforeEach(async ({ restClient }) => {
+        beforeEach(async ({ restClient }) => {
           const response = await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email,
@@ -900,7 +900,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
           })
         })
 
-        test.beforeEach(async ({ payload }) => {
+        beforeEach(async ({ payload }) => {
           await payload.db.updateOne({
             collection: slug,
             data: {
@@ -1219,13 +1219,13 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('config defaults', () => {
+  describe('config defaults', () => {
     test('should default auth.depth to 0 when the collection does not set it', ({ payload }) => {
       expect(payload.collections[publicUsersSlug]?.config.auth.depth).toBe(0)
     })
   })
 
-  test.describe('disableLocalStrategy', () => {
+  describe('disableLocalStrategy', () => {
     test('should allow create of a user with disableLocalStrategy', async ({ payload }) => {
       const email = 'test@example.com'
       const user = await payload.create({
@@ -1306,7 +1306,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('API Key', () => {
+  describe('API Key', () => {
     test('should authenticate via the correct API key user', async ({ payload, restClient }) => {
       const usersQuery = await payload.find({
         collection: apiKeysSlug,
@@ -1466,7 +1466,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('Local API', () => {
+  describe('Local API', () => {
     test('should login via the local API', async ({ payload }) => {
       const authenticated = await payload.login({
         collection: slug,
@@ -1620,7 +1620,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
       ).rejects.toThrow('Token is either invalid or has expired.')
     })
 
-    test.describe('Login Attempts', () => {
+    describe('Login Attempts', () => {
       async function attemptLogin(
         email: string,
         password: string,
@@ -1762,7 +1762,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('Email - format validation', () => {
+  describe('Email - format validation', () => {
     const mockT = vitest.fn((key) => key) // Mocks translation function
 
     const mockContext: Parameters<EmailFieldValidation>[1] = {
@@ -1824,7 +1824,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('Sessions', () => {
+  describe('Sessions', () => {
     test('should set a session on a user', async ({ payload }) => {
       const authenticated = await payload.login({
         collection: slug,
@@ -2230,7 +2230,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('rotateSecret - PAYLOAD_SECRET rotation', () => {
+  describe('rotateSecret - PAYLOAD_SECRET rotation', () => {
     const OLD_SECRET = rotateSecretOldSecret
     const createdIDs: Array<{ collection: string; id: number | string }> = []
 
@@ -2308,7 +2308,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
       return user
     }
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       const idsByCollection = new Map<string, Array<number | string>>()
       for (const { id, collection } of createdIDs) {
         idsByCollection.set(collection, [...(idsByCollection.get(collection) ?? []), id])
@@ -2600,7 +2600,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('encryption envelope (v1) and keyring', () => {
+  describe('encryption envelope (v1) and keyring', () => {
     const legacyCtrEncrypt = (value: string, secret: string) => {
       const key = crypto.createHash('sha256').update(secret).digest('hex').slice(0, 32)
       const iv = crypto.randomBytes(16)

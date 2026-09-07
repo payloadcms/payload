@@ -4,10 +4,10 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
-  test.describe('seed', () => {
+suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
+  describe('seed', () => {
     test('should populate two levels of breadcrumbs', async ({ payload }) => {
       const query = await payload.find({
         collection: 'pages',
@@ -179,10 +179,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
-  test.describe('versions', () => {
+  describe('versions', () => {
     const createdPageIDs: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       // Clean up in reverse order (children before parents)
       for (const id of [...createdPageIDs].reverse()) {
         await payload.delete({ collection: 'pages', id })
@@ -385,7 +385,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
-  test.describe('scheduled publish', () => {
+  describe('scheduled publish', () => {
     test('should allow scheduled publish on a collection with a nested-docs breadcrumbs field', async ({
       payload,
     }) => {
@@ -434,9 +434,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
-  test.describe('overrides', () => {
+  describe('overrides', () => {
     let collection
-    test.beforeEach(({ payload }) => {
+    beforeEach(({ payload }) => {
       collection = payload.config.collections.find(({ slug }) => slug === 'categories')
     })
 

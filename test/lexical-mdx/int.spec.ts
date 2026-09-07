@@ -12,7 +12,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
 import { codeTest1 } from './tests/code1.test.js'
@@ -43,11 +43,11 @@ export type Test = {
 }
 type Tests = Array<Test>
 
-test.suite({ config: './config.ts' })('Lexical MDX', () => {
+suite('Lexical MDX', { config: './config.ts' }, () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
-  test.beforeEach(async ({ config }) => {
+  beforeEach(async ({ config }) => {
     const richTextField: RichTextField = config.collections
       .find((collection) => collection.slug === postsSlug)
       .fields.find(
@@ -175,7 +175,7 @@ test.suite({ config: './config.ts' })('Lexical MDX', () => {
     }
   }
 
-  test.describe('upload markdown: Markdown → Lexical (import)', () => {
+  describe('upload markdown: Markdown → Lexical (import)', () => {
     function countUploadNodes(node: {
       [key: string]: unknown
       children?: unknown[]
@@ -246,7 +246,7 @@ test.suite({ config: './config.ts' })('Lexical MDX', () => {
     })
   })
 
-  test.describe('link markdown: should not match image markdown', () => {
+  describe('link markdown: should not match image markdown', () => {
     test('should not parse image markdown as a link node', () => {
       const markdown = '![Alt text](https://example.com/image.jpg)'
       const result = mdxToEditorJSON({ mdxWithFrontmatter: markdown, editorConfig })

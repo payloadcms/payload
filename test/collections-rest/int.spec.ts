@@ -10,7 +10,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
@@ -24,12 +24,12 @@ import {
   relationSlug,
 } from './config.js'
 
-test.suite({ config: './config.ts' })('collections-rest', () => {
-  test.beforeEach(async ({ payload }) => {
+suite('collections-rest', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload }) => {
     await clearDocs({ payload })
   })
 
-  test.describe('CRUD', () => {
+  describe('CRUD', () => {
     test('should create', async ({ restClient }) => {
       const data = {
         title: 'title',
@@ -164,7 +164,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
       expect(res.doc.array[0].text).toEqual(arrayData[0].text)
     })
 
-    test.describe('Bulk operations', () => {
+    describe('Bulk operations', () => {
       test('should bulk update', async ({ restClient }) => {
         for (let i = 0; i < 11; i++) {
           await createPost({ restClient }, { description: `desc ${i}` })
@@ -428,8 +428,8 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
       })
     })
 
-    test.describe('Custom ID', () => {
-      test.describe('string', () => {
+    describe('Custom ID', () => {
+      describe('string', () => {
         test('should create', async ({ restClient }) => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const customIdName = 'custom-id-name'
@@ -509,7 +509,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         })
       })
 
-      test.describe('number', () => {
+      describe('number', () => {
         test('should create', async ({ restClient }) => {
           const customId = Math.floor(Math.random() * 1_000_000) + 1
           const { doc } = await restClient
@@ -592,16 +592,16 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
     })
   })
 
-  test.describe('Querying', () => {
+  describe('Querying', () => {
     test.todo('should allow querying by a field within a group')
-    test.describe('Relationships', () => {
+    describe('Relationships', () => {
       let post: Post
       let relation: Relation
       let relation2: Relation
       const nameToQuery = 'name'
       const nameToQuery2 = 'name2'
 
-      test.beforeEach(async ({ restClient }) => {
+      beforeEach(async ({ restClient }) => {
         ;({ doc: relation } = await restClient
           .POST(`/${relationSlug}`, {
             body: JSON.stringify({ name: nameToQuery }),
@@ -623,7 +623,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         await createPost({ restClient }) // Extra post to allow asserting totalDoc count
       })
 
-      test.describe('regular relationship', () => {
+      describe('regular relationship', () => {
         test('query by property value', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
@@ -718,7 +718,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         expect(result2.totalDocs).toEqual(1)
       })
 
-      test.describe('relationTo multi', () => {
+      describe('relationTo multi', () => {
         test('nested by id', async ({ restClient }) => {
           const post1 = await createPost(
             { restClient },
@@ -768,7 +768,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         expect(foundExcludedDoc).toBe(false)
       })
 
-      test.describe('relationTo multi hasMany', () => {
+      describe('relationTo multi hasMany', () => {
         test('nested by id', async ({ restClient }) => {
           const post1 = await createPost(
             { restClient },
@@ -809,7 +809,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
       })
     })
 
-    test.describe('Edge cases', () => {
+    describe('Edge cases', () => {
       test('should query a localized field without localization configured', async ({
         restClient,
       }) => {
@@ -840,7 +840,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
       })
     })
 
-    test.describe('Operators', () => {
+    describe('Operators', () => {
       test('equals', async ({ restClient }) => {
         const valueToQuery = 'valueToQuery'
         const post1 = await createPost({ restClient }, { title: valueToQuery })
@@ -981,7 +981,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
-      test.describe('like - special characters', () => {
+      describe('like - special characters', () => {
         const specialCharacters = '~!@#$%^&*()_+-+[]{}|;:"<>,.?/})'
 
         test.for(specialCharacters.split(''))(
@@ -1128,10 +1128,10 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         expect(result.docs).toEqual([postWithoutDesc])
       })
 
-      test.describe('numbers', () => {
+      describe('numbers', () => {
         let post1: Post
         let post2: Post
-        test.beforeEach(async ({ restClient }) => {
+        beforeEach(async ({ restClient }) => {
           post1 = await createPost({ restClient }, { number: 1 })
           post2 = await createPost({ restClient }, { number: 2 })
         })
@@ -1209,7 +1209,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         })
       })
 
-      test.describe('near', () => {
+      describe('near', () => {
         const point = [10, 20]
         const [lat, lng] = point
         test('should return a document near a point', async ({ payload, restClient }) => {
@@ -1408,7 +1408,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         })
       })
 
-      test.describe('within', () => {
+      describe('within', () => {
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -1469,7 +1469,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         })
       })
 
-      test.describe('intersects', () => {
+      describe('intersects', () => {
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -1623,10 +1623,10 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         expect(result.docs).toEqual([post1])
       })
 
-      test.describe('pagination', () => {
+      describe('pagination', () => {
         let relatedDoc
 
-        test.beforeEach(async ({ payload, restClient }) => {
+        beforeEach(async ({ payload, restClient }) => {
           relatedDoc = await payload.create({
             collection: relationSlug,
             data: {
@@ -1743,8 +1743,8 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
           expect(page3.totalPages).toStrictEqual(3)
         })
 
-        test.describe('limit', () => {
-          test.beforeEach(async ({ restClient }) => {
+        describe('limit', () => {
+          beforeEach(async ({ restClient }) => {
             for (let i = 0; i < 50; i++) {
               await createPost({ restClient }, { number: i, title: 'limit-test' })
             }
@@ -1815,7 +1815,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
     })
   })
 
-  test.describe('Error Handler', () => {
+  describe('Error Handler', () => {
     test('should return the minimum allowed information about internal errors', async ({
       restClient,
     }) => {
@@ -1902,7 +1902,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
     })
   })
 
-  test.describe('Local', () => {
+  describe('Local', () => {
     test('findByID should throw NotFound if the doc was not found, if disableErrors: true then return null', async ({
       payload,
       restClient,
@@ -1916,7 +1916,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
     })
   })
 
-  test.describe('Custom endpoints', () => {
+  describe('Custom endpoints', () => {
     test('should execute custom root endpoints', async ({ restClient }) => {
       for (const method of methods) {
         const response = await restClient[method.toUpperCase()](`/${method}-test`, {})

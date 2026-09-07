@@ -4,12 +4,12 @@ import { expect } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { buildFieldSchemaMap } from '../../packages/ui/src/utilities/buildFieldSchemaMap/index.js'
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'
 
-test.suite({ config: './config.ts' })('Field Paths', () => {
-  test.describe('hooks', () => {
+suite('Field Paths', { config: './config.ts' }, () => {
+  describe('hooks', () => {
     test('should pass correct field paths through field hooks', async ({ payload }) => {
       const formatExpectedFieldPaths = (
         fieldIdentifier: string,
@@ -132,7 +132,7 @@ test.suite({ config: './config.ts' })('Field Paths', () => {
     })
   })
 
-  test.describe('field schema map', () => {
+  describe('field schema map', () => {
     test('should build a field schema map with correct field schema paths', async ({ config }) => {
       const i18n = await initI18n({
         config: config.i18n,

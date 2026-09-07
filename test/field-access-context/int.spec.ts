@@ -2,14 +2,14 @@ import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, suite, test } from '../__helpers/int/vitest.js'
 import { childrenSlug, globalSlug, parentsSlug, readAccessLog, resetAccessLog } from './shared.js'
 
 const childIDs: (number | string)[] = []
 const parentIDs: (number | string)[] = []
 
-test.suite({ config: './config.ts' })('field access collection context', () => {
-  test.afterEach(async ({ payload }) => {
+suite('field access collection context', { config: './config.ts' }, () => {
+  afterEach(async ({ payload }) => {
     for (const id of parentIDs) {
       await payload.delete({ id, collection: parentsSlug })
     }

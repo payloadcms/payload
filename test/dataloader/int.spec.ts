@@ -5,14 +5,14 @@ import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect, vitest } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { postDoc } from './config.js'
 
 let token: string
 
-test.suite({ config: './config.ts' })('dataloader', () => {
-  test.beforeEach(async ({ payload }) => {
+suite('dataloader', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: {
@@ -26,7 +26,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
     }
   })
 
-  test.describe('graphql', () => {
+  describe('graphql', () => {
     test('should allow multiple parallel queries', async ({ restClient }) => {
       for (let i = 0; i < 100; i++) {
         const query = `
@@ -153,7 +153,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
     })
   })
 
-  test.describe('find', () => {
+  describe('find', () => {
     test('should call the same query only once in a request', async ({ payload }) => {
       const req = await createLocalReq({}, payload)
       const spy = vitest.spyOn(payload, 'find')

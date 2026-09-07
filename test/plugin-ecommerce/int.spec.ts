@@ -3,7 +3,7 @@ import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 
 // Helper to create a guest cart with items
 async function createGuestCartWithItems(
@@ -42,7 +42,7 @@ async function createGuestCartWithItems(
   return { cartId, cartSecret }
 }
 
-test.suite({ config: './config.ts' })('ecommerce', () => {
+suite('ecommerce', { config: './config.ts' }, () => {
   test('should add a variants collection', async ({ payload }) => {
     const variants = await payload.find({
       collection: 'variants',
@@ -70,7 +70,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     expect(arTranslations?.['plugin-ecommerce']).toBeUndefined()
   })
 
-  test.describe('guest cart access', () => {
+  describe('guest cart access', () => {
     test('should allow guest users to create carts', async ({ restClient }) => {
       // Create a cart without authentication
       const cartResponse = await restClient
@@ -278,11 +278,11 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     })
   })
 
-  test.describe('cart item endpoints', () => {
+  describe('cart item endpoints', () => {
     let productId: string
     let variantId: string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       // Get an existing product and variant from seed data
       const products = await payload.find({
         collection: 'products',
@@ -297,7 +297,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       variantId = variants.docs[0]?.id as string
     })
 
-    test.describe('add-item endpoint', () => {
+    describe('add-item endpoint', () => {
       test('should add an item to a guest cart', async ({ restClient }) => {
         // Create a cart without authentication
         const createResponse = await restClient
@@ -466,7 +466,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       })
     })
 
-    test.describe('remove-item endpoint', () => {
+    describe('remove-item endpoint', () => {
       test('should remove an item from cart', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
@@ -516,7 +516,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       })
     })
 
-    test.describe('update-item endpoint', () => {
+    describe('update-item endpoint', () => {
       test('should update item quantity directly', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
@@ -661,7 +661,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       })
     })
 
-    test.describe('clear endpoint', () => {
+    describe('clear endpoint', () => {
       test('should clear all items from cart', async ({ restClient }) => {
         // Create cart with multiple items
         const createResponse = await restClient
@@ -740,11 +740,11 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     })
   })
 
-  test.describe('cart merge endpoint', () => {
+  describe('cart merge endpoint', () => {
     let productId: string
     let variantId: string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1034,10 +1034,10 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     })
   })
 
-  test.describe('authenticated user cart operations', () => {
+  describe('authenticated user cart operations', () => {
     let productId: string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1164,10 +1164,10 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     })
   })
 
-  test.describe('cart transfer to user', () => {
+  describe('cart transfer to user', () => {
     let productId: string
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,

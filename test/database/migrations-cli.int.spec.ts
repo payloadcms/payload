@@ -7,7 +7,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, suite, test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -15,12 +15,12 @@ const dirname = path.dirname(filename)
 
 const migrationDir = path.join(dirname, './migrations')
 
-test.suite({ config: './config.ts' })('migrations CLI', () => {
-  test.afterEach(() => {
+suite('migrations CLI', { config: './config.ts' }, () => {
+  afterEach(() => {
     removeFiles(migrationDir)
   })
 
-  test.beforeEach(() => {
+  beforeEach(() => {
     removeFiles(migrationDir)
   })
 

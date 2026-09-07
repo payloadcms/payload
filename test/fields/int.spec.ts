@@ -9,7 +9,14 @@ import { expect } from 'vitest'
 
 import type { BlockField, GroupField } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  matchesDatabase,
+  suite,
+  test,
+} from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
@@ -42,8 +49,8 @@ import {
 
 let user: any
 
-test.suite({ config: './config.ts' })('Fields', () => {
-  test.beforeEach(async ({ payload, restClient }) => {
+suite('Fields', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload, restClient }) => {
     await restClient.login({
       slug: 'users',
       credentials: devUser,
@@ -57,10 +64,10 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('slug field', () => {
+  describe('slug field', () => {
     const created: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of created) {
         await payload.delete({ collection: 'slug-fields', id })
       }
@@ -528,10 +535,10 @@ test.suite({ config: './config.ts' })('Fields', () => {
       expect(regenerated).toBe('own-slug')
     })
 
-    test.describe('autosave drafts', () => {
+    describe('autosave drafts', () => {
       const created: (number | string)[] = []
 
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         for (const id of created) {
           await payload.delete({ collection: 'slug-autosave', id })
         }
@@ -865,11 +872,11 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('slug field read access', () => {
+  describe('slug field read access', () => {
     const collection = 'slug-field-access'
     const created: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of created) {
         await payload.delete({ collection, id })
       }
@@ -1016,10 +1023,10 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('text', () => {
+  describe('text', () => {
     let doc
     const text = 'text field'
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       doc = await payload.create({
         collection: 'text-fields',
         data: { text },
@@ -1520,7 +1527,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('relationship', () => {
+  describe('relationship', () => {
     let textDoc
     let otherTextDoc
     let selfReferencing
@@ -1532,7 +1539,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     const otherTextDocText = 'alt text'
     const relationshipText = 'relationship text'
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       textDoc = await payload.create({
         collection: 'text-fields',
         data: {
@@ -1674,7 +1681,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('rows', () => {
+  describe('rows', () => {
     test('should show proper validation error message on text field within row field', async ({
       payload,
     }) => {
@@ -1690,11 +1697,11 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('timestamps', () => {
+  describe('timestamps', () => {
     const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
     const tenMinutesLater = new Date(Date.now() + 1000 * 60 * 10)
     let doc
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       doc = await payload.create({
         collection: 'date-fields',
         data: dateDoc,
@@ -1850,9 +1857,9 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('select', () => {
+  describe('select', () => {
     let doc
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const { id } = await payload.create({
         collection: 'select-fields',
         data: {
@@ -2123,9 +2130,9 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('number', () => {
+  describe('number', () => {
     let doc
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       doc = await payload.create({
         collection: 'number-fields',
         data: numberDoc,
@@ -2449,12 +2456,12 @@ test.suite({ config: './config.ts' })('Fields', () => {
     expect(resInSecond.totalDocs).toBe(1)
   })
 
-  test.options({ db: 'mongo' }).describe('indexes', () => {
+  describe.runIf(matchesDatabase({ db: 'mongo' }))('indexes', () => {
     let indexes
     const definitions: Record<string, IndexDirection> = {}
     const options: Record<string, IndexOptions> = {}
 
-    test.beforeEach(({ payload }) => {
+    beforeEach(({ payload }) => {
       indexes = (payload.db as MongooseAdapter).collections['indexed-fields'].schema.indexes() as [
         Record<string, IndexDirection>,
         IndexOptions,
@@ -2508,12 +2515,12 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.options({ db: 'mongo' }).describe('version indexes', () => {
+  describe.runIf(matchesDatabase({ db: 'mongo' }))('version indexes', () => {
     let indexes
     const definitions: Record<string, IndexDirection> = {}
     const options: Record<string, IndexOptions> = {}
 
-    test.beforeEach(({ payload }) => {
+    beforeEach(({ payload }) => {
       indexes = (payload.db as MongooseAdapter).versions['indexed-fields'].schema.indexes() as [
         Record<string, IndexDirection>,
         IndexOptions,
@@ -2531,13 +2538,13 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('point', () => {
+  describe('point', () => {
     let doc
     const point = [7, -7]
     const localized = [5, -2]
     const group = { point: [1, 9] }
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       const findDoc = await payload.find({
         collection: 'point-fields',
         pagination: false,
@@ -2701,8 +2708,8 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('checkbox', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('checkbox', () => {
+    beforeEach(async ({ payload }) => {
       await payload.delete({
         collection: checkboxFieldsSlug,
         where: {
@@ -2753,8 +2760,8 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('unique indexes', () => {
-    test.beforeEach(async ({ payload }) => {
+  describe('unique indexes', () => {
+    beforeEach(async ({ payload }) => {
       // Clean up indexed-fields to avoid unique constraint violations
       // This ensures each test starts with a clean slate
       await payload.delete({
@@ -3070,11 +3077,11 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('array', () => {
+  describe('array', () => {
     let doc
     const collection = arrayFieldsSlug
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       doc = await payload.create({
         collection,
         data: {},
@@ -3536,10 +3543,10 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('group', () => {
+  describe('group', () => {
     let document
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       document = await payload.create({
         collection: groupFieldsSlug,
         data: {},
@@ -3993,10 +4000,10 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('tabs', () => {
+  describe('tabs', () => {
     let document
 
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       document = await payload.create({
         collection: tabsFieldsSlug,
         data: tabsDoc,
@@ -4125,7 +4132,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('blocks', () => {
+  describe('blocks', () => {
     test('should retrieve doc with blocks', async ({ payload }) => {
       const blockFields = await payload.find({
         collection: 'block-fields',
@@ -4458,7 +4465,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('collapsible', () => {
+  describe('collapsible', () => {
     test('should show proper validation error message for fields nested in collapsible', async ({
       payload,
     }) => {
@@ -4480,7 +4487,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('json', () => {
+  describe('json', () => {
     test('should save json data', async ({ payload }) => {
       const json = { foo: 'bar' }
       const doc = await payload.create({
@@ -4540,11 +4547,11 @@ test.suite({ config: './config.ts' })('Fields', () => {
       expect(updatedJsonFieldsDoc.json.state).toEqual({})
     })
 
-    test.describe('querying', () => {
+    describe('querying', () => {
       let fooBar
       let bazBar
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         // Clean up all json-fields documents to have a clean slate
         // This ensures each test has predictable data and query results
         await payload.delete({
@@ -5056,7 +5063,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('relationships', () => {
+  describe('relationships', () => {
     test('should not crash if querying with empty in operator', async ({ payload }) => {
       const query = await payload.find({
         collection: 'relationship-fields',
@@ -5070,10 +5077,10 @@ test.suite({ config: './config.ts' })('Fields', () => {
       expect(query.docs).toBeDefined()
     })
 
-    test.describe('querying', () => {
+    describe('querying', () => {
       const createdIDs: (number | string)[] = []
 
-      test.afterEach(async ({ payload }) => {
+      afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           await payload.delete({ collection: 'relationship-fields', id })
         }
@@ -5434,7 +5441,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('clearable fields - exists', () => {
+  describe('clearable fields - exists', () => {
     test('exists should not return null values', async ({ payload }) => {
       const { id } = await payload.create({
         collection: 'select-fields',
@@ -5493,10 +5500,10 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('Custom ID Nested', () => {
+  describe('Custom ID Nested', () => {
     const createdIDs: number[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
         await payload.delete({
           collection: customIDNestedSlug,
@@ -5569,7 +5576,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
     })
   })
 
-  test.describe('date fields with timezones', () => {
+  describe('date fields with timezones', () => {
     test('should create document with UTC offset timezone', async ({ payload }) => {
       const doc = await payload.create({
         collection: dateFieldsSlug,
@@ -5713,7 +5720,7 @@ test.suite({ config: './config.ts' })('Fields', () => {
       expect(doc3.dateWithOffsetTimezone_tz).toEqual('+00:00')
     })
 
-    test.describe('GraphQL timezone operations', () => {
+    describe('GraphQL timezone operations', () => {
       // Note: GraphQL enums serialize to their NAME (e.g., '_TZOFFSET_PLUS_05_30'), not their VALUE (e.g., '+05:30')
       // This is standard GraphQL behavior. UTC offsets are transformed to GraphQL-safe names:
       // +05:30 → _TZOFFSET_PLUS_05_30, -08:00 → _TZOFFSET_MINUS_08_00, America/New_York → America_New_York

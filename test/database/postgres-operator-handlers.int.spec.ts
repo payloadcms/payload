@@ -7,7 +7,15 @@ import { BasePayload, buildConfig } from 'payload'
 import pg from 'pg'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  matchesDatabase,
+  suite,
+  test,
+} from '../__helpers/int/vitest.js'
 import { defaultPostgresUrl } from '../dbAdapters.js'
 
 const connectionString = process.env.POSTGRES_URL || defaultPostgresUrl
@@ -45,9 +53,9 @@ const runOperatorHandlerConfigSuite = (
       secret: 'secret',
     })
 
-  test
-    .options({ db: (adapter) => adapter.startsWith('postgres') })
-    .describe(`${label} operator handlers - config surface`, () => {
+  describe.runIf(matchesDatabase({ db: (adapter) => adapter.startsWith('postgres') }))(
+    `${label} operator handlers - config surface`,
+    () => {
       test('rejects at initialization when a handler requires a Postgres extension that is not configured, naming the handler and the extension', async () => {
         const config = await buildConfigWithOperatorHandlers([
           {
@@ -145,7 +153,8 @@ const runOperatorHandlerConfigSuite = (
           await payload.destroy()
         }
       })
-    })
+    },
+  )
 }
 
 runOperatorHandlerConfigSuite('postgres', 'operator-handlers', (operatorHandlers) =>
@@ -257,12 +266,13 @@ const getAccentCollections = () => [
 const initPayload = async (config: Promise<SanitizedConfig>): Promise<Payload> =>
   new BasePayload().init({ config: await config })
 
-test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
+suite(
   'postgres operator handlers - postgresUnaccent() behavior',
+  { db: (adapter) => adapter.startsWith('postgres') },
   () => {
     const activePayloads: Payload[] = []
 
-    test.afterEach(async () => {
+    afterEach(async () => {
       while (activePayloads.length) {
         const payload = activePayloads.pop()
         await payload?.destroy()
@@ -311,7 +321,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
       expect((thrown as Error).message).toContain('unaccent')
     })
 
-    test.describe('with postgresUnaccent() configured', () => {
+    describe('with postgresUnaccent() configured', () => {
       // A single shared Payload instance is seeded once for every test in this block, rather than
       // one fresh instance per test: `pushDevSchema` caches the last-pushed schema at module scope
       // and skips re-pushing an identical schema, which would otherwise leave later tests querying
@@ -320,7 +330,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
       let richDoc: { id: number | string }
       let seeded: Record<string, number | string>
 
-      test.beforeAll(async () => {
+      beforeAll(async () => {
         payload = await initPayload(
           buildConfig({
             db: postgresAdapter({
@@ -383,7 +393,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
         })
       })
 
-      test.afterAll(async () => {
+      afterAll(async () => {
         await payload.destroy()
       })
 

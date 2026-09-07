@@ -4,7 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { readCSV, readJSON } from './helpers.js'
 import { hookCalls, resetHookSpies } from './hookSpies.js'
@@ -17,8 +17,8 @@ const dirname = path.dirname(filename)
 
 const createdHookPostIDs: (number | string)[] = []
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hooks', () => {
-  test.beforeEach(async ({ payload }) => {
+suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
@@ -27,7 +27,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
     user = loginResult.user!
   })
 
-  test.afterEach(async ({ payload }) => {
+  afterEach(async ({ payload }) => {
     resetHookSpies()
     for (const id of createdHookPostIDs) {
       await payload
@@ -41,7 +41,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
   // Export hooks
   // ─────────────────────────────────────────────
 
-  test.describe('export hooks', () => {
+  describe('export hooks', () => {
     test('should call export.hooks.before with correct args and apply its return value to CSV output', async ({
       payload,
     }) => {
@@ -224,7 +224,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
   // Import hooks
   // ─────────────────────────────────────────────
 
-  test.describe('import hooks', () => {
+  describe('import hooks', () => {
     test('should call import.hooks.before with correct args and apply its return value to DB write', async ({
       payload,
     }) => {
@@ -474,10 +474,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
     })
   })
 
-  test.describe('column mapping — export', () => {
+  describe('column mapping — export', () => {
     const createdIDs: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
         await payload.delete({ collection: postsWithColumnMapSlug, id })
       }
@@ -657,10 +657,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
     })
   })
 
-  test.describe('column mapping — import', () => {
+  describe('column mapping — import', () => {
     const createdIDs: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
         await payload
           .delete({ collection: postsWithColumnMapSlug, id })

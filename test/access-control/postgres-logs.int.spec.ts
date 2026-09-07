@@ -4,15 +4,16 @@ import { createLocalReq } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { whereCacheSameSlug, whereCacheUniqueSlug } from './shared.js'
 
 let req: PayloadRequest
 
-test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') })(
+suite(
   'Access Control - postgres logs',
+  { config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') },
   () => {
-    test.beforeEach(async ({ payload }) => {
+    beforeEach(async ({ payload }) => {
       req = await createLocalReq(
         {
           user: {
@@ -28,8 +29,8 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
       )
     })
 
-    test.describe('Tests', () => {
-      test.describe('where query cache - same where queries', () => {
+    describe('Tests', () => {
+      describe('where query cache - same where queries', () => {
         test('should cache identical where queries across operations, without passing data (2 DB calls total)', async ({
           payload,
         }) => {
@@ -116,7 +117,7 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
         })
       })
 
-      test.describe('where query cache - unique where queries', () => {
+      describe('where query cache - unique where queries', () => {
         test('should handle unique where queries per operation (1 DB call per operation)', async ({
           payload,
         }) => {

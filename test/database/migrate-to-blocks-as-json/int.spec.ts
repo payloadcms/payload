@@ -8,7 +8,7 @@ import path from 'path'
 import { getPayload } from 'payload'
 import { expect } from 'vitest'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { suite, test } from '../../__helpers/int/vitest.js'
 import config from './config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -17,7 +17,7 @@ const dirname = path.dirname(filename)
 // path for temp config created after initial migration which should have blocks as json enabled
 const tempConfigPath = path.resolve(dirname, 'GENERATED_after_migration.config.ts')
 
-test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
+suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
   test('should migrate to blocks as json', async () => {
     // seed initital data
     const payload = await getPayload({ config })

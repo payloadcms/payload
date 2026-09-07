@@ -10,7 +10,7 @@ import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { afterEach, beforeEach, describe, suite, test } from '../../__helpers/int/vitest.js'
 import { mediaSlug } from '../shared.js'
 import { mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
 import { mediaHeaderOnlyWithSizesSlug } from './collections/MediaHeaderOnlyWithSizes.js'
@@ -21,7 +21,7 @@ const dirname = path.dirname(filename)
 let containerClient: ContainerClient
 let TEST_CONTAINER: string
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads', () => {
+suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' }, () => {
   const clearContainer = async () => {
     for await (const blob of containerClient.listBlobsFlat()) {
       await containerClient.deleteBlob(blob.name)
@@ -73,7 +73,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     return form
   }
 
-  test.beforeEach(async () => {
+  beforeEach(async () => {
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
     containerClient = BlobServiceClient.fromConnectionString(
       process.env.AZURE_STORAGE_CONNECTION_STRING!,
@@ -82,7 +82,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     await clearContainer()
   }, 90000)
 
-  test.afterEach(async () => {
+  afterEach(async () => {
     await clearContainer()
   })
 
@@ -171,10 +171,10 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
    * depends on the uploaded MIME type as well as collection configuration, so `audio/mpeg`
    * selects `'none'` while `image/jpeg` selects `'header'`.
    */
-  test.describe('header-only and no-content requirements (real Azure handler)', () => {
+  describe('header-only and no-content requirements (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: mediaHeaderOnlySlug })
       }
@@ -264,10 +264,10 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
    * requirement anyway - handing `createImageSizes` a truncated buffer and crashing instead of
    * fetching the full file through the real Azure handler.
    */
-  test.describe('imageSizes with a large upload (real Azure handler)', () => {
+  describe('imageSizes with a large upload (real Azure handler)', () => {
     const createdIds: (number | string)[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
       }

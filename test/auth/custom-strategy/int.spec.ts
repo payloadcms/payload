@@ -1,6 +1,6 @@
 import { expect } from 'vitest'
 
-import { test } from '../../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../../__helpers/int/vitest.js'
 import { usersSlug } from './shared.js'
 
 const [code, secret, name] = ['test', 'strategy', 'Tester']
@@ -9,9 +9,9 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-test.suite({ config: './config.ts' })('AuthStrategies', () => {
-  test.describe('create user', () => {
-    test.beforeEach(async ({ restClient }) => {
+suite('AuthStrategies', { config: './config.ts' }, () => {
+  describe('create user', () => {
+    beforeEach(async ({ restClient }) => {
       await restClient.POST(`/${usersSlug}`, {
         body: JSON.stringify({
           name,

@@ -9,7 +9,7 @@ import { handleUploads } from '../../packages/plugin-form-builder/src/collection
 import { keyValuePairToHtmlTable } from '../../packages/plugin-form-builder/src/utilities/keyValuePairToHtmlTable.js'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../packages/plugin-form-builder/src/utilities/replaceDoubleCurlys.js'
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeAll, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug } from './shared.js'
 
@@ -21,8 +21,8 @@ const testImagePath = path.resolve(dirname, '../uploads/image.png')
 const testPdfPath = path.resolve(dirname, '../uploads/test-pdf.pdf')
 let form: Form
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
-  test.beforeEach(async ({ payload }) => {
+suite('@payloadcms/plugin-form-builder', { config: './config.ts' }, () => {
+  beforeEach(async ({ payload }) => {
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       confirmationType: 'message',
       confirmationMessage: {
@@ -71,7 +71,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     })) as unknown as Form
   })
 
-  test.describe('plugin collections', () => {
+  describe('plugin collections', () => {
     test('adds forms collection', async ({ payload }) => {
       const { docs: forms } = await payload.find({ collection: formsSlug })
       expect(forms.length).toBeGreaterThan(0)
@@ -83,7 +83,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     })
   })
 
-  test.describe('form building', () => {
+  describe('form building', () => {
     test('can create a simple form', async ({ payload }) => {
       const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
         confirmationType: 'message',
@@ -184,7 +184,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     })
   })
 
-  test.describe('form submissions and validations', () => {
+  describe('form submissions and validations', () => {
     test('can create a form submission', async ({ payload }) => {
       const formSubmission = await payload.create({
         collection: formSubmissionsSlug,
@@ -226,8 +226,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       await expect(req).rejects.toThrow(ValidationError)
     })
 
-    test.describe('replaces curly braces', () => {
-      test.describe('lexical serializer', () => {
+    describe('replaces curly braces', () => {
+      describe('lexical serializer', () => {
         test('specific field names', async () => {
           const mockName = 'Test Submission'
           const mockEmail = 'dev@payloadcms.com'
@@ -447,7 +447,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     })
   })
 
-  test.describe('replaceDoubleCurlys', () => {
+  describe('replaceDoubleCurlys', () => {
     const testVariables = [
       { field: 'name', value: '<script>alert("xss")</script>' },
       { field: '<img onerror=alert(1)>', value: 'normal' },
@@ -495,7 +495,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     })
   })
 
-  test.describe('keyValuePairToHtmlTable', () => {
+  describe('keyValuePairToHtmlTable', () => {
     test('escapes HTML in keys and values', () => {
       const result = keyValuePairToHtmlTable({
         '<script>alert(1)</script>': '<img src=x onerror=alert(1)>',
@@ -519,10 +519,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     })
   })
 
-  test.describe('Lexical TextHTMLConverter', () => {
+  describe('Lexical TextHTMLConverter', () => {
     // Dynamic import to avoid circular dependency with serializeLexical
     let FormBuilderTextConverter: any
-    test.beforeAll(async () => {
+    beforeAll(async () => {
       FormBuilderTextConverter = (
         await import('../../packages/plugin-form-builder/src/utilities/lexical/converters/text.js')
       ).TextHTMLConverter
@@ -567,10 +567,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     })
   })
 
-  test.describe('Lexical LinkHTMLConverter', () => {
+  describe('Lexical LinkHTMLConverter', () => {
     // Dynamic import to avoid circular dependency with serializeLexical
     let FormBuilderLinkConverter: any
-    test.beforeAll(async () => {
+    beforeAll(async () => {
       FormBuilderLinkConverter = (
         await import('../../packages/plugin-form-builder/src/utilities/lexical/converters/link.js')
       ).LinkHTMLConverter
@@ -663,13 +663,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
     })
   })
 
-  test.describe('upload fields', () => {
+  describe('upload fields', () => {
     const createdFormIds: string[] = []
     const createdSubmissionIds: string[] = []
     const createdMediaIds: string[] = []
     const createdDocumentIds: string[] = []
 
-    test.afterEach(async ({ payload }) => {
+    afterEach(async ({ payload }) => {
       for (const id of createdSubmissionIds) {
         try {
           await payload.delete({ collection: formSubmissionsSlug, id })
@@ -739,7 +739,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       },
     }
 
-    test.describe('form creation with upload fields', () => {
+    describe('form creation with upload fields', () => {
       test('should create a form with a single upload field', async ({ payload }) => {
         const testForm = await payload.create({
           collection: formsSlug,
@@ -816,7 +816,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('required field validation', () => {
+    describe('required field validation', () => {
       test('should reject submission when required upload field is missing', async ({
         payload,
       }) => {
@@ -934,7 +934,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('optional field handling', () => {
+    describe('optional field handling', () => {
       test('should accept submission when optional upload field is omitted', async ({
         payload,
       }) => {
@@ -1025,7 +1025,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('mimeType validation', () => {
+    describe('mimeType validation', () => {
       test('should reject file with disallowed mime type', async ({ payload }) => {
         // Create a PDF document in documents collection
         const pdfDoc = await payload.create({
@@ -1112,7 +1112,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('file reference validation', () => {
+    describe('file reference validation', () => {
       test('should reject non-existent file ID', async ({ payload }) => {
         const testForm = await payload.create({
           collection: formsSlug,
@@ -1145,7 +1145,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('other form data integrity', () => {
+    describe('other form data integrity', () => {
       test('should save all non-upload fields when upload succeeds', async ({ payload }) => {
         const mediaDoc = await payload.create({
           collection: mediaSlug,
@@ -1227,7 +1227,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('direct file upload via REST', () => {
+    describe('direct file upload via REST', () => {
       test('should upload file directly with form submission', async ({ payload, restClient }) => {
         const testForm = await payload.create({
           collection: formsSlug,
@@ -1475,7 +1475,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('submissionUploads population', () => {
+    describe('submissionUploads population', () => {
       test('should populate submissionUploads when direct file upload succeeds', async ({
         payload,
         restClient,
@@ -1801,7 +1801,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('multiple guard', () => {
+    describe('multiple guard', () => {
       test('should reject direct upload of multiple files when multiple is false', async ({
         payload,
         restClient,
@@ -1907,7 +1907,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('uploadCollection allowlist guard', () => {
+    describe('uploadCollection allowlist guard', () => {
       test('should reject uploads when uploadCollection is not in plugin config', async ({
         payload,
       }) => {
@@ -1961,7 +1961,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       })
     })
 
-    test.describe('dangling doc cleanup', () => {
+    describe('dangling doc cleanup', () => {
       test('should delete successfully created docs when a later file fails validation', async ({
         payload,
         restClient,

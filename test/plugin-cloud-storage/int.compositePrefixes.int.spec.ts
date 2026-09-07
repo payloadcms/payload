@@ -6,7 +6,7 @@ import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterEach, beforeAll, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { collectionPrefix, mediaWithCompositePrefixesSlug } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
@@ -15,35 +15,35 @@ const dirname = path.dirname(filename)
 
 function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   if (process.env.CI) {
-    return test.describe
+    return describe
   }
 
   const { code } = shelljs.exec(`docker ps | grep localstack`)
 
   if (code !== 0) {
     console.warn('Localstack is not running. Skipping test suite.')
-    return test.describe.skip
+    return describe.skip
   }
 
   console.log('Localstack is running. Running test suite.')
 
-  return test.describe
+  return describe
 }
 
 const configPath = './config.compositePrefixes.ts'
 
-test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
+suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: configPath }, () => {
   let TEST_BUCKET: string
 
-  test.beforeEach(async () => {
+  beforeEach(async () => {
     TEST_BUCKET = process.env.S3_BUCKET!
   })
 
   let client: AWS.S3Client
 
   describeIfInCIOrHasLocalstack()('S3 composite prefixes', () => {
-    test.describe('S3', () => {
-      test.beforeAll(async () => {
+    describe('S3', () => {
+      beforeAll(async () => {
         client = new AWS.S3({
           credentials: {
             accessKeyId: process.env.S3_ACCESS_KEY_ID!,
@@ -58,7 +58,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite 
         await clearTestBucket(client)
       })
 
-      test.afterEach(async () => {
+      afterEach(async () => {
         await clearTestBucket(client)
       })
 

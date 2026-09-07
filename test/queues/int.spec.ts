@@ -13,7 +13,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { afterAll, afterEach, beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
@@ -24,7 +24,7 @@ const dirname = path.dirname(filename)
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: './config.ts' })('Queues - Payload', () => {
+suite('Queues - Payload', { config: './config.ts' }, () => {
   let processingLeaseDefaults: {
     duration: number
     safetyBuffer: number
@@ -32,11 +32,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
   let token: string
   let user: User
 
-  test.beforeEach(async ({ payload }) => {
+  beforeEach(async ({ payload }) => {
     processingLeaseDefaults = { ...payload.config.jobs.processingLease }
   })
 
-  test.afterAll(async () => {
+  afterAll(async () => {
     // Ensure no new crons are scheduled
     _internal_jobSystemGlobals.shouldAutoRun = false
     _internal_jobSystemGlobals.shouldAutoSchedule = false
@@ -46,13 +46,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     _internal_resetJobSystemGlobals()
   })
 
-  test.afterEach(({ payload }) => {
+  afterEach(({ payload }) => {
     _internal_jobSystemGlobals.shouldAutoRun = false
     _internal_jobSystemGlobals.shouldAutoSchedule = false
     Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
   })
 
-  test.beforeEach(async ({ payload, restClient }) => {
+  beforeEach(async ({ payload, restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -71,7 +71,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     _internal_jobSystemGlobals.shouldAutoSchedule = true
   })
 
-  test.describe('default config', () => {
+  describe('default config', () => {
     test('should always add the jobs stats global and job metadata field', ({ payload }) => {
       const jobsCollection = payload.config.collections.find(({ slug }) => slug === 'payload-jobs')
       const jobsStatsGlobal = payload.config.globals.find(
@@ -86,7 +86,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     })
   })
 
-  test.describe('access control', () => {
+  describe('access control', () => {
     test('should deny raw job creation when access control is enabled', async ({ payload }) => {
       const req = await createLocalReq({ user }, payload)
 
@@ -1157,14 +1157,14 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     expect(allSimples.docs[0]?.title).toBe('from single task')
   })
 
-  test.describe('when a queued task slug is no longer registered in config', () => {
+  describe('when a queued task slug is no longer registered in config', () => {
     let originalTasks: Payload['config']['jobs']['tasks']
 
-    test.beforeEach(({ payload }) => {
+    beforeEach(({ payload }) => {
       originalTasks = payload.config.jobs.tasks
     })
 
-    test.afterEach(({ payload }) => {
+    afterEach(({ payload }) => {
       payload.config.jobs.tasks = originalTasks
     })
 
@@ -1274,7 +1274,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     expect(jobAfterRun.processingUntil).toBeFalsy()
   })
 
-  test.describe('worker recovery', () => {
+  describe('worker recovery', () => {
     // The child process can share the file-backed SQLite test database.
     test.options({ db: (type) => type.startsWith('sqlite') })(
       'should recover a job after its worker process is killed',
@@ -2539,7 +2539,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     expect(allSimples?.docs?.[0]?.title).toBe('hello!')
   })
 
-  test.describe('concurrency controls', () => {
+  describe('concurrency controls', () => {
     test('should store concurrencyKey when queuing jobs with concurrency config', async ({
       payload,
     }) => {
@@ -3042,7 +3042,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(results[1].completedAt).toBeDefined()
     })
 
-    test.describe('supersedes', () => {
+    describe('supersedes', () => {
       test('should delete older pending jobs when supersedes is enabled', async ({ payload }) => {
         payload.config.jobs.deleteJobOnComplete = false
 
@@ -3291,7 +3291,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     })
   })
 
-  test.describe('cron recovery', () => {
+  describe('cron recovery', () => {
     test('should recover cron after a transient DB error in jobs.run', async ({ payload }) => {
       // --- Step 1: Verify cron works normally ---
 

@@ -15,7 +15,7 @@ import type {
   Relation,
 } from './payload-types.js'
 
-import { test } from '../__helpers/int/vitest.js'
+import { beforeEach, describe, suite, test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
   chainedRelSlug,
@@ -32,13 +32,13 @@ import {
 
 type EasierChained = { id: string; relation: EasierChained }
 
-test.suite({ config: './config.ts' })('Relationships', () => {
-  test.beforeEach(async ({ restClient }) => {
+suite('Relationships', { config: './config.ts' }, () => {
+  beforeEach(async ({ restClient }) => {
     await restClient.login({ slug: usersSlug, credentials: devUser })
   })
 
-  test.describe('Querying', () => {
-    test.describe('Relationships', () => {
+  describe('Querying', () => {
+    describe('Relationships', () => {
       let post: Post
       let relation: Relation
       let filteredRelation: Relation
@@ -52,7 +52,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       let generatedCustomIdNumber: number
       const nameToQuery = 'name'
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         relation = await payload.create({
           collection: relationSlug,
           data: {
@@ -520,8 +520,8 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         },
       )
 
-      test.describe('hasMany relationships', () => {
-        test.describe('has-many relationship operators', () => {
+      describe('hasMany relationships', () => {
+        describe('has-many relationship operators', () => {
           let directorWithoutMovies: Director
           let electricCarsDirector: Director
           let electricCarsMovieID: number | string
@@ -529,7 +529,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           let recallsDirector: Director
           let recallsMovieID: number | string
 
-          test.beforeEach(async ({ payload }) => {
+          beforeEach(async ({ payload }) => {
             const recallsMovie = await payload.create({
               collection: 'movies',
               data: { name: 'recalls', select: ['a'] },
@@ -1063,7 +1063,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
       })
 
-      test.describe('sorting by relationships', () => {
+      describe('sorting by relationships', () => {
         test('should sort by a property of a relationship', async ({ payload }) => {
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
@@ -1272,7 +1272,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
       })
 
-      test.describe('Custom ID', () => {
+      describe('Custom ID', () => {
         test('should query a custom id relation', async ({ restClient }) => {
           const { customIdRelation } = await restClient
             .GET(`/${slug}/${post.id}`)
@@ -1288,7 +1288,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
       })
 
-      test.describe('depth', () => {
+      describe('depth', () => {
         test('should populate one level by default', async ({ restClient }) => {
           const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
           const chainedRel = doc?.chainedRelation as EasierChained
@@ -1337,7 +1337,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
         })
 
-        test.describe('Local API', () => {
+        describe('Local API', () => {
           test('should populate to depth via local API find', async ({ payload }) => {
             const result = await payload.find({
               collection: slug,
@@ -1425,13 +1425,13 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
       })
 
-      test.describe('with localization', () => {
+      describe('with localization', () => {
         let relation1: Relation
         let relation2: Relation
         let localizedPost1: PostsLocalized
         let localizedPost2: PostsLocalized
 
-        test.beforeEach(async ({ payload }) => {
+        beforeEach(async ({ payload }) => {
           relation1 = await payload.create<Relation>({
             collection: relationSlug,
             data: {
@@ -1550,12 +1550,12 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       })
     })
 
-    test.describe('Nested Querying', () => {
+    describe('Nested Querying', () => {
       let thirdLevelID: string
       let secondLevelID: string
       let firstLevelID: string
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         const thirdLevelDoc = await payload.create({
           collection: 'chained',
           data: {
@@ -1758,10 +1758,10 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       expect(res2.docs[0].id).toBe(movie.id)
     })
 
-    test.describe('Nested Querying Separate Collections', () => {
+    describe('Nested Querying Separate Collections', () => {
       let director: Director
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         // 1. create a director
         director = await payload.create({
           collection: 'directors',
@@ -1802,7 +1802,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         expect(query.docs).toHaveLength(1)
       })
     })
-    test.describe('Multiple Docs', () => {
+    describe('Multiple Docs', () => {
       const movieList = [
         'Pulp Fiction',
         'Reservoir Dogs',
@@ -1821,7 +1821,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         'Insidious',
       ]
 
-      test.beforeEach(async ({ payload }) => {
+      beforeEach(async ({ payload }) => {
         await Promise.all(
           movieList.map(async (movie) => {
             return await payload.create({
@@ -1893,7 +1893,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       })
     })
 
-    test.describe('Hierarchy', () => {
+    describe('Hierarchy', () => {
       test('finds 1 root item with equals', async ({ payload }) => {
         const {
           docs: [item],
@@ -1952,8 +1952,8 @@ test.suite({ config: './config.ts' })('Relationships', () => {
     })
   })
 
-  test.describe('Writing', () => {
-    test.describe('With transactions', () => {
+  describe('Writing', () => {
+    describe('With transactions', () => {
       test('should be able to create filtered relations within a transaction', async ({
         payload,
       }) => {
@@ -1982,7 +1982,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       })
     })
 
-    test.describe('With passing an object', () => {
+    describe('With passing an object', () => {
       test('should create with passing an object', async ({ payload }) => {
         const movie = await payload.create({ collection: 'movies', data: {} })
         const result = await payload.create({
@@ -2054,7 +2054,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
     })
   })
 
-  test.describe('Polymorphic Relationships', () => {
+  describe('Polymorphic Relationships', () => {
     test('should allow REST querying on polymorphic relationships', async ({
       payload,
       restClient,

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { expect } from 'vitest'
 
-import { test } from '../__helpers/int/vitest.js'
+import { describe, suite, test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 
 const stat = promisify(fs.stat)
@@ -12,8 +12,8 @@ const stat = promisify(fs.stat)
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/payload--cloud', () => {
-  test.describe('tests', () => {
+suite('@payloadcms/payload--cloud', { config: './config.ts' }, () => {
+  describe('tests', () => {
     test.todo('payload-cloud tests')
 
     test('should not throw file MIME type error when useTempFiles is true', async ({
