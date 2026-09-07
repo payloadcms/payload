@@ -161,9 +161,6 @@ export const cloudStoragePlugin =
         }
 
         const getSkipSafeFetchSetting = (): AllowList | boolean => {
-          if (options.disablePayloadAccessControl) {
-            return true
-          }
           const isBooleanTrueSkipSafeFetch =
             typeof existingCollection.upload === 'object' &&
             existingCollection.upload.skipSafeFetch === true
