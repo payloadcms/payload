@@ -7,6 +7,7 @@ import os from 'os'
 import path from 'path'
 import { afterEach, describe, expect, it } from 'vitest'
 
+import { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from './getFileFromClientUpload.js'
 import { unlinkTempFiles } from './unlinkTempFiles.js'
 
 const createTempFile = async (contents = 'temp-file-contents'): Promise<string> => {
@@ -107,6 +108,54 @@ describe('unlinkTempFiles', () => {
       config: { upload: { useTempFiles: true } } as unknown as SanitizedConfig,
       req,
     })
+
+    expect(await fileExists(tempFilePath)).toBe(false)
+  })
+
+  it('removes a client-upload temp file tracked on req.context after req.file was cleared', async () => {
+    const tempFilePath = await createTempFile()
+    tempFilesToRemove.push(tempFilePath)
+
+    // Mirrors plugin-cloud-storage's afterChange hook, which clears req.file after uploading
+    // generated image sizes but leaves req.context untouched.
+    const req = {
+      context: { [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath },
+      file: undefined,
+    } as unknown as PayloadRequest
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config: { upload: { useTempFiles: false } } as unknown as SanitizedConfig,
+      req,
+    })
+
+    expect(await fileExists(tempFilePath)).toBe(false)
+    expect(req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]).toBeUndefined()
+  })
+
+  it('does not attempt a second unlink when the context-tracked path matches req.file.tempFilePath', async () => {
+    const tempFilePath = await createTempFile()
+    tempFilesToRemove.push(tempFilePath)
+
+    const req = {
+      context: { [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath },
+      file: {
+        clientUploadContext: undefined,
+        data: Buffer.alloc(0),
+        mimetype: 'video/mp4',
+        name: 'clip.mp4',
+        size: 10,
+        tempFilePath,
+      },
+    } as unknown as PayloadRequest
+
+    await expect(
+      unlinkTempFiles({
+        collectionConfig,
+        config: { upload: { useTempFiles: false } } as unknown as SanitizedConfig,
+        req,
+      }),
+    ).resolves.not.toThrow()
 
     expect(await fileExists(tempFilePath)).toBe(false)
   })

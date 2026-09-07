@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import fs from 'fs'
-import { mkdir, rm } from 'fs/promises'
+import { mkdir, rm, writeFile } from 'fs/promises'
 import os from 'os'
 import path from 'path'
 import { Readable } from 'stream'
@@ -10,6 +10,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { SanitizedUploadConfig, UploadEdits } from './types.js'
 
 import { APIError } from '../errors/APIError.js'
+import { isolateObjectProperty } from '../utilities/isolateObjectProperty.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
 
@@ -20,6 +21,14 @@ export type ClientUploadData = {
   mimeType: string
   size: number
 }
+
+/**
+ * `req.context` key `unlinkTempFiles` reads to find a materializer-created temp file once
+ * `req.file` is gone - plugin-cloud-storage's afterChange hook clears `req.file` after
+ * uploading generated image sizes, before cleanup runs, so tracking it only on `req.file`
+ * would leak the temp file.
+ */
+export const CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY = 'payloadClientUploadTempFilePath'
 
 export async function getFileFromClientUpload({
   file,
@@ -59,6 +68,11 @@ export async function getFileFromClientUpload({
 
   const response = await fetchUploadResponse({ file, req, uploadConfig })
   const tempFilePath = await streamResponseToTempFile({ req, response })
+
+  if (!req.context) {
+    req.context = {}
+  }
+  req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY] = tempFilePath
 
   return {
     name: file.filename,
@@ -131,7 +145,12 @@ async function fetchUploadResponse({
   if (response.status >= 300 && response.status < 400) {
     const redirectUrl = response.headers.get('Location')
     if (redirectUrl) {
-      response = await fetch(redirectUrl)
+      // Forward the Range header (if any) so a redirect from the header-probe path still
+      // fetches only the bounded slice, instead of the whole object, from the redirect target.
+      const rangeHeader = req.headers.get('Range')
+      response = rangeHeader
+        ? await fetch(redirectUrl, { headers: { Range: rangeHeader } })
+        : await fetch(redirectUrl)
     }
   }
 
@@ -155,14 +174,8 @@ async function fetchHeaderOnly({
   const rangedHeaders = new Headers(req.headers)
   rangedHeaders.set('Range', `bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}`)
 
-  const scopedReq = new Proxy(req, {
-    get(target, prop) {
-      if (prop === 'headers') {
-        return rangedHeaders
-      }
-      return Reflect.get(target, prop, target)
-    },
-  })
+  const scopedReq = isolateObjectProperty(req, 'headers')
+  scopedReq.headers = rangedHeaders
 
   const response = await fetchUploadResponse({ file, req: scopedReq, uploadConfig })
 
@@ -219,13 +232,16 @@ async function streamResponseToTempFile({
   req: PayloadRequest
   response: Response
 }): Promise<string> {
-  if (!response.body) {
-    throw new APIError('Expected a response body from the upload handler.')
-  }
-
   const tempFileDir = req.payload.config.upload?.tempFileDir || os.tmpdir()
   await mkdir(tempFileDir, { recursive: true })
   const tempFilePath = path.join(tempFileDir, `payload-client-upload-${randomUUID()}`)
+
+  // A null body is a legitimate zero-byte file (the Fetch API allows a Response to omit a
+  // body entirely), not a failure - `response.arrayBuffer()` tolerated this the same way.
+  if (!response.body) {
+    await writeFile(tempFilePath, Buffer.alloc(0))
+    return tempFilePath
+  }
 
   try {
     await pipeline(

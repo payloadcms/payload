@@ -293,6 +293,29 @@ describe('getFileFromClientUpload', () => {
     expect(fetchMock).toHaveBeenCalledWith(redirectTarget)
   })
 
+  it('forwards the Range header through a redirect during the bounded header probe', async () => {
+    const redirectTarget = 'http://storage.example.com/photo.png'
+    const handler = vi.fn(
+      async () => new Response(null, { headers: { Location: redirectTarget }, status: 302 }),
+    )
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' }, status: 206 }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const req = createReq({ handlers: [handler], upload: { disableLocalStorage: true } })
+    const file = imageFile()
+
+    const result = await getFileFromClientUpload({ file, req })
+
+    expect(result.tempFilePath).toBeUndefined()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledWith(redirectTarget, {
+      headers: { Range: `bytes=0-${HEADER_PROBE_BYTE_LENGTH - 1}` },
+    })
+  })
+
   it('removes the partial temp file when the stream fails before completion', async () => {
     const stream = new ReadableStream({
       pull(controller) {
@@ -338,5 +361,23 @@ describe('getFileFromClientUpload', () => {
     expect(handler).toHaveBeenCalledTimes(1)
     expect(result.tempFilePath).toBeDefined()
     expect(result.data.length).toBe(0)
+  })
+
+  it('treats a null response body as a legitimate zero-byte file', async () => {
+    const handler = vi.fn(
+      async () => new Response(null, { headers: { 'Content-Type': 'video/mp4' }, status: 200 }),
+    )
+    const req = createReq({
+      handlers: [handler],
+      upload: { disableLocalStorage: true, mimeTypes: ['video/*'] },
+    })
+    const file = videoFile({ size: 0 })
+
+    const result = await getFileFromClientUpload({ file, req })
+    tempFilesToRemove.push(result.tempFilePath!)
+
+    expect(result.tempFilePath).toBeDefined()
+    const written = await fs.readFile(result.tempFilePath!)
+    expect(written.length).toBe(0)
   })
 })
