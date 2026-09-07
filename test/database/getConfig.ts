@@ -51,6 +51,20 @@ export const getConfig: () => Partial<Config> = () => ({
       versions: { drafts: true },
       fields: [
         {
+          name: '_status',
+          type: 'select',
+          options: [
+            {
+              label: 'Draft',
+              value: 'draft',
+            },
+            {
+              label: 'Published',
+              value: 'published',
+            },
+          ],
+        },
+        {
           type: 'text',
           name: 'title',
         },
