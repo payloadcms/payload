@@ -75,3 +75,9 @@ minimumReleaseAgeExclude:
   - next@16.3.3
   - mongoose@9.9.2
   - eslint-config-next@16.3.3
+  - '@vitest/mocker@5.0.0'
+  - '@vitest/pretty-format@5.0.0'
+  - '@vitest/spy@5.0.0'
+  - '@vitest/ui@5.0.0'
+  - '@vitest/utils@5.0.0'
+  - vitest@5.0.0
