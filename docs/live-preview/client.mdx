@@ -280,6 +280,7 @@ It is possible that either you are setting an improper [`depth`](../queries/dept
 // Your initial request
 const { docs } = await payload.find({
   collection: 'pages',
+  overrideAccess: true,
   depth: 1, // Ensure this is set to the proper depth for your application
   where: {
     slug: {

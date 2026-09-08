@@ -155,6 +155,7 @@ export default buildConfig({
             task: async ({ req }) => {
               const newPost = await req.payload.update({
                 collection: 'post',
+                overrideAccess: true,
                 id: '2',
                 req,
                 retries: 3,
@@ -367,11 +368,13 @@ export default buildConfig({
               // documentId can run at the same time
               const doc = await req.payload.findByID({
                 collection: 'posts',
+                overrideAccess: true,
                 id: job.input.documentId,
               })
 
               await req.payload.update({
                 collection: 'posts',
+                overrideAccess: true,
                 id: job.input.documentId,
                 data: { syncedAt: new Date().toISOString() },
               })

@@ -22,6 +22,40 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### `overrideAccess` now defaults to `false` on Local API operations
+
+Local API operations previously defaulted `overrideAccess` to `true`, so omitting it skipped Access Control. It now defaults to `false`, so an omitted value respects Access Control instead.
+
+```diff
+const posts = await payload.find({
+  collection: 'posts',
++ overrideAccess: true, // preserves the Payload 3 default
+})
+```
+
+- `overrideAccess: false` (the new default) — respect Access Control. Use this whenever the operation acts on behalf of a user, and pass `user` alongside it.
+- `overrideAccess: true` — bypass Access Control. Use this for trusted server-side work such as cron jobs, seeding, and migrations.
+
+The property stays optional, and there is no compile error for either TypeScript or JavaScript projects — a call that omitted `overrideAccess` before still compiles after upgrading, it just behaves differently: it now enforces Access Control instead of skipping it. Run the codemod to find every affected call site and restore the previous behavior explicitly:
+
+```bash
+npx @payloadcms/codemod
+```
+
+Review the results afterwards. Leave the property off, or set it to `overrideAccess: false`, wherever the operation acts on behalf of a user — that is the more secure outcome and is now the default.
+
+#### Cases the codemod leaves behind
+
+Run a typecheck after the codemod. Three patterns it cannot resolve:
+
+- **Spread arguments** — `payload.find({ ...args })`. The codemod cannot tell whether `args` already supplies the property.
+- **Aliased receivers** — `const db = payload; db.find({ ... })`. It matches `payload` and `.payload` only.
+- **Casts** — anything reaching the operation through `as any`.
+
+#### The jobs queue is unchanged
+
+`payload.jobs.queue`, `run`, `runByID`, `cancel`, and `cancelByID` keep their Payload 3 behavior. `overrideAccess` stays optional on those methods and still defaults to `true`. Migrating your collection, global, and auth calls does not cover your jobs calls.
+
 ### Collection and Global Access Control callbacks receive `slug`
 
 Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
@@ -150,6 +184,7 @@ If your application relies on two populated levels, prefer specifying `depth: 2`
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   depth: 2,
 })
 ```

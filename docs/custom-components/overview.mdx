@@ -241,6 +241,7 @@ async function MyServerComponent({
 }) {
   const page = await payload.findByID({
     collection: 'pages',
+    overrideAccess: true,
     id: '123',
   })
 
@@ -452,6 +453,7 @@ import React from 'react'
 export default async function MyServerComponent({ payload, locale }) {
   const localizedPage = await payload.findByID({
     collection: 'pages',
+    overrideAccess: true,
     id: '123',
     locale,
   })

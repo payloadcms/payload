@@ -218,6 +218,7 @@ import type { Payload } from 'payload'
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     where: {
       color: {
         equals: 'mint',
@@ -328,6 +329,7 @@ Relationships will only populate down to the specified depth, and any relationsh
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: { ... },
   // highlight-start
   depth: 0, // Only return the IDs of related documents
@@ -344,6 +346,7 @@ Set the [Limit](./pagination#limit) if you can reliably predict the number of ma
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: {
     slug: {
       equals: 'unique-post-slug',
@@ -390,6 +393,7 @@ To learn more, see the [Select documentation](./select).
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   where: {
     slug: {
       equals: 'unique-post-slug',

@@ -162,6 +162,7 @@ export default buildConfig({
 
           const analytics = await req.payload.find({
             collection: 'analytics',
+            overrideAccess: true,
             where: {
               createdAt: {
                 greater_than_equal: yesterday.toISOString(),
@@ -172,6 +173,7 @@ export default buildConfig({
           // Save the report
           const report = await req.payload.create({
             collection: 'reports',
+            overrideAccess: true,
             data: {
               date: new Date().toISOString(),
               totalEvents: analytics.totalDocs,

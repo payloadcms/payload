@@ -774,6 +774,7 @@ const localFilePath = path.resolve(__dirname, filename)
 
 await payload.create({
   collection: 'media',
+  overrideAccess: true,
   data: {
     alt,
   },

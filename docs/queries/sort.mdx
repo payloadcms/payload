@@ -27,6 +27,7 @@ import type { Payload } from 'payload'
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     sort: '-createdAt', // highlight-line
   })
 
@@ -42,6 +43,7 @@ import type { Payload } from 'payload'
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     sort: ['priority', '-createdAt'], // highlight-line
   })
 

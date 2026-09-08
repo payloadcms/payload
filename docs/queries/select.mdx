@@ -21,6 +21,7 @@ import type { Payload } from 'payload'
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     // highlight-start
     select: {
       text: true,
@@ -41,6 +42,7 @@ const getPosts = async (payload: Payload) => {
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     // Select everything except for array and group.number
     // highlight-start
     select: {
@@ -63,6 +65,7 @@ The `id` field is always included in the result, regardless of your `select` que
 ```ts
 const post = await payload.findByID({
   collection: 'posts',
+  overrideAccess: true,
   id: '1',
   select: {},
 })
@@ -261,6 +264,7 @@ import type { Payload } from 'payload'
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     populate: {
       // Select only `text` from populated docs in the "pages" collection
       // Now, no matter what the `defaultPopulate` is set to on the "pages" collection,
