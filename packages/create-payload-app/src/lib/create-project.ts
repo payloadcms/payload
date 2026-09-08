@@ -70,6 +70,96 @@ async function installDeps(args: {
   }
 }
 
+type PayloadGenerateResult = { error: string; ok: false } | { ok: true }
+
+function getRunCommand(packageManager: PackageManager): string {
+  if (packageManager === 'yarn') {
+    return 'yarn'
+  } else if (packageManager === 'pnpm') {
+    return 'pnpm'
+  } else if (packageManager === 'bun') {
+    return 'bun'
+  }
+  return 'npx'
+}
+
+async function runPayloadCommand(args: {
+  command: string
+  packageManager: PackageManager
+  projectDir: string
+}): Promise<PayloadGenerateResult> {
+  const { command, packageManager, projectDir } = args
+
+  try {
+    await execa.command(`${getRunCommand(packageManager)} payload ${command}`, {
+      cwd: path.resolve(projectDir),
+    })
+    return { ok: true }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : String(err), ok: false }
+  }
+}
+
+async function generateImportMap(args: {
+  packageManager: PackageManager
+  projectDir: string
+}): Promise<PayloadGenerateResult> {
+  return runPayloadCommand({ ...args, command: 'generate:importmap' })
+}
+
+async function generateTypes(args: {
+  packageManager: PackageManager
+  projectDir: string
+}): Promise<PayloadGenerateResult> {
+  return runPayloadCommand({ ...args, command: 'generate:types' })
+}
+
+async function runPayloadGenerate(args: {
+  artifact: string
+  command: string
+  generate: (args: {
+    packageManager: PackageManager
+    projectDir: string
+  }) => Promise<PayloadGenerateResult>
+  packageManager: PackageManager
+  projectDir: string
+  spinner: ReturnType<typeof p.spinner>
+}): Promise<void> {
+  const { artifact, command, generate, packageManager, projectDir, spinner } = args
+
+  spinner.start(`Generating ${artifact}...`)
+  const result = await generate({ packageManager, projectDir })
+  const capitalizedArtifact = artifact.charAt(0).toUpperCase() + artifact.slice(1)
+
+  if (result.ok) {
+    spinner.stop(`${capitalizedArtifact} generated`)
+    return
+  }
+
+  spinner.stop(`Could not generate ${artifact}`, 1)
+  warning(`Run '${getRunCommand(packageManager)} payload ${command}' later. ${result.error}`)
+}
+
+/** Generate the admin import map and Payload types so the scaffold builds clean. */
+async function runProjectCodegen(args: {
+  packageManager: PackageManager
+  projectDir: string
+  spinner: ReturnType<typeof p.spinner>
+}): Promise<void> {
+  await runPayloadGenerate({
+    ...args,
+    artifact: 'import map',
+    command: 'generate:importmap',
+    generate: generateImportMap,
+  })
+  await runPayloadGenerate({
+    ...args,
+    artifact: 'types',
+    command: 'generate:types',
+    generate: generateTypes,
+  })
+}
+
 type TemplateOrExample =
   | {
       example: ProjectExample
@@ -182,6 +272,8 @@ export async function createProject(
     const result = await installDeps({ cliArgs, packageManager, projectDir })
     if (result) {
       spinner.stop('Successfully installed Payload and dependencies')
+
+      await runProjectCodegen({ packageManager, projectDir, spinner })
     } else {
       spinner.stop('Error installing dependencies', 1)
     }
