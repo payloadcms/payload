@@ -39,6 +39,8 @@ export const ThirdPartyAccess: CollectionConfig = {
 User API keys are encrypted within the database, meaning that if your database is compromised,
 your API keys will not be.
 
+An API key is independent of the user's password. Changing or resetting a password does not disable an existing API key, so remove or regenerate the key when its access should end.
+
 <Banner type="warning">
   **Important:**
   If you change your `PAYLOAD_SECRET`, you will need to regenerate your API keys.

@@ -1,5 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
+import type { UserSession } from '../../../auth/types.js'
 import type { Args } from '../../../fields/hooks/beforeChange/index.js'
 import type {
   CollectionSlug,
@@ -23,6 +24,7 @@ import type {
 } from '../../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
+import { removeExpiredSessions } from '../../../auth/sessions.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
@@ -425,6 +427,20 @@ export const updateDocument = async <
     dataToUpdate.hash = hash
     delete dataToUpdate.password
     delete data.password
+
+    if (collectionConfig.auth?.useSessions) {
+      const currentSid =
+        req.user?.collection === collectionConfig.slug && String(req.user.id) === String(id)
+          ? req.user._sid
+          : undefined
+      const existingSessions = removeExpiredSessions(
+        (docWithLocales.sessions as undefined | UserSession[]) ?? [],
+      )
+
+      dataToUpdate.sessions = currentSid
+        ? existingSessions.filter((session) => session.id === currentSid)
+        : []
+    }
   }
 
   // /////////////////////////////////////
