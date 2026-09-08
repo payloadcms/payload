@@ -1736,6 +1736,16 @@ defineCollectionTool({
 
 `createDocuments` and `updateDocument` now return affected document IDs instead of complete documents by default. Add `returning: true` to preserve the previous response. If the call uses `select`, it must also set `returning: true`.
 
+**MCP URL uploads require an explicit allow-list.** Previously, MCP could download a URL when the upload collection's `pasteURL` was unset. Configure `upload.pasteURL.allowList` for collections that accept MCP URL uploads. The initial URL and any redirect targets must match; `skipSafeFetch` does not bypass this requirement. Base64 and upload-reference inputs are unaffected.
+
+```ts
+upload: {
+  pasteURL: {
+    allowList: [{ hostname: 'cdn.example.com', protocol: 'https' }],
+  },
+}
+```
+
 **Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per auth collection via its `tools` map, and pass the target auth collection as `slug`. Like every MCP item, auth tools now use default MCP access unless you provide an `access` callback, so unauthenticated auth tools such as `login` need `access: () => true`.
 
 ```diff

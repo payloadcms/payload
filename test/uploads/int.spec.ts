@@ -16,7 +16,7 @@ import type { Enlarge, Media } from './payload-types.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkFileRestrictions.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
-import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
+import { downloadFileToBuffer } from '../../packages/payload/src/uploads/downloadFileToBuffer.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
 import { test } from '../__helpers/int/vitest.js'
@@ -1123,7 +1123,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
         fetchSpy.mockRestore()
       })
 
-      test('getExternalFile should not filter out payload cookies when externalFileHeaderFilter is not defined and the URL is not external', async ({
+      test('downloadFileToBuffer should not filter out payload cookies when externalFileHeaderFilter is not defined and the URL is not external', async ({
         payload,
       }) => {
         const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
@@ -1152,7 +1152,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
           }),
         })
 
-        await getExternalFile({
+        await downloadFileToBuffer({
           data: { url: '/api/media/image.png' },
           req,
           uploadConfig: { skipSafeFetch: true },
