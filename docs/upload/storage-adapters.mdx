@@ -264,16 +264,28 @@ export default buildConfig({
 
 ### Configuration Options#azure-configuration
 
-| Option                 | Description                                                                              | Default |
-| ---------------------- | ---------------------------------------------------------------------------------------- | ------- |
-| `enabled`              | Whether or not to enable the plugin                                                      | `true`  |
-| `collections`          | Collections to apply the Azure Blob adapter to                                           |         |
-| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist                 | `false` |
-| `baseURL`              | Base URL for the Azure Blob storage account                                              |         |
-| `connectionString`     | Azure Blob storage connection string                                                     |         |
-| `containerName`        | Azure Blob storage container name                                                        |         |
-| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                            |         |
-| `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false` |
+| Option                 | Description                                                                                                                                                                                                                                                 | Default     |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `enabled`              | Whether or not to enable the plugin                                                                                                                                                                                                                         | `true`      |
+| `collections`          | Collections to apply the Azure Blob adapter to                                                                                                                                                                                                              |             |
+| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist                                                                                                                                                                                    | `false`     |
+| `containerAccess`      | Public access level for a container the plugin creates. `'private'` (default) serves blobs only through Payload's access-controlled route; `'blob'` / `'container'` expose them to anonymous clients directly from Azure. No effect on existing containers. | `'private'` |
+| `baseURL`              | Base URL for the Azure Blob storage account                                                                                                                                                                                                                 |             |
+| `connectionString`     | Azure Blob storage connection string                                                                                                                                                                                                                        |             |
+| `containerName`        | Azure Blob storage container name                                                                                                                                                                                                                           |             |
+| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                                                                                                                                                                                               |             |
+| `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it.                                                                                                                                                                    | `false`     |
+
+<Banner type="warning">
+  **Breaking change (private by default):** When `allowContainerCreate: true`,
+  the plugin now creates containers with **private** access, where it previously
+  used public `blob` access. If you relied on files being served directly from
+  the anonymous Azure blob URL (typically alongside
+  `disablePayloadAccessControl: true`), set `containerAccess: 'blob'` to restore
+  the old behaviour. Only **newly created** containers are affected — existing
+  containers keep their current access level and must be updated manually if
+  needed.
+</Banner>
 
 ## Google Cloud Storage
 
