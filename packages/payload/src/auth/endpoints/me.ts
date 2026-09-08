@@ -17,7 +17,7 @@ export const meHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
   const currentToken = extractJWT(req)
   const depthFromSearchParams = searchParams.get('depth')
-  const draftFromSearchParams = searchParams.get('depth')
+  const draftFromSearchParams = searchParams.get('draft')
 
   const {
     depth: depthFromQuery,
