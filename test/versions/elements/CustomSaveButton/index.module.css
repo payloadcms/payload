@@ -1,0 +1,29 @@
+.customButton {
+  :global(.btn) {
+    background-color: var(--color-bg-success-tertiary);
+    color: var(--color-text-success);
+
+    &:hover {
+      background-color: var(--color-bg-success-tertiary-hover) !important;
+    }
+
+    &:disabled {
+      background-color: var(--color-bg-success-tertiary);
+      color: var(--color-text-success);
+    }
+  }
+
+  :global(.popup-button) {
+    background-color: var(--color-bg-success-tertiary);
+    color: var(--color-text-success);
+
+    &:hover {
+      background-color: var(--color-bg-success-tertiary-hover) !important;
+    }
+
+    &:disabled {
+      background-color: var(--color-bg-success-tertiary);
+      color: var(--color-text-success);
+    }
+  }
+}

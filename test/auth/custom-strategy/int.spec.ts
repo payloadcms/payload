@@ -1,16 +1,7 @@
-import type { Payload } from 'payload'
+import { expect } from 'vitest'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { test } from '../../__helpers/int/vitest.js'
 import { usersSlug } from './shared.js'
-
-let payload: Payload
-let restClient: NextRESTClient
 
 const [code, secret, name] = ['test', 'strategy', 'Tester']
 
@@ -18,20 +9,9 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('AuthStrategies', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/custom-strategy'))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('create user', () => {
-    beforeAll(async () => {
+test.suite({ config: './config.ts' })('AuthStrategies', () => {
+  test.describe('create user', () => {
+    test.beforeEach(async ({ restClient }) => {
       await restClient.POST(`/${usersSlug}`, {
         body: JSON.stringify({
           name,
@@ -42,7 +22,7 @@ describe('AuthStrategies', () => {
       })
     })
 
-    it('should return a logged in user from /me', async () => {
+    test('should return a logged in user from /me', async ({ restClient }) => {
       const response = await restClient.GET(`/${usersSlug}/me`, {
         headers: {
           code,

@@ -48,6 +48,7 @@ export const RESTRICTED_FILE_EXT_AND_TYPES: FileAllowList = [
 ]
 
 export const checkFileRestrictions = async ({
+  checkFileContents = true,
   collection,
   file,
   req,
@@ -84,6 +85,24 @@ export const checkFileRestrictions = async ({
 
   // Skip validation if `allowRestrictedFileTypes` is true
   if (allowRestrictedFileTypes) {
+    return
+  }
+
+  if (!checkFileContents) {
+    const isAllowed = configMimeTypes.length
+      ? validateMimeType(file.mimetype, configMimeTypes)
+      : !RESTRICTED_FILE_EXT_AND_TYPES.some(
+          ({ extensions, mimeType }) =>
+            mimeType === file.mimetype ||
+            extensions.some((extension) => file.name.toLowerCase().endsWith(extension)),
+        )
+
+    if (!isAllowed) {
+      throw new ValidationError({
+        errors: [{ message: `File type '${file.mimetype}' is not allowed.`, path: 'file' }],
+      })
+    }
+
     return
   }
 

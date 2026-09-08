@@ -7,9 +7,7 @@ import type { Config } from '../../payload-types.js'
 
 import {
   closeAllToasts,
-  ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
 } from '../../../__helpers/e2e/helpers.js'
@@ -17,6 +15,8 @@ import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsMultiPoly } from '../../slugs.js'
 
@@ -34,21 +34,14 @@ let url: AdminUrlUtil
 describe('Upload polymorphic with hasMany', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     url = new AdminUrlUtil(serverURL, uploadsMultiPoly)
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    await initPage({ page, serverURL })
   })
 
   test('should upload in new doc', async ({ page }) => {

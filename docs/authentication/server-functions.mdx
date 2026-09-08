@@ -1,0 +1,133 @@
+---
+title: Authentication Server Functions
+label: Server Functions
+order: 25
+desc: Use Payload's ready-to-use authentication server functions with Next.js or TanStack Start.
+keywords: authentication, server functions, login, logout, refresh, nextjs, tanstack start
+---
+
+Payload provides `login`, `logout`, and `refresh` server functions that manage authentication cookies for you. Each function requires your Payload config, so it must run on the server.
+
+The examples below expose the same call signatures for Next.js and TanStack Start:
+
+- `loginAction({ email, password })`
+- `logoutAction()`
+- `refreshAction()`
+
+## Next.js
+
+Import the helpers from `@payloadcms/next/auth` in a file marked with `'use server'`:
+
+```ts
+'use server'
+
+import { login, logout, refresh } from '@payloadcms/next/auth'
+import config from '@payload-config'
+
+type LoginArgs = {
+  email: string
+  password: string
+}
+
+export function loginAction({ email, password }: LoginArgs) {
+  return login({
+    collection: 'users',
+    config,
+    email,
+    password,
+  })
+}
+
+export function logoutAction() {
+  return logout({ config })
+}
+
+export function refreshAction() {
+  return refresh({ config })
+}
+```
+
+## TanStack Start
+
+Import the helpers from `@payloadcms/tanstack-start/server` inside each `createServerFn` handler:
+
+```ts
+import { createServerFn } from '@tanstack/react-start'
+
+type LoginArgs = {
+  email: string
+  password: string
+}
+
+const loginServerFn = createServerFn({ method: 'POST' })
+  .validator((data: LoginArgs) => data)
+  .handler(async ({ data }) => {
+    const [{ login }, { default: config }] = await Promise.all([
+      import('@payloadcms/tanstack-start/server'),
+      import('@payload-config'),
+    ])
+
+    await login({
+      collection: 'users',
+      config,
+      email: data.email,
+      password: data.password,
+    })
+  })
+
+const logoutServerFn = createServerFn({ method: 'POST' }).handler(async () => {
+  const [{ logout }, { default: config }] = await Promise.all([
+    import('@payloadcms/tanstack-start/server'),
+    import('@payload-config'),
+  ])
+
+  return logout({ config })
+})
+
+const refreshServerFn = createServerFn({ method: 'POST' }).handler(async () => {
+  const [{ refresh }, { default: config }] = await Promise.all([
+    import('@payloadcms/tanstack-start/server'),
+    import('@payload-config'),
+  ])
+
+  return refresh({ config })
+})
+
+export function loginAction(data: LoginArgs) {
+  return loginServerFn({ data })
+}
+
+export function logoutAction() {
+  return logoutServerFn()
+}
+
+export function refreshAction() {
+  return refreshServerFn()
+}
+```
+
+## Client Usage
+
+The normalized functions can be called the same way from event handlers in either framework:
+
+```tsx
+'use client'
+
+import { loginAction } from './actions'
+
+async function handleLogin({
+  email,
+  password,
+}: {
+  email: string
+  password: string
+}) {
+  try {
+    await loginAction({ email, password })
+  } catch (error) {
+    // Display the error to the user
+  }
+}
+```
+
+All three functions reject when the operation fails. Use the same `try`/`catch` pattern for `refreshAction` and `logoutAction` so failures do not become unhandled promise rejections.

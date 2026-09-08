@@ -4,7 +4,7 @@ import type { Config, Plugin, SanitizedConfig } from 'payload'
 import { serveStdio } from '@modelcontextprotocol/server/stdio'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
-import { findConfig } from 'payload/node'
+import { findConfig, loadEnv } from 'payload/node'
 
 import type { SanitizedMCPPluginConfig } from './types.js'
 
@@ -28,6 +28,7 @@ export const runMcpStdio = async (): Promise<void> => {
     process.chdir(projectRoot)
   }
 
+  loadEnv()
   const configPath = findConfig()
   const configModule = await import(pathToFileURL(configPath).toString())
   const config = (await (configModule.default ?? configModule)) as SanitizedConfig

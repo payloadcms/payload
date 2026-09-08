@@ -28,7 +28,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
   const { className, element = 'h1', fallback, renderAsLink, title: titleFromProps } = props
 
   const { id, collectionSlug, globalSlug, isInitializing } = useDocumentInfo()
-  const { title: titleFromContext } = useDocumentTitle()
+  const { isPlaceholder, title: titleFromContext } = useDocumentTitle()
   const {
     config: {
       routes: { admin: adminRoute },
@@ -38,6 +38,8 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
   const title = titleFromProps || titleFromContext || fallback
 
   const idAsTitle = title === id
+
+  const showPlaceholder = !titleFromProps && isPlaceholder
 
   const Tag = element
 
@@ -54,7 +56,12 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   return (
     <Tag
-      className={[className, baseClass, idAsTitle && `${baseClass}--has-id`]
+      className={[
+        className,
+        baseClass,
+        idAsTitle && `${baseClass}--has-id`,
+        showPlaceholder && `${baseClass}--placeholder`,
+      ]
         .filter(Boolean)
         .join(' ')}
       data-doc-id={id}

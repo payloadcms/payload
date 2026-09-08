@@ -73,7 +73,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
           hasSavePermission: docInfo.hasSavePermission,
           initialData: docInfo.initialData,
           initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-          locale: typeof locale === 'object' ? locale?.code : locale,
+          locale: locale?.code,
           title,
         } satisfies Omit<
           Parameters<GenerateURL>[0],
@@ -113,7 +113,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
       </div>
       <div
         style={{
-          background: 'var(--theme-elevation-50)',
+          background: 'var(--color-bg-secondary)',
           borderRadius: '5px',
           boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
           maxWidth: '600px',

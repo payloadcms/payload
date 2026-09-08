@@ -16,13 +16,6 @@ export type Result = {
   exp: number
   refreshedToken: string
   setCookie?: boolean
-  /** @deprecated
-   * use:
-   * ```ts
-   * user._strategy
-   * ```
-   */
-  strategy?: string
   user: Document
 }
 
@@ -154,13 +147,6 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         exp,
         refreshedToken,
         setCookie: true,
-        /** @deprecated
-         * use:
-         * ```ts
-         * user._strategy
-         * ```
-         */
-        strategy: args.req.user._strategy,
         user,
       }
     }

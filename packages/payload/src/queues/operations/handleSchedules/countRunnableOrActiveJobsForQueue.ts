@@ -1,6 +1,6 @@
 import type { PayloadRequest, Where } from '../../../types/index.js'
-import type { TaskType } from '../../config/types/taskTypes.js'
-import type { WorkflowTypes } from '../../config/types/workflowTypes.js'
+import type { TaskSlug } from '../../config/types/taskTypes.js'
+import type { WorkflowSlug } from '../../config/types/workflowTypes.js'
 
 import { jobsCollectionSlug } from '../../config/collection.js'
 
@@ -25,8 +25,8 @@ export async function countRunnableOrActiveJobsForQueue({
   onlyScheduled?: boolean
   queue: string
   req: PayloadRequest
-  taskSlug?: TaskType
-  workflowSlug?: WorkflowTypes
+  taskSlug?: TaskSlug
+  workflowSlug?: WorkflowSlug
 }): Promise<number> {
   const and: Where[] = [
     {

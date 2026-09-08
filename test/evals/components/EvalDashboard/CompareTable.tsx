@@ -1408,7 +1408,6 @@ export function CompareTable({
                         gap: '0 12px',
                         gridTemplateColumns: '1fr 80px 60px 110px 130px 130px 90px 32px',
                         padding: '10px 12px',
-                        transition: 'background 0.1s',
                       }}
                       tabIndex={0}
                     >

@@ -53,6 +53,7 @@ export function createR2Adapter({
         uploadReference: {},
       },
     }),
+    useInAdmin: true,
   }
 
   return ({ collection, prefix = '' }): GeneratedAdapter => ({

@@ -8,8 +8,8 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import { login } from '../__helpers/e2e/auth/login.js'
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -29,13 +29,11 @@ describe('Queues', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
     // This suite logs in explicitly (no auto-login), so `/admin` redirects to
     // `/admin/login`. Pass `noAutoLogin` so the compilation poll waits for the
     // login URL instead of the dashboard URL that never loads — otherwise it
     // loops until the beforeAll times out on TanStack (server-side 307 redirect).
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
 
     await login({ page, serverURL })
 
@@ -116,6 +114,11 @@ describe('Queues', () => {
     })
 
     test('can queue and run external task with file path handler within Next.js', async () => {
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'Next.js-bundled-environment specific; generic behaviour covered by int.spec.ts.',
+      )
+
       // Queue a task directly using the ExternalTask which uses a file path handler
       await payload.create({
         collection: 'payload-jobs',

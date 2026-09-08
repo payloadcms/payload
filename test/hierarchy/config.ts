@@ -181,13 +181,27 @@ export const Organizations: CollectionConfig = {
     parentFieldName: 'parent',
   },
   versions: {
-    drafts: true,
+    drafts: {
+      autosave: {
+        interval: 1000,
+      },
+    },
   },
 }
 
 // Folders collection with collectionSpecific (enables filter in tree search)
 export const Folders: CollectionConfig = {
   slug: 'folders',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
   folders: {
     admin: {
       components: {
@@ -200,16 +214,6 @@ export const Folders: CollectionConfig = {
     collectionSpecific: { fieldName: 'allowedTypes' },
     parentFieldName: 'parentFolder',
   },
-  admin: {
-    useAsTitle: 'name',
-  },
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-  ],
   versions: false,
 }
 
@@ -250,28 +254,34 @@ export const Products: CollectionConfig = {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'hierarchy',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      Categories,
+      Departments,
+      Divisions,
+      Folders,
+      Organizations,
+      Pages,
+      Products,
+      Regions,
+    ],
+    debug: true,
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: ['en', 'es', 'de'],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    Categories,
-    Departments,
-    Divisions,
-    Folders,
-    Organizations,
-    Pages,
-    Products,
-    Regions,
-  ],
-  debug: true,
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: ['en', 'es', 'de'],
-  },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -280,8 +290,5 @@ export default buildConfigWithDefaults({
       },
     })
     await seed(payload)
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

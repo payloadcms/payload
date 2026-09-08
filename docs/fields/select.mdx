@@ -82,6 +82,8 @@ The result of `filterOptions` will determine:
 - Which options are displayed in the Admin Panel
 - Which options can be saved to the database
 
+This function can be synchronous or asynchronous, i.e. it can return `Option[]` or `Promise<Option[]>`, allowing you to perform an async lookup (e.g. querying another collection) before resolving the filtered options.
+
 To do this, use the `filterOptions` property in your [Field Config](./overview):
 
 ```ts

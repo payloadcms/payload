@@ -3,6 +3,7 @@ import type { UploadInstructions } from '../uploads/types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
+import { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -65,7 +66,6 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         } catch {
           throw new APIError('A file name is required.', 400)
         }
-        const { filename, mimeType, size, uploadReference } = uploadedFile
         const collectionSlug =
           typeof req.routeParams?.collection === 'string'
             ? req.routeParams.collection
@@ -78,54 +78,11 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
           throw new APIError('Invalid upload collection.', 400)
         }
 
-        if (!uploadConfig.handlers) {
-          throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
-        }
-
-        let response: null | Response = null
-        let error: unknown
-
-        for (const handler of uploadConfig.handlers) {
-          try {
-            const result = await handler(req, {
-              doc: null!,
-              params: {
-                collection: collectionSlug,
-                filename,
-                uploadReference,
-              },
-            })
-            if (result) {
-              response = result
-            }
-            // If we couldn't get the file from that handler, save the error and try other.
-          } catch (err) {
-            error = err
-          }
-        }
-
-        if (!response) {
-          if (error) {
-            payload.logger.error(error)
-          }
-
-          throw new APIError('Expected response from the upload handler.')
-        }
-
-        if (response.status >= 300 && response.status < 400) {
-          const redirectUrl = response.headers.get('Location')
-          if (redirectUrl) {
-            response = await fetch(redirectUrl)
-          }
-        }
-
-        req.file = {
-          name: filename,
-          data: Buffer.from(await response.arrayBuffer()),
-          mimetype: response.headers.get('Content-Type') || mimeType,
-          size,
-          uploadReference,
-        }
+        req.file = await getFileFromUploadInstructions({
+          collectionSlug,
+          file: uploadedFile,
+          req,
+        })
       }
     }
   }

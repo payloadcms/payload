@@ -2,6 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { hasAutosaveEnabled } from 'payload/shared'
 import React, { useState } from 'react'
 
 import type { Props as ButtonProps } from '../Button/types.js'
@@ -70,7 +71,10 @@ export function CreateDocumentButton({
   }
 
   const handleSave: DocumentDrawerContextProps['onSave'] = (args) => {
-    closeModal(drawerSlug)
+    if (!hasAutosaveEnabled(args.collectionConfig)) {
+      closeModal(drawerSlug)
+    }
+
     return onSave?.(args)
   }
 

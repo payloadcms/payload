@@ -13,6 +13,7 @@ import { Button } from '../../elements/Button/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
+  insertRowFromClipboard,
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
@@ -86,7 +87,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     replaceState,
     setModified,
   } = useForm()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const {
     config: { localization },
     config,
@@ -278,6 +280,38 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           })
           replaceState(newState)
           setModified(true)
+        },
+        path,
+        schemaBlocks: clientBlocks,
+        t,
+      }
+
+      const clipboardResult = clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [clientBlocks, getFields, path, replaceState, setModified, t],
+  )
+
+  const pasteRowBelow = useCallback(
+    (rowIndex: number) => {
+      const pasteArgs = {
+        onPaste: (dataFromClipboard: ClipboardPasteData) => {
+          const formState = { ...getFields() }
+          const newState = insertRowFromClipboard({
+            dataFromClipboard,
+            formState,
+            path,
+            rowIndex: rowIndex + 1,
+          })
+          replaceState(newState)
+          setModified(true)
+
+          setTimeout(() => {
+            scrollToID(`${path?.split('.').join('-')}-row-${rowIndex + 1}`)
+          }, 0)
         },
         path,
         schemaBlocks: clientBlocks,
@@ -490,6 +524,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       moveRow={moveRow}
                       parentPath={path}
                       pasteRow={pasteRow}
+                      pasteRowBelow={pasteRowBelow}
                       path={rowPath}
                       permissions={permissions}
                       readOnly={readOnly || disabled}
@@ -528,16 +563,16 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly || disabled}
+            disabled={disabled}
             slug={drawerSlug}
           >
             <Button
               buttonStyle="ghost"
-              disabled={readOnly || disabled}
+              disabled={disabled}
               el="span"
               icon={<CirclePlusIcon />}
               iconPosition="left"

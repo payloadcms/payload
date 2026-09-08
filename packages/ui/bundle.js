@@ -87,7 +87,7 @@ async function build() {
     // chain). `copyfiles` also copies `src/styles.css` to `dist/styles.css`,
     // but the write below would overwrite it — dropping the tokens entirely.
     // Consumers that load `styles.css` directly (the `@payloadcms/ui/css`
-    // export, and `scss/app.scss`'s `@import '../styles.css'`) would then get
+    // export, and `css/app.css`'s `@import '../styles.css'`) would then get
     // components with no CSS custom properties, so every `var(--spacer-*)`
     // resolves empty (e.g. switch toggles collapse to 0×0). Prepend the token
     // chain so the published `styles.css` is a complete, self-contained sheet.

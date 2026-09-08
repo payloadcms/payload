@@ -406,4 +406,64 @@ describe('transform', () => {
       expect(flattenValuesBefore[i]).toBe(value.toHexString())
     })
   })
+
+  it('should strip null elements from array and blocks fields on read', () => {
+    const data: Record<string, any> = {
+      _id: new Types.ObjectId(),
+      array: [null, { rel_1: new Types.ObjectId() }],
+      arrayLocalized: {
+        en: [null, { rel_1: new Types.ObjectId() }],
+      },
+      blocks: [null, { blockType: 'block', rel_1: new Types.ObjectId() }],
+    }
+
+    const mockAdapter = {
+      allowAdditionalKeys: false,
+      payload: {
+        config,
+      },
+    } as MongooseAdapter
+
+    expect(() =>
+      transform({
+        adapter: mockAdapter,
+        operation: 'read',
+        data,
+        fields: config.collections[0].fields,
+      }),
+    ).not.toThrow()
+
+    expect(data.array).toHaveLength(1)
+    expect(data.array[0]).toMatchObject({})
+    expect(data.arrayLocalized.en).toHaveLength(1)
+    expect(data.blocks).toHaveLength(1)
+    expect(data.blocks[0].blockType).toBe('block')
+  })
+
+  it('should skip null entries in hasMany relationship arrays without coercing them', () => {
+    const validId = new Types.ObjectId()
+    const data: Record<string, any> = {
+      _id: new Types.ObjectId(),
+      rel_2: [null, validId],
+    }
+
+    const mockAdapter = {
+      allowAdditionalKeys: false,
+      payload: {
+        config,
+      },
+    } as MongooseAdapter
+
+    expect(() =>
+      transform({
+        adapter: mockAdapter,
+        operation: 'read',
+        data,
+        fields: config.collections[0].fields,
+      }),
+    ).not.toThrow()
+
+    expect(data.rel_2[0]).toBeNull()
+    expect(data.rel_2[1]).toBe(validId.toHexString())
+  })
 })

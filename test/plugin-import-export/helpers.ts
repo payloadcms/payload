@@ -1,8 +1,8 @@
 import { parse } from 'csv-parse'
 import fs from 'fs'
 
-export const readCSV = async (path: string): Promise<any[]> => {
-  const buffer = fs.readFileSync(path)
+export const readCSV = async (pathOrBuffer: Buffer | string): Promise<any[]> => {
+  const buffer = Buffer.isBuffer(pathOrBuffer) ? pathOrBuffer : fs.readFileSync(pathOrBuffer)
   const data: any[] = []
   const promise = new Promise<void>((resolve) => {
     const parser = parse({ bom: true, columns: true })

@@ -1,20 +1,42 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Operator, Sort, Where } from 'payload'
+import type { FlattenedField, HasManyRelationshipOperator, Operator, Sort, Where } from 'payload'
 
-import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import {
+  aliasedTable,
+  and,
+  eq,
+  exists,
+  getTableName,
+  isNotNull,
+  isNull,
+  like,
+  notExists,
+  notInArray,
+  or,
+  sql,
+} from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, QueryError } from 'payload'
-import { validOperatorSet } from 'payload/shared'
+import {
+  hasManyRelationshipOperatorSet,
+  isNestedRelationshipQuery,
+  validOperatorSet,
+} from 'payload/shared'
+import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
+import type { DrizzleResolvedOperator } from './operatorMap.js'
 
 import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
-import { DistinctSymbol } from '../utilities/rawConstraint.js'
+import { DistinctSymbol, isRawConstraint } from '../utilities/rawConstraint.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
+import { buildOperatorConstraint } from './buildOperatorConstraint.js'
+import { getTableAlias } from './getTableAlias.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
+import { resolveRelationshipPath } from './resolveRelationshipPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 export type QueryContext = { rawSort?: SQL; sort: Sort }
@@ -86,6 +108,41 @@ export function parseParams({
             for (let operator of Object.keys(pathOperators)) {
               if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
+                const originalOperator = operator as Operator
+
+                if (
+                  hasManyRelationshipOperatorSet.has(operator as HasManyRelationshipOperator) &&
+                  isNestedRelationshipQuery(val) &&
+                  !isRawConstraint(val)
+                ) {
+                  const relationshipPath = resolveRelationshipPath({
+                    adapter,
+                    fields,
+                    locale,
+                    parentIsLocalized,
+                    path: relationOrPath.replace(/__/g, '.'),
+                  })
+
+                  if (
+                    relationshipPath?.field.hasMany &&
+                    typeof relationshipPath.field.relationTo === 'string'
+                  ) {
+                    constraints.push(
+                      buildHasManyRelationshipCondition({
+                        adapter,
+                        aliasTable,
+                        fields,
+                        locale,
+                        operator: operator as HasManyRelationshipOperator,
+                        parentIsLocalized,
+                        relationOrPath,
+                        tableName,
+                        where: val,
+                      }),
+                    )
+                    continue
+                  }
+                }
 
                 const {
                   columnName,
@@ -236,9 +293,18 @@ export function parseParams({
                 if (operator === 'like') {
                   constraints.push(
                     and(
-                      ...val
-                        .split(' ')
-                        .map((word) => adapter.operators.like(table[columnName], `%${word}%`)),
+                      ...val.split(' ').map((word) =>
+                        buildOperatorConstraint({
+                          adapter,
+                          column: table[columnName],
+                          field,
+                          locale,
+                          originalOperator,
+                          path: relationOrPath,
+                          resolvedOperator: 'like',
+                          value: `%${word}%`,
+                        }),
+                      ),
                     ),
                   )
                   break
@@ -294,7 +360,16 @@ export function parseParams({
                   constraints.push(
                     wrapOperator(
                       ...queryColumns.map(({ rawColumn, value }) =>
-                        adapter.operators[queryOperator](rawColumn, value),
+                        buildOperatorConstraint({
+                          adapter,
+                          column: rawColumn,
+                          field,
+                          locale,
+                          originalOperator,
+                          path: relationOrPath,
+                          resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                          value,
+                        }),
                       ),
                     ),
                   )
@@ -306,8 +381,16 @@ export function parseParams({
                   constraints.push(
                     or(
                       isNull(resolvedColumn),
-                      /* eslint-disable @typescript-eslint/no-explicit-any */
-                      ne<any>(resolvedColumn, queryValue),
+                      buildOperatorConstraint({
+                        adapter,
+                        column: resolvedColumn,
+                        field,
+                        locale,
+                        originalOperator,
+                        path: relationOrPath,
+                        resolvedOperator: 'not_equals',
+                        value: queryValue,
+                      }),
                     ),
                   )
                   break
@@ -404,7 +487,16 @@ export function parseParams({
                   // Create OR conditions for each value in the array
                   orConditions.push(
                     ...queryValue.map((val) =>
-                      adapter.operators[queryOperator](resolvedColumn, val),
+                      buildOperatorConstraint({
+                        adapter,
+                        column: resolvedColumn,
+                        field,
+                        locale,
+                        originalOperator,
+                        path: relationOrPath,
+                        resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                        value: val,
+                      }),
                     ),
                   )
                   // Set constraint to combine all OR conditions
@@ -415,10 +507,16 @@ export function parseParams({
                   break
                 }
 
-                let constraint = adapter.operators[queryOperator](
-                  resolvedColumn,
-                  resolvedQueryValue,
-                )
+                let constraint = buildOperatorConstraint({
+                  adapter,
+                  column: resolvedColumn,
+                  field,
+                  locale,
+                  originalOperator,
+                  path: relationOrPath,
+                  resolvedOperator: queryOperator as DrizzleResolvedOperator,
+                  value: resolvedQueryValue,
+                })
 
                 if (
                   adapter.limitedBoundParameters &&
@@ -491,4 +589,164 @@ export function parseParams({
   }
 
   return result
+}
+
+/**
+ * Builds a SQL condition for an operator containing a nested has-many relationship query.
+ *
+ * `contains`: at least one related document matches.
+ * `not_equals`: no related documents match.
+ * `equals`: all related documents match; an empty relationship also matches.
+ *
+ * A normal dotted relationship query adds joins to the parent query. That cannot implement
+ * the negative cases, because they must inspect all relationship rows before deciding whether to
+ * include the parent. A correlated `EXISTS` subquery keeps that decision scoped to one parent.
+ *
+ * @example
+ * ```ts
+ * // Find burgers with no unhealthy ingredients.
+ * const where = {
+ *   ingredients: {
+ *     not_equals: {
+ *       isHealthy: { equals: false },
+ *     },
+ *   },
+ * }
+ * ```
+ */
+function buildHasManyRelationshipCondition({
+  adapter,
+  aliasTable,
+  fields,
+  locale,
+  operator,
+  parentIsLocalized,
+  relationOrPath,
+  tableName,
+  where,
+}: {
+  adapter: DrizzleAdapter
+  aliasTable?: Table
+  fields: FlattenedField[]
+  locale?: string
+  operator: HasManyRelationshipOperator
+  parentIsLocalized: boolean
+  relationOrPath: string
+  tableName: string
+  where: Where
+}): SQL {
+  const relationshipFieldPath = relationOrPath.replace(/__/g, '.')
+
+  if (!where || typeof where !== 'object' || Array.isArray(where)) {
+    throw new QueryError([{ path: `${relationshipFieldPath}.${operator}` }])
+  }
+
+  const relationshipPath = resolveRelationshipPath({
+    adapter,
+    fields,
+    locale,
+    parentIsLocalized,
+    path: relationshipFieldPath,
+  })
+
+  if (!relationshipPath) {
+    throw new QueryError([{ path: `${relationshipFieldPath}.${operator}` }])
+  }
+
+  const relationshipField = relationshipPath.field
+
+  if (!relationshipField.hasMany || typeof relationshipField.relationTo !== 'string') {
+    throw new QueryError([{ path: `${relationshipFieldPath}.${operator}` }])
+  }
+
+  // Every related document matches an empty query, including when there are no related documents.
+  if (operator === 'equals' && Object.keys(where).length === 0) {
+    return sql`true`
+  }
+
+  const relationshipTableName = `${tableName}${adapter.relationshipsSuffix}`
+  const relatedCollection = adapter.payload.collections[relationshipField.relationTo]
+  const relatedTableName = adapter.tableNameMap.get(toSnakeCase(relatedCollection.config.slug))
+  const relationshipLocale = relationshipPath.locale
+  const { newAliasTable: relationshipTable } = getTableAlias({
+    adapter,
+    tableName: relationshipTableName,
+  })
+  const { newAliasTable: relatedTable } = getTableAlias({
+    adapter,
+    tableName: relatedTableName,
+  })
+
+  // Parse the nested `where` exactly like a normal query, but start from the related collection
+  // and keep its joins inside the subquery.
+  const nestedJoins: BuildQueryJoinAliases = []
+  const relatedDocumentWhere =
+    Object.keys(where).length > 0
+      ? parseParams({
+          adapter,
+          aliasTable: relatedTable,
+          context: { sort: undefined },
+          fields: relatedCollection.config.flattenedFields,
+          joins: nestedJoins,
+          locale: relationshipLocale,
+          parentIsLocalized: false,
+          selectFields: {},
+          tableName: relatedTableName,
+          where,
+        })
+      : undefined
+
+  // Correlate relationship rows back to the parent document currently being considered by the
+  // outer query. The stored path distinguishes this field from other relationships on the parent.
+  const outerTable = aliasTable ?? aliasedTable(adapter.tables[tableName], tableName)
+  const relationshipRowConstraints: SQL[] = [
+    eq(relationshipTable.parent, outerTable.id),
+    relationshipPath.path.includes('%')
+      ? like(relationshipTable.path, relationshipPath.path)
+      : eq(relationshipTable.path, relationshipPath.path),
+  ]
+
+  if (relationshipLocale && relationshipLocale !== 'all' && relationshipPath.isLocalized) {
+    relationshipRowConstraints.push(eq(relationshipTable.locale, relationshipLocale))
+  }
+
+  const relatedDocumentConstraints = [
+    eq(relatedTable.id, relationshipTable[`${relationshipField.relationTo}ID`]),
+  ]
+
+  if (relatedDocumentWhere) {
+    relatedDocumentConstraints.push(relatedDocumentWhere)
+  }
+
+  let relatedDocumentSubquery = (adapter.drizzle as any)
+    .select({ id: relatedTable.id })
+    .from(relatedTable)
+    .$dynamic()
+
+  for (const join of nestedJoins) {
+    relatedDocumentSubquery = relatedDocumentSubquery[join.type ?? 'leftJoin'](
+      join.table,
+      join.condition,
+    )
+  }
+
+  relatedDocumentSubquery = relatedDocumentSubquery.where(and(...relatedDocumentConstraints))
+
+  const buildRelationshipRowsSubquery = (relatedDocumentCheck: SQL) =>
+    (adapter.drizzle as any)
+      .select({ id: relationshipTable.parent })
+      .from(relationshipTable)
+      .where(and(...relationshipRowConstraints, relatedDocumentCheck))
+
+  switch (operator) {
+    case 'contains':
+      return exists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
+
+    case 'equals':
+      // All related documents match when no relationship row points to one that fails.
+      return notExists(buildRelationshipRowsSubquery(notExists(relatedDocumentSubquery)))
+
+    case 'not_equals':
+      return notExists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
+  }
 }

@@ -15,13 +15,14 @@ import { ProgressBar, RootProvider } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getLanguageDir } from '../../utilities/getLanguageDir.js'
+import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
 import { getViewportMeta } from './viewport.js'
-// eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full SCSS chain (design tokens, preflight, etc.) in prod builds
-import '@payloadcms/ui/scss/app.scss'
+// eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full CSS chain (design tokens, preflight, etc.) in prod builds
+import '@payloadcms/ui/css/app.css'
 
 type Font = {
   className?: string
@@ -127,6 +128,7 @@ const RootLayoutContent = async ({
   })
 
   const dir = getLanguageDir({ languageCode })
+  const embed = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(
     config.i18n.supportedLanguages || {},
@@ -174,6 +176,7 @@ const RootLayoutContent = async ({
         <RootProvider
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
+          embed={embed}
           fallbackLang={config.i18n.fallbackLanguage}
           highContrastMode={highContrastMode}
           isNavOpen={navPrefs?.open ?? true}

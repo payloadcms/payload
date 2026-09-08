@@ -52,7 +52,7 @@ export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactEl
    * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
    */
   static override importJSON(
-    serializedNode: SerializedHorizontalRuleNode,
+    _serializedNode: Record<string, unknown> & SerializedHorizontalRuleNode,
   ): HorizontalRuleServerNode {
     return $createHorizontalRuleServerNode()
   }

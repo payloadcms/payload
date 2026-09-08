@@ -62,21 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_1486C0E2".
+ * via the `definition` "LexicalNodes_DFDE7E69".
  */
-export type LexicalNodes_1486C0E2 =
+export type LexicalNodes_DFDE7E69 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_1486C0E2>
+  | SerializedParagraphNode<LexicalNodes_DFDE7E69>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_1486C0E2>
+  | SerializedHeadingNode<LexicalNodes_DFDE7E69>
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_1486C0E2>
-  | SerializedListNode<LexicalNodes_1486C0E2>
-  | SerializedListItemNode<LexicalNodes_1486C0E2>
-  | SerializedAutoLinkNode<LexicalNodes_1486C0E2, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_1486C0E2, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_DFDE7E69>
+  | SerializedListNode<LexicalNodes_DFDE7E69>
+  | SerializedListItemNode<LexicalNodes_DFDE7E69>
+  | SerializedAutoLinkNode<LexicalNodes_DFDE7E69, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_DFDE7E69, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'error-fields'
       | 'validate-drafts-on'
@@ -84,6 +84,7 @@ export type LexicalNodes_1486C0E2 =
       | 'validate-drafts-on-autosave'
       | 'prev-value'
       | 'prev-value-relation'
+      | 'tab-error-reset'
       | 'payload-kv'
       | 'users'
       | 'payload-locked-documents'
@@ -104,6 +105,7 @@ export interface Config {
     'validate-drafts-on-autosave': ValidateDraftsOnAutosave;
     'prev-value': PrevValue;
     'prev-value-relation': PrevValueRelation;
+    'tab-error-reset': TabErrorReset;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -119,6 +121,7 @@ export interface Config {
     'validate-drafts-on-autosave': ValidateDraftsOnAutosaveSelect<false> | ValidateDraftsOnAutosaveSelect<true>;
     'prev-value': PrevValueSelect<false> | PrevValueSelect<true>;
     'prev-value-relation': PrevValueRelationSelect<false> | PrevValueRelationSelect<true>;
+    'tab-error-reset': TabErrorResetSelect<false> | TabErrorResetSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -138,6 +141,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -209,7 +214,7 @@ export interface ErrorField {
           point: [number, number];
           radio: 'mint' | 'dark_gray';
           relationship: string | User;
-          richtext: LexicalRichText<LexicalNodes_1486C0E2>;
+          richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
           select: 'mint' | 'dark_gray';
           upload: string | Upload;
           text: string;
@@ -248,7 +253,7 @@ export interface ErrorField {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_1486C0E2>;
+        richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -267,6 +272,13 @@ export interface ErrorField {
     id?: string | null;
   }[];
   layout?: Block1[] | null;
+  arrayWithMinRows?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithMinRows?: MinRowsBlock[] | null;
   group: {
     text: string;
   };
@@ -306,7 +318,7 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
-  richText?: LexicalRichText<LexicalNodes_1486C0E2> | null;
+  richText?: LexicalRichText<LexicalNodes_DFDE7E69> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -354,7 +366,7 @@ export interface Block1 {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_1486C0E2>;
+        richtext: LexicalRichText<LexicalNodes_DFDE7E69>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -365,6 +377,16 @@ export interface Block1 {
   id?: string | null;
   blockName?: string | null;
   blockType: 'block1';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MinRowsBlock".
+ */
+export interface MinRowsBlock {
+  name?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'minRowsBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -446,6 +468,19 @@ export interface PrevValueRelation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tab-error-reset".
+ */
+export interface TabErrorReset {
+  id: string;
+  title?: string | null;
+  errorTab: {
+    requiredInTab: string;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -495,6 +530,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'prev-value-relation';
         value: string | PrevValueRelation;
+      } | null)
+    | ({
+        relationTo: 'tab-error-reset';
+        value: string | TabErrorReset;
       } | null)
     | ({
         relationTo: 'users';
@@ -672,6 +711,23 @@ export interface ErrorFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  arrayWithMinRows?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  blocksWithMinRows?:
+    | T
+    | {
+        minRowsBlock?:
+          | T
+          | {
+              name?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   group?:
     | T
     | {
@@ -752,6 +808,20 @@ export interface PrevValueSelect<T extends boolean = true> {
  */
 export interface PrevValueRelationSelect<T extends boolean = true> {
   previousValueRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tab-error-reset_select".
+ */
+export interface TabErrorResetSelect<T extends boolean = true> {
+  title?: T;
+  errorTab?:
+    | T
+    | {
+        requiredInTab?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -854,6 +924,60 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'error-fields'
+      | 'uploads'
+      | 'validate-drafts-on'
+      | 'validate-drafts-off'
+      | 'validate-drafts-on-autosave'
+      | 'prev-value'
+      | 'prev-value-relation'
+      | 'tab-error-reset'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'error-fields'
+          | 'uploads'
+          | 'validate-drafts-on'
+          | 'validate-drafts-off'
+          | 'validate-drafts-on-autosave'
+          | 'prev-value'
+          | 'prev-value-relation'
+          | 'tab-error-reset'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

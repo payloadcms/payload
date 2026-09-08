@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { SortDownIcon } from '../../icons/Sort/index.js'
+import { SortDownIcon, SortUpIcon } from '../../icons/Sort/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
@@ -17,29 +17,26 @@ const baseClass = 'sort-header'
 function useSort() {
   const { handleSortChange, orderableFieldName, query } = useListQuery()
   const querySort = Array.isArray(query.sort) ? query.sort[0] : query.sort
-  const isActive = querySort === orderableFieldName
+  const isAscending = querySort === orderableFieldName
+  const isDescending = querySort === `-${orderableFieldName}`
+  const isActive = isAscending || isDescending
 
   const handleSortPress = () => {
-    // If it's already sorted by the "_order" field, do nothing
-    if (isActive) {
-      return
-    }
-    // If NOT sorted by the "_order" field, sort by that field.
-    void handleSortChange(orderableFieldName)
+    void handleSortChange(isAscending ? `-${orderableFieldName}` : orderableFieldName)
   }
 
-  return { handleSortPress, isActive }
+  return { handleSortPress, isActive, isAscending }
 }
 
 export const SortHeader: React.FC<SortHeaderProps> = (props) => {
   const { appearance } = props
-  const { handleSortPress, isActive } = useSort()
+  const { handleSortPress, isActive, isAscending } = useSort()
   const { t } = useTranslation()
 
   return (
     <button
       aria-label={t('general:sortByLabelDirection', {
-        direction: t('general:ascending'),
+        direction: isAscending ? t('general:descending') : t('general:ascending'),
         label: 'Order',
       })}
       className={[
@@ -52,7 +49,7 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
       onClick={handleSortPress}
       type="button"
     >
-      <SortDownIcon />
+      {isAscending ? <SortUpIcon /> : <SortDownIcon />}
     </button>
   )
 }

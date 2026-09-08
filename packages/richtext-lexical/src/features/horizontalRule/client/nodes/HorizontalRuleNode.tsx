@@ -20,7 +20,9 @@ export class HorizontalRuleNode extends HorizontalRuleServerNode {
   /**
    * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
    */
-  static override importJSON(serializedNode: SerializedHorizontalRuleNode): HorizontalRuleNode {
+  static override importJSON(
+    _serializedNode: Record<string, unknown> & SerializedHorizontalRuleNode,
+  ): HorizontalRuleNode {
     return $createHorizontalRuleNode()
   }
 

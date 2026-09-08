@@ -2,11 +2,11 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 import {
   BoldFeature,
-  EXPERIMENTAL_TableFeature,
   IndentFeature,
   ItalicFeature,
   LinkFeature,
   OrderedListFeature,
+  TableFeature,
   UnderlineFeature,
   UnorderedListFeature,
   lexicalEditor,
@@ -73,7 +73,7 @@ export default buildConfig({
           },
         }),
         IndentFeature(),
-        EXPERIMENTAL_TableFeature(),
+        TableFeature(),
       ]
     },
   }),

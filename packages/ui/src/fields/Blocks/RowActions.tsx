@@ -23,6 +23,7 @@ export const RowActions: React.FC<{
   readonly moveRow: (fromIndex: number, toIndex: number) => void
   readonly pasteData: ClipboardPasteEligibilityArgs
   readonly pasteRow: (rowIndex: number) => void
+  readonly pasteRowBelow: (rowIndex: number) => void
   readonly removeRow: (rowIndex: number) => void
   readonly rowCount: number
   readonly rowIndex: number
@@ -39,6 +40,7 @@ export const RowActions: React.FC<{
     moveRow,
     pasteData,
     pasteRow,
+    pasteRowBelow,
     removeRow,
     rowCount,
     rowIndex,
@@ -76,6 +78,7 @@ export const RowActions: React.FC<{
         moveRow={moveRow}
         pasteData={pasteData}
         pasteRow={pasteRow}
+        pasteRowBelow={pasteRowBelow}
         removeRow={removeRow}
         rowCount={rowCount}
       />

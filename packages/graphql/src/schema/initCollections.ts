@@ -106,6 +106,10 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       })
     }
 
+    if (collectionConfig.auth) {
+      baseFields._strategy = { type: GraphQLString }
+    }
+
     const forceNullableObjectType = Boolean(versions?.drafts)
 
     collection.graphQL.type = buildObjectType({
@@ -437,6 +441,10 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
             type: 'text',
             required: true,
           },
+          {
+            name: '_strategy',
+            type: 'text',
+          },
         ],
         graphqlResult,
         parentName: formatName(`${slug}JWT`),
@@ -452,9 +460,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
               },
               exp: {
                 type: GraphQLInt,
-              },
-              strategy: {
-                type: GraphQLString,
               },
               token: {
                 type: GraphQLString,
@@ -482,9 +487,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
                 type: GraphQLInt,
               },
               refreshedToken: {
-                type: GraphQLString,
-              },
-              strategy: {
                 type: GraphQLString,
               },
               user: {

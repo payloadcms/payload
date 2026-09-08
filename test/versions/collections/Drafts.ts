@@ -124,6 +124,16 @@ const DraftPosts: CollectionConfig = {
       relationTo: draftCollectionSlug,
     },
     {
+      name: 'relationWithFilterOptions',
+      type: 'relationship',
+      filterOptions: ({ req }) => {
+        // Verify validation preserves access to native Request properties.
+        return req.payloadAPI === 'REST' ? req.method === 'POST' : true
+      },
+      hasMany: true,
+      relationTo: draftCollectionSlug,
+    },
+    {
       name: 'restrictedToUpdate',
       type: 'checkbox',
     },

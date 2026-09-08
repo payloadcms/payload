@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 
-import { installTanStackHydrationGotoWait } from '../../__helpers/e2e/helpers.js'
+import { patchPageMethods } from '../../__setup/e2e/patchPageMethods.js'
 
 export type PasteMode = 'blob' | 'html'
 
@@ -36,7 +36,7 @@ export class LexicalHelpers {
   page: Page
   constructor(page: Page) {
     this.page = page
-    installTanStackHydrationGotoWait(page)
+    patchPageMethods(page)
   }
 
   async addLine(
@@ -143,9 +143,9 @@ export class LexicalHelpers {
           const evt = new DragEvent(type, {
             bubbles: true,
             cancelable: true,
-            composed: true,
             clientX: x,
             clientY: y,
+            composed: true,
             dataTransfer: dt,
           })
           target.dispatchEvent(evt)
@@ -155,7 +155,7 @@ export class LexicalHelpers {
         dispatch('dragover')
         dispatch('drop')
       },
-      { bytes, name, mime },
+      { name, bytes, mime },
     )
   }
 
@@ -185,12 +185,12 @@ export class LexicalHelpers {
 
     if (mode === 'blob') {
       const buf = await fs.promises.readFile(filePath)
-      payload = { kind: 'blob', bytes: Array.from(buf), name, mime }
+      payload = { name, bytes: Array.from(buf), kind: 'blob', mime }
     } else if (mode === 'html') {
       const b64 = await readAsBase64(filePath)
       const src = `data:${mime};base64,${b64}`
       const html = `<img src="${src}" alt="${name}">`
-      payload = { kind: 'html', html }
+      payload = { html, kind: 'html' }
     }
 
     await this.page.evaluate((p) => {
@@ -210,9 +210,9 @@ export class LexicalHelpers {
 
       try {
         const evt = new ClipboardEvent('paste', {
-          clipboardData: dt,
           bubbles: true,
           cancelable: true,
+          clipboardData: dt,
         })
         target.dispatchEvent(evt)
       } catch {

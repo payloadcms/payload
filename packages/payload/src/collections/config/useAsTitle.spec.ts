@@ -22,15 +22,15 @@ describe('sanitize - collections -', () => {
       ],
     }
 
-    it('should throw on invalid field', async () => {
+    it('should throw on invalid field', () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         admin: {
           useAsTitle: 'invalidField',
         },
       }
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -38,18 +38,18 @@ describe('sanitize - collections -', () => {
           },
           collectionConfig,
         )
-      }).rejects.toThrow(InvalidConfiguration)
+      }).toThrow(InvalidConfiguration)
     })
 
-    it('should not throw on valid field', async () => {
+    it('should not throw on valid field', () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         admin: {
           useAsTitle: 'title',
         },
       }
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -60,7 +60,7 @@ describe('sanitize - collections -', () => {
       }).not.toThrow()
     })
 
-    it('should not throw on valid field inside tabs', async () => {
+    it('should not throw on valid field inside tabs', () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         admin: {
@@ -83,8 +83,8 @@ describe('sanitize - collections -', () => {
           },
         ],
       }
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -95,7 +95,7 @@ describe('sanitize - collections -', () => {
       }).not.toThrow()
     })
 
-    it('should not throw on valid field inside collapsibles', async () => {
+    it('should not throw on valid field inside collapsibles', () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         admin: {
@@ -114,8 +114,8 @@ describe('sanitize - collections -', () => {
           },
         ],
       }
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -126,15 +126,15 @@ describe('sanitize - collections -', () => {
       }).not.toThrow()
     })
 
-    it('should throw on nested useAsTitle', async () => {
+    it('should throw on nested useAsTitle', () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         admin: {
           useAsTitle: 'content.title',
         },
       }
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -142,18 +142,18 @@ describe('sanitize - collections -', () => {
           },
           collectionConfig,
         )
-      }).rejects.toThrow(InvalidConfiguration)
+      }).toThrow(InvalidConfiguration)
     })
 
-    it('should not throw on default field: id', async () => {
+    it('should not throw on default field: id', () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         admin: {
           useAsTitle: 'id',
         },
       }
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -164,7 +164,7 @@ describe('sanitize - collections -', () => {
       }).not.toThrow()
     })
 
-    it('should not throw on default field: email if auth is enabled', async () => {
+    it('should not throw on default field: email if auth is enabled', () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         auth: true,
@@ -172,8 +172,8 @@ describe('sanitize - collections -', () => {
           useAsTitle: 'email',
         },
       }
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -183,15 +183,15 @@ describe('sanitize - collections -', () => {
         )
       }).not.toThrow()
     })
-    it('should throw on default field: email if auth is not enabled', async () => {
+    it('should throw on default field: email if auth is not enabled', () => {
       const collectionConfig: CollectionConfig = {
         ...defaultCollection,
         admin: {
           useAsTitle: 'email',
         },
       }
-      await expect(async () => {
-        await sanitizeCollection(
+      expect(() => {
+        sanitizeCollection(
           // @ts-expect-error
           {
             ...config,
@@ -199,7 +199,7 @@ describe('sanitize - collections -', () => {
           },
           collectionConfig,
         )
-      }).rejects.toThrow(InvalidConfiguration)
+      }).toThrow(InvalidConfiguration)
     })
   })
 })

@@ -4,6 +4,7 @@ import type React from 'react'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 
 export type RenderTabServerFnArgs = {
+  searchParams?: Record<string, unknown>
   tabSlug: string
 }
 
@@ -14,7 +15,7 @@ export type RenderTabServerFnReturnType = {
 export const renderTabHandler: ServerFunction<
   RenderTabServerFnArgs,
   RenderTabServerFnReturnType
-> = ({ req, tabSlug }) => {
+> = ({ req, searchParams, tabSlug }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -42,7 +43,7 @@ export const renderTabHandler: ServerFunction<
         params: req.routeParams,
         payload: req.payload,
         req,
-        searchParams: req.query,
+        searchParams: searchParams ?? req.query,
         user: req.user,
       },
     })

@@ -23,6 +23,7 @@ import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
 import { removeLocalizeStatusConfig } from './transforms/remove-localize-status-config/index.js'
 import { removePublishSpecificLocale } from './transforms/remove-publish-specific-locale/index.js'
 import { removeVersionsTrue } from './transforms/remove-versions-true/index.js'
+import { renameExperimentalTableFeature } from './transforms/rename-experimental-table-feature/index.js'
 import { renameStorageAdaptersToStorage } from './transforms/rename-storage-adapters-to-storage/index.js'
 import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescript-schema-to-json-schema/index.js'
 
@@ -52,4 +53,5 @@ export const transforms: Transform[] = [
   removeVersionsTrue,
   removePublishSpecificLocale,
   renameTypescriptSchemaToJsonSchema,
+  renameExperimentalTableFeature,
 ]

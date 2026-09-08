@@ -23,7 +23,9 @@ export const defaultR2ClientUploadsAccess: UploadInstructionsAccess = async ({
   }
 
   const createAccess = collection.config.access?.create
-  return createAccess ? Boolean(await createAccess({ req })) : Boolean(req.user)
+  return createAccess
+    ? Boolean(await createAccess({ slug: collectionSlug, req }))
+    : Boolean(req.user)
 }
 
 // Adapted from https://developers.cloudflare.com/r2/api/workers/workers-multipart-usage/

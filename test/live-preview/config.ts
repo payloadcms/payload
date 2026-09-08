@@ -32,50 +32,53 @@ import {
 import { formatLivePreviewURL } from './utilities/formatLivePreviewURL.js'
 
 export default buildConfigWithDefaults({
-  localization: {
-    defaultLocale: 'en',
-    locales: ['en', 'es'],
-  },
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'live-preview',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      livePreview: {
+        // You can define any of these properties on a per collection or global basis
+        // The Live Preview config cascades from the top down, properties are inherited from here
+        breakpoints: [mobileBreakpoint, desktopBreakpoint],
+        collections: [
+          pagesSlug,
+          postsSlug,
+          ssrPagesSlug,
+          ssrAutosavePagesSlug,
+          customLivePreviewSlug,
+        ],
+        globals: ['header', 'footer'],
+        url: formatLivePreviewURL,
+      },
     },
-    livePreview: {
-      // You can define any of these properties on a per collection or global basis
-      // The Live Preview config cascades from the top down, properties are inherited from here
-      url: formatLivePreviewURL,
-      breakpoints: [mobileBreakpoint, desktopBreakpoint],
-      collections: [
-        pagesSlug,
-        postsSlug,
-        ssrPagesSlug,
-        ssrAutosavePagesSlug,
-        customLivePreviewSlug,
-      ],
-      globals: ['header', 'footer'],
+    blocks: [MediaBlock],
+    collections: [
+      Users,
+      Pages,
+      Posts,
+      SSR,
+      SSRAutosave,
+      Tenants,
+      Categories,
+      Media,
+      CollectionLevelConfig,
+      OpenByDefault,
+      StaticURLCollection,
+      CustomLivePreview,
+      ConditionalURL,
+    ],
+    cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
+    csrf: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
+    globals: [Header, Footer],
+    localization: {
+      defaultLocale: 'en',
+      locales: ['en', 'es'],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
-  csrf: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
-  collections: [
-    Users,
-    Pages,
-    Posts,
-    SSR,
-    SSRAutosave,
-    Tenants,
-    Categories,
-    Media,
-    CollectionLevelConfig,
-    OpenByDefault,
-    StaticURLCollection,
-    CustomLivePreview,
-    ConditionalURL,
-  ],
-  globals: [Header, Footer],
-  onInit: seed,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  blocks: [MediaBlock],
+  seed,
 })

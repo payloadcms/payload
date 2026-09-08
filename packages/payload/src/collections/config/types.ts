@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
+import type { IsAny, MarkOptional } from 'ts-essentials'
 
 import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
@@ -71,7 +71,8 @@ import type {
   OperationMap,
 } from '../operations/utilities/types.js'
 
-export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+export type DataFromCollectionSlug<TSlug extends CollectionSlug> =
+  TypedCollection[string extends CollectionSlug ? CollectionSlug : TSlug]
 
 /**
  * The ID type of a given collection (e.g. `string` or `number`), taken from its generated type.
@@ -530,6 +531,48 @@ export type CollectionAdminOptions = {
   useAsTitle?: string
 }
 
+export type CollectionAccess<TData = any> = {
+  admin?: ({ slug, req }: { req: PayloadRequest; slug: string }) => boolean | Promise<boolean>
+  create?: Access<TData>
+  delete?: Access<TData>
+  read?: Access<TData>
+  readVersions?: Access<TData>
+  unlock?: Access<TData>
+  update?: Access<TData>
+}
+
+type CollectionHooks<TSlug extends CollectionSlug = any> = {
+  afterChange?: AfterChangeHook[]
+  afterDelete?: AfterDeleteHook[]
+  afterError?: AfterErrorHook[]
+  afterForgotPassword?: AfterForgotPasswordHook[]
+  afterLogin?: AfterLoginHook[]
+  afterLogout?: AfterLogoutHook[]
+  afterMe?: AfterMeHook[]
+  afterOperation?: AfterOperationHook<TSlug>[]
+  afterRead?: AfterReadHook[]
+  afterRefresh?: AfterRefreshHook[]
+  beforeChange?: BeforeChangeHook[]
+  beforeDelete?: BeforeDeleteHook[]
+  beforeLogin?: BeforeLoginHook[]
+  beforeOperation?: BeforeOperationHook<TSlug>[]
+  beforeRead?: BeforeReadHook[]
+  beforeValidate?: BeforeValidateHook[]
+  /**
+    /**
+     * Use the `me` hook to control the `me` operation.
+     * Here, you can optionally instruct the me operation to return early,
+     * and skip its default logic.
+     */
+  me?: MeHook[]
+  /**
+   * Use the `refresh` hook to control the refresh operation.
+   * Here, you can optionally instruct the refresh operation to return early,
+   * and skip its default logic.
+   */
+  refresh?: RefreshHook[]
+}
+
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
@@ -540,15 +583,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Access control
    */
-  access?: {
-    admin?: ({ req }: { req: PayloadRequest }) => boolean | Promise<boolean>
-    create?: Access
-    delete?: Access
-    read?: Access
-    readVersions?: Access
-    unlock?: Access
-    update?: Access
-  }
+  access?: CollectionAccess
   /**
    * Collection admin options
    */
@@ -639,37 +674,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Hooks to modify Payload functionality
    */
-  hooks?: {
-    afterChange?: AfterChangeHook[]
-    afterDelete?: AfterDeleteHook[]
-    afterError?: AfterErrorHook[]
-    afterForgotPassword?: AfterForgotPasswordHook[]
-    afterLogin?: AfterLoginHook[]
-    afterLogout?: AfterLogoutHook[]
-    afterMe?: AfterMeHook[]
-    afterOperation?: AfterOperationHook<TSlug>[]
-    afterRead?: AfterReadHook[]
-    afterRefresh?: AfterRefreshHook[]
-    beforeChange?: BeforeChangeHook[]
-    beforeDelete?: BeforeDeleteHook[]
-    beforeLogin?: BeforeLoginHook[]
-    beforeOperation?: BeforeOperationHook<TSlug>[]
-    beforeRead?: BeforeReadHook[]
-    beforeValidate?: BeforeValidateHook[]
-    /**
-    /**
-     * Use the `me` hook to control the `me` operation.
-     * Here, you can optionally instruct the me operation to return early,
-     * and skip its default logic.
-     */
-    me?: MeHook[]
-    /**
-     * Use the `refresh` hook to control the refresh operation.
-     * Here, you can optionally instruct the refresh operation to return early,
-     * and skip its default logic.
-     */
-    refresh?: RefreshHook[]
-  }
+  hooks?: CollectionHooks<TSlug>
   /**
    * Define compound indexes for this collection.
    * This can be used to either speed up querying/sorting by 2 or more fields at the same time or
@@ -787,28 +792,36 @@ export type SanitizedJoins = {
 }
 
 /**
- * @todo remove the `DeepRequired` in v4.
- * We don't actually guarantee that all properties are set when sanitizing configs.
+ * Properties populated during sanitization are redefined below. All other collection properties
+ * preserve their incoming optionality.
  */
 export interface SanitizedCollectionConfig
   extends Omit<
-    DeepRequired<CollectionConfig>,
-    | 'admin'
-    | 'auth'
-    | 'endpoints'
-    | 'fields'
-    | 'folder'
-    | 'folders'
-    | 'hierarchy'
-    | 'slug'
-    | 'tags'
-    | 'upload'
-    | 'versions'
-  > {
-  admin: CollectionAdminOptions
+      CollectionConfig,
+      | '_sanitized'
+      | 'access'
+      | 'admin'
+      | 'auth'
+      | 'custom'
+      | 'endpoints'
+      | 'folder'
+      | 'folders'
+      | 'hierarchy'
+      | 'hooks'
+      | 'indexes'
+      | 'labels'
+      | 'slug'
+      | 'tags'
+      | 'timestamps'
+      | 'upload'
+      | 'versions'
+    >,
+    Required<Pick<CollectionConfig, 'admin' | 'custom' | 'indexes' | 'timestamps'>> {
+  _sanitized: true
+  access: Pick<CollectionAccess, 'admin' | 'readVersions'> &
+    Required<Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'unlock' | 'update'>>
   auth: Auth
   endpoints: Endpoint[] | false
-  fields: Field[]
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
@@ -818,10 +831,12 @@ export interface SanitizedCollectionConfig
    * Hierarchy configuration (when collection is a hierarchy type like folders or tags)
    */
   hierarchy: false | SanitizedHierarchyConfig
+  hooks: Required<CollectionHooks>
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+  labels: Required<NonNullable<CollectionConfig['labels']>>
   /**
    * List of all polymorphic join fields
    */

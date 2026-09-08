@@ -50,6 +50,50 @@ const defaultPayloadAccess = ({ req: { payload, user } }) => {
   `false` in your requests.
 </Banner>
 
+## Base Access Control
+
+Use the top-level `baseAccess` config to apply an additional constraint to
+standard Collection and Global Access Control operations:
+
+```ts
+export default buildConfig({
+  baseAccess: {
+    collections: {
+      create: ({ req, slug }) =>
+        slug === 'public-posts' || req.user?.role === 'admin',
+      delete: ({ req, slug }) =>
+        slug === 'public-posts' || req.user?.role === 'admin',
+      update: ({ req, slug }) =>
+        slug === 'public-posts' || req.user?.role === 'admin',
+    },
+    globals: {
+      update: ({ req, slug }) =>
+        slug === 'public-settings' || req.user?.role === 'admin',
+    },
+  },
+  // ...
+})
+```
+
+The `collections` and `globals` properties are typed as `CollectionAccess` and
+`GlobalAccess`. All Collection and Global Access Control callbacks, including
+normal document access, receive the document's `slug`.
+
+Payload combines each configured base function with the corresponding
+document-specific function using `AND` semantics. Returning `false` denies the
+operation before the document-specific function runs. For operations that
+support query constraints, returning one combines it with a document-specific
+constraint using an `and` query. Collection `create` access only supports
+booleans, so returning a query constraint for that operation throws an error.
+Collection `admin` access also only supports booleans.
+
+`baseAccess` applies only to Collection and Global Access Control. It does not
+apply to Field Access Control, custom endpoints, direct database adapter calls,
+job access, or other APIs with dedicated access configuration.
+
+Like other Access Control, `baseAccess` is skipped when Local API operations use
+`overrideAccess: true`.
+
 ## The Access Operation
 
 The Admin Panel responds dynamically to your changes to Access Control. For example, if you restrict editing `ExampleCollection` to only users that feature an "admin" role, Payload will **hide** that Collection from the Admin Panel entirely. This is super powerful and allows you to control who can do what within your Admin Panel using the same functions that secure your APIs.

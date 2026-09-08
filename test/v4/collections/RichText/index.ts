@@ -3,9 +3,9 @@ import type { CollectionConfig } from 'payload'
 import {
   BlocksFeature,
   CodeBlock,
-  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   lexicalEditor,
+  TableFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
 
@@ -90,7 +90,7 @@ const RichTextFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           FixedToolbarFeature(),
-          EXPERIMENTAL_TableFeature(),
+          TableFeature(),
         ],
       }),
     },

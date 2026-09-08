@@ -26,6 +26,7 @@ CLAUDE.local.md
 
 test/packed
 test-results
+playwright-report
 .localstack
 /migrations
 .localstack
@@ -364,9 +365,6 @@ licenses.csv
 # SQLite DB
 payload.db
 test/payload.db
-
-# TanStack Router auto-generated route tree
-**/app-tanstack/routeTree.gen.ts
 
 # Generated TanStack admin importMap (shippable app + per-suite standalone apps)
 **/app-tanstack/app/_payload/importMap.js

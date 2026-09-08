@@ -49,7 +49,6 @@
     }
 
     .table-section__content {
-      padding: 0 calc(var(--spacer-3) - var(--spacer-2));
       padding-bottom: var(--spacer-2);
     }
 

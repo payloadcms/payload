@@ -2,6 +2,7 @@ import { withPayload } from '@payloadcms/tanstack-start'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import rsc from '@vitejs/plugin-rsc'
+import dotenv from 'dotenv'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -20,6 +21,9 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const repoRoot = path.resolve(__dirname, '..')
+const emulatedCloudEnv = dotenv.parse(
+  fs.readFileSync(path.resolve(__dirname, 'plugin-cloud-storage/.env.emulated')),
+)
 
 const databaseAdapterPath = path.resolve(__dirname, 'databaseAdapter.js')
 if (!fs.existsSync(databaseAdapterPath)) {
@@ -52,6 +56,16 @@ const testSuite = process.env.PAYLOAD_TEST_SUITE || '_community'
 const suiteDir = path.resolve(__dirname, testSuite, 'app-tanstack')
 const srcDirectory = fs.existsSync(suiteDir) ? path.relative(__dirname, suiteDir) : 'app-tanstack'
 
+// A suite that defines its own `createServerFn`s puts them in
+// `test/<suite>/tanstackServerFunctions.ts`, which the base app's `_payload` route imports
+// for its registration side effect. Route modules are the only ones reached early enough
+// for the RSC environment's resolver manifest to pick the functions up, and that manifest
+// is what serves the server-function RPC. Suites with none resolve to an empty stub.
+const suiteServerFunctions = path.resolve(__dirname, testSuite, 'tanstackServerFunctions.ts')
+const suiteServerFunctionsPath = fs.existsSync(suiteServerFunctions)
+  ? suiteServerFunctions
+  : path.resolve(__dirname, '__helpers/tanstack/noSuiteServerFunctions.ts')
+
 export default withPayload(
   ({ pluginOptions }) => ({
     plugins: [
@@ -62,6 +76,14 @@ export default withPayload(
     // Keep build output out of the app dirs (they ship as pure source); the
     // repo root already ignores `dist`.
     build: { outDir: path.resolve(repoRoot, 'dist/app-tanstack') },
+    define: {
+      'process.env.NEXT_PUBLIC_VERCEL_BLOB_API_URL': JSON.stringify(
+        emulatedCloudEnv.NEXT_PUBLIC_VERCEL_BLOB_API_URL,
+      ),
+    },
+    resolve: {
+      alias: { '@payload-suite-server-functions': suiteServerFunctionsPath },
+    },
     optimizeDeps: {
       include: [
         // `recharts` is only reached through the dashboard suite's Revenue
@@ -102,11 +124,16 @@ export default withPayload(
   {
     additionalIgnoreImporters: [
       /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+      // Azure's browser SDK imports the browser-compatible `events` package.
+      /@azure\/storage-blob\/dist\/browser\//,
+      // Vercel Blob's client SDK resolves `undici` to its browser shim.
+      /@vercel\/blob\/dist\//,
     ],
-    // In the monorepo, Payload's `.client.*` files resolve to `packages/*/src`
-    // (not `node_modules`), so exempt them from the `.client.*` SSR denial too.
-    clientDenialExcludeFiles: ['**/packages/*/src/**'],
-    payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
+    // Payload's monorepo packages and Next.js test fixtures both use `.client.*` modules.
+    // The server-only specifier protection remains enabled for other source files.
+    clientDenialExcludeFiles: ['**/packages/*/src/**', '**/*.client.*'],
+    payloadConfigPath:
+      process.env.PAYLOAD_CONFIG_PATH ?? path.resolve(__dirname, testSuite, 'config.ts'),
     routesDirectory: 'app',
     srcDirectory,
   },

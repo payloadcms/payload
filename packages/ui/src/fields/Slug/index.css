@@ -46,7 +46,6 @@
       background: transparent;
       color: var(--color-icon-secondary);
       cursor: pointer;
-      transition: color 100ms;
 
       &:hover {
         color: var(--color-icon);

@@ -225,7 +225,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         incomingState: serverState,
       })
 
-      prevStateRef.current = newState
+      if (prevStateRef) {
+        prevStateRef.current = newState
+      }
 
       return newState
     }

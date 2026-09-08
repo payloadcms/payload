@@ -5,6 +5,7 @@ import type {
   MigrateDownArgs,
   MigrateUpArgs,
   PostgresDB,
+  PostgresQueryConfig,
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
 import type { VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
@@ -68,6 +69,11 @@ export type Args = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push?: boolean
+  /**
+   * Customize how Payload's Drizzle query operators (`contains`, `like`, `not_like`, etc.) are
+   * built, for example to make text matching accent-insensitive with `postgresUnaccent()`.
+   */
+  query?: PostgresQueryConfig
   readReplicas?: string[]
   /**
    * How long (ms) after a write to keep routing reads to the primary instead

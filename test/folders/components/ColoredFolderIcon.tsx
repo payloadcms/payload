@@ -3,7 +3,7 @@
 import { FolderIcon } from '@payloadcms/ui'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'colored-folder-icon'
 

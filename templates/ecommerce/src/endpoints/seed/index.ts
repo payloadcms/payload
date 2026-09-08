@@ -41,7 +41,7 @@ const colorVariantOptions = [
   { label: 'White', value: 'white' },
 ]
 
-const globals: GlobalSlug[] = ['header', 'footer']
+const globals = ['header', 'footer'] as const satisfies GlobalSlug[]
 
 const baseAddressUSData: Transaction['billingAddress'] = {
   title: 'Dr.',

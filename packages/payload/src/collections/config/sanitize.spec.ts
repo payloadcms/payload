@@ -2,7 +2,361 @@ import type { CollectionConfig } from './types.js'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { warnOnInvalidCustomViews } from './sanitize.js'
+import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
+import { sanitizeCollection, warnOnInvalidCustomViews } from './sanitize.js'
+
+describe('baseAccess', () => {
+  it('should combine base and collection access constraints', async () => {
+    const baseConstraint = {
+      tenant: {
+        equals: 'tenant-1',
+      },
+    }
+    const collectionConstraint = {
+      status: {
+        equals: 'published',
+      },
+    }
+    const baseAccess = vi.fn(() => baseConstraint)
+    const collectionAccess = vi.fn(() => collectionConstraint)
+    const config = {
+      baseAccess: {
+        collections: {
+          read: baseAccess,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        read: collectionAccess,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+    const accessResult = await result.access.read({ req, slug: 'posts' })
+
+    expect(accessResult).toEqual({
+      and: [baseConstraint, collectionConstraint],
+    })
+    expect(baseAccess).toHaveBeenCalledWith({
+      data: undefined,
+      id: undefined,
+      isReadingStaticFile: undefined,
+      req,
+      slug: 'posts',
+    })
+    expect(collectionAccess).toHaveBeenCalledWith({
+      data: undefined,
+      id: undefined,
+      isReadingStaticFile: undefined,
+      req,
+      slug: 'posts',
+    })
+  })
+
+  it('should not run collection access when base access denies the operation', async () => {
+    const collectionAccess = vi.fn(() => true)
+    const config = {
+      baseAccess: {
+        collections: {
+          update: () => false,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        update: collectionAccess,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+    const accessResult = await result.access.update({ req, slug: 'posts' })
+
+    expect(accessResult).toBe(false)
+    expect(collectionAccess).not.toHaveBeenCalled()
+  })
+
+  it('should only apply the base function for the matching operation', async () => {
+    const baseReadAccess = vi.fn(() => false)
+    const collectionUpdateAccess = vi.fn(() => true)
+    const config = {
+      baseAccess: {
+        collections: {
+          read: baseReadAccess,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        update: collectionUpdateAccess,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.update({ req, slug: 'posts' })).toBe(true)
+    expect(collectionUpdateAccess).toHaveBeenCalledOnce()
+    expect(baseReadAccess).not.toHaveBeenCalled()
+  })
+
+  it('should fail closed when base access returns undefined', async () => {
+    const collectionAccess = vi.fn(() => true)
+    const config = {
+      baseAccess: {
+        collections: {
+          read: (() => undefined) as any,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        read: collectionAccess,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.read({ req, slug: 'posts' })).toBe(false)
+    expect(collectionAccess).not.toHaveBeenCalled()
+  })
+
+  it('should fail closed when collection access returns undefined', async () => {
+    const config = {
+      baseAccess: {
+        collections: {
+          read: () => true,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        read: (() => undefined) as any,
+      },
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.read({ req, slug: 'posts' })).toBe(false)
+  })
+
+  it('should combine base and collection admin access', async () => {
+    const adminAccess = vi.fn(() => true)
+    const baseAccess = vi.fn(() => true)
+    const config = {
+      baseAccess: {
+        collections: {
+          admin: baseAccess,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'users',
+      access: {
+        admin: adminAccess,
+      },
+      auth: true,
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.admin({ req, slug: 'users' })).toBe(true)
+    expect(baseAccess).toHaveBeenCalledWith({ req, slug: 'users' })
+    expect(adminAccess).toHaveBeenCalledWith({ req, slug: 'users' })
+  })
+
+  it('should deny admin access before collection admin access runs', async () => {
+    const adminAccess = vi.fn(() => true)
+    const baseAccess = vi.fn(() => false)
+    const config = {
+      admin: {
+        user: 'users',
+      },
+      baseAccess: {
+        collections: {
+          admin: baseAccess,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'users',
+      access: {
+        admin: adminAccess,
+      },
+      auth: true,
+      fields: [],
+    }
+    const sanitizedCollection = sanitizeCollection(config, collection)
+    const req = {
+      payload: {
+        collections: {
+          users: {
+            config: sanitizedCollection,
+          },
+        },
+        config,
+      },
+      user: {
+        collection: 'users',
+        id: 'user-1',
+      },
+    } as any
+
+    await expect(canAccessAdmin({ req })).rejects.toThrow()
+    expect(baseAccess).toHaveBeenCalledWith({ req, slug: 'users' })
+    expect(adminAccess).not.toHaveBeenCalled()
+  })
+
+  it('should not grant admin access to a different auth collection', async () => {
+    const config = {
+      admin: {
+        user: 'users',
+      },
+      baseAccess: {
+        collections: {
+          admin: () => true,
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'customers',
+      auth: true,
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+      user: {
+        collection: 'customers',
+        id: 'customer-1',
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(await result.access.admin({ req, slug: 'customers' })).toBe(false)
+  })
+
+  it('should reject query constraints for collection admin operations', async () => {
+    const config = {
+      baseAccess: {
+        collections: {
+          admin: () => ({
+            role: {
+              equals: 'admin',
+            },
+          }),
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'users',
+      auth: true,
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    await expect(result.access.admin({ req, slug: 'users' })).rejects.toThrow(
+      'baseAccess must return a boolean for collection admin operations.',
+    )
+  })
+
+  it('should reject query constraints for collection create operations', async () => {
+    const config = {
+      baseAccess: {
+        collections: {
+          create: () => ({
+            tenant: {
+              equals: 'tenant-1',
+            },
+          }),
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      fields: [],
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    await expect(result.access.create({ req, slug: 'posts' })).rejects.toThrow(
+      'baseAccess must return a boolean for collection create operations.',
+    )
+  })
+})
 
 describe('warnOnInvalidCustomViews', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>

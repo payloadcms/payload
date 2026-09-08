@@ -8,16 +8,14 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../../../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { pointFieldsSlug } from '../../slugs.js'
 
@@ -38,7 +36,6 @@ let emptyGroupPoint
 describe('Point', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
@@ -46,16 +43,11 @@ describe('Point', () => {
     url = new AdminUrlUtil(serverURL, pointFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -164,9 +156,9 @@ describe('Point', () => {
       await page.locator('#field-longitude-point').waitFor()
 
       const scanResults = await runAxeScan({
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -178,8 +170,8 @@ describe('Point', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

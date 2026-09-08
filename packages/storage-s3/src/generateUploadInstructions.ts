@@ -23,8 +23,16 @@ export const generateUploadInstructions = ({
   getStorageClient,
   useCompositePrefixes = false,
 }: Args): GenerateUploadInstructions => {
-  return async ({ collectionSlug, docPrefix, filename, filesize, mimeType, req }) => {
-    if (access ? !(await access({ collectionSlug, req })) : !req.user) {
+  return async ({
+    collectionSlug,
+    docPrefix,
+    filename,
+    filesize,
+    mimeType,
+    overrideAccess,
+    req,
+  }) => {
+    if (!overrideAccess && (access ? !(await access({ collectionSlug, req })) : !req.user)) {
       throw new Forbidden(req.t)
     }
 

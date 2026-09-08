@@ -2,7 +2,7 @@
 
 import type { WidgetWidth } from 'payload'
 
-import { expect, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 export class DashboardHelper {
   private page: Page
@@ -24,6 +24,8 @@ export class DashboardHelper {
   }
 
   widgetByPos = (pos: number) => this.page.locator(`.modular-dashboard > :nth-child(${pos})`)
+
+  getDeleteWidgetButton = (widget: Locator) => widget.locator('.widget-wrapper__delete-btn')
 
   getSnapshot = async (): Promise<[slug: string, width: WidgetWidth][]> => {
     const widgets: [slug: string, width: WidgetWidth][] = await Promise.all(
@@ -225,7 +227,7 @@ export class DashboardHelper {
     const widget = this.widgetByPos(position)
     const widgetDomElem = await widget.elementHandle()
     await widget.hover()
-    await widget.getByText('Delete widget').click()
+    await this.getDeleteWidgetButton(widget).click()
     expect(await widgetDomElem?.isHidden()).toBe(true)
     await expect(this.widgets).toHaveCount(widgetsCount - 1)
   }

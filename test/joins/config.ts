@@ -28,360 +28,359 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    user: 'users',
-  },
-  collections: [
-    {
-      slug: 'users',
-      auth: true,
-      fields: [
-        {
-          type: 'join',
-          collection: 'posts',
-          on: 'author',
-          name: 'posts',
-        },
-      ],
-      versions: false,
-    },
-    Posts,
-    Categories,
-    HiddenPosts,
-    Uploads,
-    Versions,
-    CategoriesVersions,
-    Singular,
-    SelfJoins,
-    {
-      slug: localizedPostsSlug,
-      admin: {
-        useAsTitle: 'title',
+  suite: 'joins',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          localized: true,
-        },
-        {
-          name: 'category',
-          type: 'relationship',
-          localized: true,
-          relationTo: localizedCategoriesSlug,
-        },
-      ],
-      versions: false,
+      user: 'users',
     },
-    {
-      slug: localizedCategoriesSlug,
-      admin: {
-        useAsTitle: 'name',
+    collections: [
+      {
+        slug: 'users',
+        auth: true,
+        fields: [
+          {
+            name: 'posts',
+            type: 'join',
+            collection: 'posts',
+            on: 'author',
+          },
+        ],
+        versions: false,
       },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
+      Posts,
+      Categories,
+      HiddenPosts,
+      Uploads,
+      Versions,
+      CategoriesVersions,
+      Singular,
+      SelfJoins,
+      {
+        slug: localizedPostsSlug,
+        admin: {
+          useAsTitle: 'title',
         },
-        {
-          name: 'relatedPosts',
-          type: 'join',
-          collection: localizedPostsSlug,
-          on: 'category',
-          localized: true,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: restrictedCategoriesSlug,
-      admin: {
-        useAsTitle: 'name',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'category',
+            type: 'relationship',
+            localized: true,
+            relationTo: localizedCategoriesSlug,
+          },
+        ],
+        versions: false,
       },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
+      {
+        slug: localizedCategoriesSlug,
+        admin: {
+          useAsTitle: 'name',
         },
-        {
-          // this field is misconfigured to have `where` constraint using a restricted field
-          name: 'restrictedPosts',
-          type: 'join',
-          collection: postsSlug,
-          on: 'category',
-          where: {
-            restrictedField: { equals: 'restricted' },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'relatedPosts',
+            type: 'join',
+            collection: localizedPostsSlug,
+            localized: true,
+            on: 'category',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: restrictedCategoriesSlug,
+        admin: {
+          useAsTitle: 'name',
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            // this field is misconfigured to have `where` constraint using a restricted field
+            name: 'restrictedPosts',
+            type: 'join',
+            collection: postsSlug,
+            on: 'category',
+            where: {
+              restrictedField: { equals: 'restricted' },
+            },
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: categoriesJoinRestrictedSlug,
+        admin: {
+          useAsTitle: 'name',
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            // join collection with access.read: () => false which should not populate
+            name: 'collectionRestrictedJoin',
+            type: 'join',
+            collection: collectionRestrictedSlug,
+            on: 'category',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: restrictedPostsSlug,
+        admin: {
+          useAsTitle: 'title',
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'restrictedField',
+            type: 'text',
+            access: {
+              read: () => false,
+              update: () => false,
+            },
+          },
+          {
+            name: 'category',
+            type: 'relationship',
+            relationTo: restrictedCategoriesSlug,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: collectionRestrictedSlug,
+        access: {
+          read: () => ({ canRead: { equals: true } }),
+        },
+        admin: {
+          useAsTitle: 'title',
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'canRead',
+            type: 'checkbox',
+            defaultValue: false,
+          },
+          {
+            name: 'category',
+            type: 'relationship',
+            relationTo: categoriesJoinRestrictedSlug,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'depth-joins-1',
+        fields: [
+          {
+            name: 'rel',
+            type: 'relationship',
+            relationTo: 'depth-joins-2',
+          },
+          {
+            name: 'joins',
+            type: 'join',
+            collection: 'depth-joins-3',
+            maxDepth: 2,
+            on: 'rel',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'depth-joins-2',
+        fields: [
+          {
+            name: 'joins',
+            type: 'join',
+            collection: 'depth-joins-1',
+            maxDepth: 2,
+            on: 'rel',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'depth-joins-3',
+        fields: [
+          {
+            name: 'rel',
+            type: 'relationship',
+            relationTo: 'depth-joins-1',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'multiple-collections-parents',
+        access: { read: () => true },
+        fields: [
+          {
+            name: 'children',
+            type: 'join',
+            admin: {
+              defaultColumns: ['title', 'name', 'description'],
+            },
+            collection: ['multiple-collections-1', 'multiple-collections-2'],
+            on: 'parent',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'multiple-collections-1',
+        access: { read: () => true },
+        admin: { useAsTitle: 'title' },
+        fields: [
+          {
+            name: 'parent',
+            type: 'relationship',
+            relationTo: 'multiple-collections-parents',
+          },
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'multiple-collections-2',
+        access: { read: () => true },
+        admin: { useAsTitle: 'title' },
+        fields: [
+          {
+            name: 'parent',
+            type: 'relationship',
+            relationTo: 'multiple-collections-parents',
+          },
+          {
+            name: 'title',
+            type: 'text',
+          },
+          {
+            name: 'description',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: foldersSlug,
+        admin: {
+          group: 'Joins Test',
+          useAsTitle: 'name',
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        folders: {
+          collectionSpecific: { fieldName: 'folderType' },
+          joinField: {
+            name: 'children',
+            admin: {
+              defaultColumns: ['title', 'name', 'description'],
+            },
           },
         },
-      ],
-      versions: false,
-    },
-    {
-      slug: categoriesJoinRestrictedSlug,
-      admin: {
-        useAsTitle: 'name',
+        versions: false,
       },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          // join collection with access.read: () => false which should not populate
-          name: 'collectionRestrictedJoin',
-          type: 'join',
-          collection: collectionRestrictedSlug,
-          on: 'category',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: restrictedPostsSlug,
-      admin: {
-        useAsTitle: 'title',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'restrictedField',
-          type: 'text',
-          access: {
-            read: () => false,
-            update: () => false,
+      {
+        slug: 'example-pages',
+        admin: { useAsTitle: 'title' },
+        fields: [
+          createFolderField({ relationTo: foldersSlug }),
+          {
+            name: 'title',
+            type: 'text',
           },
-        },
-        {
-          name: 'category',
-          type: 'relationship',
-          relationTo: restrictedCategoriesSlug,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: collectionRestrictedSlug,
-      admin: {
-        useAsTitle: 'title',
-      },
-      access: {
-        read: () => ({ canRead: { equals: true } }),
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'canRead',
-          type: 'checkbox',
-          defaultValue: false,
-        },
-        {
-          name: 'category',
-          type: 'relationship',
-          relationTo: categoriesJoinRestrictedSlug,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'depth-joins-1',
-      fields: [
-        {
-          name: 'rel',
-          type: 'relationship',
-          relationTo: 'depth-joins-2',
-        },
-        {
-          name: 'joins',
-          type: 'join',
-          collection: 'depth-joins-3',
-          on: 'rel',
-          maxDepth: 2,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'depth-joins-2',
-      fields: [
-        {
-          name: 'joins',
-          type: 'join',
-          collection: 'depth-joins-1',
-          on: 'rel',
-          maxDepth: 2,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'depth-joins-3',
-      fields: [
-        {
-          name: 'rel',
-          type: 'relationship',
-          relationTo: 'depth-joins-1',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'multiple-collections-parents',
-      access: { read: () => true },
-      fields: [
-        {
-          type: 'join',
-          name: 'children',
-          collection: ['multiple-collections-1', 'multiple-collections-2'],
-          on: 'parent',
-          admin: {
-            defaultColumns: ['title', 'name', 'description'],
+          {
+            name: 'name',
+            type: 'text',
           },
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'multiple-collections-1',
-      access: { read: () => true },
-      admin: { useAsTitle: 'title' },
-      fields: [
-        {
-          type: 'relationship',
-          relationTo: 'multiple-collections-parents',
-          name: 'parent',
-        },
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'multiple-collections-2',
-      access: { read: () => true },
-      admin: { useAsTitle: 'title' },
-      fields: [
-        {
-          type: 'relationship',
-          relationTo: 'multiple-collections-parents',
-          name: 'parent',
-        },
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'description',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: foldersSlug,
-      admin: {
-        useAsTitle: 'name',
-        group: 'Joins Test',
+        ],
+        versions: false,
       },
-      folders: {
-        collectionSpecific: { fieldName: 'folderType' },
-        joinField: {
-          name: 'children',
-          admin: {
-            defaultColumns: ['title', 'name', 'description'],
+      {
+        slug: 'example-posts',
+        admin: { useAsTitle: 'title' },
+        fields: [
+          createFolderField({ relationTo: foldersSlug }),
+          {
+            name: 'title',
+            type: 'text',
           },
-        },
+          {
+            name: 'description',
+            type: 'text',
+          },
+        ],
+        versions: false,
       },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'example-pages',
-      admin: { useAsTitle: 'title' },
-      fields: [
-        createFolderField({ relationTo: foldersSlug }),
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'example-posts',
-      admin: { useAsTitle: 'title' },
-      fields: [
-        createFolderField({ relationTo: foldersSlug }),
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'description',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'folderPoly1',
-      fields: [
-        {
-          name: 'folderPoly1Title',
-          type: 'text',
-        },
-        createFolderField({ relationTo: foldersSlug }),
-      ],
-      versions: false,
-    },
-    {
-      slug: 'folderPoly2',
-      fields: [
-        {
-          name: 'folderPoly2Title',
-          type: 'text',
-        },
-        createFolderField({ relationTo: foldersSlug }),
-      ],
-      versions: false,
-    },
-  ],
-  localization: {
-    locales: [
-      { label: '(en)', code: 'en' },
-      { label: '(es)', code: 'es' },
+      {
+        slug: 'folderPoly1',
+        fields: [
+          {
+            name: 'folderPoly1Title',
+            type: 'text',
+          },
+          createFolderField({ relationTo: foldersSlug }),
+        ],
+        versions: false,
+      },
+      {
+        slug: 'folderPoly2',
+        fields: [
+          {
+            name: 'folderPoly2Title',
+            type: 'text',
+          },
+          createFolderField({ relationTo: foldersSlug }),
+        ],
+        versions: false,
+      },
     ],
-    defaultLocale: 'en',
+    localization: {
+      defaultLocale: 'en',
+      locales: [
+        { code: 'en', label: '(en)' },
+        { code: 'es', label: '(es)' },
+      ],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

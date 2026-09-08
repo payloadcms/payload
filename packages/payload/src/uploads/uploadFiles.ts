@@ -1,3 +1,5 @@
+import fs from 'fs/promises'
+
 import type { Payload } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { FileToSave } from './types.js'
@@ -12,8 +14,12 @@ export const uploadFiles = async (
 ): Promise<void> => {
   try {
     await Promise.all(
-      files.map(async ({ buffer, path }) => {
-        await saveBufferToFile(buffer, path)
+      files.map(async (file) => {
+        if ('sourcePath' in file) {
+          await fs.copyFile(file.sourcePath, file.path)
+        } else {
+          await saveBufferToFile(file.buffer, file.path)
+        }
       }),
     )
   } catch (err) {

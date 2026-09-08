@@ -1,1 +1,1 @@
-Please read the /CLAUDE.md file for context.
+Please read `./CLAUDE.md` for context.

@@ -112,7 +112,7 @@ To find the correct icon:
 
 #### SCSS Variable Dependencies
 
-**CRITICAL:** The `packages/ui/src/scss/` folder is being deprecated. Any CSS variables defined there must be migrated to `packages/ui/src/css/` before use.
+**CRITICAL:** The `packages/ui/src/scss/` folder has been removed. All global tokens now live in `packages/ui/src/css/`. Any CSS variable you use must exist there.
 
 **Before using a variable, verify it exists in the CSS folder:**
 

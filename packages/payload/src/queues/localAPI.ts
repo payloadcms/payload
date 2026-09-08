@@ -1,4 +1,4 @@
-import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.js'
+import type { JobFromTask } from './config/types/workflowTypes.js'
 
 import {
   createLocalReq,
@@ -56,7 +56,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     args:
       | {
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
-          meta?: BaseJob['meta']
+          meta?: Job['meta']
           /**
            * If set to false, access control as defined in jobsConfig.access.queue will be run.
            * By default, this is true and no access control will be run.
@@ -80,7 +80,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         }
       | {
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
-          meta?: BaseJob['meta']
+          meta?: Job['meta']
           /**
            * If set to false, access control as defined in jobsConfig.access.queue will be run.
            * By default, this is true and no access control will be run.
@@ -107,7 +107,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   ): Promise<
     TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? Job<TTaskOrWorkflowSlug>
-      : RunningJobFromTask<TTaskOrWorkflowSlug>
+      : JobFromTask<TTaskOrWorkflowSlug>
   > => {
     const overrideAccess = args?.overrideAccess !== false
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
@@ -158,59 +158,56 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       data.meta = args.meta
     }
 
-    // Compute concurrency key from workflow or task config (only if feature is enabled)
-    if (payload.config.jobs?.enableConcurrencyControl) {
-      let concurrencyKey: null | string = null
-      let supersedes = false
-      const queueName = queue || 'default'
+    let concurrencyKey: null | string = null
+    let supersedes = false
+    const queueName = queue || 'default'
 
-      if (args.workflow) {
-        const workflow = payload.config.jobs?.workflows?.find(({ slug }) => slug === args.workflow)
-        if (workflow?.concurrency) {
-          const concurrencyConfig = workflow.concurrency
-          if (typeof concurrencyConfig === 'function') {
-            concurrencyKey = concurrencyConfig({ input: args.input, queue: queueName })
-          } else {
-            concurrencyKey = concurrencyConfig.key({ input: args.input, queue: queueName })
-            supersedes = concurrencyConfig.supersedes ?? false
-          }
-        }
-      } else if (args.task) {
-        const task = payload.config.jobs?.tasks?.find(({ slug }) => slug === args.task)
-        if (task?.concurrency) {
-          const concurrencyConfig = task.concurrency
-          if (typeof concurrencyConfig === 'function') {
-            concurrencyKey = concurrencyConfig({ input: args.input, queue: queueName })
-          } else {
-            concurrencyKey = concurrencyConfig.key({ input: args.input, queue: queueName })
-            supersedes = concurrencyConfig.supersedes ?? false
-          }
+    if (args.workflow) {
+      const workflow = payload.config.jobs?.workflows?.find(({ slug }) => slug === args.workflow)
+      if (workflow?.concurrency) {
+        const concurrencyConfig = workflow.concurrency
+        if (typeof concurrencyConfig === 'function') {
+          concurrencyKey = concurrencyConfig({ input: args.input, queue: queueName })
+        } else {
+          concurrencyKey = concurrencyConfig.key({ input: args.input, queue: queueName })
+          supersedes = concurrencyConfig.supersedes ?? false
         }
       }
-
-      if (concurrencyKey) {
-        data.concurrencyKey = concurrencyKey
-
-        // If supersedes is enabled, delete older pending jobs with the same key
-        if (supersedes) {
-          await payload.db.deleteMany({
-            collection: jobsCollectionSlug,
-            req,
-            where: {
-              and: [
-                { concurrencyKey: { equals: concurrencyKey } },
-                { processing: { equals: false } },
-                { completedAt: { exists: false } },
-              ],
-            },
-          })
+    } else if (args.task) {
+      const task = payload.config.jobs?.tasks?.find(({ slug }) => slug === args.task)
+      if (task?.concurrency) {
+        const concurrencyConfig = task.concurrency
+        if (typeof concurrencyConfig === 'function') {
+          concurrencyKey = concurrencyConfig({ input: args.input, queue: queueName })
+        } else {
+          concurrencyKey = concurrencyConfig.key({ input: args.input, queue: queueName })
+          supersedes = concurrencyConfig.supersedes ?? false
         }
+      }
+    }
+
+    if (concurrencyKey) {
+      data.concurrencyKey = concurrencyKey
+
+      // If supersedes is enabled, delete older pending jobs with the same key
+      if (supersedes) {
+        await payload.db.deleteMany({
+          collection: jobsCollectionSlug,
+          req,
+          where: {
+            and: [
+              { concurrencyKey: { equals: concurrencyKey } },
+              { processingUntil: { exists: false } },
+              { completedAt: { exists: false } },
+            ],
+          },
+        })
       }
     }
 
     type ReturnType = TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? Job<TTaskOrWorkflowSlug>
-      : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
+      : JobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
 
     return jobAfterRead({
       config: payload.config,
@@ -378,7 +375,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           cancelled: true,
         },
         hasError: true,
-        processing: false,
+        processingUntil: null,
         waitUntil: null,
       },
       req,
@@ -422,7 +419,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           cancelled: true,
         },
         hasError: true,
-        processing: false,
+        processingUntil: null,
         waitUntil: null,
       },
       req,

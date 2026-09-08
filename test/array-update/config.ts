@@ -7,132 +7,138 @@ import { devUser } from '../credentials.js'
 import { arraySlug, complexSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'array-update',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
-  },
-  collections: [
-    {
-      slug: arraySlug,
-      fields: [
-        {
-          name: 'arrayOfFields',
-          type: 'array',
-          admin: {
-            initCollapsed: true,
+    collections: [
+      {
+        slug: arraySlug,
+        fields: [
+          {
+            name: 'arrayOfFields',
+            type: 'array',
+            admin: {
+              initCollapsed: true,
+            },
+            fields: [
+              {
+                name: 'required',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'optional',
+                type: 'text',
+              },
+              {
+                name: 'innerArrayOfFields',
+                type: 'array',
+                fields: [
+                  {
+                    name: 'required',
+                    type: 'text',
+                    required: true,
+                  },
+                  {
+                    name: 'optional',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
           },
-          fields: [
-            {
-              name: 'required',
-              type: 'text',
-              required: true,
-            },
-            {
-              name: 'optional',
-              type: 'text',
-            },
-            {
-              name: 'innerArrayOfFields',
-              type: 'array',
-              fields: [
-                {
-                  name: 'required',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'optional',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      versions: false,
+        ],
+        versions: false,
+      },
+      {
+        slug: complexSlug,
+        fields: [
+          {
+            name: 'localizedArray',
+            type: 'array',
+            fields: [
+              {
+                name: 'text',
+                type: 'text',
+              },
+            ],
+            localized: true,
+          },
+          {
+            name: 'group',
+            type: 'group',
+            fields: [
+              {
+                name: 'groupArray',
+                type: 'array',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            name: 'localizedGroup',
+            type: 'group',
+            fields: [
+              {
+                name: 'localizedGroupArray',
+                type: 'array',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+            localized: true,
+          },
+          {
+            name: 'blocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'content',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                  {
+                    name: 'innerArray',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'text',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+    ],
+    localization: {
+      defaultLocale: 'en',
+      locales: ['en', 'es'],
     },
-    {
-      slug: complexSlug,
-      fields: [
-        {
-          name: 'localizedArray',
-          type: 'array',
-          localized: true,
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'groupArray',
-              type: 'array',
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'localizedGroup',
-          type: 'group',
-          localized: true,
-          fields: [
-            {
-              name: 'localizedGroupArray',
-              type: 'array',
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'blocks',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'content',
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                },
-                {
-                  name: 'innerArray',
-                  type: 'array',
-                  fields: [
-                    {
-                      name: 'text',
-                      type: 'text',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      versions: false,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
-  ],
-  localization: {
-    defaultLocale: 'en',
-    locales: ['en', 'es'],
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -140,8 +146,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import type {
-  AgentType,
   CliArgs,
   DbDetails,
   PackageManager,
@@ -20,15 +19,14 @@ import {
   DEFAULT_PAYLOAD_VERSION_TAG,
   resolvePackageVersion,
 } from '../utils/resolvePackageVersion.js'
+import { buildAgentConfigFiles } from './agent-config.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
 import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { downloadExample } from './download-example.js'
-import { downloadSkill } from './download-skill.js'
 import { downloadTemplate } from './download-template.js'
 import { generateSecret } from './generate-secret.js'
 import { manageEnvFiles } from './manage-env-files.js'
-import { getAgentChoice } from './select-agent.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -82,7 +80,6 @@ type TemplateOrExample =
 
 export async function createProject(
   args: {
-    agentType?: AgentType
     cliArgs: CliArgs
     dbDetails?: DbDetails
     packageManager: PackageManager
@@ -90,7 +87,7 @@ export async function createProject(
     projectName: string
   } & TemplateOrExample,
 ): Promise<void> {
-  const { agentType, cliArgs, dbDetails, packageManager, projectDir, projectName } = args
+  const { cliArgs, dbDetails, packageManager, projectDir, projectName } = args
 
   if (cliArgs['--dry-run']) {
     debug(`Dry run: Creating project in ${chalk.green(projectDir)}`)
@@ -173,28 +170,9 @@ export async function createProject(
     template: 'template' in args ? args.template : undefined,
   })
 
-  if (agentType) {
-    spinner.message('Installing agent skill...')
-    try {
-      await downloadSkill({
-        agentType,
-        branch: cliArgs['--branch'] || undefined,
-        debug: cliArgs['--debug'],
-        projectDir,
-      })
-
-      const { configFile, skillsDir } = getAgentChoice(agentType)
-      const skillPath = `${skillsDir}/payload`
-      const configContent =
-        configFile === 'CLAUDE.md'
-          ? `# Claude Code\n\nThis project uses the Payload CMS skill at \`${skillPath}/\`.\nStart with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.\n`
-          : `# Agents\n\nThis project uses the Payload CMS skill at \`${skillPath}/\`.\nStart with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.\n`
-      await fse.writeFile(path.resolve(projectDir, configFile), configContent)
-    } catch (err) {
-      if (cliArgs['--debug'] && err instanceof Error) {
-        debug(`Failed to download skill: ${err.message}`)
-      }
-      warning('Could not download agent skill. You can install it manually later.')
+  if (!cliArgs['--no-agent']) {
+    for (const { content, fileName } of buildAgentConfigFiles()) {
+      await fse.writeFile(path.resolve(projectDir, fileName), content)
     }
   }
 

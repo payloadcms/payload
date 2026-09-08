@@ -104,9 +104,7 @@ export type FeatureProviderServer<
         resolvedFeatures: ResolvedServerFeatureMap
         // unSanitized EditorConfig,
         unSanitizedEditorConfig: ServerEditorConfig
-      }) =>
-        | Promise<ServerFeature<ServerFeatureProps, ClientFeatureProps>>
-        | ServerFeature<ServerFeatureProps, ClientFeatureProps>)
+      }) => ServerFeature<ServerFeatureProps, ClientFeatureProps>)
     | ServerFeature<ServerFeatureProps, ClientFeatureProps>
   key: string
   /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */

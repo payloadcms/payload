@@ -23,7 +23,7 @@ const data: SerializedEditorState = {}
 
 const markdown = convertLexicalToMarkdown({
   data,
-  editorConfig: await editorConfigFactory.default({
+  editorConfig: editorConfigFactory.default({
     config, // <= make sure you have access to your Payload Config
   }),
 })
@@ -102,7 +102,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 const lexicalJSON = convertMarkdownToLexical({
-  editorConfig: await editorConfigFactory.default({
+  editorConfig: editorConfigFactory.default({
     config, // <= make sure you have access to your Payload Config
   }),
   markdown: '# Hello world\n\nThis is a **test**.',

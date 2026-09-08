@@ -8,7 +8,7 @@ allowed-tools: Write, Bash(date:*), Bash(mkdir -p *)
 
 ## Overview
 
-Systematic workflow for triaging and fixing test failures in CI, especially flaky tests that pass locally but fail in CI. Tests that made it to `main` are usually flaky due to timing, bundling, or environment differences.
+Systematic workflow designed specifically for triaging and fixing end-to-end (e2e) test failures in CI, especially flaky Playwright tests that pass locally but fail in CI. E2E tests that made it to `main` are usually flaky due to timing, bundling, or environment differences.
 
 **CRITICAL RULE: You MUST run the reproduction workflow before proposing any fixes. No exceptions.**
 
@@ -17,7 +17,7 @@ Systematic workflow for triaging and fixing test failures in CI, especially flak
 - CI test fails on `main` branch after PR was merged
 - Test passes locally but fails in CI
 - Test failure labeled as "flaky" or intermittent
-- E2E or integration test timing out in CI only
+- E2E test timing out in CI only
 - User provides a PR URL/number with failing checks
 
 ## PR-Based Workflow (When PR URL/Number Provided)
@@ -148,7 +148,7 @@ From CI logs or GitHub Actions URL, identify:
 - **Test file**: Full path (e.g., `test/i18n/e2e.spec.ts`)
 - **Test name**: Exact test description
 - **Error message**: Full stack trace
-- **Test type**: E2E (Playwright) or integration (Vitest)
+- **Test type**: E2E (Playwright)
 
 ### 2. Reproduce with Dev Code
 
@@ -185,8 +185,6 @@ until curl -s http://localhost:3000/admin > /dev/null 2>&1; do sleep 1; done && 
 # For E2E tests (DO NOT use pnpm test:e2e as it spawns its own server):
 pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts -g "exact test name"
 
-# For integration tests:
-pnpm test:int $SUITE_NAME -t "exact test name"
 ```
 
 **Did the test fail?**
@@ -229,8 +227,6 @@ until curl -s http://localhost:3000/admin > /dev/null 2>&1; do sleep 1; done && 
 # ========================================
 # Run the specific test again using Playwright directly
 pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts -g "exact test name"
-# OR for integration tests:
-pnpm test:int $SUITE_NAME -t "exact test name"
 ```
 
 **Did the test fail now?**

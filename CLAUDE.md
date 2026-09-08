@@ -97,18 +97,23 @@ Each React component should have its own named folder:
 ```
 ComponentName/
 ├── index.tsx       # Component implementation
-└── index.scss      # Styles (if applicable)
+└── index.css       # Styles (if applicable)
 ```
 
-- **Do:** Create a folder per component with `index.tsx` and `index.scss`
-- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.scss` file
+- **Do:** Create a folder per component with `index.tsx` and `index.css`
+- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.css` file
 - Re-export from barrel files (`index.ts`) when grouping related components in a parent directory
+- New styles should be written in plain CSS, not SCSS - SCSS is being phased out and is no longer linted (see [Writing CSS](#writing-css))
 
 ### Running Dev Server
 
 - `pnpm run dev` - Start dev server with default config (`test/_community/config.ts`)
 - `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
 - `pnpm run dev:postgres` - Run dev server with Postgres
+
+### Running the Payload CLI
+
+`pnpm payload <directory_name> <command> [...args]` runs the real Payload CLI against a test suite config. The first argument selects the test folder (e.g. `pnpm payload fields generate:types` uses `test/fields/config.ts`); everything after it is forwarded to the CLI unchanged. Run `pnpm payload <directory_name>` with no command to list all commands.
 
 ### Development Environment
 
@@ -160,36 +165,40 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 
 ### Writing Tests - Required Practices
 
-**Tests MUST be self-contained and clean up after themselves:**
+**Integration tests MUST use the shared fixture wrapper:**
 
-- If you create a database record in a test, you MUST delete it before the test completes
-- For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
-- Track created resources (IDs, files, etc.) in a shared array within the `describe` block
-- Do not use conditionals in tests where it can be avoided such as `if else`
-- Do not use `try {} finally {}` in e2e tests; prefer Playwright cleanup hooks (`afterEach`, `afterAll`)
-
-**Example pattern:**
+- Import `test` from `test/__helpers/int/vitest.ts`, not directly from Vitest
+- Wrap Payload-backed tests in one root `test.suite({ config: './config.ts' })`
+- Read `payload`, `restClient`, `sdk`, or `cli` from the test or hook arguments
+- Do not initialize Payload manually or add database reset/seed hooks; the fixture initializes
+  Payload once per file, resets and seeds before each test that uses it, and destroys it afterward
+- Existing suites that intentionally manage shared state can set `resetBetweenTests: false`. The fixture
+  resets and seeds once for the file, and the suite keeps responsibility for between-test cleanup.
+  New suites should use the default per-test reset behavior.
+- Use `test.suite({})` only for integration tests that do not use Payload
 
 ```typescript
-describe('My Feature', () => {
-  const createdIDs: number[] = []
+import { expect } from 'vitest'
 
-  afterEach(async () => {
-    for (const id of createdIDs) {
-      await payload.delete({ collection: 'my-collection', id })
-    }
-    createdIDs.length = 0
-  })
+import { test } from '../__helpers/int/vitest.js'
 
-  it('should create a record', async () => {
-    const id = 123
-    createdIDs.push(id)
+test.suite({ config: './config.ts' })('My Feature', () => {
+  test('should create a record', async ({ payload }) => {
+    const record = await payload.create({
+      collection: 'my-collection',
+      data: { title: 'Test' },
+    })
 
-    await payload.create({ collection: 'my-collection', data: { id, title: 'Test' } })
-    // assertions...
+    expect(record.title).toBe('Test')
   })
 })
 ```
+
+**Tests MUST be self-contained and clean up side effects not handled by their fixtures:**
+
+- Integration-test database records are cleared automatically by the shared fixture
+- Clean up files, external resources, environment changes, and other non-database side effects
+- For multiple tests with similar cleanup needs, use `test.afterEach` to centralize cleanup logic
 
 **Additional test guidelines:**
 
@@ -221,6 +230,32 @@ test/<feature-name>/
 ```
 
 Generate types for a test directory: `pnpm run dev:generate-types <directory_name>`
+
+### Visual Regression Testing
+
+Screenshot comparisons live alongside normal e2e tests and are opt-in via the `visual()` helper,
+which applies the `@visual` tag for you:
+
+```ts
+import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
+import { visual } from '../__helpers/e2e/visual.js'
+
+visual('renders the posts list view', async () => {
+  await page.goto(url.list)
+  await expectScreenshot({ page, name: 'posts-list-view.png' })
+})
+```
+
+- Baselines are committed PNGs next to their spec file (`__snapshots__/<spec-file>/<name>.png`).
+- **Baselines must be generated/updated inside the pinned Playwright Docker image**, never on a
+  bare host — font rendering differs enough between operating systems to fail the comparison on
+  CI even when nothing visually changed. Use `pnpm test:visual:update`.
+- On a PR, CI only runs `@visual` tests when the diff could plausibly change rendered UI — e.g.
+  `.css`/`.scss`/`.tsx`/`.jsx`/`.svg` files, any `e2e.spec.ts`/`__snapshots__/**`, or fixture
+  config the current `@visual` tests render (see `needs_visual` in `.github/workflows/main.yml`
+  for the full path list).
+- If the `visual-regression` CI job fails, reproduce and inspect the diff locally with
+  `pnpm test:visual` — there is no CI-posted comment.
 
 ## Linting & Formatting
 
@@ -325,6 +360,78 @@ const docs = await payload.find({
   user,
 })
 ```
+
+### Writing CSS
+
+Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
+
+**Mobile-first media queries only - never `max-width`:**
+
+```css
+/* BAD - rejected by plugin/no-max-width-media-query */
+@media (max-width: 768px) {
+  ...;
+}
+
+/* GOOD */
+@media (min-width: 768px) {
+  ...;
+}
+```
+
+**Only the four canonical breakpoints are allowed in a media query** (`plugin/no-non-standard-breakpoints`): `400px`, `768px`, `1024px`, `1440px`. Don't invent one-off breakpoint values.
+
+**Never use `!important`** (`plugin/no-important`). Refactor selector specificity instead.
+Exceptions to this rule are when it's not possible to do so when dealing with external libraries.
+
+**Prefer logical properties over physical properties** for RTL support:
+
+```css
+/* BAD - physical properties don't flip for RTL */
+padding-left: var(--spacer-3);
+margin-right: var(--spacer-2);
+border-left: 1px solid var(--color-border);
+left: 0;
+
+/* GOOD - logical properties adapt automatically */
+padding-inline-start: var(--spacer-3);
+margin-inline-end: var(--spacer-2);
+border-inline-start: var(--stroke-width-small) solid var(--color-border);
+inset-inline-start: 0;
+```
+
+Use `padding-inline`/`padding-block`, `margin-inline`/`margin-block`, `inset-inline`/`inset-block`, and `border-inline`/`border-block` (with their `-start`/`-end` variants) instead of the `-left`/`-right`/`-top`/`-bottom` equivalents where a direction is implied.
+
+**Prioritize design tokens over hardcoded pixel/rem values:**
+
+Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, etc.) should use a `--spacer-*` token from `packages/ui/src/css/spacing.css`, not a raw pixel or rem value:
+
+| Token          | Pixel |
+| -------------- | ----- |
+| `--spacer-0`   | 0px   |
+| `--spacer-1`   | 4px   |
+| `--spacer-1-5` | 6px   |
+| `--spacer-2`   | 8px   |
+| `--spacer-2-5` | 12px  |
+| `--spacer-3`   | 16px  |
+| `--spacer-4`   | 24px  |
+| `--spacer-5`   | 32px  |
+| `--spacer-6`   | 40px  |
+
+- If the value needed isn't an exact token, round to the nearest `--spacer-*` token rather than hand-writing a one-off value.
+- If a niche value must be precise (not a rounding-friendly case), use `calc()` with a spacer token instead of a raw pixel/rem value, e.g. `calc(var(--spacer-1) * 2.5)` for `10px`.
+- The same principle applies to other token families:
+  - **Colors:** use semantic `--color-*` tokens from `colors.css` (e.g. `--color-bg`, `--color-text-brand`, `--color-border`). Never reference raw `--ramp-*` palette tokens directly outside of `colors.css` as they aren't theme-aware.
+  - **Radius:** use `--radius-*` from `radius.css` (`--radius-small` 2px, `--radius-medium` 5px, `--radius-large` 13px, `--radius-full` 9999px) instead of hardcoded values.
+  - **Stroke width:** use `--stroke-width-small` (1px) / `--stroke-width-medium` (2px) from `theme.css`.
+  - **Box shadows:** use elevation tokens from `elevations.css` (`--elevation-100-canvas`, `--elevation-300-tooltip`, `--elevation-400-menu-panel`, `--elevation-500-modal-window`) instead of a hardcoded `box-shadow`/`rgba()` value - they also handle light/dark theming.
+  - **Typography:** use `--text-*` tokens from `typography.css`.
+
+**No sub-pixel precision** (`plugin/no-subpixel-values`) - applies to whatever raw value remains after the above (e.g. an exception case):
+
+- Pixel values may have at most one decimal place (e.g. `0.5px` is fine, `13.523px` is not).
+- Box-model and position properties - `width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, `min-`/`max-width`/`height` - must be whole numbers with no decimals at all.
+- `font-size`, `letter-spacing`, `line-height`, and custom properties (`--*`) are exempt, since a `var()` can't be statically traced to the property it ends up on.
 
 ### RSC/Client Bundling Rules
 

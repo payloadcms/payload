@@ -11,6 +11,33 @@ type JWTToken = {
   sid?: string
 }
 
+/**
+ * Verifies a token against every secret in the keyring (active first), so tokens
+ * signed under a previous secret still validate during a bounded rotation.
+ * Throws if no key verifies.
+ */
+async function verifyWithKeyring({
+  payload,
+  token,
+}: {
+  payload: Payload
+  token: string
+}): Promise<JWTToken> {
+  let lastError: unknown
+  for (const key of payload.encryptionKeyring.all) {
+    try {
+      const { payload: decodedPayload } = await jwtVerify<JWTToken>(
+        token,
+        new TextEncoder().encode(key.legacyKey),
+      )
+      return decodedPayload
+    } catch (error) {
+      lastError = error
+    }
+  }
+  throw lastError
+}
+
 async function autoLogin({
   isGraphQL,
   payload,
@@ -90,8 +117,10 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       return { user: null }
     }
 
-    const secretKey = new TextEncoder().encode(payload.secret)
-    const { payload: decodedPayload } = await jwtVerify<JWTToken>(token, secretKey)
+    // Verify against every keyring secret so tokens signed under a previous
+    // secret still validate during a bounded rotation. New tokens are always
+    // signed with the active secret.
+    const decodedPayload = await verifyWithKeyring({ payload, token })
     const collection = payload.collections[decodedPayload.collection]
 
     const user = (await payload.findByID({

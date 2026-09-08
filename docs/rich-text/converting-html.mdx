@@ -239,7 +239,7 @@ import {
 import { JSDOM } from 'jsdom'
 
 const lexicalJSON = convertHTMLToLexical({
-  editorConfig: await editorConfigFactory.default({
+  editorConfig: editorConfigFactory.default({
     config, // Your Payload Config
   }),
   html: '<p>text</p>',
@@ -289,7 +289,7 @@ const htmlWithImage = `
 
 // Step 3: Convert to Lexical
 const lexicalJSON = convertHTMLToLexical({
-  editorConfig: await editorConfigFactory.default({ config }),
+  editorConfig: editorConfigFactory.default({ config }),
   html: htmlWithImage,
   JSDOM,
 })
@@ -363,7 +363,7 @@ async function convertHTMLWithImageUpload(htmlString: string) {
   const updatedHTML = dom.window.document.body.innerHTML
 
   return convertHTMLToLexical({
-    editorConfig: await editorConfigFactory.default({ config }),
+    editorConfig: editorConfigFactory.default({ config }),
     html: updatedHTML,
     JSDOM,
   })

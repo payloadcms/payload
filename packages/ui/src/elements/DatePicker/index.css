@@ -40,7 +40,7 @@
   }
 
   .react-datepicker-popper {
-    z-index: 10;
+    z-index: var(--z-portal-element);
     line-height: 0;
   }
 

@@ -1569,7 +1569,7 @@ export interface JoinField {
   id: string;
   name: string;
   /**
-   * Posts related to this category
+   * This is a join field description. It’s pretty long so I can see how the spacing looks when the text reaches all the way across and is below the other controls.
    */
   relatedPosts?: {
     docs?: (string | JoinPost)[];
@@ -1932,45 +1932,21 @@ export interface SlugField {
   id: string;
   title?: string | null;
   /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  /**
    * This is the default slug field
    */
   slug: string;
   requiredTitle: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateRequiredSlug?: boolean | null;
   requiredSlug: string;
   readOnlyTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateReadOnlySlug?: boolean | null;
   readOnlySlug: string;
   longTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateLongSlug?: boolean | null;
   /**
    * This slug has a long value to test text-overflow behavior
    */
   longSlug: string;
   placeholderTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generatePlaceholderSlug?: boolean | null;
   placeholderSlug: string;
   lockedTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateLockedSlug?: boolean | null;
   /**
    * This slug starts with a value to show the locked state
    */
@@ -3331,22 +3307,16 @@ export interface SelectFieldsSelect<T extends boolean = true> {
  */
 export interface SlugFieldsSelect<T extends boolean = true> {
   title?: T;
-  generateSlug?: T;
   slug?: T;
   requiredTitle?: T;
-  generateRequiredSlug?: T;
   requiredSlug?: T;
   readOnlyTitle?: T;
-  generateReadOnlySlug?: T;
   readOnlySlug?: T;
   longTitle?: T;
-  generateLongSlug?: T;
   longSlug?: T;
   placeholderTitle?: T;
-  generatePlaceholderSlug?: T;
   placeholderSlug?: T;
   lockedTitle?: T;
-  generateLockedSlug?: T;
   lockedSlug?: T;
   updatedAt?: T;
   createdAt?: T;

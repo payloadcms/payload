@@ -40,19 +40,19 @@
     gap: var(--spacer-2);
   }
 
+  @keyframes rich-text-lexical-fade-in-background {
+    from {
+      background-color: transparent;
+    }
+    to {
+      background-color: var(--color-bg-hover);
+    }
+  }
+
   .rich-text-lexical--read-only {
     .editor-container {
       .editor {
-        @keyframes fadeInBackground {
-          from {
-            background-color: transparent;
-          }
-          to {
-            background-color: var(--color-bg-hover);
-          }
-        }
-
-        animation: fadeInBackground 0.5s ease forwards;
+        animation: rich-text-lexical-fade-in-background 0.5s ease forwards;
         color: var(--color-text-tertiary);
       }
     }

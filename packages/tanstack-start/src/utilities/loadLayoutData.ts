@@ -2,8 +2,12 @@ import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 
+import type { SerializableRecord } from './toSerializable.js'
+
 import { getLayoutData } from '../layouts/Root/getLayoutData.js'
 import { toSerializable } from './toSerializable.js'
+
+export type LoadLayoutDataResult = SerializableRecord
 
 /**
  * Resolves the admin layout data for TanStack Start and returns a serializable
@@ -20,11 +24,10 @@ export async function loadLayoutData({
 }: {
   config: SanitizedConfig
   importMap: ImportMap
-}): Promise<Record<string, unknown>> {
+}): Promise<LoadLayoutDataResult> {
   const { providers, ...data } = await getLayoutData({ configPromise: config, importMap })
 
-  return {
-    ...(toSerializable(data) as Record<string, unknown>),
+  return toSerializable(data, {
     providers: providers ? await renderServerComponent(providers as any) : undefined,
-  }
+  })
 }

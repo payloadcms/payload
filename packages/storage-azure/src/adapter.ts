@@ -55,6 +55,7 @@ export function createAzureAdapter({
         getStorageClient,
         useCompositePrefixes,
       }),
+      useInAdmin: true,
     },
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>

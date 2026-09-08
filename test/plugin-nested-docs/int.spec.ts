@@ -1,30 +1,14 @@
-import type { ArrayField, Payload, RelationshipField } from 'payload'
+import type { ArrayField, RelationshipField } from 'payload'
 
-import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { Page } from './payload-types.js'
+import { test } from '../__helpers/int/vitest.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('@payloadcms/plugin-nested-docs', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('seed', () => {
-    it('should populate two levels of breadcrumbs', async () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
+  test.describe('seed', () => {
+    test('should populate two levels of breadcrumbs', async ({ payload }) => {
       const query = await payload.find({
         collection: 'pages',
         where: {
@@ -37,7 +21,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(query.docs[0].breadcrumbs).toHaveLength(2)
     })
 
-    it('should populate three levels of breadcrumbs', async () => {
+    test('should populate three levels of breadcrumbs', async ({ payload }) => {
       const query = await payload.find({
         collection: 'pages',
         where: {
@@ -55,7 +39,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       )
     })
 
-    it('should update more than 10 (default limit) breadcrumbs', async () => {
+    test('should update more than 10 (default limit) breadcrumbs', async ({ payload }) => {
       // create a parent doc
       const parentDoc = await payload.create({
         collection: 'pages',
@@ -111,7 +95,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(lastUpdatedChildBreadcrumbs[0].url).toStrictEqual('/11-children-updated')
     })
 
-    it('should return breadcrumbs as an array of objects', async () => {
+    test('should return breadcrumbs as an array of objects', async ({ payload }) => {
       const parentDoc = await payload.create({
         collection: 'pages',
         data: {
@@ -141,7 +125,9 @@ describe('@payloadcms/plugin-nested-docs', () => {
       })
     })
 
-    it('should update child doc breadcrumb without affecting any other data', async () => {
+    test('should update child doc breadcrumb without affecting any other data', async ({
+      payload,
+    }) => {
       const parentDoc = await payload.create({
         collection: 'pages',
         data: {
@@ -193,10 +179,10 @@ describe('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
-  describe('versions', () => {
+  test.describe('versions', () => {
     const createdPageIDs: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Clean up in reverse order (children before parents)
       for (const id of [...createdPageIDs].reverse()) {
         await payload.delete({ collection: 'pages', id })
@@ -204,7 +190,9 @@ describe('@payloadcms/plugin-nested-docs', () => {
       createdPageIDs.length = 0
     })
 
-    it('should preserve published version of child when parent is saved and child has unpublished draft', async () => {
+    test('should preserve published version of child when parent is saved and child has unpublished draft', async ({
+      payload,
+    }) => {
       // Step 1: Create parent page and publish it
       const parentDoc = await payload.create({
         collection: 'pages',
@@ -281,7 +269,9 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(draftChild.title).toBe('Version Child Draft Edit')
     })
 
-    it('should update breadcrumbs for draft-only children when parent is saved', async () => {
+    test('should update breadcrumbs for draft-only children when parent is saved', async ({
+      payload,
+    }) => {
       const parentDoc = await payload.create({
         collection: 'pages',
         data: {
@@ -328,7 +318,9 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(updatedDraftChild.breadcrumbs?.[0]?.url).toBe('/draft-parent-updated')
     })
 
-    it('should update breadcrumbs for both published and draft versions when parent changes', async () => {
+    test('should update breadcrumbs for both published and draft versions when parent changes', async ({
+      payload,
+    }) => {
       const parent = await payload.create({
         collection: 'pages',
         data: {
@@ -393,8 +385,10 @@ describe('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
-  describe('scheduled publish', () => {
-    it('should allow scheduled publish on a collection with a nested-docs breadcrumbs field', async () => {
+  test.describe('scheduled publish', () => {
+    test('should allow scheduled publish on a collection with a nested-docs breadcrumbs field', async ({
+      payload,
+    }) => {
       const draft = await payload.create({
         collection: 'pages',
         data: {
@@ -440,13 +434,13 @@ describe('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
-  describe('overrides', () => {
+  test.describe('overrides', () => {
     let collection
-    beforeAll(() => {
+    test.beforeEach(({ payload }) => {
       collection = payload.config.collections.find(({ slug }) => slug === 'categories')
     })
 
-    it('should allow overriding breadcrumbs field', () => {
+    test('should allow overriding breadcrumbs field', () => {
       const breadcrumbField = collection.fields.find(
         (field) => field.type === 'array' && field.name === 'categorization',
       ) as ArrayField
@@ -460,7 +454,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(breadcrumbField.admin.readOnly).toStrictEqual(true)
     })
 
-    it('should allow overriding parent field', () => {
+    test('should allow overriding parent field', () => {
       const parentField = collection.fields.find(
         (field) => field.type === 'relationship' && field.name === 'owner',
       ) as RelationshipField
@@ -468,7 +462,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(parentField.admin.description).toStrictEqual('custom')
     })
 
-    it('should allow custom breadcrumb and parent slugs', async () => {
+    test('should allow custom breadcrumb and parent slugs', async ({ payload }) => {
       const parent = await payload.create({
         collection: 'categories',
         data: {

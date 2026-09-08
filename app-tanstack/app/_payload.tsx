@@ -1,12 +1,8 @@
 import { payloadLayoutRoute } from '@payloadcms/tanstack-start/client'
 import { createFileRoute } from '@tanstack/react-router'
-import '@payloadcms/ui/scss/app.scss'
-// Custom admin styles for this test app — mirrors the Next test app's
-// `(payload)/custom.scss` so the shared "custom CSS" e2e passes on both adapters.
-import './custom.scss'
 
-import { HydrationMarker } from '../components/HydrationMarker/index.js'
 import { getLayoutDataFn, serverFunctionHandler } from './_payload/server.functions.js'
+import styles from './payload.css?url'
 
 const { component: PayloadProviders, loader } = payloadLayoutRoute({
   load: getLayoutDataFn,
@@ -14,18 +10,24 @@ const { component: PayloadProviders, loader } = payloadLayoutRoute({
 })
 
 export const Route = createFileRoute('/_payload')({
-  component: PayloadLayout,
+  component: PayloadProviders,
+  head: () => ({
+    links: [
+      { rel: 'stylesheet', href: styles },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.googleapis.com',
+      },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto+Mono:wght@100..700&display=swap',
+      },
+    ],
+  }),
   loader,
 })
-
-// `withPayloadRoot` swaps `__root`'s shell (and its `<HydrationMarker />`) for the
-// Payload admin document on `/admin` routes, so the marker must be re-mounted here
-// for the Playwright hydration-wait wrapper to fire on admin pages.
-function PayloadLayout() {
-  return (
-    <>
-      <PayloadProviders />
-      <HydrationMarker />
-    </>
-  )
-}

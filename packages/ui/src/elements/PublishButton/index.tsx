@@ -40,7 +40,8 @@ export function PublishButton({
   const { submit } = useForm()
   const modified = useFormModified()
   const editDepth = useEditDepth()
-  const { code: localeCode } = useLocale()
+  const locale = useLocale()
+  const localeCode = locale?.code
   const {
     localization,
     routes: { api },

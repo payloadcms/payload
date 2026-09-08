@@ -25,7 +25,7 @@ export const UploadHandlersProvider = ({ children }) => {
     serverURL: config.serverURL,
   })
   const getUploadHandler: UploadHandlersContext['getUploadHandler'] = ({ collectionSlug }) => {
-    if (!getEntityConfig({ collectionSlug })?.upload?.uploadInstructions) {
+    if (!getEntityConfig({ collectionSlug })?.upload?.uploadInstructions.useInAdmin) {
       return null
     }
 

@@ -28,63 +28,66 @@ import { ValueCollection } from './collections/Value/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    BeforeOperationCollection,
-    BeforeChangeHooks,
-    BeforeValidateCollection,
-    AfterOperationCollection,
-    ContextHooks,
-    TransformHooks,
-    Hooks,
-    NestedAfterReadHooks,
-    NestedAfterChangeHooks,
-    ChainingHooks,
-    Relations,
-    Users,
-    DataHooks,
-    BeforeDeleteCollection,
-    BeforeDelete2Collection,
-    ValueCollection,
-    AfterReadCollection,
-    OverrideAccessCollection,
-  ],
-  globals: [DataHooksGlobal],
-  endpoints: [
-    {
-      path: '/throw-to-after-error',
-      method: 'get',
-      handler: () => {
-        throw new APIError("I'm a teapot", 418)
+  suite: 'hooks',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
     },
-  ],
-  hooks: {
-    afterError: [() => console.log('Running afterError hook')],
+    collections: [
+      BeforeOperationCollection,
+      BeforeChangeHooks,
+      BeforeValidateCollection,
+      AfterOperationCollection,
+      ContextHooks,
+      TransformHooks,
+      Hooks,
+      NestedAfterReadHooks,
+      NestedAfterChangeHooks,
+      ChainingHooks,
+      Relations,
+      Users,
+      DataHooks,
+      BeforeDeleteCollection,
+      BeforeDelete2Collection,
+      ValueCollection,
+      AfterReadCollection,
+      OverrideAccessCollection,
+    ],
+    endpoints: [
+      {
+        handler: () => {
+          throw new APIError("I'm a teapot", 418)
+        },
+        method: 'get',
+        path: '/throw-to-after-error',
+      },
+    ],
+    globals: [DataHooksGlobal],
+    hooks: {
+      afterError: [() => console.log('Running afterError hook')],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await seedHooksUsers(payload)
     await payload.create({
       collection: hooksSlug,
       data: {
-        fieldBeforeValidate: false,
-        collectionBeforeValidate: false,
-        fieldBeforeChange: false,
-        collectionBeforeChange: false,
-        fieldAfterChange: false,
         collectionAfterChange: false,
-        collectionBeforeRead: false,
-        fieldAfterRead: false,
         collectionAfterRead: false,
+        collectionBeforeChange: false,
+        collectionBeforeRead: false,
+        collectionBeforeValidate: false,
+        fieldAfterChange: false,
+        fieldAfterRead: false,
+        fieldBeforeChange: false,
+        fieldBeforeValidate: false,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 

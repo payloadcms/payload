@@ -161,6 +161,7 @@ export interface Post {
         }[]
       | null;
   };
+  selectWithAsyncFilterOptions?: ('allowed' | 'excluded') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -366,6 +367,7 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  selectWithAsyncFilterOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }

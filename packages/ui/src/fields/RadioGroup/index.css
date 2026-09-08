@@ -10,13 +10,6 @@
       gap: var(--spacer-2);
     }
 
-    .tooltip:not([aria-hidden='true']) {
-      right: auto;
-      position: static;
-      margin-bottom: 0.2em;
-      max-width: fit-content;
-    }
-
     ul {
       list-style: none;
       padding: 0;
