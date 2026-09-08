@@ -1,3 +1,4 @@
+import type { File } from '@payloadcms/plugin-cloud-storage/types'
 import type { S3StorageOptions } from '@payloadcms/storage-s3'
 import type { StorageAdapter } from 'payload'
 
@@ -37,6 +38,8 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+export const uploadedTestFiles = new Map<string, { prefix?: string } & File>()
 
 export type BuildPluginCloudStorageIntConfigArgs = {
   /** When false, S3 uses non-composite prefix resolution (single stored prefix segment; pre-composite behavior). */
@@ -162,8 +165,12 @@ export function buildPluginCloudStorageIntConfig({
       [testMetadataSlug]: {
         adapter: () => ({
           name: 'test-metadata-adapter',
-          handleDelete: () => Promise.resolve(),
+          handleDelete: ({ filename }) => {
+            uploadedTestFiles.delete(filename)
+          },
           handleUpload: ({ data, file }) => {
+            uploadedTestFiles.set(file.filename, { ...file, prefix: data.prefix })
+
             const metadata = {
               ...data,
               bucketName: 'test-bucket',
@@ -178,6 +185,7 @@ export function buildPluginCloudStorageIntConfig({
           },
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
+        prefix: 'test-prefix',
       },
     },
   })
