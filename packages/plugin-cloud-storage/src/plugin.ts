@@ -68,7 +68,7 @@ export const cloudStoragePlugin =
       return config
     }
 
-    const initFunctions: Array<() => void> = []
+    const initFunctions: Array<() => Promise<void> | void> = []
     const endpointPaths = new Map<Adapter, string>()
 
     const collections = (config.collections || []).map((existingCollection) => {
@@ -237,7 +237,9 @@ export const cloudStoragePlugin =
       ...config,
       collections,
       onInit: async (payload) => {
-        initFunctions.forEach((fn) => fn())
+        // Await each init so a provisioning failure fails Payload startup
+        // instead of becoming an unhandled rejection.
+        await Promise.all(initFunctions.map((fn) => fn()))
         if (config.onInit) {
           await config.onInit(payload)
         }

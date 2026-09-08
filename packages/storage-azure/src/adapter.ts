@@ -16,7 +16,7 @@ interface CreateAzureAdapterArgs {
   baseURL: string
   clientUploads?: ClientUploadsConfig
   containerName: string
-  createContainerIfNotExists: () => void
+  createContainerIfNotExists: () => Promise<void> | void
   getStorageClient: () => ContainerClient
   useCompositePrefixes?: boolean
 }

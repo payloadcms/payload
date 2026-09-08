@@ -72,7 +72,7 @@ export interface GeneratedAdapter {
   handleDelete: HandleDelete
   handleUpload: HandleUpload
   name: string
-  onInit?: () => void
+  onInit?: () => Promise<void> | void
   staticHandler: StaticHandler
   /** Generates upload instructions when supported. */
   uploadInstructions?: {

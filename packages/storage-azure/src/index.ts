@@ -64,6 +64,22 @@ export type AzureStorageOptions = {
   connectionString: string
 
   /**
+   * Public access level applied to a container that the plugin creates via
+   * `allowContainerCreate`. Has no effect on containers that already exist.
+   *
+   * - `'private'` (default): no anonymous access. Blobs are reachable only
+   *   through Payload's access-controlled file route.
+   * - `'blob'`: unauthenticated clients can read any blob directly from Azure.
+   * - `'container'`: unauthenticated clients can read and list blobs directly.
+   *
+   * Only choose `'blob'` or `'container'` if you deliberately want files served
+   * publicly from Azure, bypassing Payload read access control.
+   *
+   * @default 'private'
+   */
+  containerAccess?: 'blob' | 'container' | 'private'
+
+  /**
    * Azure Blob storage container name
    */
   containerName: string
@@ -110,13 +126,20 @@ export const azureStorage: AzureStorageFactory = (
       return incomingConfig
     }
 
-    const createContainerIfNotExists = () => {
-      void getStorageClientFunc({
+    const createContainerIfNotExists = async (): Promise<void> => {
+      const containerClient = getStorageClientFunc({
         connectionString: azureStorageOptions.connectionString,
         containerName: azureStorageOptions.containerName,
-      }).createIfNotExists({
-        access: 'blob',
       })
+
+      // Private by default; public access is opt-in via `containerAccess`.
+      const containerAccess = azureStorageOptions.containerAccess ?? 'private'
+
+      if (containerAccess === 'private') {
+        await containerClient.createIfNotExists()
+      } else {
+        await containerClient.createIfNotExists({ access: containerAccess })
+      }
     }
 
     const adapter = createAzureAdapter({
