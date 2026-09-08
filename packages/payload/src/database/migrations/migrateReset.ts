@@ -38,6 +38,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<Migration
         await migration.down({ payload, req, session })
         await payload.delete({
           collection: 'payload-migrations',
+          overrideAccess: true,
           req,
           where: {
             id: {
@@ -60,6 +61,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<Migration
   try {
     await payload.delete({
       collection: 'payload-migrations',
+      overrideAccess: true,
       where: {
         batch: {
           equals: -1,
