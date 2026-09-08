@@ -7,8 +7,9 @@ import { expect, test as vitestTest } from 'vitest'
 import type { DatabaseAdapterType } from '../../dbAdapters.js'
 
 import { getCurrentDatabaseAdapter } from '../../dbAdapters.js'
+import { resetAndSeed } from '../shared/clearAndSeed/resetAndSeed.js'
+import { getTestDataConfig } from '../shared/clearAndSeed/testDataConfig.js'
 import { getSDK } from '../shared/getSDK.js'
-import { initPayloadInt } from '../shared/initPayloadInt.js'
 import { mongooseList } from '../shared/isMongoose.js'
 import { NextRESTClient } from '../shared/NextRESTClient.js'
 import { runCLICommand } from '../shared/runCLICommand.js'
@@ -18,14 +19,25 @@ type TestOptions = {
   db?: 'all' | 'drizzle' | 'mongo' | ((adapterType: DatabaseAdapterType) => boolean)
 }
 
+type TestSuiteOptions = {
+  config?: string
+  cron?: boolean
+} & TestOptions
+
 type IntegrationFixtures = {
   $file: {
     config: SanitizedConfig
-    payload: Payload
+    configPath: null | string
+    /** Raw file-scoped instance for suite hooks. Tests should use `payload`. */
+    payloadInstance: Payload
+    /** Config supplied to `test.suite`, imported automatically before file hooks run. */
+    resolvedConfig: null | SanitizedConfig
+    testCron: boolean
     testDir: string
   }
   $test: {
     cli: (input: Parameters<typeof runCLICommand>[0]) => ReturnType<typeof runCLICommand>
+    payload: Payload
     restClient: NextRESTClient
     sdk: ReturnType<typeof getSDK>
   }
@@ -33,38 +45,105 @@ type IntegrationFixtures = {
 
 // Keep all fixtures in one extension so Vitest can trace test calls back to their source lines.
 const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
-  cli: async ({ testDir }, use) => {
-    await use(async (input: Parameters<typeof runCLICommand>[0]) => {
-      const configPath = typeof input === 'string' ? undefined : input.configPath
+  cli: async ({ configPath, payload, testDir }, use) => {
+    // Resolving this dependency initializes Payload and resets and seeds the database first.
+    void payload
 
-      await initPayloadInt(testDir, undefined, false, configPath)
+    const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
 
-      return runCLICommand(input, { cwd: testDir })
-    })
+    if (previousDropDatabase !== 'true') {
+      throw new Error('The CLI fixture expected PAYLOAD_DROP_DATABASE to be true before setup.')
+    }
+
+    // The parent Payload instance already prepared the database. The child CLI process must reuse it.
+    process.env.PAYLOAD_DROP_DATABASE = 'false'
+
+    try {
+      if (configPath === null) {
+        throw new Error(
+          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+        )
+      }
+
+      await use((input) =>
+        runCLICommand(input, {
+          configPath,
+          cwd: testDir,
+        }),
+      )
+    } finally {
+      process.env.PAYLOAD_DROP_DATABASE = previousDropDatabase
+    }
   },
   config: [
-    async ({ testDir }, use) => {
-      const { config } = await initPayloadInt(testDir, undefined, false)
+    async ({ resolvedConfig }, use) => {
+      if (resolvedConfig === null) {
+        throw new Error(
+          "This integration test requires Payload. Pass its config path to test.suite({ config: './config.ts' })(...).",
+        )
+      }
 
-      await use(config)
+      await use(resolvedConfig)
     },
     { scope: 'file' },
   ],
-  payload: [
-    async ({ config }, use) => {
-      const payload = await getPayload({ config, cron: true })
+  configPath: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(null)
+    },
+    { scope: 'file' },
+  ],
+  payload: async ({ payloadInstance }, use) => {
+    const testDataConfig = getTestDataConfig(payloadInstance.config)
 
-      await use(payload)
-      await payload.destroy()
+    if (!testDataConfig) {
+      throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
+    }
+
+    await resetAndSeed({ payload: payloadInstance, ...testDataConfig })
+    await use(payloadInstance)
+  },
+  payloadInstance: [
+    async ({ config, testCron }, use) => {
+      const payload = await getPayload({ config, cron: testCron })
+
+      try {
+        await use(payload)
+      } finally {
+        await payload.destroy()
+      }
     },
     { scope: 'file' },
   ],
   restClient: async ({ payload }, use) => {
     await use(new NextRESTClient(payload.config))
   },
+  resolvedConfig: [
+    async ({ configPath }, use) => {
+      if (configPath === null) {
+        await use(null)
+        return
+      }
+
+      const { default: config } = (await import(configPath)) as {
+        default: Promise<SanitizedConfig> | SanitizedConfig
+      }
+
+      await use(await config)
+    },
+    { auto: true, scope: 'file' },
+  ],
   sdk: async ({ payload }, use) => {
     await use(getSDK(payload.config))
   },
+  testCron: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use) => {
+      await use(true)
+    },
+    { scope: 'file' },
+  ],
   testDir: [
     // eslint-disable-next-line no-empty-pattern
     async ({}, use) => {
@@ -75,20 +154,20 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
 })
 
 /**
- * Integration test API with Payload's shared fixtures and database filtering.
+ * Integration test API with Payload's shared lifecycle and database filtering.
  *
- * `config`, `payload`, and `testDir` are shared for the test file. `payload` is destroyed
- * automatically after the file finishes. Clients are new for every test so
- * authentication and other mutable state cannot leak into the next test.
- *
- * @example
- * test.options({ db: 'mongo' })('MongoDB only', async ({ payload }) => {
- *   await payload.find({ collection: 'posts' })
- * })
+ * Payload-backed test files supply their config to one root `test.suite`. The config module is
+ * imported once before file hooks run. Payload is initialized lazily, once per file, and destroyed
+ * afterward. Before every test that uses Payload, REST, or the SDK, the database and upload
+ * directories are reset and the suite's optional seed function is run. REST and SDK clients are
+ * recreated per test. Standalone integration tests use `test.suite({})` and do not initialize
+ * Payload.
  *
  * @example
- * test.options({ db: 'drizzle' }).describe('Drizzle only', () => {
- *   test('works', async ({ payload }) => { ... })
+ * test.suite({ config: './config.ts' })('Posts', () => {
+ *   test('reads posts', async ({ payload }) => {
+ *     await payload.find({ collection: 'posts' })
+ *   })
  * })
  */
 export const test = Object.assign(testWithFixtures, {
@@ -99,7 +178,15 @@ export const test = Object.assign(testWithFixtures, {
       describe: testWithFixtures.describe.runIf(shouldRun),
     })
   },
+  suite(this: typeof testWithFixtures, { config, cron = true, db }: TestSuiteOptions) {
+    this.override('configPath', config ? path.resolve(getTestDirectory(), config) : null)
+    this.override('testCron', cron)
+
+    return this.describe.runIf(matchesDatabase({ db }))
+  },
 })
+
+export const it = test
 
 const getTestDirectory = (): string => {
   const testPath = expect.getState().testPath

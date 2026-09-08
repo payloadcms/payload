@@ -1,8 +1,8 @@
 import * as z from 'zod/mini'
 
+import { strictObject } from '../../utilities/zod.js'
 import { defineCLICommand } from '../defineCLICommand.js'
 import { CLICommandError } from '../runtime/output.js'
-import { strictObject } from '../zod.js'
 
 export const createHelpCommand = defineCLICommand({
   cli: {
@@ -10,10 +10,10 @@ export const createHelpCommand = defineCLICommand({
   },
   description: 'Display help for Payload commands.',
   handler: ({ args, help, isJSON }) => {
-    const selectedCommand = args.command
+    const commandName = args.command
+    const selectedCommand = commandName
       ? help.commands.find(
-          (command) =>
-            command.name === args.command || command.aliases?.includes(args.command as string),
+          (command) => command.name === commandName || command.aliases?.includes(commandName),
         )
       : undefined
 
@@ -30,7 +30,11 @@ export const createHelpCommand = defineCLICommand({
       return
     }
 
-    return { result: selectedCommand ? { command: selectedCommand } : { commands: help.commands } }
+    return {
+      result: selectedCommand
+        ? { command: selectedCommand, globalOptions: help.globalOptions }
+        : { commands: help.commands, globalOptions: help.globalOptions },
+    }
   },
   helpGroup: 'Core commands',
   input: strictObject({

@@ -12,6 +12,10 @@ import path from 'node:path'
  * payload migrate:create add-users
  * payload migrate:create --input '{"migrationName":"add-users"}'
  * ```
+ *
+ * Explicit shell values override values from `--input`. If `seed.json` contains
+ * `{ "returning": false }`, then `payload createDocuments --input @seed.json --returning`
+ * returns input with `{ returning: true }`.
  */
 export const getCommandInput = async (command: Command): Promise<unknown> => {
   const input = command.getOptionValue('input') as string | undefined
@@ -21,11 +25,13 @@ export const getCommandInput = async (command: Command): Promise<unknown> => {
     return shellInput
   }
 
-  if (Object.keys(shellInput).length > 0) {
-    command.error('error: --input cannot be combined with command arguments or options')
+  const parsedInput = await parseJSONInput(input)
+
+  if (typeof parsedInput !== 'object' || parsedInput === null || Array.isArray(parsedInput)) {
+    command.error('error: --input must contain a JSON object')
   }
 
-  return parseJSONInput(input)
+  return { ...parsedInput, ...shellInput }
 }
 
 /**

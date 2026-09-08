@@ -1,15 +1,9 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { AuthenticationError } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
+import { test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {
   beforeOperationSlug,
@@ -32,39 +26,24 @@ import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
-let restClient: NextRESTClient
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Hooks', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-  if (isMongoose(payload)) {
-    describe('transform actions', () => {
-      it('should create and not throw an error', async () => {
-        // the collection has hooks that will cause an error if transform actions is not handled properly
-        const doc = await payload.create({
-          collection: transformSlug,
-          data: {
-            localizedTransform: [2, 8],
-            transform: [2, 8],
-          },
-        })
-
-        expect(doc.transform).toBeDefined()
-        expect(doc.localizedTransform).toBeDefined()
+test.suite({ config: './config.ts' })('Hooks', () => {
+  test.options({ db: 'mongo' }).describe('transform actions', () => {
+    test('should create and not throw an error', async ({ payload }) => {
+      // the collection has hooks that will cause an error if transform actions is not handled properly
+      const doc = await payload.create({
+        collection: transformSlug,
+        data: {
+          localizedTransform: [2, 8],
+          transform: [2, 8],
+        },
       })
-    })
-  }
 
-  describe('hook execution', () => {
+      expect(doc.transform).toBeDefined()
+      expect(doc.localizedTransform).toBeDefined()
+    })
+  })
+
+  test.describe('hook execution', () => {
     let doc
     const data = {
       collectionAfterChange: false,
@@ -77,14 +56,14 @@ describe('Hooks', () => {
       fieldBeforeChange: false,
       fieldBeforeValidate: false,
     }
-    beforeEach(async () => {
+    test.beforeEach(async ({ payload }) => {
       doc = await payload.create({
         collection: hooksSlug,
         data,
       })
     })
 
-    it('should execute hooks in correct order on create', () => {
+    test('should execute hooks in correct order on create', () => {
       expect(doc.collectionAfterChange).toBeTruthy()
       expect(doc.collectionAfterRead).toBeTruthy()
       expect(doc.collectionBeforeChange).toBeTruthy()
@@ -97,7 +76,7 @@ describe('Hooks', () => {
       expect(doc.fieldBeforeValidate).toBeTruthy()
     })
 
-    it('should execute hooks in correct order on update', async () => {
+    test('should execute hooks in correct order on update', async ({ payload }) => {
       doc = await payload.update({
         id: doc.id,
         collection: hooksSlug,
@@ -116,7 +95,7 @@ describe('Hooks', () => {
       expect(doc.fieldBeforeValidate).toBeTruthy()
     })
 
-    it('should execute hooks in correct order on find', async () => {
+    test('should execute hooks in correct order on find', async ({ payload }) => {
       doc = await payload.findByID({
         id: doc.id,
         collection: hooksSlug,
@@ -127,7 +106,9 @@ describe('Hooks', () => {
       expect(doc.fieldAfterRead).toBeTruthy()
     })
 
-    it('should save data generated with afterRead hooks in nested field structures', async () => {
+    test('should save data generated with afterRead hooks in nested field structures', async ({
+      payload,
+    }) => {
       const document = await payload.create({
         collection: nestedAfterReadHooksSlug,
         data: {
@@ -142,7 +123,7 @@ describe('Hooks', () => {
       expect(document.group.array[0].afterRead).toEqual(generatedAfterReadText)
     })
 
-    it('should populate related docs within nested field structures', async () => {
+    test('should populate related docs within nested field structures', async ({ payload }) => {
       const relation = await payload.create({
         collection: relationsSlug,
         data: {
@@ -176,7 +157,9 @@ describe('Hooks', () => {
       expect(retrievedDoc.group.subGroup.shouldPopulate.title).toEqual(relation.title)
     })
 
-    it('should pass result from previous hook into next hook with findByID', async () => {
+    test('should pass result from previous hook into next hook with findByID', async ({
+      payload,
+    }) => {
       const document = await payload.create({
         collection: chainingHooksSlug,
         data: {
@@ -192,7 +175,7 @@ describe('Hooks', () => {
       expect(retrievedDoc.text).toEqual('ok!!')
     })
 
-    it('should pass result from previous hook into next hook with find', async () => {
+    test('should pass result from previous hook into next hook with find', async ({ payload }) => {
       const document = await payload.create({
         collection: chainingHooksSlug,
         data: {
@@ -207,7 +190,7 @@ describe('Hooks', () => {
       expect(retrievedDocs[0].text).toEqual('ok!!')
     })
 
-    it('should execute collection afterOperation hook', async () => {
+    test('should execute collection afterOperation hook', async ({ payload }) => {
       const [doc1, doc2] = await Promise.all([
         await payload.create({
           collection: afterOperationSlug,
@@ -263,7 +246,7 @@ describe('Hooks', () => {
       expect(findResult2.docs[1].title === 'Title').toBeTruthy()
     })
 
-    it('should pass context from beforeChange to afterChange', async () => {
+    test('should pass context from beforeChange to afterChange', async ({ payload }) => {
       const document = await payload.create({
         collection: contextHooksSlug,
         data: {
@@ -279,7 +262,7 @@ describe('Hooks', () => {
       expect(retrievedDoc.value).toEqual('secret')
     })
 
-    it('should pass context from local API to hooks', async () => {
+    test('should pass context from local API to hooks', async ({ payload }) => {
       const document = await payload.create({
         collection: contextHooksSlug,
         context: {
@@ -298,7 +281,7 @@ describe('Hooks', () => {
       expect(retrievedDoc.value).toEqual('data from Local API')
     })
 
-    it('should pass context from Local API to global hooks', async () => {
+    test('should pass context from Local API to global hooks', async ({ payload }) => {
       const globalDocument = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
       })
@@ -314,7 +297,7 @@ describe('Hooks', () => {
       expect(globalDocumentWithContext.field_globalAndField).toEqual('data from Local API context')
     })
 
-    it('should pass context from REST API to hooks', async () => {
+    test('should pass context from REST API to hooks', async ({ payload, restClient }) => {
       const params = new URLSearchParams({
         context_secretValue: 'data from REST API',
       })
@@ -335,7 +318,7 @@ describe('Hooks', () => {
       expect(retrievedDoc.value).toEqual('data from REST API')
     })
 
-    it('should populate previousValue in nested afterChange hooks', async () => {
+    test('should populate previousValue in nested afterChange hooks', async ({ payload }) => {
       // this collection will throw an error if previousValue is not defined in nested afterChange hook
       const nestedAfterChangeDoc = await payload.create({
         collection: nestedAfterChangeHooksSlug,
@@ -369,7 +352,9 @@ describe('Hooks', () => {
       expect(updatedDoc).toBeDefined()
     })
 
-    it('should populate previousValue in Lexical nested afterChange hooks', async () => {
+    test('should populate previousValue in Lexical nested afterChange hooks', async ({
+      payload,
+    }) => {
       const relationID = await payload.create({
         collection: 'relations',
         data: {
@@ -475,11 +460,11 @@ describe('Hooks', () => {
     })
   })
 
-  describe('auth collection hooks', () => {
+  test.describe('auth collection hooks', () => {
     let hookUser
     let hookUserToken
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       const email = 'dontrefresh@payloadcms.com'
 
       hookUser = await payload.create({
@@ -502,7 +487,7 @@ describe('Hooks', () => {
       hookUserToken = token
     })
 
-    it('should call afterLogin hook', async () => {
+    test('should call afterLogin hook', async ({ payload }) => {
       const { user } = await payload.login({
         collection: hooksUsersSlug,
         data: {
@@ -521,7 +506,7 @@ describe('Hooks', () => {
       expect(result.afterLoginHook).toStrictEqual(true)
     })
 
-    it('should call afterLogin hook on password reset', async () => {
+    test('should call afterLogin hook on password reset', async ({ payload }) => {
       const resetUser = await payload.create({
         collection: hooksUsersSlug,
         data: {
@@ -562,7 +547,7 @@ describe('Hooks', () => {
       expect(result.afterLoginHook).toStrictEqual(true)
     })
 
-    it('deny user login', async () => {
+    test('deny user login', async ({ payload }) => {
       await expect(() =>
         payload.login({
           collection: hooksUsersSlug,
@@ -571,7 +556,7 @@ describe('Hooks', () => {
       ).rejects.toThrow(AuthenticationError)
     })
 
-    it('should respect refresh hooks', async () => {
+    test('should respect refresh hooks', async ({ restClient }) => {
       const response = await restClient.POST(`/${hooksUsersSlug}/refresh-token`, {
         headers: {
           Authorization: `JWT ${hookUserToken}`,
@@ -584,7 +569,7 @@ describe('Hooks', () => {
       expect(data.refreshedToken).toStrictEqual('fake')
     })
 
-    it('should respect me hooks', async () => {
+    test('should respect me hooks', async ({ restClient }) => {
       const response = await restClient.GET(`/${hooksUsersSlug}/me`, {
         headers: {
           Authorization: `JWT ${hookUserToken}`,
@@ -597,8 +582,8 @@ describe('Hooks', () => {
     })
   })
 
-  describe('hook parameter data', () => {
-    it('should pass collection prop to collection hooks', async () => {
+  test.describe('hook parameter data', () => {
+    test('should pass collection prop to collection hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksCollection = JSON.parse(
         JSON.stringify(sanitizedConfig.collections.find(({ slug }) => slug === dataHooksSlug)),
@@ -640,7 +625,7 @@ describe('Hooks', () => {
       )
     })
 
-    it('should pass collection and field props to field hooks', async () => {
+    test('should pass collection and field props to field hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksCollection = sanitizedConfig.collections.find(
         ({ slug }) => slug === dataHooksSlug,
@@ -660,7 +645,7 @@ describe('Hooks', () => {
       expect(doc.field_collectionAndField).toStrictEqual(collectionAndField + collectionAndField)
     })
 
-    it('should pass global prop to global hooks', async () => {
+    test('should pass global prop to global hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksGlobal = JSON.parse(
         JSON.stringify(sanitizedConfig.globals.find(({ slug }) => slug === dataHooksGlobalSlug)),
@@ -683,7 +668,7 @@ describe('Hooks', () => {
       expect(JSON.parse(foundDoc.global_beforeRead_global)).toStrictEqual(sanitizedHooksGlobal)
     })
 
-    it('should pass global and field props to global hooks', async () => {
+    test('should pass global and field props to global hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksGlobal = sanitizedConfig.globals.find(
         ({ slug }) => slug === dataHooksGlobalSlug,
@@ -708,8 +693,8 @@ describe('Hooks', () => {
     })
   })
 
-  describe('config level after error hook', () => {
-    it('should handle error', async () => {
+  test.describe('config level after error hook', () => {
+    test('should handle error', async ({ restClient }) => {
       const response = await restClient.GET(`/throw-to-after-error`, {})
       const body = await response.json()
       expect(response.status).toEqual(418)
@@ -717,8 +702,8 @@ describe('Hooks', () => {
     })
   })
 
-  describe('beforeValidate', () => {
-    it('should have correct arguments', async () => {
+  test.describe('beforeValidate', () => {
+    test('should have correct arguments', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeValidateSlug,
         data: {
@@ -741,12 +726,12 @@ describe('Hooks', () => {
     })
   })
 
-  describe('beforeOperation', () => {
-    afterEach(() => {
+  test.describe('beforeOperation', () => {
+    test.afterEach(() => {
       clearLastOperation()
     })
 
-    it('should pass correct operation arg on create', async () => {
+    test('should pass correct operation arg on create', async ({ payload }) => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -755,7 +740,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('create')
     })
 
-    it('should pass correct operation arg on update', async () => {
+    test('should pass correct operation arg on update', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -770,7 +755,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('update')
     })
 
-    it('should pass correct operation arg on updateByID', async () => {
+    test('should pass correct operation arg on updateByID', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -785,7 +770,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('update')
     })
 
-    it('should pass correct operation arg on read (findByID)', async () => {
+    test('should pass correct operation arg on read (findByID)', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -799,7 +784,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('read')
     })
 
-    it('should pass correct operation arg on read (find)', async () => {
+    test('should pass correct operation arg on read (find)', async ({ payload }) => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -814,7 +799,9 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('read')
     })
 
-    it('should pass correct operation arg on readDistinct (findDistinct)', async () => {
+    test('should pass correct operation arg on readDistinct (findDistinct)', async ({
+      payload,
+    }) => {
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test1' },
@@ -836,7 +823,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('readDistinct')
     })
 
-    it('should pass correct operation arg on delete', async () => {
+    test('should pass correct operation arg on delete', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -850,7 +837,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('delete')
     })
 
-    it('should pass correct operation arg on deleteByID', async () => {
+    test('should pass correct operation arg on deleteByID', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -864,7 +851,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('delete')
     })
 
-    it('should pass correct operation arg on count', async () => {
+    test('should pass correct operation arg on count', async ({ payload }) => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -877,7 +864,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('count')
     })
 
-    it('should pass correct operation arg on countVersions', async () => {
+    test('should pass correct operation arg on countVersions', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -895,7 +882,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('countVersions')
     })
 
-    it('should pass correct operation arg on findVersions', async () => {
+    test('should pass correct operation arg on findVersions', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -913,7 +900,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('read')
     })
 
-    it('should pass correct operation arg on findVersionByID', async () => {
+    test('should pass correct operation arg on findVersionByID', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'v1' },
@@ -945,7 +932,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('read')
     })
 
-    it('should pass correct operation arg on restoreVersion', async () => {
+    test('should pass correct operation arg on restoreVersion', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'v1' },
@@ -978,8 +965,8 @@ describe('Hooks', () => {
     })
   })
 
-  describe('afterRead', () => {
-    it('should return same for find and findByID', async () => {
+  test.describe('afterRead', () => {
+    test('should return same for find and findByID', async ({ payload }) => {
       const createdDoc = await payload.create({
         collection: afterReadSlug,
         data: {
@@ -1009,17 +996,17 @@ describe('Hooks', () => {
     })
   })
 
-  describe('overrideAccess in hooks', () => {
+  test.describe('overrideAccess in hooks', () => {
     const createdIDs: string[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
         await payload.delete({ collection: overrideAccessSlug, id })
       }
       createdIDs.length = 0
     })
 
-    it('should pass overrideAccess: false to hooks when not overriding', async () => {
+    test('should pass overrideAccess: false to hooks when not overriding', async ({ payload }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test' },
@@ -1040,7 +1027,7 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(false)
     })
 
-    it('should pass overrideAccess: true to hooks when overriding', async () => {
+    test('should pass overrideAccess: true to hooks when overriding', async ({ payload }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test' },
@@ -1061,7 +1048,7 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(true)
     })
 
-    it('should pass overrideAccess to hooks in find operation', async () => {
+    test('should pass overrideAccess to hooks in find operation', async ({ payload }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Find' },
@@ -1088,7 +1075,9 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(true)
     })
 
-    it('should pass overrideAccess: false to hooks in find operation when not overriding', async () => {
+    test('should pass overrideAccess: false to hooks in find operation when not overriding', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Find No Override' },
@@ -1115,7 +1104,9 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(false)
     })
 
-    it('should default to true when overrideAccess is not specified in Local API', async () => {
+    test('should default to true when overrideAccess is not specified in Local API', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },

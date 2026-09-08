@@ -1,4 +1,5 @@
-import { defineCLICommand, strictObject, z } from 'payload/cli'
+import { strictObject, z } from 'payload'
+import { defineCLICommand } from 'payload/cli'
 
 export const createHelloCommand = defineCLICommand({
   description: 'Return a greeting.',

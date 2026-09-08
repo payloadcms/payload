@@ -1,11 +1,11 @@
-import type { JsonSchemaType } from '../../types.js'
+import type { EntityInputSchema as JsonSchemaType } from './types.js'
 
 /**
- * Refines Payload's `input`-variant JSON Schema into an MCP create/update tool's input schema. The
- * variant already covers correctness (ID-only relationships, no managed/virtual/join fields); the
- * passes here are MCP-specific - reshaping fields for the model and shrinking the result - and keep
- * every node valid JSON Schema draft 2020-12. Each is tagged **Correctness**, **Size**, or **LLM
- * ergonomics**, with a before/after example on its definition.
+ * Refines Payload's `input`-variant JSON Schema into an agent-friendly create/update input schema.
+ * The variant already covers correctness (ID-only relationships, no managed/virtual/join fields);
+ * the passes here reshape fields for models and shrink the result while keeping every node valid
+ * JSON Schema draft 2020-12. Each is tagged **Correctness**, **Size**, or **LLM ergonomics**, with a
+ * before/after example on its definition.
  */
 export const sanitizeEntitySchema = (schema: JsonSchemaType): JsonSchemaType => {
   // Work on a copy — the caller reuses the original schema elsewhere (e.g. when listing tools).
@@ -282,7 +282,7 @@ const mergeMembersByConst = (members: Array<boolean | JsonSchemaType>): JsonSche
     const discriminatorProp = merged.properties![discriminator]
     if (discriminatorProp && typeof discriminatorProp === 'object') {
       delete discriminatorProp.const
-      discriminatorProp.enum = uniqueConstValues as NonNullable<typeof discriminatorProp.enum>
+      discriminatorProp.enum = uniqueConstValues
     }
     return merged
   }

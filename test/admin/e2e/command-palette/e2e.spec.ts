@@ -44,8 +44,6 @@ test.describe('Command Palette', () => {
     const prebuild = false
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -64,7 +62,6 @@ test.describe('Command Palette', () => {
     // the "create first user" screen, so the nav (and the palette trigger) never render.
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests',
     })
 
     await page.goto(`${serverURL}${adminRoute}`)

@@ -23,108 +23,114 @@ const access = {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  globals: [
-    {
-      access,
-      fields: [
-        {
-          name: 'json',
-          type: 'json',
-        },
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-      slug,
-      versions: false,
-    },
-    {
-      access,
-      fields: [
-        {
-          name: 'array',
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-            },
-          ],
-          localized: true,
-          type: 'array',
-        },
-      ],
-      slug: arraySlug,
-      versions: false,
-    },
-    {
-      fields: [
-        {
-          name: 'text',
-          defaultValue: 'test',
-          type: 'text',
-        },
-        {
-          name: 'group',
-          fields: [
-            {
-              name: 'text',
-              defaultValue: 'test',
-              type: 'text',
-            },
-          ],
-          type: 'group',
-        },
-      ],
-      slug: defaultValueSlug,
-      versions: false,
-    },
-    {
-      access: {
-        read: ({ req: { user } }) => {
-          if (user) {
-            return true
-          }
-
-          return {
-            enabled: {
-              equals: true,
-            },
-          }
-        },
+  suite: 'globals',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      fields: [
-        {
-          name: 'title',
-          required: true,
-          type: 'text',
-        },
-        {
-          name: 'enabled',
-          type: 'checkbox',
-        },
-      ],
-      slug: accessControlSlug,
-      versions: false,
     },
-    {
-      access,
-      fields: [],
-      graphQL: false,
-      slug: 'without-graphql',
-      versions: false,
+    globals: [
+      {
+        slug,
+        access,
+        fields: [
+          {
+            name: 'json',
+            type: 'json',
+          },
+          {
+            name: 'title',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: arraySlug,
+        access,
+        fields: [
+          {
+            name: 'array',
+            type: 'array',
+            fields: [
+              {
+                name: 'text',
+                type: 'text',
+              },
+            ],
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: defaultValueSlug,
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+            defaultValue: 'test',
+          },
+          {
+            name: 'group',
+            type: 'group',
+            fields: [
+              {
+                name: 'text',
+                type: 'text',
+                defaultValue: 'test',
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: accessControlSlug,
+        access: {
+          read: ({ req: { user } }) => {
+            if (user) {
+              return true
+            }
+
+            return {
+              enabled: {
+                equals: true,
+              },
+            }
+          },
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'enabled',
+            type: 'checkbox',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'without-graphql',
+        access,
+        fields: [],
+        graphQL: false,
+        versions: false,
+      },
+    ],
+    localization: {
+      defaultLocale: englishLocale,
+      locales: [englishLocale, spanishLocale],
     },
-  ],
-  localization: {
-    defaultLocale: englishLocale,
-    locales: [englishLocale, spanishLocale],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -134,13 +140,10 @@ export default buildConfigWithDefaults({
     })
 
     await payload.updateGlobal({
+      slug: accessControlSlug,
       data: {
         title: 'hello',
       },
-      slug: accessControlSlug,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

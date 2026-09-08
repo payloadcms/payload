@@ -58,7 +58,6 @@ const getTimezoneOptionSelector = ({
 describe('Date', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
@@ -71,8 +70,6 @@ describe('Date', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -749,7 +746,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
   describe(`Date with TZ - Context: ${contextName}`, () => {
     beforeAll(async ({ browser }, testInfo) => {
       testInfo.setTimeout(TEST_TIMEOUT_LONG)
-      process.env.SEED_IN_CONFIG_ONINIT = 'false'
       ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
         dirname,
       }))
@@ -762,8 +758,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
     beforeEach(async () => {
       await reInitializeDB({
         serverURL,
-        snapshotKey: 'fieldsTest',
-        uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
       })
 
       if (client) {

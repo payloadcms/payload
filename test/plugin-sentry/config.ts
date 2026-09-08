@@ -12,17 +12,41 @@ import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    components: {
-      beforeDashboard: ['/TestErrors.js#TestErrors'],
+  suite: 'plugin-sentry',
+  config: {
+    admin: {
+      components: {
+        beforeDashboard: ['/TestErrors.js#TestErrors'],
+      },
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      user: Users.slug,
     },
-    importMap: {
-      baseDir: path.resolve(dirname),
+    collections: [Posts, Users],
+    endpoints: [
+      {
+        handler: () => {
+          throw new APIError('Test Plugin-Sentry Exception', 500)
+        },
+        method: 'get',
+        path: '/exception',
+      },
+    ],
+    plugins: [
+      sentryPlugin({
+        options: {
+          captureErrors: [400, 403, 404],
+          debug: true,
+        },
+        Sentry,
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
-    user: Users.slug,
   },
-  collections: [Posts, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -30,26 +54,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  endpoints: [
-    {
-      path: '/exception',
-      handler: () => {
-        throw new APIError('Test Plugin-Sentry Exception', 500)
-      },
-      method: 'get',
-    },
-  ],
-  plugins: [
-    sentryPlugin({
-      Sentry,
-      options: {
-        debug: true,
-        captureErrors: [400, 403, 404],
-      },
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

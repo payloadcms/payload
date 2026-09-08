@@ -1,5 +1,5 @@
 import type { AddressInfo } from 'net'
-import type { CollectionSlug, Payload, PayloadRequest, UploadInstructions } from 'payload'
+import type { CollectionSlug, PayloadRequest, UploadInstructions } from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
@@ -9,9 +9,8 @@ import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
+import { expect, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
@@ -20,7 +19,7 @@ import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkF
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
@@ -52,23 +51,14 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
 
-let restClient: NextRESTClient
-let payload: Payload
-
-describe('Collections - Uploads', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+test.suite({ config: './config.ts' })('Collections - Uploads', () => {
+  test.beforeEach(async ({ restClient }) => {
     await restClient.login({ slug: usersSlug })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('REST API', () => {
-    describe('create', () => {
-      it('creates from upload instructions', async () => {
+  test.describe('REST API', () => {
+    test.describe('create', () => {
+      test('creates from upload instructions', async ({ payload, restClient }) => {
         const file = fs.readFileSync(path.join(dirname, './image.png'))
         const instructionsResponse = await restClient.POST('/upload-instructions', {
           body: JSON.stringify({
@@ -124,7 +114,10 @@ describe('Collections - Uploads', () => {
        * The request declares one more byte than it uploads. Payload rejects the partial file so it
        * cannot be used when creating a document later.
        */
-      it('rejects staged uploads smaller than the declared size', async () => {
+      test('rejects staged uploads smaller than the declared size', async ({
+        payload,
+        restClient,
+      }) => {
         const file = fs.readFileSync(path.join(dirname, './image.png'))
         const instructions = await restClient
           .POST('/upload-instructions', {
@@ -153,7 +146,9 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
-      it('rejects restricted file metadata before creating staged instructions', async () => {
+      test('rejects restricted file metadata before creating staged instructions', async ({
+        restClient,
+      }) => {
         const response = await restClient.POST('/upload-instructions', {
           body: JSON.stringify({
             collectionSlug: mediaSlug,
@@ -166,7 +161,10 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
-      it('rejects staged file bytes that do not match the collection MIME types', async () => {
+      test('rejects staged file bytes that do not match the collection MIME types', async ({
+        payload,
+        restClient,
+      }) => {
         const executable = Buffer.alloc(64)
         executable.write('MZ')
 
@@ -197,7 +195,7 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
-      it('requires authentication before staging an upload', async () => {
+      test('requires authentication before staging an upload', async ({ restClient }) => {
         const response = await restClient.POST('/upload-instructions', {
           auth: false,
           body: JSON.stringify({
@@ -211,7 +209,9 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(403)
       })
 
-      it('requires create or update permission before staging an upload', async () => {
+      test('requires create or update permission before staging an upload', async ({
+        restClient,
+      }) => {
         const response = await restClient.POST('/upload-instructions', {
           body: JSON.stringify({
             collectionSlug: mediaWithoutWriteAccessSlug,
@@ -224,7 +224,9 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(403)
       })
 
-      it('rejects a file payload missing an upload reference with a 400', async () => {
+      test('rejects a file payload missing an upload reference with a 400', async ({
+        restClient,
+      }) => {
         const formData = new FormData()
         formData.append('_payload', JSON.stringify({ alt: 'Missing reference' }))
         formData.append('file', JSON.stringify({ filename: 'no-reference.png' }))
@@ -234,7 +236,7 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
-      it('creates from form data given a png', async () => {
+      test('creates from form data given a png', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
         const { file, handle } = await createStreamableFile(filePath)
@@ -275,7 +277,9 @@ describe('Collections - Uploads', () => {
         expect(sizes).toHaveProperty('icon')
       })
 
-      it('should URL encode filenames with spaces in both main url and size urls', async () => {
+      test('should URL encode filenames with spaces in both main url and size urls', async ({
+        payload,
+      }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         file!.name = 'my test image.png'
@@ -302,7 +306,7 @@ describe('Collections - Uploads', () => {
         await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
 
-      it('creates from form data given an svg', async () => {
+      test('creates from form data given an svg', async ({ restClient }) => {
         const filePath = path.join(dirname, './image.svg')
         const formData = new FormData()
         const { file, handle } = await createStreamableFile(filePath)
@@ -329,7 +333,9 @@ describe('Collections - Uploads', () => {
         expect(doc.height).toBeDefined()
       })
 
-      it('should upload svg in an image mimetype restricted collection', async () => {
+      test('should upload svg in an image mimetype restricted collection', async ({
+        restClient,
+      }) => {
         const filePath = path.join(dirname, './image.svg')
         const formData = new FormData()
         const { file, handle } = await createStreamableFile(filePath)
@@ -347,7 +353,7 @@ describe('Collections - Uploads', () => {
         expect(doc.mimeType).toEqual('image/svg+xml')
       })
 
-      it('should have valid image url', async () => {
+      test('should have valid image url', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.svg')
         const { file, handle } = await createStreamableFile(filePath)
@@ -368,7 +374,7 @@ describe('Collections - Uploads', () => {
         expect(doc.url).not.toContain('undefined')
       })
 
-      it('creates images that do not require all sizes', async () => {
+      test('creates images that do not require all sizes', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './small.png')
         const { file, handle } = await createStreamableFile(filePath)
@@ -396,7 +402,10 @@ describe('Collections - Uploads', () => {
         expect(doc.sizes.icon.filename).toBeDefined()
       })
 
-      it('should not set url on image sizes that cannot be generated', async () => {
+      test('should not set url on image sizes that cannot be generated', async ({
+        payload,
+        restClient,
+      }) => {
         // Create image too small for size generation
         const formData = new FormData()
         const filePath = path.join(dirname, './small.png')
@@ -430,7 +439,7 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes.tablet.url).toBeNull()
       })
 
-      it('creates images from a different format', async () => {
+      test('creates images from a different format', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.jpg')
         const { file, handle } = await createStreamableFile(filePath)
@@ -461,7 +470,7 @@ describe('Collections - Uploads', () => {
         expect(doc.sizes.differentFormatFromMainImage.mimeType).toContain('image/jpeg')
       })
 
-      it('creates media without storing a file', async () => {
+      test('creates media without storing a file', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './unstored.png')
         const { file, handle } = await createStreamableFile(filePath)
@@ -485,7 +494,7 @@ describe('Collections - Uploads', () => {
         expect(doc.filename).toBeDefined()
       })
 
-      it('should not allow creation of corrupted PDF', async () => {
+      test('should not allow creation of corrupted PDF', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './fake-pdf.pdf')
         const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
@@ -499,7 +508,9 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
-      it('should not allow html file to be uploaded to PDF only collection', async () => {
+      test('should not allow html file to be uploaded to PDF only collection', async ({
+        restClient,
+      }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './test.html')
         const { file, handle } = await createStreamableFile(filePath, 'application/pdf')
@@ -514,7 +525,7 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
-      it('should not allow invalid mimeType to be created', async () => {
+      test('should not allow invalid mimeType to be created', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.jpg')
         const { file, handle } = await createStreamableFile(filePath, 'image/png')
@@ -530,7 +541,7 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
-      it('should not allow corrupted SVG to be created', async () => {
+      test('should not allow corrupted SVG to be created', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './corrupt.svg')
         const { file, handle } = await createStreamableFile(filePath)
@@ -544,8 +555,8 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
     })
-    describe('update', () => {
-      it('should replace image and delete old files - by ID', async () => {
+    test.describe('update', () => {
+      test('should replace image and delete old files - by ID', async ({ payload, restClient }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         file.name = 'renamed.png'
@@ -577,7 +588,10 @@ describe('Collections - Uploads', () => {
         expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
       })
 
-      it('should replace image and delete old files - where query', async () => {
+      test('should replace image and delete old files - where query', async ({
+        payload,
+        restClient,
+      }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         file.name = 'renamed.png'
@@ -616,8 +630,8 @@ describe('Collections - Uploads', () => {
         expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(false)
       })
     })
-    describe('delete', () => {
-      it('should remove related files when deleting by ID', async () => {
+    test.describe('delete', () => {
+      test('should remove related files when deleting by ID', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
         const { file, handle } = await createStreamableFile(filePath)
@@ -639,7 +653,9 @@ describe('Collections - Uploads', () => {
         expect(await fileExists(path.join(dirname, doc.filename))).toBe(false)
       })
 
-      it('should remove all related files when deleting with where query', async () => {
+      test('should remove all related files when deleting with where query', async ({
+        restClient,
+      }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
         const { file, handle } = await createStreamableFile(filePath)
@@ -671,8 +687,11 @@ describe('Collections - Uploads', () => {
         expect(await fileExists(path.join(dirname, doc.filename))).toBe(false)
       })
     })
-    describe('read', () => {
-      it('should serve files with hash characters in filename', async () => {
+    test.describe('read', () => {
+      test('should serve files with hash characters in filename', async ({
+        payload,
+        restClient,
+      }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         file!.name = 'file #hash.png'
@@ -697,7 +716,10 @@ describe('Collections - Uploads', () => {
         await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
 
-      it('should return the media document with the correct file type', async () => {
+      test('should return the media document with the correct file type', async ({
+        payload,
+        restClient,
+      }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         file.name = 'renamed.png'
@@ -719,9 +741,9 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('Local API', () => {
-    describe('create', () => {
-      it('should create documents when passing filePath', async () => {
+  test.describe('Local API', () => {
+    test.describe('create', () => {
+      test('should create documents when passing filePath', async ({ payload }) => {
         const expectedPath = path.join(dirname, './svg-only')
 
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
@@ -734,7 +756,7 @@ describe('Collections - Uploads', () => {
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
       })
 
-      it('should create documents when passing file', async () => {
+      test('should create documents when passing file', async ({ payload }) => {
         const expectedPath = path.join(dirname, './with-any-image-type')
 
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
@@ -755,7 +777,9 @@ describe('Collections - Uploads', () => {
         await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
       })
 
-      it('should create documents for JPEG XL files, which sharp cannot decode', async () => {
+      test('should create documents for JPEG XL files, which sharp cannot decode', async ({
+        payload,
+      }) => {
         const expectedPath = path.join(dirname, './with-any-image-type')
 
         // `canResizeImage` already excludes `image/jxl` from any resize or
@@ -781,7 +805,7 @@ describe('Collections - Uploads', () => {
         await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
       })
 
-      it('should upload svg files', async () => {
+      test('should upload svg files', async ({ payload }) => {
         const expectedPath = path.join(dirname, './with-any-image-type')
 
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
@@ -794,7 +818,7 @@ describe('Collections - Uploads', () => {
         expect(doc.mimeType).toEqual('image/svg+xml')
       })
 
-      it('should not crash when adminThumbnail size is not generated', async () => {
+      test('should not crash when adminThumbnail size is not generated', async ({ payload }) => {
         const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
         const fileBuffer = fs.readFileSync(svgFilePath)
 
@@ -822,8 +846,8 @@ describe('Collections - Uploads', () => {
       })
     })
 
-    describe('update', () => {
-      it('should remove existing media on re-upload - by ID', async () => {
+    test.describe('update', () => {
+      test('should remove existing media on re-upload - by ID', async ({ payload }) => {
         // Create temp file
         const filePath = path.resolve(dirname, './temp.png')
         const file = await getFileByPath(filePath)
@@ -859,7 +883,7 @@ describe('Collections - Uploads', () => {
         await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.id })
       })
 
-      it('should remove existing media on re-upload - where query', async () => {
+      test('should remove existing media on re-upload - where query', async ({ payload }) => {
         // Create temp file
         const filePath = path.resolve(dirname, './temp.png')
         const file = await getFileByPath(filePath)
@@ -900,7 +924,9 @@ describe('Collections - Uploads', () => {
         await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.docs[0].id })
       })
 
-      it('should remove sizes that do not pertain to the new image - by ID', async () => {
+      test('should remove sizes that do not pertain to the new image - by ID', async ({
+        payload,
+      }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         const small = await getFileByPath(path.resolve(dirname, './small.png'))
@@ -922,7 +948,9 @@ describe('Collections - Uploads', () => {
         expect(doc.sizes.tablet.width).toBeNull()
       })
 
-      it('should remove sizes that do not pertain to the new image - where query', async () => {
+      test('should remove sizes that do not pertain to the new image - where query', async ({
+        payload,
+      }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         const small = await getFileByPath(path.resolve(dirname, './small.png'))
@@ -946,7 +974,9 @@ describe('Collections - Uploads', () => {
         expect(doc.docs[0].sizes.tablet.width).toBeNull()
       })
 
-      it('should allow removing file from upload relationship field - by ID', async () => {
+      test('should allow removing file from upload relationship field - by ID', async ({
+        payload,
+      }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         file.name = 'renamed.png'
@@ -975,7 +1005,7 @@ describe('Collections - Uploads', () => {
         expect(doc.image).toBeFalsy()
       })
 
-      it('should allow update removing a relationship - where query', async () => {
+      test('should allow update removing a relationship - where query', async ({ payload }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
         file.name = 'renamed.png'
@@ -1006,7 +1036,7 @@ describe('Collections - Uploads', () => {
         expect(doc.docs[0].image).toBeFalsy()
       })
 
-      it('should allow a localized upload relationship in a block', async () => {
+      test('should allow a localized upload relationship in a block', async ({ payload }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
 
@@ -1060,8 +1090,10 @@ describe('Collections - Uploads', () => {
       })
     })
 
-    describe('cookie filtering', () => {
-      it('should filter out payload cookies when externalFileHeaderFilter is not defined', async () => {
+    test.describe('cookie filtering', () => {
+      test('should filter out payload cookies when externalFileHeaderFilter is not defined', async ({
+        payload,
+      }) => {
         const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
           '; ',
         )
@@ -1091,7 +1123,9 @@ describe('Collections - Uploads', () => {
         fetchSpy.mockRestore()
       })
 
-      it('getExternalFile should not filter out payload cookies when externalFileHeaderFilter is not defined and the URL is not external', async () => {
+      test('getExternalFile should not filter out payload cookies when externalFileHeaderFilter is not defined and the URL is not external', async ({
+        payload,
+      }) => {
         const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
           '; ',
         )
@@ -1135,7 +1169,9 @@ describe('Collections - Uploads', () => {
         await new Promise((res) => server.close(res))
       })
 
-      it('should keep all cookies when externalFileHeaderFilter is defined', async () => {
+      test('should keep all cookies when externalFileHeaderFilter is defined', async ({
+        payload,
+      }) => {
         const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
           '; ',
         )
@@ -1166,30 +1202,65 @@ describe('Collections - Uploads', () => {
       })
     })
 
-    describe('filters', () => {
-      it.each`
-        url                                  | collection            | errorContains
-        ${'http://127.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
-        ${'http://[::1]/file.png'}           | ${mediaSlug}          | ${'unsafe'}
-        ${'http://10.0.0.1/file.png'}        | ${mediaSlug}          | ${'unsafe'}
-        ${'http://192.168.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
-        ${'http://172.16.0.1/file.png'}      | ${mediaSlug}          | ${'unsafe'}
-        ${'http://169.254.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
-        ${'http://224.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
-        ${'http://0.0.0.0/file.png'}         | ${mediaSlug}          | ${'unsafe'}
-        ${'http://255.255.255.255/file.png'} | ${mediaSlug}          | ${'unsafe'}
-        ${'http://127.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-        ${'http://[::1]/file.png'}           | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-        ${'http://10.0.0.1/file.png'}        | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-        ${'http://192.168.1.1/file.png'}     | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-        ${'http://172.16.0.1/file.png'}      | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-        ${'http://169.254.1.1/file.png'}     | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-        ${'http://224.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-        ${'http://0.0.0.0/file.png'}         | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-        ${'http://255.255.255.255/file.png'} | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
-      `(
+    test.describe('filters', () => {
+      test.for([
+        { url: 'http://127.0.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { url: 'http://[::1]/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { url: 'http://10.0.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { url: 'http://192.168.1.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { url: 'http://172.16.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { url: 'http://169.254.1.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { url: 'http://224.0.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { url: 'http://0.0.0.0/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { url: 'http://255.255.255.255/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        {
+          url: 'http://127.0.0.1/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+        {
+          url: 'http://[::1]/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+        {
+          url: 'http://10.0.0.1/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+        {
+          url: 'http://192.168.1.1/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+        {
+          url: 'http://172.16.0.1/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+        {
+          url: 'http://169.254.1.1/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+        {
+          url: 'http://224.0.0.1/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+        {
+          url: 'http://0.0.0.0/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+        {
+          url: 'http://255.255.255.255/file.png',
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
+        },
+      ])(
         'should block or filter uploading from $collection with URL: $url',
-        async ({ url, collection, errorContains }) => {
+        async ({ url, collection, errorContains }, { payload }) => {
           const globalCachedFn = _internal_safeFetchGlobal.lookup
 
           let hostname = new URL(url).hostname
@@ -1228,6 +1299,16 @@ describe('Collections - Uploads', () => {
           _internal_safeFetchGlobal.lookup = globalCachedFn
 
           // Now ensure this throws if we pass the IP address directly, without the mock
+          const directURLFailure =
+            collection === allowListMediaSlug
+              ? {
+                  message: expect.not.stringContaining('unsafe'),
+                }
+              : {
+                  message: expect.stringContaining(errorContains),
+                  name: 'FileRetrievalError',
+                }
+
           await expect(
             payload.create({
               collection,
@@ -1236,15 +1317,10 @@ describe('Collections - Uploads', () => {
                 url,
               },
             }),
-          ).rejects.toThrow(
-            expect.objectContaining({
-              name: 'FileRetrievalError',
-              message: expect.stringContaining(errorContains),
-            }),
-          )
+          ).rejects.toThrow(expect.objectContaining(directURLFailure))
         },
       )
-      it('should fetch when skipSafeFetch is set with a boolean', async () => {
+      test('should fetch when skipSafeFetch is set with a boolean', async ({ payload }) => {
         await expect(
           payload.create({
             collection: skipSafeFetchMediaSlug as CollectionSlug,
@@ -1262,7 +1338,7 @@ describe('Collections - Uploads', () => {
         )
       })
 
-      it('should fetch when skipSafeFetch is set with an AllowList', async () => {
+      test('should fetch when skipSafeFetch is set with an AllowList', async ({ payload }) => {
         await expect(
           payload.create({
             collection: skipAllowListSafeFetchMediaSlug as CollectionSlug,
@@ -1281,14 +1357,14 @@ describe('Collections - Uploads', () => {
       })
     })
 
-    describe('file restrictions', () => {
+    test.describe('file restrictions', () => {
       const file: File = {
         name: `test-${randomUUID()}.html`,
         data: Buffer.from('<html><script>alert("test")</script></html>'),
         mimetype: 'text/html',
         size: 100,
       }
-      it('should not allow files with restricted file types', async () => {
+      test('should not allow files with restricted file types', async ({ payload }) => {
         await expect(async () =>
           payload.create({
             collection: restrictFileTypesSlug as CollectionSlug,
@@ -1303,7 +1379,9 @@ describe('Collections - Uploads', () => {
         )
       })
 
-      it('should allow files with restricted file types when allowRestrictedFileTypes is true', async () => {
+      test('should allow files with restricted file types when allowRestrictedFileTypes is true', async ({
+        payload,
+      }) => {
         await expect(
           payload.create({
             collection: noRestrictFileTypesSlug as CollectionSlug,
@@ -1313,7 +1391,9 @@ describe('Collections - Uploads', () => {
         ).resolves.not.toThrow()
       })
 
-      it('should allow files with restricted file types when mimeTypes are set', async () => {
+      test('should allow files with restricted file types when mimeTypes are set', async ({
+        payload,
+      }) => {
         await expect(
           payload.create({
             collection: noRestrictFileMimeTypesSlug as CollectionSlug,
@@ -1323,7 +1403,7 @@ describe('Collections - Uploads', () => {
         ).resolves.not.toThrow()
       })
 
-      describe('useTempFiles MIME type bypass', () => {
+      test.describe('useTempFiles MIME type bypass', () => {
         const createdTmpFiles: string[] = []
 
         const mockReq = {
@@ -1333,7 +1413,7 @@ describe('Collections - Uploads', () => {
           },
         } as unknown as PayloadRequest
 
-        afterEach(async () => {
+        test.afterEach(async () => {
           for (const tmpFile of createdTmpFiles) {
             try {
               await fs.promises.unlink(tmpFile)
@@ -1344,7 +1424,7 @@ describe('Collections - Uploads', () => {
           createdTmpFiles.length = 0
         })
 
-        it('should not bypass mimeTypes restriction when useTempFiles is enabled and file is HTML', async () => {
+        test('should not bypass mimeTypes restriction when useTempFiles is enabled and file is HTML', async () => {
           const htmlContent = Buffer.from('<html><script>alert("xss")</script></html>')
           const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.html`)
           createdTmpFiles.push(tmpFile)
@@ -1368,7 +1448,7 @@ describe('Collections - Uploads', () => {
           ).rejects.toMatchObject({ name: 'ValidationError' })
         })
 
-        it('should not bypass SVG content validation when useTempFiles is enabled', async () => {
+        test('should not bypass SVG content validation when useTempFiles is enabled', async () => {
           const svgContent = Buffer.from(
             '<svg xmlns="http://www.w3.org/2000/svg"><script>alert("xss")</script></svg>',
           )
@@ -1394,7 +1474,7 @@ describe('Collections - Uploads', () => {
           ).rejects.toMatchObject({ name: 'ValidationError' })
         })
 
-        it('should allow a valid image file when useTempFiles is enabled', async () => {
+        test('should allow a valid image file when useTempFiles is enabled', async () => {
           const pngData = await fs.promises.readFile(path.resolve(dirname, './image.png'))
           const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.png`)
           createdTmpFiles.push(tmpFile)
@@ -1418,7 +1498,7 @@ describe('Collections - Uploads', () => {
           ).resolves.not.toThrow()
         })
 
-        it('should throw ValidationError when tempFilePath is missing and file.data is empty', async () => {
+        test('should throw ValidationError when tempFilePath is missing and file.data is empty', async () => {
           // No tempFilePath — falls through to extension-based check, which should still reject
           await expect(
             checkFileRestrictions({
@@ -1437,7 +1517,7 @@ describe('Collections - Uploads', () => {
           ).rejects.toMatchObject({ name: 'ValidationError' })
         })
 
-        it('should reject an invalid PDF when useTempFiles is enabled', async () => {
+        test('should reject an invalid PDF when useTempFiles is enabled', async () => {
           const invalidPdfContent = Buffer.from('not a pdf')
           const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.pdf`)
           createdTmpFiles.push(tmpFile)
@@ -1464,17 +1544,17 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('focal point', () => {
+  test.describe('focal point', () => {
     let file
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       // Create image
       const filePath = path.resolve(dirname, './image.png')
       file = await getFileByPath(filePath)
       file.name = 'focal.png'
     })
 
-    it('should be able to set focal point through local API', async () => {
+    test('should be able to set focal point through local API', async ({ payload }) => {
       const doc = await payload.create({
         collection: focalOnlySlug,
         data: {
@@ -1512,7 +1592,7 @@ describe('Collections - Uploads', () => {
       await payload.delete({ collection: focalOnlySlug, id: doc.id })
     })
 
-    it('should default focal point to 50, 50', async () => {
+    test('should default focal point to 50, 50', async ({ payload }) => {
       const doc = await payload.create({
         collection: focalOnlySlug,
         data: {
@@ -1536,7 +1616,7 @@ describe('Collections - Uploads', () => {
       await payload.delete({ collection: focalOnlySlug, id: doc.id })
     })
 
-    it('should set focal point even if no sizes defined', async () => {
+    test('should set focal point even if no sizes defined', async ({ payload }) => {
       const doc = await payload.create({
         collection: focalNoSizesSlug, // config without sizes
         data: {
@@ -1552,8 +1632,10 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('Image Manipulation', () => {
-    it('should enlarge images if resize options `withoutEnlargement` is set to false', async () => {
+  test.describe('Image Manipulation', () => {
+    test('should enlarge images if resize options `withoutEnlargement` is set to false', async ({
+      payload,
+    }) => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = await payload.create({
@@ -1598,7 +1680,9 @@ describe('Collections - Uploads', () => {
     })
 
     // This test makes sure that the image resizing is not prevented if only one dimension is larger (due to payload preventing enlargement by default)
-    it('should resize images if one desired dimension is smaller and the other is larger', async () => {
+    test('should resize images if one desired dimension is smaller and the other is larger', async ({
+      payload,
+    }) => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = (await payload.create({
@@ -1625,7 +1709,9 @@ describe('Collections - Uploads', () => {
       })
     })
 
-    it('should not reduce images if resize options `withoutReduction` is set to true', async () => {
+    test('should not reduce images if resize options `withoutReduction` is set to true', async ({
+      payload,
+    }) => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = await payload.create({
@@ -1666,7 +1752,9 @@ describe('Collections - Uploads', () => {
       await payload.delete({ collection: reduceSlug, id: result.id })
     })
 
-    it('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async () => {
+    test('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async ({
+      payload,
+    }) => {
       const small = await getFileByPath(path.resolve(dirname, './small.png'))
 
       const result = await payload.create({
@@ -1695,8 +1783,10 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('Required Files', () => {
-    it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
+  test.describe('Required Files', () => {
+    test('should allow file to be optional if filesRequiredOnCreate is false', async ({
+      payload,
+    }) => {
       const successfulCreate = await payload.create({
         collection: 'optional-file',
         data: {},
@@ -1705,7 +1795,9 @@ describe('Collections - Uploads', () => {
       expect(successfulCreate.id).toBeDefined()
     })
 
-    it('should throw an error if no file and filesRequiredOnCreate is true', async () => {
+    test('should throw an error if no file and filesRequiredOnCreate is true', async ({
+      payload,
+    }) => {
       await expect(async () =>
         payload.create({
           collection: 'required-file',
@@ -1718,7 +1810,9 @@ describe('Collections - Uploads', () => {
         }),
       )
     })
-    it('should throw an error if no file and filesRequiredOnCreate is not defined', async () => {
+    test('should throw an error if no file and filesRequiredOnCreate is not defined', async ({
+      payload,
+    }) => {
       await expect(async () =>
         payload.create({
           collection: mediaSlug,
@@ -1733,8 +1827,8 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('Duplicate', () => {
-    it('should duplicate upload collection doc', async () => {
+  test.describe('Duplicate', () => {
+    test('should duplicate upload collection doc', async ({ payload }) => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
       file.name = 'file-to-duplicate.png'
@@ -1760,7 +1854,9 @@ describe('Collections - Uploads', () => {
       await payload.delete({ collection: 'media', id: duplicatedDoc.id })
     })
 
-    it('should not leak req.file between sequential duplicate() calls on a shared req', async () => {
+    test('should not leak req.file between sequential duplicate() calls on a shared req', async ({
+      payload,
+    }) => {
       const filePath1 = path.resolve(dirname, './image.png')
       const file1 = await getFileByPath(filePath1)
       file1.name = 'alpha-leak-test.png'
@@ -1809,8 +1905,10 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('serverURL handling', () => {
-    it('should store relative URLs in database even when serverURL is set', async () => {
+  test.describe('serverURL handling', () => {
+    test('should store relative URLs in database even when serverURL is set', async ({
+      payload,
+    }) => {
       // Temporarily set serverURL for this test
       const originalServerURL = payload.config.serverURL
       payload.config.serverURL = 'http://local-images:3000'
@@ -1867,7 +1965,9 @@ describe('Collections - Uploads', () => {
       }
     })
 
-    it('should strip serverURL when duplicating an upload with serverURL set', async () => {
+    test('should strip serverURL when duplicating an upload with serverURL set', async ({
+      payload,
+    }) => {
       // Temporarily set serverURL for this test
       const originalServerURL = payload.config.serverURL
       payload.config.serverURL = 'http://local-images:3000'
@@ -1929,7 +2029,9 @@ describe('Collections - Uploads', () => {
       }
     })
 
-    it('should strip serverURL when updating an upload with serverURL set', async () => {
+    test('should strip serverURL when updating an upload with serverURL set', async ({
+      payload,
+    }) => {
       // Temporarily set serverURL for this test
       const originalServerURL = payload.config.serverURL
       payload.config.serverURL = 'http://local-images:3000'
@@ -1991,12 +2093,12 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('HTTP Range Requests', () => {
+  test.describe('HTTP Range Requests', () => {
     let uploadedDoc: Media
     let uploadedFilename: string
     let fileSize: number
 
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       // Upload a test file for range request testing
       const filePath = path.join(dirname, './audio.mp3')
       const file = await getFileByPath(filePath)
@@ -2012,7 +2114,7 @@ describe('Collections - Uploads', () => {
       fileSize = stats.size
     })
 
-    it('should return Accept-Ranges header on full file request', async () => {
+    test('should return Accept-Ranges header on full file request', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`)
 
       expect(response.status).toBe(200)
@@ -2020,7 +2122,7 @@ describe('Collections - Uploads', () => {
       expect(response.headers.get('Content-Length')).toBe(String(fileSize))
     })
 
-    it('should handle range request with single byte range', async () => {
+    test('should handle range request with single byte range', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
         headers: { Range: 'bytes=0-1023' },
       })
@@ -2034,7 +2136,7 @@ describe('Collections - Uploads', () => {
       expect(arrayBuffer.byteLength).toBe(1024)
     })
 
-    it('should handle range request with open-ended range', async () => {
+    test('should handle range request with open-ended range', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
         headers: { Range: 'bytes=1024-' },
       })
@@ -2047,7 +2149,7 @@ describe('Collections - Uploads', () => {
       expect(arrayBuffer.byteLength).toBe(fileSize - 1024)
     })
 
-    it('should handle range request for suffix bytes', async () => {
+    test('should handle range request for suffix bytes', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
         headers: { Range: 'bytes=-512' },
       })
@@ -2062,7 +2164,7 @@ describe('Collections - Uploads', () => {
       expect(arrayBuffer.byteLength).toBe(512)
     })
 
-    it('should return 416 for invalid range (start > file size)', async () => {
+    test('should return 416 for invalid range (start > file size)', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
         headers: { Range: `bytes=${fileSize + 1000}-` },
       })
@@ -2071,7 +2173,7 @@ describe('Collections - Uploads', () => {
       expect(response.headers.get('Content-Range')).toBe(`bytes */${fileSize}`)
     })
 
-    it('should handle multi-range requests by returning first range', async () => {
+    test('should handle multi-range requests by returning first range', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
         headers: { Range: 'bytes=0-1023,2048-3071' },
       })
@@ -2084,7 +2186,7 @@ describe('Collections - Uploads', () => {
       expect(arrayBuffer.byteLength).toBe(1024)
     })
 
-    it('should handle range at end of file', async () => {
+    test('should handle range at end of file', async ({ restClient }) => {
       const lastByte = fileSize - 1
       const response = await restClient.GET(`/${mediaSlug}/file/${uploadedFilename}`, {
         headers: { Range: `bytes=${lastByte}-${lastByte}` },
@@ -2101,14 +2203,14 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('SVG Security', () => {
+  test.describe('SVG Security', () => {
     let xssPayloadDoc: Media
     const docIDs: (number | string)[] = []
 
-    afterAll(async () => {
+    test.afterAll(async ({ payloadInstance }) => {
       for (const id of docIDs) {
         try {
-          await payload.delete({
+          await payloadInstance.delete({
             collection: noRestrictFileTypesSlug as CollectionSlug,
             id,
           })
@@ -2118,7 +2220,10 @@ describe('Collections - Uploads', () => {
       }
     })
 
-    it('should serve SVG files with Content-Security-Policy header to prevent XSS', async () => {
+    test('should serve SVG files with Content-Security-Policy header to prevent XSS', async ({
+      payload,
+      restClient,
+    }) => {
       // Upload an SVG with embedded JavaScript
       const filePath = path.resolve(dirname, './xss-payload.svg')
       const file = await getFileByPath(filePath)
@@ -2144,7 +2249,10 @@ describe('Collections - Uploads', () => {
       expect(cspHeader).toContain("script-src 'none'")
     })
 
-    it('should serve all SVG files with CSP headers regardless of content', async () => {
+    test('should serve all SVG files with CSP headers regardless of content', async ({
+      payload,
+      restClient,
+    }) => {
       // Upload a safe SVG file
       const filePath = path.resolve(dirname, './image.svg')
       const file = await getFileByPath(filePath)
@@ -2169,7 +2277,7 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('External File Upload - Redirect Blocking', () => {
+  test.describe('External File Upload - Redirect Blocking', () => {
     const validPNG = Buffer.from(
       '89504e470d0a1a0a0000000d494844520000000100000001' +
         '0806000000ifad8300000010494441541865000000018001' +
@@ -2185,7 +2293,7 @@ describe('Collections - Uploads', () => {
       })
     }
 
-    it('should block malicious redirect', async () => {
+    test('should block malicious redirect', async ({ payload }) => {
       const internalServer = createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'text/plain' })
         res.end('SECRET_CREDENTIALS')
@@ -2218,7 +2326,7 @@ describe('Collections - Uploads', () => {
       }
     })
 
-    it('should allow legitimate redirects within allowlist', async () => {
+    test('should allow legitimate redirects within allowlist', async ({ payload }) => {
       const edgeServer = createServer((req, res) => {
         res.writeHead(200, {
           'Content-Type': 'image/png',
@@ -2253,7 +2361,7 @@ describe('Collections - Uploads', () => {
       }
     })
 
-    it('should enforce allowList on redirect targets', async () => {
+    test('should enforce allowList on redirect targets', async ({ payload }) => {
       const redirectServer = createServer((req, res) => {
         // Redirect to a host that is NOT on the allowList
         res.writeHead(302, { Location: 'http://192.168.99.99/file.png' })
@@ -2277,7 +2385,7 @@ describe('Collections - Uploads', () => {
       }
     })
 
-    it('should not allow infinite redirect loops', async () => {
+    test('should not allow infinite redirect loops', async ({ payload }) => {
       // eslint-disable-next-line prefer-const
       let redirectServerPort: number
 
@@ -2304,29 +2412,29 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('paste-url endpoint', () => {
-    it('should return 400 when pasteURL is not configured', async () => {
+  test.describe('paste-url endpoint', () => {
+    test('should return 400 when pasteURL is not configured', async ({ restClient }) => {
       const response = await restClient.GET(`/${mediaSlug}/paste-url`, {
         query: { src: 'http://example.com/file.png' },
       })
       expect(response.status).toBe(400)
     })
 
-    it('should return 400 when pasteURL is disabled', async () => {
+    test('should return 400 when pasteURL is disabled', async ({ restClient }) => {
       const response = await restClient.GET(`/${focalNoSizesSlug}/paste-url`, {
         query: { src: 'http://example.com/file.png' },
       })
       expect(response.status).toBe(400)
     })
 
-    it('should reject requests to non-public addresses', async () => {
+    test('should reject requests to non-public addresses', async ({ restClient }) => {
       const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
         query: { src: 'http://127.0.0.1/file.png' },
       })
       expect(response.status).toBe(500)
     })
 
-    it('should validate resolved addresses', async () => {
+    test('should validate resolved addresses', async ({ restClient }) => {
       const globalCachedFn = _internal_safeFetchGlobal.lookup
 
       // @ts-expect-error mock lookup
@@ -2344,14 +2452,14 @@ describe('Collections - Uploads', () => {
       }
     })
 
-    it('should reject URLs not matching the allowList', async () => {
+    test('should reject URLs not matching the allowList', async ({ restClient }) => {
       const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
         query: { src: 'http://other.example.com/file.png' },
       })
       expect(response.status).toBe(400)
     })
 
-    it('should require authentication', async () => {
+    test('should require authentication', async ({ restClient }) => {
       const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
         query: { src: 'http://127.0.0.1/file.png' },
         auth: false,
@@ -2359,14 +2467,14 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should require a src query parameter', async () => {
+    test('should require a src query parameter', async ({ restClient }) => {
       const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`)
       expect(response.status).toBeGreaterThanOrEqual(400)
     })
   })
 
-  describe('tempFileDir', () => {
-    it.each([
+  test.describe('tempFileDir', () => {
+    test.each([
       { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
       { dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp'), description: 'relative path' },
     ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
@@ -2378,10 +2486,10 @@ describe('Collections - Uploads', () => {
     })
   })
 
-  describe('prefix query parameter', () => {
+  test.describe('prefix query parameter', () => {
     const docIDs: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of docIDs) {
         try {
           await payload.delete({ collection: prefixMediaSlug, id })
@@ -2392,7 +2500,10 @@ describe('Collections - Uploads', () => {
       docIDs.length = 0
     })
 
-    it('should return 200 when the prefix query param matches the stored document prefix', async () => {
+    test('should return 200 when the prefix query param matches the stored document prefix', async ({
+      payload,
+      restClient,
+    }) => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
 
@@ -2411,7 +2522,10 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should return 403 when the prefix query param does not match the stored document prefix', async () => {
+    test('should return 403 when the prefix query param does not match the stored document prefix', async ({
+      payload,
+      restClient,
+    }) => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
 
@@ -2430,7 +2544,10 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should return 200 without prefix param for documents that have no prefix (backward compatibility)', async () => {
+    test('should return 200 without prefix param for documents that have no prefix (backward compatibility)', async ({
+      payload,
+      restClient,
+    }) => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
 
@@ -2447,7 +2564,10 @@ describe('Collections - Uploads', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should return 403 when prefix param is provided but no document has a matching prefix', async () => {
+    test('should return 403 when prefix param is provided but no document has a matching prefix', async ({
+      payload,
+      restClient,
+    }) => {
       const filePath = path.resolve(dirname, './image.png')
       const file = await getFileByPath(filePath)
 
@@ -2475,10 +2595,10 @@ describe('Collections - Uploads', () => {
    * with a `payload-client-upload-` prefix - this is a regression test for those files leaking
    * on disk when something after the fetch (e.g. a `beforeChange` hook) makes the operation fail.
    */
-  describe('client upload temp file cleanup', () => {
+  test.describe('client upload temp file cleanup', () => {
     const createdIds: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: clientUploadTempFileSlug })
       }
@@ -2507,7 +2627,7 @@ describe('Collections - Uploads', () => {
       return formData
     }
 
-    it('removes the temp file after a successful create', async () => {
+    test('removes the temp file after a successful create', async ({ restClient }) => {
       const before = await listClientUploadTempFiles()
 
       const response = await restClient.POST(`/${clientUploadTempFileSlug}`, {
@@ -2520,7 +2640,9 @@ describe('Collections - Uploads', () => {
       expect(await listClientUploadTempFiles()).toEqual(before)
     })
 
-    it('removes the temp file even when a beforeChange hook throws after the file was fetched', async () => {
+    test('removes the temp file even when a beforeChange hook throws after the file was fetched', async ({
+      restClient,
+    }) => {
       const before = await listClientUploadTempFiles()
 
       const response = await restClient.POST(`/${clientUploadTempFileSlug}`, {
@@ -2539,11 +2661,11 @@ describe('Collections - Uploads', () => {
    * mime types, so an audio file uploaded there skips all sharp processing and exercises that
    * copy against real disk I/O.
    */
-  describe('temp file copy to local storage', () => {
+  test.describe('temp file copy to local storage', () => {
     const createdIds: (number | string)[] = []
     const tempFilesToClean: string[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
         await payload.delete({ id, collection: mediaSlug })
       }
@@ -2555,7 +2677,9 @@ describe('Collections - Uploads', () => {
       tempFilesToClean.length = 0
     })
 
-    it('copies the temp file to its destination instead of reading it into memory', async () => {
+    test('copies the temp file to its destination instead of reading it into memory', async ({
+      payload,
+    }) => {
       const fileContents = Buffer.from(`fake-audio-bytes-${randomUUID()}`)
       const tempFilePath = path.join(os.tmpdir(), `payload-test-temp-file-${randomUUID()}.mp3`)
       await fs.promises.writeFile(tempFilePath, fileContents)

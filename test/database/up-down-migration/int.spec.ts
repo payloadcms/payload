@@ -2,12 +2,11 @@ import { existsSync, rmSync } from 'fs'
 import path from 'path'
 import { buildConfig, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
-import { describe, it } from 'vitest'
+
+import { test } from '../../__helpers/int/vitest.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-const describeToUse = process.env.PAYLOAD_DATABASE === 'postgres' ? describe : describe.skip
 
 const clearMigrations = () => {
   if (existsSync(path.resolve(dirname, 'migrations'))) {
@@ -15,9 +14,9 @@ const clearMigrations = () => {
   }
 }
 
-describeToUse('SQL migrations', () => {
+test.suite({ db: (adapter) => adapter === 'postgres' })('SQL migrations', () => {
   // If something fails - an error will be thrown.
-  it('should up and down migration successfully', async () => {
+  test('should up and down migration successfully', async () => {
     clearMigrations()
 
     const { databaseAdapter } = await import(path.resolve(dirname, '../../databaseAdapter.js'))

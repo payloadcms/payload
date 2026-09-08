@@ -16,178 +16,184 @@ import { devUser } from '../credentials.js'
 // - tabs -> named-tab -> fields
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'nested-fields',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      {
+        slug: 'nested-fields',
+        fields: [
+          {
+            name: 'array',
+            type: 'array',
+            fields: [
+              {
+                type: 'row',
+                fields: [
+                  {
+                    type: 'collapsible',
+                    fields: [
+                      {
+                        name: 'group',
+                        type: 'group',
+                        fields: [
+                          {
+                            type: 'tabs',
+                            tabs: [
+                              {
+                                name: 'namedTab',
+                                fields: [
+                                  {
+                                    type: 'tabs',
+                                    tabs: [
+                                      {
+                                        fields: [
+                                          {
+                                            name: 'blocks',
+                                            type: 'blocks',
+                                            blocks: [
+                                              {
+                                                slug: 'blockWithFields',
+                                                fields: [
+                                                  {
+                                                    name: 'text',
+                                                    type: 'text',
+                                                  },
+                                                  {
+                                                    name: 'blockArray',
+                                                    type: 'array',
+                                                    fields: [
+                                                      {
+                                                        name: 'arrayText',
+                                                        type: 'text',
+                                                      },
+                                                    ],
+                                                  },
+                                                ],
+                                              },
+                                            ],
+                                          },
+                                        ],
+                                        label: 'Unnamed Tab',
+                                      },
+                                    ],
+                                  },
+                                ],
+                                label: 'Named Tab',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                    label: 'Collapsible',
+                  },
+                ],
+              },
+            ],
+          },
+
+          {
+            type: 'tabs',
+            label: 'Tabs',
+            tabs: [
+              {
+                name: 'tab1',
+                fields: [
+                  {
+                    name: 'layout',
+                    type: 'blocks',
+                    blocks: [
+                      {
+                        slug: 'block-1',
+                        fields: [
+                          {
+                            name: 'items',
+                            type: 'array',
+                            fields: [
+                              {
+                                name: 'title',
+                                type: 'text',
+                                required: true,
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      {
+                        slug: 'block-2',
+                        fields: [
+                          {
+                            name: 'items',
+                            type: 'array',
+                            fields: [
+                              {
+                                name: 'title2',
+                                type: 'text',
+                                required: true,
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+                label: 'Tab 1',
+              },
+            ],
+          },
+          {
+            name: 'blocksWithSimilarConfigs',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'block-1',
+                fields: [
+                  {
+                    name: 'items',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'title',
+                        type: 'text',
+                        required: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                slug: 'block-2',
+                fields: [
+                  {
+                    name: 'items',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'title2',
+                        type: 'text',
+                        required: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    {
-      slug: 'nested-fields',
-      fields: [
-        {
-          name: 'array',
-          type: 'array',
-          fields: [
-            {
-              type: 'row',
-              fields: [
-                {
-                  label: 'Collapsible',
-                  type: 'collapsible',
-                  fields: [
-                    {
-                      type: 'group',
-                      name: 'group',
-                      fields: [
-                        {
-                          type: 'tabs',
-                          tabs: [
-                            {
-                              name: 'namedTab',
-                              label: 'Named Tab',
-                              fields: [
-                                {
-                                  type: 'tabs',
-                                  tabs: [
-                                    {
-                                      label: 'Unnamed Tab',
-                                      fields: [
-                                        {
-                                          name: 'blocks',
-                                          type: 'blocks',
-                                          blocks: [
-                                            {
-                                              slug: 'blockWithFields',
-                                              fields: [
-                                                {
-                                                  type: 'text',
-                                                  name: 'text',
-                                                },
-                                                {
-                                                  type: 'array',
-                                                  name: 'blockArray',
-                                                  fields: [
-                                                    {
-                                                      type: 'text',
-                                                      name: 'arrayText',
-                                                    },
-                                                  ],
-                                                },
-                                              ],
-                                            },
-                                          ],
-                                        },
-                                      ],
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-
-        {
-          type: 'tabs',
-          label: 'Tabs',
-          tabs: [
-            {
-              label: 'Tab 1',
-              name: 'tab1',
-              fields: [
-                {
-                  type: 'blocks',
-                  name: 'layout',
-                  blocks: [
-                    {
-                      slug: 'block-1',
-                      fields: [
-                        {
-                          type: 'array',
-                          name: 'items',
-                          fields: [
-                            {
-                              type: 'text',
-                              name: 'title',
-                              required: true,
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                    {
-                      slug: 'block-2',
-                      fields: [
-                        {
-                          type: 'array',
-                          name: 'items',
-                          fields: [
-                            {
-                              type: 'text',
-                              name: 'title2',
-                              required: true,
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          type: 'blocks',
-          name: 'blocksWithSimilarConfigs',
-          blocks: [
-            {
-              slug: 'block-1',
-              fields: [
-                {
-                  type: 'array',
-                  name: 'items',
-                  fields: [
-                    {
-                      type: 'text',
-                      name: 'title',
-                      required: true,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              slug: 'block-2',
-              fields: [
-                {
-                  type: 'array',
-                  name: 'items',
-                  fields: [
-                    {
-                      type: 'text',
-                      name: 'title2',
-                      required: true,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -195,8 +201,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

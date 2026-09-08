@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import type { JsonSchemaType } from '../../types.js'
+import type { EntityInputSchema as JsonSchemaType } from './types.js'
 
 import { sanitizeEntitySchema } from './sanitizeEntitySchema.js'
 
 describe('sanitizeEntitySchema', () => {
   it('renames the Lexical node-union definition to a short name and keeps it a strict oneOf', () => {
-    // Shaped like the schema the MCP server prepares for a collection with a Lexical richText field
+    // Shaped like the agent-friendly schema for a collection with a Lexical richText field
     // (Payload's `input` variant): a `$defs` node union (a `oneOf` of node shapes). The input variant
     // already types the relationship node's `value` as a bare ID - there is no populated-doc `$ref` to
     // reduce here (the variant did that upstream), so sanitize leaves the value untouched.

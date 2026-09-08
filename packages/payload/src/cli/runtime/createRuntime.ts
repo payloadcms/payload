@@ -49,15 +49,7 @@ export const createCLIRuntime = (): CLIRuntime => {
       const shouldRedirectLogger = process.env.PAYLOAD_CLI_JSON !== undefined
 
       if (shouldRedirectLogger) {
-        config.logger = {
-          destination: process.stderr,
-          options:
-            configuredLogger !== 'sync' &&
-            typeof configuredLogger === 'object' &&
-            'options' in configuredLogger
-              ? configuredLogger.options
-              : {},
-        }
+        config.logger = getJSONLogger(configuredLogger)
       }
 
       try {
@@ -82,4 +74,24 @@ export const createCLIRuntime = (): CLIRuntime => {
   }
 
   return runtime
+}
+
+/** Redirects configurable stdout loggers while preserving opaque logger instances. */
+const getJSONLogger = (configuredLogger: SanitizedConfig['logger']): SanitizedConfig['logger'] => {
+  if (!configuredLogger || configuredLogger === 'sync') {
+    return { destination: process.stderr, options: {} }
+  }
+
+  if (!('options' in configuredLogger)) {
+    return configuredLogger
+  }
+
+  if (
+    configuredLogger.options.transport ||
+    (configuredLogger.destination && configuredLogger.destination !== process.stdout)
+  ) {
+    return configuredLogger
+  }
+
+  return { ...configuredLogger, destination: process.stderr }
 }
