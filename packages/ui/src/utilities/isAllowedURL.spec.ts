@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { isValidPreviewURL } from './isValidPreviewURL.js'
+import { isAllowedURL } from './isAllowedURL.js'
 
-describe('isValidPreviewURL', () => {
+describe('isAllowedURL', () => {
   beforeEach(() => {
     vi.stubGlobal('window', {
       location: { origin: 'https://admin.example.com' },
@@ -19,7 +19,7 @@ describe('isValidPreviewURL', () => {
   ] as const)('should validate parsed URL %s without the client environment', (input, expected) => {
     vi.stubGlobal('window', undefined)
 
-    expect(isValidPreviewURL(new URL(input))).toBe(expected)
+    expect(isAllowedURL(new URL(input))).toBe(expected)
   })
 
   it.each([
@@ -32,7 +32,7 @@ describe('isValidPreviewURL', () => {
     '#preview',
     '//preview.example.com/page',
   ])('should accept HTTP(S) or relative URL %s', (input) => {
-    expect(isValidPreviewURL(input)).toBe(true)
+    expect(isAllowedURL(input)).toBe(true)
   })
 
   it.each([
@@ -43,6 +43,6 @@ describe('isValidPreviewURL', () => {
     'https://[invalid',
     'http://',
   ])('should reject absent, unsupported, or invalid URL %s', (input) => {
-    expect(isValidPreviewURL(input)).toBe(false)
+    expect(isAllowedURL(input)).toBe(false)
   })
 })

@@ -1,4 +1,4 @@
-import { isValidPreviewURL } from './isValidPreviewURL.js'
+import { isAllowedURL } from './isAllowedURL.js'
 
 /**
  * Ensures the provided URL is absolute. If not, it converts it to an absolute URL based
@@ -10,7 +10,7 @@ export const formatAbsoluteURL = (incomingURL: string): string | undefined => {
   try {
     const url = new URL(incomingURL, window.location.origin)
 
-    if (!isValidPreviewURL(url)) {
+    if (!isAllowedURL(url)) {
       return undefined
     }
 
