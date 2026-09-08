@@ -59,6 +59,7 @@ export const EverySecondMax2Task: TaskConfig<'EverySecondMax2'> = {
         title: input.message,
       },
       req,
+      overrideAccess: true,
     })
     return {
       output: {},

@@ -19,6 +19,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     if (loginResult.token) {
@@ -97,6 +98,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
         data: {
           richText: buildDefaultEditorState({ text: 'relation a' }),
         },
+        overrideAccess: true,
       })
 
       const relationB = await payload.create({
@@ -105,6 +107,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
           relationship: relationA.id,
           richText: buildDefaultEditorState({ text: 'relation b' }),
         },
+        overrideAccess: true,
       })
 
       expect(relationA.id).toBeDefined()
@@ -128,12 +131,14 @@ test.suite({ config: './config.ts' })('dataloader', () => {
             ],
           }),
         },
+        overrideAccess: true,
       })
 
       const relationANoDepth = await payload.findByID({
         id: relationA.id,
         collection: 'relation-a',
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(relationANoDepth.relationship).toStrictEqual(relationB.id)
@@ -142,6 +147,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
         id: relationA.id,
         collection: 'relation-a',
         depth: 4,
+        overrideAccess: true,
       })
 
       const innerMostRelationship =
@@ -162,6 +168,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
         collection: 'items' as CollectionSlug,
         req,
         depth: 0,
+        overrideAccess: true,
         where: {
           name: { exists: true },
         },

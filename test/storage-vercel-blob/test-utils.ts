@@ -25,6 +25,7 @@ export async function verifyUploads({
   const uploadData = (await payload.findByID({
     collection: collectionSlug as CollectionSlug,
     id: uploadId,
+    overrideAccess: true,
   })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
   const { blobs } = await list()

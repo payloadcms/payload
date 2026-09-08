@@ -57,7 +57,7 @@ export type CreateArgs<
   file?: File
   filePath?: string
   locale?: string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   overwriteExistingFiles?: boolean
   showHiddenFields?: boolean
   user?: TypeWithID
@@ -92,7 +92,7 @@ export type UpdateBaseArgs<
   file?: File
   filePath?: string
   locale?: string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   overwriteExistingFiles?: boolean
   showHiddenFields?: boolean
   user?: TypeWithID
@@ -108,6 +108,7 @@ export type UpdateGlobalArgs<
   TSlug extends keyof TGeneratedTypes['globals'],
 > = {
   data: DeepPartial<TGeneratedTypes['globals'][TSlug]>
+  overrideAccess: boolean
   slug: TSlug
 } & BaseArgs
 
@@ -122,7 +123,7 @@ export type FindArgs<
   fallbackLocale?: string
   limit?: number
   locale?: string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   page?: number
   pagination?: boolean
   showHiddenFields?: boolean
@@ -141,6 +142,7 @@ export type LoginArgs<
     email: string
     password: string
   }
+  overrideAccess: boolean
 } & BaseArgs
 
 export type DeleteArgs<
@@ -149,7 +151,7 @@ export type DeleteArgs<
 > = {
   collection: TSlug
   id?: string
-  overrideAccess?: boolean
+  overrideAccess: boolean
   trash?: boolean
   where?: Where
 } & BaseArgs

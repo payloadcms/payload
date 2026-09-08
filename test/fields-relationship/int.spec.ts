@@ -29,6 +29,7 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
         data: {
           name: relatedDocName,
         },
+        overrideAccess: true,
       })
 
       const version1 = await payload.create({
@@ -40,6 +41,7 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
             relationTo: collection1Slug,
           },
         },
+        overrideAccess: true,
       })
 
       const version2 = await payload.update({
@@ -48,6 +50,7 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
         data: {
           title: 'Version 2 Title',
         },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -59,6 +62,7 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
         },
         sort: '-updatedAt',
         limit: 1,
+        overrideAccess: true,
       })
 
       version2ID = versions.docs[0].id
@@ -81,6 +85,7 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
         collection: versionedRelationshipFieldSlug,
         id: version2ID,
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(version2Data.version.title).toEqual('Version 2 Title')

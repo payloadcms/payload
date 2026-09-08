@@ -31,6 +31,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     user = loginResult.user
@@ -41,6 +42,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         email: 'test@payloadcms.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     post = await payload.create({
@@ -48,6 +50,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'some post',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -55,6 +58,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'some page',
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -62,6 +66,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         globalText: 'global text',
       },
+      overrideAccess: true,
     })
   })
 
@@ -76,6 +81,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         text: 'updated post',
       },
       id: post.id,
+      overrideAccess: true,
     })
 
     expect(updatedPost.text).toEqual('updated post')
@@ -87,6 +93,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         globalText: 'updated global text',
       },
+      overrideAccess: true,
     })
 
     expect(updatedGlobalMenu.globalText).toEqual('updated global text')
@@ -96,6 +103,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
     const { docs } = await payload.find({
       collection: postsSlug,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(docs).toHaveLength(2)
@@ -103,11 +111,13 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
     await payload.delete({
       collection: postsSlug,
       id: post.id,
+      overrideAccess: true,
     })
 
     const { docs: deletedResults } = await payload.find({
       collection: postsSlug,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(deletedResults).toHaveLength(1)
@@ -119,6 +129,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'new post 2',
       },
+      overrideAccess: true,
     })
 
     // Set lock duration to 1 second for testing purposes
@@ -138,6 +149,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     await wait(1100)
@@ -149,6 +161,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       },
       overrideLock: false,
       id: newPost2.id,
+      overrideAccess: true,
     })
     postConfig.lockDocuments = { duration: 300 }
 
@@ -161,6 +174,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -171,6 +185,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: lockedDocInstance.id },
       },
+      overrideAccess: true,
     })
 
     // Updating a document with the local API should not keep a stored doc
@@ -195,6 +210,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         document: undefined,
         globalSlug: menuSlug,
       },
+      overrideAccess: true,
     })
 
     await wait(1100)
@@ -205,6 +221,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       },
       overrideLock: false,
       slug: menuSlug,
+      overrideAccess: true,
     })
     globalConfig.lockDocuments = { duration: 300 }
 
@@ -217,6 +234,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -227,6 +245,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: lockedGlobalInstance.id },
       },
+      overrideAccess: true,
     })
 
     // Updating a document with the local API should not keep a stored doc
@@ -240,6 +259,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'some post',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership to another user
@@ -256,6 +276,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
           value: user2.id,
         },
       },
+      overrideAccess: true,
     })
 
     try {
@@ -266,6 +287,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         },
         overrideLock: false, // necessary to trigger the lock check
         id: newPost.id,
+        overrideAccess: true,
       })
     } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
@@ -275,6 +297,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
     const updatedPost = await payload.findByID({
       collection: postsSlug,
       id: newPost.id,
+      overrideAccess: true,
     })
 
     // Should not allow update - expect data not to change
@@ -293,6 +316,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
           value: user2.id,
         },
       },
+      overrideAccess: true,
     })
 
     try {
@@ -302,6 +326,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         },
         overrideLock: false, // necessary to trigger the lock check
         slug: menuSlug,
+        overrideAccess: true,
       })
     } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
@@ -310,6 +335,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
 
     const updatedGlobalMenu = await payload.findGlobal({
       slug: menuSlug,
+      overrideAccess: true,
     })
 
     // Should not allow update - expect data not to change
@@ -323,6 +349,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'new post 3',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership to another user
@@ -339,13 +366,15 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
           value: user2.id,
         },
       },
+      overrideAccess: true,
     })
 
     try {
       await payload.delete({
         collection: postsSlug,
         id: newPost3.id,
-        overrideLock: false, // necessary to trigger the lock check
+        overrideLock: false,
+        overrideAccess: true, // necessary to trigger the lock check
       })
     } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
@@ -357,6 +386,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: newPost3.id },
       },
+      overrideAccess: true,
     })
 
     expect(findPostDocs.docs).toHaveLength(1)
@@ -368,6 +398,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'new post 4',
       },
+      overrideAccess: true,
     })
 
     // Set lock duration to 1 second for testing purposes
@@ -387,6 +418,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     await wait(1100)
@@ -395,6 +427,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       collection: postsSlug,
       id: newPost4.id,
       overrideLock: false,
+      overrideAccess: true,
     })
 
     const findPostDocs = await payload.find({
@@ -402,6 +435,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: newPost4.id },
       },
+      overrideAccess: true,
     })
 
     expect(findPostDocs.docs).toHaveLength(0)
@@ -411,6 +445,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -421,6 +456,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: lockedDocInstance.id },
       },
+      overrideAccess: true,
     })
 
     expect(docsFromLocksCollection.docs).toHaveLength(0)
@@ -434,6 +470,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'new post 5',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership to another user
@@ -450,6 +487,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     const updateLockedDoc = await payload.update({
@@ -459,6 +497,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       },
       id: newPost5.id,
       overrideLock: true,
+      overrideAccess: true,
     })
 
     // Should allow update since using overrideLock flag
@@ -469,6 +508,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -479,6 +519,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: lockedDocInstance.id },
       },
+      overrideAccess: true,
     })
 
     // Updating a document with the local API should not keep a stored doc
@@ -500,6 +541,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         },
         document: undefined,
       },
+      overrideAccess: true,
     })
 
     const updateGlobalLockedDoc = await payload.updateGlobal({
@@ -508,6 +550,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       },
       slug: menuSlug,
       overrideLock: true,
+      overrideAccess: true,
     })
 
     // Should allow update since using overrideLock flag
@@ -518,6 +561,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedGlobalInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -528,6 +572,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: lockedGlobalInstance.id },
       },
+      overrideAccess: true,
     })
 
     // Updating a document with the local API should not keep a stored doc
@@ -543,6 +588,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'new post 6',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership to another user
@@ -559,12 +605,14 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     await payload.delete({
       collection: postsSlug,
       id: newPost6.id,
       overrideLock: true,
+      overrideAccess: true,
     })
 
     const findPostDocs = await payload.find({
@@ -572,6 +620,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: newPost6.id },
       },
+      overrideAccess: true,
     })
 
     expect(findPostDocs.docs).toHaveLength(0)
@@ -581,6 +630,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       await payload.findByID({
         collection: lockedDocumentCollection,
         id: lockedDocInstance.id,
+        overrideAccess: true,
       })
     } catch (error) {
       expect(error).toBeInstanceOf(NotFound)
@@ -591,6 +641,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         id: { equals: lockedDocInstance.id },
       },
+      overrideAccess: true,
     })
 
     expect(docsFromLocksCollection.docs).toHaveLength(0)
@@ -604,6 +655,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       data: {
         text: 'new post 7',
       },
+      overrideAccess: true,
     })
 
     const lockedDocInstance = await payload.create({
@@ -619,6 +671,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         },
         globalSlug: undefined,
       },
+      overrideAccess: true,
     })
 
     // This is the take over action - changing the user to the current user
@@ -628,6 +681,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
         user: { relationTo: 'users', value: user?.id },
       },
       id: lockedDocInstance.id,
+      overrideAccess: true,
     })
 
     const docsFromLocksCollection = await payload.find({
@@ -635,6 +689,7 @@ test.suite({ config: './config.ts' })('Locked documents', () => {
       where: {
         'user.value': { equals: user.id },
       },
+      overrideAccess: true,
     })
 
     expect(docsFromLocksCollection.docs).toHaveLength(1)

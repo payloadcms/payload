@@ -22,6 +22,7 @@ export const syncPriceJSON = async (args) => {
           equals: eventID,
         },
       },
+      overrideAccess: true,
     })
 
     payloadProductID = productQuery.docs?.[0]?.id
@@ -47,6 +48,7 @@ export const syncPriceJSON = async (args) => {
         },
         skipSync: true,
       },
+      overrideAccess: true,
     })
 
     payload.logger.info(`✅ Successfully updated product price.`)

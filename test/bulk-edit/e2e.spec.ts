@@ -467,6 +467,7 @@ test.describe('Bulk Edit', () => {
       collection: postsSlug,
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       where: {
         id: {
           equals: postID,
@@ -507,6 +508,7 @@ test.describe('Bulk Edit', () => {
       .find({
         collection: 'posts',
         limit: 1,
+        overrideAccess: true,
       })
       ?.then((res) => res.docs[0])
 
@@ -692,6 +694,7 @@ test.describe('Bulk Edit', () => {
         },
         title: 'Tab Title',
       },
+      overrideAccess: true,
     })
 
     await page.goto(tabsUrl.list)
@@ -730,6 +733,7 @@ test.describe('Bulk Edit', () => {
 
     const updatedDocQuery = await payload.find({
       collection: tabsSlug,
+      overrideAccess: true,
       where: {
         id: {
           equals: originalDoc.id,
@@ -754,6 +758,7 @@ test.describe('Bulk Edit', () => {
         },
         title: 'Tab Doc',
       },
+      overrideAccess: true,
     })
 
     await page.goto(tabsUrl.list)
@@ -790,6 +795,7 @@ test.describe('Bulk Edit', () => {
 
     const updatedDocQuery = await payload.find({
       collection: tabsSlug,
+      overrideAccess: true,
       where: {
         id: {
           equals: originalDoc.id,
@@ -802,22 +808,23 @@ test.describe('Bulk Edit', () => {
       .poll(() => updatedDoc?.tabTab?.tabText, { timeout: POLL_TOPASS_TIMEOUT })
       .toEqual('updated value')
 
-    await payload.delete({ id: originalDoc.id, collection: tabsSlug })
+    await payload.delete({ id: originalDoc.id, collection: tabsSlug, overrideAccess: true })
   })
 
   test('should include named-tab fields in bulk edit when a collection has a restricted field', async () => {
     const doc = await payload.create({
       collection: restrictedTabsSlug,
       data: { title: 'Restricted Tabs Doc' },
+      overrideAccess: true,
     })
 
     await page.goto(restrictedTabsUrl.list)
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await addListFilter({
-      page,
       fieldLabel: 'ID',
       operatorLabel: 'equals',
+      page,
       value: doc.id,
     })
 
@@ -843,13 +850,14 @@ test.describe('Bulk Edit', () => {
       selectMenu.locator('.rs__option', { hasText: exactText('Named Tab No Update') }),
     ).toBeHidden()
 
-    await payload.delete({ collection: restrictedTabsSlug, id: doc.id })
+    await payload.delete({ id: doc.id, collection: restrictedTabsSlug, overrideAccess: true })
   })
 
   test('should show clean labels for fields inside label-false groups and rows', async () => {
     const doc = await payload.create({
       collection: tabsSlug,
       data: { title: 'Label Test Doc' },
+      overrideAccess: true,
     })
 
     await page.goto(tabsUrl.list)
@@ -880,13 +888,14 @@ test.describe('Bulk Edit', () => {
     })
     await expect(option).toBeVisible()
 
-    await payload.delete({ id: doc.id, collection: tabsSlug })
+    await payload.delete({ id: doc.id, collection: tabsSlug, overrideAccess: true })
   })
 
   test('should fall back to the field name for fields with label: false', async () => {
     const doc = await payload.create({
       collection: tabsSlug,
       data: { title: 'No Label Doc' },
+      overrideAccess: true,
     })
 
     await page.goto(tabsUrl.list)
@@ -920,7 +929,7 @@ test.describe('Bulk Edit', () => {
     const optionTexts = await menu.locator('.rs__option').allInnerTexts()
     expect(optionTexts.every((text) => text.trim().length > 0)).toBe(true)
 
-    await payload.delete({ id: doc.id, collection: tabsSlug })
+    await payload.delete({ id: doc.id, collection: tabsSlug, overrideAccess: true })
   })
 
   test('should preserve beforeInput components when selecting multiple fields', async () => {
@@ -1064,7 +1073,11 @@ async function selectAllAndEditMany(page: Page): Promise<{ modal: Locator }> {
 }
 
 async function deleteAllPosts() {
-  await payload.delete({ collection: postsSlug, where: { id: { exists: true } } })
+  await payload.delete({
+    collection: postsSlug,
+    overrideAccess: true,
+    where: { id: { exists: true } },
+  })
 }
 
 async function createPost(
@@ -1073,6 +1086,7 @@ async function createPost(
 ): Promise<Post> {
   return payload.create({
     collection: postsSlug,
+    overrideAccess: true,
     ...(overrides || {}),
     data: {
       title: 'Post Title',

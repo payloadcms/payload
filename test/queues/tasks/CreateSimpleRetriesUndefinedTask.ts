@@ -30,6 +30,7 @@ export const CreateSimpleRetriesUndefinedTask: TaskConfig<'CreateSimpleRetriesUn
       data: {
         title: input.message,
       },
+      overrideAccess: true,
     })
     return {
       output: {

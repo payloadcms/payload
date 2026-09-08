@@ -82,6 +82,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const post1 = await payload.create({
           collection: 'testMigrationPosts',
           data: { title: 'Post 1' },
+          overrideAccess: true,
         })
 
         // Publish the post
@@ -89,6 +90,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post1.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Post 1 Updated' },
+          overrideAccess: true,
         })
 
         // Step 2: Verify "before" state
@@ -277,6 +279,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const post = await payload.create({
           collection: 'testMigrationPosts',
           data: { title: 'Initial Draft' },
+          overrideAccess: true,
         })
 
         // Publish it
@@ -284,6 +287,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Published Version' },
+          overrideAccess: true,
         })
 
         // Make a draft change
@@ -291,6 +295,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'draft', title: 'Draft Changes' },
+          overrideAccess: true,
         })
 
         // Publish again
@@ -298,6 +303,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Re-published' },
+          overrideAccess: true,
         })
 
         // Query BEFORE migration
@@ -537,6 +543,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const doc = await payload.create({
           collection: 'testNoVersions',
           data: { title: 'Test document' },
+          overrideAccess: true,
         })
 
         expect(doc.id).toBeDefined()
@@ -680,12 +687,14 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const post1 = await payload.create({
           collection: 'testMigrationPosts',
           data: { title: 'Post 1' },
+          overrideAccess: true,
         })
 
         await payload.update({
           id: post1.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'Post 1 Updated' },
+          overrideAccess: true,
         })
 
         const beforeVersions = (await drizzle.all(
@@ -897,6 +906,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const doc = await payload.create({
           collection: 'testNoVersions',
           data: { title: 'Test document' },
+          overrideAccess: true,
         })
 
         expect(doc.id).toBeDefined()
@@ -950,6 +960,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
         const post = await payload.create({
           collection: 'testMigrationPosts',
           data: { title: 'MongoDB Test Post' },
+          overrideAccess: true,
         })
 
         // Publish the post
@@ -957,6 +968,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
           id: post.id,
           collection: 'testMigrationPosts',
           data: { _status: 'published', title: 'MongoDB Test Post Published' },
+          overrideAccess: true,
         })
 
         // Step 2: Get MongoDB connection and verify "before" state

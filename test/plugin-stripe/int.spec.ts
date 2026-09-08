@@ -10,6 +10,7 @@ test.suite({ config: './config.ts' })('Stripe Plugin', () => {
       data: {
         name: 'Test Product',
       },
+      overrideAccess: true,
     })
 
     expect(product).toHaveProperty('name', 'Test Product')

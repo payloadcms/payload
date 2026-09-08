@@ -20,6 +20,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
 
@@ -30,6 +31,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
           email: regularUser.email,
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
 
@@ -40,6 +42,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
           email: 'public@email.com',
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
   })
@@ -69,6 +72,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
           title: 'Only Logged In Users',
           relatedCollection: 'pages',
         },
+        overrideAccess: true,
       })
 
       // read
@@ -107,6 +111,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
           collection: queryPresetsCollectionSlug,
           depth: 0,
           id,
+          overrideAccess: true,
         })
 
         expect(preset.title).toBe('Only Logged In Users')
@@ -130,6 +135,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
           collection: queryPresetsCollectionSlug,
           depth: 0,
           id,
+          overrideAccess: true,
         })
 
         expect(preset.title).toBe('Only Logged In Users')
@@ -714,6 +720,7 @@ test.suite({ config: './config.ts' })('Query Presets', () => {
             },
           },
         },
+        overrideAccess: true,
       })
 
       try {
