@@ -1,3 +1,5 @@
+import { isAllowedURL } from './isAllowedURL.js'
+
 /**
  * Ensures the provided URL is absolute. If not, it converts it to an absolute URL based
  * on the current window location.
@@ -8,7 +10,7 @@ export const formatAbsoluteURL = (incomingURL: string): string | undefined => {
   try {
     const url = new URL(incomingURL, window.location.origin)
 
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    if (!isAllowedURL(url)) {
       return undefined
     }
 
