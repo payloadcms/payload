@@ -67,8 +67,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",
-    "tsx": "4.22.4",
-    "zod": "^4.2.0"
+    "tsx": "4.22.4"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -104,7 +103,6 @@
     "types": "./dist/index.d.ts"
   },
   "//deps_notes": {
-    "zod": "zod is a hard dependency of @modelcontextprotocol/server, thus we can safely use it without it impacting bundle size. Make extra sure the zod version here matches exactly what's defined in the dependencies of @modelcontextprotocol/server to avoid duplicate versions being installed.",
     "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."
   },
   "homepage:": "https://payloadcms.com"

@@ -66,13 +66,21 @@ describe('getFileFromUploadInstructions', () => {
   })
 
   it('streams the fetched file to a temp file instead of buffering it in memory', async () => {
-    const handler = vi.fn(
-      async () =>
-        new Response('some file contents', {
-          headers: { 'Content-Type': 'video/mp4' },
-          status: 200,
-        }),
-    )
+    const response = new Response('some file contents', {
+      headers: { 'Content-Type': 'video/mp4' },
+      status: 200,
+    })
+
+    const arrayBufferTripwire = vi.fn(async () => {
+      throw new Error('Unexpected whole-body buffering')
+    })
+
+    Object.defineProperty(response, 'arrayBuffer', {
+      configurable: true,
+      value: arrayBufferTripwire,
+    })
+
+    const handler = vi.fn(async () => response)
 
     const req = createReq([handler])
     const uploadReferenceFile = createUploadReferenceFile()
@@ -90,6 +98,7 @@ describe('getFileFromUploadInstructions', () => {
     expect(fs.readFileSync(file.tempFilePath!, 'utf8')).toBe('some file contents')
     expect(file.uploadReference).toBe(uploadReferenceFile.uploadReference)
     expect(file.mimetype).toBe('video/mp4')
+    expect(arrayBufferTripwire).not.toHaveBeenCalled()
   })
 
   it('writes the temp file under the configured tempFileDir', async () => {
@@ -124,7 +133,9 @@ describe('getFileFromUploadInstructions', () => {
   })
 
   it('skips fetching entirely when nothing downstream needs the file content', async () => {
-    const handler = vi.fn(async () => new Response('unused', { status: 200 }))
+    const handler = vi.fn(() => {
+      throw new Error('No-content handler was invoked')
+    })
     const req = createReq([handler], {})
 
     const file = await getFileFromUploadInstructions({
@@ -191,29 +202,31 @@ describe('getFileFromUploadInstructions', () => {
   })
 
   it('stops reading once it has enough bytes to probe dimensions, even if the handler ignores the range hint', async () => {
-    const totalSize = HEADER_PROBE_BYTE_LENGTH * 4
-    let cancelled = false
-    let bytesProduced = 0
+    const prefix = Buffer.alloc(HEADER_PROBE_BYTE_LENGTH)
+    MINIMAL_PNG.copy(prefix)
 
-    const stream = new ReadableStream({
-      cancel() {
-        cancelled = true
+    let cancelled = false
+    let hasReadPastBoundary = false
+    let servedPrefix = false
+
+    const stream = new ReadableStream(
+      {
+        cancel() {
+          cancelled = true
+        },
+        pull(controller) {
+          if (!servedPrefix) {
+            servedPrefix = true
+            controller.enqueue(prefix)
+            return
+          }
+
+          hasReadPastBoundary = true
+          controller.error(new Error('Read past header boundary'))
+        },
       },
-      pull(controller) {
-        if (bytesProduced === 0) {
-          controller.enqueue(MINIMAL_PNG)
-          bytesProduced += MINIMAL_PNG.length
-          return
-        }
-        if (bytesProduced >= totalSize) {
-          controller.close()
-          return
-        }
-        const chunkSize = Math.min(64 * 1024, totalSize - bytesProduced)
-        controller.enqueue(new Uint8Array(chunkSize))
-        bytesProduced += chunkSize
-      },
-    })
+      { highWaterMark: 0 },
+    )
 
     const handler = vi.fn(
       async () => new Response(stream, { headers: { 'Content-Type': 'image/png' }, status: 200 }),
@@ -223,16 +236,17 @@ describe('getFileFromUploadInstructions', () => {
     const file = await getFileFromUploadInstructions({
       collectionSlug: 'media',
       file: createUploadReferenceFile({
-        filename: 'photo.png',
+        filename: 'header-boundary-tripwire.png',
         mimeType: 'image/png',
-        size: totalSize,
+        size: HEADER_PROBE_BYTE_LENGTH * 4,
       }),
       req,
     })
 
     expect(file.tempFilePath).toBeUndefined()
-    expect(file.data.length).toBeLessThanOrEqual(HEADER_PROBE_BYTE_LENGTH)
+    expect(file.data.length).toBe(HEADER_PROBE_BYTE_LENGTH)
     expect(cancelled).toBe(true)
+    expect(hasReadPastBoundary).toBe(false)
   })
 
   it('preserves native Request accessors like signal on the request passed to a range-scoped handler', async () => {

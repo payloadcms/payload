@@ -37,8 +37,6 @@ describe('i18n', () => {
     const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -52,7 +50,6 @@ describe('i18n', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'i18nTests',
     })
 
     await ensureCompilationIsDone({ page, serverURL })

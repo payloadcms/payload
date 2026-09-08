@@ -11,58 +11,48 @@ import {
 } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Queues - Payload', () => {
-  let payload: Payload
+_internal_jobSystemGlobals.shouldAutoRun = false
+_internal_jobSystemGlobals.shouldAutoSchedule = false
+
+test.suite({ config: './config.ts' })('Queues - Payload', () => {
   let processingLeaseDefaults: {
     duration: number
     safetyBuffer: number
   }
-  let restClient: NextRESTClient
   let token: string
   let user: User
 
-  beforeAll(async () => {
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+  test.beforeEach(async ({ payload }) => {
     processingLeaseDefaults = { ...payload.config.jobs.processingLease }
   })
 
-  afterAll(async () => {
+  test.afterAll(async () => {
     // Ensure no new crons are scheduled
     _internal_jobSystemGlobals.shouldAutoRun = false
     _internal_jobSystemGlobals.shouldAutoSchedule = false
     // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
     // Cron function runs may persist after a test has finished
     await wait(3000)
-    // Now we can destroy the payload instance
-    await payload.destroy()
     _internal_resetJobSystemGlobals()
   })
 
-  afterEach(() => {
-    _internal_resetJobSystemGlobals()
+  test.afterEach(({ payload }) => {
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    _internal_jobSystemGlobals.shouldAutoSchedule = false
     Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
   })
 
-  beforeEach(async () => {
-    // Set autorun to false during seed process to ensure no crons are scheduled, which may affect the tests
-    _internal_jobSystemGlobals.shouldAutoRun = false
-    _internal_jobSystemGlobals.shouldAutoSchedule = false
-    await clearAndSeedEverything(payload)
+  test.beforeEach(async ({ payload, restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -81,8 +71,8 @@ describe('Queues - Payload', () => {
     _internal_jobSystemGlobals.shouldAutoSchedule = true
   })
 
-  describe('default config', () => {
-    it('should always add the jobs stats global and job metadata field', () => {
+  test.describe('default config', () => {
+    test('should always add the jobs stats global and job metadata field', ({ payload }) => {
       const jobsCollection = payload.config.collections.find(({ slug }) => slug === 'payload-jobs')
       const jobsStatsGlobal = payload.config.globals.find(
         ({ slug }) => slug === 'payload-jobs-stats',
@@ -96,8 +86,8 @@ describe('Queues - Payload', () => {
     })
   })
 
-  describe('access control', () => {
-    it('should deny raw job creation when access control is enabled', async () => {
+  test.describe('access control', () => {
+    test('should deny raw job creation when access control is enabled', async ({ payload }) => {
       const req = await createLocalReq({ user }, payload)
 
       await expect(
@@ -115,7 +105,7 @@ describe('Queues - Payload', () => {
       ).rejects.toThrow()
     })
 
-    it('should deny raw job reads when access control is enabled', async () => {
+    test('should deny raw job reads when access control is enabled', async ({ payload }) => {
       const req = await createLocalReq({ user }, payload)
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -134,7 +124,7 @@ describe('Queues - Payload', () => {
       ).rejects.toThrow()
     })
 
-    it('should deny raw job updates when access control is enabled', async () => {
+    test('should deny raw job updates when access control is enabled', async ({ payload }) => {
       const req = await createLocalReq({ user }, payload)
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -165,7 +155,7 @@ describe('Queues - Payload', () => {
       expect(unchangedJob.input).toEqual({ message: 'protected job' })
     })
 
-    it('should deny raw job deletion when access control is enabled', async () => {
+    test('should deny raw job deletion when access control is enabled', async ({ payload }) => {
       const req = await createLocalReq({ user }, payload)
       const job = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -191,7 +181,7 @@ describe('Queues - Payload', () => {
       expect(unchangedJob.id).toBe(job.id)
     })
 
-    it('will run access control on jobs runner run endpoint', async () => {
+    test('will run access control on jobs runner run endpoint', async ({ restClient }) => {
       const response = await restClient.GET('/payload-jobs/run?silent=true', {
         headers: {
           // Authorization: `JWT ${token}`,
@@ -199,7 +189,7 @@ describe('Queues - Payload', () => {
       }) // Needs to be a rest call to test auth
       expect(response.status).toBe(401)
     })
-    it('will return 200 from jobs runner', async () => {
+    test('will return 200 from jobs runner', async ({ restClient }) => {
       const response = await restClient.GET('/payload-jobs/run?silent=true', {
         headers: {
           Authorization: `JWT ${token}`,
@@ -209,7 +199,9 @@ describe('Queues - Payload', () => {
       expect(response.status).toBe(200)
     })
 
-    it('will fail access control on local api .queue when passing overrideAccess: false', async () => {
+    test('will fail access control on local api .queue when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       await expect(
         payload.jobs.queue({
           task: 'CreateSimple',
@@ -221,7 +213,9 @@ describe('Queues - Payload', () => {
       ).rejects.toThrow(Forbidden)
     })
 
-    it('will pass access control on local api .queue when passing overrideAccess: false', async () => {
+    test('will pass access control on local api .queue when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       const req = await createLocalReq({ user }, payload)
       const result = await payload.jobs.queue({
         task: 'CreateSimple',
@@ -236,7 +230,9 @@ describe('Queues - Payload', () => {
       expect(result.input.message).toBe('from single task')
     })
 
-    it('will fail access control on local api .run when passing overrideAccess: false', async () => {
+    test('will fail access control on local api .run when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       await expect(
         payload.jobs.run({
           overrideAccess: false,
@@ -244,7 +240,9 @@ describe('Queues - Payload', () => {
       ).rejects.toThrow(Forbidden)
     })
 
-    it('will pass access control on local api .run when passing overrideAccess: false', async () => {
+    test('will pass access control on local api .run when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       const req = await createLocalReq({ user }, payload)
       const result = await payload.jobs.run({
         overrideAccess: false,
@@ -254,7 +252,9 @@ describe('Queues - Payload', () => {
       expect(result).toBeDefined()
     })
 
-    it('will fail access control on local api .runByID when passing overrideAccess: false', async () => {
+    test('will fail access control on local api .runByID when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       await expect(
         payload.jobs.runByID({
           id: '1',
@@ -263,7 +263,9 @@ describe('Queues - Payload', () => {
       ).rejects.toThrow(Forbidden)
     })
 
-    it('will pass access control on local api .runByID when passing overrideAccess: false', async () => {
+    test('will pass access control on local api .runByID when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       const req = await createLocalReq({ user }, payload)
 
       // Queue a job first so we have a valid ID
@@ -284,7 +286,9 @@ describe('Queues - Payload', () => {
       expect(result).toBeDefined()
     })
 
-    it('will fail access control on local api .cancel when passing overrideAccess: false', async () => {
+    test('will fail access control on local api .cancel when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue a job without running it
@@ -317,7 +321,9 @@ describe('Queues - Payload', () => {
       expect(jobAfterCancel.error?.cancelled).toBeUndefined()
     })
 
-    it('will pass access control on local api .cancel when passing overrideAccess: false', async () => {
+    test('will pass access control on local api .cancel when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       const req = await createLocalReq({ user }, payload)
@@ -351,7 +357,9 @@ describe('Queues - Payload', () => {
       expect(jobAfterCancel.error?.cancelled).toBe(true)
     })
 
-    it('will fail access control on local api .cancelByID when passing overrideAccess: false', async () => {
+    test('will fail access control on local api .cancelByID when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue a job without running it
@@ -380,7 +388,9 @@ describe('Queues - Payload', () => {
       expect(jobAfterCancel.error?.cancelled).toBeUndefined()
     })
 
-    it('will pass access control on local api .cancelByID when passing overrideAccess: false', async () => {
+    test('will pass access control on local api .cancelByID when passing overrideAccess: false', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       const req = await createLocalReq({ user }, payload)
@@ -415,7 +425,7 @@ describe('Queues - Payload', () => {
   // postgres:
   // QueryError: The following path cannot be queried: document.relationTo
   // This test is to ensure that the bug is fixed
-  it('can create and update new jobs', async () => {
+  test('can create and update new jobs', async ({ payload }) => {
     const job = await payload.create({
       collection: 'payload-jobs',
       data: {
@@ -440,7 +450,7 @@ describe('Queues - Payload', () => {
     expect(updatedJob.input.message).toBe('2')
   })
 
-  it('can create new jobs', async () => {
+  test('can create new jobs', async ({ payload }) => {
     const newPost = await payload.create({
       collection: 'posts',
       data: {
@@ -467,7 +477,7 @@ describe('Queues - Payload', () => {
     expect(postAfterJobs.jobStep2Ran).toBe('hellohellohellohello')
   })
 
-  it('can create new JSON-workflow jobs', async () => {
+  test('can create new JSON-workflow jobs', async ({ payload }) => {
     const newPost = await payload.create({
       collection: 'posts',
       data: {
@@ -497,7 +507,7 @@ describe('Queues - Payload', () => {
     expect(postAfterJobs.jobStep2Ran).toBe('hellohellohellohello')
   })
 
-  it('ensure job retrying works', async () => {
+  test('ensure job retrying works', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesTest',
@@ -533,7 +543,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(3)
   })
 
-  it('ensure workflow-level retries are respected', async () => {
+  test('ensure workflow-level retries are respected', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesWorkflowLevelTest',
@@ -568,7 +578,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(2)
   })
 
-  it('ensure workflows dont limit retries if no retries property is set', async () => {
+  test('ensure workflows dont limit retries if no retries property is set', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'workflowNoRetriesSet',
@@ -603,7 +613,9 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(3)
   })
 
-  it('ensure workflows dont retry if retries set to 0, even if individual tasks have retries > 0 set', async () => {
+  test('ensure workflows dont retry if retries set to 0, even if individual tasks have retries > 0 set', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'workflowRetries0',
@@ -638,7 +650,9 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(0)
   })
 
-  it('ensure workflows dont retry if neither workflows nor tasks have retries set', async () => {
+  test('ensure workflows dont retry if neither workflows nor tasks have retries set', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'workflowAndTasksRetriesUndefined',
@@ -673,7 +687,9 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(0)
   })
 
-  it('ensure workflows retry if workflows have retries set and tasks do not have retries set, due to tasks inheriting workflow retries', async () => {
+  test('ensure workflows retry if workflows have retries set and tasks do not have retries set, due to tasks inheriting workflow retries', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'workflowRetries2TasksRetriesUndefined',
@@ -708,7 +724,9 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(2)
   })
 
-  it('ensure workflows do not retry if workflows have retries set and tasks have retries set to 0', async () => {
+  test('ensure workflows do not retry if workflows have retries set and tasks have retries set to 0', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'workflowRetries2TasksRetries0',
@@ -744,7 +762,7 @@ describe('Queues - Payload', () => {
   })
 
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
-  it.skip('ensure failed tasks are rolled back via transactions', async () => {
+  test.skip('ensure failed tasks are rolled back via transactions', async ({ payload }) => {
     const job = await payload.jobs.queue({
       workflow: 'retriesRollbackTest',
       input: {
@@ -778,7 +796,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountRetried).toBe(4)
   })
 
-  it('ensure backoff strategy of task is respected', async () => {
+  test('ensure backoff strategy of task is respected', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'retriesBackoffTest',
@@ -864,7 +882,9 @@ describe('Queues - Payload', () => {
     expect(durations[3]).toBeGreaterThan(2400)
   })
 
-  it('should run a job only once when multiple workers poll the same queue', async () => {
+  test('should run a job only once when multiple workers poll the same queue', async ({
+    payload,
+  }) => {
     _internal_jobSystemGlobals.shouldAutoRun = false
     payload.config.jobs.deleteJobOnComplete = false
 
@@ -902,7 +922,9 @@ describe('Queues - Payload', () => {
     expect(workersThatRanTheJob).toHaveLength(1)
   })
 
-  it('should run a job only once when multiple workers run the same job by ID', async () => {
+  test('should run a job only once when multiple workers run the same job by ID', async ({
+    payload,
+  }) => {
     _internal_jobSystemGlobals.shouldAutoRun = false
     payload.config.jobs.deleteJobOnComplete = false
 
@@ -938,7 +960,7 @@ describe('Queues - Payload', () => {
     expect(workersThatRanTheJob).toHaveLength(1)
   })
 
-  it('ensure jobs run in FIFO order by default', async () => {
+  test('ensure jobs run in FIFO order by default', async ({ payload }) => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTestDelayed',
       input: {
@@ -971,7 +993,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs?.[1]?.title).toBe('task 2')
   })
 
-  it('ensure jobs can run LIFO if processingOrder is passed', async () => {
+  test('ensure jobs can run LIFO if processingOrder is passed', async ({ payload }) => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTestDelayed',
       input: {
@@ -1005,7 +1027,9 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs?.[1]?.title).toBe('task 1')
   })
 
-  it('ensure job config processingOrder using queues object is respected', async () => {
+  test('ensure job config processingOrder using queues object is respected', async ({
+    payload,
+  }) => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTestDelayed',
       queue: 'lifo',
@@ -1041,7 +1065,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs?.[1]?.title).toBe('task 1')
   })
 
-  it('can create new inline jobs', async () => {
+  test('can create new inline jobs', async ({ payload }) => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTest',
       input: {
@@ -1060,7 +1084,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[0]?.title).toBe('hello!')
   })
 
-  it('should respect deleteJobOnComplete true default configuration', async () => {
+  test('should respect deleteJobOnComplete true default configuration', async ({ payload }) => {
     const { id } = await payload.jobs.queue({
       workflow: 'inlineTaskTest',
       input: {
@@ -1077,7 +1101,7 @@ describe('Queues - Payload', () => {
     expect(after).toBeNull()
   })
 
-  it('should not delete failed jobs if deleteJobOnComplete is true', async () => {
+  test('should not delete failed jobs if deleteJobOnComplete is true', async ({ payload }) => {
     const { id } = await payload.jobs.queue({
       workflow: 'failsImmediately',
       input: {},
@@ -1094,7 +1118,7 @@ describe('Queues - Payload', () => {
     expect(after?.processingToken).toBeFalsy()
   })
 
-  it('should respect deleteJobOnComplete false configuration', async () => {
+  test('should respect deleteJobOnComplete false configuration', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const { id } = await payload.jobs.queue({
       workflow: 'inlineTaskTest',
@@ -1114,7 +1138,7 @@ describe('Queues - Payload', () => {
     expect(after?.processingToken).toBeFalsy()
   })
 
-  it('can queue single tasks', async () => {
+  test('can queue single tasks', async ({ payload }) => {
     await payload.jobs.queue({
       task: 'CreateSimple',
       input: {
@@ -1133,18 +1157,20 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[0]?.title).toBe('from single task')
   })
 
-  describe('when a queued task slug is no longer registered in config', () => {
-    let originalTasks: typeof payload.config.jobs.tasks
+  test.describe('when a queued task slug is no longer registered in config', () => {
+    let originalTasks: Payload['config']['jobs']['tasks']
 
-    beforeEach(() => {
+    test.beforeEach(({ payload }) => {
       originalTasks = payload.config.jobs.tasks
     })
 
-    afterEach(() => {
+    test.afterEach(({ payload }) => {
       payload.config.jobs.tasks = originalTasks
     })
 
-    it('should permanently fail the job after one attempt instead of retrying forever', async () => {
+    test('should permanently fail the job after one attempt instead of retrying forever', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       const job = await payload.jobs.queue({
@@ -1169,7 +1195,9 @@ describe('Queues - Payload', () => {
       expect(jobAfterRun.totalTried).toBe(1)
     })
 
-    it('should permanently fail when a workflow handler calls a task that has been removed', async () => {
+    test('should permanently fail when a workflow handler calls a task that has been removed', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       const job = await payload.jobs.queue({
@@ -1194,7 +1222,9 @@ describe('Queues - Payload', () => {
     })
   })
 
-  it('should not retry a workflow with no retries configured when its handler throws', async () => {
+  test('should not retry a workflow with no retries configured when its handler throws', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
@@ -1214,7 +1244,9 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.totalTried).toBe(1)
   })
 
-  it('should retry a workflow with retries=1 exactly once when its handler throws', async () => {
+  test('should retry a workflow with retries=1 exactly once when its handler throws', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
@@ -1242,11 +1274,11 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.processingUntil).toBeFalsy()
   })
 
-  describe('worker recovery', () => {
+  test.describe('worker recovery', () => {
     // The child process can share the file-backed SQLite test database.
     test.options({ db: (type) => type.startsWith('sqlite') })(
       'should recover a job after its worker process is killed',
-      async () => {
+      async ({ payload }) => {
         _internal_jobSystemGlobals.shouldAutoRun = false
         payload.config.jobs.deleteJobOnComplete = false
 
@@ -1274,7 +1306,6 @@ describe('Queues - Payload', () => {
               CRASH_WORKER_LEASE_DURATION: '1000',
               CRASH_WORKER_LEASE_SAFETY_BUFFER: '100',
               PAYLOAD_DROP_DATABASE: 'false',
-              SEED_IN_CONFIG_ONINIT: 'false',
             },
             stdio: ['ignore', 'ignore', 'pipe'],
           },
@@ -1358,7 +1389,9 @@ describe('Queues - Payload', () => {
       },
     )
 
-    it('should let only one replacement worker recover a job after its original worker stops responding', async () => {
+    test('should let only one replacement worker recover a job after its original worker stops responding', async ({
+      payload,
+    }) => {
       _internal_jobSystemGlobals.shouldAutoRun = false
       payload.config.jobs.deleteJobOnComplete = false
       // Short lease (shorter than 500ms task delay in longRunning workflow) to simulate lease expiry
@@ -1424,7 +1457,9 @@ describe('Queues - Payload', () => {
       expect(completedJob.totalTried).toBe(1)
     })
 
-    it('should not let another worker pick up a healthy long-running job', async () => {
+    test('should not let another worker pick up a healthy long-running job', async ({
+      payload,
+    }) => {
       _internal_jobSystemGlobals.shouldAutoRun = false
       expect(payload.config.jobs.processingLease.duration).toBe(20 * 60 * 1000)
       expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
@@ -1472,7 +1507,7 @@ describe('Queues - Payload', () => {
       expect(completedJob.totalTried).toBe(1)
     })
 
-    it('should recover an interrupted job without consuming a retry', async () => {
+    test('should recover an interrupted job without consuming a retry', async ({ payload }) => {
       _internal_jobSystemGlobals.shouldAutoRun = false
       payload.config.jobs.deleteJobOnComplete = false
       payload.config.jobs.processingLease.duration = 300
@@ -1506,7 +1541,9 @@ describe('Queues - Payload', () => {
       expect(completedJob.totalTried).toBe(1)
     })
 
-    it('should ignore task results from a timed-out worker after another worker recovers the job', async () => {
+    test('should ignore task results from a timed-out worker after another worker recovers the job', async ({
+      payload,
+    }) => {
       _internal_jobSystemGlobals.shouldAutoRun = false
       payload.config.jobs.deleteJobOnComplete = false
       payload.config.jobs.processingLease.duration = 300
@@ -1555,7 +1592,10 @@ describe('Queues - Payload', () => {
     })
   })
 
-  it('can queue and run via the endpoint single tasks without workflows', async () => {
+  test('can queue and run via the endpoint single tasks without workflows', async ({
+    payload,
+    restClient,
+  }) => {
     const workflowsRef = payload.config.jobs.workflows
     delete payload.config.jobs.workflows
     await payload.jobs.queue({
@@ -1582,7 +1622,7 @@ describe('Queues - Payload', () => {
   })
 
   // Task rollbacks are not supported in the current version of Payload. This test will be re-enabled when task rollbacks are supported once we figure out the transaction issues
-  it.skip('transaction test against payload-jobs collection', async () => {
+  test.skip('transaction test against payload-jobs collection', async ({ payload }) => {
     // This kinds of emulates what happens when multiple jobs are queued and then run in parallel.
     const runWorkflowFN = async (i: number) => {
       const { id } = await payload.create({
@@ -1692,7 +1732,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.totalDocs).toBe(30)
   })
 
-  it('can queue single tasks 8 times', async () => {
+  test('can queue single tasks 8 times', async ({ payload }) => {
     for (let i = 0; i < 8; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1714,7 +1754,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[7]?.title).toBe('from single task')
   })
 
-  it('can queue single tasks hundreds of times', async () => {
+  test('can queue single tasks hundreds of times', async ({ payload }) => {
     const numberOfTasks = 150
     // TODO: Ramp up the limit from 150 to 500 or 1000, to test reliability of the database
     payload.config.jobs.deleteJobOnComplete = false
@@ -1747,7 +1787,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[numberOfTasks - 1]?.title).toBe('from single task')
   })
 
-  it('ensure default jobs run limit of 10 works', async () => {
+  test('ensure default jobs run limit of 10 works', async ({ payload }) => {
     for (let i = 0; i < 65; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1769,7 +1809,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[9]?.title).toBe('from single task')
   })
 
-  it('ensure jobs run limit can be customized', async () => {
+  test('ensure jobs run limit can be customized', async ({ payload }) => {
     for (let i = 0; i < 110; i++) {
       await payload.jobs.queue({
         task: 'CreateSimple',
@@ -1795,7 +1835,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[41]?.title).toBe('from single task')
   })
 
-  it('can queue different kinds of single tasks multiple times', async () => {
+  test('can queue different kinds of single tasks multiple times', async ({ payload }) => {
     for (let i = 0; i < 3; i++) {
       await payload.jobs.queue({
         task: 'CreateSimpleWithDuplicateMessage',
@@ -1841,7 +1881,7 @@ describe('Queues - Payload', () => {
     expect(amountOfCreateSimpleWithDuplicateMessage).toBe(6)
   })
 
-  it('can queue external tasks', async () => {
+  test('can queue external tasks', async ({ payload }) => {
     await payload.jobs.queue({
       task: 'ExternalTask',
       input: {
@@ -1860,7 +1900,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[0]?.title).toBe('external')
   })
 
-  it('can queue external workflow that is running external task', async () => {
+  test('can queue external workflow that is running external task', async ({ payload }) => {
     await payload.jobs.queue({
       workflow: 'externalWorkflow',
       input: {
@@ -1879,7 +1919,7 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[0]?.title).toBe('externalWorkflow')
   })
 
-  it('ensure payload.jobs.runByID works and only runs the specified job', async () => {
+  test('ensure payload.jobs.runByID works and only runs the specified job', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     let lastJobID: null | number | string = null
@@ -1923,7 +1963,9 @@ describe('Queues - Payload', () => {
     expect(allCompletedJobs.docs[0]?.id).toBe(lastJobID)
   })
 
-  it('ensure where query for id in payload.jobs.run works and only runs the specified job', async () => {
+  test('ensure where query for id in payload.jobs.run works and only runs the specified job', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     let lastJobID: null | number | string = null
@@ -1971,7 +2013,9 @@ describe('Queues - Payload', () => {
     expect(allCompletedJobs.docs[0]?.id).toBe(lastJobID)
   })
 
-  it('ensure where query for input data in payload.jobs.run works and only runs the specified job', async () => {
+  test('ensure where query for input data in payload.jobs.run works and only runs the specified job', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     for (let i = 0; i < 3; i++) {
@@ -2014,7 +2058,7 @@ describe('Queues - Payload', () => {
     expect((allCompletedJobs.docs[0]?.input as any).message).toBe('from single task 2')
   })
 
-  it('can run sub-tasks', async () => {
+  test('can run sub-tasks', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
     const job = await payload.jobs.queue({
       workflow: 'subTask',
@@ -2054,7 +2098,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun?.log?.[2]?.taskID).toBe('create two docs')
   })
 
-  it('ensure successful sub-tasks are not retried', async () => {
+  test('ensure successful sub-tasks are not retried', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
@@ -2093,7 +2137,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.input.amountTask1Retried).toBe(0)
   })
 
-  it('ensure jobs can be cancelled using payload.jobs.cancelByID', async () => {
+  test('ensure jobs can be cancelled using payload.jobs.cancelByID', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
@@ -2142,7 +2186,7 @@ describe('Queues - Payload', () => {
     expect(runResponse.jobStatus).toBeUndefined()
   })
 
-  it('ensure jobs can be cancelled using payload.jobs.cancel', async () => {
+  test('ensure jobs can be cancelled using payload.jobs.cancel', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
@@ -2181,7 +2225,9 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.processingUntil).toBeFalsy()
   })
 
-  it('ensure jobs can cancel themselves by throwing a JobCancelledError in workflow handler', async () => {
+  test('ensure jobs can cancel themselves by throwing a JobCancelledError in workflow handler', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     /**
@@ -2278,7 +2324,9 @@ describe('Queues - Payload', () => {
     }
   })
 
-  it('ensure jobs can cancel themselves by throwing a JobCancelledError in task handler', async () => {
+  test('ensure jobs can cancel themselves by throwing a JobCancelledError in task handler', async ({
+    payload,
+  }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     /**
@@ -2377,7 +2425,7 @@ describe('Queues - Payload', () => {
     }
   })
 
-  it('can tasks throw error', async () => {
+  test('can tasks throw error', async ({ payload }) => {
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
@@ -2398,7 +2446,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
   })
 
-  it('can reliably run workflows with parallel tasks', async () => {
+  test('can reliably run workflows with parallel tasks', async ({ payload }) => {
     if (process.env.PAYLOAD_DATABASE === 'supabase') {
       // TODO: This test is flaky on supabase in CI, so we skip it for now
       return
@@ -2442,7 +2490,9 @@ describe('Queues - Payload', () => {
     }
   })
 
-  it('can reliably run workflows with parallel tasks that complete immediately', async () => {
+  test('can reliably run workflows with parallel tasks that complete immediately', async ({
+    payload,
+  }) => {
     const amount = 20
     payload.config.jobs.deleteJobOnComplete = false
 
@@ -2466,7 +2516,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.log?.length).toBe(amount)
   })
 
-  it('can create and autorun jobs', async () => {
+  test('can create and autorun jobs', async ({ payload }) => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTest',
       queue: 'autorunSecond',
@@ -2489,8 +2539,10 @@ describe('Queues - Payload', () => {
     expect(allSimples?.docs?.[0]?.title).toBe('hello!')
   })
 
-  describe('concurrency controls', () => {
-    it('should store concurrencyKey when queuing jobs with concurrency config', async () => {
+  test.describe('concurrency controls', () => {
+    test('should store concurrencyKey when queuing jobs with concurrency config', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       const job = await payload.jobs.queue({
@@ -2503,7 +2555,9 @@ describe('Queues - Payload', () => {
       expect(job.concurrencyKey).toBe('exclusive:resource-1')
     })
 
-    it('should not store concurrencyKey for workflows without concurrency config', async () => {
+    test('should not store concurrencyKey for workflows without concurrency config', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       const job = await payload.jobs.queue({
@@ -2516,7 +2570,7 @@ describe('Queues - Payload', () => {
       expect(job.concurrencyKey).toBeFalsy()
     })
 
-    it('should run jobs with different concurrencyKeys in parallel', async () => {
+    test('should run jobs with different concurrencyKeys in parallel', async ({ payload }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue two jobs with different resourceIds (different concurrency keys)
@@ -2553,7 +2607,9 @@ describe('Queues - Payload', () => {
       expect(job2After.completedAt).toBeDefined()
     })
 
-    it('should run jobs with same concurrencyKey exclusively (one at a time)', async () => {
+    test('should run jobs with same concurrencyKey exclusively (one at a time)', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue two jobs with the SAME resourceId (same concurrency key)
@@ -2607,7 +2663,7 @@ describe('Queues - Payload', () => {
       expect(job2Final.completedAt).toBeDefined()
     })
 
-    it('should verify exclusive concurrency prevents race conditions', async () => {
+    test('should verify exclusive concurrency prevents race conditions', async ({ payload }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue 3 jobs with the same concurrency key
@@ -2673,7 +2729,9 @@ describe('Queues - Payload', () => {
       expect(completedCount3).toBe(3)
     })
 
-    it('should allow parallel execution for jobs without concurrency config', async () => {
+    test('should allow parallel execution for jobs without concurrency config', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue two jobs with the same resourceId but NO concurrency config
@@ -2714,7 +2772,9 @@ describe('Queues - Payload', () => {
       expect(job2After.completedAt).toBeDefined()
     })
 
-    it('should handle mixed scenario: concurrent and non-concurrent jobs together', async () => {
+    test('should handle mixed scenario: concurrent and non-concurrent jobs together', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue jobs: 2 with same concurrency key, 1 with different key, 1 without concurrency
@@ -2767,7 +2827,7 @@ describe('Queues - Payload', () => {
       expect(concurrentJob2After.completedAt).toBeDefined()
     })
 
-    it('should preserve FIFO order for jobs with same concurrencyKey', async () => {
+    test('should preserve FIFO order for jobs with same concurrencyKey', async ({ payload }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue 3 jobs with same key in specific order
@@ -2828,7 +2888,9 @@ describe('Queues - Payload', () => {
       expect(results[2].completedAt).toBeDefined() // C completed
     })
 
-    it('should preserve LIFO order when processingOrder is set to -createdAt', async () => {
+    test('should preserve LIFO order when processingOrder is set to -createdAt', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue 3 jobs with same key in specific order
@@ -2892,7 +2954,9 @@ describe('Queues - Payload', () => {
       expect(results[2].completedAt).toBeDefined() // C completed
     })
 
-    it('should block new pending jobs when a job with same key is already running', async () => {
+    test('should block new pending jobs when a job with same key is already running', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue and start running a long job
@@ -2939,7 +3003,9 @@ describe('Queues - Payload', () => {
       expect(pendingJobFinal.completedAt).toBeDefined()
     })
 
-    it('should pass queue name to concurrency key function for queue-specific concurrency', async () => {
+    test('should pass queue name to concurrency key function for queue-specific concurrency', async ({
+      payload,
+    }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue jobs to different queues with same resource ID
@@ -2976,8 +3042,8 @@ describe('Queues - Payload', () => {
       expect(results[1].completedAt).toBeDefined()
     })
 
-    describe('supersedes', () => {
-      it('should delete older pending jobs when supersedes is enabled', async () => {
+    test.describe('supersedes', () => {
+      test('should delete older pending jobs when supersedes is enabled', async ({ payload }) => {
         payload.config.jobs.deleteJobOnComplete = false
 
         // Queue 3 jobs with same key - newer ones should supersede older pending ones
@@ -3024,7 +3090,7 @@ describe('Queues - Payload', () => {
         expect(jobCAfter.concurrencyKey).toBe('supersedes:supersedes-test')
       })
 
-      it('should not delete running jobs when supersedes is enabled', async () => {
+      test('should not delete running jobs when supersedes is enabled', async ({ payload }) => {
         payload.config.jobs.deleteJobOnComplete = false
 
         // Queue and start running a job
@@ -3078,7 +3144,7 @@ describe('Queues - Payload', () => {
         expect(finalResults[1].completedAt).toBeDefined()
       })
 
-      it('should handle supersedes with multiple sequential queues', async () => {
+      test('should handle supersedes with multiple sequential queues', async ({ payload }) => {
         payload.config.jobs.deleteJobOnComplete = false
 
         // Queue jobs sequentially - each new job should delete previous pending ones
@@ -3142,7 +3208,9 @@ describe('Queues - Payload', () => {
         expect(finalJob.completedAt).toBeDefined()
       })
 
-      it('should supersede middle job when one is running and another queued', async () => {
+      test('should supersede middle job when one is running and another queued', async ({
+        payload,
+      }) => {
         payload.config.jobs.deleteJobOnComplete = false
 
         // Queue and start running first job
@@ -3223,8 +3291,8 @@ describe('Queues - Payload', () => {
     })
   })
 
-  describe('cron recovery', () => {
-    it('should recover cron after a transient DB error in jobs.run', async () => {
+  test.describe('cron recovery', () => {
+    test('should recover cron after a transient DB error in jobs.run', async ({ payload }) => {
       // --- Step 1: Verify cron works normally ---
 
       _internal_jobSystemGlobals.shouldAutoRun = false

@@ -104,7 +104,6 @@ describe('Live Preview', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'livePreviewTest',
     })
 
     await ensureCompilationIsDone({ page, serverURL })

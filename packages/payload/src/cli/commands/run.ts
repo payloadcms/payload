@@ -2,8 +2,8 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import * as z from 'zod/mini'
 
+import { strictObject } from '../../utilities/zod.js'
 import { defineCLICommand } from '../defineCLICommand.js'
-import { strictObject } from '../zod.js'
 
 export const createRunCommand = defineCLICommand({
   allowUnknownOption: true,

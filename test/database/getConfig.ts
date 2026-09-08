@@ -38,22 +38,21 @@ export const getConfig: () => Partial<Config> = () => ({
   collections: [
     {
       slug: 'noTimeStamps',
-      timestamps: false,
-      versions: false,
       fields: [
         {
-          type: 'text',
           name: 'title',
+          type: 'text',
         },
       ],
+      timestamps: false,
+      versions: false,
     },
     {
       slug: 'categories',
-      versions: { drafts: true },
       fields: [
         {
-          type: 'text',
           name: 'title',
+          type: 'text',
         },
         {
           name: 'simple',
@@ -67,9 +66,8 @@ export const getConfig: () => Partial<Config> = () => ({
               name: 'hideout',
               fields: [
                 {
-                  label: 'Cameras',
                   type: 'tabs',
-                  unique: true,
+                  label: 'Cameras',
                   tabs: [
                     {
                       name: 'camera1',
@@ -88,23 +86,25 @@ export const getConfig: () => Partial<Config> = () => ({
                       ],
                     },
                   ],
+                  unique: true,
                 },
               ],
             },
           ],
         },
       ],
+      versions: { drafts: true },
     },
     {
       slug: 'simple',
       fields: [
         {
-          type: 'text',
           name: 'text',
+          type: 'text',
         },
         {
-          type: 'number',
           name: 'number',
+          type: 'number',
         },
       ],
       versions: false,
@@ -113,26 +113,26 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'simple-localized',
       fields: [
         {
+          name: 'text',
           type: 'text',
           localized: true,
-          name: 'text',
         },
         {
-          type: 'number',
           name: 'number',
+          type: 'number',
         },
       ],
       versions: false,
     },
     {
       slug: 'categories-custom-id',
-      versions: { drafts: true },
       fields: [
         {
-          type: 'number',
           name: 'id',
+          type: 'number',
         },
       ],
+      versions: { drafts: true },
     },
     {
       slug: postsSlug,
@@ -144,65 +144,65 @@ export const getConfig: () => Partial<Config> = () => ({
           // access: { read: () => false },
         },
         {
+          name: 'category',
           type: 'relationship',
           relationTo: 'categories',
-          name: 'category',
         },
         {
-          type: 'json',
           name: 'categoryID',
+          type: 'json',
           virtual: 'category.id',
         },
         {
-          type: 'text',
           name: 'categoryTitle',
+          type: 'text',
           virtual: 'category.title',
         },
         {
-          type: 'text',
           name: 'categorySimpleText',
+          type: 'text',
           virtual: 'category.simple.text',
         },
         {
-          type: 'relationship',
-          relationTo: 'categories',
-          hasMany: true,
           name: 'categories',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: 'categories',
         },
         {
-          type: 'relationship',
-          relationTo: 'categories-custom-id',
-          hasMany: true,
           name: 'categoriesCustomID',
-        },
-        {
           type: 'relationship',
-          relationTo: ['categories'],
-          name: 'categoryPoly',
-        },
-        {
-          type: 'relationship',
-          relationTo: ['categories'],
           hasMany: true,
-          name: 'categoryPolyMany',
+          relationTo: 'categories-custom-id',
         },
         {
+          name: 'categoryPoly',
+          type: 'relationship',
+          relationTo: ['categories'],
+        },
+        {
+          name: 'categoryPolyMany',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: ['categories'],
+        },
+        {
+          name: 'categoryCustomID',
           type: 'relationship',
           relationTo: 'categories-custom-id',
-          name: 'categoryCustomID',
         },
         {
-          type: 'relationship',
-          relationTo: ['categories', 'simple'],
-          hasMany: true,
           name: 'polymorphicRelations',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: ['categories', 'simple'],
         },
         {
+          name: 'localizedPolymorphicRelations',
           type: 'relationship',
-          relationTo: ['categories', 'simple'],
           hasMany: true,
           localized: true,
-          name: 'localizedPolymorphicRelations',
+          relationTo: ['categories', 'simple'],
         },
         {
           name: 'localized',
@@ -232,22 +232,22 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'date',
         },
         {
-          type: 'blocks',
           name: 'blocks',
+          type: 'blocks',
           blocks: [
             {
               slug: 'block-third',
               fields: [
                 {
-                  type: 'blocks',
                   name: 'nested',
+                  type: 'blocks',
                   blocks: [
                     {
                       slug: 'block-fourth',
                       fields: [
                         {
-                          type: 'blocks',
                           name: 'nested',
+                          type: 'blocks',
                           blocks: [],
                         },
                       ],
@@ -259,15 +259,15 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
         {
-          type: 'group',
           name: 'testNestedGroup',
+          type: 'group',
           fields: [
             {
               name: 'nestedLocalizedPolymorphicRelation',
               type: 'relationship',
-              relationTo: ['categories', 'simple'],
               hasMany: true,
               localized: true,
+              relationTo: ['categories', 'simple'],
             },
             {
               name: 'nestedLocalizedText',
@@ -346,11 +346,11 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'hasTransaction',
           type: 'checkbox',
-          hooks: {
-            beforeChange: [({ req }) => !!req.transactionID],
-          },
           admin: {
             readOnly: true,
+          },
+          hooks: {
+            beforeChange: [({ req }) => !!req.transactionID],
           },
         },
         {
@@ -385,13 +385,13 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'arrayWithIDsLocalized',
           type: 'array',
-          localized: true,
           fields: [
             {
               name: 'text',
               type: 'text',
             },
           ],
+          localized: true,
         },
         {
           name: 'blocksWithIDs',
@@ -409,8 +409,8 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
         {
-          type: 'group',
           name: 'group',
+          type: 'group',
           fields: [{ name: 'text', type: 'text' }],
         },
         {
@@ -447,7 +447,6 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'tabs',
           tabs: [
             {
-              label: 'UnnamedTab',
               fields: [
                 {
                   name: 'groupWithinUnnamedTab',
@@ -461,6 +460,7 @@ export const getConfig: () => Partial<Config> = () => ({
                   ],
                 },
               ],
+              label: 'UnnamedTab',
             },
           ],
         },
@@ -494,9 +494,9 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'select',
           defaultValue: 'default',
           options: [
-            { value: 'option0', label: 'Option 0' },
-            { value: 'option1', label: 'Option 1' },
-            { value: 'default', label: 'Default' },
+            { label: 'Option 0', value: 'option0' },
+            { label: 'Option 1', value: 'option1' },
+            { label: 'Default', value: 'default' },
           ],
         },
         {
@@ -712,8 +712,8 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: 'virtual-relations',
-      admin: { useAsTitle: 'postTitle' },
       access: { read: () => true },
+      admin: { useAsTitle: 'postTitle' },
       fields: [
         {
           name: 'postTitle',
@@ -733,8 +733,8 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'postTitleHidden',
           type: 'text',
-          virtual: 'post.title',
           hidden: true,
+          virtual: 'post.title',
         },
         {
           name: 'postCategoryTitle',
@@ -769,8 +769,8 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'posts',
           type: 'relationship',
-          relationTo: 'posts',
           hasMany: true,
+          relationTo: 'posts',
         },
         {
           name: 'customID',
@@ -796,21 +796,21 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'textHooked',
           type: 'text',
-          virtual: true,
           hooks: { afterRead: [() => 'hooked'] },
+          virtual: true,
         },
         {
           name: 'array',
           type: 'array',
-          virtual: true,
           fields: [],
+          virtual: true,
         },
         {
           type: 'row',
           fields: [
             {
-              type: 'text',
               name: 'textWithinRow',
+              type: 'text',
               virtual: true,
             },
           ],
@@ -819,8 +819,8 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'collapsible',
           fields: [
             {
-              type: 'text',
               name: 'textWithinCollapsible',
+              type: 'text',
               virtual: true,
             },
           ],
@@ -830,14 +830,14 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'tabs',
           tabs: [
             {
-              label: 'tab',
               fields: [
                 {
-                  type: 'text',
                   name: 'textWithinTabs',
+                  type: 'text',
                   virtual: true,
                 },
               ],
+              label: 'tab',
             },
           ],
         },
@@ -875,7 +875,7 @@ export const getConfig: () => Partial<Config> = () => ({
           },
           hooks: {
             beforeChange: [
-              ({ value, operation }) => {
+              ({ operation, value }) => {
                 if (operation === 'create') {
                   return randomUUID()
                 }
@@ -929,14 +929,14 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: relationshipsMigrationSlug,
       fields: [
         {
+          name: 'relationship',
           type: 'relationship',
           relationTo: 'default-values',
-          name: 'relationship',
         },
         {
+          name: 'relationship_2',
           type: 'relationship',
           relationTo: ['default-values'],
-          name: 'relationship_2',
         },
       ],
       versions: true,
@@ -984,8 +984,8 @@ export const getConfig: () => Partial<Config> = () => ({
       fields: [
         {
           name: 'thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName',
-          dbName: 'shortname',
           type: 'array',
+          dbName: 'shortname',
           fields: [
             {
               name: 'nestedArray',
@@ -993,8 +993,8 @@ export const getConfig: () => Partial<Config> = () => ({
               dbName: 'short_nested_1',
               fields: [
                 {
-                  type: 'text',
                   name: 'text',
+                  type: 'text',
                 },
               ],
             },
@@ -1007,35 +1007,35 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'blocks-docs',
       fields: [
         {
+          name: 'testBlocksLocalized',
           type: 'blocks',
-          localized: true,
           blocks: [
             {
               slug: 'cta',
               fields: [
                 {
-                  type: 'text',
                   name: 'text',
+                  type: 'text',
                 },
               ],
             },
           ],
-          name: 'testBlocksLocalized',
+          localized: true,
         },
         {
+          name: 'testBlocks',
           type: 'blocks',
           blocks: [
             {
               slug: 'cta',
               fields: [
                 {
-                  type: 'text',
                   name: 'text',
+                  type: 'text',
                 },
               ],
             },
           ],
-          name: 'testBlocks',
         },
       ],
       versions: false,
@@ -1212,13 +1212,13 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'virtual-relation-global',
       fields: [
         {
-          type: 'text',
           name: 'postTitle',
+          type: 'text',
           virtual: 'post.title',
         },
         {
-          type: 'relationship',
           name: 'post',
+          type: 'relationship',
           relationTo: 'posts',
         },
       ],
@@ -1229,12 +1229,9 @@ export const getConfig: () => Partial<Config> = () => ({
     defaultLocale: 'en',
     locales: ['en', 'es', 'uk'],
   },
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
+
+export { seed }

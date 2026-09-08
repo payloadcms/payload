@@ -14,13 +14,11 @@ import { localizeStatus } from '@payloadcms/db-mongodb/migration-utils'
 import { sql } from '@payloadcms/db-postgres'
 import { migratePostgresLocalizeStatus } from '@payloadcms/db-postgres/migration-utils'
 import { Types } from 'mongoose'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { getPayload } from 'payload'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { resetAndSeed } from '../__helpers/shared/clearAndSeed/resetAndSeed.js'
+import { getTestDataConfig } from '../__helpers/shared/clearAndSeed/testDataConfig.js'
+import testConfig from './localizeStatus.config.js'
 
 async function main() {
   console.log('🚀 Starting localizeStatus migration test...\n')
@@ -29,12 +27,15 @@ async function main() {
   console.log(`Database: ${dbType}\n`)
 
   // Initialize Payload
-  const { payload } = await initPayloadInt(
-    dirname,
-    undefined,
-    undefined,
-    'localizeStatus.config.ts',
-  )
+  const config = await testConfig
+  const payload = await getPayload({ config, cron: true })
+  const testDataConfig = getTestDataConfig(config)
+
+  if (!testDataConfig) {
+    throw new Error('Test suite metadata was not registered by buildConfigWithDefaults.')
+  }
+
+  await resetAndSeed({ payload, ...testDataConfig })
 
   console.log('✅ Payload initialized\n')
 
@@ -140,7 +141,7 @@ async function main() {
   console.log()
 
   // Cleanup
-  await payload.db.destroy()
+  await payload.destroy()
   console.log('✨ Test completed successfully!')
 }
 

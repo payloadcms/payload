@@ -14,7 +14,7 @@ import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
-import { getExternalFile } from './getExternalFile.js'
+import { downloadFileToBuffer } from './downloadFileToBuffer.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
@@ -143,7 +143,7 @@ export const generateFileData = async <T>({
         file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
-        file = await getExternalFile({
+        file = await downloadFileToBuffer({
           data: incomingFileData as unknown as FileData,
           req,
           uploadConfig: collectionConfig.upload,

@@ -1,34 +1,32 @@
 /**
- * Standalone CLI migration tests.
- *
- * These tests verify that predefined migrations are correctly imported and created via the CLI.
- * Isolated from the main database tests to avoid connection pool issues from the CLI's
- * separate Payload instance.
+ * Verifies that predefined migrations are correctly imported and created through the CLI.
+ * This remains separate from the main database test file to limit connection-pool contention.
  */
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
-import { runCLICommand } from '../__helpers/shared/runCLICommand.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const migrationDir = path.join(dirname, './migrations')
 
-describe('migrations CLI', () => {
-  afterEach(() => {
+test.suite({ config: './config.ts' })('migrations CLI', () => {
+  test.afterEach(() => {
     removeFiles(migrationDir)
   })
 
-  beforeEach(() => {
+  test.beforeEach(() => {
     removeFiles(migrationDir)
   })
 
-  it('should create migration from external file path via CLI (plugin predefined migration)', async () => {
+  test('should create migration from external file path via CLI (plugin predefined migration)', async ({
+    cli,
+  }) => {
     // Tests: Absolute file path imports (goes through Path 2 in getPredefinedMigration.ts)
     // Example: pnpm payload migrate:create --file /absolute/path/to/migration.ts
 
@@ -39,13 +37,9 @@ describe('migrations CLI', () => {
 
     // Use the CLI interface directly, simulating:
     // pnpm payload migrate:create --file /path/to/predefinedMigrations/testPluginMigration.ts
-    await runCLICommand(
-      {
-        command: `migrate:create --file ${JSON.stringify(predefinedMigrationPath)} --force-accept-warning`,
-        configPath: path.join(dirname, 'config.ts'),
-      },
-      { cwd: dirname },
-    )
+    await cli({
+      command: `migrate:create --file ${JSON.stringify(predefinedMigrationPath)} --force-accept-warning`,
+    })
 
     // Find the created migration file
     const migrationFiles = fs
@@ -64,21 +58,14 @@ describe('migrations CLI', () => {
 
   test.options({ db: 'mongo' })(
     'should create migration from @payloadcms/db-* adapter predefinedMigrations folder',
-    async () => {
+    async ({ cli }) => {
       // Tests: Path 1 in getPredefinedMigration.ts - @payloadcms/db-* prefix handling
       // These load directly from adapter's predefinedMigrations folder WITHOUT package.json exports
       // Example: pnpm payload migrate:create --file @payloadcms/db-mongodb/__testing__
 
       // Use the CLI interface directly, simulating:
       // pnpm payload migrate:create --file @payloadcms/db-mongodb/__testing__
-      await runCLICommand(
-        {
-          command:
-            'migrate:create --file @payloadcms/db-mongodb/__testing__ --force-accept-warning',
-          configPath: path.join(dirname, 'config.ts'),
-        },
-        { cwd: dirname },
-      )
+      await cli('migrate:create --file @payloadcms/db-mongodb/__testing__ --force-accept-warning')
 
       // Find the created migration file
       const migrationFiles = fs
@@ -95,7 +82,7 @@ describe('migrations CLI', () => {
     },
   )
 
-  it('should create migration from package.json export (non-db package)', async () => {
+  test('should create migration from package.json export (non-db package)', async ({ cli }) => {
     // Tests: Path 2 in getPredefinedMigration.ts - module specifier via package.json exports
     // Packages WITHOUT @payloadcms/db-* prefix MUST use package.json exports
     // Example: pnpm payload migrate:create --file payload/__testing__/predefinedMigration
@@ -103,13 +90,8 @@ describe('migrations CLI', () => {
     // Use the CLI interface directly, simulating:
     // pnpm payload migrate:create --file payload/__testing__/predefinedMigration
     // payload/__testing__/predefinedMigration is explicitly defined in payload's package.json exports
-    await runCLICommand(
-      {
-        command:
-          'migrate:create --file payload/__testing__/predefinedMigration --force-accept-warning',
-        configPath: path.join(dirname, 'config.ts'),
-      },
-      { cwd: dirname },
+    await cli(
+      'migrate:create --file payload/__testing__/predefinedMigration --force-accept-warning',
     )
 
     // Find the created migration file
