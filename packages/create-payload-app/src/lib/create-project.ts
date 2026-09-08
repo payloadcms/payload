@@ -72,26 +72,31 @@ async function installDeps(args: {
 
 type PayloadGenerateResult = { error: string; ok: false } | { ok: true }
 
+/**
+ * npm needs `npm run <script>`; pnpm, yarn, and bun run package scripts directly.
+ */
 function getRunCommand(packageManager: PackageManager): string {
-  if (packageManager === 'yarn') {
-    return 'yarn'
-  } else if (packageManager === 'pnpm') {
-    return 'pnpm'
-  } else if (packageManager === 'bun') {
-    return 'bun'
-  }
-  return 'npx'
+  return packageManager === 'npm' ? 'npm run' : packageManager
 }
 
-async function runPayloadCommand(args: {
-  command: string
+async function getPackageScripts(projectDir: string): Promise<Record<string, string>> {
+  try {
+    const packageJson = await fse.readJson(path.resolve(projectDir, 'package.json'))
+    return packageJson?.scripts ?? {}
+  } catch {
+    return {}
+  }
+}
+
+async function runPackageScript(args: {
   packageManager: PackageManager
   projectDir: string
+  script: string
 }): Promise<PayloadGenerateResult> {
-  const { command, packageManager, projectDir } = args
+  const { packageManager, projectDir, script } = args
 
   try {
-    await execa.command(`${getRunCommand(packageManager)} payload ${command}`, {
+    await execa.command(`${getRunCommand(packageManager)} ${script}`, {
       cwd: path.resolve(projectDir),
     })
     return { ok: true }
@@ -100,63 +105,55 @@ async function runPayloadCommand(args: {
   }
 }
 
-async function generateImportMap(args: {
-  packageManager: PackageManager
-  projectDir: string
-}): Promise<PayloadGenerateResult> {
-  return runPayloadCommand({ ...args, command: 'generate:importmap' })
-}
-
-async function generateTypes(args: {
-  packageManager: PackageManager
-  projectDir: string
-}): Promise<PayloadGenerateResult> {
-  return runPayloadCommand({ ...args, command: 'generate:types' })
-}
-
-async function runPayloadGenerate(args: {
+/**
+ * Runs one of the template's own codegen scripts. A failure only warns, so codegen
+ * never blocks project creation, and templates without the script are skipped.
+ */
+async function runGenerateScript(args: {
   artifact: string
-  command: string
-  generate: (args: {
-    packageManager: PackageManager
-    projectDir: string
-  }) => Promise<PayloadGenerateResult>
+  availableScripts: Record<string, string>
   packageManager: PackageManager
   projectDir: string
+  script: string
   spinner: ReturnType<typeof p.spinner>
 }): Promise<void> {
-  const { artifact, command, generate, packageManager, projectDir, spinner } = args
+  const { artifact, availableScripts, packageManager, projectDir, script, spinner } = args
+
+  if (!availableScripts[script]) {
+    return
+  }
 
   spinner.start(`Generating ${artifact}...`)
-  const result = await generate({ packageManager, projectDir })
-  const capitalizedArtifact = artifact.charAt(0).toUpperCase() + artifact.slice(1)
+  const result = await runPackageScript({ packageManager, projectDir, script })
 
   if (result.ok) {
-    spinner.stop(`${capitalizedArtifact} generated`)
+    spinner.stop(`${artifact.charAt(0).toUpperCase()}${artifact.slice(1)} generated`)
     return
   }
 
   spinner.stop(`Could not generate ${artifact}`, 1)
-  warning(`Run '${getRunCommand(packageManager)} payload ${command}' later. ${result.error}`)
+  warning(`Run '${getRunCommand(packageManager)} ${script}' to generate it later.`)
 }
 
-/** Generate the admin import map and Payload types so the scaffold builds clean. */
+/** Generate the admin import map and types so the scaffold starts in sync with core. */
 async function runProjectCodegen(args: {
   packageManager: PackageManager
   projectDir: string
   spinner: ReturnType<typeof p.spinner>
 }): Promise<void> {
-  await runPayloadGenerate({
+  const availableScripts = await getPackageScripts(args.projectDir)
+
+  await runGenerateScript({
     ...args,
     artifact: 'import map',
-    command: 'generate:importmap',
-    generate: generateImportMap,
+    availableScripts,
+    script: 'generate:importmap',
   })
-  await runPayloadGenerate({
+  await runGenerateScript({
     ...args,
     artifact: 'types',
-    command: 'generate:types',
-    generate: generateTypes,
+    availableScripts,
+    script: 'generate:types',
   })
 }
 
