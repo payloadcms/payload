@@ -1,4 +1,4 @@
-import type { DrizzleAdapter, Operators, RequireDrizzleKit } from '@payloadcms/drizzle'
+import type { DrizzleAdapter, Operators } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -46,6 +46,7 @@ import {
   convertPathToJSONTraversal,
   countDistinct,
   createJSONQuery,
+  createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
@@ -53,14 +54,8 @@ import {
   init,
   insert,
 } from '@payloadcms/drizzle/sqlite'
-import { createRequireDrizzleKit } from '@payloadcms/drizzle/sqlite/create-require-drizzle-kit'
 import { like, notLike } from 'drizzle-orm'
-import {
-  createDatabaseAdapter,
-  defaultBeginTransaction,
-  dynamicImport,
-  findMigrationDir,
-} from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteAdapter, WalConfig } from './types.js'
@@ -70,23 +65,8 @@ import { connect } from './connect.js'
 const filename = fileURLToPath(import.meta.url)
 
 const requireDrizzleKit = createRequireDrizzleKit({
-  load: async () => {
-    const {
-      generateSQLiteDrizzleJson: generateDrizzleJson,
-      generateSQLiteMigration: generateMigration,
-      pushSQLiteSchema: pushSchema,
-    } = await dynamicImport<{
-      generateSQLiteDrizzleJson: ReturnType<RequireDrizzleKit>['generateDrizzleJson']
-      generateSQLiteMigration: ReturnType<RequireDrizzleKit>['generateMigration']
-      pushSQLiteSchema: ReturnType<RequireDrizzleKit>['pushSchema']
-    }>('drizzle-kit/api', { from: import.meta.url })
-
-    return {
-      generateDrizzleJson,
-      generateMigration,
-      pushSchema,
-    }
-  },
+  from: import.meta.url,
+  packageName: '@payloadcms/db-sqlite',
 })
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
