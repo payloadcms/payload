@@ -1,0 +1,64 @@
+---
+title: ReactSelect
+label: ReactSelect
+order: 220
+desc: Select one or more options with Payload's ReactSelect component.
+keywords: ui, component, select, dropdown, option, form
+---
+
+The `ReactSelect` component adapts `react-select` to Payload's styles and interaction patterns. It is also exported as `Select`.
+
+## Import
+
+Inside a Payload Admin Panel Custom Component:
+
+```tsx
+import { ReactSelect } from '@payloadcms/ui'
+```
+
+You can also import the component directly:
+
+```tsx
+import { ReactSelect } from '@payloadcms/ui/elements/ReactSelect'
+```
+
+## Basic usage
+
+<ComponentPreview component="ReactSelect" example="basic" />
+
+Store the selected option object rather than only its value. Use `isMulti` when users can select more than one option.
+
+By default, the options menu is rendered in a portal so it can escape drawers and other containers without being clipped.
+
+## Multiple values
+
+<ComponentPreview component="ReactSelect" example="multiple" />
+
+Enable `isMulti` to store an array of selected options. Add `isSortable` when users should also be able to reorder those values by dragging them.
+
+## Accessibility
+
+- Add `aria-label` or associate the select with a visible field label when its purpose is not clear from nearby text.
+- Keep option labels unique and concise.
+- Preserve keyboard search and selection behavior when supplying custom `components`.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop           | Type                                  | Default   | Description                                        |
+| -------------- | ------------------------------------- | --------- | -------------------------------------------------- |
+| `options` \*   | `Option[] \| OptionGroup[]`           | —         | Options displayed in the menu.                     |
+| `value`        | `Option \| Option[]`                  | —         | Selected option or options.                        |
+| `onChange`     | `(value: Option \| Option[]) => void` | —         | Runs when the selection changes.                   |
+| `placeholder`  | `string \| LabelFunction`             | Localized | Sets the empty-state label.                        |
+| `isMulti`      | `boolean`                             | `false`   | Allows multiple selected values.                   |
+| `isSortable`   | `boolean`                             | `false`   | Allows selected multi-value items to be reordered. |
+| `isClearable`  | `boolean`                             | `true`    | Displays a control for clearing the value.         |
+| `isSearchable` | `boolean`                             | `true`    | Allows options to be filtered by typing.           |
+| `isCreatable`  | `boolean`                             | `false`   | Allows users to create values not in `options`.    |
+| `disabled`     | `boolean`                             | `false`   | Prevents interaction.                              |
+| `isLoading`    | `boolean`                             | `false`   | Displays the loading state.                        |
+| `showError`    | `boolean`                             | `false`   | Applies the validation error style.                |
+
+_\* An asterisk denotes that a prop is required._
