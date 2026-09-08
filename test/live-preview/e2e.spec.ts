@@ -321,7 +321,7 @@ describe('Live Preview', () => {
       documentIDs.length = 0
     })
 
-    test('should disable live preview for unsupported URLs and recover with a valid URL', async () => {
+    test('should disable preview controls for unsupported URLs and recover with a valid URL', async () => {
       const urlUtil = new AdminUrlUtil(serverURL, 'conditional-url')
       const doc = await payload.create({
         collection: 'conditional-url',
@@ -335,25 +335,65 @@ describe('Live Preview', () => {
 
       const { iframe } = await getLivePreviewIframe(page)
       const toggler = page.locator('#live-preview-toggler')
+      const previewButton = page.locator('#preview-button')
       const previewURLField = page.locator('#field-previewURL')
 
       await expect(iframe).toHaveAttribute('src', `${serverURL}/live-preview/static`)
+      await expect(previewButton).toBeVisible()
 
       await previewURLField.fill('mailto:editor@example.com')
       await saveDocAndAssert(page)
       await expect(toggler).toBeHidden()
       await expect(iframe).toBeHidden()
+      await expect(previewButton).toBeHidden()
 
       await page.reload()
       await expect(previewURLField).toHaveValue('mailto:editor@example.com')
       await expect(toggler).toBeHidden()
       await expect(iframe).toBeHidden()
+      await expect(previewButton).toBeHidden()
 
       await previewURLField.fill('/live-preview/static')
       await saveDocAndAssert(page)
       await toggleLivePreview(page, { targetState: 'on' })
       await expect(iframe).toHaveAttribute('src', `${serverURL}/live-preview/static`)
       await expect(iframe).toBeVisible()
+      await expect(previewButton).toBeVisible()
+    })
+
+    test('should omit the preview button for an unsupported initial URL and open a valid URL after editing', async () => {
+      const urlUtil = new AdminUrlUtil(serverURL, 'conditional-url')
+      const doc = await payload.create({
+        collection: 'conditional-url',
+        data: {
+          enabled: true,
+          previewURL: 'mailto:editor@example.com',
+          title: 'Initial preview URL',
+        },
+      })
+
+      documentIDs.push(doc.id)
+
+      await page.goto(urlUtil.edit(doc.id))
+
+      const previewButton = page.locator('#preview-button')
+      const previewURLField = page.locator('#field-previewURL')
+      const validURL = `${serverURL}/live-preview/static`
+
+      await expect(previewURLField).toHaveValue('mailto:editor@example.com')
+      await expect(previewButton).toBeHidden()
+
+      await previewURLField.fill(validURL)
+      await saveDocAndAssert(page)
+      await expect(previewButton).toBeVisible()
+
+      const [newTab] = await Promise.all([
+        context.waitForEvent('page'),
+        previewButton.click({ modifiers: ['ControlOrMeta'] }),
+      ])
+
+      await expect(newTab).toHaveURL(validURL)
+      await newTab.close()
     })
   })
 

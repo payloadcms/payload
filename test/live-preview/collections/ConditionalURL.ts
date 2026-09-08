@@ -7,7 +7,7 @@ export const ConditionalURL: CollectionConfig = {
       url: ({ data }) => (data?.enabled ? data.previewURL || '/live-preview/static' : null),
     },
     preview: (doc) => {
-      return doc?.enabled ? '/live-preview/static' : null
+      return doc?.enabled ? doc.previewURL || '/live-preview/static' : null
     },
   },
   fields: [
