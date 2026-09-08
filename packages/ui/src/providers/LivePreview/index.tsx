@@ -81,7 +81,15 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   )
 
   const [url, setURL] = useState<string>('')
-  const [previewURL, setPreviewURL] = useState<string>(previewURLFromProps)
+  const [previewURL, _setPreviewURL] = useState<string>()
+
+  const setPreviewURL = useCallback<LivePreviewContextType['setPreviewURL']>((incomingURL) => {
+    _setPreviewURL(incomingURL && formatAbsoluteURL(incomingURL) ? incomingURL : undefined)
+  }, [])
+
+  useEffect(() => {
+    setPreviewURL(previewURLFromProps)
+  }, [previewURLFromProps, setPreviewURL])
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
