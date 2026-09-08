@@ -63,6 +63,7 @@ export const seed = async ({
         navItems: [],
       },
       req,
+      overrideAccess: true,
     })
   }
 
@@ -75,6 +76,7 @@ export const seed = async ({
         },
       },
       req,
+      overrideAccess: true,
     })
   }
 
@@ -82,6 +84,7 @@ export const seed = async ({
     collection: 'pages',
     where: {},
     req,
+    overrideAccess: true,
   })
   // #endregion
 
@@ -96,6 +99,7 @@ export const seed = async ({
       },
     },
     req,
+    overrideAccess: true,
   })
 
   const demoAuthor = await payload.create({
@@ -106,6 +110,7 @@ export const seed = async ({
       password: 'password',
     },
     req,
+    overrideAccess: true,
   })
 
   let demoAuthorID: number | string = demoAuthor.id
@@ -119,6 +124,7 @@ export const seed = async ({
     locale: 'en',
     filePath: path.resolve(dirname, 'image-post1.webp'),
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'media',
@@ -127,6 +133,7 @@ export const seed = async ({
     locale: 'es',
     filePath: path.resolve(dirname, 'image-post1.webp'),
     req,
+    overrideAccess: true,
   })
 
   const image2Doc = await payload.create({
@@ -135,6 +142,7 @@ export const seed = async ({
     data: image2('en'),
     filePath: path.resolve(dirname, 'image-post2.webp'),
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'media',
@@ -143,6 +151,7 @@ export const seed = async ({
     locale: 'es',
     filePath: path.resolve(dirname, 'image-post2.webp'),
     req,
+    overrideAccess: true,
   })
 
   const image3Doc = await payload.create({
@@ -151,6 +160,7 @@ export const seed = async ({
     data: image2('en'),
     filePath: path.resolve(dirname, 'image-post3.webp'),
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'media',
@@ -159,6 +169,7 @@ export const seed = async ({
     locale: 'es',
     filePath: path.resolve(dirname, 'image-post3.webp'),
     req,
+    overrideAccess: true,
   })
 
   const imageHomeDoc = await payload.create({
@@ -167,6 +178,7 @@ export const seed = async ({
     data: image2('en'),
     filePath: path.resolve(dirname, 'image-hero1.webp'),
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'media',
@@ -175,6 +187,7 @@ export const seed = async ({
     locale: 'es',
     filePath: path.resolve(dirname, 'image-hero1.webp'),
     req,
+    overrideAccess: true,
   })
 
   let image1ID: number | string = image1Doc.id
@@ -200,6 +213,7 @@ export const seed = async ({
       title: 'Technology',
     },
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'categories',
@@ -209,6 +223,7 @@ export const seed = async ({
       title: 'Tecnología',
     },
     req,
+    overrideAccess: true,
   })
 
   const newsCategory = await payload.create({
@@ -218,6 +233,7 @@ export const seed = async ({
       title: 'News',
     },
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'categories',
@@ -227,6 +243,7 @@ export const seed = async ({
       title: 'Noticias',
     },
     req,
+    overrideAccess: true,
   })
 
   const financeCategory = await payload.create({
@@ -236,6 +253,7 @@ export const seed = async ({
       title: 'Finance',
     },
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'categories',
@@ -245,6 +263,7 @@ export const seed = async ({
       title: 'Finanzas',
     },
     req,
+    overrideAccess: true,
   })
 
   const designCategory = await payload.create({
@@ -254,6 +273,7 @@ export const seed = async ({
       title: 'Design',
     },
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'categories',
@@ -263,6 +283,7 @@ export const seed = async ({
       title: 'Diseño',
     },
     req,
+    overrideAccess: true,
   })
 
   const softwareCategory = await payload.create({
@@ -272,6 +293,7 @@ export const seed = async ({
       title: 'Software',
     },
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'categories',
@@ -281,6 +303,7 @@ export const seed = async ({
       title: 'Software',
     },
     req,
+    overrideAccess: true,
   })
 
   const engineeringCategory = await payload.create({
@@ -290,6 +313,7 @@ export const seed = async ({
       title: 'Engineering',
     },
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'categories',
@@ -299,6 +323,7 @@ export const seed = async ({
       title: 'Ingeniería',
     },
     req,
+    overrideAccess: true,
   })
   // #endregion
 
@@ -317,6 +342,7 @@ export const seed = async ({
     ),
     locale: 'en',
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'posts',
@@ -329,6 +355,7 @@ export const seed = async ({
     ),
     locale: 'es',
     req,
+    overrideAccess: true,
   })
 
   const post2Doc = await payload.create({
@@ -341,6 +368,7 @@ export const seed = async ({
     ),
     locale: 'en',
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'posts',
@@ -353,6 +381,7 @@ export const seed = async ({
     ),
     locale: 'es',
     req,
+    overrideAccess: true,
   })
 
   const post3Doc = await payload.create({
@@ -365,6 +394,7 @@ export const seed = async ({
     ),
     locale: 'en',
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'posts',
@@ -377,6 +407,7 @@ export const seed = async ({
     ),
     locale: 'es',
     req,
+    overrideAccess: true,
   })
 
   // update each post with related posts
@@ -387,6 +418,7 @@ export const seed = async ({
       relatedPosts: [post2Doc.id, post3Doc.id],
     },
     req,
+    overrideAccess: true,
   })
   await payload.update({
     id: post2Doc.id,
@@ -395,6 +427,7 @@ export const seed = async ({
       relatedPosts: [post1Doc.id, post3Doc.id],
     },
     req,
+    overrideAccess: true,
   })
   await payload.update({
     id: post3Doc.id,
@@ -403,6 +436,7 @@ export const seed = async ({
       relatedPosts: [post1Doc.id, post2Doc.id],
     },
     req,
+    overrideAccess: true,
   })
   // #endregion
 
@@ -418,6 +452,7 @@ export const seed = async ({
         .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID)),
     ),
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'pages',
@@ -429,6 +464,7 @@ export const seed = async ({
         .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID)),
     ),
     req,
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding contact form...`)
@@ -438,6 +474,7 @@ export const seed = async ({
     locale: 'en',
     data: JSON.parse(JSON.stringify(contactFormData('en'))),
     req,
+    overrideAccess: true,
   })
 
   const contactFormData_es = JSON.parse(JSON.stringify(contactFormData('es')))
@@ -464,6 +501,7 @@ export const seed = async ({
       })),
     },
     req,
+    overrideAccess: true,
   })
 
   let contactFormID: number | string = contactForm.id
@@ -484,6 +522,7 @@ export const seed = async ({
       ),
     ),
     req,
+    overrideAccess: true,
   })
   await payload.update({
     collection: 'pages',
@@ -496,6 +535,7 @@ export const seed = async ({
       ),
     ),
     req,
+    overrideAccess: true,
   })
   // #endregion
 
@@ -527,6 +567,7 @@ export const seed = async ({
       ],
     },
     req,
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
@@ -556,6 +597,7 @@ export const seed = async ({
       ],
     },
     req,
+    overrideAccess: true,
   })
 
   payload.logger.info(`— Seeding footer...`)
@@ -591,6 +633,7 @@ export const seed = async ({
       ],
     },
     req,
+    overrideAccess: true,
   })
   await payload.updateGlobal({
     slug: 'footer',
@@ -624,6 +667,7 @@ export const seed = async ({
       ],
     },
     req,
+    overrideAccess: true,
   })
   // #endregion
 
