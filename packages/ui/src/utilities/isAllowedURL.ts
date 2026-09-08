@@ -1,8 +1,4 @@
-/**
- * Allows only HTTP(S) URLs without changing their formatting.
- * String inputs must be nonempty and require the client to resolve relative URLs against the admin origin.
- * Parsed URLs can be passed to avoid resolving the same input twice.
- */
+/** Allows only HTTP(S) URLs, e.g. `http://` or `https://`. */
 export const isAllowedURL = (incomingURL?: string | URL): boolean => {
   if (!incomingURL) {
     return false
