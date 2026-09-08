@@ -4,7 +4,7 @@ export const ConditionalURL: CollectionConfig = {
   slug: 'conditional-url',
   admin: {
     livePreview: {
-      url: ({ data }) => (data?.enabled ? '/live-preview/static' : null),
+      url: ({ data }) => (data?.enabled ? data.previewURL || '/live-preview/static' : null),
     },
     preview: (doc) => {
       return doc?.enabled ? '/live-preview/static' : null
@@ -18,6 +18,10 @@ export const ConditionalURL: CollectionConfig = {
     {
       name: 'enabled',
       type: 'checkbox',
+    },
+    {
+      name: 'previewURL',
+      type: 'text',
     },
   ],
   versions: false,

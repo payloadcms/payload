@@ -647,6 +647,7 @@ export interface ConditionalUrl {
   id: string;
   title?: string | null;
   enabled?: boolean | null;
+  previewURL?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1391,6 +1392,7 @@ export interface CustomLivePreviewSelect<T extends boolean = true> {
 export interface ConditionalUrlSelect<T extends boolean = true> {
   title?: T;
   enabled?: T;
+  previewURL?: T;
   updatedAt?: T;
   createdAt?: T;
 }

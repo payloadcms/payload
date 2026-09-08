@@ -311,6 +311,52 @@ describe('Live Preview', () => {
     await expect(iframe).toBeHidden()
   })
 
+  describe('URL validation', () => {
+    const documentIDs: (number | string)[] = []
+
+    test.afterEach(async () => {
+      for (const id of documentIDs) {
+        await payload.delete({ id, collection: 'conditional-url' })
+      }
+      documentIDs.length = 0
+    })
+
+    test('should disable live preview for unsupported URLs and recover with a valid URL', async () => {
+      const urlUtil = new AdminUrlUtil(serverURL, 'conditional-url')
+      const doc = await payload.create({
+        collection: 'conditional-url',
+        data: { enabled: true, title: 'Preview URL validation' },
+      })
+
+      documentIDs.push(doc.id)
+
+      await page.goto(urlUtil.edit(doc.id))
+      await toggleLivePreview(page, { targetState: 'on' })
+
+      const { iframe } = await getLivePreviewIframe(page)
+      const toggler = page.locator('#live-preview-toggler')
+      const previewURLField = page.locator('#field-previewURL')
+
+      await expect(iframe).toHaveAttribute('src', `${serverURL}/live-preview/static`)
+
+      await previewURLField.fill('mailto:editor@example.com')
+      await saveDocAndAssert(page)
+      await expect(toggler).toBeHidden()
+      await expect(iframe).toBeHidden()
+
+      await page.reload()
+      await expect(previewURLField).toHaveValue('mailto:editor@example.com')
+      await expect(toggler).toBeHidden()
+      await expect(iframe).toBeHidden()
+
+      await previewURLField.fill('/live-preview/static')
+      await saveDocAndAssert(page)
+      await toggleLivePreview(page, { targetState: 'on' })
+      await expect(iframe).toHaveAttribute('src', `${serverURL}/live-preview/static`)
+      await expect(iframe).toBeVisible()
+    })
+  })
+
   test('collection — does not render preview button when url is null', async () => {
     const noURL = new AdminUrlUtil(serverURL, 'conditional-url')
     await page.goto(noURL.create)
