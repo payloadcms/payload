@@ -25,6 +25,7 @@ import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
 import { addSessionToUser, revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
@@ -218,6 +219,8 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
   user.collection = collectionConfig.slug
   user._strategy = 'local-jwt'
 
+  const authenticatedHash = user.hash
+  const authenticatedSalt = user.salt
   const authResult = await authenticateLocalStrategy({ doc: user, password })
   user = sanitizeInternalFields(user)
 
@@ -291,6 +294,37 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
 
     if (sid) {
       fieldsToSignArgs.sid = sid
+    }
+
+    if (
+      authResult.shouldUpdatePasswordHash &&
+      typeof authenticatedHash === 'string' &&
+      typeof authenticatedSalt === 'string'
+    ) {
+      try {
+        const { hash, salt } = await generatePasswordSaltHash({
+          collection: collectionConfig,
+          isPasswordAuthenticated: true,
+          password,
+          req,
+        })
+
+        await payload.db.updateOne({
+          collection: collectionConfig.slug,
+          data: { hash, salt },
+          req,
+          select: { id: true },
+          where: {
+            id: { equals: user.id },
+            hash: { equals: authenticatedHash },
+            salt: { equals: authenticatedSalt },
+          },
+        })
+      } catch (err) {
+        // Rehashing is opportunistic and is retried on the next login, so a failure here
+        // must not reject an otherwise valid login or discard the session already created
+        payload.logger.error({ err, msg: 'Failed to update the stored password hash' })
+      }
     }
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs)

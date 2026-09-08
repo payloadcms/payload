@@ -1,3 +1,4 @@
+import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
@@ -33,6 +34,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   let idToUpdate = id
+  let whereToUpdate: SQL<unknown> | undefined
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
@@ -44,6 +46,9 @@ export const updateOne: UpdateOne = async function updateOne(
       tableName,
       where: whereArg,
     })
+    // A `where` that needs joins cannot be applied to the UPDATE statement itself, so those
+    // queries keep resolving a matching id first and then update that row unconditionally
+    whereToUpdate = joins.length === 0 ? where : undefined
 
     if (options.atomic === true) {
       if (!shouldUseOptimizedUpsertRow({ data, fields: collection.flattenedFields })) {
@@ -132,6 +137,7 @@ export const updateOne: UpdateOne = async function updateOne(
     req,
     select,
     tableName,
+    where: whereToUpdate,
   })
 
   if (returning === false) {

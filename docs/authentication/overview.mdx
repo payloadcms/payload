@@ -76,6 +76,12 @@ export const Admins: CollectionConfig = {
   details](../fields/overview#field-names).
 </Banner>
 
+The `hash` field stores a PBKDF2-SHA256 derived key prefixed with the scheme it was created with,
+for example `pbkdf2-sha256-v1:<derived-key>`. Values stored before that prefix was introduced stay
+valid and are rewritten to the current scheme after the next successful login, which also assigns a
+new `salt`. Treat the stored format as internal and read these fields through Payload rather than
+deriving them yourself.
+
 The following options are available:
 
 | Option                         | Description                                                                                                                                                                                                                 |
