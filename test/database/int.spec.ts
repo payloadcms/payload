@@ -55,8 +55,8 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-test.suite({ config: './config.ts' })('database', () => {
-  test.beforeEach(async ({ payload, restClient }) => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('database', () => {
+  test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     payload.db.migrationDir = path.join(dirname, './migrations')
 
     await restClient.login({
@@ -893,7 +893,7 @@ test.suite({ config: './config.ts' })('database', () => {
   })
 
   test.describe('allow ID on create', () => {
-    test.beforeEach(({ payload }) => {
+    test.beforeAll(({ payloadInstance: payload }) => {
       payload.db.allowIDOnCreate = true
       payload.config.db.allowIDOnCreate = true
     })
@@ -2512,7 +2512,7 @@ test.suite({ config: './config.ts' })('database', () => {
 
       test.describe('disableTransaction', () => {
         let disabledTransactionPost
-        test.beforeEach(async ({ payload }) => {
+        test.beforeAll(async ({ payloadInstance: payload }) => {
           disabledTransactionPost = await payload.create({
             collection,
             data: {

@@ -172,6 +172,9 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 - Read `payload`, `restClient`, `sdk`, or `cli` from the test or hook arguments
 - Do not initialize Payload manually or add database reset/seed hooks; the fixture initializes
   Payload once per file, resets and seeds before each test that uses it, and destroys it afterward
+- Existing suites that intentionally manage shared state can set `resetBetweenTests: false`. The fixture
+  resets and seeds once for the file, and the suite keeps responsibility for between-test cleanup.
+  New suites should use the default per-test reset behavior.
 - Use `test.suite({})` only for integration tests that do not use Payload
 
 ```typescript

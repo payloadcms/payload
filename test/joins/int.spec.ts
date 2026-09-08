@@ -25,7 +25,7 @@ let token: string
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts' })('Joins Field', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', () => {
   let category: Category
   let otherCategory: Category
   let categoryID
@@ -33,7 +33,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
-  test.beforeEach(async ({ payload, restClient }) => {
+  test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -675,7 +675,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
 
   test.describe('`where` filters', () => {
     let categoryWithFilteredPost
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       categoryWithFilteredPost = await payload.create({
         collection: categoriesSlug,
         data: {
@@ -733,7 +733,7 @@ test.suite({ config: './config.ts' })('Joins Field', () => {
   test.describe('Joins with localization', () => {
     let localizedCategory: Category
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       localizedCategory = await payload.create({
         collection: 'localized-categories',
         locale: 'en',

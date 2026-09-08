@@ -100,7 +100,7 @@ function draft2020Violations(schema: unknown, rootPath: string): string[] {
   walk(schema, rootPath)
   return errors
 }
-test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plugin-mcp', () => {
   test.afterEach(() => {
     vi.unstubAllEnvs()
   })
@@ -839,10 +839,23 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
     })
   })
   test.describe('Collections', () => {
+    const createdMediaIDs: Array<number | string> = []
+    const createdPostIDs: Array<number | string> = []
     const uploadServers: TestFileServer[] = []
-    test.afterEach(async () => {
+
+    test.afterEach(async ({ payload }) => {
       await Promise.all(uploadServers.map(({ close }) => close()))
       uploadServers.length = 0
+
+      for (const id of createdMediaIDs) {
+        await payload.delete({ collection: 'media', id })
+      }
+      createdMediaIDs.length = 0
+
+      for (const id of createdPostIDs) {
+        await payload.delete({ collection: 'posts', id })
+      }
+      createdPostIDs.length = 0
     })
     it('getCollectionSchema returns collection fields for createDocuments', async ({
       mcp,
@@ -945,6 +958,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
         id: number | string
       }>(callResponse)
 
+      createdPostIDs.push(createdPost.id)
+
       expect(createdPost).toMatchObject({
         _status: 'draft',
         content: 'Incomplete draft',
@@ -972,6 +987,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
         docs: Array<{ id: number | string; index: number }>
         errors: Array<{ index: number; message: string }>
       }>(callResponse)
+
+      createdPostIDs.push(...result.docs.map(({ id }) => id))
 
       expect(callResponse.isError).not.toBe(true)
       expect(result.docs).toEqual([
@@ -1022,6 +1039,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
         errors: Array<{ index: number; message: string }>
       }>(callResponse)
 
+      createdMediaIDs.push(...result.docs.map(({ id }) => id))
+
       const [storedPNG, storedJPEG] = await Promise.all(
         result.docs.map(({ id }) => payload.findByID({ collection: 'media', id })),
       )
@@ -1064,6 +1083,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       const createdMedia = getCreatedDocument<{
         id: number | string
       }>(callResponse)
+      createdMediaIDs.push(createdMedia.id)
+
       const storedMedia = await payload.findByID({
         id: createdMedia.id,
         collection: 'media',
@@ -1081,6 +1102,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
         },
         filePath: path.resolve(dirname, '../uploads/image.jpg'),
       })
+      createdMediaIDs.push(media.id)
+
       const image = await readFile(path.resolve(dirname, '../uploads/image.png'))
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -1235,6 +1258,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       const createdPost = getCreatedDocument<{
         id: number | string
       }>(callResponse)
+      createdPostIDs.push(createdPost.id)
+
       const storedPost = await payload.findByID({
         id: createdPost.id,
         collection: 'posts',
@@ -1314,6 +1339,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
       const createdMedia = getCreatedDocument<{
         id: number | string
       }>(callResponse)
+      createdMediaIDs.push(createdMedia.id)
+
       const storedMedia = await payload.findByID({
         id: createdMedia.id,
         collection: 'media',
@@ -1331,6 +1358,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
           title: 'Test Post for Finding',
         },
       })
+      createdPostIDs.push(post.id)
+
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({
@@ -2866,6 +2895,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
     })
   })
   test.describe('Minified JSON responses', () => {
+    const createdIDs: string[] = []
+
+    test.afterEach(async ({ payload }) => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: 'posts', id })
+      }
+      createdIDs.length = 0
+    })
+
     it('should return minified JSON without newlines or indentation in resource responses', async ({
       mcp,
       getApiKey,
@@ -2878,6 +2916,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
           content: 'Content for minified test.',
         },
       })
+      createdIDs.push(doc.id)
+
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({
@@ -2928,6 +2968,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-mcp', () => {
           content: 'Content for findByID minified test.',
         },
       })
+      createdIDs.push(doc.id)
+
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({

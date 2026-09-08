@@ -34,11 +34,11 @@ import {
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts' })('Auth', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
   test.describe('GraphQL - admin user', () => {
     let token
     let user
-    test.beforeEach(async ({ restClient }) => {
+    test.beforeAll(async ({ restClientInstance: restClient }) => {
       const { data } = await restClient
         .GRAPHQL_POST({
           body: JSON.stringify({
@@ -264,7 +264,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
       let token: string | undefined
       let loggedInUser: undefined | User
 
-      test.beforeEach(async ({ restClient }) => {
+      test.beforeAll(async ({ restClientInstance: restClient }) => {
         const response = await restClient.POST(`/${slug}/login`, {
           body: JSON.stringify({
             email,
@@ -490,16 +490,6 @@ test.suite({ config: './config.ts' })('Auth', () => {
         payload,
         restClient,
       }) => {
-        await payload.create({
-          collection: slug,
-          data: {
-            apiKey: '987e6543-e21b-12d3-a456-426614174999',
-            email: 'user@example.com',
-            enableAPIKey: true,
-            password: 'Password123',
-          },
-        })
-
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
@@ -598,7 +588,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
         const property = 'store'
         let data
 
-        test.beforeEach(async ({ restClient }) => {
+        test.beforeAll(async ({ restClientInstance: restClient }) => {
           const response = await restClient.POST(`/payload-preferences/${key}`, {
             body: JSON.stringify({
               value: { property },
@@ -757,7 +747,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
         let publicUserId: number | string
         const createdIDs: (number | string)[] = []
 
-        test.beforeEach(async ({ payload, restClient }) => {
+        test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
           // Admin creates preference
           const adminPref = await restClient.POST(`/payload-preferences/${adminKey}`, {
             body: JSON.stringify({ value: { data: 'admin-sensitive' } }),
@@ -877,7 +867,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
           return await res.json()
         }
 
-        test.beforeEach(async ({ restClient }) => {
+        test.beforeAll(async ({ restClientInstance: restClient }) => {
           const response = await restClient.POST(`/${slug}/login`, {
             body: JSON.stringify({
               email,
@@ -1721,19 +1711,6 @@ test.suite({ config: './config.ts' })('Auth', () => {
       })
 
       test('should allow force unlocking of a user', async ({ payload }) => {
-        await payload.db.updateOne({
-          collection: slug,
-          data: {
-            lockUntil: new Date(Date.now() + 60_000).toISOString(),
-            loginAttempts: 2,
-          },
-          where: {
-            email: {
-              equals: devUser.email,
-            },
-          },
-        })
-
         await payload.unlock({
           collection: slug,
           data: {

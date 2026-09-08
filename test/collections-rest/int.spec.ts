@@ -24,7 +24,7 @@ import {
   relationSlug,
 } from './config.js'
 
-test.suite({ config: './config.ts' })('collections-rest', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('collections-rest', () => {
   test.beforeEach(async ({ payload }) => {
     await clearDocs({ payload })
   })

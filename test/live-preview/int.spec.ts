@@ -19,7 +19,10 @@ import type { CollectionPopulationRequestHandler } from '../../packages/live-pre
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
+test.suite({
+  config: './config.ts',
+  resetBetweenTests: false,
+})('Collections - Live Preview', () => {
   const serverURL: string = `http://localhost:${process.env.PORT || 3000}`
 
   let testPost: Post
@@ -34,7 +37,7 @@ test.suite({ config: './config.ts' })('Collections - Live Preview', () => {
   ) => Promise<Record<string, any>> = mergeDataImport as any
   let createPageWithInitialData: (initialData: Partial<Page>) => Promise<Page>
 
-  test.beforeEach(async ({ payload, restClient }) => {
+  test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
       const url = `/${endpoint}`
       const headers: Record<string, string> = {

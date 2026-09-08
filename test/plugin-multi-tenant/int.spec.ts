@@ -17,8 +17,11 @@ import {
 
 let token: string
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-multi-tenant', () => {
-  test.beforeEach(async ({ restClient }) => {
+test.suite({
+  config: './config.ts',
+  resetBetweenTests: false,
+})('@payloadcms/plugin-multi-tenant', () => {
+  test.beforeAll(async ({ restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({

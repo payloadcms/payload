@@ -17,7 +17,7 @@ import { usersSlug } from './collections/Users/index.js'
 
 let user: any
 
-test.suite({ config: './config.ts' })('trash', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
   let restrictedCollectionDoc: RestrictedCollection
   let postsDocOne: Post
   let postsDocTwo: Post
@@ -131,7 +131,7 @@ test.suite({ config: './config.ts' })('trash', () => {
     let adminUser: any
     const createdDocIds: (number | string)[] = []
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       // Login as admin user
       adminUser = await payload.login({
         collection: usersSlug,

@@ -51,8 +51,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
 
-test.suite({ config: './config.ts' })('Collections - Uploads', () => {
-  test.beforeEach(async ({ restClient }) => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - Uploads', () => {
+  test.beforeAll(async ({ restClientInstance: restClient }) => {
     await restClient.login({ slug: usersSlug })
   })
 
@@ -2098,7 +2098,7 @@ test.suite({ config: './config.ts' })('Collections - Uploads', () => {
     let uploadedFilename: string
     let fileSize: number
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       // Upload a test file for range request testing
       const filePath = path.join(dirname, './audio.mp3')
       const file = await getFileByPath(filePath)
