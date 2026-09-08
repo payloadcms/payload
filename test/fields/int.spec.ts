@@ -1258,6 +1258,114 @@ test.suite({ config: './config.ts' })('Fields', () => {
       await payload.delete({ collection: 'text-fields', id: miss.id })
     })
 
+    test('should query hasMany text with all operator', async ({ payload }) => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple', 'banana', 'cherry'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple', 'cherry'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            all: ['apple', 'banana'],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit.id })
+      await payload.delete({ collection: 'text-fields', id: miss.id })
+    })
+
+    test('should query hasMany text with all operator - comma delimited string value', async ({
+      payload,
+    }) => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple', 'banana'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            all: 'apple,banana',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit.id })
+      await payload.delete({ collection: 'text-fields', id: miss.id })
+    })
+
+    test('should query with all operator on a field storing a single value', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'single value',
+        },
+      })
+
+      const single = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            all: ['single value'],
+          },
+        },
+      })
+
+      const multiple = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            all: ['single value', 'another value'],
+          },
+        },
+      })
+
+      expect(single.docs.find(({ id: findID }) => doc.id === findID)).toBeDefined()
+      expect(multiple.docs.find(({ id: findID }) => doc.id === findID)).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
     test('should query like on value', async ({ payload }) => {
       const miss = await payload.create({
         collection: 'text-fields',
@@ -1871,6 +1979,81 @@ test.suite({ config: './config.ts' })('Fields', () => {
       expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two'])
     })
 
+    test('should query hasMany select with all operator', async ({ payload }) => {
+      const hit = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two', 'three'],
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'three'],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'select-fields',
+        where: {
+          selectHasMany: {
+            all: ['one', 'two'],
+          },
+        },
+      })
+
+      expect(docs.find(({ id: findID }) => hit.id === findID)).toBeDefined()
+      expect(docs.find(({ id: findID }) => miss.id === findID)).toBeFalsy()
+    })
+
+    test('should combine the all operator with another condition on the same field', async ({
+      payload,
+    }) => {
+      const hit = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two', 'three'],
+        },
+      })
+
+      const missingThird = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      })
+
+      const missingSecond = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'three'],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'select-fields',
+        where: {
+          and: [
+            {
+              selectHasMany: {
+                all: ['one', 'two'],
+              },
+            },
+            {
+              selectHasMany: {
+                equals: 'three',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(docs.find(({ id: findID }) => hit.id === findID)).toBeDefined()
+      expect(docs.find(({ id: findID }) => missingThird.id === findID)).toBeFalsy()
+      expect(docs.find(({ id: findID }) => missingSecond.id === findID)).toBeFalsy()
+    })
+
     test('retains hasMany updates', async ({ payload }) => {
       const { id } = await payload.create({
         collection: 'select-fields',
@@ -2141,6 +2324,34 @@ test.suite({ config: './config.ts' })('Fields', () => {
       expect(doc.decimalMin).toEqual(numberDoc.decimalMin)
       expect(doc.decimalMax).toEqual(numberDoc.decimalMax)
       expect(doc.defaultNumber).toEqual(defaultNumber)
+    })
+
+    test('should query hasMany number with all operator', async ({ payload }) => {
+      const hit = await payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: [5, 10, 15],
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'number-fields',
+        data: {
+          hasMany: [5, 15],
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'number-fields',
+        where: {
+          hasMany: {
+            all: [5, 10],
+          },
+        },
+      })
+
+      expect(docs.find(({ id: findID }) => hit.id === findID)).toBeDefined()
+      expect(docs.find(({ id: findID }) => miss.id === findID)).toBeFalsy()
     })
 
     test('should not create number below minimum', async ({ payload }) => {
