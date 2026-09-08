@@ -60,6 +60,7 @@ export const handleUploads = async (
     form = await payload.findByID({
       id: formID,
       collection: formSlug,
+      overrideAccess: true,
       req,
     })
   } catch {
@@ -170,6 +171,7 @@ export const handleUploads = async (
               mimetype: requestFile.mimetype,
               size: requestFile.size,
             },
+            overrideAccess: true,
             req,
           })
 
@@ -226,6 +228,7 @@ export const handleUploads = async (
           fileDoc = (await payload.findByID({
             id: fileId,
             collection: uploadCollection,
+            overrideAccess: true,
             req,
           })) as FileData & TypeWithID
         } catch {
@@ -294,7 +297,7 @@ export const handleUploads = async (
     // Best-effort cleanup of any docs created before the error was detected
     for (const doc of createdDocs) {
       try {
-        await payload.delete({ id: doc.id, collection: doc.collection, req })
+        await payload.delete({ id: doc.id, collection: doc.collection, overrideAccess: true, req })
       } catch {
         // best-effort — don't mask the original validation error
       }

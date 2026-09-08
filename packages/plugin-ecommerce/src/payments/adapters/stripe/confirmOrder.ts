@@ -60,6 +60,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       // Find our existing transaction by the payment intent ID
       const transactionsResults = await payload.find({
         collection: transactionsSlug,
+        overrideAccess: true,
         req,
         where: {
           'stripe.paymentIntentID': {
@@ -108,6 +109,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           status: 'processing',
           transactions: [transaction.id],
         },
+        overrideAccess: true,
         req,
       })
 
@@ -119,6 +121,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         data: {
           purchasedAt: timestamp,
         },
+        overrideAccess: true,
         req,
       })
 
@@ -129,6 +132,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           order: order.id,
           status: 'succeeded',
         },
+        overrideAccess: true,
         req,
       })
 
