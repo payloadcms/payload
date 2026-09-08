@@ -28,6 +28,7 @@ export const getSchedulePublishTask = ({
           id: userID,
           collection: adminUserSlug,
           depth: 0,
+          overrideAccess: true,
         })) as User
 
         user.collection = adminUserSlug

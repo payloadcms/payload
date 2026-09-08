@@ -109,6 +109,7 @@ async function validateNoCircularReference({
         id: ancestorId,
         collection: collection.slug,
         depth: 0,
+        overrideAccess: true,
         req,
         select: {
           [fieldName]: true,
