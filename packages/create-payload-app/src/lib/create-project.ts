@@ -70,91 +70,41 @@ async function installDeps(args: {
   }
 }
 
-type PayloadGenerateResult = { error: string; ok: false } | { ok: true }
-
 /**
- * npm needs `npm run <script>`; pnpm, yarn, and bun run package scripts directly.
+ * Runs the template's own codegen scripts so the scaffold starts in sync with core.
+ * A failure only warns, since missing generated files should not block project creation.
  */
-function getRunCommand(packageManager: PackageManager): string {
-  return packageManager === 'npm' ? 'npm run' : packageManager
-}
-
-async function getPackageScripts(projectDir: string): Promise<Record<string, string>> {
-  try {
-    const packageJson = await fse.readJson(path.resolve(projectDir, 'package.json'))
-    return packageJson?.scripts ?? {}
-  } catch {
-    return {}
-  }
-}
-
-async function runPackageScript(args: {
-  packageManager: PackageManager
-  projectDir: string
-  script: string
-}): Promise<PayloadGenerateResult> {
-  const { packageManager, projectDir, script } = args
-
-  try {
-    await execa.command(`${getRunCommand(packageManager)} ${script}`, {
-      cwd: path.resolve(projectDir),
-    })
-    return { ok: true }
-  } catch (err: unknown) {
-    return { error: err instanceof Error ? err.message : String(err), ok: false }
-  }
-}
-
-/**
- * Runs one of the template's own codegen scripts. A failure only warns, so codegen
- * never blocks project creation, and templates without the script are skipped.
- */
-async function runGenerateScript(args: {
-  artifact: string
-  availableScripts: Record<string, string>
-  packageManager: PackageManager
-  projectDir: string
-  script: string
-  spinner: ReturnType<typeof p.spinner>
-}): Promise<void> {
-  const { artifact, availableScripts, packageManager, projectDir, script, spinner } = args
-
-  if (!availableScripts[script]) {
-    return
-  }
-
-  spinner.start(`Generating ${artifact}...`)
-  const result = await runPackageScript({ packageManager, projectDir, script })
-
-  if (result.ok) {
-    spinner.stop(`${artifact.charAt(0).toUpperCase()}${artifact.slice(1)} generated`)
-    return
-  }
-
-  spinner.stop(`Could not generate ${artifact}`, 1)
-  warning(`Run '${getRunCommand(packageManager)} ${script}' to generate it later.`)
-}
-
-/** Generate the admin import map and types so the scaffold starts in sync with core. */
-async function runProjectCodegen(args: {
+async function generateProjectFiles(args: {
   packageManager: PackageManager
   projectDir: string
   spinner: ReturnType<typeof p.spinner>
 }): Promise<void> {
-  const availableScripts = await getPackageScripts(args.projectDir)
+  const { packageManager, projectDir, spinner } = args
 
-  await runGenerateScript({
-    ...args,
-    artifact: 'import map',
-    availableScripts,
-    script: 'generate:importmap',
-  })
-  await runGenerateScript({
-    ...args,
-    artifact: 'types',
-    availableScripts,
-    script: 'generate:types',
-  })
+  // npm needs `npm run <script>`; pnpm, yarn, and bun run package scripts directly.
+  const runCmd = packageManager === 'npm' ? 'npm run' : packageManager
+  const { scripts } = await fse
+    .readJson(path.resolve(projectDir, 'package.json'))
+    .catch(() => ({ scripts: {} }))
+
+  for (const [label, script] of [
+    ['import map', 'generate:importmap'],
+    ['types', 'generate:types'],
+  ] as const) {
+    if (!scripts?.[script]) {
+      continue
+    }
+
+    spinner.start(`Generating ${label}...`)
+
+    try {
+      await execa.command(`${runCmd} ${script}`, { cwd: path.resolve(projectDir) })
+      spinner.stop(`Generated ${label}`)
+    } catch {
+      spinner.stop(`Could not generate ${label}`, 1)
+      warning(`Run '${runCmd} ${script}' to generate it later.`)
+    }
+  }
 }
 
 type TemplateOrExample =
@@ -270,7 +220,7 @@ export async function createProject(
     if (result) {
       spinner.stop('Successfully installed Payload and dependencies')
 
-      await runProjectCodegen({ packageManager, projectDir, spinner })
+      await generateProjectFiles({ packageManager, projectDir, spinner })
     } else {
       spinner.stop('Error installing dependencies', 1)
     }
