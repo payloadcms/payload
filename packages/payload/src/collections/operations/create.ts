@@ -448,6 +448,7 @@ export const createOperation = async <
             overrideAccess,
             previousDoc: {},
             req: args.req,
+            select,
           })) || result
       }
     }
