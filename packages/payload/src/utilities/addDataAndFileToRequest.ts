@@ -68,6 +68,18 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
           throw new APIError('A file name is required.', 400)
         }
 
+        // The collection must come from the route, never from the request body: the body
+        // is client-controlled and would select another collection's upload handlers.
+        const collectionSlug =
+          typeof req.routeParams?.collection === 'string' ? req.routeParams.collection : undefined
+        const uploadConfig = collectionSlug
+          ? req.payload.collections[collectionSlug]?.config.upload
+          : undefined
+
+        if (!collectionSlug || !uploadConfig) {
+          throw new APIError('Invalid upload collection.', 400)
+        }
+
         req.file = await getFileFromClientUpload({
           file: clientUploadFile,
           req,
