@@ -61,6 +61,7 @@ export const generateLabelFromValue = async ({
         collection: relationTo,
         depth: 0,
         locale: titleFieldIsLocalized ? locale : undefined,
+        overrideAccess: true,
         req,
         select: {
           [useAsTitle]: true,

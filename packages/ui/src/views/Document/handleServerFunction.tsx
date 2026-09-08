@@ -54,6 +54,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
         collection: 'payload-preferences',
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         where: {
           and: [
             {

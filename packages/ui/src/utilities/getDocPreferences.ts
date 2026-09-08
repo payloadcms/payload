@@ -32,6 +32,7 @@ export const getDocPreferences = async ({
       collection: 'payload-preferences',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       where: {
         and: [
           {

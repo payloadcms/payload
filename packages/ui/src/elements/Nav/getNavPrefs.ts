@@ -13,6 +13,7 @@ export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPrefere
       collection: 'payload-preferences',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
       req,
       where: {
@@ -42,6 +43,7 @@ export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPrefere
       collection: 'payload-preferences',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
       req,
       where: {
