@@ -36,7 +36,12 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
      * 5. No user input or external data is involved in the schema generation process
      */
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    return new Function('z', `return ${transpileResult.outputText}`)(z)
+    // TypeScript >= 6 emits a `"use strict";` prologue even for a bare
+    // expression, so the Function body would return that string instead of
+    // the Zod schema. Strip it before evaluating.
+    const transpiledExpression = transpileResult.outputText.replace(/^\s*(['"])use strict\1;?\s*/, '')
+
+    return new Function('z', `return ${transpiledExpression}`)(z)
   } catch (error) {
     // If schema conversion fails (e.g., due to Zod v4 toJSONSchema null-check bug
     // with record schemas that have undefined valueType, or bundler transforms
@@ -47,6 +52,7 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
       `[plugin-mcp] Schema conversion failed, using permissive fallback:`,
       error instanceof Error ? error.message : error,
     )
-    return z.record(z.any())
+    // Must stay a ZodObject: the update tool calls `.partial()` on it.
+    return z.object({}).catchall(z.any())
   }
 }
