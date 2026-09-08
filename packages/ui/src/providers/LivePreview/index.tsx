@@ -10,6 +10,7 @@ import { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
+import { isValidPreviewURL } from '../../utilities/isValidPreviewURL.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
 import { sizeReducer } from './sizeReducer.js'
@@ -84,7 +85,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   const [previewURL, _setPreviewURL] = useState<string>()
 
   const setPreviewURL = useCallback<LivePreviewContextType['setPreviewURL']>((incomingURL) => {
-    _setPreviewURL(incomingURL && formatAbsoluteURL(incomingURL) ? incomingURL : undefined)
+    _setPreviewURL(isValidPreviewURL(incomingURL) ? incomingURL : undefined)
   }, [])
 
   useEffect(() => {
