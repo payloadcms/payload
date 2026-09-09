@@ -7,7 +7,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import { createLocalReq, Forbidden } from 'payload'
+import { AuthenticationError, createLocalReq, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
@@ -17,6 +17,7 @@ import { test } from '../__helpers/int/vitest.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
+  authSlug,
   firstArrayText,
   fullyRestrictedSlug,
   hiddenAccessCountSlug,
@@ -31,6 +32,7 @@ import {
   siblingDataSlug,
   slug,
   unrestrictedSlug,
+  usersSlug,
 } from './shared.js'
 test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control', () => {
   let post1: Post
@@ -227,6 +229,98 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
       // should fallback to original data and not throw validation error
       expect(updatedDoc.cannotMutateRequired).toBe('cannotMutateRequired')
       expect(updatedDoc.cannotMutateNotRequired).toBe('cannotMutateNotRequired')
+    })
+
+    test.describe('Password update access', () => {
+      const createdAdminUserIDs: string[] = []
+      const createdAuthIDs: string[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdAdminUserIDs) {
+          await payload.delete({ id, collection: usersSlug })
+        }
+        for (const id of createdAuthIDs) {
+          await payload.delete({ id, collection: authSlug })
+        }
+        createdAdminUserIDs.length = 0
+        createdAuthIDs.length = 0
+      })
+
+      test('should preserve credentials when password update access is denied', async ({
+        payload,
+      }) => {
+        const originalPassword = 'OriginalPassword123!'
+        const replacementPassword = 'ReplacementPassword123!'
+
+        const caller = await payload.create({
+          collection: usersSlug,
+          data: {
+            email: 'credential-editor@example.com',
+            password: 'CallerPassword123!',
+            roles: ['user'],
+          },
+        })
+
+        createdAdminUserIDs.push(caller.id)
+
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'credential-owner@example.com',
+            password: originalPassword,
+            roles: ['user'],
+          },
+        })
+
+        createdAuthIDs.push(account.id)
+
+        const credentialsBefore = await payload.findByID({
+          id: account.id,
+          collection: authSlug,
+          showHiddenFields: true,
+        })
+
+        await payload.update({
+          id: account.id,
+          collection: authSlug,
+          data: {
+            password: replacementPassword,
+          },
+          overrideAccess: false,
+          user: { ...caller, collection: usersSlug },
+        })
+
+        const credentialsAfter = await payload.findByID({
+          id: account.id,
+          collection: authSlug,
+          showHiddenFields: true,
+        })
+
+        expect({ hash: credentialsAfter.hash, salt: credentialsAfter.salt }).toStrictEqual({
+          hash: credentialsBefore.hash,
+          salt: credentialsBefore.salt,
+        })
+
+        const authenticated = await payload.login({
+          collection: authSlug,
+          data: {
+            email: account.email,
+            password: originalPassword,
+          },
+        })
+
+        expect(authenticated.user.id).toBe(account.id)
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: replacementPassword,
+            },
+          }),
+        ).rejects.toThrow(AuthenticationError)
+      })
     })
 
     test('should not return default values for hidden fields with values', async ({ payload }) => {

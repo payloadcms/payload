@@ -99,7 +99,6 @@ export const updateDocument = async <
   showHiddenFields,
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
-  const password = data?.password
   const publishAllLocales =
     !draftArg &&
     (publishAllLocalesArg ??
@@ -112,15 +111,6 @@ export const updateDocument = async <
     Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
     data._status !== 'published' &&
     !publishAllLocales
-  const shouldSavePassword = Boolean(
-    password &&
-      collectionConfig.auth &&
-      (!collectionConfig.auth.disableLocalStrategy ||
-        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
-          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
-      !isSavingDraft,
-  )
-
   if (isSavingDraft) {
     data._status = 'draft'
   }
@@ -201,6 +191,16 @@ export const updateDocument = async <
     overrideAccess,
     req,
   })
+
+  const password = data?.password
+  const shouldSavePassword = Boolean(
+    password &&
+      collectionConfig.auth &&
+      (!collectionConfig.auth.disableLocalStrategy ||
+        (typeof collectionConfig.auth.disableLocalStrategy === 'object' &&
+          collectionConfig.auth.disableLocalStrategy.enableFields)) &&
+      !isSavingDraft,
+  )
 
   // /////////////////////////////////////
   // beforeValidate - Collection
