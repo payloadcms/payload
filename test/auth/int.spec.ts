@@ -363,6 +363,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
 
         expect(result.id).toStrictEqual(loggedInUser.id)
         expect(result.password).toBeUndefined()
+
+        const reLogin = await restClient.POST(`/${slug}/login`, {
+          body: JSON.stringify({
+            email,
+            password: 'test',
+          }),
+        })
+        const reLoginData = await reLogin.json()
+        token = reLoginData.token
+        loggedInUser = reLoginData.user
       })
 
       test('should return strategy only on the /me user', async ({ restClient }) => {
@@ -927,8 +937,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
           publicUserId = (await userRes.json()).doc.id
 
           const user = await payload.findByID({
-            collection: publicUsersSlug,
             id: publicUserId,
+            collection: publicUsersSlug,
             showHiddenFields: true,
           })
           await restClient.POST(`/${publicUsersSlug}/verify/${(user as any)._verificationToken}`)
@@ -1232,16 +1242,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
 
           const manuallyReleaseLock = new Date(Date.now() - 605 * 1000).toISOString()
           await payload.db.updateOne({
-            collection: slug,
             id: lockedUser.docs[0]!.id,
+            collection: slug,
             data: {
               lockUntil: manuallyReleaseLock,
             },
           })
 
           const userAfterUpdate = await payload.findByID({
-            collection: slug,
             id: lockedUser.docs[0]!.id,
+            collection: slug,
             showHiddenFields: true,
           })
 
@@ -3090,7 +3100,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
 
       // Reading through the Local API runs the afterRead decrypt hook, which must
       // mask the undecryptable field rather than failing the whole document read.
-      const doc = await payload.findByID({ collection: rotateSecretSlug, id: user.id })
+      const doc = await payload.findByID({ id: user.id, collection: rotateSecretSlug })
       expect(doc.apiKey).toBeNull()
     })
 
@@ -3261,6 +3271,185 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         .then((res) => res.json())
 
       expect(response.user).toBeFalsy()
+    })
+  })
+
+  test.describe('credential change sessions', () => {
+    const createdUserIDs: Array<number | string> = []
+
+    test.afterEach(async ({ payload }) => {
+      for (const id of createdUserIDs) {
+        await payload.delete({ id, collection: slug }).catch(() => null)
+      }
+      createdUserIDs.length = 0
+    })
+
+    test('should remove pre-existing sessions after a password reset', async ({
+      payload,
+      restClient,
+    }) => {
+      const userEmail = `session-reset-${Date.now()}@example.com`
+
+      const user = await payload.create({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+      createdUserIDs.push(user.id)
+
+      const preReset = await payload.login({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+
+      const preResetSid = jwtDecode<{ sid: string }>(String(preReset.token)).sid
+
+      const resetToken = await payload.forgotPassword({
+        collection: slug,
+        data: { email: userEmail },
+        disableEmail: true,
+      })
+
+      await payload.resetPassword({
+        collection: slug,
+        data: { password: 'new-pw', token: resetToken },
+        overrideAccess: true,
+      })
+
+      const dbUser = await payload.db.find<User>({
+        collection: slug,
+        where: { email: { equals: userEmail } },
+      })
+
+      const remainingSessions = dbUser.docs[0]?.sessions ?? []
+      expect(remainingSessions.find(({ id }) => id === preResetSid)).toBeUndefined()
+
+      const meWithOldToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${preReset.token}` } })
+        .then((res) => res.json())
+      expect(meWithOldToken.user).toBeNull()
+    })
+
+    test('should remove other sessions when a user changes their own password', async ({
+      payload,
+      restClient,
+    }) => {
+      const userEmail = `session-change-${Date.now()}@example.com`
+
+      const user = await payload.create({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+      createdUserIDs.push(user.id)
+
+      const currentSession = await restClient
+        .POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: userEmail, password: 'original-pw' }),
+        })
+        .then((res) => res.json())
+
+      const otherSession = await restClient
+        .POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: userEmail, password: 'original-pw' }),
+        })
+        .then((res) => res.json())
+
+      await restClient.PATCH(`/${slug}/${user.id}`, {
+        body: JSON.stringify({ password: 'changed-pw' }),
+        headers: { Authorization: `JWT ${currentSession.token}` },
+      })
+
+      const meWithOtherToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${otherSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithOtherToken.user).toBeNull()
+
+      const meWithCurrentToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${currentSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithCurrentToken.user?.id).toStrictEqual(user.id)
+    })
+
+    test('should remove all sessions when a password is changed without a live session', async ({
+      payload,
+      restClient,
+    }) => {
+      const userEmail = `session-admin-change-${Date.now()}@example.com`
+
+      const user = await payload.create({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+      createdUserIDs.push(user.id)
+
+      const existingSession = await payload.login({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+
+      await payload.update({
+        id: user.id,
+        collection: slug,
+        data: { password: 'admin-changed-pw' },
+      })
+
+      const dbUser = await payload.db.find<User>({
+        collection: slug,
+        where: { email: { equals: userEmail } },
+      })
+      expect(dbUser.docs[0]?.sessions ?? []).toHaveLength(0)
+
+      const meWithOldToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${existingSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithOldToken.user).toBeNull()
+    })
+
+    test("should keep the acting user signed in when changing another user's password", async ({
+      payload,
+      restClient,
+    }) => {
+      const actingUserEmail = `session-acting-${Date.now()}@example.com`
+      const otherUserEmail = `session-other-${Date.now()}@example.com`
+
+      const actingUser = await payload.create({
+        collection: slug,
+        data: { email: actingUserEmail, password: 'original-pw', roles: ['admin'] },
+      })
+      createdUserIDs.push(actingUser.id)
+
+      const otherUser = await payload.create({
+        collection: slug,
+        data: { email: otherUserEmail, password: 'original-pw' },
+      })
+      createdUserIDs.push(otherUser.id)
+
+      const actingSession = await restClient
+        .POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: actingUserEmail, password: 'original-pw' }),
+        })
+        .then((res) => res.json())
+
+      const otherSession = await restClient
+        .POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: otherUserEmail, password: 'original-pw' }),
+        })
+        .then((res) => res.json())
+
+      const updateResponse = await restClient.PATCH(`/${slug}/${otherUser.id}`, {
+        body: JSON.stringify({ password: 'changed-pw' }),
+        headers: { Authorization: `JWT ${actingSession.token}` },
+      })
+      expect(updateResponse.status).toBe(200)
+
+      const meWithOtherToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${otherSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithOtherToken.user).toBeNull()
+
+      const meWithActingToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${actingSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithActingToken.user?.id).toStrictEqual(actingUser.id)
     })
   })
 })
