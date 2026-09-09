@@ -27,10 +27,10 @@ importers:
     devDependencies:
       '@ai-sdk/anthropic':
         specifier: 3.0.84
-        version: 3.0.84(zod@4.5.4)
+        version: 3.0.84(zod@4.6.0)
       '@ai-sdk/openai':
         specifier: 3.0.71
-        version: 3.0.71(zod@4.5.4)
+        version: 3.0.71(zod@4.6.0)
       '@axe-core/playwright':
         specifier: 4.11.0
         version: 4.11.0(playwright-core@1.59.1)
@@ -102,7 +102,7 @@ importers:
         version: 4.1.6(vitest@4.1.6)
       ai:
         specifier: 6.0.206
-        version: 6.0.206(zod@4.5.4)
+        version: 6.0.206(zod@4.6.0)
       axe-core:
         specifier: 4.11.0
         version: 4.11.0
@@ -233,8 +233,8 @@ importers:
         specifier: ~4.61.1
         version: 4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)
       zod:
-        specifier: 4.5.4
-        version: 4.5.4
+        specifier: 4.6.0
+        version: 4.6.0
 
   packages/admin-bar:
     dependencies:
@@ -1001,8 +1001,8 @@ importers:
         specifier: ^8.16.0
         version: 8.21.0(bufferutil@4.1.0)
       zod:
-        specifier: ^4.5.4
-        version: 4.5.4
+        specifier: ^4.6.0
+        version: 4.6.0
     devDependencies:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
@@ -2490,7 +2490,7 @@ importers:
         version: link:../packages/eslint-plugin
       '@payloadcms/figma':
         specifier: latest
-        version: 0.1.0-alpha.2(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
+        version: 0.1.0-alpha.7(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -3895,6 +3895,9 @@ packages:
 
   '@cloudflare/workers-types@4.20260218.0':
     resolution: {integrity: sha512-E28uJNJb9J9pca3RaxjXm1JxAjp8td9/cudkY+IT8rio71NlshN7NKMe2Cr/6GN+RufbSnp+N3ZKP74xgUaL0A==}
+
+  '@cloudflare/workers-types@5.20260716.1':
+    resolution: {integrity: sha512-LqQPmGAvdpQxzZGAMlDI6fnCsTlr8nRQibWsREaERqD0PucwFl25aXpUskSob70uSY2n6K1sp6Te9xkmzSFgaw==}
 
   '@corex/deepmerge@4.0.43':
     resolution: {integrity: sha512-N8uEMrMPL0cu/bdboEWpQYb/0i2K5Qn8eCsxzOmxSggJbbQte7ljMRoXm917AbntqTGOzdTu+vP3KOOzoC70HQ==}
@@ -6818,13 +6821,16 @@ packages:
     resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
 
-  '@payloadcms/figma@0.1.0-alpha.2':
-    resolution: {integrity: sha512-VrY0sjlUfCVlrabZHGnkHhK/DXp2fTC0dK5LorvbbmQlgYE3qiLpmI2ZdY6lu/9HpG88tO442NcDI6deaSh4lg==}
+  '@payloadcms/figma@0.1.0-alpha.7':
+    resolution: {integrity: sha512-7TCd0cAY9KGItVuyOAqra+8UdemyGRbR+xiN+g7lXMT8nwEbUR1U0LbhsjWJqWpa0OIv/dR+3vBpkXJ920xNzQ==}
     hasBin: true
     peerDependencies:
-      '@payloadcms/plugin-cloud-storage': '>=4.0.0-canary.20 <4.0.0-internal'
-      '@payloadcms/richtext-lexical': '>=4.0.0-canary.20 <4.0.0-internal'
-      payload: '>=4.0.0-canary.20 <4.0.0-internal'
+      '@payloadcms/plugin-cloud-storage': '>=4.0.0-canary.28 <4.0.0-internal'
+      '@payloadcms/richtext-lexical': '>=4.0.0-canary.28 <4.0.0-internal'
+      '@payloadcms/translations': '>=4.0.0-canary.28 <4.0.0-internal'
+      '@payloadcms/ui': '>=4.0.0-canary.28 <4.0.0-internal'
+      payload: '>=4.0.0-canary.28 <4.0.0-internal'
+      react: 19.2.6
     peerDependenciesMeta:
       '@payloadcms/plugin-cloud-storage':
         optional: true
@@ -14585,6 +14591,11 @@ packages:
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
+  skills@1.4.4:
+    resolution: {integrity: sha512-Ihu9Nfp2Ff95254Wq73grr6hcwCQG1G0K7Ty+0/N7xiT6LG01+XY1FCdTBiGPVoIsCpG4WudJj6/LvHUZWxmCQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   slash@2.0.0:
     resolution: {integrity: sha512-ZYKh3Wh2z1PpEXWr0MpSBZ0V6mZHAQfYevttO11c51CaWjGTaadiKZ+wVt1PbMlDV5qhMFslpZCemhwOK7C89A==}
     engines: {node: '>=6'}
@@ -15927,8 +15938,8 @@ packages:
   zod@4.5.4:
     resolution: {integrity: sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA==}
 
-  zod@4.5.4:
-    resolution: {integrity: sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA==}
+  zod@4.6.0:
+    resolution: {integrity: sha512-iIvwyDnebKYpww2ta0DjaNOL8RnVLmPMhgWyOzlW9y0EIIxv5gl+H6Y0ONpt83HqjGqkk78uWp6xWtpxzZdPbw==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -15937,31 +15948,31 @@ snapshots:
 
   '@acemir/cssom@0.9.31': {}
 
-  '@ai-sdk/anthropic@3.0.84(zod@4.5.4)':
+  '@ai-sdk/anthropic@3.0.84(zod@4.6.0)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.5.4)
-      zod: 4.5.4
+      '@ai-sdk/provider-utils': 4.0.29(zod@4.6.0)
+      zod: 4.6.0
 
-  '@ai-sdk/gateway@3.0.132(zod@4.5.4)':
+  '@ai-sdk/gateway@3.0.132(zod@4.6.0)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.5.4)
+      '@ai-sdk/provider-utils': 4.0.29(zod@4.6.0)
       '@vercel/oidc': 3.2.0
-      zod: 4.5.4
+      zod: 4.6.0
 
-  '@ai-sdk/openai@3.0.71(zod@4.5.4)':
+  '@ai-sdk/openai@3.0.71(zod@4.6.0)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.5.4)
-      zod: 4.5.4
+      '@ai-sdk/provider-utils': 4.0.29(zod@4.6.0)
+      zod: 4.6.0
 
-  '@ai-sdk/provider-utils@4.0.29(zod@4.5.4)':
+  '@ai-sdk/provider-utils@4.0.29(zod@4.6.0)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.1.0
-      zod: 4.5.4
+      zod: 4.6.0
 
   '@ai-sdk/provider@3.0.10':
     dependencies:
@@ -17658,6 +17669,8 @@ snapshots:
     optional: true
 
   '@cloudflare/workers-types@4.20260218.0': {}
+
+  '@cloudflare/workers-types@5.20260716.1': {}
 
   '@corex/deepmerge@4.0.43': {}
 
@@ -20213,10 +20226,13 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.5.6
     optional: true
 
-  '@payloadcms/figma@0.1.0-alpha.2(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
+  '@payloadcms/figma@0.1.0-alpha.7(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)':
     dependencies:
       '@clack/prompts': 0.11.0
+      '@cloudflare/workers-types': 5.20260716.1
       '@figma/rest-api-spec': 0.34.0
+      '@payloadcms/translations': link:packages/translations
+      '@payloadcms/ui': link:packages/ui
       '@sindresorhus/slugify': 3.0.0
       archiver: 7.0.1
       arg: 5.0.2
@@ -20230,6 +20246,10 @@ snapshots:
       openapi-fetch: 0.15.0
       payload: link:packages/payload
       picocolors: 1.1.1
+      qs-esm: 8.0.1
+      react: 19.2.6
+      sanitize-filename: 1.6.4
+      skills: 1.4.4
       tar: 7.5.19
       terminal-link: 5.0.0
       ts-morph: 21.0.1
@@ -23421,13 +23441,13 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@6.0.206(zod@4.5.4):
+  ai@6.0.206(zod@4.6.0):
     dependencies:
-      '@ai-sdk/gateway': 3.0.132(zod@4.5.4)
+      '@ai-sdk/gateway': 3.0.132(zod@4.6.0)
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.29(zod@4.5.4)
+      '@ai-sdk/provider-utils': 4.0.29(zod@4.6.0)
       '@opentelemetry/api': 1.9.1
-      zod: 4.5.4
+      zod: 4.6.0
 
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
@@ -29224,6 +29244,8 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
+  skills@1.4.4: {}
+
   slash@2.0.0: {}
 
   slash@3.0.0: {}
@@ -30801,6 +30823,6 @@ snapshots:
 
   zod@4.5.4: {}
 
-  zod@4.5.4: {}
+  zod@4.6.0: {}
 
   zwitch@2.0.4: {}
