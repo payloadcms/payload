@@ -5,7 +5,7 @@ import type { PayloadRequest } from '../types/index.js'
 import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY } from './getFileFromClientUpload.js'
 import { unlinkTempFiles } from './unlinkTempFiles.js'
@@ -31,6 +31,8 @@ const fileExists = async (filePath: string): Promise<boolean> => {
 const collectionConfig = {
   upload: { disableLocalStorage: true },
 } as unknown as SanitizedCollectionConfig
+
+const nonUploadCollectionConfig = {} as unknown as SanitizedCollectionConfig
 
 describe('unlinkTempFiles', () => {
   const tempFilesToRemove: string[] = []
@@ -158,5 +160,58 @@ describe('unlinkTempFiles', () => {
     ).resolves.not.toThrow()
 
     expect(await fileExists(tempFilePath)).toBe(false)
+  })
+
+  it('removes a client-upload temp file when the collection is not an upload collection', async () => {
+    const tempFilePath = await createTempFile()
+    tempFilesToRemove.push(tempFilePath)
+
+    // A forged `collectionSlug` in the multipart file field materializes a temp file for a
+    // collection that never accepts uploads, so nothing in the upload branch removes it.
+    const req = {
+      context: { [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: tempFilePath },
+      file: {
+        clientUploadContext: { prefix: '' },
+        data: Buffer.alloc(0),
+        mimetype: 'video/mp4',
+        name: 'clip.mp4',
+        size: 10,
+        tempFilePath,
+      },
+    } as unknown as PayloadRequest
+
+    await unlinkTempFiles({
+      collectionConfig: nonUploadCollectionConfig,
+      config: { upload: { useTempFiles: false } } as unknown as SanitizedConfig,
+      req,
+    })
+
+    expect(await fileExists(tempFilePath)).toBe(false)
+    expect(req.context[CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]).toBeUndefined()
+  })
+
+  it('logs instead of throwing when a client-upload temp file can no longer be removed', async () => {
+    const req = {
+      context: {
+        [CLIENT_UPLOAD_TEMP_FILE_PATH_CONTEXT_KEY]: path.join(
+          os.tmpdir(),
+          'unlink-temp-files-spec-missing-file',
+        ),
+      },
+      payload: { logger: { error: vi.fn() } },
+    } as unknown as PayloadRequest
+
+    await expect(
+      unlinkTempFiles({
+        collectionConfig,
+        config: { upload: { useTempFiles: false } } as unknown as SanitizedConfig,
+        req,
+      }),
+    ).resolves.toBeUndefined()
+
+    expect(req.payload.logger.error).toHaveBeenCalledWith({
+      err: expect.objectContaining({ code: 'ENOENT' }),
+      msg: 'Failed to remove client upload temp file',
+    })
   })
 })

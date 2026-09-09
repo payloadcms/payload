@@ -23,8 +23,8 @@ export type ClientUploadData = {
 }
 
 /**
- * `req.context` key `unlinkTempFiles` reads to find a materializer-created temp file once
- * `req.file` is gone - plugin-cloud-storage's afterChange hook clears `req.file` after
+ * `req.context` key `unlinkClientUploadTempFile` reads to find a materializer-created temp file
+ * once `req.file` is gone - plugin-cloud-storage's afterChange hook clears `req.file` after
  * uploading generated image sizes, before cleanup runs, so tracking it only on `req.file`
  * would leak the temp file.
  */
@@ -43,11 +43,13 @@ export async function getFileFromClientUpload({
     throw new APIError(`uploadConfig.handlers is not present for ${file.collectionSlug}`)
   }
 
-  const contentRequirement = getFileContentRequirement({
-    hasSizeEdits: requestHasSizeEdits(req),
-    mimeType: file.mimeType,
-    uploadConfig,
-  })
+  const contentRequirement = file.clientUploadContext
+    ? getFileContentRequirement({
+        hasSizeEdits: requestHasSizeEdits(req),
+        mimeType: file.mimeType,
+        uploadConfig,
+      })
+    : 'full'
 
   if (contentRequirement === 'none') {
     return {

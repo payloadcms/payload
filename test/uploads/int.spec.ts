@@ -2431,6 +2431,83 @@ describe('Collections - Uploads', () => {
   })
 
   /**
+   * A bulk update runs `generateFileData` once and hands the resulting `filesToUpload` to the
+   * per-document promises, so the temp file it copies from has to outlive those writes.
+   */
+  describe('temp file copy during a bulk update', () => {
+    const createdIDs: (number | string)[] = []
+    const tempFilesToClean: string[] = []
+    let originalUploadConfig: typeof payload.config.upload
+
+    beforeAll(() => {
+      originalUploadConfig = payload.config.upload
+      payload.config.upload = { ...payload.config.upload, useTempFiles: true }
+    })
+
+    afterAll(() => {
+      payload.config.upload = originalUploadConfig
+    })
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ id, collection: mediaSlug })
+      }
+      createdIDs.length = 0
+
+      for (const tempFilePath of tempFilesToClean) {
+        await fs.promises.rm(tempFilePath, { force: true })
+      }
+      tempFilesToClean.length = 0
+    })
+
+    it('copies the temp file before removing it', async () => {
+      const alt = `bulk-temp-file-${randomUUID()}`
+
+      const existingDoc = await payload.create({
+        collection: mediaSlug,
+        data: { alt },
+        file: {
+          name: `bulk-temp-file-initial-${randomUUID()}.mp3`,
+          data: Buffer.from('initial-audio-bytes'),
+          mimetype: 'audio/mpeg',
+          size: 19,
+        },
+      })
+
+      createdIDs.push(existingDoc.id)
+
+      const fileContents = Buffer.from(`bulk-audio-bytes-${randomUUID()}`)
+      const tempFilePath = path.join(os.tmpdir(), `payload-test-bulk-temp-${randomUUID()}.mp3`)
+
+      await fs.promises.writeFile(tempFilePath, fileContents)
+      tempFilesToClean.push(tempFilePath)
+
+      const result = await payload.update({
+        collection: mediaSlug,
+        data: { alt },
+        file: {
+          name: `bulk-temp-file-${randomUUID()}.mp3`,
+          data: Buffer.alloc(0),
+          mimetype: 'audio/mpeg',
+          size: fileContents.length,
+          tempFilePath,
+        },
+        where: { alt: { equals: alt } },
+      })
+
+      expect(result.errors).toEqual([])
+      expect(result.docs).toHaveLength(1)
+
+      const savedFilePath = path.join(dirname, './media', result.docs[0]!.filename!)
+
+      expect(await fileExists(savedFilePath)).toBe(true)
+      expect(await fs.promises.readFile(savedFilePath)).toEqual(fileContents)
+
+      expect(await fileExists(tempFilePath)).toBe(false)
+    })
+  })
+
+  /**
    * When local storage is enabled and no image processing changes the bytes, generateFileData
    * copies straight from `file.tempFilePath` to its destination instead of reading the whole
    * file into memory (see generateFileData.ts). `mediaSlug` has no restrictions on non-image

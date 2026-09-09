@@ -77,6 +77,7 @@ const videoFile = (overrides: Partial<ClientUploadData> = {}): ClientUploadData 
 })
 
 const imageFile = (overrides: Partial<ClientUploadData> = {}): ClientUploadData => ({
+  clientUploadContext: { prefix: 'abc' },
   collectionSlug: 'media',
   filename: 'photo.png',
   mimeType: 'image/png',
@@ -379,5 +380,44 @@ describe('getFileFromClientUpload', () => {
     expect(result.tempFilePath).toBeDefined()
     const written = await fs.readFile(result.tempFilePath!)
     expect(written.length).toBe(0)
+  })
+
+  it('streams the full file to disk when a non-image client upload carries no context', async () => {
+    const handler = vi.fn(
+      async () =>
+        new Response(Buffer.from('full-video-bytes'), {
+          headers: { 'Content-Type': 'video/mp4' },
+          status: 200,
+        }),
+    )
+    const req = createReq({ handlers: [handler], upload: { disableLocalStorage: true } })
+    const file = videoFile({ clientUploadContext: undefined })
+
+    const result = await getFileFromClientUpload({ file, req })
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(result.tempFilePath).toBeDefined()
+    tempFilesToRemove.push(result.tempFilePath!)
+
+    const written = await fs.readFile(result.tempFilePath!)
+    expect(written.toString()).toBe('full-video-bytes')
+  })
+
+  it('streams the full file to disk when an image client upload carries no context', async () => {
+    const handler = vi.fn(async (handlerReq: PayloadRequest) => {
+      expect(handlerReq.headers.get('Range')).toBeNull()
+      return new Response(MINIMAL_PNG, { headers: { 'Content-Type': 'image/png' }, status: 200 })
+    })
+    const req = createReq({ handlers: [handler], upload: { disableLocalStorage: true } })
+    const file = imageFile({ clientUploadContext: undefined })
+
+    const result = await getFileFromClientUpload({ file, req })
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(result.tempFilePath).toBeDefined()
+    tempFilesToRemove.push(result.tempFilePath!)
+
+    const written = await fs.readFile(result.tempFilePath!)
+    expect(written).toEqual(MINIMAL_PNG)
   })
 })

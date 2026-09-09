@@ -316,12 +316,6 @@ export const updateOperation = async <
       return null
     })
 
-    await unlinkTempFiles({
-      collectionConfig,
-      config,
-      req,
-    })
-
     // Process sequentially when using single transaction mode to avoid shared state issues
     // Process in parallel when using one transaction for better performance
     let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
@@ -333,6 +327,12 @@ export const updateOperation = async <
     } else {
       awaitedDocs = await Promise.all(promises)
     }
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config,
+      req,
+    })
 
     let result = {
       docs: awaitedDocs.filter(Boolean),
