@@ -11,9 +11,11 @@ import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Config } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { recordedCleanupTargets } from './buildPluginCloudStorageIntConfig.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
@@ -268,10 +270,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
   describe('integration (non-composite prefixes)', () => {
     let payload: Payload
+    let restClient: NextRESTClient
     let TEST_BUCKET: string
 
     beforeAll(async () => {
-      ;({ payload } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
+      ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
       TEST_BUCKET = process.env.S3_BUCKET!
     })
 
@@ -558,6 +561,130 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           }
         }
         createdIDs.length = 0
+        recordedCleanupTargets.length = 0
+      })
+
+      it('should preserve cleanup coordinates after a metadata-only update', async () => {
+        await restClient.login({ slug: 'users' })
+
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Cleanup ownership',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        const originalFilenames = [
+          upload.filename,
+          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        const updateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: JSON.stringify({
+            filename: 'submitted.png',
+            prefix: 'submitted-prefix',
+            sizes: {
+              thumbnail: {
+                filename: 'submitted-thumbnail.png',
+              },
+            },
+          }),
+        })
+
+        expect(updateResponse.status).toBe(200)
+
+        await payload.delete({ id: upload.id, collection: testMetadataSlug })
+        createdIDs.length = 0
+
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+      })
+
+      it('should preserve cleanup metadata across a metadata override attempt and replacement', async () => {
+        await restClient.login({ slug: 'users' })
+
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Replacement cleanup ownership',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        const originalFilenames = [
+          upload.filename,
+          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        const metadataUpdateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: JSON.stringify({
+            filename: 'submitted.png',
+            prefix: 'submitted-prefix',
+            sizes: {
+              thumbnail: {
+                filename: 'submitted-thumbnail.png',
+              },
+            },
+          }),
+        })
+
+        expect(metadataUpdateResponse.status).toBe(200)
+
+        const preservedUpload = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+        })
+
+        expect(preservedUpload.filename).toBe(upload.filename)
+        expect(preservedUpload.prefix).toBe('test-metadata')
+        expect(preservedUpload.sizes).toEqual(upload.sizes)
+
+        recordedCleanupTargets.length = 0
+
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ testNote: 'Replacement uploaded' }))
+        formData.append(
+          'file',
+          new Blob([fs.readFileSync(path.resolve(dirname, '../uploads/small.png'))], {
+            type: 'image/png',
+          }),
+          'replacement.png',
+        )
+
+        const updateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: formData,
+        })
+
+        expect(updateResponse.status).toBe(200)
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+
+        const replacement = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+        })
+        const replacementFilenames = [
+          replacement.filename,
+          ...Object.values(replacement.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        expect(replacement.filename).not.toBe('submitted.png')
+        expect(replacementFilenames).not.toContain('submitted-thumbnail.png')
+
+        recordedCleanupTargets.length = 0
+        await payload.delete({ id: upload.id, collection: testMetadataSlug })
+        createdIDs.length = 0
+
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(replacementFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
       })
 
       it('should automatically persist metadata returned by custom adapters', async () => {

@@ -141,3 +141,35 @@ async function fetchExternalFile({
     uploadConfig,
   })
 }
+
+const adapter = () => ({
+  handleDelete: () => undefined,
+  handleUpload: () => undefined,
+  name: 'test-adapter',
+  staticHandler: () => new Response(),
+})
+
+describe('cloudStoragePlugin', () => {
+  it('should normalize a stored prefix during a server-mediated upload', async () => {
+    const config = cloudStoragePlugin({
+      collections: {
+        media: { adapter },
+      },
+    } as any)({
+      collections: [{ fields: [], slug: 'media', upload: true }],
+    } as any)
+    const hooks = config.collections?.[0]?.hooks?.beforeChange || []
+    const req = {
+      context: {},
+      file: { mimetype: 'image/png', name: 'photo.png', size: 42 },
+    }
+    let data = { filename: 'photo.png', prefix: '/tenant/../acme' }
+
+    for (const hook of hooks) {
+      const result = await hook({ data, operation: 'create', req } as any)
+      data = result || data
+    }
+
+    expect(data.prefix).toBe('tenant/acme')
+  })
+})
