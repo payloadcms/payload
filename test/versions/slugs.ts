@@ -62,6 +62,8 @@ export const draftUnlimitedGlobalSlug = 'draft-unlimited-global'
 
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 
+export const restoreAccessGlobalSlug = 'restore-access-global'
+
 export const globalSlugs = [
   autoSaveGlobalSlug,
   draftGlobalSlug,

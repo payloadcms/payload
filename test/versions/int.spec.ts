@@ -6,7 +6,7 @@ import {
 } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import fs from 'fs'
 import path from 'path'
-import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'
+import { createLocalReq, Forbidden, getFileByPath, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -36,6 +36,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
+  restoreAccessGlobalSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -3484,6 +3485,137 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         expect(restoredGlobal.title).toBe(restore.version.title.en)
+      })
+    })
+
+    test.describe('Restore - access control', () => {
+      // Seeds a historical version ('historical') and leaves the current
+      // global at a different state ('current'), returning the id of the
+      // historical version to restore.
+      const seedRestoreAccessGlobal = async (payload: Payload): Promise<number | string> => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'historical' },
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'current' },
+        })
+
+        const versions = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 100,
+        })
+
+        const target = versions.docs.find((doc) => doc.version.title === 'historical')
+
+        return target!.id
+      }
+
+      test.afterEach(async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'reset' },
+        })
+
+        await payload.db.deleteVersions({
+          globalSlug: restoreAccessGlobalSlug,
+          where: {},
+        })
+      })
+
+      test('should restore when update access returns true', async ({ payload }) => {
+        const versionID = await seedRestoreAccessGlobal(payload)
+
+        const restored = await payload.restoreGlobalVersion({
+          id: versionID,
+          slug: restoreAccessGlobalSlug,
+          context: { restoreAccessMode: 'allow' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(restored.version.title).toBe('historical')
+      })
+
+      test('should throw Forbidden when update access returns false', async ({ payload }) => {
+        const versionID = await seedRestoreAccessGlobal(payload)
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: versionID,
+            slug: restoreAccessGlobalSlug,
+            context: { restoreAccessMode: 'deny' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      test('should restore when the current global matches the update Where constraint', async ({
+        payload,
+      }) => {
+        const versionID = await seedRestoreAccessGlobal(payload)
+
+        // Move the current global into the 'unlocked' state so it satisfies the
+        // constrained update rule (title equals 'unlocked').
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+        })
+
+        const restored = await payload.restoreGlobalVersion({
+          id: versionID,
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: false,
+          user,
+        })
+
+        expect(restored.version.title).toBe('historical')
+      })
+
+      test('should throw Forbidden when the current global does not match the update Where constraint', async ({
+        payload,
+      }) => {
+        // Current title is 'current', constraint requires title === 'unlocked',
+        // so the current global does not match and restore must be denied.
+        const versionID = await seedRestoreAccessGlobal(payload)
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: versionID,
+            slug: restoreAccessGlobalSlug,
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      test('should throw Forbidden when read-version access filters out the selected version', async ({
+        payload,
+      }) => {
+        const versionID = await seedRestoreAccessGlobal(payload)
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: versionID,
+            slug: restoreAccessGlobalSlug,
+            // Allow the update so the read-version check is isolated.
+            context: { readVersionsMode: 'constrained', restoreAccessMode: 'allow' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
       })
     })
 
