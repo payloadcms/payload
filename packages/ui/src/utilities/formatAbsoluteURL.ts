@@ -12,7 +12,7 @@ export const formatAbsoluteURL = (incomingURL: string): string | undefined => {
     // Preformed absolute URLs ignore `window.location.origin` when parsed.
     const parsedURL = new URL(incomingURL, window.location.origin)
 
-    // If the given URL is already absolute, preserve its original format exactly, i.e.. `new URL()` may have added a trailing slash
+    // If the given URL is already absolute, preserve its original format exactly, i.e. `new URL()` may have added a trailing slash
     if (incomingURL.startsWith('http://') || incomingURL.startsWith('https://')) {
       return incomingURL
     }
