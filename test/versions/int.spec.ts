@@ -36,6 +36,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   restoreAccessGlobalSlug,
+  restoreAccessNoVersionsGlobalSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -3358,11 +3359,13 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'historical' },
+          overrideAccess: true,
         })
 
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'current' },
+          overrideAccess: true,
         })
 
         const versions = await payload.findGlobalVersions({
@@ -3379,11 +3382,18 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'reset' },
+          overrideAccess: true,
         })
 
         await payload.db.deleteVersions({
           globalSlug: restoreAccessGlobalSlug,
           where: {},
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          data: { title: 'reset' },
+          overrideAccess: true,
         })
       })
 
@@ -3426,6 +3436,7 @@ describe('Versions', () => {
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'unlocked' },
+          overrideAccess: true,
         })
 
         const restored = await payload.restoreGlobalVersion({
@@ -3447,6 +3458,58 @@ describe('Versions', () => {
           payload.restoreGlobalVersion({
             id: versionID,
             slug: restoreAccessGlobalSlug,
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      it('should reject non-versioned global updates outside the access constraint', async () => {
+        await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          data: { title: 'current' },
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessNoVersionsGlobalSlug,
+            data: { title: 'updated' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessNoVersionsGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      it('should use one global lookup when access is not constrained', async () => {
+        const findGlobal = vi.spyOn(payload.db, 'findGlobal')
+
+        try {
+          await payload.updateGlobal({
+            slug: restoreAccessNoVersionsGlobalSlug,
+            data: { title: 'updated' },
+            overrideAccess: true,
+          })
+
+          expect(findGlobal).toHaveBeenCalledTimes(1)
+        } finally {
+          findGlobal.mockRestore()
+        }
+      })
+
+      it('should throw Forbidden when an update does not match the access constraint', async () => {
+        await seedRestoreAccessGlobal()
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessGlobalSlug,
+            data: { title: 'updated' },
             overrideAccess: false,
             user,
           }),

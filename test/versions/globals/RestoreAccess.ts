@@ -1,6 +1,28 @@
 import type { GlobalConfig } from 'payload'
 
-import { restoreAccessGlobalSlug } from '../slugs.js'
+import { restoreAccessGlobalSlug, restoreAccessNoVersionsGlobalSlug } from '../slugs.js'
+
+const updateAccess: NonNullable<GlobalConfig['access']>['update'] = ({ req: { context } }) => {
+  if (context?.restoreAccessMode === 'allow') {
+    return true
+  }
+
+  if (context?.restoreAccessMode === 'deny') {
+    return false
+  }
+
+  // Constrained: only allow when the current global is unlocked. `equals`
+  // filters consistently across adapters, unlike relational NULL/text cases.
+  return { title: { equals: 'unlocked' } }
+}
+
+const fields: GlobalConfig['fields'] = [
+  {
+    name: 'title',
+    type: 'text',
+    required: true,
+  },
+]
 
 /**
  * Global used to verify that version restore honors update-access query
@@ -19,32 +41,18 @@ const RestoreAccessGlobal: GlobalConfig = {
 
       return true
     },
-    update: ({ req: { context } }) => {
-      if (context?.restoreAccessMode === 'allow') {
-        return true
-      }
-
-      if (context?.restoreAccessMode === 'deny') {
-        return false
-      }
-
-      // Constrained: only allow when the current global is unlocked.
-      // Uses `equals` because it filters consistently across all database
-      // adapters (relational `not_equals` has NULL/text semantics that differ
-      // from MongoDB).
-      return { title: { equals: 'unlocked' } }
-    },
+    update: updateAccess,
   },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      required: true,
-    },
-  ],
+  fields,
   versions: {
     drafts: true,
   },
+}
+
+export const RestoreAccessNoVersionsGlobal: GlobalConfig = {
+  slug: restoreAccessNoVersionsGlobalSlug,
+  access: { update: updateAccess },
+  fields,
 }
 
 export default RestoreAccessGlobal

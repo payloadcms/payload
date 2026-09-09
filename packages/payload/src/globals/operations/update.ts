@@ -17,6 +17,8 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { Forbidden } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -202,6 +204,14 @@ export const updateOperation = async <
       where: query,
     })
     const { global, globalExists } = globalVersionResult || {}
+
+    if (
+      hasWhereAccessResult(accessResults) &&
+      globalExists &&
+      (!global || Object.keys(global).length === 0)
+    ) {
+      throw new Forbidden(req.t)
+    }
 
     let globalJSON: JsonObject = {}
 
