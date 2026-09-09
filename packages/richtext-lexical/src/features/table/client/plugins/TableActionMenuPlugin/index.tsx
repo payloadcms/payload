@@ -7,12 +7,11 @@ import type { JSX } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
-  $computeTableMapSkipCellCheck,
+  $computeTableMap,
   $deleteTableColumnAtSelection,
   $deleteTableRowAtSelection,
   $getNodeTriplet,
   $getTableCellNodeFromLexicalNode,
-  $getTableColumnIndexFromTableCellNode,
   $getTableNodeFromLexicalNodeOrThrow,
   $getTableRowIndexFromTableCellNode,
   $insertTableColumnAtSelection,
@@ -20,6 +19,8 @@ import {
   $isTableCellNode,
   $isTableSelection,
   $mergeCells,
+  $setTableColumnIsHeader,
+  $setTableRowIsHeader,
   $unmergeCell,
   getTableElement,
   getTableObserverFromTableElement,
@@ -123,7 +124,11 @@ function TableActionMenu({
         const currentSelectionCounts = $computeSelectionCount({ selection })
         updateSelectionCounts(currentSelectionCounts)
 
-        setCanMergeCells(currentSelectionCounts.columns > 1 || currentSelectionCounts.rows > 1)
+        const isCollapsedTableSelection = selection.anchor.is(selection.focus)
+        setCanMergeCells(
+          !isCollapsedTableSelection &&
+            (currentSelectionCounts.columns > 1 || currentSelectionCounts.rows > 1),
+        )
       }
       // Unmerge cell
       setCanUnmergeCell($canUnmerge())
@@ -222,6 +227,7 @@ function TableActionMenu({
     editor.update(() => {
       $unmergeCell()
     })
+    clearTableSelection()
   }
 
   const insertTableRowAtSelection = useCallback(
@@ -276,27 +282,9 @@ function TableActionMenu({
     editor.update(() => {
       const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode)
 
-      const tableRowIndex = $getTableRowIndexFromTableCellNode(tableCellNode)
-
-      const [gridMap] = $computeTableMapSkipCellCheck(tableNode, null, null)
-
-      const rowCells = new Set<TableCellNode>()
-
-      const newStyle = tableCellNode.getHeaderStyles() ^ TableCellHeaderStates.ROW
-      if (gridMap[tableRowIndex]) {
-        for (let col = 0; col < gridMap[tableRowIndex].length; col++) {
-          const mapCell = gridMap[tableRowIndex][col]
-
-          if (!mapCell?.cell) {
-            continue
-          }
-
-          if (!rowCells.has(mapCell.cell)) {
-            rowCells.add(mapCell.cell)
-            mapCell.cell.setHeaderStyles(newStyle, TableCellHeaderStates.ROW)
-          }
-        }
-      }
+      const rowIndex = $getTableRowIndexFromTableCellNode(tableCellNode)
+      const isHeader = !tableCellNode.hasHeaderState(TableCellHeaderStates.ROW)
+      $setTableRowIsHeader(tableNode, rowIndex, isHeader)
 
       clearTableSelection()
       onClose()
@@ -307,27 +295,10 @@ function TableActionMenu({
     editor.update(() => {
       const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode)
 
-      const tableColumnIndex = $getTableColumnIndexFromTableCellNode(tableCellNode)
-
-      const [gridMap] = $computeTableMapSkipCellCheck(tableNode, null, null)
-
-      const columnCells = new Set<TableCellNode>()
-
-      const newStyle = tableCellNode.getHeaderStyles() ^ TableCellHeaderStates.COLUMN
-      if (gridMap) {
-        for (let row = 0; row < gridMap.length; row++) {
-          const mapCell = gridMap?.[row]?.[tableColumnIndex]
-
-          if (!mapCell?.cell) {
-            continue
-          }
-
-          if (!columnCells.has(mapCell.cell)) {
-            columnCells.add(mapCell.cell)
-            mapCell.cell.setHeaderStyles(newStyle, TableCellHeaderStates.COLUMN)
-          }
-        }
-      }
+      // Merged cells can make the grid column differ from the cell's index in its row.
+      const [, cellMap] = $computeTableMap(tableNode, tableCellNode, tableCellNode)
+      const isHeader = !tableCellNode.hasHeaderState(TableCellHeaderStates.COLUMN)
+      $setTableColumnIsHeader(tableNode, cellMap.startColumn, isHeader)
 
       clearTableSelection()
       onClose()
