@@ -34,6 +34,9 @@ const generateInstructions = async ({ hasOwner }: { hasOwner: boolean }) => {
     baseUrl: 'https://example.com',
     cacheControlMaxAge: 60,
     clientUploads: true,
+    collectionSources: [
+      { collectionPrefix: '', collectionSlug: 'media', useCompositePrefixes: false },
+    ],
     token: 'read-write-token',
   })
   const generatedAdapter = adapter({
