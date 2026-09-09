@@ -22,6 +22,57 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### JWT authentication is versioned without moving token data
+
+Payload 4 keeps the decoded JWT payload flat, so integrations can continue reading `id`, `collection`, `sid`, `email`, and fields selected by `saveToJWT` from the same paths as Payload 3.
+
+Payload now reserves `id`, `collection`, `email`, `sid`, `iat`, and `exp`. A `saveToJWT` alias using one of those names is ignored, and Payload writes the trusted value after collecting fields configured with `saveToJWT`. This prevents an alias such as `saveToJWT: 'id'` or `saveToJWT: 'collection'` from changing which user or collection the signed token authenticates as.
+
+The token's signed protected header now contains `authVersion: 1`. This marker identifies tokens issued by the fixed authentication format. It lives in the header, rather than the payload, because earlier configurations could alias a field to any payload key. Payload rejects tokens that do not contain the supported header version.
+
+```ts
+// Decoded payload: unchanged paths
+{
+  id: 'user-id',
+  collection: 'users',
+  sid: 'session-id',
+  email: 'user@example.com',
+  role: 'super-admin', // from saveToJWT
+  iat: 1750000000,
+  exp: 1750007200,
+}
+
+// Signed protected header
+{
+  alg: 'HS256',
+  typ: 'JWT',
+  authVersion: 1,
+}
+```
+
+Tokens issued by a patched Payload 3 release already contain the same `authVersion: 1` protected-header marker and remain valid after upgrading to Payload 4, provided the signing secrets and authentication collection configuration remain compatible.
+
+Tokens issued by an unpatched Payload release do not contain the marker and are rejected. There is no safe compatibility fallback because a legacy token might have been signed after its trusted identity fields were overwritten. When upgrading directly from an unpatched release:
+
+- Users must sign in again after deployment.
+- Integrations must reissue stored bearer tokens.
+- Expect a temporary spike in `401` responses until clients discard their stored tokens.
+
+Raw-token consumers do not need to change token data paths, and `/me` returns the same data for a valid new token. External validators and integrations that mint Payload-compatible JWTs must set and check the protected-header version. Import Payload's shared version instead of hardcoding it:
+
+```ts
+import { decodeProtectedHeader } from 'jose'
+import { JWT_AUTH_VERSION } from 'payload'
+
+if (decodeProtectedHeader(token).authVersion !== JWT_AUTH_VERSION) {
+  throw new Error('Unsupported Payload token')
+}
+```
+
+A token is also rejected if its `collection` is not auth-enabled or has `disableLocalStrategy` enabled.
+
+See [Token Data](../authentication/token-data) for the full token data shape.
+
 ### Collection and Global Access Control callbacks receive `slug`
 
 Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.

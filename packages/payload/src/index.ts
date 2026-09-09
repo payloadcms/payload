@@ -1411,6 +1411,8 @@ export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
+export { JWT_AUTH_VERSION } from './auth/jwtAuth.js'
+export type { JWTAuthVersion } from './auth/jwtAuth.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'

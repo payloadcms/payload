@@ -77,11 +77,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
 
     test('should have fields saved to JWT', () => {
       const decoded = jwtDecode<User>(token)
+      const protectedHeader = jwtDecode<{ authVersion?: unknown }>(token, { header: true })
       const { collection, email: jwtEmail, exp, iat, roles } = decoded
 
       expect(jwtEmail).toBeDefined()
       expect(collection).toEqual('users')
       expect(Array.isArray(roles)).toBeTruthy()
+      expect(protectedHeader.authVersion).toBe(1)
       expect(iat).toBeDefined()
       expect(exp).toBeDefined()
     })
@@ -3035,11 +3037,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
     })
 
     // Hand-signs an HS256 JWT (jose verifies with the utf8 bytes of the derived
-    // key), re-using a real login's claims so session validation still passes.
-    const signHS256 = (claims: Record<string, unknown>, secret: string) => {
+    // key), re-using a real login's token data so session validation still passes.
+    const signHS256 = ({
+      protectedHeader = { alg: 'HS256', authVersion: 1, typ: 'JWT' },
+      secret,
+      tokenData,
+    }: {
+      protectedHeader?: Record<string, unknown>
+      secret: string
+      tokenData: Record<string, unknown>
+    }) => {
       const key = crypto.createHash('sha256').update(secret).digest('hex').slice(0, 32)
       const b64 = (obj: unknown) => Buffer.from(JSON.stringify(obj)).toString('base64url')
-      const data = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64(claims)}`
+      const data = `${b64(protectedHeader)}.${b64(tokenData)}`
       const signature = crypto.createHmac('sha256', key).update(data).digest('base64url')
       return `${data}.${signature}`
     }
@@ -3050,14 +3060,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
     }) => {
       const { token, user } = await payload.login({ collection: slug, data: { email, password } })
 
-      const { exp: _exp, iat: _iat, ...claims } = jwtDecode<Record<string, unknown>>(token)
+      const { exp: _exp, iat: _iat, ...tokenData } = jwtDecode<Record<string, unknown>>(token)
       const nowInSeconds = Math.floor(Date.now() / 1000)
-      const freshClaims = { ...claims, exp: nowInSeconds + 3600, iat: nowInSeconds }
+      const freshTokenData = { ...tokenData, exp: nowInSeconds + 3600, iat: nowInSeconds }
 
       // Signed under a previousSecret (in the keyring) - still authenticates.
       const underPrevious = await restClient
         .GET('/users/me', {
-          headers: { Authorization: `JWT ${signHS256(freshClaims, rotateSecretOldSecret)}` },
+          headers: {
+            Authorization: `JWT ${signHS256({ secret: rotateSecretOldSecret, tokenData: freshTokenData })}`,
+          },
         })
         .then((res) => res.json())
       expect(underPrevious.user?.id).toBe(user?.id)
@@ -3066,11 +3078,39 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       const underUnknown = await restClient
         .GET('/users/me', {
           headers: {
-            Authorization: `JWT ${signHS256(freshClaims, 'a-secret-not-in-the-keyring')}`,
+            Authorization: `JWT ${signHS256({ secret: 'a-secret-not-in-the-keyring', tokenData: freshTokenData })}`,
           },
         })
         .then((res) => res.json())
       expect(underUnknown.user).toBeFalsy()
+    })
+
+    test('should reject a token without the authentication header version', async ({
+      payload,
+      restClient,
+    }) => {
+      const { token } = await payload.login({ collection: slug, data: { email, password } })
+      const { exp: _exp, iat: _iat, ...tokenData } = jwtDecode<Record<string, unknown>>(token)
+      const nowInSeconds = Math.floor(Date.now() / 1000)
+
+      const response = await restClient
+        .GET('/users/me', {
+          headers: {
+            Authorization: `JWT ${signHS256({
+              protectedHeader: { alg: 'HS256', typ: 'JWT' },
+              secret: payload.config.secret,
+              tokenData: {
+                ...tokenData,
+                authVersion: 1,
+                exp: nowInSeconds + 3600,
+                iat: nowInSeconds,
+              },
+            })}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.user).toBeFalsy()
     })
   })
 })
