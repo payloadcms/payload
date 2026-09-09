@@ -668,25 +668,39 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
 
       test.describe('refresh collection identity', () => {
         let alternateUserID: number | string | undefined
+        let createdAlternateUser = false
 
         test.beforeAll(async ({ payloadInstance }) => {
           payloadInstance.db.allowIDOnCreate = true
           payloadInstance.config.db.allowIDOnCreate = true
 
-          const alternateUser = await payloadInstance.create({
+          // On SQL adapters the admin user's integer ID can already be taken in
+          // publicUsers by an earlier test, so reuse that row instead of colliding.
+          const existingAlternateUser = await payloadInstance.findByID({
+            id: loggedInUser!.id,
             collection: publicUsersSlug,
-            data: {
-              id: loggedInUser!.id,
-              email: 'refresh-collection@example.com',
-              password,
-            },
+            disableErrors: true,
           })
 
-          alternateUserID = alternateUser.id
+          if (existingAlternateUser) {
+            alternateUserID = existingAlternateUser.id
+          } else {
+            const alternateUser = await payloadInstance.create({
+              collection: publicUsersSlug,
+              data: {
+                id: loggedInUser!.id,
+                email: 'refresh-collection@example.com',
+                password,
+              },
+            })
+
+            alternateUserID = alternateUser.id
+            createdAlternateUser = true
+          }
         })
 
         test.afterAll(async ({ payloadInstance }) => {
-          if (alternateUserID !== undefined) {
+          if (createdAlternateUser && alternateUserID !== undefined) {
             await payloadInstance
               .delete({ id: alternateUserID, collection: publicUsersSlug })
               .catch(() => {})
