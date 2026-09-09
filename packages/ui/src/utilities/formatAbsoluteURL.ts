@@ -8,14 +8,17 @@ import { isHttpURL } from './isHttpURL.js'
  */
 export const formatAbsoluteURL = (incomingURL: string): string | undefined => {
   try {
+    // This throws for malformed URLs, e.g. `https://[wrong`.
+    // Preformed absolute URLs ignore `window.location.origin` when parsed.
+    const parsedURL = new URL(incomingURL, window.location.origin)
+
+    // If the given URL is already absolute, preserve its original format exactly, e.g. `new URL()` may add a trailing slash
     if (incomingURL.startsWith('http://') || incomingURL.startsWith('https://')) {
       return incomingURL
     }
 
-    const url = new URL(incomingURL, window.location.origin)
-
-    if (isHttpURL(url)) {
-      return url.href
+    if (isHttpURL(parsedURL)) {
+      return parsedURL.href
     }
 
     return undefined
