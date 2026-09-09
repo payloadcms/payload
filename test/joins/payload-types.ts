@@ -267,6 +267,7 @@ export interface Post {
    */
   isFiltered?: boolean | null;
   restrictedField?: string | null;
+  hiddenSecret?: string | null;
   upload?: (string | null) | Upload;
   category?: (string | null) | Category;
   categories?: (string | Category)[] | null;
@@ -1043,6 +1044,7 @@ export interface PostsSelect<T extends boolean = true> {
   author?: T;
   isFiltered?: T;
   restrictedField?: T;
+  hiddenSecret?: T;
   upload?: T;
   category?: T;
   categories?: T;
