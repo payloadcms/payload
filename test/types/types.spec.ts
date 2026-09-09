@@ -1476,7 +1476,7 @@ describe('Types testing', () => {
         })
       })
 
-      test('should allow partial create data when action is omitted and status is draft or omitted', () => {
+      test('should allow partial create data when action is omitted and status is draft-like', () => {
         const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
 
         expect(_sdk.create).type.toBeCallableWith({
@@ -1492,6 +1492,24 @@ describe('Types testing', () => {
             _status: 'draft',
             title: 'Test',
           },
+        })
+
+        expect(_sdk.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            _status: null,
+            title: 'Test',
+          },
+        })
+      })
+
+      test('should allow a complete fetched document when create action is omitted', () => {
+        const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+        const fetchedDoc = {} as DraftPost
+
+        expect(_sdk.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: fetchedDoc,
         })
       })
 
@@ -1954,7 +1972,7 @@ describe('Types testing', () => {
         })
       })
 
-      test('should allow partial create data when action is omitted and status is draft or omitted', () => {
+      test('should allow partial create data when action is omitted and status is draft-like', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
@@ -1968,6 +1986,23 @@ describe('Types testing', () => {
             _status: 'draft',
             title: 'Test',
           },
+        })
+
+        expect(payload.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: {
+            _status: null,
+            title: 'Test',
+          },
+        })
+      })
+
+      test('should allow a complete fetched document when create action is omitted', () => {
+        const fetchedDoc = {} as DraftPost
+
+        expect(payload.create).type.toBeCallableWith({
+          collection: 'draft-posts',
+          data: fetchedDoc,
         })
       })
 

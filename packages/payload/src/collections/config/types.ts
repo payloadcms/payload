@@ -209,8 +209,8 @@ export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDat
 /**
  * Create write data discriminated by explicit `action`, then omitted-action `_status`.
  * Explicit `saveDraft` always accepts draft-safe partial data. Explicit `publish` always requires
- * publish-valid data. Omitted action with published status requires publish-valid data; omitted
- * action with draft or omitted status accepts draft-safe partial data.
+ * publish-valid data. Omitted action accepts complete publish-valid data with any status; partial
+ * data remains limited to a draft, null, or omitted status.
  */
 type PermissiveCreateDataFromCollectionSlug<TSlug extends CollectionSlug> = {
   action?: CreateAction
@@ -244,11 +244,11 @@ export type CreateDataFromCollectionSlug<TSlug extends CollectionSlug> =
               }
             | {
                 action?: undefined
-                data: { _status: 'published' } & RequiredDataFromCollectionSlug<TSlug>
+                data: { _status?: 'draft' | null } & DraftDataFromCollectionSlug<TSlug>
               }
             | {
                 action?: undefined
-                data: { _status?: 'draft' } & DraftDataFromCollectionSlug<TSlug>
+                data: RequiredDataFromCollectionSlug<TSlug>
               }
 
 /**
