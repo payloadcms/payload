@@ -9,9 +9,13 @@ export type RewriteSummary = {
   floorsWritten: string[]
   overridesRemoved: string[]
   pinnedPayload: string[]
+  placeholdersSkipped: string[]
 }
 
 const DEP_FIELDS = ['dependencies', 'devDependencies'] as const
+
+/** Any protocol-prefixed specifier (`workspace:*`, `catalog:`, `link:`, `file:`, `npm:`, a URL). */
+const PLACEHOLDER_SPEC = /^[a-z][a-z0-9+.-]*:/i
 
 export const isPayloadPackage = (name: string): boolean =>
   name === 'payload' || name.startsWith('@payloadcms/')
@@ -24,37 +28,55 @@ export const isPayloadEslintPackage = (name: string): boolean =>
   name.startsWith('@payloadcms/eslint')
 
 /**
+ * A dependency whose version is resolved by the package manager, not a semver
+ * range: `workspace:*`, `catalog:`, `link:`, `file:`, `npm:` aliases, URLs.
+ * Overwriting one with an exact version would break the link, so it is left as-is.
+ */
+export const isPlaceholderSpec = (spec: unknown): boolean =>
+  typeof spec === 'string' && PLACEHOLDER_SPEC.test(spec)
+
+/**
  * Mutate `data` in place for a v4 upgrade: exact-pin payload packages, drop
  * payload dependency overrides, and write the toolchain floors. Never touches
  * next/react — the Next.js upgrade is delegated to Next's own workflow.
  * Returns a summary for the report. Idempotent.
  */
 export function rewritePackageJson({ data, resolved }: RewriteArgs): RewriteSummary {
-  const pinnedPayload = pinPayloadPackages(data, resolved.payloadVersion)
+  const { pinnedPayload, placeholdersSkipped } = pinPayloadPackages(data, resolved.payloadVersion)
   const overridesRemoved = removePayloadOverrides(data)
   const floorsWritten = writeFloors(data, resolved)
-  return { floorsWritten, overridesRemoved, pinnedPayload }
+  return { floorsWritten, overridesRemoved, pinnedPayload, placeholdersSkipped }
 }
 
-function pinPayloadPackages(data: Record<string, unknown>, version: string): string[] {
+function pinPayloadPackages(
+  data: Record<string, unknown>,
+  version: string,
+): { pinnedPayload: string[]; placeholdersSkipped: string[] } {
   const pinned: string[] = []
+  const skipped: string[] = []
   for (const field of DEP_FIELDS) {
     const deps = data[field]
     if (!isRecord(deps)) {
       continue
     }
     for (const name of Object.keys(deps)) {
+      if (!isPayloadPackage(name)) {
+        continue
+      }
+      // A workspace/catalog/link spec resolves itself; pinning it breaks the link.
+      if (isPlaceholderSpec(deps[name])) {
+        skipped.push(name)
+        continue
+      }
       if (isPayloadEslintPackage(name)) {
         deps[name] = 'latest'
         continue
       }
-      if (isPayloadPackage(name)) {
-        deps[name] = version
-        pinned.push(name)
-      }
+      deps[name] = version
+      pinned.push(name)
     }
   }
-  return pinned
+  return { pinnedPayload: pinned, placeholdersSkipped: skipped }
 }
 
 function removePayloadOverrides(data: Record<string, unknown>): string[] {
