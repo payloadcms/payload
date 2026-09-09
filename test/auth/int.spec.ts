@@ -352,6 +352,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
 
       test('should allow a user to change password without returning password', async ({
         payload,
+        restClient,
       }) => {
         const result = await payload.update({
           id: loggedInUser.id,
