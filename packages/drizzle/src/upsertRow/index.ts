@@ -150,6 +150,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           }
         }
 
+        // Fields like `point` are excluded from `columns` and computed via `extras`
+        // (e.g. ST_AsGeoJSON) instead - without this, their value is dropped from the result.
+        if (findManyArgs.extras) {
+          for (const [name, extra] of Object.entries(findManyArgs.extras)) {
+            selectedFields[name] = extra
+          }
+        }
+
         const docs = await drizzle
           .update(adapter.tables[tableName])
           .set(row)
