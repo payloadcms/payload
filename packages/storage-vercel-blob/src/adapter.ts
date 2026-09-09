@@ -9,6 +9,8 @@ import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
 import { Forbidden } from 'payload'
 import { assertClientUploadAllowed } from 'payload/internal'
 
+import type { VercelBlobCollectionSource } from './authorizeFileOverwrite.js'
+
 import { authorizeClientOverwrite } from './authorizeFileOverwrite.js'
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
@@ -21,6 +23,7 @@ interface CreateVercelBlobAdapterArgs {
   baseUrl: string
   cacheControlMaxAge: number
   clientUploads?: ClientUploadsConfig
+  collectionSources: VercelBlobCollectionSource[]
   token: string
   useCompositePrefixes?: boolean
 }
@@ -31,6 +34,7 @@ export function createVercelBlobAdapter({
   baseUrl,
   cacheControlMaxAge,
   clientUploads,
+  collectionSources,
   token,
   useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
@@ -69,12 +73,11 @@ export function createVercelBlobAdapter({
           useCompositePrefixes,
         })
         const allowOverwrite = await authorizeClientOverwrite({
-          collectionPrefix: prefix,
-          collectionSlug,
+          collectionSources,
           fileKey: requested.fileKey,
           overrideAccess,
           req,
-          useCompositePrefixes,
+          requestedCollectionSlug: collectionSlug,
         })
         const resolved = allowOverwrite
           ? requested

@@ -101,6 +101,41 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     expect(res.ContentType).toBe('image/png')
   })
 
+  test('does not overwrite an existing object through client uploads', async ({ restClient }) => {
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const replacement = Buffer.alloc(file.length, 1)
+    const instructions = await restClient
+      .POST(signedURLEndpoint, {
+        body: signedURLBody('media', 'protected.png', file.length, 'image/png'),
+      })
+      .then((res) => res.json<UploadInstructions>())
+
+    if (instructions.type !== 'http') {
+      throw new Error('Expected HTTP upload instructions')
+    }
+
+    const headers = new Headers(instructions.request.headers)
+    headers.delete('Content-Length')
+
+    const upload = (body: Buffer) =>
+      fetch(instructions.request.url, {
+        body,
+        headers,
+        method: instructions.request.method,
+      })
+
+    await expect(upload(file)).resolves.toMatchObject({ ok: true })
+
+    const overwrite = await upload(replacement)
+    expect(overwrite.status).toBe(412)
+
+    const stored = await getAWSClient().getObject({
+      Bucket: getTestBucketName(),
+      Key: 'protected.png',
+    })
+    expect(Buffer.from(await stored.Body!.transformToByteArray())).toEqual(file)
+  })
+
   for (const [uploadFilename, mimeType] of [
     ['reference.svg', 'image/svg+xml'],
     ['reference.xml', 'application/xml'],

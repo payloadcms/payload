@@ -5,6 +5,17 @@ import { combineQueries, executeAccess, Forbidden } from 'payload'
 
 type OwnerDocument = { prefix?: string } & FileData & TypeWithID
 
+export type VercelBlobCollectionSource = {
+  collectionPrefix: string
+  collectionSlug: string
+  useCompositePrefixes: boolean
+}
+
+type Owner = {
+  collectionSlug: string
+  doc: OwnerDocument
+}
+
 function getDocumentFileKeys({
   collectionPrefix,
   doc,
@@ -109,35 +120,48 @@ async function canUpdateOwner({
 }
 
 export async function authorizeClientOverwrite({
-  collectionPrefix,
-  collectionSlug,
+  collectionSources,
   fileKey,
   overrideAccess = false,
   req,
-  useCompositePrefixes = false,
+  requestedCollectionSlug,
 }: {
-  collectionPrefix: string
-  collectionSlug: string
+  collectionSources: VercelBlobCollectionSource[]
   fileKey: string
   overrideAccess?: boolean
   req: PayloadRequest
-  useCompositePrefixes?: boolean
+  requestedCollectionSlug: string
 }): Promise<boolean> {
-  const owners = await findOwners({
-    collectionPrefix,
-    collectionSlug,
-    fileKey,
-    req,
-    useCompositePrefixes,
-  })
+  const owners = (
+    await Promise.all(
+      collectionSources.map(
+        async ({ collectionPrefix, collectionSlug, useCompositePrefixes }): Promise<Owner[]> => {
+          const docs = await findOwners({
+            collectionPrefix,
+            collectionSlug,
+            fileKey,
+            req,
+            useCompositePrefixes,
+          })
+
+          return docs.map((doc) => ({ collectionSlug, doc }))
+        },
+      ),
+    )
+  ).flat()
 
   if (owners.length === 0) {
     return false
   }
 
+  const owner = owners[0]!
+  if (owners.length !== 1 || owner.collectionSlug !== requestedCollectionSlug) {
+    throw new Forbidden(req.t)
+  }
+
   if (
-    owners.length !== 1 ||
-    (!overrideAccess && !(await canUpdateOwner({ collectionSlug, owner: owners[0]!, req })))
+    !overrideAccess &&
+    !(await canUpdateOwner({ collectionSlug: owner.collectionSlug, owner: owner.doc, req }))
   ) {
     throw new Forbidden(req.t)
   }

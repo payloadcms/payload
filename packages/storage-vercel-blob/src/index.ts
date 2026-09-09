@@ -8,6 +8,11 @@ import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { createVercelBlobAdapter } from './adapter.js'
+import {
+  getCollectionSources,
+  type InternalVercelBlobStorageAdapter,
+  vercelBlobStorageMetadata,
+} from './getCollectionSources.js'
 
 export type VercelBlobStorageOptions = {
   /**
@@ -95,102 +100,110 @@ type VercelBlobStorageFactory = (vercelBlobStorageOpts: VercelBlobStorageOptions
 
 export const vercelBlobStorage: VercelBlobStorageFactory = (
   options: VercelBlobStorageOptions,
-): StorageAdapter => ({
-  name: 'vercel-blob',
-  collections: Object.keys(options.collections),
-  init: (incomingConfig: Config): Config => {
-    // Parse storeId from token
-    const storeId = options.token
-      ?.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]
-      ?.toLowerCase()
-
-    const isPluginDisabled = options.enabled === false || !options.token
-
-    // Don't throw if the plugin is disabled
-    if (!storeId && !isPluginDisabled) {
-      throw new Error(
-        'Invalid token format for Vercel Blob adapter. Should be vercel_blob_rw_<store_id>_<random_string>.',
-      )
-    }
-
-    const optionsWithDefaults = {
-      ...defaultUploadOptions,
-      ...options,
-    }
-
-    // support overriding the base URL for emulator https://github.com/payloadcms/vercel-blob-emulator
-    const baseUrl =
-      process.env.STORAGE_VERCEL_BLOB_BASE_URL ||
-      `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
-
-    // If the plugin is disabled or no token is provided, do not enable the plugin
-    if (isPluginDisabled) {
-      if (options.alwaysInsertFields) {
-        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
-          options.collections,
-        ).reduce(
-          (acc, [slug, collOptions]) => ({
-            ...acc,
-            [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
-          }),
-          {} as Record<string, CollectionOptions>,
+): StorageAdapter => {
+  const storeId = options.token?.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]?.toLowerCase()
+  const isPluginDisabled = options.enabled === false || !options.token
+  const storageAdapter: InternalVercelBlobStorageAdapter = {
+    name: 'vercel-blob',
+    collections: Object.keys(options.collections),
+    init: (incomingConfig: Config): Config => {
+      // Don't throw if the plugin is disabled
+      if (!storeId && !isPluginDisabled) {
+        throw new Error(
+          'Invalid token format for Vercel Blob adapter. Should be vercel_blob_rw_<store_id>_<random_string>.',
         )
-        return cloudStoragePlugin({
-          alwaysInsertFields: true,
-          collections: collectionsWithoutAdapter,
-          enabled: false,
-          useCompositePrefixes: options.useCompositePrefixes,
-        })(incomingConfig)
       }
-      return incomingConfig
-    }
 
-    const adapter = createVercelBlobAdapter({
-      access: optionsWithDefaults.access ?? 'public',
-      addRandomSuffix: optionsWithDefaults.addRandomSuffix,
-      baseUrl,
-      cacheControlMaxAge: optionsWithDefaults.cacheControlMaxAge ?? 60 * 60 * 24 * 365,
-      clientUploads: optionsWithDefaults.clientUploads,
-      token: options.token!,
-      useCompositePrefixes: options.useCompositePrefixes,
-    })
+      const optionsWithDefaults = {
+        ...defaultUploadOptions,
+        ...options,
+      }
 
-    // Add adapter to each collection option object
-    const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
-      options.collections,
-    ).reduce(
-      (acc, [slug, collOptions]) => ({
-        ...acc,
-        [slug]: {
-          ...(collOptions === true ? {} : collOptions),
-          adapter,
-        },
-      }),
-      {} as Record<string, CollectionOptions>,
-    )
+      // support overriding the base URL for emulator https://github.com/payloadcms/vercel-blob-emulator
+      const baseUrl =
+        process.env.STORAGE_VERCEL_BLOB_BASE_URL ||
+        `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
 
-    // Set disableLocalStorage: true for collections specified in the plugin options
-    const config = {
-      ...incomingConfig,
-      collections: (incomingConfig.collections || []).map((collection) => {
-        if (!collectionsWithAdapter[collection.slug]) {
-          return collection
+      // If the plugin is disabled or no token is provided, do not enable the plugin
+      if (isPluginDisabled) {
+        if (options.alwaysInsertFields) {
+          const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] =
+            Object.entries(options.collections).reduce(
+              (acc, [slug, collOptions]) => ({
+                ...acc,
+                [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
+              }),
+              {} as Record<string, CollectionOptions>,
+            )
+          return cloudStoragePlugin({
+            alwaysInsertFields: true,
+            collections: collectionsWithoutAdapter,
+            enabled: false,
+            useCompositePrefixes: options.useCompositePrefixes,
+          })(incomingConfig)
         }
+        return incomingConfig
+      }
 
-        return {
-          ...collection,
-          upload: {
-            ...(typeof collection.upload === 'object' ? collection.upload : {}),
-            disableLocalStorage: true,
+      const adapter = createVercelBlobAdapter({
+        access: optionsWithDefaults.access ?? 'public',
+        addRandomSuffix: optionsWithDefaults.addRandomSuffix,
+        baseUrl,
+        cacheControlMaxAge: optionsWithDefaults.cacheControlMaxAge ?? 60 * 60 * 24 * 365,
+        clientUploads: optionsWithDefaults.clientUploads,
+        collectionSources: getCollectionSources({
+          currentAdapter: storageAdapter,
+          storageAdapters: incomingConfig.storage,
+        }),
+        token: options.token!,
+        useCompositePrefixes: options.useCompositePrefixes,
+      })
+
+      // Add adapter to each collection option object
+      const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+        options.collections,
+      ).reduce(
+        (acc, [slug, collOptions]) => ({
+          ...acc,
+          [slug]: {
+            ...(collOptions === true ? {} : collOptions),
+            adapter,
           },
-        }
-      }),
-    }
+        }),
+        {} as Record<string, CollectionOptions>,
+      )
 
-    return cloudStoragePlugin({
-      alwaysInsertFields: options.alwaysInsertFields,
-      collections: collectionsWithAdapter,
-      useCompositePrefixes: options.useCompositePrefixes,
-    })(config)
-  },
-})
+      // Set disableLocalStorage: true for collections specified in the plugin options
+      const config = {
+        ...incomingConfig,
+        collections: (incomingConfig.collections || []).map((collection) => {
+          if (!collectionsWithAdapter[collection.slug]) {
+            return collection
+          }
+
+          return {
+            ...collection,
+            upload: {
+              ...(typeof collection.upload === 'object' ? collection.upload : {}),
+              disableLocalStorage: true,
+            },
+          }
+        }),
+      }
+
+      return cloudStoragePlugin({
+        alwaysInsertFields: options.alwaysInsertFields,
+        collections: collectionsWithAdapter,
+        useCompositePrefixes: options.useCompositePrefixes,
+      })(config)
+    },
+    [vercelBlobStorageMetadata]: {
+      collections: options.collections,
+      enabled: !isPluginDisabled,
+      storeId,
+      useCompositePrefixes: Boolean(options.useCompositePrefixes),
+    },
+  }
+
+  return storageAdapter
+}
