@@ -16,7 +16,7 @@ import {
   sql,
 } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
-import { APIError, QueryError } from 'payload'
+import { APIError, getFieldByPath, QueryError } from 'payload'
 import {
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
@@ -141,6 +141,38 @@ export function parseParams({
                       }),
                     )
                     continue
+                  }
+
+                  // A join points to many related documents. Expanding the nested query into
+                  // prefixed dot-paths reuses the join's shared table alias, so every condition is
+                  // evaluated against the same joined row (same-document `contains` semantics).
+                  if (operator === 'contains' && !relationshipPath) {
+                    const joinField = getFieldByPath({
+                      fields,
+                      path: relationOrPath.replace(/__/g, '.'),
+                    })?.field
+
+                    if (joinField?.type === 'join') {
+                      constraints.push(
+                        parseParams({
+                          adapter,
+                          aliasTable,
+                          context,
+                          fields,
+                          joins,
+                          locale,
+                          parentIsLocalized,
+                          selectFields,
+                          selectLocale,
+                          tableName,
+                          where: prefixJoinContainsWhere({
+                            prefix: relationOrPath,
+                            where: val,
+                          }),
+                        }),
+                      )
+                      continue
+                    }
                   }
                 }
 
@@ -594,6 +626,32 @@ export function parseParams({
   }
 
   return result
+}
+
+/**
+ * Prefixes every field path in a join's nested `contains` query with the join field's path, so the
+ * query can be resolved through the join's shared table alias.
+ *
+ * @example
+ * ```ts
+ * prefixJoinContainsWhere({ prefix: 'comments', where: { and: [{ text: { equals: 'hi' } }] } })
+ * // => { and: [{ 'comments.text': { equals: 'hi' } }] }
+ * ```
+ */
+function prefixJoinContainsWhere({ prefix, where }: { prefix: string; where: Where }): Where {
+  const prefixedWhere: Where = {}
+
+  for (const [key, value] of Object.entries(where)) {
+    if (['and', 'or'].includes(key.toLowerCase()) && Array.isArray(value)) {
+      prefixedWhere[key] = value.map((nestedWhere) =>
+        prefixJoinContainsWhere({ prefix, where: nestedWhere }),
+      )
+    } else {
+      prefixedWhere[`${prefix}.${key}`] = value
+    }
+  }
+
+  return prefixedWhere
 }
 
 /**

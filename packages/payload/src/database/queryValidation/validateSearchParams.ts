@@ -1,7 +1,12 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { HasManyRelationshipOperator, PayloadRequest, WhereField } from '../../types/index.js'
+import type {
+  HasManyRelationshipOperator,
+  PayloadRequest,
+  Where,
+  WhereField,
+} from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -177,6 +182,63 @@ export async function validateSearchParam({
           ) {
             errors.push({ path: incomingPath })
           }
+
+          const relatedCollectionReadPermission = policies.collections![collectionSlug].read
+          if (
+            paths.length > 1 &&
+            relatedCollectionReadPermission &&
+            typeof relatedCollectionReadPermission === 'object' &&
+            relatedCollectionReadPermission.where
+          ) {
+            const relationshipPath = paths
+              .slice(0, -1)
+              .map(({ path: pathToRelationship }) => pathToRelationship)
+              .join('.')
+
+            const accessWhere = prefixWherePaths({
+              prefix: relationshipPath,
+              where: relatedCollectionReadPermission.where,
+            })
+            const mutableWhere = constraint as Record<string, unknown>
+            const existingAnd = Array.isArray(mutableWhere.and) ? mutableWhere.and : []
+            const relationshipField = paths.at(-2)?.field
+
+            // Has-many relationships and joins can point to many related documents, so the user's
+            // filter and the access constraint must be satisfied by the SAME related document.
+            // Scoping both into a single `contains` prevents a different, readable document from
+            // masking one the user cannot read (a related-document oracle).
+            const isHasManyRelationship =
+              relationshipField &&
+              (relationshipField.type === 'relationship' || relationshipField.type === 'upload') &&
+              relationshipField.hasMany
+            const isJoin = relationshipField?.type === 'join'
+
+            if (isHasManyRelationship || isJoin) {
+              const relatedFieldPath = paths.at(-1)?.path
+
+              if (relatedFieldPath) {
+                mutableWhere.and = [
+                  ...existingAnd,
+                  {
+                    [relationshipPath]: {
+                      contains: {
+                        and: [
+                          {
+                            [relatedFieldPath]: {
+                              [operator]: val,
+                            },
+                          },
+                          relatedCollectionReadPermission.where,
+                        ],
+                      },
+                    },
+                  },
+                ]
+              }
+            } else {
+              mutableWhere.and = [...existingAnd, accessWhere]
+            }
+          }
         }
         let fieldPath = path
         // remove locale from end of path
@@ -261,4 +323,20 @@ export async function validateSearchParam({
     }),
   )
   await Promise.all(promises)
+}
+
+const prefixWherePaths = ({ prefix, where }: { prefix: string; where: Where }): Where => {
+  const prefixedWhere: Where = {}
+
+  for (const [key, value] of Object.entries(where)) {
+    if (['and', 'or'].includes(key.toLowerCase()) && Array.isArray(value)) {
+      prefixedWhere[key] = value.map((nestedWhere) =>
+        prefixWherePaths({ prefix, where: nestedWhere }),
+      )
+    } else {
+      prefixedWhere[`${prefix}.${key}`] = value
+    }
+  }
+
+  return prefixedWhere
 }

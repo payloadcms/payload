@@ -125,6 +125,21 @@ export async function buildSearchParam({
     })
   }
 
+  if (
+    operator === 'contains' &&
+    paths.length === 1 &&
+    field.type === 'join' &&
+    typeof field.collection === 'string' &&
+    isNestedRelationshipQuery(val)
+  ) {
+    return buildJoinContainsSearchParam({
+      field,
+      locale,
+      nestedWhere: val,
+      payload,
+    })
+  }
+
   if (path) {
     const sanitizedQueryValue = sanitizeQueryValue({
       field,
@@ -532,5 +547,65 @@ async function buildHasManyRelationshipSearchParam({
         value: { $nin: matchingRelatedDocumentIDs },
       }
     }
+  }
+}
+
+/**
+ * Builds a MongoDB condition for a `contains` query nested on a join field.
+ *
+ * Finds documents in the joined collection that match the nested query, then follows the join's
+ * `on` relationship to collect the parent IDs those documents point back to. Because the nested
+ * query resolves against a single joined document, the user's filter and any injected access
+ * constraint must be satisfied by the same document.
+ */
+async function buildJoinContainsSearchParam({
+  field,
+  locale,
+  nestedWhere,
+  payload,
+}: {
+  field: FlattenedField
+  locale?: string
+  nestedWhere: unknown
+  payload: Payload
+}): Promise<SearchParam | undefined> {
+  if (
+    field.type !== 'join' ||
+    typeof field.collection !== 'string' ||
+    !isNestedRelationshipQuery(nestedWhere)
+  ) {
+    return undefined
+  }
+
+  const { collectionConfig, Model: JoinedModel } = getCollection({
+    adapter: payload.db as MongooseAdapter,
+    collectionSlug: field.collection,
+  })
+
+  const relationshipField = getFieldByPath({
+    fields: collectionConfig.flattenedFields,
+    path: field.on,
+  })
+
+  if (!relationshipField) {
+    throw new APIError('Relationship field was not found')
+  }
+
+  let joinPath = relationshipField.localizedPath
+  if (relationshipField.pathHasLocalized && payload.config.localization) {
+    joinPath = joinPath.replace('<locale>', locale || payload.config.localization.defaultLocale)
+  }
+
+  const subQuery = await JoinedModel.buildQuery({
+    locale,
+    payload,
+    where: nestedWhere,
+  })
+
+  const parentIDs = await JoinedModel.distinct(joinPath, subQuery)
+
+  return {
+    path: '_id',
+    value: { $in: parentIDs },
   }
 }
