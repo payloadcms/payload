@@ -16,6 +16,44 @@ pnpm add @payloadcms/storage-azure
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 - When deploying to Vercel, server uploads are limited to 4.5MB. Set `clientUploads` to `true` to use upload instructions and send files directly to Azure.
 
+### Authentication
+
+The adapter supports two mutually exclusive authentication methods.
+
+#### Connection string
+
+```ts
+azureStorage({
+  // ...
+  baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
+  connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
+  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+})
+```
+
+#### Entra ID / managed identity
+
+Pass any [`TokenCredential`](https://learn.microsoft.com/en-us/javascript/api/@azure/core-auth/tokencredential) from `@azure/identity` as `credential` to authenticate without storing secrets — for example with a managed identity on Azure App Service or a workload identity on AKS:
+
+```ts
+import { DefaultAzureCredential } from '@azure/identity'
+
+azureStorage({
+  // ...
+  baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL, // https://<account>.blob.core.windows.net
+  credential: new DefaultAzureCredential(),
+  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+})
+```
+
+Requirements when using `credential`:
+
+- `baseURL` must be the storage account's blob endpoint (`https://<account>.blob.core.windows.net`), not a CDN URL, since it is also used to connect to the account.
+- The identity needs the **Storage Blob Data Contributor** role on the storage account or container. Client uploads (`clientUploads`) sign upload URLs with a [user delegation SAS](https://learn.microsoft.com/en-us/rest/api/storageservices/create-user-delegation-sas), whose `generateUserDelegationKey` action is included in that role.
+- For a user-assigned managed identity with `DefaultAzureCredential`, set the `AZURE_CLIENT_ID` environment variable to the identity's client ID (or use `ManagedIdentityCredential` with an explicit client ID).
+
+> **Note:** SAS-based connection strings (containing `SharedAccessSignature=`) work for server uploads but cannot sign upload URLs, so they are not supported with `clientUploads`.
+
 ### Client uploads and CORS
 
 Client uploads (`clientUploads: true`) use the Azure Blob SDK, which splits large files into blocks and therefore avoids the ~5GB limit of a single upload request. Because the SDK sends `x-ms-*` headers, the browser issues a CORS preflight, so your storage account's CORS rules must allow the `OPTIONS` and `PUT` methods **and** the required headers.
@@ -58,12 +96,13 @@ export default buildConfig({
 
 ### Configuration Options
 
-| Option                 | Description                                                              | Default |
-| ---------------------- | ------------------------------------------------------------------------ | ------- |
-| `enabled`              | Whether or not to enable the plugin                                      | `true`  |
-| `collections`          | Collections to apply the Azure Blob adapter to                           |         |
-| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist | `false` |
-| `baseURL`              | Base URL for the Azure Blob storage account                              |         |
-| `connectionString`     | Azure Blob storage connection string                                     |         |
-| `containerName`        | Azure Blob storage container name                                        |         |
-| `clientUploads`        | Upload directly to Azure instead of through Payload.                     |         |
+| Option                 | Description                                                                                            | Default |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ------- |
+| `enabled`              | Whether or not to enable the plugin                                                                    | `true`  |
+| `collections`          | Collections to apply the Azure Blob adapter to                                                         |         |
+| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist                               | `false` |
+| `baseURL`              | Base URL for the Azure Blob storage account (the blob endpoint when using `credential`)                |         |
+| `connectionString`     | Azure Blob storage connection string (mutually exclusive with `credential`)                            |         |
+| `credential`           | Entra ID `TokenCredential` (e.g. `DefaultAzureCredential`), mutually exclusive with `connectionString` |         |
+| `containerName`        | Azure Blob storage container name                                                                      |         |
+| `clientUploads`        | Upload directly to Azure instead of through Payload.                                                   |         |

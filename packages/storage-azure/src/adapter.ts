@@ -1,4 +1,4 @@
-import type { ContainerClient } from '@azure/storage-blob'
+import type { BlobServiceClient, ContainerClient } from '@azure/storage-blob'
 import type {
   Adapter,
   ClientUploadsConfig,
@@ -17,6 +17,7 @@ interface CreateAzureAdapterArgs {
   clientUploads?: ClientUploadsConfig
   containerName: string
   createContainerIfNotExists: () => void
+  getBlobServiceClient: () => BlobServiceClient
   getStorageClient: () => ContainerClient
   useCompositePrefixes?: boolean
 }
@@ -27,6 +28,7 @@ export function createAzureAdapter({
   clientUploads,
   containerName,
   createContainerIfNotExists,
+  getBlobServiceClient,
   getStorageClient,
   useCompositePrefixes = false,
 }: CreateAzureAdapterArgs): Adapter {
@@ -52,6 +54,7 @@ export function createAzureAdapter({
         access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
         collectionPrefix: prefix,
         containerName,
+        getBlobServiceClient,
         getStorageClient,
         useCompositePrefixes,
       }),
