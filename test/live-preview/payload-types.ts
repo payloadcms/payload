@@ -82,6 +82,7 @@ export interface Config {
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
     'conditional-url': ConditionalUrl;
+    'forbidden-url': ForbiddenUrl;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -102,6 +103,7 @@ export interface Config {
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
+    'forbidden-url': ForbiddenUrlSelect<false> | ForbiddenUrlSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1079,6 +1081,15 @@ export interface ConditionalUrl {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forbidden-url".
+ */
+export interface ForbiddenUrl {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1152,6 +1163,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-url';
         value: string | ConditionalUrl;
+      } | null)
+    | ({
+        relationTo: 'forbidden-url';
+        value: string | ForbiddenUrl;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1818,6 +1833,14 @@ export interface CustomLivePreviewSelect<T extends boolean = true> {
 export interface ConditionalUrlSelect<T extends boolean = true> {
   title?: T;
   enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forbidden-url_select".
+ */
+export interface ForbiddenUrlSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }

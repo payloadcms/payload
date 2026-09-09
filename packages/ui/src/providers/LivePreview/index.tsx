@@ -10,6 +10,7 @@ import { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
+import { isHttpURL } from '../../utilities/isHttpURL.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
 import { sizeReducer } from './sizeReducer.js'
@@ -81,7 +82,15 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   )
 
   const [url, setURL] = useState<string>('')
-  const [previewURL, setPreviewURL] = useState<string>(previewURLFromProps)
+  const [previewURL, _setPreviewURL] = useState<string>()
+
+  const setPreviewURL = useCallback<LivePreviewContextType['setPreviewURL']>((incomingURL) => {
+    _setPreviewURL(isHttpURL(incomingURL) ? incomingURL : undefined)
+  }, [])
+
+  useEffect(() => {
+    setPreviewURL(previewURLFromProps)
+  }, [previewURLFromProps, setPreviewURL])
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
