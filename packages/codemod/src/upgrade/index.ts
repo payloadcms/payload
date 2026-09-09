@@ -14,7 +14,11 @@ import { loadProject } from '../utils/project.js'
 import { detectPackageManager } from './detectPackageManager.js'
 import { renderReport } from './report.js'
 import { resolveVersions } from './resolveVersions.js'
-import { isPayloadEslintPackage, rewritePackageJson } from './rewritePackageJson.js'
+import {
+  isPayloadEslintPackage,
+  isPlaceholderSpec,
+  rewritePackageJson,
+} from './rewritePackageJson.js'
 import { runInstall } from './runInstall.js'
 import { RUNBOOK_RELATIVE_PATH } from './types.js'
 
@@ -140,6 +144,7 @@ export async function runUpgrade(
     floorsWritten: summary.floorsWritten,
     nextTarget: resolved.nextTarget,
     overridesRemoved: summary.overridesRemoved,
+    placeholdersSkipped: summary.placeholdersSkipped,
     runbookPath: resolve(dirname(fileURLToPath(import.meta.url)), '..', RUNBOOK_RELATIVE_PATH),
     transforms: results,
     versions,
@@ -173,6 +178,11 @@ function verifyResolution(
     // eslint packages are versioned independently, so they are not part of the
     // lockstep-pinned set and cannot be verified against the payload version.
     if (isPayloadEslintPackage(name)) {
+      continue
+    }
+    // Workspace/catalog/link specs were left unpinned, so there is no exact
+    // version to verify against.
+    if (isPlaceholderSpec(deps[name])) {
       continue
     }
     const installed = readInstalledVersion(projectPath, name)

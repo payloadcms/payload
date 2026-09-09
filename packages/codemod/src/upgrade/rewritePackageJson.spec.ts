@@ -63,6 +63,42 @@ describe('rewritePackageJson', () => {
     expect(summary.pinnedPayload).not.toContain('@payloadcms/eslint-config')
   })
 
+  it('leaves workspace/catalog/link specs untouched and reports them as skipped', () => {
+    const data: Record<string, unknown> = {
+      dependencies: {
+        '@payloadcms/next': 'catalog:',
+        '@payloadcms/richtext-lexical': 'link:../lexical',
+        payload: 'workspace:*',
+      },
+      devDependencies: {
+        '@payloadcms/eslint-config': 'workspace:^',
+        '@payloadcms/ui': '^3.0.0',
+      },
+    }
+
+    const summary = rewritePackageJson({ data, resolved })
+
+    expect(data.dependencies).toEqual({
+      '@payloadcms/next': 'catalog:',
+      '@payloadcms/richtext-lexical': 'link:../lexical',
+      payload: 'workspace:*',
+    })
+    // The non-placeholder eslint dep still moves to latest; the workspace one does not.
+    expect(data.devDependencies).toMatchObject({
+      '@payloadcms/eslint-config': 'workspace:^',
+      '@payloadcms/ui': '4.0.0-canary.20',
+    })
+    expect(summary.placeholdersSkipped.sort()).toEqual(
+      [
+        '@payloadcms/eslint-config',
+        '@payloadcms/next',
+        '@payloadcms/richtext-lexical',
+        'payload',
+      ].sort(),
+    )
+    expect(summary.pinnedPayload).toEqual(['@payloadcms/ui'])
+  })
+
   it('adds floors to devDependencies when absent', () => {
     const data: Record<string, unknown> = { dependencies: { payload: '^3.0.0' } }
 
