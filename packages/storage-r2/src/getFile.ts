@@ -4,7 +4,7 @@ import {
   getFilePrefix as getDocPrefix,
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 import type { R2Bucket } from './types.js'
 
@@ -120,10 +120,10 @@ export async function getFile({
       obj.writeHttpMetadata(headers)
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
+    // Apply a restrictive policy to XML-family responses served through Payload.
     const contentType = headers.get('Content-Type')
-    if (contentType === 'image/svg+xml') {
-      headers.set('Content-Security-Policy', "script-src 'none'")
+    if (isXmlMimeType(contentType)) {
+      headers.set('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

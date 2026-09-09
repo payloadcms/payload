@@ -1,3 +1,5 @@
+import type { CollectionConfig } from 'payload'
+
 import { azureStorage } from '@payloadcms/storage-azure'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
@@ -19,6 +21,14 @@ import { MediaWithDocPrefix, mediaWithDocPrefixSlug } from './collections/MediaW
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const enableAzureClientUploads = (collection: CollectionConfig): CollectionConfig => ({
+  ...collection,
+  upload: {
+    ...(typeof collection.upload === 'object' ? collection.upload : {}),
+    allowRestrictedFileTypes: true,
+  },
+})
+
 dotenv.config({
   path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emulated'),
 })
@@ -32,11 +42,11 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [
-      Media,
-      MediaWithPrefix,
-      MediaWithDocPrefix,
-      MediaHeaderOnly,
-      MediaHeaderOnlyWithSizes,
+      enableAzureClientUploads(Media),
+      enableAzureClientUploads(MediaWithPrefix),
+      enableAzureClientUploads(MediaWithDocPrefix),
+      enableAzureClientUploads(MediaHeaderOnly),
+      enableAzureClientUploads(MediaHeaderOnlyWithSizes),
       Users,
     ],
     storage: [

@@ -2,7 +2,6 @@ import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
-import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
@@ -17,6 +16,7 @@ import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
 import { getFileByPath } from './getFileByPath.js'
+import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
 import { createImageSizes } from './image-resizing/createImageSizes.js'
@@ -261,7 +261,7 @@ export const generateFileData = async <T>({
       fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop()?.split('?')[0]
+        ext = getFileExtension(getSanitizedUploadFilename(file.name))
       } else {
         ext = ''
       }
@@ -273,8 +273,7 @@ export const generateFileData = async <T>({
     }
     fileData.mimeType = mime
 
-    const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
-    fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
+    fsSafeName = getSanitizedUploadFilename(file.name, ext)
 
     if (!overwriteExistingFiles) {
       // Extract prefix if present (added by plugin-cloud-storage)

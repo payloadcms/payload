@@ -7,7 +7,7 @@ import {
   getFilePrefix as getDocPrefix,
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 interface GetFileArgs {
   client: ContainerClient
@@ -132,9 +132,9 @@ export async function getFile({
       headers.append('ETag', String(properties.etag))
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (properties.contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Apply a restrictive policy to XML-family responses served through Payload.
+    if (isXmlMimeType(properties.contentType)) {
+      headers.append('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

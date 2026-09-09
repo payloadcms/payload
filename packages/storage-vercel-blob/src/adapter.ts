@@ -7,6 +7,7 @@ import type {
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
 import { Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
 
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
@@ -57,6 +58,8 @@ export function createVercelBlobAdapter({
         ) {
           throw new Forbidden(req.t)
         }
+
+        assertClientUploadAllowed({ collection, filename, mimeType })
 
         const resolved = await resolveSignedURLKey({
           collectionPrefix: prefix,

@@ -3,7 +3,10 @@ import type { GenerateUploadInstructions, UploadInstructionsAccess } from 'paylo
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
-import { Forbidden } from 'payload'
+import { APIError, Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
+
+import { isClientUploadAllowed } from './isClientUploadAllowed.js'
 
 interface Args {
   access?: UploadInstructionsAccess
@@ -32,6 +35,16 @@ export const generateUploadInstructions = ({
     if (!overrideAccess && (access ? !(await access({ collectionSlug, req })) : !req.user)) {
       throw new Forbidden(req.t)
     }
+
+    const collection = req.payload.collections[collectionSlug]?.config
+    if (!isClientUploadAllowed(collection)) {
+      throw new APIError(
+        'Azure client uploads require allowRestrictedFileTypes to be enabled.',
+        400,
+      )
+    }
+
+    assertClientUploadAllowed({ collection, filename, mimeType })
 
     const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,

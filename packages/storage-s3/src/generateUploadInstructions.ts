@@ -5,6 +5,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
 
 interface Args {
   access?: UploadInstructionsAccess
@@ -36,6 +37,11 @@ export const generateUploadInstructions = ({
       throw new Forbidden(req.t)
     }
 
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
+      filename,
+      mimeType,
+    })
     let filesizeLimit = req.payload.config.upload.limits?.fileSize
 
     if (filesizeLimit === Infinity) {
@@ -51,7 +57,7 @@ export const generateUploadInstructions = ({
       useCompositePrefixes,
     })
 
-    const signableHeaders = new Set<string>()
+    const signableHeaders = new Set<string>(['content-type'])
 
     if (filesizeLimit) {
       // Still force S3 to validate

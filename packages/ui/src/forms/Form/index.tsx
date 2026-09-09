@@ -8,6 +8,7 @@ import {
   getSiblingData as getSiblingDataFunc,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
+  uploadRequiresServerValidation,
   wait,
 } from 'payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
@@ -589,7 +590,14 @@ export const Form: React.FC<FormProps> = (props) => {
 
         const handler = getUploadHandler({ collectionSlug })
 
-        if (typeof handler === 'function') {
+        if (
+          typeof handler === 'function' &&
+          !uploadRequiresServerValidation({
+            allowRestrictedFileTypes: docConfig.upload.allowRestrictedFileTypes,
+            filename: file.name,
+            mimeType: file.type,
+          })
+        ) {
           file = JSON.stringify(
             await handler({
               docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,

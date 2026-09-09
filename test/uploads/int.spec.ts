@@ -57,6 +57,200 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
     await restClient.login({ slug: usersSlug })
   })
 
+  test('should inspect temp-file SVG without whole-file reads', async () => {
+    const fileContent = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg"><text>Reference</text></svg>',
+    )
+    const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}`)
+    await fs.promises.writeFile(tmpFile, fileContent)
+    const readFileSpy = vitest.spyOn(fs.promises, 'readFile')
+
+    try {
+      await expect(
+        checkFileRestrictions({
+          collection: {
+            slug: 'media',
+            upload: { staticDir: '/tmp' },
+          } as any,
+          file: {
+            name: 'reference.svg',
+            data: Buffer.alloc(0),
+            mimetype: 'image/svg+xml',
+            size: fileContent.length,
+            tempFilePath: tmpFile,
+          },
+          req: {
+            payload: {
+              logger: { error: () => {}, warn: () => {} },
+            },
+          } as unknown as PayloadRequest,
+        }),
+      ).resolves.toBeUndefined()
+
+      expect(readFileSpy).not.toHaveBeenCalled()
+    } finally {
+      readFileSpy.mockRestore()
+      await fs.promises.unlink(tmpFile)
+    }
+  })
+
+  for (const [description, name, mimetype, content, mimeTypes] of [
+    [
+      'default collection metadata',
+      'reference.svg',
+      'image/svg+xml',
+      '<svg xmlns="http://www.w3.org/2000/svg"><script>reference()</script></svg>',
+      [],
+    ],
+    [
+      'XML-declared SVG content',
+      'reference.svg',
+      'application/xml',
+      '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" onload="reference()"/>',
+      ['image/svg+xml'],
+    ],
+    [
+      'detected XML content with neutral metadata',
+      'reference.txt',
+      'text/plain',
+      '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"><script>reference()</script></svg>',
+      [],
+    ],
+    [
+      'decoded URL attributes',
+      'reference.svg',
+      'image/svg+xml',
+      '<svg xmlns="http://www.w3.org/2000/svg"><a href="j&#x61;vascript:reference"/></svg>',
+      [],
+    ],
+    [
+      'nested SVG data URLs',
+      'reference.svg',
+      'image/svg+xml',
+      '<svg xmlns="http://www.w3.org/2000/svg"><image href="data:image/svg+xml,%3Csvg/%3E"/></svg>',
+      [],
+    ],
+    [
+      'UTF-16 XML-declared SVG content',
+      'reference.xml',
+      'application/xml',
+      Buffer.concat([
+        Buffer.from([0xff, 0xfe]),
+        Buffer.from(
+          '<?xml version="1.0" encoding="UTF-16"?><svg xmlns="http://www.w3.org/2000/svg" onload="reference()"/>',
+          'utf16le',
+        ),
+      ]),
+      [],
+    ],
+  ] as const) {
+    test(`should apply SVG content rules for ${description}`, async () => {
+      const svgContent = Buffer.from(content)
+
+      await expect(
+        checkFileRestrictions({
+          collection: {
+            slug: 'media',
+            upload: { mimeTypes: [...mimeTypes], staticDir: '/tmp' },
+          } as any,
+          file: {
+            name,
+            data: svgContent,
+            mimetype,
+            size: svgContent.length,
+          },
+          req: {
+            payload: {
+              logger: { error: () => {}, warn: () => {} },
+            },
+          } as unknown as PayloadRequest,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: [{ message: 'SVG file contains potentially harmful content.', path: 'file' }],
+        },
+      })
+    })
+  }
+
+  test('should accept ordinary SVG text content', async () => {
+    const svgContent = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg"><text>JavaScript: reference</text></svg>',
+    )
+
+    await expect(
+      checkFileRestrictions({
+        collection: {
+          slug: 'media',
+          upload: { staticDir: '/tmp' },
+        } as any,
+        file: {
+          name: 'reference.svg',
+          data: svgContent,
+          mimetype: 'image/svg+xml',
+          size: svgContent.length,
+        },
+        req: {
+          payload: {
+            logger: { error: () => {}, warn: () => {} },
+          },
+        } as unknown as PayloadRequest,
+      }),
+    ).resolves.toBeUndefined()
+  })
+
+  test('should accept ordinary non-SVG XML content', async () => {
+    const xmlContent = Buffer.from(
+      '<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><title>Reference</title></feed>',
+    )
+
+    await expect(
+      checkFileRestrictions({
+        collection: {
+          slug: 'media',
+          upload: { staticDir: '/tmp' },
+        } as any,
+        file: {
+          name: 'reference.txt',
+          data: xmlContent,
+          mimetype: 'application/atom+xml; charset=utf-8',
+          size: xmlContent.length,
+        },
+        req: {
+          payload: {
+            logger: { error: () => {}, warn: () => {} },
+          },
+        } as unknown as PayloadRequest,
+      }),
+    ).resolves.not.toThrow()
+  })
+
+  test('should apply the default media policy to XHTML metadata', async () => {
+    const xhtmlContent = Buffer.from(
+      '<html xmlns="http://www.w3.org/1999/xhtml"><body><p>Reference</p></body></html>',
+    )
+
+    await expect(
+      checkFileRestrictions({
+        collection: {
+          slug: 'media',
+          upload: { staticDir: '/tmp' },
+        } as any,
+        file: {
+          name: 'reference.txt',
+          data: xhtmlContent,
+          mimetype: 'application/xhtml+xml; charset=utf-8',
+          size: xhtmlContent.length,
+        },
+        req: {
+          payload: {
+            logger: { error: () => {}, warn: () => {} },
+          },
+        } as unknown as PayloadRequest,
+      }),
+    ).rejects.toMatchObject({ name: 'ValidationError' })
+  })
+
   test.describe('file access with generated image sizes', () => {
     const createdIDs: (number | string)[] = []
     const staticDir = path.resolve(dirname, `./${fileAccessMediaSlug}`)
@@ -2659,8 +2853,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
     })
   })
 
-  test.describe('SVG Security', () => {
-    let xssPayloadDoc: Media
+  test.describe('Upload content responses', () => {
+    let svgDoc: Media
     const docIDs: (number | string)[] = []
 
     test.afterAll(async ({ payloadInstance }) => {
@@ -2676,40 +2870,33 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       }
     })
 
-    test('should serve SVG files with Content-Security-Policy header to prevent XSS', async ({
+    test('should serve SVG files with a restrictive content policy', async ({
       payload,
       restClient,
     }) => {
-      // Upload an SVG with embedded JavaScript
-      const filePath = path.resolve(dirname, './xss-payload.svg')
+      const filePath = path.resolve(dirname, './image.svg')
       const file = await getFileByPath(filePath)
 
-      xssPayloadDoc = (await payload.create({
+      svgDoc = (await payload.create({
         collection: noRestrictFileTypesSlug as CollectionSlug,
         data: {},
         file,
       })) as unknown as Media
 
-      docIDs.push(xssPayloadDoc.id)
+      docIDs.push(svgDoc.id)
 
-      // Fetch the SVG file
-      const response = await restClient.GET(
-        `/${noRestrictFileTypesSlug}/file/${xssPayloadDoc.filename}`,
-      )
+      const response = await restClient.GET(`/${noRestrictFileTypesSlug}/file/${svgDoc.filename}`)
 
       expect(response.status).toBe(200)
 
-      // Verify the Content-Security-Policy header is present
       const cspHeader = response.headers.get('Content-Security-Policy')
-      expect(cspHeader).toBeTruthy()
-      expect(cspHeader).toContain("script-src 'none'")
+      expect(cspHeader).toBe("script-src 'none'; frame-src 'none'; object-src 'none'")
     })
 
     test('should serve all SVG files with CSP headers regardless of content', async ({
       payload,
       restClient,
     }) => {
-      // Upload a safe SVG file
       const filePath = path.resolve(dirname, './image.svg')
       const file = await getFileByPath(filePath)
 
@@ -2721,15 +2908,41 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
       docIDs.push(safeDoc.id)
 
-      // Fetch the uploaded SVG file
       const response = await restClient.GET(`/${svgOnlySlug}/file/${safeDoc.filename}`)
 
       expect(response.status).toBe(200)
 
-      // Expect to have CSP headers
       const cspHeader = response.headers.get('Content-Security-Policy')
-      expect(cspHeader).toBeTruthy()
-      expect(cspHeader).toContain("script-src 'none'")
+      expect(cspHeader).toBe("script-src 'none'; frame-src 'none'; object-src 'none'")
+    })
+
+    test('should serve XML files with a restrictive content policy', async ({
+      payload,
+      restClient,
+    }) => {
+      const data = Buffer.from(
+        '<?xml version="1.0"?><?xml-stylesheet type="text/xsl" href="/api/media/file/theme.xsl"?><document><title>Reference</title></document>',
+      )
+      const xmlDoc = (await payload.create({
+        collection: noRestrictFileTypesSlug as CollectionSlug,
+        data: {},
+        file: {
+          name: 'reference.xml',
+          data,
+          mimetype: 'application/xml',
+          size: data.length,
+        },
+      })) as unknown as Media
+
+      docIDs.push(xmlDoc.id)
+
+      const response = await restClient.GET(`/${noRestrictFileTypesSlug}/file/${xmlDoc.filename}`)
+
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toContain('application/xml')
+      expect(response.headers.get('Content-Security-Policy')).toBe(
+        "script-src 'none'; frame-src 'none'; object-src 'none'",
+      )
     })
   })
 

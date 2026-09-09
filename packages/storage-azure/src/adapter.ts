@@ -9,6 +9,7 @@ import { deleteFile } from './deleteFile.js'
 import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
+import { isClientUploadAllowed } from './isClientUploadAllowed.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateAzureAdapterArgs {
@@ -47,7 +48,7 @@ export function createAzureAdapter({
       adminHandler: {
         path: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
       },
-      enabled: Boolean(clientUploads),
+      enabled: Boolean(clientUploads) && isClientUploadAllowed(collection),
       generate: generateUploadInstructions({
         access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
         collectionPrefix: prefix,

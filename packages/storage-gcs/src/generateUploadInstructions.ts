@@ -3,6 +3,7 @@ import type { GenerateUploadInstructions, UploadInstructionsAccess } from 'paylo
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { Forbidden } from 'payload'
+import { assertClientUploadAllowed } from 'payload/internal'
 
 interface Args {
   access?: UploadInstructionsAccess
@@ -32,6 +33,11 @@ export const generateUploadInstructions = ({
       throw new Forbidden(req.t)
     }
 
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
+      filename,
+      mimeType,
+    })
     const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,

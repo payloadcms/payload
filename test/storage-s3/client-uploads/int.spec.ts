@@ -51,10 +51,10 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
 
     expect(instructions.type).toBe('http')
     expect(instructions.file).toEqual({
-      uploadReference: { prefix: '' },
       filename: 'image.png',
       mimeType: 'image/png',
       size: file.length,
+      uploadReference: { prefix: '' },
     })
 
     if (instructions.type !== 'http') {
@@ -70,6 +70,9 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     const { url } = instructions.request
 
     expect(url).toBeDefined()
+    expect(new URL(url).searchParams.get('X-Amz-SignedHeaders')?.split(';')).toEqual(
+      expect.arrayContaining(['content-length', 'content-type']),
+    )
 
     const uploadResponse = await fetch(url, {
       body: file,
@@ -96,6 +99,70 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     assert(res)
     expect(res.ContentLength).toBe(file.length)
     expect(res.ContentType).toBe('image/png')
+  })
+
+  for (const [uploadFilename, mimeType] of [
+    ['reference.svg', 'image/svg+xml'],
+    ['reference.xml', 'application/xml'],
+    ['reference.bin', 'application/atom+xml'],
+  ] as const) {
+    test(`should keep ${uploadFilename} with ${mimeType} in document uploads`, async ({
+      restClient,
+    }) => {
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: signedURLBody('media', uploadFilename, 100, mimeType),
+      })
+
+      expect(response.status).toBe(400)
+      const { errors } = await response.json()
+      expect(errors[0].message).toContain('uploaded with the document through Payload')
+    })
+  }
+
+  test('should persist adapter-backed SVG only after document validation', async ({
+    restClient,
+  }) => {
+    const safeSVG =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>'
+    const safeForm = new FormData()
+    safeForm.append('_payload', JSON.stringify({ alt: 'Reference graphic' }))
+    safeForm.append('file', new Blob([safeSVG], { type: 'image/svg+xml' }), 'reference.svg')
+
+    const safeResponse = await restClient.POST('/media', { body: safeForm })
+    const { doc } = await safeResponse.json()
+
+    expect(safeResponse.status).toBe(201)
+    expect(doc.filename).toBe('reference.svg')
+    await expect(
+      getAWSClient().headObject({ Bucket: getTestBucketName(), Key: 'reference.svg' }),
+    ).resolves.toMatchObject({ ContentType: 'image/svg+xml' })
+
+    await clearTestBucket()
+
+    for (const file of [
+      new File(
+        ['<svg xmlns="http://www.w3.org/2000/svg"><script>reference()</script></svg>'],
+        'reference.svg',
+        { type: 'image/svg+xml' },
+      ),
+      new File(
+        [
+          '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" onload="reference()"><rect width="10" height="10"/></svg>',
+        ],
+        'reference.xml',
+        { type: 'application/xml' },
+      ),
+    ]) {
+      const formData = new FormData()
+      formData.append('_payload', JSON.stringify({ alt: 'Reference graphic' }))
+      formData.append('file', file)
+
+      const response = await restClient.POST('/media', { body: formData })
+
+      expect(response.status).toBe(400)
+      const objects = await getAWSClient().listObjectsV2({ Bucket: getTestBucketName() })
+      expect(objects.Contents).toBeUndefined()
+    }
   })
 
   test("should reject signed URL generation by access control when 'x-disallow-access' header is set", async ({
