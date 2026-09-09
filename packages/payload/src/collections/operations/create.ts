@@ -42,6 +42,13 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  buildAllLocalesPublicationHookDoc,
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -82,6 +89,22 @@ export const createOperation = async <
       externalUploadSource = getExternalUploadSource(args.data)
       args = { ...args, data: sanitizeUploadData(args.data, 'create') }
     }
+
+    const initialCollectionConfig = args.collection.config
+    const initialPublishAllLocales =
+      !args.draft && (args.publishAllLocales ?? !hasLocalizeStatusEnabled(initialCollectionConfig))
+    const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
+      ),
+      publishAllLocales: initialPublishAllLocales,
+      unpublishAllLocales: false,
+    })
+
+    const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+      data: args.data,
+      status: initialAllLocalesPublicationStatus,
+    })
     ensureUsernameOrEmail<TSlug>({
       authOptions: args.collection.config.auth,
       collectionSlug: args.collection.config.slug,
@@ -128,9 +151,25 @@ export const createOperation = async <
     let { data } = args
 
     // For creates there is no existing doc — always publish all locales when not a draft.
-    const publishAllLocales =
-      !draft &&
-      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    let publishAllLocales =
+      !draft && (publishAllLocalesArg ?? !hasLocalizeStatusEnabled(collectionConfig))
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales,
+      unpublishAllLocales: false,
+    })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
+
+    if (requestedAllLocalesPublicationStatus && !allLocalesPublicationStatus) {
+      publishAllLocales = false
+    }
+
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
     if (isSavingDraft) {
@@ -199,15 +238,38 @@ export const createOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
+    let statusFieldAccessDenied = false
+    const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      status:
+        data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+    })
+
     data = await beforeValidate({
       collection: collectionConfig,
       context: req.context,
       data,
       doc: duplicatedFromDoc,
+      docForHooks: publicationFieldPolicyDoc,
       global: null,
+      onFieldAccessDenied: (path) => {
+        if (path === '_status') {
+          statusFieldAccessDenied = true
+        }
+      },
       operation: 'create',
       overrideAccess: overrideAccess!,
       req,
+    })
+
+    const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      status:
+        !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
+          ? allLocalesPublicationStatus
+          : undefined,
     })
 
     // /////////////////////////////////////
@@ -222,7 +284,7 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
-            originalDoc: duplicatedFromDoc,
+            originalDoc: publicationHookDoc,
             req,
           })) || data
       }
@@ -240,28 +302,56 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
-            originalDoc: duplicatedFromDoc,
+            originalDoc: publicationHookDoc,
             req,
           })) || data
       }
     }
 
+    const publicationData = { ...data }
+
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
+
+    let statusFieldValue: unknown
+    const docWithLocalesForFields = statusFieldAccessDenied
+      ? { ...duplicatedFromDocWithLocales, _status: {} }
+      : duplicatedFromDocWithLocales
 
     const dataWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: duplicatedFromDoc,
-      docWithLocales: duplicatedFromDocWithLocales,
+      doc: publicationHookDoc,
+      docWithLocales: docWithLocalesForFields,
       global: null,
+      onDataProcessed: (processedData) => {
+        statusFieldValue = processedData._status
+      },
       operation: 'create',
       overrideAccess,
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
+      data: publicationData,
+      fieldAccessDenied: statusFieldAccessDenied,
+      fieldValue: statusFieldValue,
+      status: allLocalesPublicationStatus,
+    })
+
+    if (
+      allLocalesPublicationStatus &&
+      !hasAuthorizedPublicationStatus &&
+      !statusFieldAccessDenied &&
+      typeof statusFieldValue === 'undefined' &&
+      typeof duplicatedFromDocWithLocales._status === 'object' &&
+      duplicatedFromDocWithLocales._status !== null
+    ) {
+      dataWithLocales._status = { ...duplicatedFromDocWithLocales._status }
+    }
 
     // When locale='all' or when beforeChange doesn't convert the string (e.g. no locale hook ran),
     // the localized _status remains a plain string. Expand it to a per-locale object so MongoDB
@@ -272,13 +362,29 @@ export const createOperation = async <
       typeof dataWithLocales._status === 'string'
     ) {
       const statusStr = dataWithLocales._status
-      dataWithLocales._status = {}
-      for (const localeCode of config.localization.localeCodes) {
-        ;(dataWithLocales._status as Record<string, unknown>)[localeCode] = statusStr
+
+      if (
+        hasAuthorizedPublicationStatus &&
+        typeof duplicatedFromDocWithLocales._status === 'object' &&
+        duplicatedFromDocWithLocales._status !== null
+      ) {
+        dataWithLocales._status = { ...duplicatedFromDocWithLocales._status }
+      } else {
+        dataWithLocales._status = {}
+      }
+
+      if (!hasAuthorizedPublicationStatus) {
+        for (const localeCode of config.localization.localeCodes) {
+          ;(dataWithLocales._status as Record<string, unknown>)[localeCode] = statusStr
+        }
       }
     }
 
-    if (config.localization && hasLocalizeStatusEnabled(collectionConfig) && publishAllLocales) {
+    if (
+      config.localization &&
+      hasLocalizeStatusEnabled(collectionConfig) &&
+      hasAuthorizedPublicationStatus
+    ) {
       let accessibleLocaleCodes = config.localization.localeCodes
 
       if (config.localization.filterAvailableLocales) {

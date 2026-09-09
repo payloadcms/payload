@@ -19,9 +19,11 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
+  docForHooks?: T
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
+  onFieldAccessDenied?: (path: string) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
@@ -46,8 +48,10 @@ export const traverseFields = async <T>({
   context,
   data,
   doc,
+  docForHooks,
   fields,
   global,
+  onFieldAccessDenied,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -71,9 +75,11 @@ export const traverseFields = async <T>({
         context,
         data,
         doc,
+        docForHooks,
         field,
         fieldIndex,
         global,
+        onFieldAccessDenied,
         operation,
         overrideAccess,
         parentIndexPath,
