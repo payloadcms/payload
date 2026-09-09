@@ -1,5 +1,5 @@
 /** Allows only HTTP(S) URLs, e.g. `http://` or `https://`. */
-export const isAllowedURL = (incomingURL?: string | URL): boolean => {
+export const isHttpURL = (incomingURL?: string | URL): boolean => {
   if (!incomingURL) {
     return false
   }
