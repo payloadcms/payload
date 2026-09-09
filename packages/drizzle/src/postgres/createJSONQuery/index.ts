@@ -17,7 +17,7 @@ const operatorMap: Record<string, string> = {
 
 const sanitizeValue = (value: unknown, operator?: string): string => {
   if (value === null) {
-    return `NULL`
+    return `null`
   }
 
   if (typeof value === 'number' || typeof value === 'boolean') {

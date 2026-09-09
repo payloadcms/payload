@@ -4995,6 +4995,64 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         expect(docIDs).toContain(2)
       })
 
+      test('should query nested strings as literals - in', async ({ payload }) => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { in: ['foobar'] },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      test('should query nested strings as literals - not_in', async ({ payload }) => {
+        const otherFoo = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { foo: 'bar', number: 10 },
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { not_in: ['foobar'] },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).not.toContain(fooBar.id)
+        expect(docIDs).toContain(otherFoo.id)
+      })
+
+      test('should query nested mixed arrays with null literals - in', async ({ payload }) => {
+        const stringValue = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { value: 'literal-value' },
+          },
+        })
+
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.value': { in: [null, 1, 'literal-value'] },
+          },
+        })
+
+        const docValues = docs.map(({ json }) => json.value)
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docValues).toContain(1)
+        expect(docIDs).toContain(stringValue.id)
+        expect(docValues).not.toContain(2)
+      })
+
       test('should query nested numbers with multiple clauses - equals_and_in', async ({
         payload,
       }) => {
