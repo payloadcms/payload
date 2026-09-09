@@ -18,7 +18,16 @@ export function resolveSelect(info: GraphQLResolveInfo, select: SelectType): Sel
       const pathType = info.schema.getType(path.typename) as GraphQLObjectType
 
       if (pathType) {
-        const field = pathType?.getFields()?.[pathKey]?.extensions?.field as
+        // `path.key` is the response key, i.e. the alias when the field is aliased
+        // in the query, whereas the schema field map is keyed by the real field
+        // name. For the field currently being resolved (the leaf of `info.path`,
+        // which is always the relationship `resolveSelect` runs for) recover the
+        // real name from `info.fieldName` — graphql-js never puts the alias there.
+        // Without this, aliased relationship fields fall back to an id-only fetch
+        // instead of projecting their sub-selection. No-op when the field is not
+        // aliased (`info.fieldName === pathKey`).
+        const lookupKey = path === info.path ? info.fieldName : pathKey
+        const field = pathType?.getFields()?.[lookupKey]?.extensions?.field as
           | JoinField
           | RelationshipField
 
@@ -32,6 +41,15 @@ export function resolveSelect(info: GraphQLResolveInfo, select: SelectType): Sel
         }
         if (field) {
           traversePath.unshift(field.name)
+        }
+
+        // Block types nested in a blocks union have their sub-selection nested
+        // under the block slug in the select tree built by `buildSelectTree`.
+        // Mirror that here so the traversal path lines up with the built tree,
+        // keeping the projection for relationships reached through a block.
+        const blockSlug = pathType.extensions?.blockSlug as string | undefined
+        if (blockSlug) {
+          traversePath.unshift(blockSlug)
         }
       }
 
@@ -53,7 +71,9 @@ function buildSelect(info: GraphQLResolveInfo) {
   const returnType = getNamedType(info.returnType) as GraphQLObjectType
   const selectionSet = info.fieldNodes[0].selectionSet
 
-  if (!returnType) {return}
+  if (!returnType) {
+    return
+  }
 
   return buildSelectTree(info, selectionSet, returnType)
 }
@@ -74,8 +94,12 @@ function buildSelectTree(
         const field = fieldSchema?.extensions?.field as FieldBase
         const fieldNameOriginal = field?.name || fieldName
 
-        if (fieldName === '__typename') {continue}
-        if (fieldSchema == undefined) {continue}
+        if (fieldName === '__typename') {
+          continue
+        }
+        if (fieldSchema == undefined) {
+          continue
+        }
 
         if (selection.selectionSet) {
           const type = getNamedType(fieldSchema.type) as GraphQLObjectType
