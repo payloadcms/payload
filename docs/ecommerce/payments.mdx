@@ -73,7 +73,7 @@ The Stripe payment adapter takes the following configuration options:
 
 ### Confirmation retries
 
-Stripe confirmation is idempotent per ecommerce transaction: retries return the same order and public `transactionID`. After Stripe validation, core atomically changes the matching transaction from `pending` to `processing`. Only that request creates the order, marks the cart as purchased, decrements inventory, and links the succeeded transaction. No additional order field or schema migration is required.
+Stripe confirmation is idempotent per ecommerce transaction: retries return the same order and public `transactionID`. After Stripe validation, core atomically changes the matching transaction from `pending` to `processing`. Only that request creates the order, marks the cart as purchased, decrements inventory, and links the succeeded transaction.
 
 If a transaction is already `succeeded` and has exactly one matching bidirectional order relationship, a retry returns that order without writes. Ambiguous or mismatched relationships fail closed.
 
