@@ -69,6 +69,7 @@ export default buildConfigWithDefaults({
           depth: 0,
           forgotPassword: {
             expiration: 300000, // 5 minutes
+            minRequestInterval: 1,
           },
           lockTime: 600 * 1000, // lock time in ms
           maxLoginAttempts: 2,

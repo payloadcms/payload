@@ -129,6 +129,7 @@ export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
 
   auth.depth = auth.depth ?? 0
   auth.forgotPassword = auth.forgotPassword ?? {}
+  auth.forgotPassword.minRequestInterval = auth.forgotPassword.minRequestInterval ?? 15000
   auth.lockTime = auth.lockTime ?? 600000 // 10 minutes
   auth.loginWithUsername = auth.loginWithUsername
     ? addDefaultsToLoginWithUsernameConfig(

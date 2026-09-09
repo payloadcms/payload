@@ -328,6 +328,8 @@ export interface UntypedPayloadTypes {
     password?: null | string
     /** Reset-token expiry. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
     resetPasswordExpiration?: null | string
+    /** Last password-reset email time. Hidden (needs `showHiddenFields`). */
+    resetPasswordRequestedAt?: null | string
     /** Active password-reset token. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
     resetPasswordToken?: null | string
     /** Password salt. Hidden (needs `showHiddenFields`). Only with the local strategy. */

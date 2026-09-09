@@ -1216,6 +1216,206 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       expect(response.status).toBe(200)
     })
 
+    test('should enforce the minimum request interval when reserving an email', async ({
+      payload,
+    }) => {
+      const authConfig = payload.collections[slug].config.auth
+      const originalMinRequestInterval = authConfig.forgotPassword.minRequestInterval
+      const users = await Promise.all(
+        ['repeated', 'disabled-email', 'after-reset'].map((name) =>
+          payload.create({
+            collection: slug,
+            data: {
+              email: `forgot-password-${name}-${uuid()}@example.com`,
+              password,
+            },
+          }),
+        ),
+      )
+      const sendEmail = vitest.spyOn(payload.email, 'sendEmail').mockResolvedValue(undefined)
+      const collectionHooks = payload.collections[slug].config.hooks
+      const originalBeforeOperation = collectionHooks.beforeOperation
+      const originalBeforeChange = collectionHooks.beforeChange
+      const originalAfterChange = collectionHooks.afterChange
+      const beforeChange = vitest.fn()
+      const afterChange = vitest.fn()
+      const outerReq = { transactionID: 'outer-transaction' }
+      let shouldDisableEmail = false
+      collectionHooks.beforeOperation = [
+        ...(originalBeforeOperation ?? []),
+        ({ args }) => (shouldDisableEmail ? { ...args, disableEmail: true } : args),
+      ]
+      collectionHooks.beforeChange = [
+        ...(originalBeforeChange ?? []),
+        ({ data, req }) => {
+          beforeChange(req.transactionID === outerReq.transactionID)
+          return data
+        },
+      ]
+      collectionHooks.afterChange = [
+        ...(originalAfterChange ?? []),
+        ({ doc }) => {
+          afterChange()
+          return doc
+        },
+      ]
+      authConfig.forgotPassword.minRequestInterval = 300000
+
+      try {
+        const firstToken = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[0]!.email },
+          req: outerReq,
+        })
+        const secondToken = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[0]!.email },
+        })
+        expect(firstToken).not.toBeNull()
+        expect(beforeChange).toHaveBeenCalledWith(true)
+        expect(afterChange).toHaveBeenCalledTimes(1)
+        expect(outerReq.transactionID).toBe('outer-transaction')
+        expect(secondToken).toBeNull()
+
+        const tokenWithDisabledEmail = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[0]!.email },
+          disableEmail: true,
+        })
+        expect(tokenWithDisabledEmail).not.toBeNull()
+
+        beforeChange.mockClear()
+        shouldDisableEmail = true
+        await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[1]!.email },
+          req: outerReq,
+        })
+        expect(beforeChange).toHaveBeenCalledWith(true)
+        shouldDisableEmail = false
+        const tokenAfterDisabledEmail = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[1]!.email },
+        })
+        expect(tokenAfterDisabledEmail).not.toBeNull()
+
+        const resetToken = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[2]!.email },
+        })
+        await payload.resetPassword({
+          collection: slug,
+          data: {
+            password: `${password}-after-reset`,
+            token: resetToken,
+          },
+          overrideAccess: true,
+        })
+        const tokenAfterReset = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[2]!.email },
+        })
+        expect(tokenAfterReset).toBeNull()
+        expect(sendEmail).toHaveBeenCalledTimes(3)
+      } finally {
+        authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
+        collectionHooks.beforeOperation = originalBeforeOperation
+        collectionHooks.beforeChange = originalBeforeChange
+        collectionHooks.afterChange = originalAfterChange
+        sendEmail.mockRestore()
+        await Promise.all(users.map((user) => payload.delete({ id: user.id, collection: slug })))
+      }
+    })
+
+    test('should serialize concurrent reset email requests', async ({ payload }) => {
+      const authConfig = payload.collections[slug].config.auth
+      const originalMinRequestInterval = authConfig.forgotPassword.minRequestInterval
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: `forgot-password-concurrent-${uuid()}@example.com`,
+          password,
+        },
+      })
+      let releaseFirstEmail: () => void = () => undefined
+      const firstEmailPending = new Promise<void>((resolve) => {
+        releaseFirstEmail = resolve
+      })
+      const sendEmail = vitest
+        .spyOn(payload.email, 'sendEmail')
+        .mockImplementationOnce(() => firstEmailPending)
+        .mockResolvedValue(undefined)
+
+      authConfig.forgotPassword.minRequestInterval = 300000
+
+      try {
+        const firstRequest = payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+        })
+
+        await vitest.waitFor(() => expect(sendEmail).toHaveBeenCalledTimes(1))
+
+        const secondRequest = payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+        })
+
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        releaseFirstEmail()
+
+        const [firstToken, secondToken] = await Promise.all([firstRequest, secondRequest])
+
+        expect(firstToken).not.toBeNull()
+        expect(secondToken).toBeNull()
+        expect(sendEmail).toHaveBeenCalledTimes(1)
+      } finally {
+        authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
+        releaseFirstEmail()
+        sendEmail.mockRestore()
+        await payload.delete({ id: user.id, collection: slug })
+      }
+    })
+
+    test('should release the request interval after an email error', async ({ payload }) => {
+      const authConfig = payload.collections[slug].config.auth
+      const originalMinRequestInterval = authConfig.forgotPassword.minRequestInterval
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: `forgot-password-email-error-${uuid()}@example.com`,
+          password,
+        },
+      })
+      const sendEmail = vitest
+        .spyOn(payload.email, 'sendEmail')
+        .mockRejectedValueOnce(new Error('Email provider unavailable'))
+        .mockResolvedValue(undefined)
+
+      authConfig.forgotPassword.minRequestInterval = 300000
+
+      try {
+        await expect(
+          payload.forgotPassword({
+            collection: slug,
+            data: { email: user.email },
+          }),
+        ).rejects.toThrow('Email provider unavailable')
+
+        const retryToken = await payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+        })
+
+        expect(retryToken).not.toBeNull()
+        expect(sendEmail).toHaveBeenCalledTimes(2)
+      } finally {
+        authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
+        sendEmail.mockRestore()
+        await payload.delete({ id: user.id, collection: slug })
+      }
+    })
+
     test('should allow reset password', async ({ payload }) => {
       const token = await payload.forgotPassword({
         collection: 'users',
@@ -1335,6 +1535,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         'resetPasswordExpiration',
         'salt',
         'hash',
+        'resetPasswordRequestedAt',
         'loginAttempts',
         'lockUntil',
         'sessions',
@@ -1668,11 +1869,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       payload,
     }) => {
       // Mock Date.now() to simulate the forgotPassword call happening 6 minutes ago (current expiration is set to 5 minutes)
+      const authConfig = payload.collections[slug].config.auth
+      const originalMinRequestInterval = authConfig.forgotPassword.minRequestInterval
       const originalDateNow = Date.now
       const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
         // Move the current time back by 6 minutes (360,000 ms)
         return originalDateNow() - 6 * 60 * 1000
       })
+      authConfig.forgotPassword.minRequestInterval = 0
 
       let forgot
       try {
@@ -1685,6 +1889,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         })
       } finally {
         // Restore the original Date.now() after the forgotPassword call
+        authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
         mockDateNow.mockRestore()
       }
 
@@ -1826,6 +2031,59 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         const user = userQuery.docs[0]
         expect(user!.loginAttempts).toBe(0)
         expect(user!.lockUntil).toBeNull()
+      })
+
+      test('should always unlock a user after password reset', async ({ payload }) => {
+        const authConfig = payload.collections[slug].config.auth
+        const legacyAuthConfig = authConfig as {
+          unlockOnPasswordReset?: boolean
+        } & typeof authConfig
+        legacyAuthConfig.unlockOnPasswordReset = false
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: `unlock-on-reset-${uuid()}@example.com`,
+            password: 'password-before-reset',
+          },
+        })
+
+        try {
+          await payload.db.updateOne({
+            id: user.id,
+            collection: slug,
+            data: {
+              lockUntil: new Date(Date.now() + 60000).toISOString(),
+              loginAttempts: 2,
+            },
+          })
+
+          const resetToken = await payload.forgotPassword({
+            collection: slug,
+            data: { email: user.email },
+            disableEmail: true,
+          })
+
+          await payload.resetPassword({
+            collection: slug,
+            data: {
+              password: 'password-after-reset',
+              token: resetToken,
+            },
+            overrideAccess: true,
+          })
+
+          const unlockedUser = await payload.findByID({
+            id: user.id,
+            collection: slug,
+            showHiddenFields: true,
+          })
+
+          expect(unlockedUser.loginAttempts).toBe(0)
+          expect(unlockedUser.lockUntil).toBeNull()
+        } finally {
+          delete legacyAuthConfig.unlockOnPasswordReset
+          await payload.delete({ id: user.id, collection: slug })
+        }
       })
     })
   })

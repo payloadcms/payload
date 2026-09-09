@@ -60,6 +60,7 @@ export const esTranslations: DefaultTranslationsObject = {
     notRedirected: '¿No fue redirigido? <0>Inicie sesión aquí</0>',
     passed: 'Autenticación Exitosa',
     passwordResetSuccessfully: 'Contraseña restablecida con éxito.',
+    resend: 'Reenviar',
     resetPassword: 'Restablecer Contraseña',
     resetPasswordExpiration: 'Restablecer Caducidad de la Contraseña',
     resetPasswordToken: 'Restablecer Token de la Contraseña',

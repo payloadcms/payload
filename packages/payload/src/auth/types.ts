@@ -255,6 +255,12 @@ export interface IncomingAuthType {
     expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
+    /**
+     * The minimum number of milliseconds between password reset emails for the same user.
+     * @default 15000
+     * Set to 0 to disable.
+     */
+    minRequestInterval?: number
   }
   /**
    * Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than maxLoginAttempts allows for.
