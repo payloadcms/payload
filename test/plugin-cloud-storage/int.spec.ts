@@ -14,7 +14,7 @@ import { expect } from 'vitest'
 import type { Config } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { uploadedTestFiles } from './buildPluginCloudStorageIntConfig.js'
+import { recordedCleanupTargets, uploadedTestFiles } from './buildPluginCloudStorageIntConfig.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
@@ -555,7 +555,137 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           }
         }
         createdIDs.length = 0
+        recordedCleanupTargets.length = 0
         uploadedTestFiles.clear()
+      })
+
+      test('should preserve cleanup coordinates after a metadata-only update', async ({
+        payload,
+        restClient,
+      }) => {
+        await restClient.login({ slug: 'users' })
+
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Cleanup ownership',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        const originalFilenames = [
+          upload.filename,
+          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        const updateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: JSON.stringify({
+            filename: 'submitted.png',
+            prefix: 'submitted-prefix',
+            sizes: {
+              thumbnail: {
+                filename: 'submitted-thumbnail.png',
+              },
+            },
+          }),
+        })
+
+        expect(updateResponse.status).toBe(200)
+
+        await payload.delete({ id: upload.id, collection: testMetadataSlug })
+        createdIDs.length = 0
+
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+      })
+
+      test('should preserve cleanup metadata across a metadata override attempt and replacement', async ({
+        payload,
+        restClient,
+      }) => {
+        await restClient.login({ slug: 'users' })
+
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Replacement cleanup ownership',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        const originalFilenames = [
+          upload.filename,
+          ...Object.values(upload.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        const metadataUpdateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: JSON.stringify({
+            filename: 'submitted.png',
+            prefix: 'submitted-prefix',
+            sizes: {
+              thumbnail: {
+                filename: 'submitted-thumbnail.png',
+              },
+            },
+          }),
+        })
+
+        expect(metadataUpdateResponse.status).toBe(200)
+
+        const preservedUpload = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+        })
+
+        expect(preservedUpload.filename).toBe(upload.filename)
+        expect(preservedUpload.prefix).toBe('test-metadata')
+        expect(preservedUpload.sizes).toEqual(upload.sizes)
+
+        recordedCleanupTargets.length = 0
+
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ testNote: 'Replacement uploaded' }))
+        formData.append(
+          'file',
+          new Blob([fs.readFileSync(path.resolve(dirname, '../uploads/small.png'))], {
+            type: 'image/png',
+          }),
+          'replacement.png',
+        )
+
+        const updateResponse = await restClient.PATCH(`/${testMetadataSlug}/${upload.id}`, {
+          body: formData,
+        })
+
+        expect(updateResponse.status).toBe(200)
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
+
+        const replacement = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+        })
+        const replacementFilenames = [
+          replacement.filename,
+          ...Object.values(replacement.sizes || {}).map((size) => size?.filename),
+        ].filter((value): value is string => typeof value === 'string')
+
+        expect(replacement.filename).not.toBe('submitted.png')
+        expect(replacementFilenames).not.toContain('submitted-thumbnail.png')
+
+        recordedCleanupTargets.length = 0
+        await payload.delete({ id: upload.id, collection: testMetadataSlug })
+        createdIDs.length = 0
+
+        expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(replacementFilenames)
+        expect(new Set(recordedCleanupTargets.map(({ prefix }) => prefix)).size).toBe(1)
+        expect(recordedCleanupTargets[0]?.prefix).toBe('test-metadata')
       })
 
       test('should upload the original and image sizes when create only selects id', async ({
@@ -596,12 +726,12 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             expect.objectContaining({
               filename: saved.filename,
               mimeType: saved.mimeType,
-              prefix: 'test-prefix',
+              prefix: 'test-metadata',
             }),
             expect.objectContaining({
               filename: saved.sizes?.thumbnail?.filename,
               mimeType: saved.sizes?.thumbnail?.mimeType,
-              prefix: 'test-prefix',
+              prefix: 'test-metadata',
             }),
           ]),
         )

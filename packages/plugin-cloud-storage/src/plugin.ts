@@ -6,6 +6,7 @@ import { getFields } from './fields/getFields.js'
 import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
 import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
+import { getSanitizeUploadPrefixHook } from './hooks/sanitizeUploadPrefix.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -214,6 +215,7 @@ export const cloudStoragePlugin =
             beforeChange: [
               ...(existingCollection.hooks?.beforeChange || []),
               getPreserveFileDataHook(),
+              getSanitizeUploadPrefixHook(),
             ],
           },
           upload: {

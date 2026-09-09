@@ -46,6 +46,8 @@ export type BuildPluginCloudStorageIntConfigArgs = {
   useCompositePrefixes: boolean
 }
 
+export const recordedCleanupTargets: Array<{ filename: string; prefix?: string }> = []
+
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
 }: BuildPluginCloudStorageIntConfigArgs) {
@@ -165,7 +167,8 @@ export function buildPluginCloudStorageIntConfig({
       [testMetadataSlug]: {
         adapter: () => ({
           name: 'test-metadata-adapter',
-          handleDelete: ({ filename }) => {
+          handleDelete: ({ doc, filename }) => {
+            recordedCleanupTargets.push({ filename, prefix: doc.prefix })
             uploadedTestFiles.delete(filename)
           },
           handleUpload: ({ data, file }) => {
@@ -185,7 +188,7 @@ export function buildPluginCloudStorageIntConfig({
           },
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
-        prefix: 'test-prefix',
+        prefix: 'test-metadata',
       },
     },
   })
