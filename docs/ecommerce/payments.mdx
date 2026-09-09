@@ -71,6 +71,14 @@ The Stripe payment adapter takes the following configuration options:
 | webhooks       | `object` | (Optional) An object where the keys are Stripe event types and the values are functions that will be called when that event is received. See [Webhooks](#stripe-webhooks) for more details. |
 | groupOverrides | `object` | (Optional) An object to override the default fields of the payment group. See [Payment Fields](./advanced#payment-fields) for more details.                                                 |
 
+### Confirmation retries
+
+Stripe confirmation is idempotent per ecommerce transaction: retries return the same order and public `transactionID`. After Stripe validation, core atomically changes the matching transaction from `pending` to `processing`. Only that request creates the order, marks the cart as purchased, decrements inventory, and links the succeeded transaction. No additional order field or schema migration is required.
+
+If a transaction is already `succeeded` and has exactly one matching bidirectional order relationship, a retry returns that order without writes. Ambiguous or mismatched relationships fail closed.
+
+Database adapters with transaction support roll back the complete settlement on failure. Without database transactions, the atomic status claim still prevents concurrent winners, but a process crash can leave a transaction in `processing`. Payload does not reset that state automatically because it cannot safely infer whether order, cart, or inventory side effects completed. Monitor and manually reconcile stale `processing` transactions. A future inventory-reservation model can provide stronger recovery semantics.
+
 ### Stripe Webhooks
 
 You can also add your own webhooks to handle [events from Stripe](https://docs.stripe.com/api/events). This is optional and the plugin internally does not use webhooks for any core functionality. It receives the following arguments:
@@ -299,14 +307,15 @@ export const initiatePayment: NonNullable<PaymentAdapter>['initiatePayment'] =
 
 The `confirmOrder` function is called after a payment is completed on the frontend and at this step the order is created in Payload. It receives the following properties:
 
-| Property           | Type             | Description                               |
-| ------------------ | ---------------- | ----------------------------------------- |
-| `ordersSlug`       | `string`         | The orders collection slug.               |
-| `transactionsSlug` | `string`         | The transactions collection slug.         |
-| `cartsSlug`        | `string`         | The carts collection slug.                |
-| `customersSlug`    | `string`         | The customers collection slug.            |
-| `data`             | `object`         | The cart associated with the transaction. |
-| `req`              | `PayloadRequest` | The Payload request object.               |
+| Property           | Type             | Description                                                                                                                     |
+| ------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `ordersSlug`       | `string`         | The orders collection slug.                                                                                                     |
+| `transactionsSlug` | `string`         | The transactions collection slug.                                                                                               |
+| `cartsSlug`        | `string`         | The carts collection slug.                                                                                                      |
+| `customersSlug`    | `string`         | The customers collection slug.                                                                                                  |
+| `data`             | `object`         | The cart associated with the transaction.                                                                                       |
+| `finalizeOrder`    | `function`       | Atomically creates or finds the canonical order and applies the cart, inventory, and transaction side effects after validation. |
+| `req`              | `PayloadRequest` | The Payload request object.                                                                                                     |
 
 The data object will contain any data the frontend chooses to send through and at a minimum the following:
 
@@ -314,13 +323,21 @@ The data object will contain any data the frontend chooses to send through and a
 | --------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
 | `customerEmail` | `string` | In the case that `req.user` is missing, `customerEmail` should be required in order to process guest checkouts. |
 
-The return type can also contain any additional data with a minimum of the following:
+The public return must include the following:
 
-| Property        | Type     | Description                                     |
-| --------------- | -------- | ----------------------------------------------- |
-| `message`       | `string` | A success message to be returned to the client. |
-| `orderID`       | `string` | The ID of the created order.                    |
-| `transactionID` | `string` | The ID of the associated transaction.           |
+| Property        | Type               | Description                                                |
+| --------------- | ------------------ | ---------------------------------------------------------- |
+| `message`       | `string`           | A success message to be returned to the client.            |
+| `orderID`       | `string \| number` | The ID of the canonical order.                             |
+| `transactionID` | `string \| number` | The ID of the ecommerce transaction, including on retries. |
+
+> **Warning:** `confirmOrder` requests can be retried or run concurrently. Custom adapters must
+> validate the provider payment against the canonical ecommerce transaction, then call
+> `finalizeOrder`. The endpoint rejects a successful adapter response unless finalization completes;
+> adapters that create orders themselves must migrate to this callback.
+
+PostgreSQL users upgrading an existing project must generate and run a database migration that adds
+`processing` to the ecommerce transaction status enum.
 
 A heavily simplified example of implementing `confirmOrder` could look like:
 
@@ -332,12 +349,7 @@ import {
 import Stripe from 'stripe'
 
 export const confirmOrder: NonNullable<PaymentAdapter>['confirmOrder'] =
-  async ({
-    data,
-    ordersSlug = 'orders',
-    req,
-    transactionsSlug = 'transactions',
-  }) => {
+  async ({ data, finalizeOrder, req, transactionsSlug = 'transactions' }) => {
     const payload = req.payload
 
     const customerEmail = data.customerEmail
@@ -362,31 +374,14 @@ export const confirmOrder: NonNullable<PaymentAdapter>['confirmOrder'] =
       const paymentIntent =
         await stripe.paymentIntents.retrieve(paymentIntentID)
 
-      // Create the order in the database
-      const order = await payload.create({
-        collection: ordersSlug,
-        data: {},
-      })
-
-      const timestamp = new Date().toISOString()
-
-      // Update the cart to mark it as purchased, this will prevent further updates to the cart
-      await payload.update({
-        id: cartID,
-        collection: 'carts',
-        data: {
-          purchasedAt: timestamp,
+      // Validate amount, currency, cart, customer, and items here before finalizing.
+      const order = await finalizeOrder({
+        orderData: {
+          amount: transaction.amount,
+          currency: transaction.currency,
+          status: 'processing',
         },
-      })
-
-      // Update the transaction with the order ID and mark as succeeded
-      await payload.update({
-        id: transaction.id,
-        collection: transactionsSlug,
-        data: {
-          order: order.id,
-          status: 'succeeded',
-        },
+        transactionID: transaction.id,
       })
 
       return {

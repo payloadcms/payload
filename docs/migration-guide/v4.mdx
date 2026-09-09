@@ -1890,6 +1890,20 @@ The `--theme-elevation-*` scale was removed. Use the semantic `--color-*` tokens
 
 Any custom component `.scss` files you authored should be renamed to `.css` and updated to plain CSS syntax — Payload no longer ships a SCSS toolchain.
 
+### Ecommerce Stripe confirmations use an atomic transaction claim
+
+Stripe confirmation now atomically claims the existing ecommerce transaction before creating an order,
+marking the cart as purchased, and decrementing inventory. Retries return the canonical order only when
+the succeeded transaction and order are linked in both directions. Ambiguous state fails closed.
+
+PostgreSQL users must generate and run a database migration that adds `processing` to the ecommerce
+transaction status enum. No order field, unique index, or data backfill is required. The public
+`confirm-order` response continues to include `transactionID`, including on retries. This is a breaking
+security change for custom payment adapters: after provider validation, they must call the new
+`finalizeOrder` argument instead of creating orders themselves. The bundled Stripe adapter is updated in
+the same release. See the [payment confirmation guidance](../ecommerce/payments#confirmation-retries) for
+transactionless database failure behavior and reconciliation guidance.
+
 ### Stripe REST proxy requires an explicit method allowlist
 
 `@payloadcms/plugin-stripe` no longer accepts `rest: true`. To enable the REST proxy in v4, use
