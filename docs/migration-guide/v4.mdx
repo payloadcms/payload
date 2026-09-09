@@ -1838,3 +1838,25 @@ The Admin UI styles were migrated from SCSS to plain CSS. The `@payloadcms/ui/sc
 The `--theme-elevation-*` scale was removed. Use the semantic `--color-*` tokens (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`) or the raw `--ramp-*` palette instead. See [Customizing CSS](../admin/customizing-css) for the full list of available tokens.
 
 Any custom component `.scss` files you authored should be renamed to `.css` and updated to plain CSS syntax — Payload no longer ships a SCSS toolchain.
+
+### Stripe REST proxy requires an explicit method allowlist
+
+`@payloadcms/plugin-stripe` no longer accepts `rest: true`. To enable the REST proxy in v4, use
+an object with a non-empty `allowedMethods` array of exact Stripe SDK method names, such as
+`subscriptions.list`:
+
+```diff
+stripePlugin({
+- rest: true,
++ rest: {
++   allowedMethods: ['subscriptions.list'],
++ },
+})
+```
+
+Wildcards are not supported. The optional `rest.access` callback can further restrict the
+endpoint. Without it, the proxy requires an authenticated user allowed to access the Payload
+admin panel. See the [Stripe REST proxy documentation](../plugins/stripe#stripe-rest-proxy) for
+configuration and security guidance.
+
+If you previously used `rest: false`, remove the property; omitting `rest` disables the proxy.
