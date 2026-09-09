@@ -62,7 +62,7 @@ export const LexicalEditor: React.FC<
       editorConfigContext.blurEditor(editorConfigContext)
     }
 
-    const unregisterFocus = editor.registerCommand<MouseEvent>(
+    const unregisterFocus = editor.registerCommand(
       FOCUS_COMMAND,
       () => {
         handleFocus()
@@ -71,7 +71,7 @@ export const LexicalEditor: React.FC<
       COMMAND_PRIORITY_LOW,
     )
 
-    const unregisterBlur = editor.registerCommand<MouseEvent>(
+    const unregisterBlur = editor.registerCommand(
       BLUR_COMMAND,
       () => {
         handleBlur()

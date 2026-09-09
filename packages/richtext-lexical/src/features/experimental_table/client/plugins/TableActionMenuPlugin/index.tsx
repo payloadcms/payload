@@ -1,6 +1,6 @@
 'use client'
 
-import type { TableObserver, TableSelection } from '@lexical/table'
+import type { TableObserver } from '@lexical/table'
 import type { ElementNode } from 'lexical'
 import type { JSX } from 'react'
 
@@ -47,17 +47,7 @@ import type { PluginComponentWithAnchor } from '../../../../typesClient.js'
 
 import './index.scss'
 import { MeatballsIcon } from '../../../../../lexical/ui/icons/Meatballs/index.js'
-
-function computeSelectionCount(selection: TableSelection): {
-  columns: number
-  rows: number
-} {
-  const selectionShape = selection.getShape()
-  return {
-    columns: selectionShape.toX - selectionShape.fromX + 1,
-    rows: selectionShape.toY - selectionShape.fromY + 1,
-  }
-}
+import { $computeSelectionCount } from './computeSelectionCount.js'
 
 function $canUnmerge(): boolean {
   const selection = $getSelection()
@@ -130,8 +120,8 @@ function TableActionMenu({
       const selection = $getSelection()
       // Merge cells
       if ($isTableSelection(selection)) {
-        const currentSelectionCounts = computeSelectionCount(selection)
-        updateSelectionCounts(computeSelectionCount(selection))
+        const currentSelectionCounts = $computeSelectionCount({ selection })
+        updateSelectionCounts(currentSelectionCounts)
 
         setCanMergeCells(currentSelectionCounts.columns > 1 || currentSelectionCounts.rows > 1)
       }
