@@ -10,7 +10,7 @@ catalogs:
       specifier: npm:typescript@7.0.2
       version: 7.0.2
     zod:
-      specifier: 4.6.0
+      specifier: ^4.6.0
       version: 4.6.0
 
 overrides:

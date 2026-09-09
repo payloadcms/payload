@@ -17,7 +17,7 @@ catalog:
   react: '19.2.6'
   react-dom: '19.2.6'
   typescript: 'npm:@typescript/typescript6@6.0.2'
-  zod: '4.6.0'
+  zod: '^4.6.0'
 
 updateNotifier: false
 symlink: true
