@@ -466,10 +466,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
     })
 
     test.describe('Orderable', () => {
+      const createdOrderableIDs: Orderable['id'][] = []
       let orderable1: Orderable
       let orderable2: Orderable
       let orderableDraft1: Draft
       let orderableDraft2: Draft
+
       test.beforeAll(async ({ payloadInstance: payload }) => {
         orderable1 = await payload.create({
           collection: orderableSlug,
@@ -497,6 +499,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
             _status: 'draft',
           },
         })
+      })
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdOrderableIDs) {
+          await payload.delete({ id, collection: orderableSlug })
+        }
+        createdOrderableIDs.length = 0
       })
 
       test('should set order by default', async ({ payload }) => {
@@ -544,6 +553,265 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         expect(parseInt(ordered.docs[0]._order, 36)).toBeLessThan(
           parseInt(ordered.docs[1]._order, 36),
         )
+      })
+
+      test('should reject fields that are not configured for ordering', async ({
+        payload,
+        restClient,
+      }) => {
+        const doc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Original title' },
+        })
+        createdOrderableIDs.push(doc.id)
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [doc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: 'title',
+            target: {
+              id: orderable2.id,
+              key: orderable2._order,
+            },
+          }),
+        })
+        const storedDoc = await payload.findByID({ id: doc.id, collection: orderableSlug })
+
+        expect(res.status).toBe(400)
+        expect(storedDoc.title).toBe('Original title')
+      })
+
+      test('should reorder multiple documents in one request', async ({ payload, restClient }) => {
+        const firstDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'First queued item' },
+        })
+        createdOrderableIDs.push(firstDoc.id)
+        const secondDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Second queued item' },
+        })
+        createdOrderableIDs.push(secondDoc.id)
+        const firstOrder = firstDoc._order
+        const secondOrder = secondDoc._order
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [firstDoc.id, secondDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: orderable1.id,
+              key: orderable1._order,
+            },
+          }),
+        })
+        const storedFirstDoc = await payload.findByID({
+          id: firstDoc.id,
+          collection: orderableSlug,
+        })
+        const storedSecondDoc = await payload.findByID({
+          id: secondDoc.id,
+          collection: orderableSlug,
+        })
+
+        expect(res.status).toBe(200)
+        expect(storedFirstDoc._order).not.toBe(firstOrder)
+        expect(storedSecondDoc._order).not.toBe(secondOrder)
+        expect(storedFirstDoc._order < storedSecondDoc._order).toBe(true)
+      })
+
+      test('should leave a batch unchanged when one document is excluded', async ({
+        payload,
+        restClient,
+      }) => {
+        const movableDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Movable position' },
+        })
+        createdOrderableIDs.push(movableDoc.id)
+        const fixedDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Fixed position' },
+        })
+        createdOrderableIDs.push(fixedDoc.id)
+        const movableOrder = movableDoc._order
+        const fixedOrder = fixedDoc._order
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [movableDoc.id, fixedDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: orderable1.id,
+              key: orderable1._order,
+            },
+          }),
+        })
+        const storedMovableDoc = await payload.findByID({
+          id: movableDoc.id,
+          collection: orderableSlug,
+        })
+        const storedFixedDoc = await payload.findByID({
+          id: fixedDoc.id,
+          collection: orderableSlug,
+        })
+
+        expect(res.status).toBe(403)
+        expect(storedMovableDoc._order).toBe(movableOrder)
+        expect(storedFixedDoc._order).toBe(fixedOrder)
+      })
+
+      test('should leave a batch unchanged when proposed data is excluded', async ({
+        payload,
+        restClient,
+      }) => {
+        const movableDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'First movable position' },
+        })
+        createdOrderableIDs.push(movableDoc.id)
+        const fixedDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Second movable position' },
+        })
+        createdOrderableIDs.push(fixedDoc.id)
+        const movableOrder = movableDoc._order
+        const fixedOrder = fixedDoc._order
+        const collection = payload.config.collections.find(({ slug }) => slug === orderableSlug)
+
+        if (!collection) {
+          throw new Error('Orderable collection not found')
+        }
+
+        const originalUpdateAccess = collection.access.update
+        collection.access.update = ({ id, data }) => id !== fixedDoc.id || !data?._order
+
+        let res: Response
+        try {
+          res = await restClient.POST('/reorder', {
+            body: JSON.stringify({
+              collectionSlug: orderableSlug,
+              docsToMove: [movableDoc.id, fixedDoc.id],
+              newKeyWillBe: 'greater',
+              orderableFieldName: '_order',
+              target: {
+                id: orderable1.id,
+                key: orderable1._order,
+              },
+            }),
+          })
+        } finally {
+          collection.access.update = originalUpdateAccess
+        }
+
+        const storedMovableDoc = await payload.findByID({
+          id: movableDoc.id,
+          collection: orderableSlug,
+        })
+        const storedFixedDoc = await payload.findByID({
+          id: fixedDoc.id,
+          collection: orderableSlug,
+        })
+
+        expect(res!.status).toBe(403)
+        expect(storedMovableDoc._order).toBe(movableOrder)
+        expect(storedFixedDoc._order).toBe(fixedOrder)
+      })
+
+      test('should respect document update constraints when reordering', async ({
+        payload,
+        restClient,
+      }) => {
+        const doc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Fixed position' },
+        })
+        createdOrderableIDs.push(doc.id)
+        const originalOrder = doc._order
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [doc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: orderable1.id,
+              key: orderable1._order,
+            },
+          }),
+        })
+        const storedDoc = await payload.findByID({ id: doc.id, collection: orderableSlug })
+
+        expect(res.status).toBe(403)
+        expect(storedDoc._order).toBe(originalOrder)
+      })
+
+      test('should keep order initialization unchanged when one document is excluded', async ({
+        payload,
+        restClient,
+      }) => {
+        const fixedDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Fixed position' },
+        })
+        createdOrderableIDs.push(fixedDoc.id)
+        const movableDoc = await payload.create({
+          collection: orderableSlug,
+          data: { title: 'Movable position' },
+        })
+        createdOrderableIDs.push(movableDoc.id)
+
+        await payload.db.updateOne({
+          id: movableDoc.id,
+          collection: orderableSlug,
+          data: { _order: null },
+        })
+        await payload.db.updateOne({
+          id: fixedDoc.id,
+          collection: orderableSlug,
+          data: { _order: null },
+        })
+
+        const originalBeginTransaction = payload.db.beginTransaction
+        payload.db.beginTransaction = () => Promise.resolve(null as never)
+
+        let res: Response
+        try {
+          res = await restClient.POST('/reorder', {
+            body: JSON.stringify({
+              collectionSlug: orderableSlug,
+              docsToMove: [movableDoc.id],
+              newKeyWillBe: 'greater',
+              orderableFieldName: '_order',
+              target: {
+                id: movableDoc.id,
+                key: '',
+              },
+            }),
+          })
+        } finally {
+          payload.db.beginTransaction = originalBeginTransaction
+        }
+
+        const storedMovableDoc = await payload.findByID({
+          id: movableDoc.id,
+          collection: orderableSlug,
+        })
+        const storedFixedDoc = await payload.findByID({
+          id: fixedDoc.id,
+          collection: orderableSlug,
+        })
+
+        expect(res!.status).toBe(403)
+        expect(storedMovableDoc._order).toBeNull()
+        expect(storedFixedDoc._order).toBeNull()
       })
 
       test('should allow reordering with REST API with drafts enabled', async ({
