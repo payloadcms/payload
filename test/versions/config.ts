@@ -38,7 +38,7 @@ import DraftUnlimitedGlobal from './globals/DraftUnlimited.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
-import RestoreAccessGlobal from './globals/RestoreAccess.js'
+import RestoreAccessGlobal, { RestoreAccessNoVersionsGlobal } from './globals/RestoreAccess.js'
 import SimpleDraftGlobal from './globals/SimpleDraft.js'
 import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
@@ -90,6 +90,7 @@ export default buildConfigWithDefaults({
       DraftUnlimitedGlobal,
       SimpleDraftGlobal,
       RestoreAccessGlobal,
+      RestoreAccessNoVersionsGlobal,
     ],
     indexSortableFields: true,
     localization: {

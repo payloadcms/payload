@@ -18,12 +18,7 @@ import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { cloudStorageDeletedFilenames } from './collections/DraftsWithUploadCloudStorage.js'
-import {
-  cleanupDocuments,
-  cleanupGlobal,
-  createDocumentWithManyVersions,
-  createDraftDocument,
-} from './helpers.js'
+import { cleanupDocuments, cleanupGlobal, createDraftDocument } from './helpers.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
@@ -37,6 +32,7 @@ import {
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
   restoreAccessGlobalSlug,
+  restoreAccessNoVersionsGlobalSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -2847,30 +2843,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       return result.data.versionsAutosavePosts.docs[0]
     }
 
-    async function getVersionsAutosaveHelper(
-      { restClient }: { restClient: NextRESTClient },
-      { where }: { where: string },
-    ): Promise<JsonObject> {
-      const query = `query {
-          versionsAutosavePost(where: ${where}) {
-          id
-          title
-          description
-          createdAt
-          updatedAt
-          _status
-        }
-      }`
-
-      const result: JsonObject = await restClient
-        .GRAPHQL_POST({
-          body: JSON.stringify({ query }),
-        })
-        .then((res) => res.json())
-
-      return result.data.versionsAutosavePost
-    }
-
     test.describe('Create', () => {
       test('should allow a new doc to be created with draft status', async ({ restClient }) => {
         const autosavePost = await createAutoSavePostHelper(
@@ -3488,10 +3460,119 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       })
     })
 
+    test.describe('Global update access control', () => {
+      const seedGlobalForUpdateAccess = async (payload: Payload) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'historical' },
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'current' },
+          overrideAccess: true,
+        })
+      }
+
+      test.afterEach(async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'reset' },
+          overrideAccess: true,
+        })
+
+        await payload.db.deleteVersions({
+          globalSlug: restoreAccessGlobalSlug,
+          where: {},
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          data: { title: 'reset' },
+          overrideAccess: true,
+        })
+      })
+
+      test('should allow updates when the current global matches the access constraint', async ({
+        payload,
+      }) => {
+        await seedGlobalForUpdateAccess(payload)
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          overrideAccess: true,
+        })
+
+        const updated = await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'updated' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(updated.title).toBe('updated')
+      })
+
+      test('should reject updates when the current global does not match the access constraint', async ({
+        payload,
+      }) => {
+        await seedGlobalForUpdateAccess(payload)
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessGlobalSlug,
+            data: { title: 'updated' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      test('should reject non-versioned global updates outside the access constraint', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          data: { title: 'current' },
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessNoVersionsGlobalSlug,
+            data: { title: 'updated' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessNoVersionsGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      test('should use one global lookup when access is not constrained', async ({ payload }) => {
+        const findGlobal = vi.spyOn(payload.db, 'findGlobal')
+
+        try {
+          await payload.updateGlobal({
+            slug: restoreAccessNoVersionsGlobalSlug,
+            data: { title: 'updated' },
+            overrideAccess: true,
+          })
+
+          expect(findGlobal).toHaveBeenCalledTimes(1)
+        } finally {
+          findGlobal.mockRestore()
+        }
+      })
+    })
+
     test.describe('Restore - access control', () => {
-      // Seeds a historical version ('historical') and leaves the current
-      // global at a different state ('current'), returning the id of the
-      // historical version to restore.
       const seedRestoreAccessGlobal = async (payload: Payload): Promise<number | string> => {
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,

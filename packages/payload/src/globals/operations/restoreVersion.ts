@@ -52,24 +52,12 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     }
 
     // /////////////////////////////////////
-    // Access
+    // Retrieve original raw version
     // /////////////////////////////////////
 
-    // Capture the update access result rather than only checking for a thrown
-    // Forbidden - a Where constraint is truthy, so it must be applied to the
-    // current global before the historical version is allowed to overwrite it.
-    const updateAccessResult = overrideAccess
-      ? true
-      : await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.update)
-
-    // The selected version must also satisfy read-version access.
     const readVersionsAccessResult = overrideAccess
       ? true
       : await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
-
-    // /////////////////////////////////////
-    // Retrieve original raw version
-    // /////////////////////////////////////
 
     const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
       global: globalConfig.slug,
@@ -111,10 +99,10 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Update global
     // /////////////////////////////////////
 
-    // When update access returns a Where constraint, a normal update would only
-    // succeed if the current global matches it - so restore must enforce the
-    // same. findGlobal returns null (Mongo) or an empty object (relational) when
-    // nothing matches, so treat an empty result as "does not match".
+    const updateAccessResult = overrideAccess
+      ? true
+      : await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.update)
+
     if (hasWhereAccessResult(updateAccessResult)) {
       const constrainedGlobal = await payload.db.findGlobal({
         slug: globalConfig.slug,
