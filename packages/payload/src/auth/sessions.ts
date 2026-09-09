@@ -41,18 +41,17 @@ export const addSessionToUser = async ({
 
     const session = { id: sid, createdAt: now, expiresAt }
 
-    if (!user.sessions?.length) {
-      user.sessions = [session]
-    } else {
-      user.sessions = removeExpiredSessions(user.sessions)
-      user.sessions.push(session)
-    }
+    // Store the new session in memory to reflect it in the response, without
+    // writing the full sessions array back to the database. Concurrent logins
+    // each read the same sessions array, so writing it back would silently
+    // drop the sessions the other logins have added in the meantime.
+    user.sessions = [...removeExpiredSessions(user.sessions ?? []), session]
 
     await payload.db.updateOne({
       id: user.id,
       collection: collectionConfig.slug,
       data: {
-        ...user,
+        sessions: { $push: session },
         // Prevent updatedAt from being updated when only adding a session
         updatedAt: null,
       },
