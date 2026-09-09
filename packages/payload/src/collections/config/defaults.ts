@@ -2,6 +2,7 @@ import type { Auth, IncomingAuthType, LoginWithUsernameOptions } from '../../aut
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import { defaultUnlockAccess } from '../../auth/defaultUnlockAccess.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -11,7 +12,7 @@ export const defaults: Partial<CollectionConfig> = {
     create: defaultAccess,
     delete: defaultAccess,
     read: defaultAccess,
-    unlock: defaultAccess,
+    unlock: defaultUnlockAccess,
     update: defaultAccess,
   },
   admin: {
@@ -63,7 +64,7 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
     create: access?.create ?? defaultAccess,
     delete: access?.delete ?? defaultAccess,
     read: access?.read ?? defaultAccess,
-    unlock: access?.unlock ?? defaultAccess,
+    unlock: access?.unlock ?? defaultUnlockAccess,
     update: access?.update ?? defaultAccess,
   } satisfies SanitizedCollectionConfig['access']
 
