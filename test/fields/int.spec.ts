@@ -22,6 +22,7 @@ import { namedGroupDoc } from './collections/Group/shared.js'
 import { defaultNumber } from './collections/Number/index.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
+import { slugFieldAutosaveSlug } from './collections/SlugFieldAutosave/shared.js'
 import {
   localizedTextValue,
   namedTabDefaultValue,
@@ -5087,6 +5088,92 @@ describe('Fields', () => {
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+    })
+  })
+
+  describe('slug field', () => {
+    const created: (number | string)[] = []
+
+    afterEach(async () => {
+      while (created.length) {
+        await payload.delete({ collection: slugFieldAutosaveSlug, id: created.pop()! })
+      }
+    })
+
+    it('should leave the slug null when creating a draft with no source value', async () => {
+      const doc = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft' },
+      })
+      created.push(doc.id)
+
+      // Mongo leaves the field unset, Postgres stores NULL — neither is an empty string.
+      expect(doc.slug ?? null).toBeNull()
+    })
+
+    it('should leave the slug null when creating a draft with an empty source value', async () => {
+      const doc = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft', title: '' },
+      })
+      created.push(doc.id)
+
+      // Mongo leaves the field unset, Postgres stores NULL — neither is an empty string.
+      expect(doc.slug ?? null).toBeNull()
+    })
+
+    it('should leave the slug null when a custom slugify returns an empty string', async () => {
+      const doc = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft', title: '' },
+      })
+      created.push(doc.id)
+
+      expect(doc.customSlugify ?? null).toBeNull()
+    })
+
+    it('should allow multiple source-less drafts to coexist under the unique index', async () => {
+      const first = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft', title: '' },
+      })
+      created.push(first.id)
+
+      const second = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft', title: '' },
+      })
+      created.push(second.id)
+
+      expect(first.slug ?? null).toBeNull()
+      expect(second.slug ?? null).toBeNull()
+    })
+
+    it('should still generate a slug from the source field on create', async () => {
+      const doc = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft', title: 'My First Post' },
+      })
+      created.push(doc.id)
+
+      expect(doc.slug).toBe('my-first-post')
+    })
+
+    it('should keep a user-provided slug on create', async () => {
+      const doc = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft', title: 'My First Post', slug: 'custom-slug' },
+      })
+      created.push(doc.id)
+
+      expect(doc.slug).toBe('custom-slug')
     })
   })
 })

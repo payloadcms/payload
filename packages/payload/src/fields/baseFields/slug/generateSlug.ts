@@ -38,7 +38,7 @@ export const generateSlug =
   async ({ collection, data, global, operation, originalDoc, req, value: isChecked }) => {
     if (operation === 'create') {
       if (data) {
-        data[slugFieldName] = slugify({
+        const slugified = slugify({
           customSlugify,
           data,
           req,
@@ -46,6 +46,12 @@ export const generateSlug =
           // Use a generic falsy check here to include empty strings
           valueToSlugify: data?.[slugFieldName] || data?.[useAsSlug],
         })
+
+        // Leave an empty slug unset rather than `''`, mirroring the `null` the update branch below
+        // falls back to. The unique index skips a missing value — Mongo's index is sparse once
+        // drafts are enabled, and Postgres permits many NULLs — but a second `''` collides with the
+        // first. Draft creates skip field validation, so `required` does not catch it either.
+        data[slugFieldName] = slugified || undefined
       }
 
       return Boolean(!data?.[slugFieldName])
