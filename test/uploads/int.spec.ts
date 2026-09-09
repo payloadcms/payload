@@ -1206,6 +1206,40 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       })
     })
     test.describe('update', () => {
+      test('should reject filenames with parent directory segments', async ({
+        payload,
+        restClient,
+      }) => {
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file: await getFileByPath(path.resolve(dirname, './image.png')),
+        })) as unknown as Media
+
+        const response = await restClient.PATCH(`/${mediaSlug}/${mediaDoc.id}`, {
+          body: JSON.stringify({
+            filename: `archive/../${mediaDoc.filename}`,
+            sizes: {
+              icon: {
+                filename: `archive/../${mediaDoc.sizes.icon.filename}`,
+              },
+            },
+          }),
+        })
+
+        expect(response.status).toBe(400)
+
+        const unchangedDoc = (await payload.findByID({
+          id: mediaDoc.id,
+          collection: mediaSlug,
+        })) as unknown as Media
+
+        expect(unchangedDoc.filename).toBe(mediaDoc.filename)
+        expect(unchangedDoc.sizes.icon.filename).toBe(mediaDoc.sizes.icon.filename)
+
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug })
+      })
+
       test('should replace image and delete old files - by ID', async ({ payload, restClient }) => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
@@ -1281,6 +1315,37 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       })
     })
     test.describe('delete', () => {
+      test('should preserve files outside the upload directory during document deletion', async ({
+        payload,
+      }) => {
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file: await getFileByPath(path.resolve(dirname, './image.png')),
+        })) as unknown as Media
+        const outsideFilename = `retained-${randomUUID()}.txt`
+        const outsidePath = path.join(dirname, outsideFilename)
+
+        fs.writeFileSync(outsidePath, 'retained')
+
+        await payload.db.updateOne({
+          id: mediaDoc.id,
+          collection: mediaSlug,
+          data: { filename: path.join('..', outsideFilename) },
+        })
+
+        await expect(payload.delete({ id: mediaDoc.id, collection: mediaSlug })).rejects.toThrow()
+        expect(await fileExists(outsidePath)).toBe(true)
+
+        await payload.db.updateOne({
+          id: mediaDoc.id,
+          collection: mediaSlug,
+          data: { filename: mediaDoc.filename },
+        })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug })
+        fs.rmSync(outsidePath)
+      })
+
       test('should remove related files when deleting by ID', async ({ restClient }) => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
