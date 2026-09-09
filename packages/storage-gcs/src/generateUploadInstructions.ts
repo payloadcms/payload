@@ -13,6 +13,10 @@ interface Args {
   useCompositePrefixes?: boolean
 }
 
+const createOnlyHeaders = {
+  'x-goog-if-generation-match': '0',
+}
+
 export const generateUploadInstructions = ({
   access,
   bucket,
@@ -54,6 +58,7 @@ export const generateUploadInstructions = ({
         action: 'write',
         contentType: mimeType,
         expires: Date.now() + 60 * 60 * 5,
+        extensionHeaders: createOnlyHeaders,
         version: 'v4',
       })
 
@@ -69,6 +74,7 @@ export const generateUploadInstructions = ({
         headers: {
           'Content-Length': String(filesize),
           'Content-Type': mimeType,
+          ...createOnlyHeaders,
         },
         method: 'PUT',
         url,

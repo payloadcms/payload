@@ -88,7 +88,11 @@ export const getHandleMultiPartUpload =
         return Response.json(uploadedPart)
       }
     } else {
-      // Create multipart upload
+      const existing = await bucket.head(fileKey)
+      if (existing) {
+        return new Response('Object already exists', { status: 412 })
+      }
+
       const multipartUpload = await bucket.createMultipartUpload(fileKey, {
         httpMetadata: {
           contentType: filetype,

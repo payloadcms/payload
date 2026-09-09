@@ -4,11 +4,12 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
-import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFileKey, resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
 import { Forbidden } from 'payload'
 import { assertClientUploadAllowed } from 'payload/internal'
 
+import { authorizeClientOverwrite } from './authorizeFileOverwrite.js'
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -61,14 +62,30 @@ export function createVercelBlobAdapter({
 
         assertClientUploadAllowed({ collection, filename, mimeType })
 
-        const resolved = await resolveSignedURLKey({
+        const requested = getFileKey({
           collectionPrefix: prefix,
-          collectionSlug,
           docPrefix,
           filename,
+          useCompositePrefixes,
+        })
+        const allowOverwrite = await authorizeClientOverwrite({
+          collectionPrefix: prefix,
+          collectionSlug,
+          fileKey: requested.fileKey,
+          overrideAccess,
           req,
           useCompositePrefixes,
         })
+        const resolved = allowOverwrite
+          ? requested
+          : await resolveSignedURLKey({
+              collectionPrefix: prefix,
+              collectionSlug,
+              docPrefix,
+              filename,
+              req,
+              useCompositePrefixes,
+            })
 
         return {
           name: 'uploadToVercelBlob',
@@ -78,7 +95,7 @@ export function createVercelBlobAdapter({
             token: await generateClientTokenFromReadWriteToken({
               addRandomSuffix,
               allowedContentTypes: mimeType ? [mimeType] : undefined,
-              allowOverwrite: true,
+              ...(allowOverwrite && { allowOverwrite: true }),
               cacheControlMaxAge,
               maximumSizeInBytes: filesize,
               pathname: resolved.fileKey,
