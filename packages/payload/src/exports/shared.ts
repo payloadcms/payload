@@ -137,11 +137,19 @@ export {
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
 export { extractID } from '../utilities/extractID.js'
+
+export {
+  expandOwnDottedKey,
+  hasUnsupportedFieldPathSegment,
+  setOwnProperty,
+} from '../utilities/fieldPath.js'
+
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
+
 export { formatErrors } from '../utilities/formatErrors.js'
 
 export { formatLabels, toWords } from '../utilities/formatLabels.js'

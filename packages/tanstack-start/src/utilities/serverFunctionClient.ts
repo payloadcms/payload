@@ -1,5 +1,7 @@
 import type { ServerFunctionClient, ServerFunctionClientArgs } from 'payload'
 
+import { setOwnProperty } from 'payload/shared'
+
 /**
  * Builds the client-side `ServerFunctionClient` wired into
  * `RootProvider.serverFunction`, given the app's `createServerFn`-based
@@ -123,7 +125,7 @@ export function stripUnserializable(
   for (const key of Object.keys(obj)) {
     const v = stripUnserializable(obj[key], cache, ancestors)
     if (v !== undefined) {
-      result[key] = v
+      setOwnProperty({ key, target: result, value: v })
     }
   }
   ancestors.delete(obj)
