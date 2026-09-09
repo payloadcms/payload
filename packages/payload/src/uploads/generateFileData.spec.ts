@@ -16,6 +16,8 @@ const PNG_SIGNATURE = Buffer.from(
   'base64',
 )
 
+const GIF_SIGNATURE = Buffer.from('R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==', 'base64')
+
 const createSharpMock = () => {
   const toBufferMock = vi.fn().mockResolvedValue({
     data: PNG_SIGNATURE,
@@ -93,6 +95,75 @@ describe('generateFileData', () => {
     expect(toBufferMock).not.toHaveBeenCalled()
   })
 
+  it('uses the inspected non-image type for image processing', async () => {
+    const { sharp } = createSharpMock()
+    const fileContent = Buffer.from(
+      '<?xml version="1.0"?><document><title>Reference</title></document>',
+    )
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'image/avif',
+        name: 'reference.avif',
+        size: fileContent.length,
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(sharp).not.toHaveBeenCalled()
+    expect(result.data).toMatchObject({ mimeType: 'application/xml' })
+  })
+
+  it('handles inspected SVG dimensions and crop edits without image processing', async () => {
+    const { sharp } = createSharpMock()
+    const fileContent = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1"/></svg>',
+    )
+    const req = {
+      file: {
+        data: fileContent,
+        mimetype: 'image/avif',
+        name: 'reference.avif',
+        size: fileContent.length,
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+      query: {
+        uploadEdits: {
+          crop: { x: 0, y: 0 },
+          heightInPixels: 2,
+          widthInPixels: 2,
+        },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(sharp).not.toHaveBeenCalled()
+    expect(result.data).toMatchObject({ height: 1, mimeType: 'image/svg+xml', width: 1 })
+  })
+
   it('still runs sharp processing when resize options are configured', async () => {
     const { sharp, toBufferMock } = createSharpMock()
 
@@ -111,7 +182,7 @@ describe('generateFileData', () => {
   it('does not overwrite req.file with a truncated header-only buffer', async () => {
     // Mirrors what `getFileFromUploadInstructions` returns for the `'header'` content
     // requirement: only the first bytes of the file, alongside the real, full declared size.
-    const truncatedBuffer = PNG_SIGNATURE.subarray(0, 4)
+    const truncatedBuffer = PNG_SIGNATURE
     const fullFileSize = 5_000_000
     const { sharp } = createSharpMock()
 
@@ -130,7 +201,7 @@ describe('generateFileData', () => {
     } as unknown as PayloadRequest
 
     await generateFileData({
-      collection: createCollection(),
+      collection: createCollection({ imageSizes: [] }),
       config: {} as SanitizedConfig,
       data: {},
       operation: 'create',
@@ -140,6 +211,37 @@ describe('generateFileData', () => {
 
     expect(req.file?.size).toBe(fullFileSize)
     expect(req.file?.data).toBe(truncatedBuffer)
+    expect(sharp).not.toHaveBeenCalled()
+  })
+
+  it('does not process a header-only upload after detecting an animated image type', async () => {
+    const fullFileSize = 5_000_000
+    const { sharp } = createSharpMock()
+    const req = {
+      file: {
+        data: GIF_SIGNATURE,
+        mimetype: 'image/png',
+        name: 'photo.png',
+        size: fullFileSize,
+        uploadReference: { key: 'media/photo.png' },
+      },
+      payload: {
+        config: { sharp },
+        logger: { error: vi.fn() },
+      },
+    } as unknown as PayloadRequest
+
+    const result = await generateFileData({
+      collection: createCollection(),
+      config: {} as SanitizedConfig,
+      data: {},
+      operation: 'create',
+      overwriteExistingFiles: true,
+      req,
+    })
+
+    expect(sharp).not.toHaveBeenCalled()
+    expect(result.data).toMatchObject({ height: 1, mimeType: 'image/gif', width: 1 })
   })
 
   it('copies straight from the temp file instead of reading it into memory when local storage is enabled', async () => {

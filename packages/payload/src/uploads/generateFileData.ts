@@ -19,9 +19,11 @@ import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
+import { hasFullFileContents } from './hasFullFileContents.js'
 import { createImageSizes } from './image-resizing/createImageSizes.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
+import { isProcessableImage } from './isProcessableImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 type Args<T> = {
   collection: Collection
@@ -176,11 +178,19 @@ export const generateFileData = async <T>({
     }
   }
 
-  await checkFileRestrictions({
+  const detectedFileType = await checkFileRestrictions({
     collection: collectionConfig,
     file,
     req,
   })
+
+  const shouldUseDetectedFileType =
+    detectedFileType &&
+    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
+
+  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
+    file = { ...file, mimetype: detectedFileType.mime }
+  }
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -195,6 +205,7 @@ export const generateFileData = async <T>({
 
   try {
     const fileSupportsResize = canResizeImage(file.mimetype)
+    const fileHasCompleteContents = hasFullFileContents(file)
     let fsSafeName: string
     let sharpFile: Sharp | undefined
     let dimensions: ProbedImageSize | undefined
@@ -213,7 +224,7 @@ export const generateFileData = async <T>({
       sharpOptions.animated = true
     }
 
-    if (sharp && (fileIsAnimatedType || fileHasAdjustments)) {
+    if (sharp && fileHasCompleteContents && (fileIsAnimatedType || fileHasAdjustments)) {
       // rotate() auto-rotates based on EXIF data - see #3081
       sharpFile = file.tempFilePath
         ? sharp(file.tempFilePath, sharpOptions).rotate()
@@ -233,7 +244,10 @@ export const generateFileData = async <T>({
     }
 
     if (fileSupportsResize || isImage(file.mimetype)) {
-      dimensions = await getImageSize({ file, sharp })
+      dimensions = await getImageSize({
+        file,
+        sharp: fileSupportsResize && fileHasCompleteContents ? sharp : undefined,
+      })
       fileData.width = dimensions.width
       fileData.height = dimensions.height
     }
@@ -291,7 +305,7 @@ export const generateFileData = async <T>({
 
     let fileForResize = file
 
-    if (cropData && sharp) {
+    if (cropData && fileSupportsResize && sharp && fileHasCompleteContents) {
       const { data: croppedImage, info } = await cropImage({
         cropData,
         dimensions: dimensions!,
@@ -435,7 +449,7 @@ export const generateFileData = async <T>({
         mimeType: fileData.mimeType,
         req,
         savedFilename: fsSafeName || file.name,
-        sharp,
+        sharp: fileHasCompleteContents ? sharp : undefined,
         staticPath: staticPath!,
         withMetadata,
       })

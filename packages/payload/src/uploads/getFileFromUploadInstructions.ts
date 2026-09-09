@@ -184,7 +184,6 @@ const fetchHeaderOnly = async ({
         mimetype: file.mimeType,
         size: file.size,
       },
-      sharp: req.payload.config.sharp,
     })
   } catch {
     return null

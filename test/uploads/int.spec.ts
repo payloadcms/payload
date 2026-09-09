@@ -85,7 +85,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             },
           } as unknown as PayloadRequest,
         }),
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual({ ext: 'svg', mime: 'image/svg+xml' })
 
       expect(readFileSpy).not.toHaveBeenCalled()
     } finally {
@@ -196,7 +196,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           },
         } as unknown as PayloadRequest,
       }),
-    ).resolves.toBeUndefined()
+    ).resolves.toEqual({ ext: 'svg', mime: 'image/svg+xml' })
   })
 
   test('should accept ordinary non-SVG XML content', async () => {
