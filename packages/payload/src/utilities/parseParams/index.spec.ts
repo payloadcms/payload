@@ -188,6 +188,16 @@ describe('parseParams', () => {
       expect(result).toHaveProperty('joins')
       // Note: actual sanitization logic is tested in sanitizeJoinParams tests
     })
+
+    it('should handle ?joins=false (string) from REST API without iterating characters', () => {
+      const result = parseParams({ joins: 'false' as any })
+      expect(result.joins).toBe(false)
+    })
+
+    it('should handle joins=false (boolean) from local API', () => {
+      const result = parseParams({ joins: false })
+      expect(result.joins).toBe(false)
+    })
   })
 
   describe('selectedLocales parameter', () => {
