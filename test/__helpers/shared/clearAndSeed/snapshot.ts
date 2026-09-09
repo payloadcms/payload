@@ -1,10 +1,6 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { SQLiteAdapter } from '@payloadcms/db-sqlite'
-import type { PgTable } from 'drizzle-orm/pg-core'
-import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { Payload } from 'payload'
-
-import { sql } from 'drizzle-orm'
 
 import { isMongoose } from '../isMongoose.js'
 
@@ -46,15 +42,15 @@ async function restoreFromMongooseSnapshot(collectionsObj, snapshotKey: string) 
 
 async function createDrizzleSnapshot(db: PostgresAdapter | SQLiteAdapter, snapshotKey: string) {
   const snapshot = {}
+  // Capture the freshly seeded primary state instead of a potentially stale replica.
+  const drizzle = db.primaryDrizzle ?? db.drizzle
 
-  const schema: Record<string, PgTable | SQLiteTable> = db.drizzle._.schema
-  if (!schema) {
+  if (!Object.keys(db.tables).length) {
     return
   }
 
-  for (const tableName in schema) {
-    const table = db.drizzle.query[tableName]['fullSchema'][tableName] //db.drizzle._.schema[tableName]
-    const records = await db.drizzle.select().from(table).execute()
+  for (const [tableName, table] of Object.entries(db.tables)) {
+    const records = await drizzle.select().from(table).execute()
     snapshot[tableName] = records
   }
 
@@ -69,6 +65,7 @@ async function restoreFromDrizzleSnapshot(
     throw new Error('No snapshot found to restore from.')
   }
   const db = adapter.name === 'postgres' ? (adapter as PostgresAdapter) : (adapter as SQLiteAdapter)
+  const drizzle = db.primaryDrizzle ?? db.drizzle
   let disableFKConstraintChecksQuery
   let enableFKConstraintChecksQuery
 
@@ -84,29 +81,27 @@ async function restoreFromDrizzleSnapshot(
   // Temporarily disable foreign key constraint checks
   try {
     await db.execute({
-      drizzle: db.drizzle,
+      drizzle,
       raw: disableFKConstraintChecksQuery,
     })
     for (const tableName in dbSnapshot[snapshotKey]) {
-      const table = db.drizzle.query[tableName]['fullSchema'][tableName]
-      await db.execute({
-        drizzle: db.drizzle,
-        sql: sql`DELETE FROM ${table}`,
-      }) // This deletes all records from the table. Probably not necessary, as I'm deleting the table before restoring anyways
-
+      const table = db.tables[tableName]
       const records = dbSnapshot[snapshotKey][tableName]
       if (records.length > 0) {
-        await db.drizzle.insert(table).values(records).execute()
+        await drizzle.insert(table).values(records).execute()
       }
     }
-  } catch (e) {
-    console.error(e)
   } finally {
     // Re-enable foreign key constraint checks
     await db.execute({
-      drizzle: db.drizzle,
+      drizzle,
       raw: enableFKConstraintChecksQuery,
     })
+  }
+
+  if (db.primaryDrizzle) {
+    // Keep subsequent test reads on the primary until the replica catches up.
+    db.lastWriteTimestamp = Date.now()
   }
 }
 

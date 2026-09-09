@@ -337,6 +337,8 @@ type AfterChangeHookBase<T extends TypeWithID = any> = {
   overrideAccess?: boolean
   previousDoc: T
   req: PayloadRequest
+  /** Resolved field selection for the operation's response. */
+  select?: SelectType
 }
 
 export type AfterChangeHook<T extends TypeWithID = any> = (

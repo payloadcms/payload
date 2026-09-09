@@ -63,7 +63,7 @@ export const mcpDataset: EvalCase[] = [
 
       expect(createCalls).toHaveLength(1)
       expect(createCall?.input).toMatchObject({
-        collectionSlug: 'media',
+        slug: 'media',
         documents: [
           {
             data: { alt: 'Local checklist icon' },
@@ -213,7 +213,7 @@ export const mcpDataset: EvalCase[] = [
       ])
       expect(createCalls).toHaveLength(1)
       expect(createCalls[0]?.input).toMatchObject({
-        collectionSlug: 'posts',
+        slug: 'posts',
         documents: [
           { data: { title: 'First bulk MCP post' } },
           { data: { title: 'Second bulk MCP post' } },

@@ -1,13 +1,12 @@
 // @ts-ignore
 import { type MongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig, getPayload } from 'payload'
-import { afterEach, expect, it, vi } from 'vitest'
+import { expect, vi } from 'vitest'
 
-import { describe } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 
-describe(
+test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' })(
   'mongodb read path selection',
-  { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
   () => {
     const createdIDs: (number | string)[] = []
 
@@ -63,7 +62,7 @@ describe(
       }
     }
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       vi.restoreAllMocks()
 
       const payload = await getPayloadInstance()
@@ -75,7 +74,7 @@ describe(
       createdIDs.length = 0
     })
 
-    it('should use Model.paginate when a select excludes every join field', async () => {
+    test('should use Model.paginate when a select excludes every join field', async () => {
       const { adapter, payload } = await seedCategory()
       const Model = adapter.collections.categories!
 
@@ -94,7 +93,7 @@ describe(
       expect(paginateSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('should use Model.paginate when every join is disabled individually', async () => {
+    test('should use Model.paginate when every join is disabled individually', async () => {
       const { adapter, payload } = await seedCategory()
       const Model = adapter.collections.categories!
 
@@ -113,7 +112,7 @@ describe(
       expect(paginateSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('should use Model.findOne for findByID when a select excludes every join field', async () => {
+    test('should use Model.findOne for findByID when a select excludes every join field', async () => {
       const { adapter, category, payload } = await seedCategory()
       const Model = adapter.collections.categories!
 
@@ -131,7 +130,7 @@ describe(
       expect(findOneSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('should still use Model.aggregate when a join field is actually selected', async () => {
+    test('should still use Model.aggregate when a join field is actually selected', async () => {
       const { adapter, payload } = await seedCategory()
       const Model = adapter.collections.categories!
 

@@ -1,5 +1,7 @@
 import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
+import { deepMergeWithSourceArrays } from 'payload'
+
 import type { GeneratedAdapter } from '../types.js'
 
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
@@ -16,19 +18,21 @@ type CloudStorageDocument = {
 
 export const getAfterChangeHook =
   ({ adapter, collection }: Args): CollectionAfterChangeHook<CloudStorageDocument> =>
-  async ({ action, doc, operation, previousDoc, req }) => {
+  async ({ action, data, doc, operation, previousDoc, req, select }) => {
     // Skip if this is an internal update to prevent infinite loop
     if (req.context?.skipCloudStorage) {
       return doc
     }
 
+    // Restore upload metadata removed by select, including partially selected image sizes.
+    const uploadData = select ? deepMergeWithSourceArrays<FileData & TypeWithID>(data, doc) : doc
     const isDraftSave = action === 'saveDraft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
     const metadataAction = action === 'saveDraft' || action === 'unpublish' ? action : 'publish'
 
     try {
-      const files = getIncomingFiles({ data: doc, req })
+      const files = getIncomingFiles({ data: uploadData, req })
 
       if (files.length > 0) {
         const uploadResults = await Promise.all(
@@ -37,7 +41,7 @@ export const getAfterChangeHook =
             .map((file) =>
               adapter.handleUpload({
                 collection,
-                data: doc,
+                data: uploadData,
                 file,
                 req,
               }),
@@ -67,25 +71,26 @@ export const getAfterChangeHook =
           req.payloadUploadSizes = undefined
 
           try {
-            await req.payload.update({
+            const updatedDoc = await req.payload.update({
               id: doc.id,
               action: metadataAction,
               collection: collection.slug,
               data: uploadMetadata,
               depth: 0,
               req,
+              select,
             })
+
+            // Persist all adapter metadata, but do not add unselected fields to the response.
+            docWithMetadata = select
+              ? { ...doc, ...updatedDoc }
+              : {
+                  ...doc,
+                  ...uploadMetadata,
+                  ...(doc._status !== undefined ? { _status: doc._status } : {}),
+                }
           } finally {
             delete req.context.skipCloudStorage
-          }
-
-          // Adapters often spread the incoming document into their return value,
-          // which can include `_status`. Keep the status from this write so a
-          // saveDraft cannot be reported as published.
-          docWithMetadata = {
-            ...doc,
-            ...uploadMetadata,
-            ...(doc._status !== undefined ? { _status: doc._status } : {}),
           }
         }
 
@@ -111,12 +116,13 @@ export const getAfterChangeHook =
           // Collect new filenames (main + sizes) so we don't delete a
           // file that the new upload reused (e.g. same filename on reupload
           // where Payload overwrites in place).
+          const newFileData = { ...uploadData, ...uploadMetadata }
           const newFilenames = new Set<string>()
-          if (typeof docWithMetadata.filename === 'string') {
-            newFilenames.add(docWithMetadata.filename)
+          if (typeof newFileData.filename === 'string') {
+            newFilenames.add(newFileData.filename)
           }
-          if (typeof docWithMetadata.sizes === 'object') {
-            for (const size of Object.values(docWithMetadata.sizes || {})) {
+          if (typeof newFileData.sizes === 'object') {
+            for (const size of Object.values(newFileData.sizes || {})) {
               if (size?.filename && typeof size.filename === 'string') {
                 newFilenames.add(size.filename)
               }

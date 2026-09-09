@@ -4,9 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
-
-export const collectionSlug = 'users'
-export const providerCookie = 'provider-access-token=refreshed; HttpOnly; Path=/'
+import { collectionSlug, providerCookie } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,38 +21,41 @@ const refreshWithProviderCookie: CollectionRefreshHook = ({ args, user }) => {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    user: 'users',
-  },
-  collections: [
-    {
-      slug: collectionSlug,
-      auth: {
-        removeTokenFromResponses: true,
+  suite: 'auth-removed-token',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      fields: [
-        {
-          name: 'roles',
-          type: 'select',
-          access: {
-            read: () => false,
-          },
-          defaultValue: ['user'],
-          hasMany: true,
-          label: 'Role',
-          options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
-          required: true,
-          saveToJWT: true,
+      user: 'users',
+    },
+    collections: [
+      {
+        slug: collectionSlug,
+        auth: {
+          removeTokenFromResponses: true,
         },
-      ],
-      hooks: {
-        refresh: [refreshWithProviderCookie],
+        fields: [
+          {
+            name: 'roles',
+            type: 'select',
+            access: {
+              read: () => false,
+            },
+            defaultValue: ['user'],
+            hasMany: true,
+            label: 'Role',
+            options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
+            required: true,
+            saveToJWT: true,
+          },
+        ],
+        hooks: {
+          refresh: [refreshWithProviderCookie],
+        },
+        versions: false,
       },
-      versions: false,
-    },
-  ],
-  debug: true,
+    ],
+    debug: true,
+  },
 })

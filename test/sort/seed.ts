@@ -40,13 +40,11 @@ export async function seedSortable(payload: Payload) {
     await payload.create({
       collection: nonUniqueSortSlug,
       data: {
+        createdAt: new Date(Date.UTC(2020, 0, 1, 0, 0, i)).toISOString(),
         title: `Post ${i}`,
         order,
       },
     })
-
-    // Wait 2 seconds to guarantee that the createdAt date is different
-    // await wait(2000)
   }
 
   return new Response(JSON.stringify({ success: true }), {

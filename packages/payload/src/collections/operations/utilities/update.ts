@@ -470,6 +470,7 @@ export const updateDocument = async <
           overrideAccess,
           previousDoc: originalDoc,
           req,
+          select,
         })) || result
     }
   }

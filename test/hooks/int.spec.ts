@@ -1,20 +1,9 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { AuthenticationError } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { isMongoose } from '../__helpers/shared/isMongoose.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
-import {
-  afterChangeActionSlug,
-  clearAfterChangeActions,
-  getAfterChangeActions,
-} from './collections/AfterChangeAction/index.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {
   beforeOperationSlug,
@@ -25,11 +14,7 @@ import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
 import { dataHooksSlug } from './collections/Data/index.js'
 import { hooksSlug } from './collections/Hook/index.js'
-import {
-  clearLastNestedAfterChangeActions,
-  getLastNestedAfterChangeActions,
-  nestedAfterChangeHooksSlug,
-} from './collections/NestedAfterChangeHook/index.js'
+import { nestedAfterChangeHooksSlug } from './collections/NestedAfterChangeHook/index.js'
 import {
   generatedAfterReadText,
   nestedAfterReadHooksSlug,
@@ -38,51 +23,27 @@ import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
 import { HooksConfig } from './config.js'
-import {
-  afterChangeActionGlobalSlug,
-  clearGlobalAfterChangeActions,
-  getGlobalAfterChangeActions,
-} from './globals/AfterChangeAction/index.js'
-import {
-  clearLastDataGlobalAfterChangeActions,
-  dataHooksGlobalSlug,
-  getLastDataGlobalAfterChangeActions,
-} from './globals/Data/index.js'
+import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
-let restClient: NextRESTClient
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Hooks', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-  if (isMongoose(payload)) {
-    describe('transform actions', () => {
-      it('should create and not throw an error', async () => {
-        // the collection has hooks that will cause an error if transform actions is not handled properly
-        const doc = await payload.create({
-          collection: transformSlug,
-          data: {
-            localizedTransform: [2, 8],
-            transform: [2, 8],
-          },
-        })
-
-        expect(doc.transform).toBeDefined()
-        expect(doc.localizedTransform).toBeDefined()
+test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
+  test.options({ db: 'mongo' }).describe('transform actions', () => {
+    test('should create and not throw an error', async ({ payload }) => {
+      // the collection has hooks that will cause an error if transform actions is not handled properly
+      const doc = await payload.create({
+        collection: transformSlug,
+        data: {
+          localizedTransform: [2, 8],
+          transform: [2, 8],
+        },
       })
-    })
-  }
 
-  describe('hook execution', () => {
+      expect(doc.transform).toBeDefined()
+      expect(doc.localizedTransform).toBeDefined()
+    })
+  })
+
+  test.describe('hook execution', () => {
     let doc
     const data = {
       collectionAfterChange: false,
@@ -95,14 +56,14 @@ describe('Hooks', () => {
       fieldBeforeChange: false,
       fieldBeforeValidate: false,
     }
-    beforeEach(async () => {
+    test.beforeEach(async ({ payload }) => {
       doc = await payload.create({
         collection: hooksSlug,
         data,
       })
     })
 
-    it('should execute hooks in correct order on create', () => {
+    test('should execute hooks in correct order on create', () => {
       expect(doc.collectionAfterChange).toBeTruthy()
       expect(doc.collectionAfterRead).toBeTruthy()
       expect(doc.collectionBeforeChange).toBeTruthy()
@@ -115,7 +76,7 @@ describe('Hooks', () => {
       expect(doc.fieldBeforeValidate).toBeTruthy()
     })
 
-    it('should execute hooks in correct order on update', async () => {
+    test('should execute hooks in correct order on update', async ({ payload }) => {
       doc = await payload.update({
         id: doc.id,
         collection: hooksSlug,
@@ -134,7 +95,7 @@ describe('Hooks', () => {
       expect(doc.fieldBeforeValidate).toBeTruthy()
     })
 
-    it('should execute hooks in correct order on find', async () => {
+    test('should execute hooks in correct order on find', async ({ payload }) => {
       doc = await payload.findByID({
         id: doc.id,
         collection: hooksSlug,
@@ -145,7 +106,9 @@ describe('Hooks', () => {
       expect(doc.fieldAfterRead).toBeTruthy()
     })
 
-    it('should save data generated with afterRead hooks in nested field structures', async () => {
+    test('should save data generated with afterRead hooks in nested field structures', async ({
+      payload,
+    }) => {
       const document = await payload.create({
         collection: nestedAfterReadHooksSlug,
         data: {
@@ -160,7 +123,7 @@ describe('Hooks', () => {
       expect(document.group.array[0].afterRead).toEqual(generatedAfterReadText)
     })
 
-    it('should populate related docs within nested field structures', async () => {
+    test('should populate related docs within nested field structures', async ({ payload }) => {
       const relation = await payload.create({
         collection: relationsSlug,
         data: {
@@ -194,7 +157,9 @@ describe('Hooks', () => {
       expect(retrievedDoc.group.subGroup.shouldPopulate.title).toEqual(relation.title)
     })
 
-    it('should pass result from previous hook into next hook with findByID', async () => {
+    test('should pass result from previous hook into next hook with findByID', async ({
+      payload,
+    }) => {
       const document = await payload.create({
         collection: chainingHooksSlug,
         data: {
@@ -210,7 +175,7 @@ describe('Hooks', () => {
       expect(retrievedDoc.text).toEqual('ok!!')
     })
 
-    it('should pass result from previous hook into next hook with find', async () => {
+    test('should pass result from previous hook into next hook with find', async ({ payload }) => {
       const document = await payload.create({
         collection: chainingHooksSlug,
         data: {
@@ -225,7 +190,7 @@ describe('Hooks', () => {
       expect(retrievedDocs[0].text).toEqual('ok!!')
     })
 
-    it('should execute collection afterOperation hook', async () => {
+    test('should execute collection afterOperation hook', async ({ payload }) => {
       const [doc1, doc2] = await Promise.all([
         await payload.create({
           collection: afterOperationSlug,
@@ -281,7 +246,7 @@ describe('Hooks', () => {
       expect(findResult2.docs[1].title === 'Title').toBeTruthy()
     })
 
-    it('should pass context from beforeChange to afterChange', async () => {
+    test('should pass context from beforeChange to afterChange', async ({ payload }) => {
       const document = await payload.create({
         collection: contextHooksSlug,
         data: {
@@ -297,7 +262,7 @@ describe('Hooks', () => {
       expect(retrievedDoc.value).toEqual('secret')
     })
 
-    it('should pass context from local API to hooks', async () => {
+    test('should pass context from local API to hooks', async ({ payload }) => {
       const document = await payload.create({
         collection: contextHooksSlug,
         context: {
@@ -316,7 +281,7 @@ describe('Hooks', () => {
       expect(retrievedDoc.value).toEqual('data from Local API')
     })
 
-    it('should pass context from Local API to global hooks', async () => {
+    test('should pass context from Local API to global hooks', async ({ payload }) => {
       const globalDocument = await payload.findGlobal({
         slug: dataHooksGlobalSlug,
       })
@@ -332,7 +297,7 @@ describe('Hooks', () => {
       expect(globalDocumentWithContext.field_globalAndField).toEqual('data from Local API context')
     })
 
-    it('should pass context from REST API to hooks', async () => {
+    test('should pass context from REST API to hooks', async ({ payload, restClient }) => {
       const params = new URLSearchParams({
         context_secretValue: 'data from REST API',
       })
@@ -353,7 +318,7 @@ describe('Hooks', () => {
       expect(retrievedDoc.value).toEqual('data from REST API')
     })
 
-    it('should populate previousValue in nested afterChange hooks', async () => {
+    test('should populate previousValue in nested afterChange hooks', async ({ payload }) => {
       // this collection will throw an error if previousValue is not defined in nested afterChange hook
       const nestedAfterChangeDoc = await payload.create({
         collection: nestedAfterChangeHooksSlug,
@@ -387,7 +352,9 @@ describe('Hooks', () => {
       expect(updatedDoc).toBeDefined()
     })
 
-    it('should populate previousValue in Lexical nested afterChange hooks', async () => {
+    test('should populate previousValue in Lexical nested afterChange hooks', async ({
+      payload,
+    }) => {
       const relationID = await payload.create({
         collection: 'relations',
         data: {
@@ -493,11 +460,11 @@ describe('Hooks', () => {
     })
   })
 
-  describe('auth collection hooks', () => {
+  test.describe('auth collection hooks', () => {
     let hookUser
     let hookUserToken
 
-    beforeAll(async () => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const email = 'dontrefresh@payloadcms.com'
 
       hookUser = await payload.create({
@@ -520,7 +487,7 @@ describe('Hooks', () => {
       hookUserToken = token
     })
 
-    it('should call afterLogin hook', async () => {
+    test('should call afterLogin hook', async ({ payload }) => {
       const { user } = await payload.login({
         collection: hooksUsersSlug,
         data: {
@@ -539,7 +506,7 @@ describe('Hooks', () => {
       expect(result.afterLoginHook).toStrictEqual(true)
     })
 
-    it('should call afterLogin hook on password reset', async () => {
+    test('should call afterLogin hook on password reset', async ({ payload }) => {
       const resetUser = await payload.create({
         collection: hooksUsersSlug,
         data: {
@@ -580,7 +547,7 @@ describe('Hooks', () => {
       expect(result.afterLoginHook).toStrictEqual(true)
     })
 
-    it('deny user login', async () => {
+    test('deny user login', async ({ payload }) => {
       await expect(() =>
         payload.login({
           collection: hooksUsersSlug,
@@ -589,7 +556,7 @@ describe('Hooks', () => {
       ).rejects.toThrow(AuthenticationError)
     })
 
-    it('should respect refresh hooks', async () => {
+    test('should respect refresh hooks', async ({ restClient }) => {
       const response = await restClient.POST(`/${hooksUsersSlug}/refresh-token`, {
         headers: {
           Authorization: `JWT ${hookUserToken}`,
@@ -602,7 +569,7 @@ describe('Hooks', () => {
       expect(data.refreshedToken).toStrictEqual('fake')
     })
 
-    it('should respect me hooks', async () => {
+    test('should respect me hooks', async ({ restClient }) => {
       const response = await restClient.GET(`/${hooksUsersSlug}/me`, {
         headers: {
           Authorization: `JWT ${hookUserToken}`,
@@ -615,8 +582,8 @@ describe('Hooks', () => {
     })
   })
 
-  describe('hook parameter data', () => {
-    it('should pass collection prop to collection hooks', async () => {
+  test.describe('hook parameter data', () => {
+    test('should pass collection prop to collection hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksCollection = JSON.parse(
         JSON.stringify(sanitizedConfig.collections.find(({ slug }) => slug === dataHooksSlug)),
@@ -658,7 +625,7 @@ describe('Hooks', () => {
       )
     })
 
-    it('should pass collection and field props to field hooks', async () => {
+    test('should pass collection and field props to field hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksCollection = sanitizedConfig.collections.find(
         ({ slug }) => slug === dataHooksSlug,
@@ -678,7 +645,7 @@ describe('Hooks', () => {
       expect(doc.field_collectionAndField).toStrictEqual(collectionAndField + collectionAndField)
     })
 
-    it('should pass global prop to global hooks', async () => {
+    test('should pass global prop to global hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksGlobal = JSON.parse(
         JSON.stringify(sanitizedConfig.globals.find(({ slug }) => slug === dataHooksGlobalSlug)),
@@ -701,7 +668,7 @@ describe('Hooks', () => {
       expect(JSON.parse(foundDoc.global_beforeRead_global)).toStrictEqual(sanitizedHooksGlobal)
     })
 
-    it('should pass global and field props to global hooks', async () => {
+    test('should pass global and field props to global hooks', async ({ payload }) => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksGlobal = sanitizedConfig.globals.find(
         ({ slug }) => slug === dataHooksGlobalSlug,
@@ -726,8 +693,8 @@ describe('Hooks', () => {
     })
   })
 
-  describe('config level after error hook', () => {
-    it('should handle error', async () => {
+  test.describe('config level after error hook', () => {
+    test('should handle error', async ({ restClient }) => {
       const response = await restClient.GET(`/throw-to-after-error`, {})
       const body = await response.json()
       expect(response.status).toEqual(418)
@@ -735,8 +702,8 @@ describe('Hooks', () => {
     })
   })
 
-  describe('beforeValidate', () => {
-    it('should have correct arguments', async () => {
+  test.describe('beforeValidate', () => {
+    test('should have correct arguments', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeValidateSlug,
         data: {
@@ -759,12 +726,12 @@ describe('Hooks', () => {
     })
   })
 
-  describe('beforeOperation', () => {
-    afterEach(() => {
+  test.describe('beforeOperation', () => {
+    test.afterEach(() => {
       clearLastOperation()
     })
 
-    it('should pass correct operation arg on create', async () => {
+    test('should pass correct operation arg on create', async ({ payload }) => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -773,7 +740,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('create')
     })
 
-    it('should pass correct operation arg on update', async () => {
+    test('should pass correct operation arg on update', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -788,7 +755,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('update')
     })
 
-    it('should pass correct operation arg on updateByID', async () => {
+    test('should pass correct operation arg on updateByID', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -803,8 +770,9 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('update')
     })
 
-    it('should pass correct operation arg on read (findByID)', async () => {
+    test('should pass correct operation arg on read (findByID)', async ({ payload }) => {
       const doc = await payload.create({
+        action: 'publish',
         collection: beforeOperationSlug,
         data: {},
       })
@@ -817,7 +785,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('read')
     })
 
-    it('should pass correct operation arg on read (find)', async () => {
+    test('should pass correct operation arg on read (find)', async ({ payload }) => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -832,7 +800,9 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('read')
     })
 
-    it('should pass correct operation arg on readDistinct (findDistinct)', async () => {
+    test('should pass correct operation arg on readDistinct (findDistinct)', async ({
+      payload,
+    }) => {
       await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'test1' },
@@ -854,7 +824,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('readDistinct')
     })
 
-    it('should pass correct operation arg on delete', async () => {
+    test('should pass correct operation arg on delete', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -868,7 +838,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('delete')
     })
 
-    it('should pass correct operation arg on deleteByID', async () => {
+    test('should pass correct operation arg on deleteByID', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -882,7 +852,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('delete')
     })
 
-    it('should pass correct operation arg on count', async () => {
+    test('should pass correct operation arg on count', async ({ payload }) => {
       await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -895,7 +865,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('count')
     })
 
-    it('should pass correct operation arg on countVersions', async () => {
+    test('should pass correct operation arg on countVersions', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -913,7 +883,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('countVersions')
     })
 
-    it('should pass correct operation arg on findVersions', async () => {
+    test('should pass correct operation arg on findVersions', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: {},
@@ -931,7 +901,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('read')
     })
 
-    it('should pass correct operation arg on findVersionByID', async () => {
+    test('should pass correct operation arg on findVersionByID', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'v1' },
@@ -963,7 +933,7 @@ describe('Hooks', () => {
       expect(getLastOperation()).toEqual('read')
     })
 
-    it('should pass correct operation arg on restoreVersion', async () => {
+    test('should pass correct operation arg on restoreVersion', async ({ payload }) => {
       const doc = await payload.create({
         collection: beforeOperationSlug,
         data: { category: 'v1' },
@@ -996,8 +966,8 @@ describe('Hooks', () => {
     })
   })
 
-  describe('afterRead', () => {
-    it('should return same for find and findByID', async () => {
+  test.describe('afterRead', () => {
+    test('should return same for find and findByID', async ({ payload }) => {
       const createdDoc = await payload.create({
         collection: afterReadSlug,
         data: {
@@ -1027,17 +997,17 @@ describe('Hooks', () => {
     })
   })
 
-  describe('overrideAccess in hooks', () => {
+  test.describe('overrideAccess in hooks', () => {
     const createdIDs: string[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
         await payload.delete({ collection: overrideAccessSlug, id })
       }
       createdIDs.length = 0
     })
 
-    it('should pass overrideAccess: false to hooks when not overriding', async () => {
+    test('should pass overrideAccess: false to hooks when not overriding', async ({ payload }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test' },
@@ -1058,7 +1028,7 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(false)
     })
 
-    it('should pass overrideAccess: true to hooks when overriding', async () => {
+    test('should pass overrideAccess: true to hooks when overriding', async ({ payload }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test' },
@@ -1079,7 +1049,7 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(true)
     })
 
-    it('should pass overrideAccess to hooks in find operation', async () => {
+    test('should pass overrideAccess to hooks in find operation', async ({ payload }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Find' },
@@ -1106,7 +1076,9 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(true)
     })
 
-    it('should pass overrideAccess: false to hooks in find operation when not overriding', async () => {
+    test('should pass overrideAccess: false to hooks in find operation when not overriding', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Find No Override' },
@@ -1133,7 +1105,9 @@ describe('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(false)
     })
 
-    it('should default to true when overrideAccess is not specified in Local API', async () => {
+    test('should default to true when overrideAccess is not specified in Local API', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },
@@ -1150,454 +1124,6 @@ describe('Hooks', () => {
       expect(result.afterReadCalled).toBe(true)
       expect(result.beforeReadOverrideAccess).toBe(true)
       expect(result.afterReadOverrideAccess).toBe(true)
-    })
-  })
-
-  describe('afterChange action', () => {
-    const createdIDs: (number | string)[] = []
-
-    afterEach(async () => {
-      for (const id of createdIDs) {
-        await payload.delete({
-          id,
-          collection: afterChangeActionSlug,
-        })
-      }
-
-      createdIDs.length = 0
-      clearAfterChangeActions()
-      clearGlobalAfterChangeActions()
-      clearLastNestedAfterChangeActions()
-      clearLastDataGlobalAfterChangeActions()
-    })
-
-    it('should expose saveDraft for omitted create on draft collections', async () => {
-      const doc = await payload.create({
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Create omitted',
-        },
-      })
-
-      createdIDs.push(doc.id)
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'saveDraft', operation: 'create' },
-        field: { action: 'saveDraft', operation: 'create' },
-      })
-    })
-
-    it('should expose saveDraft when create infers from draft status', async () => {
-      const doc = await payload.create({
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Create draft status',
-          _status: 'draft',
-        },
-      })
-
-      createdIDs.push(doc.id)
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'saveDraft', operation: 'create' },
-        field: { action: 'saveDraft', operation: 'create' },
-      })
-    })
-
-    it('should expose publish when create infers from published status', async () => {
-      const doc = await payload.create({
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Create published status',
-          _status: 'published',
-        },
-      })
-
-      createdIDs.push(doc.id)
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'publish', operation: 'create' },
-        field: { action: 'publish', operation: 'create' },
-      })
-    })
-
-    it('should expose explicit create actions and ignore conflicting status', async () => {
-      const published = await payload.create({
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Create explicit publish',
-          _status: 'draft',
-        },
-      })
-
-      createdIDs.push(published.id)
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'publish', operation: 'create' },
-        field: { action: 'publish', operation: 'create' },
-      })
-
-      clearAfterChangeActions()
-
-      const draft = await payload.create({
-        action: 'saveDraft',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Create explicit draft',
-          _status: 'published',
-        },
-      })
-
-      createdIDs.push(draft.id)
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'saveDraft', operation: 'create' },
-        field: { action: 'saveDraft', operation: 'create' },
-      })
-    })
-
-    it('should expose saveDraft for omitted duplicate', async () => {
-      const doc = await payload.create({
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Duplicate source',
-        },
-      })
-
-      createdIDs.push(doc.id)
-      clearAfterChangeActions()
-
-      const duplicated = await payload.duplicate({
-        id: doc.id,
-        collection: afterChangeActionSlug,
-      })
-
-      createdIDs.push(duplicated.id)
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'saveDraft', operation: 'create' },
-        field: { action: 'saveDraft', operation: 'create' },
-      })
-    })
-
-    it('should expose publish for omitted update on draft collections', async () => {
-      const doc = await payload.create({
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Update omitted',
-        },
-      })
-
-      createdIDs.push(doc.id)
-      clearAfterChangeActions()
-
-      await payload.update({
-        id: doc.id,
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Update omitted next',
-        },
-      })
-
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'publish', operation: 'update' },
-        field: { action: 'publish', operation: 'update' },
-      })
-    })
-
-    it('should expose saveDraft when update infers from draft status', async () => {
-      const doc = await payload.create({
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Update draft status',
-        },
-      })
-
-      createdIDs.push(doc.id)
-      clearAfterChangeActions()
-
-      await payload.update({
-        id: doc.id,
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Update draft status next',
-          _status: 'draft',
-        },
-      })
-
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'saveDraft', operation: 'update' },
-        field: { action: 'saveDraft', operation: 'update' },
-      })
-    })
-
-    it('should expose explicit update publish, saveDraft, and unpublish', async () => {
-      const doc = await payload.create({
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Update explicit',
-        },
-      })
-
-      createdIDs.push(doc.id)
-
-      clearAfterChangeActions()
-      await payload.update({
-        id: doc.id,
-        action: 'saveDraft',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Update explicit draft',
-          _status: 'published',
-        },
-      })
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'saveDraft', operation: 'update' },
-        field: { action: 'saveDraft', operation: 'update' },
-      })
-
-      clearAfterChangeActions()
-      await payload.update({
-        id: doc.id,
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Update explicit publish',
-        },
-      })
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'publish', operation: 'update' },
-        field: { action: 'publish', operation: 'update' },
-      })
-
-      clearAfterChangeActions()
-      await payload.update({
-        id: doc.id,
-        action: 'unpublish',
-        collection: afterChangeActionSlug,
-        data: {},
-      })
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'unpublish', operation: 'update' },
-        field: { action: 'unpublish', operation: 'update' },
-      })
-    })
-
-    it('should expose the same resolved action for every bulk update document', async () => {
-      const first = await payload.create({
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Bulk first',
-        },
-      })
-      const second = await payload.create({
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Bulk second',
-        },
-      })
-
-      createdIDs.push(first.id, second.id)
-      clearAfterChangeActions()
-
-      await payload.update({
-        action: 'unpublish',
-        collection: afterChangeActionSlug,
-        data: {},
-        where: {
-          id: {
-            in: [first.id, second.id],
-          },
-        },
-      })
-
-      const captured = getAfterChangeActions()
-
-      expect(captured.collections.map(({ action }) => action)).toEqual(['unpublish', 'unpublish'])
-      expect(captured.fields.map(({ action }) => action)).toEqual(['unpublish', 'unpublish'])
-    })
-
-    it('should expose publish for omitted restore and saveDraft when requested', async () => {
-      const doc = await payload.create({
-        action: 'publish',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Restore v1',
-        },
-      })
-
-      createdIDs.push(doc.id)
-
-      await payload.update({
-        id: doc.id,
-        action: 'saveDraft',
-        collection: afterChangeActionSlug,
-        data: {
-          title: 'Restore v2',
-        },
-      })
-
-      const versions = await payload.findVersions({
-        collection: afterChangeActionSlug,
-        sort: 'createdAt',
-        where: {
-          parent: {
-            equals: doc.id,
-          },
-        },
-      })
-
-      const versionToRestore = versions.docs[0]
-
-      clearAfterChangeActions()
-      await payload.restoreVersion({
-        id: versionToRestore.id,
-        collection: afterChangeActionSlug,
-      })
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'publish', operation: 'update' },
-        field: { action: 'publish', operation: 'update' },
-      })
-
-      clearAfterChangeActions()
-      await payload.restoreVersion({
-        id: versionToRestore.id,
-        action: 'saveDraft',
-        collection: afterChangeActionSlug,
-      })
-      expect(getAfterChangeActions()).toMatchObject({
-        collection: { action: 'saveDraft', operation: 'update' },
-        field: { action: 'saveDraft', operation: 'update' },
-      })
-    })
-
-    it('should expose undefined action for non-draft collection create and update', async () => {
-      const doc = await payload.create({
-        collection: nestedAfterChangeHooksSlug,
-        data: {
-          text: 'non-draft create',
-          group: {
-            array: [
-              {
-                nestedAfterChange: 'create',
-              },
-            ],
-          },
-        },
-      })
-
-      expect(getLastNestedAfterChangeActions().collection?.action).toBeUndefined()
-      expect(getLastNestedAfterChangeActions().field?.action).toBeUndefined()
-
-      clearLastNestedAfterChangeActions()
-
-      await payload.update({
-        id: doc.id,
-        collection: nestedAfterChangeHooksSlug,
-        data: {
-          text: 'non-draft update',
-          group: {
-            array: [
-              {
-                nestedAfterChange: 'update',
-              },
-            ],
-          },
-        },
-      })
-
-      expect(getLastNestedAfterChangeActions().collection?.action).toBeUndefined()
-      expect(getLastNestedAfterChangeActions().field?.action).toBeUndefined()
-
-      await payload.delete({
-        id: doc.id,
-        collection: nestedAfterChangeHooksSlug,
-      })
-    })
-
-    it('should expose publish, saveDraft, and unpublish on draft global afterChange hooks', async () => {
-      await payload.updateGlobal({
-        slug: afterChangeActionGlobalSlug,
-        data: {
-          title: 'Global omitted',
-        },
-      })
-      expect(getGlobalAfterChangeActions().global?.action).toBe('publish')
-      expect(getGlobalAfterChangeActions().field?.action).toBe('publish')
-
-      clearGlobalAfterChangeActions()
-      await payload.updateGlobal({
-        action: 'saveDraft',
-        data: {
-          title: 'Global draft',
-          _status: 'published',
-        },
-        slug: afterChangeActionGlobalSlug,
-      })
-      expect(getGlobalAfterChangeActions().global?.action).toBe('saveDraft')
-      expect(getGlobalAfterChangeActions().field?.action).toBe('saveDraft')
-
-      clearGlobalAfterChangeActions()
-      await payload.updateGlobal({
-        action: 'unpublish',
-        data: {},
-        slug: afterChangeActionGlobalSlug,
-      })
-      expect(getGlobalAfterChangeActions().global?.action).toBe('unpublish')
-      expect(getGlobalAfterChangeActions().field?.action).toBe('unpublish')
-    })
-
-    it('should expose restore actions on draft global afterChange hooks', async () => {
-      await payload.updateGlobal({
-        action: 'publish',
-        data: {
-          title: 'Global restore v1',
-        },
-        slug: afterChangeActionGlobalSlug,
-      })
-
-      const versionsAfterPublish = await payload.findGlobalVersions({
-        limit: 1,
-        slug: afterChangeActionGlobalSlug,
-        sort: '-createdAt',
-      })
-      const versionToRestore = versionsAfterPublish.docs[0]
-
-      await payload.updateGlobal({
-        action: 'saveDraft',
-        data: {
-          title: 'Global restore v2',
-        },
-        slug: afterChangeActionGlobalSlug,
-      })
-
-      clearGlobalAfterChangeActions()
-      await payload.restoreGlobalVersion({
-        id: versionToRestore.id,
-        slug: afterChangeActionGlobalSlug,
-      })
-      expect(getGlobalAfterChangeActions().global?.action).toBe('publish')
-      expect(getGlobalAfterChangeActions().field?.action).toBe('publish')
-
-      clearGlobalAfterChangeActions()
-      await payload.restoreGlobalVersion({
-        id: versionToRestore.id,
-        action: 'saveDraft',
-        slug: afterChangeActionGlobalSlug,
-      })
-      expect(getGlobalAfterChangeActions().global?.action).toBe('saveDraft')
-      expect(getGlobalAfterChangeActions().field?.action).toBe('saveDraft')
-    })
-
-    it('should expose undefined action for non-draft global afterChange hooks', async () => {
-      await payload.updateGlobal({
-        slug: dataHooksGlobalSlug,
-        data: {},
-      })
-
-      expect(getLastDataGlobalAfterChangeActions().global?.action).toBeUndefined()
-      expect(getLastDataGlobalAfterChangeActions().field?.action).toBeUndefined()
     })
   })
 })
