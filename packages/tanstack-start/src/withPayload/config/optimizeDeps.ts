@@ -66,7 +66,6 @@ export const optimizeDepsIncludeDefaults: string[] = [
   '@payloadcms/ui > @date-fns/tz/date/mini',
   '@payloadcms/ui > uuid',
   '@payloadcms/ui > use-context-selector',
-  '@payloadcms/ui > bson-objectid',
   '@payloadcms/ui > dequal',
   '@payloadcms/ui > object-to-formdata',
   '@payloadcms/ui > md5',

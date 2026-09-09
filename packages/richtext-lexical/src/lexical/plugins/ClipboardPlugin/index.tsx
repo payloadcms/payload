@@ -3,8 +3,8 @@
 import { copyToClipboard } from '@lexical/clipboard'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { objectKlassEquals } from '@lexical/utils'
-import ObjectID from 'bson-objectid'
 import { $getSelection, $isNodeSelection, COMMAND_PRIORITY_LOW, COPY_COMMAND } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 import { useEffect } from 'react'
 
 type SerializedUnknownLexicalNode = {
@@ -24,9 +24,9 @@ const changeIds = (node: SerializedUnknownLexicalNode) => {
     node.fields !== null &&
     'id' in node.fields
   ) {
-    node.fields.id = new ObjectID.default().toHexString()
+    node.fields.id = generateObjectIdHex()
   } else if ('id' in node) {
-    node.id = new ObjectID.default().toHexString()
+    node.id = generateObjectIdHex()
   }
 
   if (node.children) {

@@ -2,8 +2,8 @@
 import type { DOMConversionMap, EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 import type { JSX } from 'react'
 
-import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 import * as React from 'react'
 
 import type { Internal_UploadData, SerializedUploadNode, UploadData } from '../../server/schema.js'
@@ -39,7 +39,7 @@ export class UploadNode extends UploadServerNode {
       serializedNode.value = (serializedNode.value as unknown as { id: string }).id
     }
     if (serializedNode.version === 2 && !serializedNode?.id) {
-      serializedNode.id = new ObjectID.default().toHexString()
+      serializedNode.id = generateObjectIdHex()
       serializedNode.version = 3
     }
 
@@ -82,7 +82,7 @@ export function $createUploadNode({
   data: Omit<UploadData, 'id'> & Partial<Pick<UploadData, 'id'>>
 }): UploadNode {
   if (!data?.id) {
-    data.id = new ObjectID.default().toHexString()
+    data.id = generateObjectIdHex()
   }
 
   return $applyNodeReplacement(new UploadNode({ data: data as UploadData }))

@@ -1,11 +1,11 @@
 'use client'
-import ObjectID from 'bson-objectid'
 import {
   $applyNodeReplacement,
   type EditorConfig,
   type LexicalEditor,
   type LexicalNode,
 } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 import React, { type JSX } from 'react'
 
 import type { ViewMapInlineBlockComponentProps } from '../../../../types/index.js'
@@ -65,7 +65,7 @@ export function $createInlineBlockNode(fields: Exclude<InlineBlockFields, 'id'>)
     new InlineBlockNode({
       fields: {
         ...fields,
-        id: fields?.id || new ObjectID.default().toHexString(),
+        id: fields?.id || generateObjectIdHex(),
       },
     }),
   )

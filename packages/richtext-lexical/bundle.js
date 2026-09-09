@@ -87,7 +87,6 @@ async function build() {
       '@lexical',
       '@lexical/*',
       '@faceless-ui/*',
-      'bson-objectid',
       'payload',
       'payload/*',
       'react',

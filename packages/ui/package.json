@@ -379,7 +379,6 @@
     "@monaco-editor/react": "4.7.0",
     "@payloadcms/translations": "workspace:*",
     "@swc/helpers": ">=0.5.17",
-    "bson-objectid": "2.0.4",
     "date-fns": "4.1.0",
     "dequal": "2.0.3",
     "md5": "2.3.0",

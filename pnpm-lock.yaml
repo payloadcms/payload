@@ -913,9 +913,6 @@ importers:
       ajv:
         specifier: 8.20.0
         version: 8.20.0
-      bson-objectid:
-        specifier: 2.0.4
-        version: 2.0.4
       busboy:
         specifier: ^1.6.0
         version: 1.6.0
@@ -1459,9 +1456,6 @@ importers:
       acorn:
         specifier: 8.16.0
         version: 8.16.0
-      bson-objectid:
-        specifier: 2.0.4
-        version: 2.0.4
       csstype:
         specifier: 3.2.3
         version: 3.2.3
@@ -1765,9 +1759,6 @@ importers:
       '@swc/helpers':
         specifier: '>=0.5.17'
         version: 0.5.23
-      bson-objectid:
-        specifier: 2.0.4
-        version: 2.0.4
       date-fns:
         specifier: 4.1.0
         version: 4.1.0
@@ -9880,9 +9871,6 @@ packages:
     resolution: {integrity: sha512-Cu2E6QejHWzuDMTkuwgpABFgDfZrXLQq5V13YOACZx4mFAG4IwGTbTfHPMr4WtxlHoXSM8FIuRwYYCz5XiabaQ==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
-
-  bson-objectid@2.0.4:
-    resolution: {integrity: sha512-vgnKAUzcDoa+AeyYwXCoHyF2q6u/8H46dxu5JN+4/TZeq/Dlinn0K6GvxsCLb3LHUJl0m/TLiEK31kUwtgocMQ==}
 
   bson@6.10.4:
     resolution: {integrity: sha512-WIsKqkSC0ABoBJuT1LEX+2HEvNmNKKgnTAyd0fL8qzK4SH2i9NXg+t08YtdZp/V9IZ33cxe3iV4yM0qg8lMQng==}
@@ -23837,8 +23825,6 @@ snapshots:
       electron-to-chromium: 1.5.388
       node-releases: 2.0.50
       update-browserslist-db: 1.2.3(browserslist@4.28.5)
-
-  bson-objectid@2.0.4: {}
 
   bson@6.10.4: {}
 

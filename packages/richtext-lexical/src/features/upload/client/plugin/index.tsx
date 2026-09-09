@@ -4,7 +4,6 @@ import type { LexicalCommand } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $dfsIterator, $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
 import { useBulkUpload, useEffectEvent, useModal } from '@payloadcms/ui'
-import ObjectID from 'bson-objectid'
 import {
   $createRangeSelection,
   $getPreviousSelection,
@@ -20,6 +19,7 @@ import {
   isHTMLElement,
   PASTE_COMMAND,
 } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 import React, { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
@@ -149,7 +149,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
                   node.replace(
                     $createUploadNode({
                       data: {
-                        id: new ObjectID.default().toHexString(),
+                        id: generateObjectIdHex(),
                         fields: {},
                         relationTo: newDoc.collectionSlug,
                         value: newDoc.doc.id,
@@ -278,7 +278,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
               files.push({
                 alt: '',
                 file,
-                formID: new ObjectID.default().toHexString(),
+                formID: generateObjectIdHex(),
               })
             })
           }
@@ -342,7 +342,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
               files.push({
                 alt: '',
                 file,
-                formID: new ObjectID.default().toHexString(),
+                formID: generateObjectIdHex(),
               })
             })
           }
