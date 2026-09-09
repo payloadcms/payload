@@ -20,6 +20,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
+import { APIError } from '../../errors/index.js'
 import { fillEmptyLocalizedSlugs } from '../../fields/baseFields/slug/fillEmptyLocalizedSlugs.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
@@ -136,10 +137,19 @@ export const createOperation = async <
       data._status = 'draft'
     }
 
+    const isDuplicating = duplicateFromID !== undefined && duplicateFromID !== null
+
+    if (isDuplicating && collectionConfig.disableDuplicate === true) {
+      throw new APIError(
+        `The collection with slug ${String(collectionConfig.slug)} cannot be duplicated.`,
+        400,
+      )
+    }
+
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
 
-    if (duplicateFromID) {
+    if (isDuplicating) {
       const duplicateResult = await getDuplicateDocumentData({
         id: duplicateFromID,
         collectionConfig,
@@ -174,7 +184,7 @@ export const createOperation = async <
       data,
       draft: isSavingDraft,
       externalUploadSource,
-      isDuplicating: Boolean(duplicateFromID),
+      isDuplicating,
       operation: 'create',
       originalDoc: duplicatedFromDoc,
       overwriteExistingFiles,

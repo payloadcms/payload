@@ -343,6 +343,167 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
       expect(findDoc2.hiddenWithDefault).toBeUndefined()
     })
   })
+
+  test.describe('Duplication', () => {
+    const createdAuthCollectionIDs: string[] = []
+    const createdPublicUserIDs: string[] = []
+
+    test.afterEach(async ({ payload }) => {
+      for (const id of createdAuthCollectionIDs) {
+        await payload.delete({ id, collection: authSlug })
+      }
+      createdAuthCollectionIDs.length = 0
+
+      for (const id of createdPublicUserIDs) {
+        await payload.delete({ id, collection: publicUsersSlug })
+      }
+      createdPublicUserIDs.length = 0
+    })
+
+    test('should reject REST duplication when disableDuplicate is true', async ({
+      payload,
+      restClient,
+    }) => {
+      const hasDuplicateEndpoint = payload.collections[publicUsersSlug].config.endpoints.some(
+        ({ method, path }) => method === 'post' && path === '/:id/duplicate',
+      )
+
+      expect.soft(hasDuplicateEndpoint).toBe(false)
+
+      const sourceResult = await payload.find({
+        collection: publicUsersSlug,
+        limit: 1,
+        where: {
+          email: {
+            equals: publicUserEmail,
+          },
+        },
+      })
+      const duplicateEmail = 'duplicate-disabled@payloadcms.com'
+
+      const response = await restClient.POST(
+        `/${publicUsersSlug}/${sourceResult.docs[0]!.id}/duplicate`,
+        {
+          auth: false,
+          body: JSON.stringify({
+            email: duplicateEmail,
+            password: 'test-password',
+          }),
+        },
+      )
+      const duplicateResult = await payload.find({
+        collection: publicUsersSlug,
+        where: {
+          email: {
+            equals: duplicateEmail,
+          },
+        },
+      })
+
+      createdPublicUserIDs.push(...duplicateResult.docs.map(({ id }) => id))
+
+      expect.soft(response.status).toBeGreaterThanOrEqual(400)
+      expect(duplicateResult.totalDocs).toBe(0)
+    })
+
+    test('should reject create with duplicateFromID when disableDuplicate is true', async ({
+      payload,
+    }) => {
+      const sourceResult = await payload.find({
+        collection: publicUsersSlug,
+        limit: 1,
+        where: {
+          email: {
+            equals: publicUserEmail,
+          },
+        },
+      })
+      const duplicateEmail = 'duplicate-direct-disabled@payloadcms.com'
+
+      await expect(
+        payload.create({
+          collection: publicUsersSlug,
+          data: {
+            email: duplicateEmail,
+            password: 'test-password',
+          },
+          duplicateFromID: sourceResult.docs[0]!.id,
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(`The collection with slug ${publicUsersSlug} cannot be duplicated.`)
+
+      const duplicateResult = await payload.find({
+        collection: publicUsersSlug,
+        where: {
+          email: {
+            equals: duplicateEmail,
+          },
+        },
+      })
+
+      createdPublicUserIDs.push(...duplicateResult.docs.map(({ id }) => id))
+
+      expect(duplicateResult.totalDocs).toBe(0)
+    })
+
+    test('should not copy fields denied by create access when duplicating', async ({
+      payload,
+      restClient,
+    }) => {
+      const source = await payload.create({
+        collection: authSlug,
+        data: {
+          _verified: true,
+          email: 'duplicate-source@payloadcms.com',
+          password: 'test-password',
+          roles: ['admin'],
+        },
+      })
+      const duplicateEmail = 'duplicate-request@payloadcms.com'
+
+      createdAuthCollectionIDs.push(source.id)
+
+      const sourceResponse = await restClient.GET(`/${authSlug}/${source.id}`, {
+        auth: false,
+      })
+      const publicSource = (await sourceResponse.json()) as { roles?: string[] }
+
+      expect.soft(sourceResponse.status).toBe(200)
+      expect.soft(publicSource.roles).toBeUndefined()
+
+      const response = await restClient.POST(`/${authSlug}/${source.id}/duplicate`, {
+        auth: false,
+        body: JSON.stringify({
+          email: duplicateEmail,
+          password: 'test-password',
+        }),
+      })
+      const { doc } = (await response.json()) as { doc: { id: string } }
+
+      createdAuthCollectionIDs.push(doc.id)
+
+      const duplicated = await payload.findByID({
+        id: doc.id,
+        collection: authSlug,
+        showHiddenFields: true,
+      })
+
+      expect.soft(response.status).toBe(200)
+      expect.soft(duplicated.roles).toEqual(['user'])
+      expect.soft(duplicated._verified).toBe(false)
+
+      const loginResponse = await restClient.POST(`/${authSlug}/login`, {
+        auth: false,
+        body: JSON.stringify({
+          email: duplicateEmail,
+          password: 'test-password',
+        }),
+      })
+
+      expect(loginResponse.status).not.toBe(200)
+    })
+  })
+
   test.describe('Collections', () => {
     test.describe('restricted collection', () => {
       test('field without read access should not show', async ({ payload }) => {

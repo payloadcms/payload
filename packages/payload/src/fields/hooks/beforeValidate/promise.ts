@@ -317,6 +317,8 @@ export const promise = async <T>({
       }
     }
 
+    let isAccessAllowed = true
+
     // Execute access control
     if (field.access && field.access[operation]) {
       const result = overrideAccess
@@ -344,14 +346,18 @@ export const promise = async <T>({
           )
 
       if (!result) {
+        isAccessAllowed = false
         delete siblingData[field.name!]
       }
     }
 
     if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
-      siblingData[field.name!] = !fallbackResult.executed
-        ? await getFallbackValue({ field, req, siblingDoc })
-        : fallbackResult.value
+      const isDocumentValueAllowed = operation === 'update' || isAccessAllowed
+
+      siblingData[field.name!] =
+        !fallbackResult.executed || !isDocumentValueAllowed
+          ? await getFallbackValue({ field, isDocumentValueAllowed, req, siblingDoc })
+          : fallbackResult.value
     }
   }
 
