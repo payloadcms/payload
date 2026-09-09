@@ -221,6 +221,7 @@ function TableHoverActionsContainer({
   }, [editor, tableResizeObserver])
 
   const insertAction = (insertRow: boolean) => {
+    editor.getRootElement()?.focus({ preventScroll: true })
     editor.update(() => {
       if (tableCellDOMNodeRef.current) {
         const maybeTableNode = $getNearestNodeFromDOMNode(tableCellDOMNodeRef.current)
