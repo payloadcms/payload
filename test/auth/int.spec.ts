@@ -586,11 +586,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       test.describe('refresh collection identity', () => {
         let alternateUserID: number | string | undefined
 
-        test.beforeEach(async ({ payload }) => {
-          payload.db.allowIDOnCreate = true
-          payload.config.db.allowIDOnCreate = true
+        test.beforeAll(async ({ payloadInstance }) => {
+          payloadInstance.db.allowIDOnCreate = true
+          payloadInstance.config.db.allowIDOnCreate = true
 
-          const alternateUser = await payload.create({
+          const alternateUser = await payloadInstance.create({
             collection: publicUsersSlug,
             data: {
               id: loggedInUser!.id,
