@@ -22,3 +22,4 @@ export const formatAbsoluteURL = (incomingURL: string): string | undefined => {
   } catch {
     return undefined
   }
+}
