@@ -21,6 +21,7 @@ import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
   authSlug,
+  docLevelAccessSlug,
   firstArrayText,
   fullyRestrictedSlug,
   hiddenAccessCountSlug,
@@ -500,6 +501,66 @@ describe('Access Control', () => {
   })
 
   describe('Collections', () => {
+    describe('document-level delete access', () => {
+      const createdDocumentIDs: Array<number | string> = []
+
+      afterEach(async () => {
+        await payload.delete({
+          collection: docLevelAccessSlug,
+          where: {
+            id: {
+              in: createdDocumentIDs,
+            },
+          },
+        })
+        createdDocumentIDs.length = 0
+      })
+
+      it('should not run beforeDelete hooks for documents outside delete access', async () => {
+        const beforeDeleteCalls: Array<number | string> = []
+        const doc = await payload.create({
+          collection: docLevelAccessSlug,
+          data: {
+            approvedForRemoval: false,
+          },
+        })
+
+        createdDocumentIDs.push(doc.id)
+
+        await expect(
+          payload.delete({
+            id: doc.id,
+            collection: docLevelAccessSlug,
+            context: { beforeDeleteCalls },
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow(Forbidden)
+        expect(beforeDeleteCalls).toHaveLength(0)
+      })
+
+      it('should run beforeDelete hooks for documents within delete access', async () => {
+        const beforeDeleteCalls: Array<number | string> = []
+        const doc = await payload.create({
+          collection: docLevelAccessSlug,
+          data: {
+            approvedForRemoval: true,
+          },
+        })
+
+        createdDocumentIDs.push(doc.id)
+
+        const deletedDoc = await payload.delete({
+          id: doc.id,
+          collection: docLevelAccessSlug,
+          context: { beforeDeleteCalls },
+          overrideAccess: false,
+        })
+
+        expect(deletedDoc.id).toBe(doc.id)
+        expect(beforeDeleteCalls).toEqual([doc.id])
+      })
+    })
+
     describe('relationship queries', () => {
       const createdPostIDs: (number | string)[] = []
       const createdPostReferenceIDs: (number | string)[] = []

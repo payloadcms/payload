@@ -567,6 +567,17 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         }),
       },
+      hooks: {
+        beforeDelete: [
+          ({ id, req }) => {
+            const beforeDeleteCalls = req.context.beforeDeleteCalls
+
+            if (Array.isArray(beforeDeleteCalls)) {
+              beforeDeleteCalls.push(id)
+            }
+          },
+        ],
+      },
       fields: [
         {
           name: 'approvedForRemoval',
