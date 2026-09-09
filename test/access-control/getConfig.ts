@@ -616,6 +616,17 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: false,
         },
       ],
+      hooks: {
+        beforeDelete: [
+          ({ id, req }) => {
+            const beforeDeleteCalls = req.context.beforeDeleteCalls
+
+            if (Array.isArray(beforeDeleteCalls)) {
+              beforeDeleteCalls.push(id)
+            }
+          },
+        ],
+      },
       labels: {
         plural: 'Doc Level Access',
         singular: 'Doc Level Access',

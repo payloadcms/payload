@@ -18,6 +18,7 @@ import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
   authSlug,
+  docLevelAccessSlug,
   firstArrayText,
   fullyRestrictedSlug,
   hiddenAccessCountSlug,
@@ -506,6 +507,70 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
   })
 
   test.describe('Collections', () => {
+    test.describe('document-level delete access', () => {
+      const createdDocumentIDs: Array<number | string> = []
+
+      test.afterEach(async ({ payload }) => {
+        await payload.delete({
+          collection: docLevelAccessSlug,
+          where: {
+            id: {
+              in: createdDocumentIDs,
+            },
+          },
+        })
+        createdDocumentIDs.length = 0
+      })
+
+      test('should not run beforeDelete hooks for documents outside delete access', async ({
+        payload,
+      }) => {
+        const beforeDeleteCalls: Array<number | string> = []
+        const doc = await payload.create({
+          collection: docLevelAccessSlug,
+          data: {
+            approvedForRemoval: false,
+          },
+        })
+
+        createdDocumentIDs.push(doc.id)
+
+        await expect(
+          payload.delete({
+            id: doc.id,
+            collection: docLevelAccessSlug,
+            context: { beforeDeleteCalls },
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow(Forbidden)
+        expect(beforeDeleteCalls).toHaveLength(0)
+      })
+
+      test('should run beforeDelete hooks for documents within delete access', async ({
+        payload,
+      }) => {
+        const beforeDeleteCalls: Array<number | string> = []
+        const doc = await payload.create({
+          collection: docLevelAccessSlug,
+          data: {
+            approvedForRemoval: true,
+          },
+        })
+
+        createdDocumentIDs.push(doc.id)
+
+        const deletedDoc = await payload.delete({
+          id: doc.id,
+          collection: docLevelAccessSlug,
+          context: { beforeDeleteCalls },
+          overrideAccess: false,
+        })
+
+        expect(deletedDoc.id).toBe(doc.id)
+        expect(beforeDeleteCalls).toEqual([doc.id])
+      })
+    })
+
     test.describe('relationship queries', () => {
       const createdPostIDs: (number | string)[] = []
       const createdPostReferenceIDs: (number | string)[] = []
