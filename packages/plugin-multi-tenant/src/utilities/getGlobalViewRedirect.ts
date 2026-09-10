@@ -79,6 +79,7 @@ export async function getGlobalViewRedirect({
         select: {
           id: true,
         },
+        version: 'latest',
         where: {
           [tenantFieldName]: {
             in: [tenant],
