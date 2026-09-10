@@ -15,8 +15,8 @@ import {
   or,
   sql,
 } from 'drizzle-orm'
-import { PgUUID } from 'drizzle-orm/pg-core'
-import { APIError, QueryError } from 'payload'
+import { type PgTableWithColumns, PgUUID } from 'drizzle-orm/pg-core'
+import { APIError, createArrayFromCommaDelineated, QueryError } from 'payload'
 import {
   hasManyRelationshipOperatorSet,
   isNestedRelationshipQuery,
@@ -142,6 +142,26 @@ export function parseParams({
                     )
                     continue
                   }
+                }
+
+                if (operator === 'all' && !isRawConstraint(val)) {
+                  const constraint = buildAllCondition({
+                    adapter,
+                    aliasTable,
+                    context,
+                    fields,
+                    locale,
+                    parentIsLocalized,
+                    relationOrPath,
+                    tableName,
+                    value: val,
+                  })
+
+                  if (constraint) {
+                    constraints.push(constraint)
+                  }
+
+                  continue
                 }
 
                 const {
@@ -749,4 +769,118 @@ function buildHasManyRelationshipCondition({
     case 'not_equals':
       return notExists(buildRelationshipRowsSubquery(exists(relatedDocumentSubquery)))
   }
+}
+
+/**
+ * Builds a SQL condition for the `all` operator, which matches documents that hold every value
+ * provided.
+ *
+ * A has-many field stores each of its values as a separate row in a child table, so the values
+ * cannot be compared against the single joined column a normal query produces - one row can only
+ * ever equal one of them. Each value instead gets its own correlated `EXISTS` subquery, and the
+ * subqueries are combined with `AND`.
+ *
+ * On a field that stores one value per document this collapses to an `AND` of `equals`, which
+ * matches only when a single distinct value was queried - the same result MongoDB's `$all`
+ * produces for a non-array field.
+ *
+ * @example
+ * ```ts
+ * // Find posts tagged both 'news' and 'sports'.
+ * const where = {
+ *   tags: {
+ *     all: ['news', 'sports'],
+ *   },
+ * }
+ * ```
+ */
+function buildAllCondition({
+  adapter,
+  aliasTable,
+  context,
+  fields,
+  locale,
+  parentIsLocalized,
+  relationOrPath,
+  tableName,
+  value,
+}: {
+  adapter: DrizzleAdapter
+  aliasTable?: Table
+  context: QueryContext
+  fields: FlattenedField[]
+  locale?: string
+  parentIsLocalized: boolean
+  relationOrPath: string
+  tableName: string
+  value: unknown
+}): SQL | undefined {
+  const values =
+    typeof value === 'string'
+      ? createArrayFromCommaDelineated(value)
+      : typeof value === 'number'
+        ? [value]
+        : value
+
+  if (!Array.isArray(values)) {
+    return undefined
+  }
+
+  // MongoDB's `$all` matches no documents when given an empty list.
+  if (values.length === 0) {
+    return sql`false`
+  }
+
+  const conditions: SQL[] = []
+
+  for (const item of values) {
+    // Each value is resolved as its own `equals` query so that field-specific handling -
+    // polymorphic relationships, localization, value sanitization - stays in one place. The joins
+    // it needs are collected separately from the outer query's, because they belong to this
+    // value's subquery alone.
+    const valueJoins: BuildQueryJoinAliases = []
+
+    const condition = parseParams({
+      adapter,
+      aliasTable,
+      context,
+      fields,
+      joins: valueJoins,
+      locale,
+      parentIsLocalized,
+      selectFields: {},
+      tableName,
+      where: { [relationOrPath]: { equals: item } },
+    })
+
+    if (!condition) {
+      continue
+    }
+
+    if (valueJoins.length === 0) {
+      conditions.push(condition)
+      continue
+    }
+
+    // The first join is the one correlating the child rows back to the document the outer query
+    // is considering; any remaining joins chain off it inside the subquery.
+    const [rootJoin, ...chainedJoins] = valueJoins
+    const rootTable = rootJoin.table as PgTableWithColumns<any>
+
+    let subquery = (adapter.drizzle as any).select({ id: rootTable.id }).from(rootTable).$dynamic()
+
+    for (const join of chainedJoins) {
+      subquery = subquery[join.type ?? 'leftJoin'](join.table, join.condition)
+    }
+
+    subquery = subquery.where(and(rootJoin.condition, condition))
+
+    conditions.push(exists(subquery))
+  }
+
+  if (conditions.length === 0) {
+    return undefined
+  }
+
+  return and(...conditions)
 }
