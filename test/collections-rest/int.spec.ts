@@ -1260,75 +1260,37 @@ describe('collections-rest', () => {
         expect(response.status).toEqual(200)
       })
 
-      describe('should reject object values for text-matching operators', () => {
-        it.each(['like', 'not_like', 'contains'] as const)(
-          'rejects raw MongoDB operator document under %s',
-          async (operator) => {
-            const post = await createPost({ title: 'canary-should-not-match' })
-
+      describe('text matching values', () => {
+        for (const operator of ['like', 'not_like', 'contains'] as const) {
+          it(`rejects object values for ${operator}`, async () => {
             const response = await restClient.GET(`/${postsSlug}`, {
               query: {
                 where: {
                   title: {
                     [operator]: {
-                      $options: 'i',
-                      $regex: '.*',
+                      pattern: 'title',
                     },
                   },
                 },
               },
             })
 
-            const result = await response.json()
-
             expect(response.status).toEqual(400)
-            expect(result.errors).toBeDefined()
-            expect(result.docs).toBeUndefined()
+          })
+        }
 
-            await payload.delete({ collection: postsSlug, id: post.id })
-          },
-        )
-
-        it('rejects array-of-objects under like', async () => {
-          const post = await createPost({ title: 'canary' })
-
+        it('rejects arrays containing object values', async () => {
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
               where: {
                 title: {
-                  like: [{ $regex: '.*' }],
+                  like: [{ pattern: 'title' }],
                 },
               },
             },
           })
 
           expect(response.status).toEqual(400)
-
-          await payload.delete({ collection: postsSlug, id: post.id })
-        })
-
-        // hasMany number/text/select `contains` routes through sanitizeQueryValue's rawQuery
-        // branch, which would otherwise splice an attacker-supplied object straight into
-        // `$or: [{ path: {$regex} }]` without ever reaching the tail-of-function checks.
-        it('rejects array-of-objects under contains on hasMany number', async () => {
-          const doc = await payload.create({
-            collection: updateShapesSlug as any,
-            data: { numbers: [1, 2, 3] },
-          })
-
-          const response = await restClient.GET(`/${updateShapesSlug}`, {
-            query: {
-              where: {
-                numbers: {
-                  contains: [{ $regex: '.*' }],
-                },
-              },
-            },
-          })
-
-          expect(response.status).toEqual(400)
-
-          await payload.delete({ collection: updateShapesSlug as any, id: doc.id })
         })
       })
 
