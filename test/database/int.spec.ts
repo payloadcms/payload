@@ -3173,6 +3173,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       expect(docs?.[4]?.title).toBe('updated')
     })
 
+    /** Both writers use the same old timestamp. Only one should be allowed to save. */
+    test('should allow only one update using the same timestamp', async ({ payload }) => {
+      const original = await payload.create({ collection: 'simple', data: { text: 'Original' } })
+      const updatedAt = new Date(Date.parse(original.updatedAt) + 1).toISOString()
+      const where = { updatedAt: { equals: original.updatedAt } }
+
+      const results = await Promise.all([
+        payload.db.updateOne({ collection: 'simple', data: { text: 'First', updatedAt }, where }),
+        payload.db.updateOne({
+          collection: 'simple',
+          data: { text: 'Second', updatedAt },
+          where,
+        }),
+      ])
+      const saved = results.filter((result) => result !== null)
+      const stored = await payload.findByID({ collection: 'simple', id: original.id })
+
+      expect(saved).toHaveLength(1)
+      expect(results).toContain(null)
+      expect(['First', 'Second']).toContain(saved[0]?.text)
+      expect(stored).toMatchObject({ text: saved[0]?.text, updatedAt })
+    })
+
     test('ensure updateOne does not create new document if `where` query has no results', async ({
       payload,
     }) => {
