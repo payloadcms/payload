@@ -32,12 +32,12 @@ The control that changes `height` remains your responsibility. Give that control
 
 These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
 
-| Prop          | Type               | Default | Description                                     |
-| ------------- | ------------------ | ------- | ----------------------------------------------- |
-| `children` \* | `ReactNode`        | —       | Content whose height is animated.               |
-| `height`      | `number \| 'auto'` | —       | Target height. Use `0` to collapse the content. |
-| `duration`    | `number`           | `300`   | Animation duration in milliseconds.             |
-| `id`          | `string`           | —       | Sets the wrapper element ID.                    |
-| `className`   | `string`           | —       | Adds a class to the wrapper element.            |
+| Prop          | Type          | Default | Description                                  |
+| ------------- | ------------- | ------- | -------------------------------------------- |
+| `children` \* | `ReactNode`   | —       | Content whose height is animated.            |
+| `height`      | `0 \| 'auto'` | —       | Uses `0` to collapse and `'auto'` to expand. |
+| `duration`    | `number`      | `300`   | Animation duration in milliseconds.          |
+| `id`          | `string`      | —       | Sets the wrapper element ID.                 |
+| `className`   | `string`      | —       | Adds a class to the wrapper element.         |
 
 _\* An asterisk denotes that a prop is required._

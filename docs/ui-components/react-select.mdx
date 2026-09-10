@@ -46,19 +46,19 @@ Enable `isMulti` to store an array of selected options. Add `isSortable` when us
 
 These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
 
-| Prop           | Type                                  | Default   | Description                                        |
-| -------------- | ------------------------------------- | --------- | -------------------------------------------------- |
-| `options` \*   | `Option[] \| OptionGroup[]`           | —         | Options displayed in the menu.                     |
-| `value`        | `Option \| Option[]`                  | —         | Selected option or options.                        |
-| `onChange`     | `(value: Option \| Option[]) => void` | —         | Runs when the selection changes.                   |
-| `placeholder`  | `string \| LabelFunction`             | Localized | Sets the empty-state label.                        |
-| `isMulti`      | `boolean`                             | `false`   | Allows multiple selected values.                   |
-| `isSortable`   | `boolean`                             | `false`   | Allows selected multi-value items to be reordered. |
-| `isClearable`  | `boolean`                             | `true`    | Displays a control for clearing the value.         |
-| `isSearchable` | `boolean`                             | `true`    | Allows options to be filtered by typing.           |
-| `isCreatable`  | `boolean`                             | `false`   | Allows users to create values not in `options`.    |
-| `disabled`     | `boolean`                             | `false`   | Prevents interaction.                              |
-| `isLoading`    | `boolean`                             | `false`   | Displays the loading state.                        |
-| `showError`    | `boolean`                             | `false`   | Applies the validation error style.                |
+| Prop           | Type                                          | Default   | Description                                        |
+| -------------- | --------------------------------------------- | --------- | -------------------------------------------------- |
+| `options` \*   | `Option[] \| OptionGroup[]`                   | —         | Options displayed in the menu.                     |
+| `value`        | `Option \| Option[]`                          | —         | Selected option or options.                        |
+| `onChange`     | `(value: Option \| Option[] \| null) => void` | —         | Runs when the selection changes or is cleared.     |
+| `placeholder`  | `string \| LabelFunction`                     | Localized | Sets the empty-state label.                        |
+| `isMulti`      | `boolean`                                     | `false`   | Allows multiple selected values.                   |
+| `isSortable`   | `boolean`                                     | `false`   | Allows selected multi-value items to be reordered. |
+| `isClearable`  | `boolean`                                     | `true`    | Displays a control for clearing the value.         |
+| `isSearchable` | `boolean`                                     | `true`    | Allows options to be filtered by typing.           |
+| `isCreatable`  | `boolean`                                     | `false`   | Allows users to create values not in `options`.    |
+| `disabled`     | `boolean`                                     | `false`   | Prevents interaction.                              |
+| `isLoading`    | `boolean`                                     | `false`   | Displays the loading state.                        |
+| `showError`    | `boolean`                                     | `false`   | Applies the validation error style.                |
 
 _\* An asterisk denotes that a prop is required._
