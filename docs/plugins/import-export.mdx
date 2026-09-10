@@ -416,7 +416,11 @@ importExportPlugin({
 })
 ```
 
-Both are read once when the run starts and passed unchanged to every batch. They are a snapshot of the document at that moment, not live state — editing the document while a large import runs does not change what later batches receive.
+Both are read once at the start of processing and reused for every batch. For queued operations, this is when the job starts, not when it is queued: edits saved before the job starts can be reflected in the document. Changes saved during processing are not reloaded. Hooks should treat this shared object as read-only.
+
+For queued exports, the built-in export options still come from the job input captured when the export was queued; `exportDoc` is the document read when processing starts.
+
+The `ExportDoc` and `ImportDoc` types are available from `@payloadcms/plugin-import-export/types`.
 
 <Banner type="warning">
   `id` is optional on both, so check for it before using it. An `id` means the
@@ -429,12 +433,16 @@ Both are read once when the run starts and passed unchanged to every batch. They
 </Banner>
 
 <Banner type="warning">
-  On the paths without an `id`, this is the submitted request body — it has not been through
-  field validation or access control, so treat those values as untrusted input. The plugin drops
-  `id`, `createdAt` and `updatedAt` from the body, so a caller cannot make an unsaved run look
-  saved, but every other field is whatever was sent. Gate privileged behaviour on
-  `if (exportDoc.id) { ... }`.
+  On the paths without an `id`, this is the submitted request body — it has not
+  been through field validation or access control, so treat those values as
+  untrusted input. The plugin drops `id`, `createdAt` and `updatedAt` from the
+  body, so a caller cannot make an unsaved run look saved, but every other field
+  is whatever was sent. An `id` indicates persistence, not permission to perform
+  an action. Apply the appropriate authorization checks inside hooks that
+  perform privileged operations.
 </Banner>
+
+Previews always use the current submitted form values, including on a saved operation’s edit view. They omit the saved document’s `id` and timestamps.
 
 ### before hooks — modify data
 

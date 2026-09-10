@@ -12,27 +12,33 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  // ...extend config here
-  collections: [PostsCollection, MediaCollection],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    components: {
-      views: {
-        FocusIndicatorsView: {
-          path: '/focus-indicators',
-          Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
+  suite: 'a11y',
+  config: {
+    // ...extend config here
+    admin: {
+      components: {
+        views: {
+          FocusIndicatorsView: {
+            Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
+            path: '/focus-indicators',
+          },
         },
       },
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [PostsCollection, MediaCollection],
+    editor: lexicalEditor({}),
+    globals: [
+      // ...add more globals here
+      MenuGlobal,
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  editor: lexicalEditor({}),
-  globals: [
-    // ...add more globals here
-    MenuGlobal,
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -47,8 +53,5 @@ export default buildConfigWithDefaults({
         title: 'example post',
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -20,28 +20,27 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'locked-documents',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      AutosaveCollection,
+      PagesCollection,
+      PostsCollection,
+      ServerComponentsCollection,
+      SimpleCollection,
+      SimpleWithVersionsCollection,
+      TestsCollection,
+      Users,
+    ],
+    globals: [AdminGlobal, AutosaveGlobal, GlobalWithVersions, MenuGlobal],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    AutosaveCollection,
-    PagesCollection,
-    PostsCollection,
-    ServerComponentsCollection,
-    SimpleCollection,
-    SimpleWithVersionsCollection,
-    TestsCollection,
-    Users,
-  ],
-  globals: [AdminGlobal, AutosaveGlobal, GlobalWithVersions, MenuGlobal],
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

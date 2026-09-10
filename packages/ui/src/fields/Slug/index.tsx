@@ -42,7 +42,8 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
 
   const { slugify } = useServerFunctions()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const {
     path: fieldPath,

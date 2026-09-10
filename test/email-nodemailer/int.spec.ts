@@ -1,20 +1,13 @@
 import type { NodemailerAdapterArgs } from '@payloadcms/email-nodemailer'
-import type { Payload } from 'payload'
 
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
+import { expect, type Mock, vi } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 
-let payload: Payload
 let mockedSendEmail: Mock
 
 const overrideRecipientAddress = 'overriden@example.com'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 type EmailReturnType = {
   subject: string
@@ -22,26 +15,16 @@ type EmailReturnType = {
   to: string
 }
 
-describe('@payloadcms/email-nodemailer', () => {
-  beforeAll(async () => {
-    process.env.SKIP_ON_INIT = 'true'
-    ;({ payload } = await initPayloadInt(dirname))
-
+test.suite({ config: './config.ts' })('@payloadcms/email-nodemailer', () => {
+  test.beforeEach(() => {
     mockedSendEmail = vi.fn()
   })
 
-  afterAll(async () => {
-    if (typeof payload?.db?.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  describe('without basic config', () => {
-    beforeEach(async () => {
+  test.describe('without basic config', () => {
+    test.beforeEach(async ({ payload }) => {
       // Partially mocked transport
       const mockedTransport = {
-        // eslint-disable-next-line @typescript-eslint/require-await
-        sendMail: async (message) => {
+        sendMail: (message) => {
           mockedSendEmail()
           return message
         },
@@ -59,7 +42,7 @@ describe('@payloadcms/email-nodemailer', () => {
       payload.email = mockedAdapter
     })
 
-    it('sends email with overrideRecipientAddress', async () => {
+    test('sends email with overrideRecipientAddress', async ({ payload }) => {
       const email = (await payload.email.sendEmail({
         to: 'dev@example.com',
         text: 'Hello, world!',
@@ -70,12 +53,11 @@ describe('@payloadcms/email-nodemailer', () => {
     })
   })
 
-  describe('with overrideRecipientAddress', () => {
-    beforeEach(async () => {
+  test.describe('with overrideRecipientAddress', () => {
+    test.beforeEach(async ({ payload }) => {
       // Partially mocked transport
       const mockedTransport = {
-        // eslint-disable-next-line @typescript-eslint/require-await
-        sendMail: async (message) => {
+        sendMail: (message) => {
           mockedSendEmail()
           return message
         },
@@ -94,7 +76,7 @@ describe('@payloadcms/email-nodemailer', () => {
       payload.email = mockedAdapter
     })
 
-    it('sends email with overrideRecipientAddress', async () => {
+    test('sends email with overrideRecipientAddress', async ({ payload }) => {
       const email = (await payload.email.sendEmail({
         to: 'dev@example.com',
         text: 'Hello, world!',

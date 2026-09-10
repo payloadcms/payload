@@ -1,0 +1,56 @@
+name: Setup Playwright
+description: Restores Chromium and installs system dependencies only when the browser cannot launch
+
+runs:
+  using: composite
+  steps:
+    - name: Store Playwright's version
+      shell: bash
+      run: |
+        PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
+        echo "Playwright's version: $PLAYWRIGHT_VERSION"
+        echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> "$GITHUB_ENV"
+
+    - name: Cache Playwright browsers
+      id: cache-playwright-browsers
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+    - name: Install Chromium
+      if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+      shell: bash
+      run: pnpm exec playwright install chromium --no-shell
+
+    - name: Verify Chromium dependencies
+      id: verify-chromium
+      continue-on-error: true
+      shell: bash
+      run: |
+        pnpm exec node -e "const { chromium } = require('@playwright/test'); (async () => { const browser = await chromium.launch({ channel: 'chromium' }); await browser.close() })().catch((error) => { console.error(error); process.exit(1) })"
+
+    - name: Configure apt fallback
+      if: steps.verify-chromium.outcome == 'failure'
+      shell: bash
+      run: |
+        if [ -f /etc/apt/apt-mirrors.txt ]; then
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+        fi
+
+        sudo tee /etc/apt/apt.conf.d/99-playwright-ci > /dev/null <<'EOF'
+        Acquire::Retries "3";
+        Acquire::http::Timeout "30";
+        Acquire::https::Timeout "30";
+        EOF
+
+    - name: Install Chromium dependencies
+      if: steps.verify-chromium.outcome == 'failure'
+      shell: bash
+      run: timeout 8m pnpm exec playwright install-deps chromium
+
+    - name: Verify installed Chromium dependencies
+      if: steps.verify-chromium.outcome == 'failure'
+      shell: bash
+      run: |
+        pnpm exec node -e "const { chromium } = require('@playwright/test'); (async () => { const browser = await chromium.launch({ channel: 'chromium' }); await browser.close() })().catch((error) => { console.error(error); process.exit(1) })"

@@ -10,6 +10,7 @@ import type { WithMetadata } from '../optionallyAppendMetadata.js'
 import type { FileSize, FileSizes, FileToSave, FocalPoint, ProbedImageSize } from '../types.js'
 
 import { fileExists } from '../fileExists.js'
+import { isAnimatedImage } from '../isAnimatedImage.js'
 import { optionallyAppendMetadata } from '../optionallyAppendMetadata.js'
 import { createImageSize } from './createImageSize.js'
 import { extractHeightFromImage } from './extractHeightFromImage.js'
@@ -74,7 +75,7 @@ export async function createImageSizes({
   }
 
   // Determine if the file is animated
-  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file!.mimetype)
+  const fileIsAnimatedType = isAnimatedImage(file!.mimetype)
   const sharpOptions: SharpOptions = {}
 
   if (fileIsAnimatedType) {

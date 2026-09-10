@@ -59,10 +59,8 @@ export interface ImportProcessOptions {
   /**
    * The import document that triggered this run — passed through to hook args.
    *
-   * Read once by the caller before the run starts and passed unchanged to every batch,
-   * rather than re-read per batch. A long import can fire this hook hundreds of times, and
-   * the values hooks need are the ones set on the form when the import was triggered, so a
-   * snapshot is both cheaper and the correct semantics.
+   * Supplied once by the caller at the start of processing and reused for every batch.
+   * Hooks should treat this shared object as read-only.
    */
   importDoc: ImportDoc
   importMode: ImportMode

@@ -3,7 +3,7 @@ import type {
   ExportBeforeHook,
   ImportAfterHook,
   ImportBeforeHook,
-} from '@payloadcms/plugin-import-export'
+} from '@payloadcms/plugin-import-export/types'
 
 import type { postsWithHooksSlug } from './shared.js'
 
@@ -31,7 +31,7 @@ export const exportBeforeHook: ExportBeforeHook<typeof postsWithHooksSlug> = (ar
 
   return args.data.map((row) => {
     // Mask the `secret` field from exported data
-    const { secret: _secret, ...rest } = row as Record<string, unknown>
+    const { secret: _secret, ...rest } = row
 
     // Stamp the editor's reference onto every row, but only when the form supplied one, so
     // that the tests which do not set it still see unchanged output.

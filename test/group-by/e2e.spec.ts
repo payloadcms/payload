@@ -77,7 +77,6 @@ test.describe('Group By', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'groupByTests',
     })
 
     await ensureCompilationIsDone({ page, serverURL })

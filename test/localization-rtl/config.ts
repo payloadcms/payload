@@ -14,43 +14,49 @@ import { Users } from './collections/users.js'
 import deepMerge from './deepMerge.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'localization-rtl',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
-  },
-  collections: [Users, Posts],
-  /*i18n: {
+    collections: [Users, Posts],
+    /*i18n: {
     fallbackLng: 'en', // default
     debug: false, // default
     resources: {
       ar: deepMerge(en, ar),
     },
   },*/
-  localization: {
-    locales: [
-      {
-        label: 'English',
-        code: 'en',
+    i18n: {
+      supportedLanguages: {
+        ar,
+        de,
+        en,
+        es,
       },
-      {
-        label: 'Arabic',
-        code: 'ar',
-        rtl: true,
-      },
-    ],
-    defaultLocale: 'en',
-    fallback: true,
-  },
-  i18n: {
-    supportedLanguages: {
-      ar,
-      en,
-      es,
-      de,
+    },
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: [
+        {
+          code: 'en',
+          label: 'English',
+        },
+        {
+          code: 'ar',
+          label: 'Arabic',
+          rtl: true,
+        },
+      ],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -58,8 +64,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

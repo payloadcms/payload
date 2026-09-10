@@ -19,6 +19,24 @@ export const Posts: CollectionConfig = {
       type: 'text',
       localized: true,
     },
+    {
+      name: 'richText',
+      type: 'richText',
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Tab',
+          fields: [
+            {
+              name: 'richTextInTab',
+              type: 'richText',
+            },
+          ],
+        },
+      ],
+    },
   ],
   versions: {
     drafts: true,
