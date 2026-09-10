@@ -405,6 +405,60 @@ describe('unflattenObject', () => {
       })
     })
 
+    describe('hasMany with gaps in the column indices', () => {
+      // Export pins each column to its source index, so an entry that could not be
+      // resolved to an id leaves a gap. Import must absorb the gap rather than
+      // emitting a null array entry.
+      const hasManyFields: FlattenedField[] = [
+        {
+          name: 'rels',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: ['posts', 'pages'],
+        } as FlattenedField,
+      ]
+
+      const expected = {
+        rels: [{ relationTo: 'posts', value: 'p1' }],
+      }
+
+      it('should absorb a leading gap left by an unresolvable entry', () => {
+        const data = {
+          rels_1_id: 'p1',
+          rels_1_relationTo: 'posts',
+        }
+
+        expect(unflattenObject({ data, fields: hasManyFields, req: mockReq })).toEqual(expected)
+      })
+
+      it('should absorb a gap padded with empty strings by schema columns', () => {
+        const data = {
+          rels_0_id: '',
+          rels_0_relationTo: '',
+          rels_1_id: 'p1',
+          rels_1_relationTo: 'posts',
+        }
+
+        expect(unflattenObject({ data, fields: hasManyFields, req: mockReq })).toEqual(expected)
+      })
+
+      it('should absorb a gap strictly between two present entries', () => {
+        const data = {
+          rels_0_id: 'p1',
+          rels_0_relationTo: 'posts',
+          rels_2_id: 'p2',
+          rels_2_relationTo: 'pages',
+        }
+
+        expect(unflattenObject({ data, fields: hasManyFields, req: mockReq })).toEqual({
+          rels: [
+            { relationTo: 'posts', value: 'p1' },
+            { relationTo: 'pages', value: 'p2' },
+          ],
+        })
+      })
+    })
+
     it('should skip polymorphic relationships with undefined values', () => {
       const data = {
         polymorphic_id: undefined,
