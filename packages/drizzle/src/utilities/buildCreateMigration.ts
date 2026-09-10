@@ -1,5 +1,5 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
-import type { CreateMigration, Payload } from 'payload'
+import type { CreateMigration } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -22,7 +22,7 @@ export const buildCreateMigration = ({
   const dirname = path.dirname(filename)
   return async function createMigration(
     this: DrizzleAdapter,
-    { file, forceAcceptWarning, migrationName, payload, skipEmpty },
+    { file, forceAcceptWarning, migrationName, payload, shouldPrompt = true, skipEmpty },
   ) {
     const dir = payload.db.migrationDir
     if (!fs.existsSync(dir)) {
@@ -116,26 +116,19 @@ export const buildCreateMigration = ({
       }
 
       if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
-        if (skipEmpty) {
-          process.exit(0)
+        if (skipEmpty || !shouldPrompt) {
+          return { created: false }
         }
 
-        const { confirm: shouldCreateBlankMigration } = await prompts(
-          {
-            name: 'confirm',
-            type: 'confirm',
-            initial: false,
-            message: 'No schema changes detected. Would you like to create a blank migration file?',
-          },
-          {
-            onCancel: () => {
-              process.exit(0)
-            },
-          },
-        )
+        const { confirm: shouldCreateBlankMigration } = await prompts({
+          name: 'confirm',
+          type: 'confirm',
+          initial: false,
+          message: 'No schema changes detected. Would you like to create a blank migration file?',
+        })
 
         if (!shouldCreateBlankMigration) {
-          process.exit(0)
+          return { created: false }
         }
       }
 
@@ -158,5 +151,7 @@ export const buildCreateMigration = ({
     writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 
     payload.logger.info({ msg: `Migration created at ${fullPath}` })
+
+    return { created: true, path: fullPath }
   }
 }

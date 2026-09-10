@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { existsSync } from 'node:fs'
+
 export const mediaHeaderOnlyWithSizesSlug = 'media-header-only-with-sizes'
 
 /**
@@ -13,6 +15,21 @@ export const mediaHeaderOnlyWithSizesSlug = 'media-header-only-with-sizes'
 export const MediaHeaderOnlyWithSizes: CollectionConfig = {
   slug: mediaHeaderOnlyWithSizesSlug,
   fields: [],
+  hooks: {
+    beforeValidate: [
+      ({ data, req }) => {
+        const file = req.file
+
+        if (file?.name === 'large-with-sizes.jpg') {
+          if (file.data.length !== 0 || !file.tempFilePath || !existsSync(file.tempFilePath)) {
+            throw new Error('Full client upload was not staged to disk')
+          }
+        }
+
+        return data
+      },
+    ],
+  },
   upload: {
     disableLocalStorage: true,
     imageSizes: [

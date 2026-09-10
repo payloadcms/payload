@@ -21,17 +21,6 @@ export const mediaSlug = 'media'
 // Tags hierarchy collection (multi-select)
 export const Tags: CollectionConfig = {
   slug: tagsSlug,
-  tags: {
-    admin: {
-      components: {
-        Icon: {
-          clientProps: { color: '#FF10F0' }, // Tags - neon pink
-          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
-        },
-      },
-    },
-  },
-  labels: { singular: 'Tag', plural: 'Tags' },
   admin: {
     useAsTitle: 'name',
   },
@@ -46,23 +35,23 @@ export const Tags: CollectionConfig = {
       type: 'textarea',
     },
   ],
+  labels: { plural: 'Tags', singular: 'Tag' },
+  tags: {
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#FF10F0' }, // Tags - neon pink
+          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
+        },
+      },
+    },
+  },
   versions: false,
 }
 
 // Categories hierarchy collection (single-select)
 export const Categories: CollectionConfig = {
   slug: categoriesSlug,
-  tags: {
-    admin: {
-      components: {
-        Icon: {
-          clientProps: { color: '#DFFF00' }, // Categories - neon yellow
-          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
-        },
-      },
-    },
-  },
-  labels: { singular: 'Category', plural: 'Categories' },
   admin: {
     useAsTitle: 'name',
   },
@@ -73,6 +62,17 @@ export const Categories: CollectionConfig = {
       required: true,
     },
   ],
+  labels: { plural: 'Categories', singular: 'Category' },
+  tags: {
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#DFFF00' }, // Categories - neon yellow
+          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
+        },
+      },
+    },
+  },
   versions: false,
 }
 
@@ -140,14 +140,20 @@ export const Media: CollectionConfig = {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'tags',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [Categories, Posts, Pages, Media, Tags],
+    debug: true,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [Categories, Posts, Pages, Media, Tags],
-  debug: true,
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -156,16 +162,12 @@ export default buildConfigWithDefaults({
       },
     })
 
-    // Seed taxonomy data
     try {
       await seed(payload)
     } catch (error) {
       payload.logger.error('Failed to seed taxonomy data:')
       payload.logger.error(error)
     }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 

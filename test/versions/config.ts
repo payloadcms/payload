@@ -44,90 +44,89 @@ import { BASE_PATH } from './shared.js'
 import { draftWithUploadCloudStorageCollectionSlug } from './slugs.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'versions',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+      // The autosave test uses this format in order to compare timestamps in the UI
+      dateFormat: 'MMMM do yyyy, h:mm:ss a',
     },
-    // The autosave test uses this format in order to compare timestamps in the UI
-    dateFormat: 'MMMM do yyyy, h:mm:ss a',
-  },
-  collections: [
-    DisablePublish,
-    Posts,
-    AutosavePosts,
-    AutosaveWithDraftButtonPosts,
-    AutosaveWithMultiSelectPosts,
-    NestedArraySelect,
-    AutosaveWithDraftValidate,
-    DraftPosts,
-    DraftsNoReadVersions,
-    DraftWithMax,
-    DraftWithChangeHook,
-    DraftsWithCustomUnpublish,
-    DraftsWithValidate,
-    ErrorOnUnpublish,
-    LocalizedPosts,
-    VersionPosts,
-    CustomIDs,
-    Diff,
-    TextCollection,
-    DraftsWithUpload,
-    DraftsWithUploadCloudStorage,
-    Media,
-    Media2,
-  ],
-  globals: [
-    AutosaveGlobal,
-    AutosaveWithDraftButtonGlobal,
-    DraftGlobal,
-    DraftWithMaxGlobal,
-    DisablePublishGlobal,
-    LocalizedGlobal,
-    MaxVersions,
-    DraftUnlimitedGlobal,
-    SimpleDraftGlobal,
-  ],
-  indexSortableFields: true,
-  localization: {
-    defaultLocale: 'en',
-    locales: [
-      {
-        code: 'en',
-        label: 'English',
-      },
-      {
-        code: 'es',
-        label: {
-          en: 'Spanish',
-          es: 'Español',
-          de: 'Spanisch',
-        },
-      },
-      {
-        code: 'de',
-        label: {
-          en: 'German',
-          es: 'Alemán',
-          de: 'Deutsch',
-        },
-      },
+    collections: [
+      DisablePublish,
+      Posts,
+      AutosavePosts,
+      AutosaveWithDraftButtonPosts,
+      AutosaveWithMultiSelectPosts,
+      NestedArraySelect,
+      AutosaveWithDraftValidate,
+      DraftPosts,
+      DraftsNoReadVersions,
+      DraftWithMax,
+      DraftWithChangeHook,
+      DraftsWithCustomUnpublish,
+      DraftsWithValidate,
+      ErrorOnUnpublish,
+      LocalizedPosts,
+      VersionPosts,
+      CustomIDs,
+      Diff,
+      TextCollection,
+      DraftsWithUpload,
+      DraftsWithUploadCloudStorage,
+      Media,
+      Media2,
     ],
-  },
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  plugins: [
-    cloudStoragePlugin({
-      collections: {
-        [draftWithUploadCloudStorageCollectionSlug]: {
-          adapter: mockCloudStorageAdapter,
+    globals: [
+      AutosaveGlobal,
+      AutosaveWithDraftButtonGlobal,
+      DraftGlobal,
+      DraftWithMaxGlobal,
+      DisablePublishGlobal,
+      LocalizedGlobal,
+      MaxVersions,
+      DraftUnlimitedGlobal,
+      SimpleDraftGlobal,
+    ],
+    indexSortableFields: true,
+    localization: {
+      defaultLocale: 'en',
+      locales: [
+        {
+          code: 'en',
+          label: 'English',
         },
-      },
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+        {
+          code: 'es',
+          label: {
+            de: 'Spanisch',
+            en: 'Spanish',
+            es: 'Español',
+          },
+        },
+        {
+          code: 'de',
+          label: {
+            de: 'Deutsch',
+            en: 'German',
+            es: 'Alemán',
+          },
+        },
+      ],
+    },
+    plugins: [
+      cloudStoragePlugin({
+        collections: {
+          [draftWithUploadCloudStorageCollectionSlug]: {
+            adapter: mockCloudStorageAdapter,
+          },
+        },
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
+  seed,
 })

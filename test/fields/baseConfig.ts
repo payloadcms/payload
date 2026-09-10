@@ -100,7 +100,27 @@ export const collections: CollectionConfig[] = [
 ]
 
 export const baseConfig: Partial<Config> = {
-  collections,
+  admin: {
+    components: {
+      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
+    },
+    custom: {
+      client: {
+        'new-value': 'client available',
+      },
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    timezones: {
+      defaultTimezone: 'America/Monterrey',
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones,
+        { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
+        { label: 'Custom UTC', value: 'UTC' },
+      ],
+    },
+  },
   blocks: [
     {
       slug: 'ConfigBlockTest',
@@ -132,6 +152,7 @@ export const baseConfig: Partial<Config> = {
       ],
     },
   ],
+  collections,
   custom: {
     client: {
       'new-value': 'client available',
@@ -140,38 +161,14 @@ export const baseConfig: Partial<Config> = {
       'new-server-value': 'only available on server',
     },
   },
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    components: {
-      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
-    },
-    custom: {
-      client: {
-        'new-value': 'client available',
-      },
-    },
-    timezones: {
-      supportedTimezones: ({ defaultTimezones }) => [
-        ...defaultTimezones,
-        { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
-        { label: 'Custom UTC', value: 'UTC' },
-      ],
-      defaultTimezone: 'America/Monterrey',
-    },
-  },
   localization: {
     defaultLocale: 'en',
     fallback: true,
     locales: ['en', 'es'],
   },
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 }
+
+export { seed }
