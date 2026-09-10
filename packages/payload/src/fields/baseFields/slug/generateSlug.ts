@@ -47,11 +47,6 @@ export const generateSlug =
           valueToSlugify: data?.[slugFieldName] || data?.[useAsSlug],
         })
 
-        // Leave an empty slug absent rather than storing `''`. The unique index skips a missing
-        // value — Mongo's index is sparse once drafts are enabled, and Postgres permits many NULLs
-        // — but a second `''` collides with the first. Draft creates skip field validation, so
-        // `required` does not catch it either. `undefined` rather than `null` because Mongo's
-        // sparse index does still include `null`.
         data[slugFieldName] = slugified || undefined
       }
 
