@@ -2213,6 +2213,7 @@ describe('List View', () => {
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
+    action: 'publish',
     collection: postsCollectionSlug,
     data: {
       description,

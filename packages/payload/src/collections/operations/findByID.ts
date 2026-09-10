@@ -212,7 +212,30 @@ export const findByIDOperation = async <
 
   const docWithLocales = await req.payload.db.findOne(findOneArgs)
 
-  if (!docWithLocales && !args.data) {
+  // A working draft can satisfy the requested filters even when the published
+  // main row does not (for example, restoring a trashed document as a draft).
+  // Fetch an ID/timestamp anchor so the version lookup can still run, but never
+  // use this unfiltered document as the published fallback.
+  const versionAnchor =
+    !docWithLocales && !args.data && queryVersions
+      ? await req.payload.db.findOne({
+          collection: collectionConfig.slug,
+          locale: locale!,
+          req: findOneArgs.req,
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          where: {
+            id: {
+              equals: id,
+            },
+          },
+        })
+      : docWithLocales
+
+  if (!versionAnchor && !args.data) {
     if (!disableErrors) {
       throw new NotFound(req.t)
     }
@@ -220,7 +243,7 @@ export const findByIDOperation = async <
   }
 
   let result: DataFromCollectionSlug<TSlug> =
-    (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!
+    (args.data as DataFromCollectionSlug<TSlug>) ?? versionAnchor!
 
   // /////////////////////////////////////
   // Add collection property for auth collections
@@ -302,10 +325,12 @@ export const findByIDOperation = async <
       doc: result,
       entity: collectionConfig,
       entityType: 'collection',
+      fallbackDoc: (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales,
       overrideAccess,
       policy: readVersion === 'draft' ? 'draft' : 'latest',
       req,
       select,
+      where: fullWhere,
     })
 
     if (!versionedDoc) {

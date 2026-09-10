@@ -11,16 +11,16 @@ describe('applyReplacePolicy', () => {
     expect(
       applyReplacePolicy({
         draftVersion: draft,
+        fallbackDoc: published,
         policy: 'latest',
-        publishedDoc: published,
       }),
     ).toBe(draft)
 
     expect(
       applyReplacePolicy({
         draftVersion: draft,
+        fallbackDoc: published,
         policy: 'draft',
-        publishedDoc: published,
       }),
     ).toBe(draft)
   })
@@ -29,8 +29,8 @@ describe('applyReplacePolicy', () => {
     expect(
       applyReplacePolicy({
         draftVersion: undefined,
+        fallbackDoc: published,
         policy: 'latest',
-        publishedDoc: published,
       }),
     ).toBe(published)
   })
@@ -39,10 +39,21 @@ describe('applyReplacePolicy', () => {
     expect(
       applyReplacePolicy({
         draftVersion: undefined,
+        fallbackDoc: published,
         policy: 'draft',
-        publishedDoc: published,
       }),
     ).toBeNull()
+  })
+
+  it('should return a draft main row when no draft version row exists', () => {
+    expect(
+      applyReplacePolicy({
+        draftVersion: undefined,
+        fallbackDoc: draft,
+        fallbackIsDraft: true,
+        policy: 'draft',
+      }),
+    ).toBe(draft)
   })
 })
 

@@ -811,6 +811,36 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     })
 
     test.describe('update operation', () => {
+      test('should restore a published trashed document as its first draft', async ({
+        payload,
+      }) => {
+        const result = await payload.update({
+          collection: postsSlug,
+          data: {
+            _status: 'draft',
+            deletedAt: null,
+          },
+          trash: true,
+          where: {
+            id: {
+              equals: postsDocTwo.id,
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+
+        const restoredDraft = await payload.findByID({
+          id: postsDocTwo.id,
+          collection: postsSlug,
+          trash: false,
+          version: 'latest',
+        })
+
+        expect(restoredDraft._status).toBe('draft')
+        expect(restoredDraft.deletedAt).toBeNull()
+      })
+
       test('should update only normal document when trash: false', async ({ payload }) => {
         const result = await payload.update({
           collection: postsSlug,

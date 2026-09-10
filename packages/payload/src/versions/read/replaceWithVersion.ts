@@ -19,10 +19,12 @@ type Arguments<T> = {
   doc: T
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
+  fallbackDoc?: null | T
   overrideAccess: boolean
   policy: ReplaceWithVersionPolicy
   req: PayloadRequest
   select?: SelectType
+  where?: Where
 }
 
 /**
@@ -31,19 +33,21 @@ type Arguments<T> = {
  */
 export function applyReplacePolicy<T>({
   draftVersion,
+  fallbackDoc,
+  fallbackIsDraft = false,
   policy,
-  publishedDoc,
 }: {
   draftVersion: T | undefined
+  fallbackDoc: null | T
+  fallbackIsDraft?: boolean
   policy: ReplaceWithVersionPolicy
-  publishedDoc: T
 }): null | T {
   if (draftVersion) {
     return draftVersion
   }
 
-  if (policy === 'latest') {
-    return publishedDoc
+  if (fallbackDoc && (policy === 'latest' || fallbackIsDraft)) {
+    return fallbackDoc
   }
 
   return null
@@ -60,11 +64,14 @@ export const replaceWithVersion = async <T extends TypeWithID>({
   doc,
   entity,
   entityType,
+  fallbackDoc: fallbackDocArg,
   policy,
   req,
   select,
+  where,
 }: Arguments<T>): Promise<null | T> => {
   const { locale, payload } = req
+  const fallbackDoc = fallbackDocArg === undefined ? doc : fallbackDocArg
 
   const queryToBuild: Where = {
     and: [getDraftStatusWhere({ entity, locale: locale ?? undefined, payload })],
@@ -101,6 +108,12 @@ export const replaceWithVersion = async <T extends TypeWithID>({
     versionAccessResult = appendVersionToQueryKey(accessResult)
   }
 
+  let versionWhere = combineQueries(queryToBuild, versionAccessResult!)
+
+  if (where) {
+    versionWhere = combineQueries(versionWhere, appendVersionToQueryKey(where))
+  }
+
   const findVersionsArgs: FindGlobalVersionsArgs & FindVersionsArgs = {
     collection: entity.slug,
     global: entity.slug,
@@ -110,7 +123,7 @@ export const replaceWithVersion = async <T extends TypeWithID>({
     req,
     select: getQueryDraftsSelect({ select }),
     sort: '-updatedAt',
-    where: combineQueries(queryToBuild, versionAccessResult!),
+    where: versionWhere,
   }
 
   let versionDocs
@@ -123,10 +136,20 @@ export const replaceWithVersion = async <T extends TypeWithID>({
   let draft = versionDocs[0]
 
   if (!draft) {
+    const fallbackStatus = (fallbackDoc as null | Record<string, unknown>)?._status
+    const fallbackIsDraft =
+      fallbackStatus === 'draft' ||
+      (fallbackStatus !== null &&
+        typeof fallbackStatus === 'object' &&
+        (locale === 'all' || locale === '*' || !locale
+          ? Object.values(fallbackStatus).some((status) => status === 'draft')
+          : (fallbackStatus as Record<string, unknown>)[locale] === 'draft'))
+
     return applyReplacePolicy({
       draftVersion: undefined,
+      fallbackDoc,
+      fallbackIsDraft,
       policy,
-      publishedDoc: doc,
     })
   }
 
@@ -145,7 +168,7 @@ export const replaceWithVersion = async <T extends TypeWithID>({
 
   return applyReplacePolicy({
     draftVersion: draft.version,
+    fallbackDoc,
     policy,
-    publishedDoc: doc,
   })
 }
