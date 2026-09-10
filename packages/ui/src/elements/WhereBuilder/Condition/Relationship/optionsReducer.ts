@@ -3,10 +3,10 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { Action, Option } from './types.js'
 
-const reduceToIDs = (options) =>
+const collectLoadedValues = (options) =>
   options.reduce((ids, option) => {
     if (option.options) {
-      return [...ids, ...reduceToIDs(option.options)]
+      return [...ids, ...collectLoadedValues(option.options)]
     }
 
     return [...ids, option.value]
@@ -19,7 +19,7 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
 
       const labelKey = collection.admin.useAsTitle || 'id'
 
-      const loadedIDs = reduceToIDs(state)
+      const loadedIDs = collectLoadedValues(state)
 
       if (!hasMultipleRelations) {
         return [
