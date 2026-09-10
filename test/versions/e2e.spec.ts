@@ -1272,7 +1272,7 @@ describe('Versions', () => {
           collection: draftWithUploadCollectionSlug,
           where: { id: { equals: duplicatedDocID } },
         })
-        expect(mainDocs[0]!._status).toStrictEqual('draft')
+        expect(mainDocs).toHaveLength(0)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
