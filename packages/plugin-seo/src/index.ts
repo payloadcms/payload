@@ -1,7 +1,7 @@
 import type { Config, Field, GroupField, TabsField } from 'payload'
 
 import { definePlugin } from 'payload'
-import { deepMergeSimple } from 'payload/shared'
+import { deepMergeSimple, fieldIsSidebar } from 'payload/shared'
 
 import type {
   GenerateDescription,
@@ -81,6 +81,15 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
                 collection.fields?.find((field) => 'name' in field && field.name === 'email')
               const hasOnlyEmailField = collection.fields?.length === 1 && emailField
 
+              // keep sidebar-positioned fields at the top level so the document
+              // view still renders its two-column layout instead of moving them
+              // into the generated Content tab where core sidebar detection
+              // cannot see them
+              const sidebarFields =
+                collection.fields?.filter((field) => fieldIsSidebar(field)) ?? []
+              const nonSidebarFields =
+                collection.fields?.filter((field) => !fieldIsSidebar(field)) ?? []
+
               const seoTabs: TabsField[] = hasOnlyEmailField
                 ? [
                     {
@@ -98,6 +107,7 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
                       type: 'tabs',
                       tabs: [
                         // append a new tab onto the end of the tabs array, if there is one at the first index
+                        // append a new tab onto the end of the tabs array, if there is one at the first index
                         // if needed, create a new `Content` tab in the first index for this collection's base fields
                         ...(collection?.fields?.[0]?.type === 'tabs' &&
                         collection?.fields?.[0]?.tabs
@@ -106,10 +116,10 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
                               {
                                 fields: [
                                   ...(emailField
-                                    ? collection.fields.filter(
+                                    ? nonSidebarFields.filter(
                                         (field) => 'name' in field && field.name !== 'email',
                                       )
-                                    : collection.fields),
+                                    : nonSidebarFields),
                                 ],
                                 label: collection?.labels?.singular || 'Content',
                               },
@@ -126,8 +136,11 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
                 ...collection,
                 fields: [
                   ...(emailField ? [emailField] : []),
+                  ...sidebarFields,
                   ...seoTabs,
-                  ...(collection?.fields?.[0]?.type === 'tabs' ? collection.fields.slice(1) : []),
+                  ...(collection?.fields?.[0]?.type === 'tabs'
+                    ? collection.fields.slice(1).filter((field) => !fieldIsSidebar(field))
+                    : []),
                 ],
               }
             }
