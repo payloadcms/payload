@@ -3,17 +3,12 @@ import type { UploadInstructions } from '../types.js'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getAccessResults } from '../../auth/getAccessResults.js'
 import { checkFileMetadataRestrictions } from '../checkFileRestrictions.js'
 import { generateStagedUploadInstructions } from '../stagedUpload.js'
 import { getUploadInstructions } from './uploadInstructions.js'
 
 const restrictionMocks = vi.hoisted(() => ({
   checkFileMetadataRestrictions: vi.fn(),
-}))
-
-vi.mock('../../auth/getAccessResults.js', () => ({
-  getAccessResults: vi.fn(),
 }))
 
 vi.mock('../checkFileRestrictions.js', () => ({
@@ -50,7 +45,6 @@ const stagedInstructions: UploadInstructions = {
 }
 
 const generateAdapterInstructions = vi.fn(async () => adapterInstructions)
-const mockedGetAccessResults = vi.mocked(getAccessResults)
 const mockedCheckFileMetadataRestrictions = vi.mocked(checkFileMetadataRestrictions)
 const mockedGenerateStagedUploadInstructions = vi.mocked(generateStagedUploadInstructions)
 
@@ -67,6 +61,7 @@ const createRequest = ({
         media: {
           config: {
             slug: 'media',
+            access: { create: () => true },
             upload: {
               allowRestrictedFileTypes,
               ...(withAdapterInstructions && {
@@ -83,7 +78,6 @@ const createRequest = ({
 describe('getUploadInstructions', () => {
   beforeEach(() => {
     generateAdapterInstructions.mockClear()
-    mockedGetAccessResults.mockReset()
     mockedCheckFileMetadataRestrictions.mockReset()
     mockedGenerateStagedUploadInstructions.mockReset()
     mockedGenerateStagedUploadInstructions.mockResolvedValue(stagedInstructions)
@@ -127,10 +121,6 @@ describe('getUploadInstructions', () => {
   })
 
   it('should require a signed-in user for staged uploads', async () => {
-    mockedGetAccessResults.mockResolvedValue({
-      collections: { media: { create: true, update: false } },
-    } as Awaited<ReturnType<typeof getAccessResults>>)
-
     await expect(
       getUploadInstructions({
         collectionSlug: 'media',

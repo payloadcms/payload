@@ -19,7 +19,7 @@ describe('getHandleMultiPartUpload', () => {
     const req = {
       payload: {
         collections: {
-          media: { config: { upload: true } },
+          media: { config: { access: {}, upload: true } },
         },
         db: { findOne: vi.fn().mockResolvedValue(null) },
       },
@@ -28,6 +28,7 @@ describe('getHandleMultiPartUpload', () => {
         fileName: 'reference.png',
         fileType: 'image/png',
       }),
+      user: { id: 'user' },
     } as unknown as PayloadRequest
     const handler = getHandleMultiPartUpload({
       access: async () => true,

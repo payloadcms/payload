@@ -2,7 +2,7 @@ import type { PayloadHandler, UploadInstructionsAccess } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
 
 import type { R2StorageOptions } from './index.js'
 import type { R2Bucket, R2StorageMultipartUploadHandlerParams } from './types.js'
@@ -14,40 +14,22 @@ type Args = {
   useCompositePrefixes?: boolean
 }
 
-export const defaultR2ClientUploadsAccess: UploadInstructionsAccess = async ({
-  collectionSlug,
-  req,
-}) => {
-  const collection = req.payload.collections[collectionSlug]
-  if (!collection?.config) {
-    throw new APIError(`Collection ${collectionSlug} not found`)
-  }
-
-  const createAccess = collection.config.access?.create
-  return createAccess
-    ? Boolean(await createAccess({ slug: collectionSlug, req }))
-    : Boolean(req.user)
-}
-
 // Adapted from https://developers.cloudflare.com/r2/api/workers/workers-multipart-usage/
 export const getHandleMultiPartUpload =
-  ({
-    access = defaultR2ClientUploadsAccess,
-    bucket,
-    collections,
-    useCompositePrefixes = false,
-  }: Args): PayloadHandler =>
+  ({ access, bucket, collections, useCompositePrefixes = false }: Args): PayloadHandler =>
   async (req) => {
     const params = Object.fromEntries(req.searchParams) as R2StorageMultipartUploadHandlerParams
     const collectionSlug = params.collection
     const filetype = params.fileType
+
+    await assertClientUploadAccess({ collectionSlug, req })
 
     const collectionConfig = collections[collectionSlug]
     if (!collectionConfig) {
       throw new APIError(`Collection ${collectionSlug} was not found in R2 Storage options`)
     }
 
-    if (!(await access({ collectionSlug, req }))) {
+    if (access && !(await access({ collectionSlug, req }))) {
       throw new Forbidden(req.t)
     }
 

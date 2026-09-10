@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
-import { mediaHeaderOnlySlug, mediaHeaderOnlyWithSizesSlug } from '../shared.js'
+import { mediaHeaderOnlySlug, mediaHeaderOnlyWithSizesSlug, mediaSlug } from '../shared.js'
 import {
   clearTestBucket,
   createTestBucket,
@@ -211,6 +211,23 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     })
 
     expect(response.status).toBe(403)
+  })
+
+  test('should reject upload instructions without collection create or update permission', async ({
+    restClient,
+  }) => {
+    const response = await restClient.POST(signedURLEndpoint, {
+      body: signedURLBody(mediaSlug, 'forbidden.png', MB(1), 'image/png'),
+      headers: {
+        'x-disallow-create': 'true',
+        'x-disallow-update': 'true',
+      },
+    })
+    const body = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(body.request).toBeUndefined()
+    expect(body.errors).toBeDefined()
   })
 
   test('should generate signed URL for file within size limit', async ({ restClient }) => {

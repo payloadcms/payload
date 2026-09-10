@@ -819,6 +819,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(response.status).toBe(403)
       })
 
+      test('should reject unauthenticated staged upload instructions with overrideAccess in the body', async ({
+        restClient,
+      }) => {
+        const response = await restClient.POST('/upload-instructions', {
+          auth: false,
+          body: JSON.stringify({
+            collectionSlug: mediaSlug,
+            filename: 'unauthorized.png',
+            filesize: 1,
+            mimeType: 'image/png',
+            overrideAccess: true,
+          }),
+        })
+
+        expect(response.status).toBe(403)
+      })
+
       test('rejects a file payload missing an upload reference with a 400', async ({
         restClient,
       }) => {

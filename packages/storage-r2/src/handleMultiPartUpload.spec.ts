@@ -13,6 +13,7 @@ const createRequest = (filename: string, mimeType: string) =>
         media: {
           config: {
             slug: 'media',
+            access: {},
             upload: { staticDir: '/tmp' },
           },
         },
@@ -23,6 +24,7 @@ const createRequest = (filename: string, mimeType: string) =>
       fileName: filename,
       fileType: mimeType,
     }),
+    user: { id: 'user' },
   }) as unknown as PayloadRequest
 
 describe('getHandleMultiPartUpload', () => {
@@ -52,7 +54,7 @@ describe('getHandleMultiPartUpload', () => {
     const req = {
       payload: {
         collections: {
-          media: { config: { upload: true } },
+          media: { config: { access: {}, upload: true } },
         },
         db: { findOne: vi.fn().mockResolvedValue(null) },
       },
@@ -61,6 +63,7 @@ describe('getHandleMultiPartUpload', () => {
         fileName: 'protected.png',
         fileType: 'image/png',
       }),
+      user: { id: 'user' },
     } as unknown as PayloadRequest
     const handler = getHandleMultiPartUpload({
       access: async () => true,

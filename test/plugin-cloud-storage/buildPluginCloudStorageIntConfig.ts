@@ -22,6 +22,7 @@ import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
+import { r2UploadEndpoints } from './r2.js'
 import {
   collectionPrefix,
   mediaSlug,
@@ -215,6 +216,7 @@ export function buildPluginCloudStorageIntConfig({
         TestMetadata,
         Users,
       ],
+      endpoints: r2UploadEndpoints,
       plugins: [testMetadataPlugin],
       storage: storagePlugin ? [storagePlugin] : [],
       typescript: {

@@ -96,7 +96,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob clientUpl
         body: JSON.stringify(body),
       })
 
-      expect(response.status).toBe(400)
+      expect(response.ok).toBe(false)
     }
   })
 

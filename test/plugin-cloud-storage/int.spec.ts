@@ -1,5 +1,7 @@
+import type { R2StorageOptions } from '@payloadcms/storage-r2'
 import type { Payload, UploadInstructions } from 'payload'
 import type { SuiteAPI } from 'vitest'
+import type { PlatformProxy } from 'wrangler'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -15,6 +17,7 @@ import type { Config } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { recordedCleanupTargets, uploadedTestFiles } from './buildPluginCloudStorageIntConfig.js'
+import { r2TestStorage } from './r2.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
@@ -1072,7 +1075,117 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
     })
 
     test.describe('R2', () => {
-      test.todo('can upload')
+      const endpoint = '/storage-r2-multi-part-upload'
+      const query = { collection: mediaSlug, fileName: 'reference.png', fileType: 'image/png' }
+      const uploadURL = `${endpoint}?${new URLSearchParams(query)}` as const
+      const uploads: { key: string; uploadId: string }[] = []
+      let r2Environment: PlatformProxy<{ R2: R2StorageOptions['bucket'] }>
+
+      test.beforeAll(async () => {
+        const { getPlatformProxy } = await import('wrangler')
+        r2Environment = await getPlatformProxy<{ R2: R2StorageOptions['bucket'] }>({
+          configPath: path.resolve(dirname, '../storage-r2/wrangler.jsonc'),
+          persist: false,
+        })
+        r2TestStorage.bucket = r2Environment.env.R2
+      })
+
+      test.beforeEach(async ({ restClient }) => {
+        await restClient.login({ slug: 'users' })
+      })
+
+      test.afterEach(async () => {
+        const { env } = r2Environment
+
+        for (const { key, uploadId } of uploads) {
+          await env.R2.resumeMultipartUpload(key, uploadId).abort()
+          await env.R2.delete(key)
+        }
+        uploads.length = 0
+      })
+
+      test.afterAll(async () => {
+        await r2Environment?.dispose()
+        delete r2TestStorage.bucket
+      })
+
+      for (const [path, accessName] of [
+        [endpoint, 'default'],
+        [`${endpoint}-custom`, 'custom'],
+      ] as const) {
+        test(`should reject anonymous R2 uploads with ${accessName} access even when create access allows them`, async ({
+          restClient,
+        }) => {
+          const response = await restClient.POST(`${path}?${new URLSearchParams(query)}`, {
+            auth: false,
+            headers: { 'x-public-create': 'true' },
+          })
+
+          expect(response.status).toBe(403)
+          expect((await response.json()).uploadId).toBeUndefined()
+        })
+
+        test(`should reject R2 uploads with ${accessName} access without create or update access`, async ({
+          restClient,
+        }) => {
+          const response = await restClient.POST(`${path}?${new URLSearchParams(query)}`, {
+            headers: { 'x-disallow-create': 'true', 'x-disallow-update': 'true' },
+          })
+
+          expect(response.status).toBe(403)
+          expect((await response.json()).uploadId).toBeUndefined()
+        })
+      }
+
+      for (const [permission, deniedHeader] of [
+        ['create', 'x-disallow-update'],
+        ['update', 'x-disallow-create'],
+      ] as const) {
+        test(`should upload R2 file bytes with only ${permission} access`, async ({
+          restClient,
+        }) => {
+          const { env } = r2Environment
+          const file = fs.readFileSync(path.resolve(dirname, '../uploads/image.png'))
+          const headers = { [deniedHeader]: 'true' }
+          const started = await restClient.POST(uploadURL, { headers })
+
+          expect(started.status).toBe(200)
+
+          const upload = await started.json()
+          uploads.push(upload)
+
+          const multipartQuery = {
+            ...query,
+            multipartId: upload.uploadId,
+            multipartKey: upload.key,
+          }
+          const multipartURL = `${endpoint}?${new URLSearchParams(multipartQuery)}` as const
+          const part = await restClient.POST(`${multipartURL}&multipartNumber=1`, {
+            body: file,
+            headers: { ...headers, 'Content-Type': 'application/octet-stream' },
+          })
+
+          expect(part.status).toBe(200)
+
+          const completed = await restClient.POST(multipartURL, {
+            body: JSON.stringify([await part.json()]),
+            headers,
+          })
+
+          expect(completed.status).toBe(200)
+          const stored = await env.R2.get(upload.key)
+
+          expect(Buffer.from(await stored!.arrayBuffer())).toEqual(file)
+        })
+      }
+
+      test('should still enforce custom R2 client upload access', async ({ restClient }) => {
+        const response = await restClient.POST(`${endpoint}-custom?${new URLSearchParams(query)}`, {
+          headers: { 'x-disallow-access': 'true' },
+        })
+
+        expect(response.status).toBe(403)
+      })
     })
   })
 })
