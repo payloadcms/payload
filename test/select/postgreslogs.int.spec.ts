@@ -134,6 +134,38 @@ test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.starts
           ],
         })
       })
+
+      // Regression: an include-mode select that omits the `version` group used to recurse into it
+      // with no select at all and join every block table (~220 joins on a 70-block-type collection).
+      test('ensure include-mode select that omits a group does not join the tables inside it', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: 'versioned-posts',
+          data: { text: 'text', blocks: [{ blockType: 'test', text: 'block' }] },
+        })
+
+        const logs: string[] = []
+        const consoleSpy = vitest.spyOn(console, 'log').mockImplementation((...args) => {
+          logs.push(args.map(String).join(' '))
+        })
+
+        const { docs } = await payload.db.findVersions({
+          collection: 'versioned-posts',
+          select: { parent: true },
+          where: { parent: { equals: doc.id } },
+        })
+
+        consoleSpy.mockRestore()
+
+        expect(docs).toHaveLength(1)
+        expect(docs[0]?.parent).toEqual(doc.id)
+        expect(logs.length).toBeGreaterThan(0)
+        // The `version` group was not selected, so nothing inside it may be joined.
+        expect(logs.some((log) => log.includes('blocks_test'))).toBe(false)
+
+        await payload.delete({ collection: 'versioned-posts', id: doc.id })
+      })
     })
   },
 )
