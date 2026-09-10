@@ -33,6 +33,7 @@ import {
   apiKeysSlug,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  preferencesSlug,
   publicUsersSlug,
   rotateSecretLoginSlug,
   rotateSecretOldSecret,
@@ -45,6 +46,122 @@ import {
 const { email, password } = devUser
 
 test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
+  test.describe('Preference updates', () => {
+    const key = 'display-settings'
+    const createdUserIDs: (number | string)[] = []
+    const createdPreferenceIDs: (number | string)[] = []
+    let owner: User
+    let otherUser: User
+    let ownerPreferenceID: number | string
+    let otherPreferenceID: number | string
+    let ownerToken: string
+
+    test.beforeAll(async ({ payloadInstance: payload }) => {
+      const firstUser = await payload.create({
+        collection: slug,
+        data: { email: 'preferences-owner@example.com', password },
+      })
+      createdUserIDs.push(firstUser.id)
+      owner = { ...firstUser, collection: slug }
+
+      const secondUser = await payload.create({
+        collection: slug,
+        data: { email: 'preferences-other@example.com', password },
+      })
+      createdUserIDs.push(secondUser.id)
+      otherUser = { ...secondUser, collection: slug }
+
+      const login = await payload.login({
+        collection: slug,
+        data: { email: firstUser.email, password },
+      })
+      ownerToken = login.token!
+    })
+
+    test.beforeEach(async ({ payloadInstance: payload }) => {
+      for (const user of [owner, otherUser]) {
+        const preference = await payload.create({
+          collection: preferencesSlug,
+          data: { key, value: { theme: 'light' } },
+          user,
+        })
+        createdPreferenceIDs.push(preference.id)
+      }
+      ;[ownerPreferenceID, otherPreferenceID] = createdPreferenceIDs
+    })
+
+    test.afterEach(async ({ payloadInstance: payload }) => {
+      for (const id of createdPreferenceIDs) {
+        await payload.delete({ id, collection: preferencesSlug })
+      }
+      createdPreferenceIDs.length = 0
+    })
+
+    test.afterAll(async ({ payloadInstance: payload }) => {
+      for (const id of createdUserIDs) {
+        await payload.delete({ id, collection: slug })
+      }
+    })
+
+    test('should update an owned preference by ID', async ({ restClient }) => {
+      const response = await restClient.PATCH(`/${preferencesSlug}/${ownerPreferenceID}`, {
+        body: JSON.stringify({ value: { theme: 'dark' } }),
+        headers: { Authorization: `JWT ${ownerToken}` },
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(result.doc.id).toBe(ownerPreferenceID)
+      expect(result.doc.value).toEqual({ theme: 'dark' })
+    })
+
+    test('should not update or return another user preference by ID', async ({
+      payload,
+      restClient,
+    }) => {
+      const response = await restClient.PATCH(`/${preferencesSlug}/${otherPreferenceID}`, {
+        body: JSON.stringify({ value: { theme: 'dark' } }),
+        headers: { Authorization: `JWT ${ownerToken}` },
+      })
+      const result = await response.json()
+      const unchanged = await payload.findByID({
+        id: otherPreferenceID,
+        collection: preferencesSlug,
+        depth: 0,
+      })
+
+      expect(response.status).toBe(403)
+      expect(result.doc).toBeUndefined()
+      expect(unchanged.value).toEqual({ theme: 'light' })
+      expect(unchanged.user).toEqual({ relationTo: slug, value: otherUser.id })
+    })
+
+    test('should only update and return owned preferences in a bulk update', async ({
+      payload,
+      restClient,
+    }) => {
+      const response = await restClient.PATCH(`/${preferencesSlug}`, {
+        body: JSON.stringify({ value: { theme: 'dark' } }),
+        headers: { Authorization: `JWT ${ownerToken}` },
+        query: { where: { key: { equals: key } } },
+      })
+      const result = await response.json()
+      const unchanged = await payload.findByID({
+        id: otherPreferenceID,
+        collection: preferencesSlug,
+        depth: 0,
+      })
+
+      expect(response.status).toBe(200)
+      expect(result.errors).toEqual([])
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0].id).toBe(ownerPreferenceID)
+      expect(result.docs[0].value).toEqual({ theme: 'dark' })
+      expect(unchanged.value).toEqual({ theme: 'light' })
+      expect(unchanged.user).toEqual({ relationTo: slug, value: otherUser.id })
+    })
+  })
+
   test.describe('GraphQL - admin user', () => {
     let token
     let user

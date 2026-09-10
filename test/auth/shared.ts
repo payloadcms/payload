@@ -1,5 +1,7 @@
 export const slug = 'users'
 
+export const preferencesSlug = 'payload-preferences'
+
 export const publicUsersSlug = 'public-users'
 
 export const apiKeysSlug = 'api-keys'
