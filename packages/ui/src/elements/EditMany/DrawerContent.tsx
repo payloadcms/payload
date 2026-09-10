@@ -20,6 +20,7 @@ import type { EditManyProps } from './index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
+import { FieldPathContext } from '../../forms/RenderFields/context.js'
 import { RenderField } from '../../forms/RenderFields/RenderField.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -407,15 +408,16 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                     } = option
 
                     return (
-                      <RenderField
-                        clientFieldConfig={field}
-                        indexPath=""
-                        key={`${path}-${i}`}
-                        parentPath=""
-                        parentSchemaPath=""
-                        path={path}
-                        permissions={fieldPermissions}
-                      />
+                      <FieldPathContext key={`${path}-${i}`} value={path}>
+                        <RenderField
+                          clientFieldConfig={field}
+                          indexPath=""
+                          parentPath=""
+                          parentSchemaPath=""
+                          path={path}
+                          permissions={fieldPermissions}
+                        />
+                      </FieldPathContext>
                     )
                   })}
                 </div>
