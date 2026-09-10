@@ -2,10 +2,12 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { WriteAction } from '../../../versions/actions/types.js'
 
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
+  action?: WriteAction
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   /**
@@ -27,6 +29,7 @@ type Args<T extends JsonObject> = {
  * - Execute field hooks
  */
 export const afterChange = async <T extends JsonObject>({
+  action,
   collection,
   context,
   data,
@@ -37,6 +40,7 @@ export const afterChange = async <T extends JsonObject>({
   req,
 }: Args<T>): Promise<T> => {
   await traverseFields({
+    action,
     collection,
     context,
     data,

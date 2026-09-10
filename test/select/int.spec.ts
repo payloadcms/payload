@@ -1460,15 +1460,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
     let postId: number | string
 
     test.beforeAll(async ({ payloadInstance: payload }) => {
-      post = await createVersionedPost({ payload })
-      postId = post.id
+      const createdPost = await createVersionedPost({ payload })
+      postId = createdPost.id
+      post = await payload.findByID({
+        id: postId,
+        collection: 'versioned-posts',
+        version: 'latest',
+      })
     })
 
     test('should select only id as default', async ({ payload }) => {
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {},
       })
 
@@ -1481,7 +1486,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
         },
@@ -1497,7 +1502,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: false,
         },
@@ -1513,7 +1518,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
       const res = await payload.findByID({
         id: postId,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
           text: true,
@@ -1530,7 +1535,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
     test('payload.find should select number and text', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           number: true,
           text: true,
@@ -1552,7 +1557,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
     test('should select base id field inside of array', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           array: {},
         },
@@ -1572,7 +1577,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
     test('should select base id field inside of blocks', async ({ payload }) => {
       const res = await payload.find({
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: {
           blocks: {},
         },
@@ -1616,17 +1621,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
       expect(doc.version.text).toBe(post.text)
     })
 
-    test('should return a latest version with findByID and draft: true', async ({ payload }) => {
+    test("should return a latest version with findByID and version: 'latest'", async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: 'versioned-posts',
         data: { _status: 'draft', text: 'draft-post' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const res = await payload.findByID({
         id: doc.id,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: { text: true },
       })
       expect(res.text).toBe('draft-post')
@@ -1639,7 +1646,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => 
       const res_2 = await payload.findByID({
         id: doc.id,
         collection: 'versioned-posts',
-        draft: true,
+        version: 'latest',
         select: { text: true },
       })
 

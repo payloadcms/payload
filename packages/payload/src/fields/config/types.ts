@@ -148,6 +148,8 @@ import type {
   Where,
 } from '../../types/index.js'
 import type { SchemaVariant } from '../../utilities/configToJSONSchema.js'
+import type { WriteAction } from '../../versions/actions/types.js'
+import type { ReadVersion } from '../../versions/types.js'
 import type { Slugify } from '../baseFields/slug/types.js'
 import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
@@ -170,6 +172,11 @@ export type BrowserAutoComplete = Extract<
 >
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
+  /**
+   * Resolved write action. Only available in `afterChange` hooks.
+   * `undefined` when drafts are not enabled.
+   */
+  action?: WriteAction
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -235,6 +242,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   siblingFields: (Field | TabAsField)[]
   /** The value of the field. */
   value?: TValue
+  /**
+   * Only available in the `afterRead` hook.
+   */
+  version?: ReadVersion
 }
 
 export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = (

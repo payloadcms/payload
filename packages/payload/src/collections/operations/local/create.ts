@@ -7,9 +7,8 @@ import type {
 import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
-  CollectionsWithoutDrafts,
+  CreateDataFromCollectionSlug,
   DataFromCollectionSlug,
-  DraftDataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../../config/types.js'
@@ -19,7 +18,6 @@ import {
   type CollectionSlug,
   deepCopyObjectSimple,
   type FindOptions,
-  type GeneratedTypes,
   type Payload,
   type RequestContext,
   type TypedLocale,
@@ -111,76 +109,11 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   user?: null | User
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
-export type Options<
-  TSlug extends CollectionSlug,
-  TSelect extends SelectType,
-> = GeneratedTypes extends { strictDraftTypes: true }
-  ? CollectionsWithoutDrafts extends TSlug
-    ? {
-        /**
-         * The data for the document to create.
-         */
-        data: DataFromCollectionSlug<TSlug>
-        /**
-         * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-         */
-        draft?: boolean
-      } & BaseOptions<TSlug, TSelect>
-    : TSlug extends CollectionsWithoutDrafts
-      ? {
-          data: RequiredDataFromCollectionSlug<TSlug>
-          /**
-           * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
-           */
-          draft?: never
-        } & BaseOptions<TSlug, TSelect>
-      : (
-          | {
-              /**
-               * The data for the document to create.
-               */
-              data: RequiredDataFromCollectionSlug<TSlug>
-              /**
-               * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-               * Omit this property or set to `false` to create a published document.
-               */
-              draft?: false
-            }
-          | {
-              /**
-               * The data for the document to create.
-               * When creating a draft, required fields are optional as validation is skipped by default.
-               */
-              data: DraftDataFromCollectionSlug<TSlug>
-              /**
-               * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-               */
-              draft: true
-            }
-        ) &
-          BaseOptions<TSlug, TSelect>
-  :
-      | ({
-          /**
-           * The data for the document to create.
-           */
-          data: RequiredDataFromCollectionSlug<TSlug>
-          /**
-           * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-           */
-          draft?: false
-        } & BaseOptions<TSlug, TSelect>)
-      | ({
-          /**
-           * The data for the document to create.
-           * When creating a draft, required fields are optional as validation is skipped by default.
-           */
-          data: DraftDataFromCollectionSlug<TSlug>
-          /**
-           * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-           */
-          draft: true
-        } & BaseOptions<TSlug, TSelect>)
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseOptions<
+  TSlug,
+  TSelect
+> &
+  CreateDataFromCollectionSlug<TSlug>
 
 export async function createLocal<
   TSlug extends CollectionSlug,
@@ -190,12 +123,12 @@ export async function createLocal<
   options: Options<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> {
   const {
+    action,
     collection: collectionSlug,
     data,
     depth,
     disableTransaction,
     disableVerificationEmail,
-    draft,
     duplicateFromID,
     file,
     filePath,
@@ -220,12 +153,12 @@ export async function createLocal<
   req.file = file ?? (await getFileByPath(filePath!))
 
   return createOperation<TSlug, TSelect>({
+    action,
     collection,
-    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
+    data: deepCopyObjectSimple(data) as RequiredDataFromCollectionSlug<TSlug>, // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     disableTransaction,
     disableVerificationEmail,
-    draft,
     duplicateFromID,
     overrideAccess,
     overwriteExistingFiles,

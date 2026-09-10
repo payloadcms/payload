@@ -17,6 +17,7 @@ export const createRestoreGlobalVersionCommand = defineCLICommand({
     const result = await payload.restoreGlobalVersion({
       id: String(args.id),
       slug: args.slug,
+      action: args.action,
       ...getReadOptions(args),
     })
 

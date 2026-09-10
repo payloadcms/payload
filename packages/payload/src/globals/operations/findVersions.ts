@@ -129,7 +129,6 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
               // Patch globalType onto version doc
               globalType: globalConfig.slug,
             },
-            draft: undefined!,
             fallbackLocale: fallbackLocale!,
             findMany: true,
             global: globalConfig,

@@ -28,7 +28,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
       skipRevalidate: true,
     },
     data: examplePageDraft as any, // eslint-disable-line
-    draft: true,
+    action: 'saveDraft',
   })
 
   const homepageJSON = JSON.parse(JSON.stringify(home).replace('{{DRAFT_PAGE_ID}}', examplePageID))

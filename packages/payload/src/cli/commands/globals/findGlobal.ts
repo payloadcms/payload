@@ -16,6 +16,7 @@ export const createFindGlobalCommand = defineCLICommand({
     const result = await payload.findGlobal({
       slug: args.slug,
       ...getReadOptions(args),
+      version: args.version,
     })
 
     if (!isJSON) {

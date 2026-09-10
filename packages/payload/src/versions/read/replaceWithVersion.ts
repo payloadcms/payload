@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { AccessResult } from '../../config/types.js'
 import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
@@ -8,68 +7,74 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
-import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
-import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
-import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
+import { appendVersionToQueryKey } from '../drafts/appendVersionToQueryKey.js'
+import { getQueryDraftsSelect } from '../drafts/getQueryDraftsSelect.js'
+import { getDraftStatusWhere } from './getDraftStatusWhere.js'
+
+export type ReplaceWithVersionPolicy = 'draft' | 'latest'
 
 type Arguments<T> = {
   accessResult: AccessResult
   doc: T
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
+  fallbackDoc?: null | T
   overrideAccess: boolean
+  policy: ReplaceWithVersionPolicy
   req: PayloadRequest
   select?: SelectType
+  where?: Where
 }
 
-export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
+/**
+ * Chooses between a found draft version and the published document.
+ * `latest` falls back to published content. `draft` returns no result when no draft exists.
+ */
+export function applyReplacePolicy<T>({
+  draftVersion,
+  fallbackDoc,
+  fallbackIsDraft = false,
+  policy,
+}: {
+  draftVersion: T | undefined
+  fallbackDoc: null | T
+  fallbackIsDraft?: boolean
+  policy: ReplaceWithVersionPolicy
+}): null | T {
+  if (draftVersion) {
+    return draftVersion
+  }
+
+  if (fallbackDoc && (policy === 'latest' || fallbackIsDraft)) {
+    return fallbackDoc
+  }
+
+  return null
+}
+
+/**
+ * Replaces a published document with its newest draft when one exists.
+ *
+ * - `latest`: newest saved draft, otherwise the published document
+ * - `draft`: newest draft only, with no published fallback
+ */
+export const replaceWithVersion = async <T extends TypeWithID>({
   accessResult,
   doc,
   entity,
   entityType,
+  fallbackDoc: fallbackDocArg,
+  policy,
   req,
   select,
-}: Arguments<T>): Promise<T> => {
+  where,
+}: Arguments<T>): Promise<null | T> => {
   const { locale, payload } = req
+  const fallbackDoc = fallbackDocArg === undefined ? doc : fallbackDocArg
 
-  let queryToBuild: Where = {
-    and: [
-      {
-        'version._status': {
-          equals: 'draft',
-        },
-      },
-    ],
-  }
-
-  if (hasLocalizeStatusEnabled(entity)) {
-    if (locale === 'all') {
-      queryToBuild = {
-        and: [
-          {
-            or: (
-              (payload.config.localization && payload.config.localization.localeCodes) ||
-              []
-            ).map((localeCode) => ({
-              [`version._status.${localeCode}`]: {
-                equals: 'draft',
-              },
-            })),
-          },
-        ],
-      }
-    } else if (locale) {
-      queryToBuild = {
-        and: [
-          {
-            [`version._status.${locale}`]: {
-              equals: 'draft',
-            },
-          },
-        ],
-      }
-    }
+  const queryToBuild: Where = {
+    and: [getDraftStatusWhere({ entity, locale: locale ?? undefined, payload })],
   }
 
   if (entityType === 'collection') {
@@ -103,6 +108,12 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     versionAccessResult = appendVersionToQueryKey(accessResult)
   }
 
+  let versionWhere = combineQueries(queryToBuild, versionAccessResult!)
+
+  if (where) {
+    versionWhere = combineQueries(versionWhere, appendVersionToQueryKey(where))
+  }
+
   const findVersionsArgs: FindGlobalVersionsArgs & FindVersionsArgs = {
     collection: entity.slug,
     global: entity.slug,
@@ -112,7 +123,7 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     req,
     select: getQueryDraftsSelect({ select }),
     sort: '-updatedAt',
-    where: combineQueries(queryToBuild, versionAccessResult!),
+    where: versionWhere,
   }
 
   let versionDocs
@@ -125,27 +136,39 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   let draft = versionDocs[0]
 
   if (!draft) {
-    return doc
+    const fallbackStatus = (fallbackDoc as null | Record<string, unknown>)?._status
+    const fallbackIsDraft =
+      fallbackStatus === 'draft' ||
+      (fallbackStatus !== null &&
+        typeof fallbackStatus === 'object' &&
+        (locale === 'all' || locale === '*' || !locale
+          ? Object.values(fallbackStatus).some((status) => status === 'draft')
+          : (fallbackStatus as Record<string, unknown>)[locale] === 'draft'))
+
+    return applyReplacePolicy({
+      draftVersion: undefined,
+      fallbackDoc,
+      fallbackIsDraft,
+      policy,
+    })
   }
 
   draft = sanitizeInternalFields(draft)
 
-  // Patch globalType onto version doc
   if (entityType === 'global' && 'globalType' in doc) {
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     draft.version.globalType = doc.globalType
   }
 
-  // handle when .version wasn't selected due to projection
   if (!draft.version) {
     draft.version = {} as T
   }
 
-  // Disregard all other draft content at this point,
-  // Only interested in the version itself.
-  // Operations will handle firing hooks, etc.
-
   draft.version.id = doc.id
 
-  return draft.version
+  return applyReplacePolicy({
+    draftVersion: draft.version,
+    fallbackDoc,
+    policy,
+  })
 }

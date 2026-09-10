@@ -62,13 +62,13 @@ export const RelationshipFeature = createServerFeature<
               ({
                 currentDepth,
                 depth,
-                draft,
                 node,
                 overrideAccess,
                 populateArg,
                 populationPromises,
                 req,
                 showHiddenFields,
+                version,
               }) => {
                 if (!node?.value) {
                   return node
@@ -90,13 +90,13 @@ export const RelationshipFeature = createServerFeature<
                     currentDepth,
                     data: node,
                     depth: populateDepth,
-                    draft,
                     key: 'value',
                     overrideAccess,
                     req,
                     select:
                       populateArg?.[collection.config.slug] ?? collection.config.defaultPopulate,
                     showHiddenFields,
+                    version,
                   }),
                 )
 

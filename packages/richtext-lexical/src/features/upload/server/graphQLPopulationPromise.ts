@@ -12,7 +12,6 @@ export const uploadPopulationPromiseHOC = (
     context,
     currentDepth,
     depth,
-    draft,
     editorPopulationPromises,
     field,
     fieldPromises,
@@ -24,6 +23,7 @@ export const uploadPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
+    version,
   }) => {
     if (node?.value) {
       const collection = req.payload.collections[node?.relationTo]
@@ -42,11 +42,11 @@ export const uploadPopulationPromiseHOC = (
             currentDepth,
             data: node,
             depth: populateDepth,
-            draft,
             key: 'value',
             overrideAccess,
             req,
             showHiddenFields,
+            version,
           }),
         )
 
@@ -63,7 +63,6 @@ export const uploadPopulationPromiseHOC = (
             depth,
             parentIsLocalized: parentIsLocalized || field.localized || false,
 
-            draft,
             editorPopulationPromises,
             fieldPromises,
             fields: collectionFieldSchema,
@@ -74,6 +73,7 @@ export const uploadPopulationPromiseHOC = (
             req,
             showHiddenFields,
             siblingDoc: node.fields || {},
+            version,
           })
         }
       }

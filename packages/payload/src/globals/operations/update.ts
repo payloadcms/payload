@@ -10,6 +10,7 @@ import type {
   TransformGlobalWithSelect,
   Where,
 } from '../../types/index.js'
+import type { UpdateAction } from '../../versions/actions/types.js'
 import type {
   DataFromGlobalSlug,
   SanitizedGlobalConfig,
@@ -34,15 +35,16 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 type Args<TSlug extends GlobalSlug> = {
+  action?: UpdateAction
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
   disableTransaction?: boolean
-  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess?: boolean
   overrideLock?: boolean
@@ -65,7 +67,6 @@ export const updateOperation = async <
     autosave,
     depth,
     disableTransaction,
-    draft: draftArg,
     globalConfig,
     overrideAccess,
     overrideLock,
@@ -101,22 +102,37 @@ export const updateOperation = async <
 
     let { data } = args
 
+    const resolvedAction = resolveAction({
+      action: args.action,
+      autosave: args.autosave,
+      draftsEnabled: hasDraftsEnabled(globalConfig),
+      locale,
+      localizedStatusEnabled: hasLocalizeStatusEnabled(globalConfig),
+      operation: 'update',
+      publishAllLocales: args.publishAllLocales,
+      status:
+        data && typeof data === 'object' && data !== null && '_status' in data
+          ? data._status
+          : undefined,
+      unpublishAllLocales: args.unpublishAllLocales,
+    })
+
+    data = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data,
+      locale,
+      publishAllLocales: publishAllLocalesArg,
+      unpublishAllLocales: unpublishAllLocalesArg,
+    })
+
+    const isSavingDraft = resolvedAction === 'saveDraft'
+    const isUnpublishing = resolvedAction === 'unpublish'
     const publishAllLocales =
-      !draftArg &&
+      !isSavingDraft &&
+      !isUnpublishing &&
       (publishAllLocalesArg ??
         (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true))
-    const unpublishAllLocales =
-      typeof unpublishAllLocalesArg === 'string'
-        ? unpublishAllLocalesArg === 'true'
-        : !!unpublishAllLocalesArg
-    const isSavingDraft =
-      Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
-      data._status !== 'published' &&
-      !publishAllLocales
-
-    if (isSavingDraft) {
-      data._status = 'draft'
-    }
+    const unpublishAllLocales = !!unpublishAllLocalesArg
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -167,13 +183,13 @@ export const updateOperation = async <
       context: req.context,
       depth: 0,
       doc: deepCopyObjectSimple(globalJSON),
-      draft: draftArg!,
       fallbackLocale: fallbackLocale!,
       global: globalConfig,
       locale: locale!,
       overrideAccess: true,
       req,
       showHiddenFields: showHiddenFields!,
+      version: isSavingDraft ? 'latest' : 'published',
     })
 
     // ///////////////////////////////////////////
@@ -251,10 +267,7 @@ export const updateOperation = async <
       global: globalConfig,
       operation: 'update' as Operation,
       req,
-      skipValidation:
-        (isSavingDraft && !hasDraftValidationEnabled(globalConfig)) ||
-        // Skip validation for unpublish operations — they only change _status, not document data
-        unpublishAllLocales,
+      skipValidation: (isSavingDraft && !hasDraftValidationEnabled(globalConfig)) || isUnpublishing,
     }
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)
@@ -393,7 +406,7 @@ export const updateOperation = async <
         payload,
         req,
         select,
-        unpublish: unpublishAllLocales,
+        unpublish: isUnpublishing,
       })
 
       resultWithLocales = {
@@ -424,7 +437,6 @@ export const updateOperation = async <
       context: req.context,
       depth: depth!,
       doc: resultWithLocales,
-      draft: draftArg!,
       fallbackLocale: null,
       global: globalConfig,
       locale: locale!,
@@ -433,6 +445,7 @@ export const updateOperation = async <
       req,
       select,
       showHiddenFields: showHiddenFields!,
+      version: isSavingDraft ? 'latest' : 'published',
     })
 
     // /////////////////////////////////////
@@ -457,6 +470,7 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     result = await afterChange({
+      action: resolvedAction,
       collection: null,
       context: req.context,
       data,
@@ -475,6 +489,7 @@ export const updateOperation = async <
       for (const hook of globalConfig.hooks.afterChange) {
         result =
           (await hook({
+            action: resolvedAction,
             context: req.context,
             data,
             doc: result,

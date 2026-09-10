@@ -60,6 +60,7 @@ export const seed = async (_payload: Payload) => {
         })
 
         return await _payload.update({
+          action: 'saveDraft',
           collection: postsCollectionSlug,
           where: {
             id: {

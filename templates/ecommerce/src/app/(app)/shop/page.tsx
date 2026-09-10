@@ -21,7 +21,7 @@ export default async function ShopPage({ searchParams }: Props) {
 
   const products = await payload.find({
     collection: 'products',
-    draft: false,
+    version: 'published',
     overrideAccess: false,
     select: {
       title: true,

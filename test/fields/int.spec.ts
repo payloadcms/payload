@@ -541,7 +541,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should generate the slug from the source on a draft create', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
@@ -553,7 +553,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
         })
         created.push(draft.id)
@@ -564,7 +564,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const latestDraft = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
         })
         expect(latestDraft.slug).toBe('slug-autosave-1')
       })
@@ -574,7 +574,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { slug: '!!!' },
         })
         created.push(draft.id)
@@ -586,14 +586,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const first = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
         })
         created.push(first.id)
 
         const second = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
         })
         created.push(second.id)
@@ -605,7 +605,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should reject a draft slug that collides with another draft', async ({ payload }) => {
         const first = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'First', slug: 'shared-draft-slug' },
         })
         created.push(first.id)
@@ -614,7 +614,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await expect(
           payload.create({
             collection: 'slug-autosave',
-            draft: true,
+            action: 'saveDraft',
             data: { title: 'Second', slug: 'shared-draft-slug' },
           }),
         ).rejects.toThrow()
@@ -625,13 +625,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const a = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'A', slug: 'draft-a' },
         })
         created.push(a.id)
         const b = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'B', slug: 'draft-b' },
         })
         created.push(b.id)
@@ -640,7 +640,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           payload.update({
             collection: 'slug-autosave',
             id: b.id,
-            draft: true,
+            action: 'saveDraft',
             data: { slug: 'draft-a' },
           }),
         ).rejects.toThrow()
@@ -651,7 +651,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const en = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { localizedTitle: 'One', localizedSlug: 'shared-draft-localized' },
           locale: 'en',
         })
@@ -661,7 +661,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // Same value in a different locale is fine — uniqueness is per-locale.
         const es = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { localizedTitle: 'Uno', localizedSlug: 'shared-draft-localized' },
           locale: 'es',
         })
@@ -672,7 +672,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await expect(
           payload.create({
             collection: 'slug-autosave',
-            draft: true,
+            action: 'saveDraft',
             data: { localizedTitle: 'Two', localizedSlug: 'shared-draft-localized' },
             locale: 'en',
           }),
@@ -684,7 +684,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
           locale: 'en',
         })
@@ -695,7 +695,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const latestDraft = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
           locale: 'en',
         })
         expect(latestDraft.localizedSlug).toBe('slug-autosave-1')
@@ -714,7 +714,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
           locale: 'en',
         })
@@ -723,7 +723,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const allLocales = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
         const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
@@ -736,7 +736,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const en = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: {},
           locale: 'en',
         })
@@ -747,7 +747,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const es = await payload.update({
           collection: 'slug-autosave',
           id: en.id,
-          draft: true,
+          action: 'saveDraft',
           data: {},
           locale: 'es',
         })
@@ -757,7 +757,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should give a duplicated draft its own unique slug', async ({ payload }) => {
         const original = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Dup Me', slug: 'dup-me' },
         })
         created.push(original.id)
@@ -775,7 +775,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One', slug: 'user-typed' },
         })
         created.push(draft.id)
@@ -785,7 +785,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should freeze the slug across subsequent autosaves once set', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
@@ -794,7 +794,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const updated = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One Updated' },
         })
         expect(updated.slug).toBe('draft-one')
@@ -803,7 +803,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should keep an admin overwrite across subsequent autosaves', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
@@ -811,14 +811,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft Two' },
         })
 
         const overwritten = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { slug: 'human-chosen-slug' },
         })
         expect(overwritten.slug).toBe('human-chosen-slug')
@@ -826,7 +826,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const afterMoreEdits = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft Three' },
         })
         expect(afterMoreEdits.slug).toBe('human-chosen-slug')
@@ -835,7 +835,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should not change an already-set slug on publish or after', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
@@ -844,7 +844,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          action: 'saveDraft',
           data: { title: 'Publishable Title' },
         })
 
@@ -2000,7 +2000,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const array = await payload.create({
         collection: 'select-versions-fields',
         data: { array: [{ hasManyArr: ['a', 'b'] }] },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(array.array[0]?.hasManyArr).toStrictEqual(['a', 'b'])
@@ -2024,7 +2024,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a'] },
-        draft: true,
+        action: 'saveDraft',
       })
       expect(data.hasMany).toStrictEqual(['a'])
 
@@ -2032,7 +2032,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b', 'c', 'd'] },
-        draft: true,
+        action: 'saveDraft',
         autosave: true,
       })
       expect(data.hasMany).toStrictEqual(['a', 'b', 'c', 'd'])
@@ -2041,7 +2041,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         id: data.id,
         collection: 'select-versions-fields',
         data: { hasMany: ['a'] },
-        draft: true,
+        action: 'saveDraft',
         autosave: true,
       })
       expect(data.hasMany).toStrictEqual(['a'])
@@ -5578,7 +5578,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
       })
 
       expect(doc.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
@@ -5593,7 +5592,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
           dateWithMixedTimezones_tz: 'America/New_York',
         },
-        draft: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
@@ -5617,7 +5615,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
       })
 
       await payload.create({
@@ -5627,7 +5624,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone: '2027-08-12T08:00:00.000Z',
           dateWithOffsetTimezone_tz: '-08:00',
         },
-        draft: true,
       })
 
       const indiaTimezoneResults = await payload.find({
@@ -5653,7 +5649,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
           dateWithMixedTimezones_tz: 'America/New_York',
         },
-        draft: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
@@ -5666,7 +5661,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
           dateWithMixedTimezones_tz: '+05:30',
         },
-        draft: true,
       })
 
       expect(doc2.dateWithMixedTimezones_tz).toEqual('+05:30')
@@ -5681,7 +5675,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
           dateWithOffsetTimezone_tz: '+05:30',
         },
-        draft: true,
       })
 
       expect(doc1.dateWithOffsetTimezone_tz).toEqual('+05:30')
@@ -5694,7 +5687,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
           dateWithOffsetTimezone_tz: '-08:00',
         },
-        draft: true,
       })
 
       expect(doc2.dateWithOffsetTimezone_tz).toEqual('-08:00')
@@ -5707,7 +5699,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone: '2027-08-12T10:00:00.000Z',
           dateWithOffsetTimezone_tz: '+00:00',
         },
-        draft: true,
       })
 
       expect(doc3.dateWithOffsetTimezone_tz).toEqual('+00:00')
@@ -5726,7 +5717,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
         })
 
         const query = `
@@ -5761,7 +5751,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
             dateWithOffsetTimezone_tz: '-08:00',
           },
-          draft: true,
         })
 
         const query = `
@@ -5790,7 +5779,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
             dateWithMixedTimezones_tz: 'America/New_York',
           },
-          draft: true,
         })
 
         const query = `
@@ -5892,7 +5880,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
         })
 
         const mutation = `
@@ -5967,7 +5954,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
             dateWithMixedTimezones_tz: '+05:30',
           },
-          draft: true,
         })
 
         const mutation = `
@@ -6004,7 +5990,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
-          draft: true,
         })
 
         await payload.create({
@@ -6014,7 +5999,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
             dateWithOffsetTimezone_tz: '-08:00',
           },
-          draft: true,
         })
 
         const query = `
@@ -6096,7 +6080,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithTimezoneWithDisabledColumns: '2027-08-12T10:00:00.000Z',
           dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
         },
-        draft: true,
       })
 
       expect(doc.dateWithTimezoneWithDisabledColumns_tz).toEqual('America/New_York')
@@ -6128,7 +6111,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           ...dataWithoutNoDefaultTz,
           dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000Z',
         },
-        draft: true,
       })
 
       expect(doc.dateWithTimezoneNoDefault_tz).toBeFalsy()
@@ -6143,7 +6125,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           ...dataWithoutMixedTz,
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
         },
-        draft: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')

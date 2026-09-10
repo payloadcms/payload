@@ -17,6 +17,7 @@ import type {
   PayloadComponent,
   PayloadRequest,
   PopulateType,
+  ReadVersion,
   ReplaceAny,
   RequestContext,
   RichTextField,
@@ -25,6 +26,7 @@ import type {
   TypedFallbackLocale,
   ValidateOptions,
   ValidationFieldError,
+  WriteAction,
 } from 'payload'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
@@ -36,7 +38,6 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   context: RequestContext
   currentDepth: number
   depth: number
-  draft: boolean
   /**
    * This maps all population promises to the node type
    */
@@ -55,6 +56,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: JsonObject
+  version?: ReadVersion
 }) => void
 
 export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
@@ -120,7 +122,6 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    * Only available in `afterRead` hooks.
    */
   depth: number
-  draft: boolean
   fallbackLocale: TypedFallbackLocale
   /**
    *  Only available in `afterRead` field hooks.
@@ -154,9 +155,12 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    * Only available in `afterRead` hooks.
    */
   triggerHooks: boolean
+  version?: ReadVersion
 }
 
 export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
+  /** The already-resolved write action for this operation. */
+  action?: WriteAction
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */

@@ -20,7 +20,7 @@ export default async function Page({ params: paramsPromise }: PageParams) {
 
   const pageRes = await payload.find({
     collection: 'pages',
-    draft: false,
+    version: 'published',
     limit: 1,
     overrideAccess: false,
     where: {
@@ -47,7 +47,7 @@ export async function generateStaticParams() {
   const payload = await getPayload({ config })
   const pagesRes = await payload.find({
     collection: 'pages',
-    draft: false,
+    version: 'published',
     limit: 100,
     overrideAccess: false,
   })

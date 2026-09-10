@@ -10,6 +10,7 @@ import type {
   TypeWithID,
   TypeWithTimestamps,
 } from '../collections/config/types.js'
+import type { QueryDraftDataFromGlobalSlug } from '../globals/config/types.js'
 import type payload from '../index.js'
 import type {
   AuthenticatedUser,
@@ -328,6 +329,13 @@ export type TransformGlobalWithSelect<
 > = TSelect extends SelectType
   ? TransformDataWithSelect<DataFromGlobalSlug<TSlug>, TSelect>
   : DataFromGlobalSlug<TSlug>
+
+export type DraftTransformGlobalWithSelect<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+> = TSelect extends SelectType
+  ? TransformDataWithSelect<QueryDraftDataFromGlobalSlug<TSlug>, TSelect>
+  : QueryDraftDataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
 

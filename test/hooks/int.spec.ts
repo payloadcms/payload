@@ -772,6 +772,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
 
     test('should pass correct operation arg on read (findByID)', async ({ payload }) => {
       const doc = await payload.create({
+        action: 'publish',
         collection: beforeOperationSlug,
         data: {},
       })

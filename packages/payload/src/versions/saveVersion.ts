@@ -14,6 +14,9 @@ type Args<T extends JsonObject = JsonObject> = {
   autosave?: boolean
   collection?: SanitizedCollectionConfig
   docWithLocales: T
+  /**
+   * Derived storage flag used when persisting a draft version row.
+   */
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string

@@ -65,7 +65,7 @@ type MergeLocalizedDataArgs = {
    * Pass an explicit list (e.g. the currently-published locales) to discard locales
    * that should not be carried forward — for example, when publishing a single locale
    * you want to avoid leaking draft data that was written to the main doc by an earlier
-   * create/update with `draft: true`.
+   * create/update with `action: 'saveDraft'`.
    */
   localesToPreserve?: string[]
   localesToUpdate: string[]

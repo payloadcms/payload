@@ -311,6 +311,7 @@ test.describe('Hierarchy Sidebar', () => {
     test.beforeAll(async () => {
       // Create a test organization for selection tests
       testOrg = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { title: 'Selection Test Org' },
       })
@@ -454,7 +455,7 @@ test.describe('Hierarchy Sidebar', () => {
       test.afterEach(async () => {
         const createdOrganizations = await payload.find({
           collection: 'organizations',
-          draft: true,
+          version: 'latest',
           where: { title: { equals: organizationTitle } },
         })
 
@@ -495,7 +496,7 @@ test.describe('Hierarchy Sidebar', () => {
             const autosavedOrganizations = await payload.find({
               collection: 'organizations',
               depth: 0,
-              draft: true,
+              version: 'latest',
               where: { title: { equals: organizationTitle } },
             })
 
@@ -739,6 +740,7 @@ test.describe('Hierarchy Sidebar', () => {
       // Create a product with the child folder selected
       // Field is 'parentFolder' because Folders collection overrides parentFieldName
       productWithFolder = await payload.create({
+        action: 'publish',
         collection: 'products',
         data: {
           name: `Product In Child Folder ${uniqueSuffix}`,

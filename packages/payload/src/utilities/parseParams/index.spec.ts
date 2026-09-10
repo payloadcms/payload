@@ -1,6 +1,16 @@
 import * as qs from 'qs-esm'
 import { describe, it, expect } from 'vitest'
-import { parseParams, booleanParams, numberParams } from './index.js'
+
+import { APIError } from '../../errors/APIError.js'
+import {
+  parseParams,
+  booleanParams,
+  numberParams,
+  parseEnumParam,
+  createActionValues,
+  restoreActionValues,
+  updateActionValues,
+} from './index.js'
 
 describe('parseParams', () => {
   describe('boolean parameters', () => {
@@ -256,14 +266,14 @@ describe('parseParams', () => {
 
     it('should handle mixed parameter types', () => {
       const result = parseParams({
-        draft: 'true',
+        autosave: 'true',
         depth: '5',
         sort: 'name,createdAt',
         data: '{"test": true}',
         customParam: 'custom',
       })
 
-      expect(result.draft).toBe(true)
+      expect(result.autosave).toBe(true)
       expect(result.depth).toBe(5)
       expect(result.sort).toEqual(['name', 'createdAt'])
       expect(result.data).toEqual({ test: true })
@@ -286,12 +296,120 @@ describe('parseParams', () => {
     })
 
     it('should only process parameters that exist in the input', () => {
-      const result = parseParams({ draft: 'true' })
+      const result = parseParams({ autosave: 'true' })
 
-      expect(result.draft).toBe(true)
-      expect(result).not.toHaveProperty('autosave')
+      expect(result.autosave).toBe(true)
+      expect(result).not.toHaveProperty('trash')
       expect(result).not.toHaveProperty('depth')
       expect(result).not.toHaveProperty('sort')
+    })
+  })
+
+  describe('version parameter', () => {
+    it.each(['published', 'latest', 'draft'] as const)(
+      'should parse exact version value %s',
+      (version) => {
+        const result = parseParams({ version })
+        expect(result.version).toBe(version)
+      },
+    )
+
+    it('should omit version when it is not provided', () => {
+      const result = parseParams({})
+      expect(result).not.toHaveProperty('version')
+    })
+
+    it('should reject invalid casing', () => {
+      expect(() => parseParams({ version: 'Latest' })).toThrow(APIError)
+      expect(() => parseParams({ version: 'DRAFT' })).toThrow(APIError)
+    })
+
+    it('should reject invalid strings', () => {
+      expect(() => parseParams({ version: 'autosave' })).toThrow(APIError)
+      expect(() => parseParams({ version: 'true' })).toThrow(APIError)
+    })
+
+    it('should reject boolean values', () => {
+      expect(() => parseParams({ version: true as unknown as string })).toThrow(APIError)
+      expect(() => parseParams({ version: false as unknown as string })).toThrow(APIError)
+    })
+
+    it('should reject repeated values', () => {
+      expect(() => parseParams({ version: ['latest', 'draft'] })).toThrow(APIError)
+    })
+  })
+
+  describe('action parameter', () => {
+    it.each(['publish', 'saveDraft', 'unpublish'] as const)(
+      'should parse exact write action %s',
+      (action) => {
+        const result = parseParams({ action })
+        expect(result.action).toBe(action)
+      },
+    )
+
+    it('should omit action when it is not provided', () => {
+      const result = parseParams({})
+      expect(result).not.toHaveProperty('action')
+    })
+
+    it('should reject invalid casing', () => {
+      expect(() => parseParams({ action: 'SaveDraft' })).toThrow(APIError)
+      expect(() => parseParams({ action: 'PUBLISH' })).toThrow(APIError)
+    })
+
+    it('should reject invalid strings', () => {
+      expect(() => parseParams({ action: 'draft' })).toThrow(APIError)
+      expect(() => parseParams({ action: 'true' })).toThrow(APIError)
+    })
+
+    it('should reject boolean values', () => {
+      expect(() => parseParams({ action: true as unknown as string })).toThrow(APIError)
+    })
+
+    it('should reject repeated values', () => {
+      expect(() => parseParams({ action: ['saveDraft', 'publish'] })).toThrow(APIError)
+    })
+
+    it('should reject unpublish for create and restore enums', () => {
+      expect(() =>
+        parseEnumParam({
+          allowed: createActionValues,
+          param: 'action',
+          value: 'unpublish',
+        }),
+      ).toThrow(APIError)
+
+      expect(() =>
+        parseEnumParam({
+          allowed: restoreActionValues,
+          param: 'action',
+          value: 'unpublish',
+        }),
+      ).toThrow(APIError)
+
+      expect(
+        parseEnumParam({
+          allowed: updateActionValues,
+          param: 'action',
+          value: 'unpublish',
+        }),
+      ).toBe('unpublish')
+    })
+  })
+
+  describe('obsolete draft parameter', () => {
+    it('should reject boolean true', () => {
+      expect(() => parseParams({ draft: 'true' })).toThrow(APIError)
+    })
+
+    it('should reject boolean false', () => {
+      expect(() => parseParams({ draft: 'false' })).toThrow(APIError)
+    })
+
+    it('should reject boolean values without coercing them', () => {
+      expect(() => parseParams({ draft: true as unknown as string })).toThrow(APIError)
+      expect(() => parseParams({ draft: false as unknown as string })).toThrow(APIError)
     })
   })
 })

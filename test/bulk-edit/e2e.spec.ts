@@ -98,7 +98,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToDelete1 }),
-      createPost({ title: titleOfPostToDelete2 }, { draft: true }),
+      createPost({ title: titleOfPostToDelete2 }, { action: 'saveDraft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -130,7 +130,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToPublish1 }),
-      createPost({ title: titleOfPostToPublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToPublish2 }, { action: 'saveDraft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -147,7 +147,7 @@ test.describe('Bulk Edit', () => {
     await page.locator('#publish-posts [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-      'Updated 2 Posts successfully.',
+      'Updated 1 Post successfully.',
     )
 
     await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
@@ -166,7 +166,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToUnpublish1 }),
-      createPost({ title: titleOfPostToUnpublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToUnpublish2 }, { action: 'saveDraft' }),
     ])
 
     await page.goto(postsUrl.list)
@@ -241,7 +241,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToPublish1 }),
-      createPost({ title: titleOfPostToPublish2 }, { draft: true }),
+      createPost({ title: titleOfPostToPublish2 }, { action: 'saveDraft' }),
     ])
 
     const description = 'published document'
@@ -288,7 +288,7 @@ test.describe('Bulk Edit', () => {
 
     await Promise.all([
       createPost({ title: titleOfPostToDraft1 }),
-      createPost({ title: titleOfPostToDraft2 }, { draft: true }),
+      createPost({ title: titleOfPostToDraft2 }, { action: 'saveDraft' }),
     ])
 
     const description = 'draft document'
@@ -316,7 +316,9 @@ test.describe('Bulk Edit', () => {
       'Updated 2 Posts successfully.',
     )
 
-    await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText(
+      'Draft (has published version)',
+    )
     await expect(await findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
   })
 
@@ -573,7 +575,7 @@ test.describe('Bulk Edit', () => {
 
     const postCount = 3
     for (let i = 1; i <= postCount; i++) {
-      await createPost({ title: `Post ${i}` }, { draft: true })
+      await createPost({ title: `Post ${i}` }, { action: 'saveDraft' })
       // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
       await wait(50)
     }
@@ -1073,6 +1075,7 @@ async function createPost(
 ): Promise<Post> {
   return payload.create({
     collection: postsSlug,
+    action: 'publish',
     ...(overrides || {}),
     data: {
       title: 'Post Title',

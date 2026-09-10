@@ -117,6 +117,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
               locale,
               overrideAccess: true,
               req,
+              version: 'latest',
             })
           }
 
@@ -130,6 +131,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
               overrideAccess: true,
               req,
               trash: true,
+              version: 'latest',
             })
           }
         })()

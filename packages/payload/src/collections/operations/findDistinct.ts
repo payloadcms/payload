@@ -236,6 +236,7 @@ export const findDistinctOperation = async (
           req,
           showHiddenFields: false,
           siblingDoc: doc,
+          version: 'published',
         }),
       )
     }

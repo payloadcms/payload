@@ -1,7 +1,6 @@
 import {
   createDocumentsInputSchema,
   getCollectionVirtualFieldNames,
-  hasDraftValidationEnabled,
   stripVirtualFields,
   transformPointDataToPayload,
   validateCollectionData,
@@ -30,12 +29,11 @@ export const createDocumentsTool = defineCollectionTool({
   input: createDocumentsInputSchema({ file: fileInputSchema }),
 }).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
-  const collectionConfig = payload.collections[slug]?.config
   const logger = getLogger({ payload })
   const {
+    action,
     depth,
     documents,
-    draft,
     fallbackLocale,
     locale,
     populate,
@@ -43,9 +41,6 @@ export const createDocumentsTool = defineCollectionTool({
     returning,
     select,
   } = input
-  const shouldUsePartialSchema =
-    draft === true && collectionConfig !== undefined && !hasDraftValidationEnabled(collectionConfig)
-
   logger.info(`Creating ${documents.length} documents in collection: ${slug}`)
 
   try {
@@ -62,17 +57,17 @@ export const createDocumentsTool = defineCollectionTool({
         validateCollectionData({
           slug,
           data: inputData,
-          partial: shouldUsePartialSchema,
+          partial: true,
           req,
         })
 
         const parsedData = transformPointDataToPayload(inputData)
         const file = await resolveFile({ slug, input: document.file, req })
         const result = await payload.create({
+          action,
           collection: slug,
           data: parsedData,
           depth,
-          draft,
           overrideAccess: authorizedMCP.overrideAccess,
           populate,
           publishAllLocales,

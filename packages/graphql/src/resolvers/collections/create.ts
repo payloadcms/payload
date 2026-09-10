@@ -1,6 +1,7 @@
 import type {
   Collection,
   CollectionSlug,
+  CreateAction,
   DataFromCollectionSlug,
   PayloadRequest,
   RequiredDataFromCollectionSlug,
@@ -13,8 +14,8 @@ import type { Context } from '../types.js'
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
+    action?: CreateAction
     data: RequiredDataFromCollectionSlug<TSlug>
-    draft: boolean
     locale?: string
   },
   context: {
@@ -31,10 +32,10 @@ export function createResolver<TSlug extends CollectionSlug>(
     }
 
     const result = await createOperation({
+      action: args.action,
       collection,
       data: args.data,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty(context.req, 'transactionID'),
     })
 

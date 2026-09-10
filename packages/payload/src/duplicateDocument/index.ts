@@ -1,6 +1,7 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { FindOneArgs } from '../database/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
+import type { CreateAction } from '../versions/actions/types.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../auth/types.js'
@@ -14,8 +15,8 @@ import { filterDataToSelectedLocales } from '../utilities/filterDataToSelectedLo
 import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 
 type GetDuplicateDocumentArgs = {
+  action?: CreateAction
   collectionConfig: SanitizedCollectionConfig
-  draftArg?: boolean
   id: number | string
   overrideAccess?: boolean
   req: PayloadRequest
@@ -23,8 +24,8 @@ type GetDuplicateDocumentArgs = {
 }
 export const getDuplicateDocumentData = async ({
   id,
+  action,
   collectionConfig,
-  draftArg,
   overrideAccess,
   req,
   selectedLocales,
@@ -99,13 +100,13 @@ export const getDuplicateDocumentData = async ({
     context: req.context,
     depth: 0,
     doc: deepCopyObjectSimple(duplicatedFromDocWithLocales),
-    draft: draftArg!,
     fallbackLocale: null,
     global: null,
     locale: req.locale!,
     overrideAccess: true,
     req,
     showHiddenFields: true,
+    version: action === 'saveDraft' ? 'latest' : 'published',
   })
 
   return { duplicatedFromDoc, duplicatedFromDocWithLocales }

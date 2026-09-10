@@ -1,3 +1,12 @@
+/**
+ * Selects which representation of a document to read.
+ *
+ * - `published` (default): published content from main document storage
+ * - `latest`: newest saved draft when one exists, otherwise published content
+ * - `draft`: newest draft only, with no published fallback
+ */
+export type ReadVersion = 'draft' | 'latest' | 'published'
+
 export type Autosave = {
   /**
    * Define an `interval` in milliseconds to automatically save progress while documents are edited.

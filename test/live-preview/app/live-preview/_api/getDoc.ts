@@ -1,4 +1,4 @@
-import type { CollectionSlug, Where } from 'payload'
+import type { CollectionSlug, ReadVersion, Where } from 'payload'
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
@@ -6,11 +6,11 @@ import { getPayload } from 'payload'
 export const getDoc = async <T>(args: {
   collection: CollectionSlug
   depth?: number
-  draft?: boolean
   slug?: string
+  version?: ReadVersion
 }): Promise<T> => {
   const payload = await getPayload({ config })
-  const { slug, collection, depth = 2, draft } = args || {}
+  const { slug, collection, depth = 2, version } = args || {}
 
   const where: Where = {}
 
@@ -24,9 +24,9 @@ export const getDoc = async <T>(args: {
     const { docs } = await payload.find({
       collection,
       depth,
-      where,
-      draft,
       trash: true, // Include trashed documents
+      version,
+      where,
     })
 
     if (docs[0]) {

@@ -2,6 +2,7 @@ import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
 import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { RestoreAction } from '../../versions/actions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 import type { FindOptions } from './local/find.js'
 
@@ -15,23 +16,25 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
-import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
+import { hasDraftsEnabled, hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+
 export type Arguments = {
+  action?: RestoreAction
   collection: Collection
   currentDepth?: number
   depth?: number
   disableErrors?: boolean
   disableTransaction?: boolean
-  draft?: boolean
   id: number | string
   overrideAccess?: boolean
   populate?: PopulateType
@@ -42,20 +45,9 @@ export type Arguments = {
 export const restoreVersionOperation = async <
   TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,
 >(
-  args: Arguments,
+  incomingArgs: Arguments,
 ): Promise<TData> => {
-  const {
-    id,
-    collection: { config: collectionConfig },
-    depth,
-    draft: draftArg = false,
-    overrideAccess = false,
-    populate,
-    req,
-    req: { fallbackLocale, locale, payload },
-    select: incomingSelect,
-    showHiddenFields,
-  } = args
+  let args = incomingArgs
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -68,12 +60,34 @@ export const restoreVersionOperation = async <
       args,
       collection: args.collection.config,
       operation: 'restoreVersion',
-      overrideAccess,
+      overrideAccess: args.overrideAccess!,
     })
+
+    const {
+      id,
+      action,
+      collection: { config: collectionConfig },
+      depth,
+      overrideAccess = false,
+      populate,
+      req,
+      req: { fallbackLocale, locale, payload },
+      select: incomingSelect,
+      showHiddenFields,
+    } = args
 
     if (!id) {
       throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
     }
+
+    const resolvedAction = resolveAction({
+      action,
+      draftsEnabled: hasDraftsEnabled(collectionConfig),
+      locale,
+      operation: 'restore',
+    })
+    const isSavingDraft = resolvedAction === 'saveDraft'
+    const readVersion = isSavingDraft ? 'latest' : 'published'
 
     // /////////////////////////////////////
     // Retrieve original raw version
@@ -94,7 +108,12 @@ export const restoreVersionOperation = async <
       throw new NotFound(req.t)
     }
 
-    const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersionToRestore
+    const { parent: parentDocID } = rawVersionToRestore
+    const versionToRestoreWithLocales = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data: rawVersionToRestore.version,
+      locale,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -157,13 +176,13 @@ export const restoreVersionOperation = async <
       context: req.context,
       depth: 0,
       doc: deepCopyObjectSimple(prevDocWithLocales),
-      draft: draftArg,
       fallbackLocale: null,
       global: null,
       locale: validationLocale,
       overrideAccess: true,
       req,
       showHiddenFields: true,
+      version: readVersion,
     })
 
     // Use locale-hoisted version data for validation while preserving all locales in docWithLocales.
@@ -171,14 +190,14 @@ export const restoreVersionOperation = async <
       collection: collectionConfig,
       context: req.context,
       depth: 0,
-      doc: deepCopyObjectSimple(rawVersionToRestore.version),
-      draft: draftArg,
+      doc: deepCopyObjectSimple(versionToRestoreWithLocales),
       fallbackLocale: null,
       global: null,
       locale: validationLocale,
       overrideAccess: true,
       req,
       showHiddenFields: true,
+      version: readVersion,
     })
 
     // /////////////////////////////////////
@@ -254,7 +273,13 @@ export const restoreVersionOperation = async <
       operation: 'update',
       overrideAccess,
       req: reqWithValidationLocale,
-      skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
+    })
+
+    result = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data: result,
+      locale,
     })
 
     // /////////////////////////////////////
@@ -273,9 +298,7 @@ export const restoreVersionOperation = async <
 
     // Ensure updatedAt date is always updated
     result.updatedAt = new Date().toISOString()
-    // Ensure status respects restoreAsDraft arg
-    result._status = draftArg ? 'draft' : result._status
-    if (!draftArg) {
+    if (!isSavingDraft) {
       result = await req.payload.db.updateOne({
         id: parentDocID,
         collection: collectionConfig.slug,
@@ -294,7 +317,7 @@ export const restoreVersionOperation = async <
       autosave: false,
       collection: collectionConfig,
       docWithLocales: result,
-      draft: draftArg,
+      draft: isSavingDraft,
       operation: 'restoreVersion',
       payload,
       req: reqWithValidationLocale,
@@ -310,8 +333,6 @@ export const restoreVersionOperation = async <
       context: req.context,
       depth: depth!,
       doc: result,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      draft: undefined,
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
@@ -320,6 +341,7 @@ export const restoreVersionOperation = async <
       req,
       select,
       showHiddenFields: showHiddenFields!,
+      version: readVersion,
     })
 
     // /////////////////////////////////////
@@ -344,6 +366,7 @@ export const restoreVersionOperation = async <
     // /////////////////////////////////////
 
     result = await afterChange({
+      action: resolvedAction,
       collection: collectionConfig,
       context: req.context,
       data: result,
@@ -362,6 +385,7 @@ export const restoreVersionOperation = async <
       for (const hook of collectionConfig.hooks.afterChange) {
         result =
           (await hook({
+            action: resolvedAction,
             collection: collectionConfig,
             context: req.context,
             data: result,
@@ -392,7 +416,7 @@ export const restoreVersionOperation = async <
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

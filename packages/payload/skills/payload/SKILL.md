@@ -14,7 +14,7 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 | Auto-generate slugs      | `{ type: 'slug', useAsSlug: 'title' }`                                     | [FIELDS.md#slug-field](reference/FIELDS.md#slug-field)                                                                           |
 | Restrict content by user | Access control with query                                                  | [ACCESS-CONTROL.md#row-level-security-with-complex-queries](reference/ACCESS-CONTROL.md#row-level-security-with-complex-queries) |
 | Local API user ops       | `user` + `overrideAccess: false`                                           | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
-| Draft/publish workflow   | `versions: { drafts: true }`                                               | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
+| Draft/publish workflow   | `versions: { drafts: true }` + `version` / `action`                        | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
 | Computed fields          | `virtual: true` with **field-level** `hooks.afterRead` returning the value | [FIELDS.md#virtual-fields](reference/FIELDS.md#virtual-fields)                                                                   |
 | Document titles          | Stored top-level field in `admin.useAsTitle`                               | [COLLECTIONS.md#useastitle](reference/COLLECTIONS.md#useastitle)                                                                 |
 | Conditional fields       | `admin.condition`                                                          | [FIELDS.md#conditional-fields](reference/FIELDS.md#conditional-fields)                                                           |
@@ -159,7 +159,7 @@ For all field types (array, blocks, point, join, virtual, conditional, etc.), se
 
 ### Hook Example
 
-Hooks live at one of two levels and they are not interchangeable. **Collection hooks** receive `{ doc, data, req, operation, ... }` and act on the whole document. **Field hooks** live inside an individual field's `hooks` object, receive `{ value, siblingData, ... }`, and **return the new value** for that field. Computed/virtual fields, per-field formatters, and per-field access masking are field hooks; cross-field business logic is a collection hook.
+Hooks live at one of two levels and they are not interchangeable. **Collection hooks** receive `{ doc, data, req, operation, action, ... }` and act on the whole document. **Field hooks** live inside an individual field's `hooks` object, receive `{ value, siblingData, ... }`, and **return the new value** for that field. Computed/virtual fields, per-field formatters, and per-field access masking are field hooks; cross-field business logic is a collection hook.
 
 ```ts
 // Collection-level: business logic across the document

@@ -85,8 +85,10 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
 
     return qs.stringify(
       {
+        action: 'unpublish',
         locale,
         select: {},
+        unpublishAllLocales: true,
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },

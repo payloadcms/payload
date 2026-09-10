@@ -44,6 +44,12 @@ import { buildObjectType } from './buildObjectType.js'
 import { buildPaginatedListType } from './buildPaginatedListType.js'
 import { buildPolicyType } from './buildPoliciesType.js'
 import { buildWhereInputType } from './buildWhereInputType.js'
+import {
+  GraphQLCreateAction,
+  GraphQLReadVersion,
+  GraphQLRestoreAction,
+  GraphQLUpdateAction,
+} from './versionActionEnums.js'
 
 type InitCollectionsGraphQLArgs = {
   config: SanitizedConfig
@@ -202,7 +208,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         type: collection.graphQL.type,
         args: {
           id: { type: new GraphQLNonNull(idType) },
-          draft: { type: GraphQLBoolean },
+          version: { type: GraphQLReadVersion },
           ...(config.localization
             ? {
                 fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
@@ -218,7 +224,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       graphqlResult.Query.fields[pluralName] = {
         type: buildPaginatedListType(pluralName, collection.graphQL.type),
         args: {
-          draft: { type: GraphQLBoolean },
+          version: { type: GraphQLReadVersion },
           where: { type: collection.graphQL.whereInputType },
           ...(config.localization
             ? {
@@ -244,7 +250,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           },
         }),
         args: {
-          draft: { type: GraphQLBoolean },
           trash: { type: GraphQLBoolean },
           where: { type: collection.graphQL.whereInputType },
           ...(config.localization
@@ -277,7 +282,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           ...(createMutationInputType
             ? { data: { type: collection.graphQL.mutationInputType } }
             : {}),
-          draft: { type: GraphQLBoolean },
+          action: { type: GraphQLCreateAction },
           ...(config.localization
             ? {
                 locale: { type: graphqlResult.types.localeInputType },
@@ -295,7 +300,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           ...(updateMutationInputType
             ? { data: { type: collection.graphQL.updateMutationInputType } }
             : {}),
-          draft: { type: GraphQLBoolean },
+          action: { type: GraphQLUpdateAction },
           ...(config.localization
             ? {
                 locale: { type: graphqlResult.types.localeInputType },
@@ -320,6 +325,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: collection.graphQL.type,
           args: {
             id: { type: new GraphQLNonNull(idType) },
+            action: { type: GraphQLCreateAction },
             ...(createMutationInputType
               ? { data: { type: collection.graphQL.mutationInputType } }
               : {}),
@@ -409,7 +415,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           type: collection.graphQL.type,
           args: {
             id: { type: versionIDType },
-            draft: { type: GraphQLBoolean },
+            action: { type: GraphQLRestoreAction },
           },
           resolve: restoreVersionResolver(collection),
         }
@@ -469,6 +475,9 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
               },
             },
           }),
+          args: {
+            version: { type: GraphQLReadVersion },
+          },
           resolve: me(collection),
         }
 

@@ -16,9 +16,9 @@ export const createRestoreVersionCommand = defineCLICommand({
     const payload = await getPayload()
     const result = await payload.restoreVersion({
       id: String(args.id),
+      action: args.action,
       collection: args.slug,
       ...getReadOptions(args),
-      draft: args.draft,
     })
 
     if (!isJSON) {

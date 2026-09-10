@@ -22,7 +22,7 @@ export const findVersionByIDTool = defineCollectionTool({
 }).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { id, depth, draft, fallbackLocale, locale, populate, select, trash } = input
+  const { id, depth, fallbackLocale, locale, populate, select, trash } = input
 
   logger.info(`Finding version in collection: ${slug} with ID: ${id}`)
 
@@ -33,7 +33,6 @@ export const findVersionByIDTool = defineCollectionTool({
       depth,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...(draft !== undefined ? { draft } : {}),
       ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(populate ? { populate } : {}),

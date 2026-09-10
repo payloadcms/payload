@@ -20,16 +20,33 @@ import type {
   GlobalAdminCustom,
   GlobalCustom,
   GlobalSlug,
+  JsonObject,
   RequestContext,
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
-import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
+import type { RestoreAction, UpdateAction } from '../../versions/actions/types.js'
+import type {
+  IncomingGlobalVersions,
+  ReadVersion,
+  SanitizedGlobalVersions,
+} from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
+
+type HasGeneratedGlobalTypes = 'globals' extends keyof GeneratedTypes ? true : false
+
+/**
+ * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional
+ */
+export type QueryDraftDataFromGlobal<TData extends JsonObject> = Partial<TData>
+
+export type QueryDraftDataFromGlobalSlug<TSlug extends GlobalSlug> = QueryDraftDataFromGlobal<
+  DataFromGlobalSlug<TSlug>
+>
 
 export type GlobalAccess<TData = any> = {
   read?: Access<TData>
@@ -46,31 +63,71 @@ export type GlobalsWithoutDrafts = {
 }[GlobalSlug]
 
 /**
- * Conditionally allows or forbids the `draft` property based on global configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ * Allows `version` on draft-enabled globals and forbids it on globals without drafts.
  */
-export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
-}
-  ? TSlug extends GlobalsWithoutDrafts
+export type VersionFromGlobalSlug<TSlug extends GlobalSlug> = HasGeneratedGlobalTypes extends false
+  ? {
+      /**
+       * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
+       *
+       * @default 'published'
+       */
+      version?: ReadVersion
+    }
+  : TSlug extends GlobalsWithoutDrafts
     ? {
         /**
-         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
+         * `version` is not allowed because this global does not have `versions.drafts` enabled.
          */
-        draft?: never
+        version?: never
       }
     : {
         /**
-         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         * Which document representation to read. [More](https://payloadcms.com/docs/versions/drafts)
+         *
+         * @default 'published'
          */
-        draft?: boolean
+        version?: ReadVersion
       }
-  : {
-      /**
-       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
+
+/**
+ * Allows update `action` on draft-enabled globals. Non-draft globals may only omit it or pass `publish`.
+ */
+export type UpdateActionFromGlobalSlug<TSlug extends GlobalSlug> =
+  HasGeneratedGlobalTypes extends false
+    ? {
+        action?: UpdateAction
+      }
+    : TSlug extends GlobalsWithoutDrafts
+      ? {
+          action?: 'publish'
+        }
+      : {
+          action?: UpdateAction
+        }
+
+/**
+ * Allows restore `action` on draft-enabled globals. Non-draft globals may only omit it or pass `publish`.
+ * Restore does not accept `unpublish`. Omitted action publishes.
+ */
+export type RestoreActionFromGlobalSlug<TSlug extends GlobalSlug> =
+  HasGeneratedGlobalTypes extends false
+    ? {
+        /**
+         * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
+         */
+        action?: RestoreAction
+      }
+    : TSlug extends GlobalsWithoutDrafts
+      ? {
+          action?: 'publish'
+        }
+      : {
+          /**
+           * Restore and publish (`publish`, default) or restore as a draft (`saveDraft`).
+           */
+          action?: RestoreAction
+        }
 
 export type BeforeValidateHook = (args: {
   context: RequestContext
@@ -99,6 +156,10 @@ export type BeforeChangeHook = (args: {
 }) => any
 
 export type AfterChangeHook = (args: {
+  /**
+   * Resolved write action for this operation. `undefined` when drafts are not enabled.
+   */
+  action?: RestoreAction | UpdateAction
   context: RequestContext
   data: any
   doc: any
@@ -136,6 +197,10 @@ export type AfterReadHook = (args: {
   overrideAccess?: boolean
   query?: Where
   req: PayloadRequest
+  /**
+   * Only available on findGlobal reads.
+   */
+  version?: ReadVersion
 }) => any
 
 export type HookOperationType = 'countVersions' | 'read' | 'restoreVersion' | 'update'

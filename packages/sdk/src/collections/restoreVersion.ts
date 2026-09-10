@@ -1,7 +1,11 @@
 import type { CollectionSlug, PayloadTypesShape, TypedLocale } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type { DataFromCollectionSlug, PopulateType } from '../types.js'
+import type {
+  CollectionRestoreActionOptions,
+  DataFromCollectionSlug,
+  PopulateType,
+} from '../types.js'
 
 export type RestoreVersionByIDOptions<
   T extends PayloadTypesShape,
@@ -15,10 +19,6 @@ export type RestoreVersionByIDOptions<
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -35,7 +35,7 @@ export type RestoreVersionByIDOptions<
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType<T>
-}
+} & CollectionRestoreActionOptions<TSlug>
 
 export async function restoreVersion<T extends PayloadTypesShape, TSlug extends CollectionSlug<T>>(
   sdk: PayloadSDK<T>,

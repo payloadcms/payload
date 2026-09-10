@@ -31,9 +31,9 @@ export const createUpdateGlobalCommand = defineCLICommand({
 
       result = await payload.updateGlobal({
         slug,
+        action: args.action,
         data: prepareGlobalData({ slug, data: inputData, payload }),
         depth: args.depth,
-        draft: args.draft,
         fallbackLocale: args.fallbackLocale,
         locale: args.locale,
         overrideAccess: args.overrideAccess,

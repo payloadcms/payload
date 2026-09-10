@@ -21,7 +21,7 @@ export const findGlobalTool = defineGlobalTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { depth, fallbackLocale, locale, populate, select } = input
+  const { depth, fallbackLocale, locale, populate, select, version } = input
 
   logger.info(`Reading global: ${slug}, depth: ${depth}${locale ? `, locale: ${locale}` : ''}`)
 
@@ -31,6 +31,7 @@ export const findGlobalTool = defineGlobalTool({
       depth,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
+      version,
     }
 
     if (locale) {

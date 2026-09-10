@@ -2112,6 +2112,7 @@ describe('List View', () => {
     test('should use different URL for trash view', async () => {
       // Create a document and then move it to trash
       const trashDoc = await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should show trash URL', title: 'trash-test' },
       })
@@ -2145,6 +2146,7 @@ describe('List View', () => {
     test('should add published query param for published documents', async () => {
       // Create a published document
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: {
           _status: 'published',
@@ -2211,6 +2213,7 @@ describe('List View', () => {
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
+    action: 'publish',
     collection: postsCollectionSlug,
     data: {
       description,

@@ -2,6 +2,7 @@ import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
 import { Types } from 'mongoose'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -265,6 +266,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
 
         await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: {
             name: 'Pulp Fiction',
@@ -272,6 +274,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
 
         await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: {
             name: 'Pulp Fiction',
@@ -279,6 +282,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
 
         await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: {
             name: 'Harry Potter',
@@ -286,6 +290,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
 
         await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: {
             name: 'Lord of the Rings is boring',
@@ -329,6 +334,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         })
 
         const movie = await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: { director: director.id },
           depth: 0,
@@ -387,7 +393,11 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       })
 
       test('should allow querying within tabs-blocks-tabs', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: { name: 'Pulp Fiction' } })
+        const movie = await payload.create({
+          action: 'publish',
+          collection: 'movies',
+          data: { name: 'Pulp Fiction' },
+        })
 
         const { id } = await payload.create({
           collection: 'deep-nested',
@@ -419,7 +429,11 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       })
 
       test('should allow query hasMany select in relationship', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: { select: ['a', 'b'] } })
+        const movie = await payload.create({
+          action: 'publish',
+          collection: 'movies',
+          data: { select: ['a', 'b'] },
+        })
         const doc = await payload.create({
           collection: 'directors',
           data: { name: 'Mega Director', movie },
@@ -462,6 +476,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
 
       test('should allow 4x deep querying', async ({ payload }) => {
         const movie_1 = await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: { name: 'random_movie_1' },
         })
@@ -470,6 +485,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           data: { name: 'random_director_1', movie: movie_1.id },
         })
         const movie_2 = await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: { name: 'random_movie_2', director: director_1.id },
         })
@@ -493,6 +509,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         'should not duplicate IDs in $in when querying through a relationship',
         async ({ payload }) => {
           const movie = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: { name: 'dup_test_movie' },
           })
@@ -531,11 +548,13 @@ test.suite({ config: './config.ts' })('Relationships', () => {
 
           test.beforeEach(async ({ payload }) => {
             const recallsMovie = await payload.create({
+              action: 'publish',
               collection: 'movies',
               data: { name: 'recalls', select: ['a'] },
             })
 
             const electricCarsMovie = await payload.create({
+              action: 'publish',
               collection: 'movies',
               data: { name: 'electric-cars', select: ['a', 'b'] },
             })
@@ -746,6 +765,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
             'should support equals with a geospatial nested query',
             async ({ payload }) => {
               const nearbyMovie = await payload.create({
+                action: 'publish',
                 collection: 'movies',
                 data: { name: 'nearby', location: [10, 20] },
               })
@@ -772,11 +792,13 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           payload,
         }) => {
           const alpha = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: { name: 'Alpha' },
           })
 
           const beta = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: { name: 'Beta' },
           })
@@ -804,20 +826,24 @@ test.suite({ config: './config.ts' })('Relationships', () => {
 
         test('should retrieve totalDocs correctly with hasMany,', async ({ payload }) => {
           const movie1 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: {},
           })
           const movie2 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: {},
           })
 
           const movie3 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: { name: 'some-name' },
           })
 
           const movie4 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: { name: 'some-name' },
           })
@@ -894,10 +920,12 @@ test.suite({ config: './config.ts' })('Relationships', () => {
 
         test('should query using "contains" by hasMany relationship field', async ({ payload }) => {
           const movie1 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: {},
           })
           const movie2 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: {},
           })
@@ -944,7 +972,11 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         test.options({ db: 'mongo' })(
           'should treat an ObjectId as a relationship ID',
           async ({ payload }) => {
-            const movie = await payload.create({ collection: 'movies', data: {} })
+            const movie = await payload.create({
+              action: 'publish',
+              collection: 'movies',
+              data: {},
+            })
 
             const director = await payload.create({
               collection: 'directors',
@@ -973,10 +1005,12 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           'should query using "all" by hasMany relationship field',
           async ({ payload }) => {
             const movie1 = await payload.create({
+              action: 'publish',
               collection: 'movies',
               data: {},
             })
             const movie2 = await payload.create({
+              action: 'publish',
               collection: 'movies',
               data: {},
             })
@@ -1093,12 +1127,14 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           })
 
           const movie_1 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             depth: 0,
             data: { director: director_1.id, name: 'Some Movie 1' },
           })
 
           const movie_2 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             depth: 0,
             data: { director: director_2.id, name: 'Some Movie 2' },
@@ -1122,17 +1158,17 @@ test.suite({ config: './config.ts' })('Relationships', () => {
             collection: 'movies',
             sort: '-director.name',
             depth: 0,
-            draft: true,
+            version: 'latest',
           })
           const draft_res_2 = await payload.find({
             collection: 'movies',
             sort: 'director.name',
             depth: 0,
-            draft: true,
+            version: 'latest',
           })
 
-          expect(draft_res_1.docs).toStrictEqual([movie_2, movie_1])
-          expect(draft_res_2.docs).toStrictEqual([movie_1, movie_2])
+          expect(draft_res_1.docs.map((doc) => doc.id)).toEqual([movie_2.id, movie_1.id])
+          expect(draft_res_2.docs.map((doc) => doc.id)).toEqual([movie_1.id, movie_2.id])
 
           const localized_res_1 = await payload.find({
             collection: 'movies',
@@ -1157,6 +1193,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           const director = await payload.create({ collection: 'directors', data: {} })
 
           const movie = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: { director: director.id, name: 'movie 1' },
           })
@@ -1170,6 +1207,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           const director_2 = await payload.create({ collection: 'directors', data: {} })
 
           const movie_2 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: { director: director_2.id, name: 'movie 2' },
           })
@@ -1201,15 +1239,18 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           } as const
 
           const director_1 = await payload.create(createDirector)
+          await wait(10)
           const director_2 = await payload.create(createDirector)
 
           const movie_1 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             depth: 0,
             data: { director: director_1.id, name: 'Some Movie 1' },
           })
 
           const movie_2 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             depth: 0,
             data: { director: director_2.id, name: 'Some Movie 2' },
@@ -1232,6 +1273,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
 
         test('should sort by a property of a hasMany relationship', async ({ payload }) => {
           const movie1 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: {
               name: 'Pulp Fiction',
@@ -1239,6 +1281,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           })
 
           const movie2 = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: {
               name: 'Inception',
@@ -1509,6 +1552,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           payload,
         }) => {
           const movie = await payload.create({
+            action: 'publish',
             collection: 'movies',
             data: { name: 'Jackie Brown' },
           })
@@ -1723,6 +1767,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         data: { name: 'direcotr' },
       })
       const movie = await payload.create({
+        action: 'publish',
         collection: 'movies',
         data: { array: [{ polymorphic: { relationTo: 'directors', value: director.id } }] },
       })
@@ -1741,6 +1786,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         data: { name: 'Test Director1337' },
       })
       const movie = await payload.create({
+        action: 'publish',
         collection: 'movies',
         data: { array: [{ director: [director.id] }] },
       })
@@ -1772,6 +1818,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
 
         // 2. create a movie
         const movie = await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: {
             name: 'Pulp Fiction',
@@ -1825,6 +1872,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         await Promise.all(
           movieList.map(async (movie) => {
             return await payload.create({
+              action: 'publish',
               collection: 'movies',
               data: {
                 name: movie,
@@ -1984,7 +2032,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
 
     test.describe('With passing an object', () => {
       test('should create with passing an object', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: {} })
+        const movie = await payload.create({ action: 'publish', collection: 'movies', data: {} })
         const result = await payload.create({
           collection: 'object-writes',
           data: {
@@ -2005,7 +2053,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       })
 
       test('should update with passing an object', async ({ payload }) => {
-        const movie = await payload.create({ collection: 'movies', data: {} })
+        const movie = await payload.create({ action: 'publish', collection: 'movies', data: {} })
         const { id } = await payload.create({ collection: 'object-writes', data: {} })
         const result = await payload.update({
           collection: 'object-writes',
@@ -2060,6 +2108,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       restClient,
     }) => {
       const movie = await payload.create({
+        action: 'publish',
         collection: 'movies',
         data: {
           name: 'Pulp Fiction 2',
@@ -2126,6 +2175,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       'should allow REST all querying on polymorphic relationships',
       async ({ payload, restClient }) => {
         const movie = await payload.create({
+          action: 'publish',
           collection: 'movies',
           data: {
             name: 'Pulp Fiction 2',
@@ -2161,6 +2211,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       payload,
     }) => {
       const movie = await payload.create({
+        action: 'publish',
         collection: 'movies',
         data: {
           name: 'Pulp Fiction 2',
@@ -2209,6 +2260,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       payload,
     }) => {
       const movie = await payload.create({
+        action: 'publish',
         collection: 'movies',
         data: {
           name: 'Pulp Fiction 2',
@@ -2247,6 +2299,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       payload,
     }) => {
       const movie = await payload.create({
+        action: 'publish',
         collection: 'movies',
         data: {
           name: 'Pulp Fiction 2',
@@ -2283,6 +2336,7 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       payload,
     }) => {
       const movie = await payload.create({
+        action: 'publish',
         collection: 'movies',
         data: {
           name: 'Pulp Fiction 2',

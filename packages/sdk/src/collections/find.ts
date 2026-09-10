@@ -2,7 +2,7 @@ import type {
   CollectionSlug,
   PaginatedDocs,
   PayloadTypesShape,
-  SelectType,
+  ReadVersion,
   Sort,
   TypedLocale,
   Where,
@@ -10,10 +10,11 @@ import type {
 
 import type { PayloadSDK } from '../index.js'
 import type {
+  CollectionVersionOptions,
   JoinQuery,
   PopulateType,
   SelectFromCollectionSlug,
-  TransformCollectionWithSelect,
+  TransformCollectionWithSelectByVersion,
 } from '../types.js'
 
 export type FindOptions<
@@ -29,10 +30,6 @@ export type FindOptions<
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Whether the documents should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -89,17 +86,18 @@ export type FindOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & CollectionVersionOptions<TSlug>
 
 export async function find<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
+  TVersion extends ReadVersion | undefined = undefined,
 >(
   sdk: PayloadSDK<T>,
-  options: FindOptions<T, TSlug, TSelect>,
+  options: { version?: TVersion } & FindOptions<T, TSlug, TSelect>,
   init?: RequestInit,
-): Promise<PaginatedDocs<TransformCollectionWithSelect<T, TSlug, TSelect>>> {
+): Promise<PaginatedDocs<TransformCollectionWithSelectByVersion<T, TSlug, TSelect, TVersion>>> {
   const response = await sdk.request({
     args: options,
     init,

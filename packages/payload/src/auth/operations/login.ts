@@ -355,14 +355,13 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
       context: req.context,
       depth: depth!,
       doc: user,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      draft: undefined,
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
       overrideAccess,
       req,
       showHiddenFields: showHiddenFields!,
+      version: 'published',
     })
 
     // /////////////////////////////////////

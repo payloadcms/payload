@@ -37,41 +37,49 @@ export async function seed(payload: Payload): Promise<void> {
 
   // Create organization hierarchy
   const acmeCorp = await payload.create({
+    action: 'publish',
     collection: organizationsSlug,
     data: { title: 'Acme Corp' },
   })
 
   await payload.create({
+    action: 'publish',
     collection: organizationsSlug,
     data: { title: 'Beta Corp' },
   })
 
   await payload.create({
+    action: 'publish',
     collection: organizationsSlug,
     data: { title: 'Gamma Corp' },
   })
 
   const engineeringDiv = await payload.create({
+    action: 'publish',
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Engineering Division' },
   })
 
   await payload.create({
+    action: 'publish',
     collection: organizationsSlug,
     data: { parent: engineeringDiv.id, title: 'Frontend Team' },
   })
 
   await payload.create({
+    action: 'publish',
     collection: organizationsSlug,
     data: { parent: engineeringDiv.id, title: 'Backend Team' },
   })
 
   await payload.create({
+    action: 'publish',
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Marketing Division' },
   })
 
   await payload.create({
+    action: 'publish',
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Zeta Division' },
   })
@@ -104,26 +112,31 @@ export async function seed(payload: Payload): Promise<void> {
 
   // Create product hierarchy (tests localization)
   const electronicsCategory = await payload.create({
+    action: 'publish',
     collection: productsSlug,
     data: { name: 'Electronics' },
   })
 
   const computersCategory = await payload.create({
+    action: 'publish',
     collection: productsSlug,
     data: { name: 'Computers', parent: electronicsCategory.id },
   })
 
   await payload.create({
+    action: 'publish',
     collection: productsSlug,
     data: { name: 'Laptops', parent: computersCategory.id },
   })
 
   await payload.create({
+    action: 'publish',
     collection: productsSlug,
     data: { name: 'Desktops', parent: computersCategory.id },
   })
 
   await payload.create({
+    action: 'publish',
     collection: productsSlug,
     data: { name: 'Phones', parent: electronicsCategory.id },
   })

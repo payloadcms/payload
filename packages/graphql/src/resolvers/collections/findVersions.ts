@@ -10,7 +10,6 @@ import { buildSelectForCollectionMany } from '../../utilities/select.js'
 export type Resolver = (
   _: unknown,
   args: {
-    draft?: boolean
     fallbackLocale?: string
     limit?: number
     locale?: string
@@ -37,16 +36,6 @@ export function findVersionsResolver(collection: Collection): Resolver {
     req.locale = args.locale || req.locale
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
     req.query = req.query || {}
-
-    const draft: boolean =
-      (args.draft ?? req.query?.draft === 'false')
-        ? false
-        : req.query?.draft === 'true'
-          ? true
-          : undefined
-    if (typeof draft === 'boolean') {
-      req.query.draft = String(draft)
-    }
 
     const { sort } = args
 

@@ -26,7 +26,6 @@ export const findDocumentsTool = defineCollectionTool({
   const {
     id,
     depth,
-    draft,
     fallbackLocale,
     joins,
     limit,
@@ -37,6 +36,7 @@ export const findDocumentsTool = defineCollectionTool({
     select,
     sort,
     trash,
+    version,
     where,
   } = input
 
@@ -58,7 +58,7 @@ export const findDocumentsTool = defineCollectionTool({
           ...(joins !== undefined && { joins }),
           ...(locale && { locale }),
           ...(fallbackLocale !== undefined && { fallbackLocale }),
-          ...(draft !== undefined && { draft }),
+          ...(version !== undefined && { version }),
           ...(trash !== undefined && { trash }),
         })
 
@@ -96,7 +96,7 @@ export const findDocumentsTool = defineCollectionTool({
       ...(joins !== undefined && { joins }),
       ...(locale && { locale }),
       ...(fallbackLocale !== undefined && { fallbackLocale }),
-      ...(draft !== undefined && { draft }),
+      ...(version !== undefined && { version }),
       ...(pagination !== undefined && { pagination }),
       ...(trash !== undefined && { trash }),
     }

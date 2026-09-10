@@ -195,15 +195,16 @@ const afterChangeHook: CollectionAfterChangeHook<Post> = async ({
 
 The following arguments are provided to the `afterChange` hook:
 
-| Option            | Description                                                                                                                                           |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**  | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
-| **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
-| **`data`**        | The incoming data passed through the operation.                                                                                                       |
-| **`doc`**         | The resulting Document after changes are applied.                                                                                                     |
-| **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
-| **`previousDoc`** | The Document before changes were applied.                                                                                                             |
-| **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+| Option            | Description                                                                                                                                                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`action`**      | Resolved write action for this operation, including defaults. `undefined` when drafts are not enabled. Create/duplicate: `saveDraft` or `publish`. Update: `saveDraft`, `publish`, or `unpublish`. Restore: `saveDraft` or `publish`. |
+| **`collection`**  | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                                                 |
+| **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                                                                                                       |
+| **`doc`**         | The resulting Document after changes are applied.                                                                                                                                                                                     |
+| **`operation`**   | The name of the operation that this hook is running within.                                                                                                                                                                           |
+| **`previousDoc`** | The Document before changes were applied.                                                                                                                                                                                             |
+| **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                 |
 
 ### beforeRead
 

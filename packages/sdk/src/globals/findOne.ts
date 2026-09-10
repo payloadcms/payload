@@ -1,7 +1,12 @@
-import type { GlobalSlug, PayloadTypesShape, SelectType, TypedLocale } from 'payload'
+import type { GlobalSlug, PayloadTypesShape, ReadVersion, TypedLocale } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type { PopulateType, SelectFromGlobalSlug, TransformGlobalWithSelect } from '../types.js'
+import type {
+  GlobalVersionOptions,
+  PopulateType,
+  SelectFromGlobalSlug,
+  TransformGlobalWithSelectByVersion,
+} from '../types.js'
 
 export type FindGlobalOptions<
   T extends PayloadTypesShape,
@@ -12,10 +17,6 @@ export type FindGlobalOptions<
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -36,17 +37,18 @@ export type FindGlobalOptions<
    * the Global slug to operate against.
    */
   slug: TSlug
-}
+} & GlobalVersionOptions<TSlug>
 
 export async function findGlobal<
   T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
   TSelect extends SelectFromGlobalSlug<T, TSlug>,
+  TVersion extends ReadVersion | undefined = undefined,
 >(
   sdk: PayloadSDK<T>,
-  options: FindGlobalOptions<T, TSlug, TSelect>,
+  options: { version?: TVersion } & FindGlobalOptions<T, TSlug, TSelect>,
   init?: RequestInit,
-): Promise<TransformGlobalWithSelect<T, TSlug, TSelect>> {
+): Promise<TransformGlobalWithSelectByVersion<T, TSlug, TSelect, TVersion>> {
   const response = await sdk.request({
     args: options,
     init,

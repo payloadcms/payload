@@ -14,7 +14,6 @@ export const blockPopulationPromiseHOC = (
     context,
     currentDepth,
     depth,
-    draft,
     editorPopulationPromises,
     field,
     fieldPromises,
@@ -26,6 +25,7 @@ export const blockPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
+    version,
   }) => {
     const blockFieldData = node.fields
 
@@ -40,7 +40,6 @@ export const blockPopulationPromiseHOC = (
       currentDepth,
       data: blockFieldData,
       depth,
-      draft,
       editorPopulationPromises,
       fieldPromises,
       fields: block.fields,
@@ -52,6 +51,7 @@ export const blockPopulationPromiseHOC = (
       req,
       showHiddenFields,
       siblingDoc: blockFieldData,
+      version,
     })
   }
 

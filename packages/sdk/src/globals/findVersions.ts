@@ -17,7 +17,6 @@ export type FindGlobalVersionsOptions<T extends PayloadTypesShape, TSlug extends
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */

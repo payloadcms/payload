@@ -8,11 +8,17 @@ export function me(collection: Collection): any {
   async function resolver(_, args, context: Context) {
     const currentToken = extractJWT(context.req)
 
+    if (args.version) {
+      context.req.query = context.req.query || {}
+      context.req.query.version = args.version
+    }
+
     const options = {
       collection,
       currentToken,
       depth: 0,
       req: isolateObjectProperty(context.req, 'transactionID'),
+      version: args.version,
     }
 
     const result = await meOperation(options)

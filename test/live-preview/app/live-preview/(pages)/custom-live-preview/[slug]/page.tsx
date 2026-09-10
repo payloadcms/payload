@@ -23,7 +23,7 @@ export default async function SSRAutosavePage({ params: paramsPromise }: Args) {
   const data = await getDoc<Page>({
     slug,
     collection: customLivePreviewSlug,
-    draft: true,
+    version: 'latest',
   })
 
   if (!data) {

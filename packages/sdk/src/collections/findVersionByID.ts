@@ -29,10 +29,6 @@ export type FindVersionByIDOptions<
    */
   disableErrors?: TDisableErrors
   /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale<T>

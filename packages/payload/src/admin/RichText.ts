@@ -15,6 +15,8 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext, TypedFallbackLocale } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
 import type { FieldsToJSONSchemaArgs } from '../utilities/configToJSONSchema.js'
+import type { WriteAction } from '../versions/actions/types.js'
+import type { ReadVersion } from '../versions/types.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
@@ -29,8 +31,6 @@ export type AfterReadRichTextHookArgs<
   currentDepth?: number
 
   depth?: number
-
-  draft?: boolean
 
   fallbackLocale?: TypedFallbackLocale
   fieldPromises?: Promise<void>[]
@@ -53,6 +53,7 @@ export type AfterReadRichTextHookArgs<
   showHiddenFields?: boolean
   triggerAccessControl?: boolean
   triggerHooks?: boolean
+  version?: ReadVersion
 }
 
 export type AfterChangeRichTextHookArgs<
@@ -60,6 +61,8 @@ export type AfterChangeRichTextHookArgs<
   TValue = any,
   TSiblingData = any,
 > = {
+  /** The already-resolved write action for this operation. */
+  action?: WriteAction
   /** A string relating to which operation the field type is currently executing within. */
   operation: 'create' | 'update'
   /** The document before changes were applied. */
@@ -231,7 +234,6 @@ type RichTextAdapterBase<
     context: RequestContext
     currentDepth?: number
     depth: number
-    draft: boolean
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
     fieldPromises: Promise<void>[]
     findMany: boolean
@@ -243,6 +245,7 @@ type RichTextAdapterBase<
     req: PayloadRequest
     showHiddenFields: boolean
     siblingDoc: JsonObject
+    version?: ReadVersion
   }) => void
   hooks?: RichTextHooks
   /**
