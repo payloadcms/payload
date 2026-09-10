@@ -73,7 +73,7 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "rimraf": "3.0.2",
-    "sharp": "0.34.2",
+    "sharp": "0.35.4",
     "sort-package-json": "^2.10.0",
     "typescript": "6.0.3",
     "vite-tsconfig-paths": "6.0.5",

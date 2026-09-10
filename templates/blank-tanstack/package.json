@@ -32,7 +32,7 @@
     "payload": "workspace:*",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "sharp": "0.34.2",
+    "sharp": "0.35.4",
     "srvx": "0.11.21",
     "vite": "8.1.0"
   },
