@@ -71,6 +71,12 @@ export type FieldState = {
    */
   isModified?: boolean
   /**
+   * Set to `true` for fields configured with `virtual: true` or `virtual: '<path>'`.
+   * Their values are not persisted and are recomputed on every read, so consumers must not
+   * treat a change in their value as a user edit. See `Autosave` for an example.
+   */
+  isVirtual?: boolean
+  /**
    * The path of the field when its custom components were last rendered.
    * This is used to denote if a field has been rendered, and if so,
    * what path it was rendered under last.
