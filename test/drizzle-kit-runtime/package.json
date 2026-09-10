@@ -1,0 +1,20 @@
+{
+  "name": "drizzle-kit-runtime-validation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "build:worker": "opennextjs-cloudflare build --skipNextBuild",
+    "dev": "next dev",
+    "verify:output": "node verify-output.mjs"
+  },
+  "dependencies": {
+    "@opennextjs/cloudflare": "1.19.4",
+    "next": "16.2.4",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.87.0"
+  }
+}
