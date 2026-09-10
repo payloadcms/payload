@@ -27,6 +27,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
     })
 
     const lockedPost = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'bulk delete locked post',
@@ -34,6 +35,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
     })
 
     const unlockedPost = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'bulk delete unlocked post',

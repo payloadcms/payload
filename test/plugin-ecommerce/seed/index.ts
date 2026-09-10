@@ -67,6 +67,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     )
 
     const hoodieProduct = await payload.create({
+      action: 'publish',
       collection: 'products',
       data: {
         name: 'Hoodie',
@@ -76,6 +77,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const hoodieSmallWhite = await payload.create({
+      action: 'publish',
       collection: 'variants',
       data: {
         product: hoodieProduct.id,
@@ -87,6 +89,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const hoodieMediumWhite = await payload.create({
+      action: 'publish',
       collection: 'variants',
       data: {
         product: hoodieProduct.id,
@@ -98,6 +101,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const hatProduct = await payload.create({
+      action: 'publish',
       collection: 'products',
       data: {
         name: 'Hat',

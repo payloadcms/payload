@@ -708,14 +708,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
       payload,
     }) => {
       await payload.create({
+        action: 'publish',
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
       })
       const { id: hitID } = await payload.create({
+        action: 'publish',
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
       })
       await payload.create({
+        action: 'publish',
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
       })

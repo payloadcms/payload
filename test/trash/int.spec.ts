@@ -37,6 +37,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     })
 
     restrictedCollectionDoc = await payload.create({
+      action: 'publish',
       collection: restrictedCollectionSlug as CollectionSlug,
       data: {
         title: 'With Access Control one',
@@ -44,6 +45,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     })
 
     postsDocOne = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         title: 'Doc one',
@@ -51,6 +53,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     })
 
     postsDocTwo = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         title: 'Doc two',
@@ -162,6 +165,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       test('should allow regular user to trash (soft-delete) a document', async ({ payload }) => {
         // Create a document as admin
         const doc = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Regular user trash test' },
         })
@@ -185,6 +189,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       test('should allow admin to trash (soft-delete) a document', async ({ payload }) => {
         // Create a document
         const doc = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Admin trash test' },
         })
@@ -212,6 +217,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         // Create and trash a document
         const doc = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Regular user perm delete test',
@@ -240,6 +246,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       test('should allow admin to permanently delete a trashed document', async ({ payload }) => {
         // Create and trash a document
         const doc = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Admin perm delete test',
@@ -273,11 +280,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       test('should allow regular user to bulk trash documents', async ({ payload }) => {
         // Create multiple documents
         const doc1 = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 1' },
         })
 
         const doc2 = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: { title: 'Bulk trash test 2' },
         })
@@ -308,6 +317,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         // Create multiple trashed documents
         const doc1 = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Bulk perm delete test 1',
@@ -316,6 +326,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         })
 
         const doc2 = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Bulk perm delete test 2',
@@ -363,6 +374,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         // Create multiple trashed documents
         const doc1 = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Admin bulk perm delete 1',
@@ -371,6 +383,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         })
 
         const doc2 = await payload.create({
+          action: 'publish',
           collection: differentiatedTrashCollectionSlug as CollectionSlug,
           data: {
             title: 'Admin bulk perm delete 2',
@@ -484,6 +497,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       }) => {
         // Add a duplicate title
         await payload.create({
+          action: 'publish',
           collection: postsSlug,
           data: { title: 'Doc one' },
         })
@@ -854,6 +868,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         payload,
       }) => {
         const docThree = await payload.create({
+          action: 'publish',
           collection: postsSlug,
           data: {
             title: 'Doc three',
@@ -1488,6 +1503,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
         const query = `?trash=true&where[deletedAt][exists]=true`
 
         const docThree = await payload.create({
+          action: 'publish',
           collection: postsSlug,
           data: {
             title: 'Doc three',
@@ -2292,6 +2308,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     }) => {
       // postsDocOne is non-trashed, postsDocTwo is trashed
       const page = await payload.create({
+        action: 'publish',
         collection: pagesSlug,
         data: {
           title: 'Page with related posts',
@@ -2317,6 +2334,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
       payload,
     }) => {
       const page = await payload.create({
+        action: 'publish',
         collection: pagesSlug,
         data: {
           title: 'Page with featured post',
@@ -2336,6 +2354,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
 
     test('should populate a non-trashed document in a single relationship', async ({ payload }) => {
       const page = await payload.create({
+        action: 'publish',
         collection: pagesSlug,
         data: {
           title: 'Page with featured post',
@@ -2356,6 +2375,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     test('should include trashed documents in relationship when depth=0', async ({ payload }) => {
       // At depth=0, relationships are returned as IDs - but trashed IDs should still be filtered
       const page = await payload.create({
+        action: 'publish',
         collection: pagesSlug,
         data: {
           title: 'Page with related posts depth 0',

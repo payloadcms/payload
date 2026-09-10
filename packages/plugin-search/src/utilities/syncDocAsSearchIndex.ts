@@ -76,6 +76,7 @@ export const syncDocAsSearchIndex = async ({
         req,
         // Include trashed documents when the document being synced is trashed
         trash: isTrashDocument,
+        version: 'latest',
       })
     }
     dataToSave = await beforeSync({

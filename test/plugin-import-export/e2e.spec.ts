@@ -688,6 +688,7 @@ test.describe('Import Export Plugin', () => {
 
       const importedDocs = await payload.find({
         collection: 'pages',
+        version: 'published',
         where: {
           title: { contains: 'E2E Import Test' },
         },
@@ -727,6 +728,7 @@ test.describe('Import Export Plugin', () => {
 
       const importedDocs = await payload.find({
         collection: 'pages',
+        version: 'published',
         where: {
           title: { contains: 'E2E JSON Import' },
         },
@@ -795,6 +797,7 @@ test.describe('Import Export Plugin', () => {
     test('should handle import with update mode', async () => {
       const existingDoc = await payload.create({
         collection: 'pages',
+        action: 'publish',
         data: {
           excerpt: 'Original excerpt',
           title: 'E2E Update Test Original',
@@ -841,6 +844,7 @@ test.describe('Import Export Plugin', () => {
         docs: [updatedDoc],
       } = await payload.find({
         collection: 'pages',
+        version: 'published',
         where: {
           id: {
             equals: existingDoc.id,
@@ -1104,6 +1108,7 @@ test.describe('Import Export Plugin', () => {
 
       const posts = await payload.find({
         collection: postsWithS3Slug,
+        version: 'published',
         where: {
           title: { contains: 'S3 E2E Import' },
         },
@@ -1115,10 +1120,12 @@ test.describe('Import Export Plugin', () => {
     test('should export to S3 via jobs queue and download file', async () => {
       await payload.create({
         collection: postsWithS3Slug,
+        action: 'publish',
         data: { title: 'S3 E2E Export 1' },
       })
       await payload.create({
         collection: postsWithS3Slug,
+        action: 'publish',
         data: { title: 'S3 E2E Export 2' },
       })
 
@@ -1239,6 +1246,7 @@ test.describe('Import Export Plugin', () => {
 
       await payload.create({
         collection: 'pages',
+        action: 'publish',
         data: {
           _status: 'published',
           customRelationship: userId,

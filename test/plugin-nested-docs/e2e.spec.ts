@@ -38,6 +38,7 @@ describe('Nested Docs Plugin', () => {
     }: Partial<PayloadPage>): Promise<PayloadPage> {
       return payload.create({
         collection: 'pages',
+        action: _status === 'published' ? 'publish' : 'saveDraft',
         data: {
           slug,
           _status,

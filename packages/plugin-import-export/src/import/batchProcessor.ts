@@ -361,6 +361,7 @@ async function processImportBatch({
             overrideAccess: false,
             req,
             user,
+            version: 'latest',
             where: {
               [matchField || 'id']: {
                 equals: matchValue,

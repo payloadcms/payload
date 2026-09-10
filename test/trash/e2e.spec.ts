@@ -1255,6 +1255,7 @@ describe('Trash', () => {
     const localizedFieldValueES = 'Localized Draft Content ES'
 
     const draftPost = await payload.create({
+      action: 'saveDraft',
       collection: postsSlug,
       data: {
         _status: 'draft',
@@ -1318,6 +1319,7 @@ describe('Trash', () => {
 
     // Create a draft post without localized data initially
     const draftPost = await payload.create({
+      action: 'saveDraft',
       collection: postsSlug,
       data: {
         _status: 'draft',
@@ -1399,6 +1401,7 @@ describe('Trash', () => {
 
 async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Promise<Post> {
   return payload.create({
+    action: 'publish',
     collection: postsSlug,
     data,
   }) as unknown as Promise<Post>
@@ -1406,6 +1409,7 @@ async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Pro
 
 async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Promise<Post> {
   return payload.create({
+    action: 'publish',
     collection: postsSlug,
     data: {
       ...data,

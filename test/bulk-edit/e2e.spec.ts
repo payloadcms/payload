@@ -317,7 +317,7 @@ test.describe('Bulk Edit', () => {
     )
 
     await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText(
-      'Published',
+      'Draft (has published version)',
     )
     await expect(await findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
   })

@@ -2040,11 +2040,13 @@ describe('List View', () => {
     test('should disable linking for documents with title "no-link"', async () => {
       // Create test documents
       await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should not be linkable', title: 'no-link' },
       })
 
       const normalDoc = await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should be linkable normally', title: 'normal' },
       })
@@ -2071,6 +2073,7 @@ describe('List View', () => {
 
     test('should use custom destination for documents with title "custom-link"', async () => {
       await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should link to custom destination', title: 'custom-link' },
       })
@@ -2089,6 +2092,7 @@ describe('List View', () => {
     test('should add admin query param for dev@payloadcms.com user', async () => {
       // This test verifies the user-based URL modification
       const adminDoc = await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should have admin query param', title: 'admin-test' },
       })
@@ -2112,6 +2116,7 @@ describe('List View', () => {
     test('should use different URL for trash view', async () => {
       // Create a document and then move it to trash
       const trashDoc = await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should show trash URL', title: 'trash-test' },
       })
@@ -2145,6 +2150,7 @@ describe('List View', () => {
     test('should add published query param for published documents', async () => {
       // Create a published document
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: {
           _status: 'published',
@@ -2171,11 +2177,13 @@ describe('List View', () => {
 
     test('should disable linking in ListDrawer for documents with formatDocURL returning null', async () => {
       await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should not be linkable in drawer', title: 'no-link' },
       })
 
       await payload.create({
+        action: 'publish',
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should be linkable in drawer', title: 'linkable' },
       })
@@ -2211,6 +2219,7 @@ describe('List View', () => {
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
+    action: 'publish',
     collection: postsCollectionSlug,
     data: {
       description,

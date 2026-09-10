@@ -11,6 +11,7 @@ let page: Page
 test.suite({ config: './config.ts' })('@payloadcms/plugin-redirects', () => {
   test.beforeEach(async ({ payload }) => {
     page = await payload.create({
+      action: 'publish',
       collection: 'pages',
       data: {
         title: 'Test',

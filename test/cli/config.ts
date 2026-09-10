@@ -165,6 +165,7 @@ export default buildConfigWithDefaults({
           slug: 'noop',
           handler: async ({ req }) => {
             await req.payload.create({
+              action: 'publish',
               collection: 'pages',
               data: { title: 'CLI job ran' },
             } as never)

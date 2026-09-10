@@ -164,6 +164,7 @@ export const createExport = async (args: CreateExportArgs) => {
       user,
       locale,
       overrideAccess: false,
+      where,
     })
     totalDocs = countResult.totalDocs
   } catch (error) {

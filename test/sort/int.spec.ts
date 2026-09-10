@@ -366,7 +366,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
         })
       })
 
-      test('should sort latest without draft', async ({ payload }) => {
+      test('should sort published documents', async ({ payload }) => {
         const posts = await payload.find({
           collection: 'drafts',
           sort: 'number',
@@ -375,7 +375,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
 
         expect(posts.docs.map((post) => post.text)).toEqual([
           'Post 2 published', // 2
-          'Post 3 draft', // 3
           'Post 1 published', // 15
         ])
       })

@@ -75,6 +75,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should compute correct paths for root document', async ({ payload }) => {
       const rootPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         data: {
@@ -90,6 +91,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should compute correct paths for nested documents', async ({ payload }) => {
       // Create root
       const rootPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: {
           parent: null,
@@ -99,6 +101,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
       // Create child
       const childPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         data: {
@@ -112,6 +115,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
       // Create grandchild
       const grandchildPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         data: {
@@ -127,21 +131,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should compute updated paths when parent changes', async ({ payload }) => {
       // Create initial tree: Root -> Child -> Grandchild
       const rootPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
       })
 
       const anotherRoot = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Another Root' },
       })
 
       const childPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: rootPage.id, title: 'Child' },
       })
 
       const grandchildPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: childPage.id, title: 'Grandchild' },
       })
@@ -172,11 +180,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should compute updated paths when ancestor title changes', async ({ payload }) => {
       // Create tree
       const rootPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
       })
 
       const childPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: rootPage.id, title: 'Child' },
       })
@@ -202,11 +212,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should handle moving to root level', async ({ payload }) => {
       // Create tree
       const rootPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
       })
 
       const childPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: rootPage.id, title: 'Child' },
       })
@@ -235,6 +247,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should prevent self-referential parent', async ({ payload }) => {
       const page = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Test Page' },
       })
@@ -250,11 +263,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should prevent circular reference with direct child', async ({ payload }) => {
       const parentPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Parent' },
       })
 
       const childPage = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: parentPage.id, title: 'Child' },
       })
@@ -270,16 +285,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should prevent circular reference with grandchild', async ({ payload }) => {
       const grandparent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Grandparent' },
       })
 
       const parent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: grandparent.id, title: 'Parent' },
       })
 
       const child = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: parent.id, title: 'Child' },
       })
@@ -295,16 +313,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should allow moving to a non-circular parent', async ({ payload }) => {
       const page1 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Page 1' },
       })
 
       const page2 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Page 2' },
       })
 
       const child = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: page1.id, title: 'Child' },
       })
@@ -336,11 +357,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should find root documents by querying parent field', async ({ payload }) => {
       const root = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
       })
 
       await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 1' },
       })
@@ -358,21 +381,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should find direct children by querying parent field', async ({ payload }) => {
       const root = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
       })
 
       const child1 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 1' },
       })
 
       const child2 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 2' },
       })
 
       await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: child1.id, title: 'Grandchild 1' },
       })
@@ -441,6 +468,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
       for (let i = 0; i < 10; i++) {
         currentParent = await payload.create({
+          action: 'publish',
           collection: 'organizations',
           context: { computeHierarchyPaths: true },
           data: {
@@ -468,12 +496,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should compute paths correctly for published and draft versions', async ({ payload }) => {
       // Create parent and child
       const parent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Products' },
       })
 
       // Publish child
       const child = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { _status: 'published', parent: parent.id, title: 'Clothing' },
       })
@@ -488,6 +518,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
       // Move parent
       const grandParent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { _status: 'published', parent: null, title: 'Categories' },
       })
@@ -521,16 +552,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should compute paths when no draft exists', async ({ payload }) => {
       const parent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { _status: 'published', parent: null, title: 'Services' },
       })
 
       const child = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { _status: 'published', parent: parent.id, title: 'Consulting' },
       })
 
       const newParent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Offerings' },
       })
@@ -603,16 +637,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
     test('should compute paths for collections without versioning', async ({ payload }) => {
       const parent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Electronics' },
       })
 
       const child = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: parent.id, title: 'Phones' },
       })
 
       const newParent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Tech' },
       })
@@ -1164,11 +1201,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     }) => {
       // Create a hierarchy: Root > Category > 5 children
       const root = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
       })
 
       const category = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: root.id, title: 'Category' },
       })
@@ -1177,6 +1216,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
       for (let i = 1; i <= 5; i++) {
         const child = await payload.create({
+          action: 'publish',
           collection: 'organizations',
           data: { parent: category.id, title: `Child ${i}` },
         })
@@ -1226,16 +1266,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should show cache benefit: 10 docs with shared ancestors', async ({ payload }) => {
       // Create deeper hierarchy
       const root = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Products' },
       })
 
       const cat1 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: root.id, title: 'Electronics' },
       })
 
       const cat2 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: root.id, title: 'Clothing' },
       })
@@ -1245,6 +1288,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
       // 5 products under Electronics
       for (let i = 1; i <= 5; i++) {
         const child = await payload.create({
+          action: 'publish',
           collection: 'organizations',
           data: { parent: cat1.id, title: `Product E${i}` },
         })
@@ -1254,6 +1298,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
       // 5 products under Clothing
       for (let i = 1; i <= 5; i++) {
         const child = await payload.create({
+          action: 'publish',
           collection: 'organizations',
           data: { parent: cat2.id, title: `Product C${i}` },
         })
@@ -1383,6 +1428,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should compute full paths when selecting path fields', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Parent Org' },
       })
@@ -1390,6 +1436,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
       // Create child
       const child = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: parent.id, title: 'Child Org' },
       })
@@ -1413,6 +1460,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should not expose auto-added fields in response', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Hidden Parent' },
       })
@@ -1420,6 +1468,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
       // Create child
       const child = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: parent.id, title: 'Hidden Child' },
       })
@@ -1446,6 +1495,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should keep explicitly selected fields in response', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Explicit Parent' },
       })
@@ -1453,6 +1503,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
 
       // Create child
       const child = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: parent.id, title: 'Explicit Child' },
       })
@@ -1481,18 +1532,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
     test('should work with deeply nested hierarchy using select', async ({ payload }) => {
       // Create 3-level hierarchy
       const level1 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: null, title: 'Level 1' },
       })
       createdOrgIds.push(level1.id)
 
       const level2 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: level1.id, title: 'Level 2' },
       })
       createdOrgIds.push(level2.id)
 
       const level3 = await payload.create({
+        action: 'publish',
         collection: 'organizations',
         data: { parent: level2.id, title: 'Level 3' },
       })

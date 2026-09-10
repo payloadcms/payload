@@ -44,6 +44,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
     })
 
     post = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'some post',
@@ -51,6 +52,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
     })
 
     await payload.create({
+      action: 'publish',
       collection: pagesSlug,
       data: {
         text: 'some page',
@@ -115,6 +117,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
 
   test('should allow update of stale locked document - collection', async ({ payload }) => {
     const newPost2 = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'new post 2',
@@ -236,6 +239,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
 
   test('should not allow update of locked document - collection', async ({ payload }) => {
     const newPost = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'some post',
@@ -319,6 +323,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
   // Try to delete locked document (collection)
   test('should not allow delete of locked document - collection', async ({ payload }) => {
     const newPost3 = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'new post 3',
@@ -364,6 +369,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
 
   test('should allow delete of stale locked document - collection', async ({ payload }) => {
     const newPost4 = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'new post 4',
@@ -430,6 +436,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
     payload,
   }) => {
     const newPost5 = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'new post 5',
@@ -539,6 +546,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
     payload,
   }) => {
     const newPost6 = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'new post 6',
@@ -600,6 +608,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Locked document
     payload,
   }) => {
     const newPost7 = await payload.create({
+      action: 'publish',
       collection: postsSlug,
       data: {
         text: 'new post 7',

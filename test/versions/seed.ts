@@ -143,6 +143,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: autosaveWithDraftValidateSlug,
     data: {
       title: 'Initial seeded title',

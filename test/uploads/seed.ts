@@ -47,6 +47,7 @@ export const seed = async (payload: Payload) => {
   await payload.create({ collection: mediaWithoutDeleteAccessSlug, data: {}, file: imageFile })
 
   const { id: versionedImage } = await payload.create({
+    action: 'publish',
     collection: versionSlug,
     data: {
       _status: 'published',
@@ -74,6 +75,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    action: 'publish',
     collection: versionSlug,
     data: {
       _status: 'published',
@@ -92,6 +94,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    action: 'publish',
     collection: versionSlug,
     data: {
       _status: 'published',

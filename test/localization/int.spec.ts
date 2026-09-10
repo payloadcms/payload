@@ -3900,6 +3900,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           id: originalPost.id,
           locale: 'es',
           fallbackLocale: 'en',
+          version: 'latest',
         })
 
         expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
@@ -3909,6 +3910,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           id: originalPost.id,
           locale: 'es',
           fallbackLocale: false,
+          version: 'latest',
         })
 
         expect(spanishPostWithNoFallback?.selfRelation?.text).toBeUndefined()
@@ -3978,6 +3980,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
         collection: allFieldsLocalizedSlug,
         id: doc.id,
         locale: 'all',
+        version: 'latest',
       })
 
       // Verify simple localized fields have locale keys at top level
@@ -4039,6 +4042,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
       payload,
     }) => {
       const doc = await payload.create({
+        action: 'publish',
         collection: noLocalizedFieldsCollectionSlug,
         data: {
           text: 'title',
@@ -4085,6 +4089,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
             locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
+            version: 'latest',
           })
 
           expect(esDoc._status).toContain('draft')
@@ -4394,7 +4399,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
             locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
-            version: 'published',
+            version: 'latest',
           })
 
           expect(unpublishedDocument._status!.en).toBe('draft')
@@ -4586,7 +4591,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           const unpublishedDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
             locale: 'all',
-            version: 'published',
+            version: 'latest',
           })
 
           expect(unpublishedDocument._status!.en).toBe('draft')
@@ -4654,6 +4659,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           collection: allFieldsLocalizedSlug,
           locale: portugueseLocale,
           fallbackLocale: 'none',
+          version: 'latest',
         })
 
         expect(localizedFallback.text).not.toBeDefined()

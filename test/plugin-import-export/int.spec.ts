@@ -205,6 +205,7 @@ test.suite({
         collection: 'pages',
         limit: 100,
         page: 1,
+        version: 'latest',
       })
 
       const firstDocOnPage1 = pages.docs?.[0]
@@ -240,6 +241,7 @@ test.suite({
         collection: 'pages',
         limit: 100,
         page: 2,
+        version: 'latest',
       })
 
       const firstDocOnPage2 = pages.docs?.[0]
@@ -2119,6 +2121,7 @@ test.suite({
         const updatedJson = { version: 2, data: 'updated', extra: [1, 2, 3] }
 
         const existingPage = await payload.create({
+          action: 'publish',
           collection: 'pages',
           data: {
             title: 'JSON Update Mode Test',
@@ -2183,6 +2186,7 @@ test.suite({
         const updatedExistingJson = { id: 'existing', value: 150, modified: true }
 
         const existingPage = await payload.create({
+          action: 'publish',
           collection: 'pages',
           data: {
             title: `JSON Upsert Existing ${timestamp}`,
@@ -2319,6 +2323,7 @@ test.suite({
         const jsonV3 = { version: 3, items: ['a', 'b', 'c'] }
 
         const page = await payload.create({
+          action: 'publish',
           collection: 'pages',
           data: {
             title: 'Sequential Import Test',
@@ -3191,6 +3196,7 @@ test.suite({
 
     test('should update existing documents in update mode', async ({ payload }) => {
       const page1 = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'Update Test 1',
@@ -3201,6 +3207,7 @@ test.suite({
       })
 
       const page2 = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'Update Test 2',
@@ -3269,8 +3276,8 @@ test.suite({
     test('should handle upsert mode correctly', async ({ payload }) => {
       const timestamp = Date.now()
       const existingPage = await payload.create({
-        collection: 'pages',
         action: 'publish',
+        collection: 'pages',
         data: {
           title: `Upsert Test ${timestamp}`,
           excerpt: 'existing',
@@ -3806,6 +3813,7 @@ test.suite({
       const postId = posts.docs[0]?.id
 
       const existingPage = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'Original Title',
@@ -6160,6 +6168,7 @@ test.suite({
 
         const importedDocs = await payload.find({
           collection: 'posts-imports-only',
+          version: 'latest',
           where: {
             title: { contains: 'Sync Import Test' },
           },
@@ -6558,6 +6567,7 @@ test.suite({
         const unchangedPost = await payload.findByID({
           collection: 'posts-imports-only',
           id: post.id,
+          version: 'latest',
         })
 
         expect(previewResponse.status).toBe(400)
@@ -7245,6 +7255,7 @@ test.suite({
 
       const importedPage = await payload.find({
         collection: 'pages',
+        version: 'latest',
         where: {
           title: { equals: 'Rich Text JSON Test' },
         },
@@ -7813,6 +7824,7 @@ test.suite({
 
       const importedPage = await payload.find({
         collection: 'pages',
+        version: 'latest',
         where: {
           title: { equals: 'JSON Roundtrip Test' },
         },

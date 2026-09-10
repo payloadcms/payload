@@ -793,9 +793,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     })
 
     test('should populate joins when versions on both sides draft false', async ({ payload }) => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        action: 'publish',
+        collection: 'categories-versions',
+        data: {},
+      })
 
       const version = await payload.create({
+        action: 'publish',
         collection: 'versions',
         data: { title: 'version', categoryVersion: category.id },
       })
@@ -808,9 +813,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should populate joins with hasMany relationships when versions on both sides draft false', async ({
       payload,
     }) => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        action: 'publish',
+        collection: 'categories-versions',
+        data: {},
+      })
 
       const version = await payload.create({
+        action: 'publish',
         collection: 'versions',
         data: { title: 'version', categoryVersions: [category.id] },
       })

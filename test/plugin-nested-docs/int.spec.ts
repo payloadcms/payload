@@ -42,6 +42,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
     test('should update more than 10 (default limit) breadcrumbs', async ({ payload }) => {
       // create a parent doc
       const parentDoc = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: '11 children',
@@ -97,6 +98,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
 
     test('should return breadcrumbs as an array of objects', async ({ payload }) => {
       const parentDoc = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'parent doc',
@@ -129,6 +131,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       payload,
     }) => {
       const parentDoc = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'parent doc',

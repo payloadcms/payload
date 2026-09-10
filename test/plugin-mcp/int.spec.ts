@@ -3203,6 +3203,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
           slug: 'posts',
           id: post.id,
           locale: 'fr',
+          version: 'latest',
         },
         name: 'findDocuments',
       })
