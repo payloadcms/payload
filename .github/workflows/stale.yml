@@ -48,4 +48,6 @@ jobs:
 
       # TODO: Add a step to notify team
       - name: Print outputs
-        run: echo ${{ format('{0},{1}', toJSON(steps.stale.outputs.staled-issues-prs), toJSON(steps.stale.outputs.closed-issues-prs)) }}
+        env:
+          STALE_OUTPUTS: ${{ format('{0},{1}', toJSON(steps.stale.outputs.staled-issues-prs), toJSON(steps.stale.outputs.closed-issues-prs)) }}
+        run: printf '%s\n' "$STALE_OUTPUTS"

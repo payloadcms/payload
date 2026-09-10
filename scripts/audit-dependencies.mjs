@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execSync } from 'child_process'
+import { execFileSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import chalk from 'chalk'
@@ -74,7 +74,7 @@ console.log(`Auditing for ${severity}+ vulnerabilities...`)
 
 let auditJson
 try {
-  const auditOutput = execSync('pnpm audit --prod --json', {
+  const auditOutput = execFileSync('pnpm', ['audit', '--prod', '--json'], {
     encoding: 'utf-8',
     maxBuffer: 10 * 1024 * 1024, // 10MB buffer
   })
@@ -124,7 +124,7 @@ const vulnerabilities = Object.entries(advisories)
     // If no paths, the vulnerable package itself might be a direct/peer dependency
     if (!deepestPath && paths.length === 0 && advisory.patched_versions !== '<0.0.0') {
       try {
-        const latestVersion = execSync(`pnpm view "${advisory.module_name}" version`, {
+        const latestVersion = execFileSync('pnpm', ['view', advisory.module_name, 'version'], {
           encoding: 'utf-8',
           maxBuffer: 10 * 1024 * 1024,
           stdio: ['pipe', 'pipe', 'ignore'],
@@ -174,7 +174,7 @@ const vulnerabilities = Object.entries(advisories)
 
         // Get latest version of this dependency
         try {
-          const latestVersion = execSync(`pnpm view "${depName}" version`, {
+          const latestVersion = execFileSync('pnpm', ['view', depName, 'version'], {
             encoding: 'utf-8',
             maxBuffer: 10 * 1024 * 1024,
             stdio: ['pipe', 'pipe', 'ignore'],
@@ -184,8 +184,9 @@ const vulnerabilities = Object.entries(advisories)
           if (latestVersion === currentVersion) continue
 
           // Check if latest version of this dep has fixed the vulnerable transitive dep
-          const depsOutput = execSync(
-            `pnpm view "${depName}@${latestVersion}" dependencies --json`,
+          const depsOutput = execFileSync(
+            'pnpm',
+            ['view', `${depName}@${latestVersion}`, 'dependencies', '--json'],
             {
               encoding: 'utf-8',
               maxBuffer: 10 * 1024 * 1024,
@@ -201,8 +202,9 @@ const vulnerabilities = Object.entries(advisories)
             // Check what version would actually be resolved
             // Use pnpm view to get the max satisfying version for the range
             try {
-              const viewOutput = execSync(
-                `pnpm view "${vulnerablePkg}@${vulnerableDepVersion}" --json 2>/dev/null`,
+              const viewOutput = execFileSync(
+                'pnpm',
+                ['view', `${vulnerablePkg}@${vulnerableDepVersion}`, '--json'],
                 {
                   encoding: 'utf-8',
                   maxBuffer: 10 * 1024 * 1024,
@@ -232,8 +234,9 @@ const vulnerabilities = Object.entries(advisories)
                   // Need to find what version of actual direct dep includes this fix
                   if (actualDirectDepName) {
                     try {
-                      const directDepLatest = execSync(
-                        `pnpm view "${actualDirectDepName}" version`,
+                      const directDepLatest = execFileSync(
+                        'pnpm',
+                        ['view', actualDirectDepName, 'version'],
                         {
                           encoding: 'utf-8',
                           maxBuffer: 10 * 1024 * 1024,
@@ -261,8 +264,9 @@ const vulnerabilities = Object.entries(advisories)
                 } else {
                   if (actualDirectDepName) {
                     try {
-                      const directDepLatest = execSync(
-                        `pnpm view "${actualDirectDepName}" version`,
+                      const directDepLatest = execFileSync(
+                        'pnpm',
+                        ['view', actualDirectDepName, 'version'],
                         {
                           encoding: 'utf-8',
                           maxBuffer: 10 * 1024 * 1024,
@@ -347,8 +351,9 @@ const vulnerabilities = Object.entries(advisories)
               depsOutput = JSON.stringify(packageJson.dependencies || {})
             } else {
               // Read from npm registry
-              depsOutput = execSync(
-                `pnpm view "${parentPkg}@${parentVersion}" dependencies --json`,
+              depsOutput = execFileSync(
+                'pnpm',
+                ['view', `${parentPkg}@${parentVersion}`, 'dependencies', '--json'],
                 {
                   encoding: 'utf-8',
                   maxBuffer: 10 * 1024 * 1024,
@@ -371,8 +376,9 @@ const vulnerabilities = Object.entries(advisories)
             }
 
             // Resolve what version this range would give us
-            const viewOutput = execSync(
-              `pnpm view "${targetDepName}@${depRange}" --json 2>/dev/null`,
+            const viewOutput = execFileSync(
+              'pnpm',
+              ['view', `${targetDepName}@${depRange}`, '--json'],
               {
                 encoding: 'utf-8',
                 maxBuffer: 10 * 1024 * 1024,
@@ -400,8 +406,9 @@ const vulnerabilities = Object.entries(advisories)
         // First check if direct dep directly depends on the vulnerable package
         const directDepDeps = (() => {
           try {
-            const output = execSync(
-              `pnpm view "${directDep}@${directDepVersion}" dependencies --json`,
+            const output = execFileSync(
+              'pnpm',
+              ['view', `${directDep}@${directDepVersion}`, 'dependencies', '--json'],
               {
                 encoding: 'utf-8',
                 maxBuffer: 10 * 1024 * 1024,
@@ -418,8 +425,13 @@ const vulnerabilities = Object.entries(advisories)
           // Direct path exists
           const resolvedVersion = (() => {
             try {
-              const viewOutput = execSync(
-                `pnpm view "${advisory.module_name}@${directDepDeps[advisory.module_name]}" --json`,
+              const viewOutput = execFileSync(
+                'pnpm',
+                [
+                  'view',
+                  `${advisory.module_name}@${directDepDeps[advisory.module_name]}`,
+                  '--json',
+                ],
                 {
                   encoding: 'utf-8',
                   maxBuffer: 10 * 1024 * 1024,
