@@ -34,9 +34,9 @@ import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 export const Component: JSONFieldClientComponent = (args) => {
   return (
     <RenderLexical
-      field={{
-        name: 'myFieldName' /* Make sure this matches the field name present in your form */,
-      }}
+      name={
+        'myFieldName' /* Make sure this matches the field name present in your form */
+      }
       initialValue={buildEditorState<DefaultNodeTypes>({
         text: 'default value',
       })}
@@ -75,7 +75,7 @@ export const Component: JSONFieldClientComponent = (args) => {
   return (
     <div>
       <RenderLexical
-        field={{ name: 'myField' }}
+        name="myField"
         initialValue={buildEditorState<DefaultNodeTypes>({
           text: 'default value',
         })}
