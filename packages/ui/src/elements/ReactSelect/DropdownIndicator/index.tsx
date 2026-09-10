@@ -16,7 +16,10 @@ export const DropdownIndicator: React.FC<
   } & DropdownIndicatorProps<OptionType, true>
 > = (props) => {
   const {
-    innerProps: { ref, ...restInnerProps },
+    // react-select marks its indicators `aria-hidden`, which is correct for the
+    // non-focusable `div` it renders by default but not for this focusable button -
+    // spreading it would hide a keyboard-reachable control from the accessibility tree.
+    innerProps: { 'aria-hidden': _ariaHidden, ref, ...restInnerProps },
   } = props
 
   const { t } = useTranslation()
