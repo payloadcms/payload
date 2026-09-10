@@ -1,0 +1,147 @@
+---
+title: UI Components
+label: Overview
+order: 10
+desc: Use the React components that power the Payload Admin Panel in your own Custom Components.
+keywords: ui, components, react, admin panel, custom components, payload ui
+---
+
+The `@payloadcms/ui` package contains the React components used throughout the Payload Admin Panel. You can use these components to build Custom Components that match the surrounding Admin Panel interface and behavior.
+
+Each component guide includes working examples for the selected version of Payload, common props, accessibility guidance, and any providers or setup the component requires.
+
+## Components
+
+<CardGroup variant="compact">
+  <Card
+    title="AnimateHeight"
+    description="Animate a container as its content changes height."
+    link="./animate-height"
+  />
+  <Card
+    title="Banner"
+    description="Display contextual notices, warnings, and errors."
+    link="./banner"
+  />
+  <Card
+    title="Button"
+    description="Trigger actions with Payload's standard button styles."
+    link="./button"
+  />
+  <Card
+    title="Card"
+    description="Present a title with optional actions or full-surface interaction."
+    link="./card"
+  />
+  <Card
+    title="Collapsible"
+    description="Show and hide a section beneath a collapsible header."
+    link="./collapsible"
+  />
+  <Card
+    title="CopyToClipboard"
+    description="Copy text to the clipboard with built-in feedback."
+    link="./copy-to-clipboard"
+  />
+  <Card
+    title="DatePicker"
+    description="Select dates and times with Payload's styled calendar control."
+    link="./date-picker"
+  />
+  <Card
+    title="ErrorPill"
+    description="Display a compact, localized validation error count."
+    link="./error-pill"
+  />
+  <Card
+    title="Gutter"
+    description="Align content with the Admin Panel's responsive gutters."
+    link="./gutter"
+  />
+  <Card
+    title="Link"
+    description="Navigate between Admin routes through Payload's router adapter."
+    link="./link"
+  />
+  <Card
+    title="List and Pagination Controls"
+    description="Navigate paginated data and compose common Admin list controls."
+    link="./list-and-pagination-controls"
+  />
+  <Card
+    title="Motion and Loading"
+    description="Communicate loading and route transitions with Payload's motion helpers."
+    link="./motion-and-loading"
+  />
+  <Card
+    title="Pill"
+    description="Display compact metadata, categories, and statuses."
+    link="./pill"
+  />
+  <Card
+    title="PillSelector"
+    description="Select, deselect, and optionally reorder compact options."
+    link="./pill-selector"
+  />
+  <Card
+    title="ReactSelect"
+    description="Select one or more options with Payload's react-select adapter."
+    link="./react-select"
+  />
+  <Card
+    title="ShimmerEffect"
+    description="Show a loading placeholder while content resolves."
+    link="./shimmer-effect"
+  />
+</CardGroup>
+
+<Banner type="warning">
+  UI component APIs can change between major versions of Payload. Use the
+  version selector to view examples that match the version installed in your
+  project.
+</Banner>
+
+## Using UI components
+
+Inside a Payload Admin Panel Custom Component, import components from `@payloadcms/ui`:
+
+```tsx
+'use client'
+
+import { Button } from '@payloadcms/ui'
+
+export function SaveButton() {
+  return <Button>Save changes</Button>
+}
+```
+
+Some components depend on context provided by the Admin Panel. Each guide calls out those requirements when a component cannot be rendered independently.
+
+## Customizing components
+
+The Design tab in each component example provides CSS you can use as a starting point. Add those overrides to the stylesheet loaded by your Admin Panel.
+
+<CodeTabs>
+```css label="Next.js"
+/* app/(payload)/custom.css */
+@layer payload {
+  .btn--style-primary {
+    --color-bg-brand: #6d5dfc;
+  }
+}
+```
+
+```css label="TanStack Start"
+/* src/payload.css */
+@import '@payloadcms/ui/css/app.css';
+
+@layer payload {
+  .btn--style-primary {
+    --color-bg-brand: #6d5dfc;
+  }
+}
+```
+
+</CodeTabs>
+
+Both frameworks use the same Payload selectors and design tokens. Only the stylesheet entry point differs.
