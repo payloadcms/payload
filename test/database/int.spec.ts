@@ -4451,6 +4451,160 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
   })
 
+  test.describe('db.updateGlobal with where', () => {
+    /** A matching condition should save the change and return the updated global. */
+    test('should update the global when the condition matches', async ({ payload }) => {
+      const original = await payload.db.createGlobal({
+        slug: 'global-2',
+        data: { text: 'Original' },
+      })
+
+      const result = await payload.db.updateGlobal({
+        slug: 'global-2',
+        data: { text: 'Updated' },
+        where: { text: { equals: 'Original' } },
+      })
+      const stored = await payload.findGlobal({ slug: 'global-2' })
+
+      expect(result).toMatchObject({ id: original.id, text: 'Updated' })
+      expect(stored.text).toBe('Updated')
+    })
+
+    /** A failed condition should return null and leave the saved value alone. */
+    test('should not update the global when the condition does not match', async ({ payload }) => {
+      await payload.db.createGlobal({ slug: 'global-2', data: { text: 'Original' } })
+
+      const result = await payload.db.updateGlobal({
+        slug: 'global-2',
+        data: { text: 'Should not be saved' },
+        where: { text: { equals: 'Does not match' } },
+      })
+      const stored = await payload.findGlobal({ slug: 'global-2' })
+
+      expect(result).toBeNull()
+      expect(stored.text).toBe('Original')
+    })
+
+    /** Asking for no returned document must not skip the condition that protects the write. */
+    test('should still check the condition when returning is false', async ({ payload }) => {
+      await payload.db.createGlobal({ slug: 'global-2', data: { text: 'Original' } })
+
+      const result = await payload.db.updateGlobal({
+        slug: 'global-2',
+        data: { text: 'Should not be saved' },
+        returning: false,
+        where: { text: { equals: 'Does not match' } },
+      })
+      const stored = await payload.findGlobal({ slug: 'global-2' })
+
+      expect(result).toBeNull()
+      expect(stored.text).toBe('Original')
+    })
+
+    /** A failed conditional update must not create a new record, even if upsert is requested. */
+    test('should not create a global when no record matches', async ({ payload }) => {
+      const result = await payload.db.updateGlobal({
+        slug: 'global-2',
+        data: { text: 'Should not be created' },
+        options: { upsert: true },
+        where: { text: { equals: 'Missing' } },
+      })
+      const stored = await payload.db.findGlobal({ slug: 'global-2' })
+
+      expect(result).toBeNull()
+      expect(stored?.id).toBeUndefined()
+    })
+
+    /** Two writers use the same old timestamp. Only one should save; the other must return null. */
+    test('should allow only one concurrent update using the same timestamp', async ({
+      payload,
+    }) => {
+      const original = await payload.db.createGlobal({
+        slug: 'global-2',
+        data: { text: 'Original' },
+      })
+      const updatedAt = new Date(Date.parse(original.updatedAt) + 1).toISOString()
+      const where = { updatedAt: { equals: original.updatedAt } }
+
+      const results = await Promise.all([
+        payload.db.updateGlobal({
+          slug: 'global-2',
+          data: { text: 'First writer', updatedAt },
+          where,
+        }),
+        payload.db.updateGlobal({
+          slug: 'global-2',
+          data: { text: 'Second writer', updatedAt },
+          where,
+        }),
+      ])
+      const saved = results.filter((result) => result !== null)
+      const stored = await payload.findGlobal({ slug: 'global-2' })
+
+      expect(saved).toHaveLength(1)
+      expect(results).toContain(null)
+      expect(['First writer', 'Second writer']).toContain(saved[0]?.text)
+      expect(stored).toMatchObject({ id: original.id, text: saved[0]?.text, updatedAt })
+    })
+
+    /**
+     * Setting updatedAt to null disables the automatic timestamp change, leaving nothing to save.
+     * The update must still return null when its condition fails.
+     */
+    test('should check the condition for an empty update', async ({ payload }) => {
+      await payload.db.createGlobal({ slug: 'global-2', data: { text: 'Original' } })
+
+      const result = await payload.db.updateGlobal({
+        slug: 'global-2',
+        data: { updatedAt: null },
+        where: { text: { equals: 'Does not match' } },
+      })
+      const stored = await payload.findGlobal({ slug: 'global-2' })
+
+      expect(result).toBeNull()
+      expect(stored.text).toBe('Original')
+    })
+
+    /** SQL stores array entries separately. Rejecting an update must leave those entries alone too. */
+    test('should preserve array entries when the condition does not match', async ({ payload }) => {
+      const original = await payload.updateGlobal({
+        slug: 'header',
+        data: { itemsLvl1: [{ label: 'Original' }] },
+      })
+
+      const result = await payload.db.updateGlobal({
+        slug: 'header',
+        data: {
+          itemsLvl1: [{ id: original.itemsLvl1?.[0]?.id, label: 'Should not be saved' }],
+          updatedAt: null,
+        },
+        where: { 'itemsLvl1.label': { equals: 'Does not match' } },
+      })
+      const stored = await payload.findGlobal({ slug: 'header' })
+
+      expect(result).toBeNull()
+      expect(stored.itemsLvl1).toEqual(original.itemsLvl1)
+    })
+
+    /** A condition can also match a value inside an array, rather than a field on the global itself. */
+    test('should update when the condition matches an array entry', async ({ payload }) => {
+      const original = await payload.updateGlobal({
+        slug: 'header',
+        data: { itemsLvl1: [{ label: 'Original' }] },
+      })
+
+      const result = await payload.db.updateGlobal({
+        slug: 'header',
+        data: { itemsLvl1: [{ id: original.itemsLvl1?.[0]?.id, label: 'Updated' }] },
+        where: { 'itemsLvl1.label': { equals: 'Original' } },
+      })
+      const stored = await payload.findGlobal({ slug: 'header' })
+
+      expect(result?.itemsLvl1).toMatchObject([{ label: 'Updated' }])
+      expect(stored.itemsLvl1).toMatchObject([{ label: 'Updated' }])
+    })
+  })
+
   test('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async ({
     payload,
   }) => {
