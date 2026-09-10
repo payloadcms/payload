@@ -8,7 +8,7 @@ import { processMultipart } from './processMultipart.js'
 import { debugLog } from './utilities.js'
 
 const DEFAULT_UPLOAD_OPTIONS: FetchAPIFileUploadOptions = {
-  abortOnLimit: false,
+  abortOnLimit: true,
   createParentPath: false,
   debug: false,
   defParamCharset: 'utf8',
