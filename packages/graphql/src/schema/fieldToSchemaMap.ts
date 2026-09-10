@@ -62,16 +62,22 @@ function formattedNameResolver({
   Context,
   any
 > {
-  if ('name' in field) {
-    if (formatName(field.name) !== field.name) {
-      return {
-        ...rest,
-        extensions: { ...rest.extensions, field },
-        resolve: (parent) => parent[field.name],
-      }
-    }
+  // Always attach `extensions.field` so that `resolveSelect`'s path traversal
+  // can recognize this GraphQL field and map its response key back to the
+  // underlying data field. Without it, sub-fields whose GraphQL name already
+  // matches their data name (e.g. fields inside arrays/blocks/uploads) are
+  // skipped during select resolution, and any relationship reached through them
+  // loses its projection and falls back to a full, unprojected fetch.
+  const config: GraphQLFieldConfig<any, Context, any> = {
+    ...rest,
+    extensions: { ...rest.extensions, field },
   }
-  return rest
+
+  if ('name' in field && formatName(field.name) !== field.name) {
+    config.resolve = (parent) => parent[field.name]
+  }
+
+  return config
 }
 
 type SharedArgs = {

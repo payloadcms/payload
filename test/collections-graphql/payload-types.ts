@@ -80,6 +80,7 @@ export interface Config {
     'cyclical-relationship': CyclicalRelationship;
     media: Media;
     sort: Sort;
+    'nested-relations': NestedRelation;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,6 +101,7 @@ export interface Config {
     'cyclical-relationship': CyclicalRelationshipSelect<false> | CyclicalRelationshipSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     sort: SortSelect<false> | SortSelect<true>;
+    'nested-relations': NestedRelationsSelect<false> | NestedRelationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -112,6 +114,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -350,6 +355,30 @@ export interface Sort {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-relations".
+ */
+export interface NestedRelation {
+  id: string;
+  topLevelRelation?: (string | null) | Relation;
+  array?:
+    | {
+        link?: (string | null) | Relation;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        link?: (string | null) | Relation;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'content';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -423,6 +452,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'sort';
         value: string | Sort;
+      } | null)
+    | ({
+        relationTo: 'nested-relations';
+        value: string | NestedRelation;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -657,6 +690,32 @@ export interface SortSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-relations_select".
+ */
+export interface NestedRelationsSelect<T extends boolean = true> {
+  topLevelRelation?: T;
+  array?:
+    | T
+    | {
+        link?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              link?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -694,6 +753,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
