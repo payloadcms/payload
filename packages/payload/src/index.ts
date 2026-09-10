@@ -1799,6 +1799,7 @@ export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 
 export type * from './uploads/types.js'
+export { unlinkClientUploadTempFile } from './uploads/unlinkClientUploadTempFile.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'

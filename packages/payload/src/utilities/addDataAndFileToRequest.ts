@@ -1,7 +1,9 @@
 import type { PayloadRequest } from '../types/index.js'
+import type { ClientUploadData } from '../uploads/getFileFromClientUpload.js'
 
 import { APIError } from '../errors/APIError.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
+import { getFileFromClientUpload } from '../uploads/getFileFromClientUpload.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -58,64 +60,18 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let clientUploadContext, collectionSlug, filename, mimeType, size
+        let clientUploadFile: ClientUploadData
+
         try {
-          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-            fields.file,
-          ))
+          clientUploadFile = JSON.parse(fields.file) as ClientUploadData
         } catch {
           throw new APIError('A file name is required.', 400)
         }
-        const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
-        if (!uploadConfig.handlers) {
-          throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
-        }
-
-        let response: null | Response = null
-        let error: unknown
-
-        for (const handler of uploadConfig.handlers) {
-          try {
-            const result = await handler(req, {
-              doc: null!,
-              params: {
-                clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
-                collection: collectionSlug,
-                filename,
-              },
-            })
-            if (result) {
-              response = result
-            }
-            // If we couldn't get the file from that handler, save the error and try other.
-          } catch (err) {
-            error = err
-          }
-        }
-
-        if (!response) {
-          if (error) {
-            payload.logger.error(error)
-          }
-
-          throw new APIError('Expected response from the upload handler.')
-        }
-
-        if (response.status >= 300 && response.status < 400) {
-          const redirectUrl = response.headers.get('Location')
-          if (redirectUrl) {
-            response = await fetch(redirectUrl)
-          }
-        }
-
-        req.file = {
-          name: filename,
-          clientUploadContext,
-          data: Buffer.from(await response.arrayBuffer()),
-          mimetype: response.headers.get('Content-Type') || mimeType,
-          size,
-        }
+        req.file = await getFileFromClientUpload({
+          file: clientUploadFile,
+          req,
+        })
       }
     }
   }

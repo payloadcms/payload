@@ -9,6 +9,12 @@ import { Media } from '../collections/Media.js'
 import { MediaWithPrefix } from '../collections/MediaWithPrefix.js'
 import { Users } from '../collections/Users.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
+import { MediaHeaderOnly, mediaHeaderOnlySlug } from './collections/MediaHeaderOnly.js'
+import {
+  MediaHeaderOnlyWithSizes,
+  mediaHeaderOnlyWithSizesSlug,
+} from './collections/MediaHeaderOnlyWithSizes.js'
+import { MediaNoContent, mediaNoContentSlug } from './collections/MediaNoContent.js'
 import { MediaWithDocPrefix, mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -24,7 +30,15 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname, '..'),
     },
   },
-  collections: [Media, MediaWithPrefix, MediaWithDocPrefix, Users],
+  collections: [
+    Media,
+    MediaWithPrefix,
+    MediaWithDocPrefix,
+    MediaNoContent,
+    MediaHeaderOnly,
+    MediaHeaderOnlyWithSizes,
+    Users,
+  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -36,7 +50,15 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     azureStorage({
+      allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
+      baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
+      clientUploads: {
+        chunkLargeFiles: true,
+      },
       collections: {
+        [mediaHeaderOnlySlug]: true,
+        [mediaHeaderOnlyWithSizesSlug]: true,
+        [mediaNoContentSlug]: true,
         [mediaSlug]: true,
         [mediaWithPrefixSlug]: {
           prefix,
@@ -46,11 +68,6 @@ export default buildConfigWithDefaults({
         [mediaWithDocPrefixSlug]: {
           prefix: 'docprefix-collection',
         },
-      },
-      allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
-      baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
-      clientUploads: {
-        chunkLargeFiles: true,
       },
       connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING!,
       containerName: process.env.AZURE_STORAGE_CONTAINER_NAME!,

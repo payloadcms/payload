@@ -316,12 +316,6 @@ export const updateOperation = async <
       return null
     })
 
-    await unlinkTempFiles({
-      collectionConfig,
-      config,
-      req,
-    })
-
     // Process sequentially when using single transaction mode to avoid shared state issues
     // Process in parallel when using one transaction for better performance
     let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
@@ -333,6 +327,12 @@ export const updateOperation = async <
     } else {
       awaitedDocs = await Promise.all(promises)
     }
+
+    await unlinkTempFiles({
+      collectionConfig,
+      config,
+      req,
+    })
 
     let result = {
       docs: awaitedDocs.filter(Boolean),
@@ -359,6 +359,13 @@ export const updateOperation = async <
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
+    await unlinkTempFiles({
+      collectionConfig: args.collection.config,
+      config: args.req.payload.config,
+      req: args.req,
+    }).catch((unlinkError) => {
+      args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
+    })
     await killTransaction(args.req)
     throw error
   }
