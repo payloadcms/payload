@@ -40,6 +40,7 @@ describe('getRelationshipGroups', () => {
           label: 'Posts',
           options: ['3'],
           remaining: 0,
+          slug: 'posts',
         },
       ])
     })
@@ -113,6 +114,29 @@ describe('getRelationshipGroups', () => {
           ],
         }).map(({ label }) => label),
       ).toEqual(['Posts', 'Users'])
+    })
+
+    it('should keep collection slugs when plural labels match', () => {
+      const collectionsWithMatchingLabels = collections.map((collection) => ({
+        ...collection,
+        labels: { ...collection.labels, plural: 'Content' },
+      }))
+
+      const groups = getRelationshipGroups({
+        collections: collectionsWithMatchingLabels,
+        dateFormat: 'MMMM do yyyy',
+        i18n,
+        relationTo: ['posts', 'users'],
+        value: [
+          { relationTo: 'posts', value: 3 },
+          { relationTo: 'users', value: 7 },
+        ],
+      })
+
+      expect(groups.map(({ label, slug }) => ({ label, slug }))).toEqual([
+        { label: 'Content', slug: 'posts' },
+        { label: 'Content', slug: 'users' },
+      ])
     })
 
     it('should fall back to the collection slug when the collection has no labels', () => {

@@ -256,6 +256,7 @@ export const ImportPreview: React.FC = () => {
                   if (shouldRenderGroupedRelationship) {
                     return (
                       <RelationshipCell
+                        fieldPath={fieldPath}
                         key={`${fieldPath}-${rowIndex}`}
                         relationTo={field.relationTo}
                         value={value}

@@ -26,6 +26,8 @@ export type RelationshipGroup = {
   options: string[]
   /** Options past `TOTAL_TO_SHOW` dropped from this group, to render as `and N more`. */
   remaining: number
+  /** Slug of the target collection, undefined when it cannot be determined. */
+  slug?: string
 }
 
 /**
@@ -64,6 +66,7 @@ export const getRelationshipGroups = ({
 
     if (!group) {
       group = {
+        slug,
         label: slug ? getTranslation(configsBySlug.get(slug)?.labels?.plural || slug, i18n) : '',
         options: [],
         remaining: 0,

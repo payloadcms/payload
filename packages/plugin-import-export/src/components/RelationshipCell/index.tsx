@@ -2,12 +2,14 @@
 import { useConfig, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
+import { getRelationshipGroupKey } from './getRelationshipGroupKey.js'
 import { getRelationshipGroups } from './getRelationshipGroups.js'
 import './index.css'
 
 const baseClass = 'import-preview-relationship'
 
 type Props = {
+  fieldPath: string
   /** `field.relationTo` — an array when the field is polymorphic. */
   relationTo: string | string[]
   value: unknown
@@ -17,7 +19,7 @@ type Props = {
  * Renders a relationship or upload value for the import preview table, stacking
  * one row per target collection.
  */
-export const RelationshipCell: React.FC<Props> = ({ relationTo, value }) => {
+export const RelationshipCell: React.FC<Props> = ({ fieldPath, relationTo, value }) => {
   const { config } = useConfig()
   const { i18n } = useTranslation()
 
@@ -38,8 +40,8 @@ export const RelationshipCell: React.FC<Props> = ({ relationTo, value }) => {
 
   return (
     <div className={baseClass}>
-      {groups.map(({ label, options, remaining }, index) => (
-        <div className={`${baseClass}__group`} key={label || index}>
+      {groups.map(({ slug, label, options, remaining }) => (
+        <div className={`${baseClass}__group`} key={getRelationshipGroupKey({ slug, fieldPath })}>
           {/* A `label` element would be unassociated here — the cell holds no control */}
           {shouldShowCollectionLabels && label && (
             <span className={`${baseClass}__collection`}>{label}</span>
