@@ -5100,7 +5100,7 @@ describe('Fields', () => {
       }
     })
 
-    it('should leave the slug null when creating a draft with no source value', async () => {
+    it('should leave the slug absent when creating a draft with no source value', async () => {
       const doc = await payload.create({
         collection: slugFieldAutosaveSlug,
         draft: true,
@@ -5112,7 +5112,7 @@ describe('Fields', () => {
       expect(doc.slug ?? null).toBeNull()
     })
 
-    it('should leave the slug null when creating a draft with an empty source value', async () => {
+    it('should leave the slug absent when creating a draft with an empty source value', async () => {
       const doc = await payload.create({
         collection: slugFieldAutosaveSlug,
         draft: true,
@@ -5124,7 +5124,7 @@ describe('Fields', () => {
       expect(doc.slug ?? null).toBeNull()
     })
 
-    it('should leave the slug null when a custom slugify returns an empty string', async () => {
+    it('should leave the slug absent when a custom slugify returns an empty string', async () => {
       const doc = await payload.create({
         collection: slugFieldAutosaveSlug,
         draft: true,
@@ -5152,6 +5152,41 @@ describe('Fields', () => {
 
       expect(first.slug ?? null).toBeNull()
       expect(second.slug ?? null).toBeNull()
+    })
+
+    it('should keep the slug absent when updating source-less drafts', async () => {
+      const first = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft', title: '' },
+      })
+      created.push(first.id)
+
+      const second = await payload.create({
+        collection: slugFieldAutosaveSlug,
+        draft: true,
+        data: { _status: 'draft', title: '' },
+      })
+      created.push(second.id)
+
+      // Autosave keeps re-saving the still-empty draft. The update path must leave the slug absent
+      // too — writing `null` here would collide on Mongo, whose sparse index does include `null`.
+      const updatedFirst = await payload.update({
+        collection: slugFieldAutosaveSlug,
+        id: first.id,
+        draft: true,
+        data: { _status: 'draft', title: '' },
+      })
+
+      const updatedSecond = await payload.update({
+        collection: slugFieldAutosaveSlug,
+        id: second.id,
+        draft: true,
+        data: { _status: 'draft', title: '' },
+      })
+
+      expect(updatedFirst.slug ?? null).toBeNull()
+      expect(updatedSecond.slug ?? null).toBeNull()
     })
 
     it('should still generate a slug from the source field on create', async () => {
