@@ -19,6 +19,7 @@ export function getLocalizedPaths({
   overrideAccess = false,
   parentIsLocalized,
   payload,
+  showHiddenFields = false,
 }: {
   collectionSlug?: string
   fields: FlattenedField[]
@@ -31,6 +32,7 @@ export function getLocalizedPaths({
    */
   parentIsLocalized?: boolean
   payload: Payload
+  showHiddenFields?: boolean
 }): PathToQuery[] {
   const pathSegments = incomingPath.split('.')
   const localizationConfig = payload.config.localization
@@ -132,7 +134,12 @@ export function getLocalizedPaths({
       }
 
       if (matchedField) {
-        if ('hidden' in matchedField && matchedField.hidden && !overrideAccess) {
+        if (
+          'hidden' in matchedField &&
+          matchedField.hidden &&
+          !overrideAccess &&
+          !showHiddenFields
+        ) {
           lastIncompletePath.invalid = true
         }
 
@@ -209,6 +216,7 @@ export function getLocalizedPaths({
                   locale,
                   parentIsLocalized: false,
                   payload,
+                  showHiddenFields,
                 })
 
                 paths = [...paths, ...remainingPaths]
