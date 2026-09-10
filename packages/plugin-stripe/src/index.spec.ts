@@ -73,3 +73,40 @@ describe('stripePlugin REST endpoint registration', () => {
     expect(transformedConfig.endpoints?.filter(({ path }) => path === '/stripe/rest')).toEqual([])
   })
 })
+
+describe('stripePlugin managed fields', () => {
+  it('should prevent API writes to Stripe-managed fields', () => {
+    const transformedConfig = stripePlugin({
+      stripeSecretKey: 'sk_test_example',
+      sync: [
+        {
+          collection: 'products',
+          fields: [],
+          stripeResourceType: 'products',
+          stripeResourceTypeSingular: 'product',
+        },
+      ],
+    })({
+      collections: [
+        {
+          fields: [],
+          slug: 'products',
+        },
+      ],
+    })
+    const fields = transformedConfig.collections?.[0]?.fields ?? []
+    const stripeIDField = fields.find((field) => 'name' in field && field.name === 'stripeID')
+    const skipSyncField = fields.find((field) => 'name' in field && field.name === 'skipSync')
+
+    expect(stripeIDField).toMatchObject({
+      access: { create: expect.any(Function), update: expect.any(Function) },
+    })
+    expect(skipSyncField).toMatchObject({
+      access: { create: expect.any(Function), update: expect.any(Function) },
+    })
+    expect(stripeIDField?.access?.create?.({} as never)).toBe(false)
+    expect(stripeIDField?.access?.update?.({} as never)).toBe(false)
+    expect(skipSyncField?.access?.create?.({} as never)).toBe(false)
+    expect(skipSyncField?.access?.update?.({} as never)).toBe(false)
+  })
+})
