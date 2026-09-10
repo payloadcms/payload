@@ -71,6 +71,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
   })
 
   test.describe('Version and action API surfaces', () => {
+    test('allows an unsaved versioned global to be initialized through a latest read', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findGlobal({
+          slug: draftGlobalSlug,
+        }),
+      ).rejects.toThrow('Not Found')
+
+      const global = await payload.findGlobal({
+        slug: draftGlobalSlug,
+        version: 'latest',
+      })
+
+      expect(global).toBeDefined()
+      expect(global._status).toBe('draft')
+    })
+
     test('resolves local actions, _status, and read versions consistently', async ({ payload }) => {
       const doc = await payload.create({
         collection: draftCollectionSlug,

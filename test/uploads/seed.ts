@@ -57,6 +57,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    action: 'publish',
     collection: relationSlug,
     data: {
       image: uploadedImage,

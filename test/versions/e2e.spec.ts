@@ -347,7 +347,7 @@ describe('Versions', () => {
       await expect(page.locator('main.versions')).toContainText('Currently Published')
     })
 
-    test('should show unpublished version status in versions view', async () => {
+    test('should show the current draft status after unpublishing', async () => {
       const publishedDoc = await payload.create({
         action: 'publish',
         collection: draftCollectionSlug,
@@ -370,7 +370,7 @@ describe('Versions', () => {
       })
 
       await page.goto(`${url.edit(publishedDoc.id)}/versions`)
-      await expect(page.locator('main.versions')).toContainText('Previously Published')
+      await expect(page.locator('main.versions')).toContainText('Current Draft')
     })
 
     test('should show global versions view level action in globals versions view', async () => {
@@ -2741,6 +2741,7 @@ describe('Versions', () => {
         depth: 0,
         limit: 3,
         sort: 'createdAt',
+        version: 'latest',
       })
 
       await expect(

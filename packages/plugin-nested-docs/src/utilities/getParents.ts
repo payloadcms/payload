@@ -22,6 +22,7 @@ export const getParents = async (
         depth: 0,
         disableErrors: true,
         req,
+        version: 'latest',
       })
     }
 

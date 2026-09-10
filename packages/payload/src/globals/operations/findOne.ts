@@ -246,14 +246,19 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       select,
     })
 
-    if (!versionedDoc) {
+    if (!versionedDoc && readVersion === 'latest' && !hasDoc) {
+      // Globals exist conceptually before their first save. Preserve the empty
+      // document shape so the Admin UI can initialize a new global while
+      // collection reads still require an actual saved document.
+      doc = {}
+    } else if (!versionedDoc) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
       return null!
+    } else {
+      doc = versionedDoc
     }
-
-    doc = versionedDoc
   }
 
   // /////////////////////////////////////

@@ -371,6 +371,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 title: { equals: 'Ready for restore' },
               },
@@ -383,6 +384,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 title: { equals: 'Ready for restore' },
               },
@@ -441,7 +443,7 @@ describe('Trash', () => {
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Ready for restore')
         await expect(page.locator('.row-2 .cell-title')).toHaveText('Ready for restore')
 
-        // Check that restored docs have `_status = "draft"`
+        // Check that restored docs have `_status = "published"`
         await expect
           .poll(async () => {
             const { docs } = await payload.find({
@@ -810,6 +812,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
@@ -822,6 +825,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
