@@ -21,6 +21,9 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
       className={baseClass}
       ref={ref}
       {...restInnerProps}
+      // react-select marks indicators aria-hidden, but this control is focusable,
+      // so forwarding that attribute would hide it from assistive tech
+      aria-hidden={undefined}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
           clearValue()

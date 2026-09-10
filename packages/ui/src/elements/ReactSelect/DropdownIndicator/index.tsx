@@ -27,6 +27,9 @@ export const DropdownIndicator: React.FC<
       className={baseClass}
       ref={ref}
       {...restInnerProps}
+      // react-select marks indicators aria-hidden, but this button is focusable
+      // and named, so forwarding that attribute would hide it from assistive tech
+      aria-hidden={undefined}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
           e.key = ' '
