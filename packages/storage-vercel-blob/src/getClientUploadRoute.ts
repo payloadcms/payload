@@ -2,7 +2,7 @@ import type { PayloadHandler, PayloadRequest, UploadCollectionSlug } from 'paylo
 
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
 import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
 
 import type { VercelBlobCollectionOptions } from './authorizeFileOverwrite.js'
 
@@ -55,13 +55,18 @@ export const getClientUploadRoute =
           if (
             typeof parsed.collectionSlug !== 'string' ||
             !parsed.collectionSlug ||
-            !Object.hasOwn(collections, parsed.collectionSlug) ||
             (parsed.mimeType !== undefined && typeof parsed.mimeType !== 'string')
           ) {
             throw new APIError('Invalid upload payload', 400)
           }
 
           const { collectionSlug, mimeType } = parsed
+
+          await assertClientUploadAccess({ collectionSlug, req })
+
+          if (!Object.hasOwn(collections, collectionSlug)) {
+            throw new APIError('Invalid upload payload', 400)
+          }
 
           if (!(await access({ collectionSlug, req }))) {
             throw new Forbidden()
@@ -95,6 +100,10 @@ export const getClientUploadRoute =
 
       return Response.json(jsonResponse)
     } catch (error) {
+      if (error instanceof APIError) {
+        throw error
+      }
+
       req.payload.logger.error(error)
       throw new APIError('storage-vercel-blob client upload route error')
     }

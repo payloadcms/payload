@@ -19,6 +19,7 @@ const createRequest = (allowRestrictedFileTypes: boolean, mimeType: unknown): Pa
         media: {
           config: {
             slug: 'media',
+            access: {},
             upload: { allowRestrictedFileTypes },
           },
         },

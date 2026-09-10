@@ -5,7 +5,7 @@ import type { PayloadHandler } from 'payload'
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
 
 import type { AzureStorageOptions } from './index.js'
 
@@ -39,6 +39,8 @@ export const getGenerateSignedURLHandler = ({
       filename: string
       mimeType: string
     }
+
+    await assertClientUploadAccess({ collectionSlug, req })
 
     const collectionStorageConfig = collections[collectionSlug]
     if (!collectionStorageConfig) {

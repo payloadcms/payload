@@ -5,7 +5,7 @@ import {
   type PayloadRequest,
   type UploadCollectionSlug,
 } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
 
 type Args = {
   access?: (args: {
@@ -52,6 +52,8 @@ export const getClientUploadRoute = ({
         if (!collectionSlug) {
           throw new APIError('No payload was provided')
         }
+
+        await assertClientUploadAccess({ collectionSlug, req })
 
         if (!(await access({ collectionSlug, req }))) {
           throw new Forbidden()

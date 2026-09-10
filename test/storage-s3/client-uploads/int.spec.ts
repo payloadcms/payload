@@ -68,11 +68,14 @@ it('should include the approved upload headers in the signature', async () => {
         media: {
           config: {
             slug: 'media',
+            access: {},
             upload: true,
           },
         },
       },
-      config: { upload: { limits: { fileSize: MB(10) } } },
+      config: {
+        upload: { limits: { fileSize: MB(10) } },
+      },
       db: { findOne: () => Promise.resolve(null) },
     },
     user: { id: 'user-id' },
@@ -111,8 +114,10 @@ it.each([
         ...(mimeType === undefined ? {} : { mimeType }),
       }),
     payload: {
-      collections: { media: { config: { slug: 'media', upload: true } } },
-      config: { upload: {} },
+      collections: { media: { config: { slug: 'media', access: {}, upload: true } } },
+      config: {
+        upload: {},
+      },
       db: { findOne: () => Promise.resolve(null) },
     },
     user: { id: 'user-id' },
@@ -166,6 +171,44 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     expect(res.ContentLength).toBe(file.length)
     expect(res.ContentType).toBe('image/png')
   })
+
+  it('should reject unauthenticated client uploads', async () => {
+    const response = await restClient.POST(signedURLEndpoint, {
+      auth: false,
+      body: signedURLBody('media', 'unauthorized.png', MB(1), 'image/png'),
+    })
+
+    expect(response.status).toBe(403)
+    expect((await response.json()).url).toBeUndefined()
+  })
+
+  it('should reject client uploads without collection create or update permission', async () => {
+    const response = await restClient.POST(signedURLEndpoint, {
+      body: signedURLBody('media', 'forbidden.png', MB(1), 'image/png'),
+      headers: {
+        'x-disallow-create': 'true',
+        'x-disallow-update': 'true',
+      },
+    })
+    const body = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(body.url).toBeUndefined()
+    expect(body.errors).toBeDefined()
+  })
+
+  it.each(['x-disallow-create', 'x-disallow-update'])(
+    'should allow client uploads when only %s is denied',
+    async (deniedPermission) => {
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: signedURLBody('media', 'allowed.png', MB(1), 'image/png'),
+        headers: { [deniedPermission]: 'true' },
+      })
+
+      expect(response.status).toBe(200)
+      expect((await response.json()).url).toBeDefined()
+    },
+  )
 
   it('should persist adapter-backed SVG only after document validation', async () => {
     const safeSVG =

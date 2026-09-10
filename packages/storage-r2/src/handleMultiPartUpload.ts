@@ -3,7 +3,7 @@ import type { PayloadHandler } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
 
 import type { R2StorageOptions } from './index.js'
 import type { R2Bucket, R2StorageMultipartUploadHandlerParams } from './types.js'
@@ -23,33 +23,15 @@ export const getHandleMultiPartUpload =
     const collectionSlug = params.collection
     const filetype = params.fileType
 
+    await assertClientUploadAccess({ collectionSlug, req })
+
     const collectionConfig = collections[collectionSlug]
     if (!collectionConfig) {
       throw new APIError(`Collection ${collectionSlug} was not found in R2 Storage options`)
     }
 
-    // Check custom access if provided, otherwise check collection's create access
-    if (access) {
-      if (!(await access({ collectionSlug, req }))) {
-        throw new Forbidden(req.t)
-      }
-    } else {
-      // Use the collection's create access control
-      const collection = req.payload.collections[collectionSlug]
-      if (!collection) {
-        throw new APIError(`Collection ${collectionSlug} not found`)
-      }
-
-      const createAccess = collection.config.access?.create
-      if (createAccess) {
-        const hasAccess = await createAccess({ req })
-        if (!hasAccess) {
-          throw new Forbidden(req.t)
-        }
-      } else if (!req.user) {
-        // No custom access and no user - deny by default
-        throw new Forbidden(req.t)
-      }
+    if (access && !(await access({ collectionSlug, req }))) {
+      throw new Forbidden(req.t)
     }
 
     assertClientUploadAllowed({

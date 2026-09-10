@@ -4,7 +4,7 @@ import type { PayloadHandler } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
 
 import type { GcsStorageOptions } from './index.js'
 
@@ -37,6 +37,8 @@ export const getGenerateSignedURLHandler = ({
       filename: string
       mimeType: string
     }
+
+    await assertClientUploadAccess({ collectionSlug, req })
 
     const collectionStorageConfig = collections[collectionSlug]
     if (!collectionStorageConfig) {

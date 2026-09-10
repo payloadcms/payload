@@ -5,7 +5,11 @@ import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAllowed, assertClientUploadFileSize } from 'payload/internal'
+import {
+  assertClientUploadAccess,
+  assertClientUploadAllowed,
+  assertClientUploadFileSize,
+} from 'payload/internal'
 
 import type { S3StorageOptions } from './index.js'
 
@@ -50,6 +54,8 @@ export const getGenerateSignedURLHandler = ({
       filesize: number
       mimeType: string
     }
+
+    await assertClientUploadAccess({ collectionSlug, req })
 
     const collectionS3Config = collections[collectionSlug]
     if (!collectionS3Config) {
