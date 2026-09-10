@@ -155,6 +155,7 @@ export const getImportCollection = ({
           mimetype: fileMimetype,
         },
         format: fileMimetype === 'text/csv' ? 'csv' : 'json',
+        importDoc: doc,
         importMode: doc.importMode || 'create',
         matchField: doc.matchField,
         maxLimit,

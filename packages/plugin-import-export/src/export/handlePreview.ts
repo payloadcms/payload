@@ -3,7 +3,7 @@ import type { PayloadRequest, Sort, Where } from 'payload'
 import { addDataAndFileToRequest } from 'payload'
 import { getObjectDotNotation } from 'payload/shared'
 
-import type { ExportBeforeHook, ExportPreviewResponse } from '../types.js'
+import type { ExportBeforeHook, ExportDoc, ExportPreviewResponse } from '../types.js'
 
 import {
   DEFAULT_PREVIEW_LIMIT,
@@ -17,23 +17,33 @@ import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
 import { getSchemaColumns, mergeColumns } from '../utilities/getSchemaColumns.js'
 import { getSelect } from '../utilities/getSelect.js'
+import { getSubmittedFormValues } from '../utilities/getSubmittedFormValues.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
 
-const applyExportBeforeHook = async (
-  hook: ExportBeforeHook | undefined,
-  data: Record<string, unknown>[],
-  originalDocs: unknown[],
-  format: 'csv' | 'json' | ({} & string),
-  req: PayloadRequest,
-): Promise<Record<string, unknown>[]> => {
+const applyExportBeforeHook = async ({
+  data,
+  exportDoc,
+  format,
+  hook,
+  originalDocs,
+  req,
+}: {
+  data: Record<string, unknown>[]
+  exportDoc: ExportDoc
+  format: 'csv' | 'json' | ({} & string)
+  hook: ExportBeforeHook | undefined
+  originalDocs: unknown[]
+  req: PayloadRequest
+}): Promise<Record<string, unknown>[]> => {
   if (!hook || data.length === 0) {
     return data
   }
   return hook({
     batchNumber: 1,
     data,
+    exportDoc,
     format,
     originalData: originalDocs as Record<string, unknown>[],
     req,
@@ -70,6 +80,13 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   // Validate and clamp pagination values to safe bounds
   const previewLimit = Math.max(MIN_PREVIEW_LIMIT, Math.min(rawPreviewLimit, MAX_PREVIEW_LIMIT))
   const previewPage = Math.max(MIN_PREVIEW_PAGE, rawPreviewPage)
+
+  // Preview runs against the open form, so nothing is saved — this carries every field the
+  // form submitted, including any added via `overrideCollection`. `getSubmittedFormValues`
+  // drops `id`, so a hook can rely on an absent `id` meaning "not saved".
+  const exportDoc = getSubmittedFormValues({
+    formData: (req.data ?? {}) as Record<string, unknown>,
+  }) as ExportDoc
 
   const targetCollection = req.payload.collections[collectionSlug]
   if (!targetCollection) {
@@ -222,7 +239,14 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       }),
     )
 
-    transformed = await applyExportBeforeHook(exportHooks?.before, transformed, docs, 'csv', req)
+    transformed = await applyExportBeforeHook({
+      data: transformed,
+      exportDoc,
+      format: 'csv',
+      hook: exportHooks?.before,
+      originalDocs: docs,
+      req,
+    })
 
     if (schemaColumns && transformed.length > 0) {
       const dataColumns: string[] = []
@@ -284,7 +308,14 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       return output
     })
 
-    transformed = await applyExportBeforeHook(exportHooks?.before, transformed, docs, 'json', req)
+    transformed = await applyExportBeforeHook({
+      data: transformed,
+      exportDoc,
+      format: 'json',
+      hook: exportHooks?.before,
+      originalDocs: docs,
+      req,
+    })
   }
 
   const hasNextPage = previewPage < previewTotalPages
