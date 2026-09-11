@@ -2,13 +2,26 @@ import type { GlobalConfig } from 'payload'
 
 import { restoreAccessGlobalSlug, restoreAccessNoVersionsGlobalSlug } from '../slugs.js'
 
-const updateAccess: NonNullable<GlobalConfig['access']>['update'] = ({ req: { context } }) => {
+const updateAccess: NonNullable<GlobalConfig['access']>['update'] = ({
+  data,
+  req: { context },
+}) => {
   if (context?.restoreAccessMode === 'allow') {
     return true
   }
 
   if (context?.restoreAccessMode === 'deny') {
     return false
+  }
+
+  // Publish gate: a non-publisher may not set the global to published.
+  if (context?.restoreAccessMode === 'publishGate') {
+    return data?._status !== 'published'
+  }
+
+  // Unpublish gate: a non-publisher may not set the global to draft.
+  if (context?.restoreAccessMode === 'unpublishGate') {
+    return data?._status !== 'draft'
   }
 
   // Constrained: only allow when the current global is unlocked. `equals`
