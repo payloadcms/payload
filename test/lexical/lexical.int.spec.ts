@@ -1,5 +1,6 @@
 import type {
   SerializedEditorState,
+  SerializedLexicalNode,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
 import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs } from 'payload'
@@ -64,9 +65,12 @@ import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
   lexicalListsFeatureSlug,
+  lexicalRelationshipFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
+  uploads2Slug,
   uploadsSlug,
+  usersSlug,
 } from './slugs.js'
 
 let createdArrayDocID: number | string = null
@@ -306,6 +310,143 @@ test.suite({ config: './config.ts' })('Lexical', () => {
 
       expect(relationshipNode.value.text).toStrictEqual(textDoc.text)
     })
+
+    test('should not populate relationships to collections outside enabledCollections', async ({
+      payload,
+      restClient,
+    }) => {
+      const relatedUser = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'related-user@example.com',
+          password: 'test-password',
+        },
+      })
+
+      const originalReadAccess = payload.collections[usersSlug].config.access.read
+      const node = {
+        type: 'relationship',
+        format: '',
+        relationTo: usersSlug,
+        value: relatedUser.id,
+        version: 2,
+      }
+      const richText = buildEditorState<SerializedLexicalNode>({ nodes: [node] })
+
+      payload.collections[usersSlug].config.access.read = () => false
+
+      try {
+        const readResponse = await restClient.GET(`/${usersSlug}/${relatedUser.id}`)
+
+        expect(readResponse.status).toBe(403)
+
+        // The referenced collection is not enabled for this field.
+        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}?depth=2`, {
+          body: JSON.stringify({ richText }),
+        })
+
+        expect(response.status).toBe(400)
+
+        const doc = await payload.create({
+          collection: lexicalRelationshipFieldsSlug,
+          data: {},
+        })
+
+        // Simulate existing content referencing a collection outside enabledCollections.
+        await payload.db.updateOne({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          data: { richText },
+        })
+
+        // Read the stored content through the Local API.
+        const rendered = await payload.findByID({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          depth: 2,
+        })
+
+        const storedNode = rendered.richText.root.children[0] as SerializedRelationshipNode
+
+        expect(storedNode.value).toBe(relatedUser.id)
+      } finally {
+        payload.collections[usersSlug].config.access.read = originalReadAccess
+      }
+    })
+
+    for (const { fieldName, relationTo, type } of [
+      { fieldName: 'richText', relationTo: textFieldsSlug, type: 'relationship' },
+      { fieldName: 'richText', relationTo: uploads2Slug, type: 'upload' },
+      { fieldName: 'richText', relationTo: usersSlug, type: 'upload' },
+      { fieldName: 'richText3', relationTo: uploadsSlug, type: 'upload' },
+    ] as const) {
+      test(`should enforce ${fieldName} collection restrictions for ${type} nodes referencing ${relationTo}`, async ({
+        payload,
+        restClient,
+      }) => {
+        const { docs: targets } = await payload.find({ collection: relationTo, depth: 0, limit: 1 })
+        const targetID = targets[0].id
+        const node = {
+          id: 'test-upload-node',
+          type,
+          fields: {},
+          format: '',
+          relationTo,
+          value: targetID,
+          version: 2,
+        }
+        const richText = buildEditorState<SerializedLexicalNode>({ nodes: [node] })
+        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}`, {
+          body: JSON.stringify({ [fieldName]: richText }),
+        })
+
+        expect(response.status).toBe(400)
+
+        const doc = await payload.create({
+          collection: lexicalRelationshipFieldsSlug,
+          data: {},
+        })
+
+        // Simulate existing content referencing a collection not enabled for this field.
+        await payload.db.updateOne({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          data: { [fieldName]: richText },
+        })
+
+        const localDoc = await payload.findByID({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          depth: 2,
+        })
+
+        expect(localDoc[fieldName].root.children[0].value).toBe(targetID)
+
+        const restResponse = await restClient.GET(`/${lexicalRelationshipFieldsSlug}/${doc.id}`, {
+          query: { depth: 2 },
+        })
+        const restDoc = await restResponse.json()
+
+        expect(restResponse.status).toBe(200)
+        expect(restDoc[fieldName].root.children[0].value).toBe(targetID)
+
+        const graphQLResponse = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+              LexicalRelationshipFields(where: { id: { equals: ${JSON.stringify(doc.id)} } }) {
+                docs { ${fieldName}(depth: 2) }
+              }
+            }`,
+          }),
+        })
+        const graphQLResult = await graphQLResponse.json()
+
+        expect(graphQLResult.errors).toBeUndefined()
+        expect(
+          graphQLResult.data.LexicalRelationshipFields.docs[0][fieldName].root.children[0].value,
+        ).toBe(targetID)
+      })
+    }
 
     test('should respect GraphQL rich text depth parameter and populate upload node', async ({
       restClient,
