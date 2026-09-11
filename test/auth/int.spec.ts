@@ -291,6 +291,292 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
   })
 
   test.describe('REST - admin user', () => {
+    test.describe('password hashes', () => {
+      const createdUserIDs: Array<number | string> = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdUserIDs) {
+          await payload.delete({ collection: slug, id })
+        }
+        createdUserIDs.length = 0
+      })
+
+      test('should update an existing password hash after login', async ({ payload }) => {
+        const testEmail = 'existing-password-hash@example.com'
+        const testPassword = 'test-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = crypto
+          .pbkdf2Sync(testPassword, existingSalt, 25000, 512, 'sha256')
+          .toString('hex')
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+          id: user.id,
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+            salt: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).not.toBe(existingHash)
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+        expect(updatedUser?.salt).not.toBe(existingSalt)
+      })
+
+      test('should preserve a password changed during login', async ({ payload }) => {
+        const testEmail = 'password-change-during-login@example.com'
+        const testPassword = 'test-password'
+        const changedPassword = 'changed-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = crypto
+          .pbkdf2Sync(testPassword, existingSalt, 25000, 512, 'sha256')
+          .toString('hex')
+        const changedSalt = crypto.randomBytes(32).toString('hex')
+        const changedHash = `pbkdf2-sha256-v1:${crypto
+          .pbkdf2Sync(changedPassword, changedSalt, 600000, 32, 'sha256')
+          .toString('hex')}`
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+          id: user.id,
+        })
+
+        const collectionConfig = payload.config.collections.find(
+          ({ slug: collectionSlug }) => collectionSlug === slug,
+        )!
+        const maxLoginAttempts = collectionConfig.auth.maxLoginAttempts
+        const originalUpdateOne = payload.db.updateOne
+        let shouldChangePassword = true
+
+        collectionConfig.auth.maxLoginAttempts = 0
+        payload.db.updateOne = async (args) => {
+          if (
+            shouldChangePassword &&
+            args.collection === slug &&
+            typeof args.data.hash === 'string' &&
+            args.data.hash.startsWith('pbkdf2-sha256-v1:')
+          ) {
+            shouldChangePassword = false
+            // Shares the login transaction so this write is not blocked by its row lock
+            await originalUpdateOne.call(payload.db, {
+              collection: slug,
+              data: {
+                hash: changedHash,
+                salt: changedSalt,
+              },
+              id: user.id,
+              req: args.req,
+            })
+          }
+
+          return originalUpdateOne.call(payload.db, args)
+        }
+
+        try {
+          await payload.login({
+            collection: slug,
+            data: {
+              email: testEmail,
+              password: testPassword,
+            },
+          })
+        } finally {
+          payload.db.updateOne = originalUpdateOne
+          collectionConfig.auth.maxLoginAttempts = maxLoginAttempts
+        }
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+            salt: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toBe(changedHash)
+        expect(updatedUser?.salt).toBe(changedSalt)
+      })
+
+      test.runIf(process.env.PAYLOAD_DATABASE === 'sqlite')(
+        'should preserve a password changed after updating an existing hash',
+        async ({ payload }) => {
+          const testEmail = 'password-change-after-hash-update@example.com'
+          const testPassword = 'test-password'
+          const changedPassword = 'changed-password'
+          const existingSalt = crypto.randomBytes(32).toString('hex')
+          const existingHash = crypto
+            .pbkdf2Sync(testPassword, existingSalt, 25000, 512, 'sha256')
+            .toString('hex')
+          const changedSalt = crypto.randomBytes(32).toString('hex')
+          const changedHash = `pbkdf2-sha256-v1:${crypto
+            .pbkdf2Sync(changedPassword, changedSalt, 600000, 32, 'sha256')
+            .toString('hex')}`
+          const user = await payload.create({
+            collection: slug,
+            data: {
+              email: testEmail,
+              password: testPassword,
+            },
+          })
+          createdUserIDs.push(user.id)
+
+          await payload.db.updateOne({
+            collection: slug,
+            data: {
+              hash: existingHash,
+              salt: existingSalt,
+            },
+            id: user.id,
+          })
+
+          const originalUpdateOne = payload.db.updateOne
+          let shouldChangePassword = true
+
+          payload.db.updateOne = async (args) => {
+            const updatedDoc = await originalUpdateOne.call(payload.db, args)
+
+            if (
+              shouldChangePassword &&
+              args.collection === slug &&
+              typeof args.data.hash === 'string' &&
+              args.data.hash.startsWith('pbkdf2-sha256-v1:') &&
+              'where' in args
+            ) {
+              shouldChangePassword = false
+              await originalUpdateOne.call(payload.db, {
+                collection: slug,
+                data: {
+                  hash: changedHash,
+                  salt: changedSalt,
+                },
+                id: user.id,
+              })
+            }
+
+            return updatedDoc
+          }
+
+          try {
+            await payload.login({
+              collection: slug,
+              data: {
+                email: testEmail,
+                password: testPassword,
+              },
+            })
+          } finally {
+            payload.db.updateOne = originalUpdateOne
+          }
+
+          const updatedUser = await payload.db.findOne({
+            collection: slug,
+            select: {
+              hash: true,
+              salt: true,
+            },
+            where: {
+              id: { equals: user.id },
+            },
+          })
+
+          expect(updatedUser?.hash).toBe(changedHash)
+          expect(updatedUser?.salt).toBe(changedSalt)
+        },
+      )
+
+      test('should update an existing password hash when the password is shorter than required', async ({
+        payload,
+      }) => {
+        const testEmail = 'short-existing-password@example.com'
+        const testPassword = 'a'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = crypto
+          .pbkdf2Sync(testPassword, existingSalt, 25000, 512, 'sha256')
+          .toString('hex')
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: 'test-password',
+          },
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+          id: user.id,
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+            salt: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+        expect(updatedUser?.salt).not.toBe(existingSalt)
+      })
+    })
+
     test('should prevent registering a new first user', async ({ restClient }) => {
       const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
