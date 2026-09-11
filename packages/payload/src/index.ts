@@ -830,7 +830,6 @@ export class BasePayload {
                 const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
                 if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
                   return
                 }
               }
