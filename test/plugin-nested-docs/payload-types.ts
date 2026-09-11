@@ -127,6 +127,7 @@ export interface Page {
   id: string;
   title: string;
   slug: string;
+  breaksOnResave?: boolean | null;
   fullTitle?: string | null;
   parent?: (string | null) | Page;
   breadcrumbs?:
@@ -277,6 +278,7 @@ export interface PayloadMigration {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  breaksOnResave?: T;
   fullTitle?: T;
   parent?: T;
   breadcrumbs?:
