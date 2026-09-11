@@ -17,10 +17,13 @@ import {
 import type { RelationshipData, SerializedRelationshipNode } from '../schema.js'
 
 function $relationshipElementToServerNode(domNode: HTMLDivElement): DOMConversionOutput | null {
-  const id = domNode.getAttribute('data-lexical-relationship-id')
+  let id: null | number | string = domNode.getAttribute('data-lexical-relationship-id')
   const relationTo = domNode.getAttribute('data-lexical-relationship-relationTo')
 
   if (id != null && relationTo != null) {
+    if (String(Number(id)) === id) {
+      id = Number(id)
+    }
     const node = $createServerRelationshipNode({
       relationTo,
       value: id,
