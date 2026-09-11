@@ -54,7 +54,7 @@ plugin-<name>/
 ├── README.md                 # Plugin documentation
 ├── LICENSE.md                # License file
 ├── eslint.config.js          # ESLint configuration (optional)
-├── vitest.config.js          # Vitest test configuration (optional)
+├── vitest.config.ts          # Vitest test configuration (optional)
 ├── playwright.config.js      # Playwright e2e tests (optional)
 └── src/
     ├── index.ts              # Entry point, re-exports plugin and config types
@@ -87,7 +87,7 @@ plugin-<name>/
 - **src/exports/rsc.ts** for React Server Component exports
 - **src/components/** for organizing React components
 - **src/endpoints/** for custom API endpoint handlers
-- Test configuration files (vitest.config.js, playwright.config.js)
+- Test configuration files (vitest.config.ts, playwright.config.js)
 
 ## Package.json Configuration
 
@@ -136,29 +136,32 @@ plugin-<name>/
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@payloadcms/translations": "^3.0.0",
-    "@payloadcms/ui": "^3.0.0"
+    "@payloadcms/translations": "^3.82.1",
+    "@payloadcms/ui": "^3.82.1"
   },
   "devDependencies": {
-    "@payloadcms/db-mongodb": "^3.0.0",
-    "@payloadcms/next": "^3.0.0",
-    "@payloadcms/richtext-lexical": "^3.0.0",
-    "@playwright/test": "^1.40.0",
-    "@swc/cli": "^0.1.62",
-    "@swc/core": "^1.3.0",
+    "@payloadcms/db-mongodb": "^3.82.1",
+    "@payloadcms/next": "^3.82.1",
+    "@payloadcms/richtext-lexical": "^3.82.1",
+    "@playwright/test": "^1.63.0",
+    "@swc/cli": "^0.7.9",
+    "@swc/core": "^1.15.3",
     "copyfiles": "^2.4.1",
     "cross-env": "10.1.0",
-    "eslint": "^9.0.0",
-    "next": "^15.4.10",
-    "payload": "^3.0.0",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
-    "rimraf": "^5.0.0",
-    "typescript": "^6.0.0",
-    "vitest": "4.1.6"
+    "eslint": "^9.39.2",
+    "next": "^16.3.3",
+    "payload": "^3.82.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "rimraf": "^6.0.1",
+    "typescript": "^6.0.3",
+    "vitest": "5.0.0"
   },
   "peerDependencies": {
-    "payload": "^3.0.0"
+    "payload": "^3.82.1"
+  },
+  "engines": {
+    "node": ">=24.15.0"
   }
 }
 ```
