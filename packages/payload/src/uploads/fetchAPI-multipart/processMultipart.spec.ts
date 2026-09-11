@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'fs/promises'
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
 import { describe, expect, it, vi } from 'vitest'
@@ -18,6 +18,47 @@ const fileForm = (size: number) => {
   const form = new FormData()
   form.append('file', new Blob([new Uint8Array(size)]), 'sample.bin')
   return form
+}
+
+const streamedFileRequest = ({
+  chunk,
+  chunkCount,
+  isClosed = true,
+  onCancel,
+}: {
+  chunk: Uint8Array
+  chunkCount: number
+  isClosed?: boolean
+  onCancel?: () => void
+}) => {
+  const header = Buffer.from(
+    '--sample\r\nContent-Disposition: form-data; name="file"; filename="sample.bin"\r\nContent-Type: application/octet-stream\r\n\r\n',
+  )
+  const footer = Buffer.from('\r\n--sample--\r\n')
+  let chunksRead = 0
+  const body = new ReadableStream<Uint8Array>({
+    cancel() {
+      onCancel?.()
+    },
+    pull(controller) {
+      if (chunksRead === 0) {
+        controller.enqueue(header)
+      } else if (chunksRead <= chunkCount) {
+        controller.enqueue(chunk)
+      } else if (isClosed) {
+        controller.enqueue(footer)
+        controller.close()
+      }
+      chunksRead += 1
+    },
+  })
+
+  return new Request('http://localhost/api/media', {
+    body,
+    duplex: 'half',
+    method: 'POST',
+    headers: { 'content-type': 'multipart/form-data; boundary=sample' },
+  } as RequestInit)
 }
 
 describe('multipart limits', () => {
@@ -86,6 +127,43 @@ describe('multipart limits', () => {
 
     expect(result.fields._payload).toBe('{"title":"Sample"}')
   })
+
+  it.each([
+    { label: 'NaN', requestSizeLimit: Number.NaN },
+    { label: 'a negative value', requestSizeLimit: -1 },
+    { label: 'negative Infinity', requestSizeLimit: -Infinity },
+    { label: 'a fractional value', requestSizeLimit: 1.5 },
+    { label: 'an unsafe integer', requestSizeLimit: Number.MAX_SAFE_INTEGER + 1 },
+  ])('should reject $label as a request size limit', async ({ requestSizeLimit }) => {
+    const request = await requestFor(fileForm(1))
+
+    await expect(
+      processMultipartFormdata({ options: { requestSizeLimit }, request }),
+    ).rejects.toThrow(
+      'requestSizeLimit must be Infinity or a non-negative safe integer representing bytes',
+    )
+    expect(request.body!.locked).toBe(false)
+  })
+
+  it('should accept zero as a request size limit', async () => {
+    await expect(
+      processMultipartFormdata({
+        options: { requestSizeLimit: 0 },
+        request: await requestFor(fileForm(1)),
+      }),
+    ).rejects.toThrow('Multipart request size limit has been reached')
+  })
+
+  it.each([Number.MAX_SAFE_INTEGER, Infinity])(
+    'should accept %s as a request size limit',
+    async (requestSizeLimit) => {
+      const result = await processMultipartFormdata({
+        options: { requestSizeLimit },
+        request: await requestFor(fileForm(1)),
+      })
+      expect(result.files.file.size).toBe(1)
+    },
+  )
 })
 
 describe('multipart streaming', () => {
@@ -113,6 +191,125 @@ describe('multipart streaming', () => {
       processMultipartFormdata({ options: { limits: { fileSize: 3 } }, request }),
     ).rejects.toMatchObject({ status: 413 })
     expect(cancelled).toBe(true)
+  }, 1000)
+
+  it.each([
+    { label: 'omitted', override: {} },
+    { label: 'explicitly undefined', override: { requestSizeLimit: undefined } },
+  ])('should enforce the default request size when it is $label', async ({ override }) => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'multipart-'))
+    try {
+      const options = {
+        limits: { fileSize: Infinity },
+        tempFileDir: directory,
+        useTempFiles: true,
+        ...override,
+      }
+      await expect(
+        processMultipartFormdata({
+          options,
+          request: streamedFileRequest({
+            chunk: Buffer.alloc(1024 * 1024),
+            chunkCount: 51,
+          }),
+        }),
+      ).rejects.toMatchObject({ status: 413 })
+      expect(await readdir(directory)).toEqual([])
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it('should accept requests within the default request size', async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'multipart-'))
+    try {
+      const result = await processMultipartFormdata({
+        options: {
+          limits: { fileSize: Infinity },
+          tempFileDir: directory,
+          useTempFiles: true,
+        },
+        request: streamedFileRequest({
+          chunk: Buffer.alloc(1024 * 1024),
+          chunkCount: 49,
+        }),
+      })
+      expect((await stat(result.files.file.tempFilePath!)).size).toBe(49 * 1024 * 1024)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it('should accept requests above the default size with a larger finite limit', async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'multipart-'))
+    try {
+      const result = await processMultipartFormdata({
+        options: {
+          limits: { fileSize: Infinity },
+          requestSizeLimit: 52 * 1024 * 1024,
+          tempFileDir: directory,
+          useTempFiles: true,
+        },
+        request: streamedFileRequest({
+          chunk: Buffer.alloc(1024 * 1024),
+          chunkCount: 51,
+        }),
+      })
+      expect((await stat(result.files.file.tempFilePath!)).size).toBe(51 * 1024 * 1024)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it('should accept requests above the default size when the limit is disabled', async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'multipart-'))
+    try {
+      const result = await processMultipartFormdata({
+        options: {
+          limits: { fileSize: Infinity },
+          requestSizeLimit: Infinity,
+          tempFileDir: directory,
+          useTempFiles: true,
+        },
+        request: streamedFileRequest({
+          chunk: Buffer.alloc(1024 * 1024),
+          chunkCount: 51,
+        }),
+      })
+      expect((await stat(result.files.file.tempFilePath!)).size).toBe(51 * 1024 * 1024)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it('should cancel and clean up before forwarding a chunk above the request size limit', async () => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'multipart-'))
+    let isCancelled = false
+    try {
+      await expect(
+        processMultipartFormdata({
+          options: {
+            limits: { fileSize: 192 * 1024 },
+            requestSizeLimit: 200 * 1024,
+            responseOnLimit: 'File size limit has been reached',
+            tempFileDir: directory,
+            useTempFiles: true,
+          },
+          request: streamedFileRequest({
+            chunk: Buffer.alloc(128 * 1024),
+            chunkCount: 2,
+            isClosed: false,
+            onCancel: () => {
+              isCancelled = true
+            },
+          }),
+        }),
+      ).rejects.toThrow('Multipart request size limit has been reached')
+      expect(isCancelled).toBe(true)
+      expect(await readdir(directory)).toEqual([])
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
   }, 1000)
 
   it.each([

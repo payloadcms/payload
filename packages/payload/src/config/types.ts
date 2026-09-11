@@ -839,6 +839,12 @@ export type FetchAPIFileUploadOptions = {
    */
   preserveExtension?: boolean | number | undefined
   /**
+   * Maximum size in bytes for the complete raw multipart request, including files, fields, headers, and boundaries.
+   * Must be a non-negative safe integer. Set to `Infinity` to disable the request-wide limit.
+   * @default 50 * 1024 * 1024
+   */
+  requestSizeLimit?: number | undefined
+  /**
    * Response which will be send to client if file size limit exceeded when `abortOnLimit` set to `true`.
    * @default 'File size limit has been reached'
    */

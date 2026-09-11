@@ -19,16 +19,18 @@ type ProcessMultipart = (args: {
 }) => Promise<FetchAPIFileUploadResponse>
 
 export const processMultipart: ProcessMultipart = async ({ options, request }) => {
+  const { requestSizeLimit = Infinity, ...busboyOptions } = options
   const result: FetchAPIFileUploadResponse = { fields: undefined!, files: undefined! }
   const headers: Record<string, string> = {}
   request.headers.forEach((value, name) => {
     headers[name] = value
   })
-  const busboy = Busboy({ ...options, headers })
+  const busboy = Busboy({ ...busboyOptions, headers })
   const reader = request.body!.getReader()
   const uploads: { cleanup: () => Promise<void> | void; clear: () => void; file: Readable }[] = []
   const writes: Promise<boolean>[] = []
   let failure: Error | undefined
+  let requestSize = 0
   let rejectFinished: (err: Error) => void
   let resolveFinished: () => void
   const finished = new Promise<void>((resolve, reject) => {
@@ -54,6 +56,11 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   }
   const limitError = () =>
     new APIError('Multipart limit has been reached', httpStatus.REQUEST_ENTITY_TOO_LARGE)
+  const requestSizeLimitError = () =>
+    new APIError(
+      'Multipart request size limit has been reached',
+      httpStatus.REQUEST_ENTITY_TOO_LARGE,
+    )
 
   busboy.on('filesLimit', () => fail(limitError()))
   busboy.on('fieldsLimit', () => fail(limitError()))
@@ -170,6 +177,13 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         }
         if (done) {
           busboy.end()
+          break
+        }
+        requestSize += value.byteLength
+        if (requestSize > requestSizeLimit) {
+          const err = requestSizeLimitError()
+          fail(err)
+          await reader.cancel(err).catch(() => {})
           break
         }
         await new Promise<void>((resolve, reject) => {
