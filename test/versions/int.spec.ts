@@ -31,7 +31,9 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
+  restoreAccessCollectionSlug,
   restoreAccessGlobalSlug,
+  restoreAccessLocalizedCollectionSlug,
   restoreAccessNoVersionsGlobalSlug,
   versionCollectionSlug,
 } from './slugs.js'
@@ -3697,6 +3699,242 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
         expect(current.title).toBe('current')
+      })
+    })
+
+    test.describe('Restore - publication access control', () => {
+      const createdCollectionDocIDs: Array<number | string> = []
+      const createdLocalizedDocIDs: Array<number | string> = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdCollectionDocIDs) {
+          await payload.delete({ id, collection: restoreAccessCollectionSlug })
+        }
+        createdCollectionDocIDs.length = 0
+
+        for (const id of createdLocalizedDocIDs) {
+          await payload.delete({ id, collection: restoreAccessLocalizedCollectionSlug })
+        }
+        createdLocalizedDocIDs.length = 0
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'reset' },
+        })
+        await payload.db.deleteVersions({
+          globalSlug: restoreAccessGlobalSlug,
+          where: {},
+        })
+      })
+
+      const findCollectionVersionByStatus = async (
+        payload: Payload,
+        docID: number | string,
+        status: string,
+      ): Promise<number | string> => {
+        const versions = await payload.findVersions({
+          collection: restoreAccessCollectionSlug,
+          limit: 100,
+          where: { parent: { equals: docID } },
+        })
+        const target = versions.docs.find((doc) => doc.version._status === status)
+
+        return target!.id
+      }
+
+      test('should deny restoring a published version when update access denies publishing', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'published', title: 'published' },
+        })
+        createdCollectionDocIDs.push(doc.id)
+
+        // Unpublish so the live document is a draft and a historical published version exists.
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'draft', title: 'unpublished' },
+        })
+
+        const publishedVersionID = await findCollectionVersionByStatus(payload, doc.id, 'published')
+
+        // Restoring the published version would re-publish; the publish gate must deny it now
+        // that access.update sees the effective _status the restore will write.
+        await expect(
+          payload.restoreVersion({
+            id: publishedVersionID,
+            collection: restoreAccessCollectionSlug,
+            context: { restoreAccessMode: 'publishGate' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findByID({
+          id: doc.id,
+          collection: restoreAccessCollectionSlug,
+          draft: true,
+        })
+        expect(current._status).toBe('draft')
+      })
+
+      test('should allow restoring a draft version under the publish gate', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'published', title: 'published' },
+        })
+        createdCollectionDocIDs.push(doc.id)
+
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'draft', title: 'draft version' },
+          draft: true,
+        })
+
+        const draftVersionID = await findCollectionVersionByStatus(payload, doc.id, 'draft')
+
+        // The restore writes _status='draft', which the publish gate permits - confirming the fix
+        // passes the real _status rather than blanket-denying restores.
+        const restored = await payload.restoreVersion({
+          id: draftVersionID,
+          collection: restoreAccessCollectionSlug,
+          context: { restoreAccessMode: 'publishGate' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(restored._status).toBe('draft')
+      })
+
+      test('should deny restoring a draft version when update access denies unpublishing', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'published', title: 'published' },
+        })
+        createdCollectionDocIDs.push(doc.id)
+
+        // Create a draft version while the live document stays published.
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'draft', title: 'draft version' },
+          draft: true,
+        })
+
+        const draftVersionID = await findCollectionVersionByStatus(payload, doc.id, 'draft')
+
+        // Restoring the draft version would unpublish the live document; the unpublish gate must
+        // deny it.
+        await expect(
+          payload.restoreVersion({
+            id: draftVersionID,
+            collection: restoreAccessCollectionSlug,
+            context: { restoreAccessMode: 'unpublishGate' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+      })
+
+      test('should deny restoring a published global version when update access denies publishing', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'published' },
+        })
+
+        // Unpublish so the live global is a draft and a historical published version exists.
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'draft', title: 'unpublished' },
+        })
+
+        const versions = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 100,
+        })
+        const publishedVersionID = versions.docs.find(
+          (doc) => doc.version._status === 'published',
+        )!.id
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: publishedVersionID,
+            slug: restoreAccessGlobalSlug,
+            context: { restoreAccessMode: 'publishGate' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ draft: true, slug: restoreAccessGlobalSlug })
+        expect(current._status).toBe('draft')
+      })
+
+      test('should deny restoring a mixed-locale version that unpublishes a locale under the unpublish gate', async ({
+        payload,
+      }) => {
+        // A localized field auto-enables localizeStatus, so `_status` is stored per locale.
+        // Publish both locales so the live document is fully online.
+        const doc = await payload.create({
+          collection: restoreAccessLocalizedCollectionSlug,
+          data: { _status: 'published', title: 'en published' },
+          locale: 'en',
+        })
+        createdLocalizedDocIDs.push(doc.id)
+
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessLocalizedCollectionSlug,
+          data: { _status: 'published', title: 'de published' },
+          locale: 'de',
+        })
+
+        // Save a draft for `en` only. This leaves the live document fully published and creates a
+        // version whose stored `_status` is the mixed object { en: 'draft', de: 'published' }.
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessLocalizedCollectionSlug,
+          data: { _status: 'draft', title: 'en draft' },
+          draft: true,
+          locale: 'en',
+        })
+
+        const versions = await payload.findVersions({
+          collection: restoreAccessLocalizedCollectionSlug,
+          limit: 100,
+          locale: 'all',
+          sort: '-updatedAt',
+          where: { parent: { equals: doc.id } },
+        })
+
+        const mixedVersion = versions.docs.find((v) => {
+          const status = v.version._status as null | Record<string, unknown>
+          return status && typeof status === 'object' && status.en === 'draft'
+        })
+
+        expect(mixedVersion).toBeDefined()
+        expect((mixedVersion!.version._status as Record<string, unknown>).en).toBe('draft')
+        expect((mixedVersion!.version._status as Record<string, unknown>).de).toBe('published')
+
+        // Restoring this version writes _status = { en: 'draft', de: 'published' } to the live
+        // document, taking `en` offline. The restore evaluates access.update for every status it
+        // writes, so the 'draft' transition hits the unpublish gate and the restore is denied.
+        await expect(
+          payload.restoreVersion({
+            id: mixedVersion!.id,
+            collection: restoreAccessLocalizedCollectionSlug,
+            context: { restoreAccessMode: 'unpublishGate' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
       })
     })
 

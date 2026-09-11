@@ -66,6 +66,10 @@ export const restoreAccessGlobalSlug = 'restore-access-global'
 
 export const restoreAccessNoVersionsGlobalSlug = 'restore-access-no-versions-global'
 
+export const restoreAccessCollectionSlug = 'restore-access'
+
+export const restoreAccessLocalizedCollectionSlug = 'restore-access-localized'
+
 export const globalSlugs = [
   autoSaveGlobalSlug,
   draftGlobalSlug,

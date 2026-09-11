@@ -1,7 +1,13 @@
 import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type {
+  JsonObject,
+  PayloadRequest,
+  PopulateType,
+  SelectType,
+  Where,
+} from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
 import type { FindOptions } from './local/find.js'
 
@@ -27,6 +33,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
+import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -106,13 +113,36 @@ export const restoreVersionOperation = async <
     // Access
     // /////////////////////////////////////
 
-    const accessResults = !overrideAccess
-      ? await executeAccess(
-          { id: parentDocID, slug: collectionConfig.slug, req },
-          collectionConfig.access.update,
+    const restoredStatuses = draftArg
+      ? ['draft']
+      : getRestoredStatusesToAuthorize(versionToRestoreWithLocales?._status)
+
+    // A localized `_status` can publish and unpublish locales in one restore, so authorize every
+    // status it writes. executeAccess throws Forbidden on the first denial; Where constraints are
+    // AND-combined into the lookup below.
+    const accessResultsList: Array<boolean | Where> = []
+
+    if (overrideAccess) {
+      accessResultsList.push(true)
+    } else {
+      const statusesToAuthorize = restoredStatuses.length > 0 ? restoredStatuses : [undefined]
+
+      for (const status of statusesToAuthorize) {
+        accessResultsList.push(
+          await executeAccess(
+            {
+              id: parentDocID,
+              slug: collectionConfig.slug,
+              data: { _status: status },
+              req,
+            },
+            collectionConfig.access.update,
+          ),
         )
-      : true
-    const hasWherePolicy = hasWhereAccessResult(accessResults)
+      }
+    }
+
+    const hasWherePolicy = accessResultsList.some((result) => hasWhereAccessResult(result))
 
     // /////////////////////////////////////
     // Retrieve document
@@ -122,7 +152,9 @@ export const restoreVersionOperation = async <
       collection: collectionConfig.slug,
       locale: 'all',
       req,
-      where: combineQueries({ id: { equals: parentDocID } }, accessResults),
+      where: accessResultsList.reduce<Where>((where, result) => combineQueries(where, result), {
+        id: { equals: parentDocID },
+      }),
     }
 
     // Get the document from the non versioned collection

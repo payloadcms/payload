@@ -1,4 +1,4 @@
-import type { PayloadRequest, PopulateType } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
@@ -11,6 +11,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 
 export type Arguments = {
   depth?: number
@@ -55,6 +56,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Retrieve original raw version
     // /////////////////////////////////////
 
+    // The selected version must satisfy read-version access.
     const readVersionsAccessResult = overrideAccess
       ? true
       : await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
@@ -79,10 +81,35 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     rawVersion.version.globalType = globalConfig.slug
 
     // Overwrite draft status if draft is true
-
     if (draft) {
       rawVersion.version._status = 'draft'
     }
+
+    // A localized `_status` can publish and unpublish locales in one restore, so authorize every
+    // status it writes. executeAccess throws Forbidden on the first denial.
+    const restoredStatuses = getRestoredStatusesToAuthorize(rawVersion.version._status)
+
+    const updateAccessResults: Array<boolean | Where> = []
+
+    if (overrideAccess) {
+      updateAccessResults.push(true)
+    } else {
+      const statusesToAuthorize = restoredStatuses.length > 0 ? restoredStatuses : [undefined]
+
+      for (const status of statusesToAuthorize) {
+        updateAccessResults.push(
+          await executeAccess(
+            {
+              slug: globalConfig.slug,
+              data: { _status: status },
+              req,
+            },
+            globalConfig.access.update,
+          ),
+        )
+      }
+    }
+
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
@@ -99,11 +126,11 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // Update global
     // /////////////////////////////////////
 
-    const updateAccessResult = overrideAccess
-      ? true
-      : await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.update)
+    for (const updateAccessResult of updateAccessResults) {
+      if (!hasWhereAccessResult(updateAccessResult)) {
+        continue
+      }
 
-    if (hasWhereAccessResult(updateAccessResult)) {
       const constrainedGlobal = await payload.db.findGlobal({
         slug: globalConfig.slug,
         req,
