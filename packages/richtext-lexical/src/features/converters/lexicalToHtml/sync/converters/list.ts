@@ -1,3 +1,4 @@
+import escapeHTML from 'escape-html'
 import { v4 as uuidv4 } from 'uuid'
 
 import type { SerializedListItemNode, SerializedListNode } from '../../../../../nodeTypes.js'
@@ -32,7 +33,7 @@ export const ListHTMLConverter: HTMLConverters<SerializedListItemNode | Serializ
           role="checkbox"
           style="list-style-type: none;${providedCSSString}"
           tabIndex="-1"
-          value="${node.value}"
+          value="${escapeHTML(String(node.value))}"
         >
           ${
             hasSubLists
@@ -46,7 +47,7 @@ export const ListHTMLConverter: HTMLConverters<SerializedListItemNode | Serializ
       return `<li
           class="${hasSubLists ? 'nestedListItem' : ''}"
           style="${hasSubLists ? `list-style-type: none;${providedCSSString}` : providedCSSString}"
-          value="${node.value}"
+          value="${escapeHTML(String(node.value))}"
         >${children}</li>`
     }
   },

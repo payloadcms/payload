@@ -4,6 +4,7 @@ import { createServerFeature } from '../../../../utilities/createServerFeature.j
 import { createNode } from '../../../typeUtilities.js'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../../htmlConverter.js'
 import { shouldRegisterListBaseNodes } from '../../shared/shouldRegisterListBaseNodes.js'
+import { listItemValidation } from '../../shared/validate.js'
 import { ORDERED_LIST } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
@@ -26,6 +27,7 @@ export const OrderedListFeature = createServerFeature({
                 html: ListItemHTMLConverter as any,
               },
               node: ListItemNode,
+              validations: [listItemValidation],
             }),
           ]
         : [],
