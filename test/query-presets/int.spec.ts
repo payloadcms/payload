@@ -11,8 +11,8 @@ let adminUser: User
 let editorUser: User
 let publicUser: User
 
-test.suite({ config: './config.ts' })('Query Presets', () => {
-  test.beforeEach(async ({ payload }) => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Query Presets', () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
     adminUser = await payload
       .login({
         collection: 'users',

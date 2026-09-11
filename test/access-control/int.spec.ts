@@ -32,7 +32,7 @@ import {
   slug,
   unrestrictedSlug,
 } from './shared.js'
-test.suite({ config: './config.ts' })('Access Control', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control', () => {
   let post1: Post
   let restricted: FullyRestricted
 
@@ -969,7 +969,7 @@ test.suite({ config: './config.ts' })('Access Control', () => {
     let adminUser: Record<string, unknown>
     let publicUser: Record<string, unknown>
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const { docs: adminDocs } = await payload.find({
         collection: 'users',
         limit: 1,

@@ -26,8 +26,8 @@ const DummyReactComponent: React.ReactNode = {
   key: null,
 }
 
-test.suite({ config: './config.ts' })('Form State', () => {
-  test.beforeEach(async ({ restClient }) => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Form State', () => {
+  test.beforeAll(async ({ restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({

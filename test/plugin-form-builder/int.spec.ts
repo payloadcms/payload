@@ -21,8 +21,11 @@ const testImagePath = path.resolve(dirname, '../uploads/image.png')
 const testPdfPath = path.resolve(dirname, '../uploads/test-pdf.pdf')
 let form: Form
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
-  test.beforeEach(async ({ payload }) => {
+test.suite({
+  config: './config.ts',
+  resetBetweenTests: false,
+})('@payloadcms/plugin-form-builder', () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       confirmationType: 'message',
       confirmationMessage: {

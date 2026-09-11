@@ -211,7 +211,7 @@
     "vite": "8.1.0",
     "vitest": "5.0.0",
     "wrangler": "~4.61.1",
-    "zod": "4.3.6"
+    "zod": "catalog:"
   },
   "packageManager": "pnpm@11.9.0"
 }

@@ -3,7 +3,10 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { expect } from 'vitest'
 
+import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
+
 import { test } from '../__helpers/int/vitest.js'
+import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI_COMMAND_TEST_TIMEOUT = 180_000
@@ -23,9 +26,16 @@ const initialCLIEnvironment = {
 }
 
 test.suite({ config: './config.ts' })('CLI', () => {
+  const uploadServers: TestFileServer[] = []
+
   test.beforeEach(async () => {
     restoreCLIEnvironment()
     await resetCLIArtifacts()
+  })
+
+  test.afterEach(async () => {
+    await Promise.all(uploadServers.map(({ close }) => close()))
+    uploadServers.length = 0
   })
 
   test.afterAll(async () => {
@@ -574,6 +584,43 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
   })
 
+  test('createDocuments --slug media --documents <external-url-json> --json', async ({
+    cli,
+    payload,
+  }) => {
+    const image = await readFile(uploadFile)
+    const server = await startTestFileServer({ contentType: 'image/png', data: image })
+    uploadServers.push(server)
+
+    const documents = JSON.stringify([
+      {
+        data: { title: 'External URL upload' },
+        file: {
+          source: 'externalURL',
+          url: `${server.url}/image.png`,
+        },
+      },
+    ])
+    const output = await cli(`createDocuments --slug media --documents '${documents}' --json`)
+    const response = JSON.parse(output.stdout)
+    const createdMedia = await payload.findByID({
+      id: response.result.docs[0].id,
+      collection: 'media',
+    })
+
+    expect(response).toMatchObject({
+      command: 'createDocuments',
+      result: { docs: [{ id: expect.anything(), index: 0 }], errors: [] },
+      success: true,
+    })
+    expect(createdMedia).toMatchObject({
+      filename: 'image.png',
+      filesize: image.length,
+      mimeType: 'image/png',
+      title: 'External URL upload',
+    })
+  })
+
   test(`createDocuments --slug pages --documents '[{"data":{}}]' --draft --returning --json`, async ({
     cli,
   }) => {
@@ -878,6 +925,42 @@ test.suite({ config: './config.ts' })('CLI', () => {
 
     expect(output.stdout).toContain('"title": "Updated media"')
     expect(updatedMedia).toMatchObject({ filename: 'image.png', title: 'Updated media' })
+  })
+
+  test(`updateDocument --slug media --id <seeded-media-id> --data '{"title":"External media"}' --file <external-url-json>`, async ({
+    cli,
+    payload,
+  }) => {
+    const image = await readFile(uploadFile)
+    const server = await startTestFileServer({ contentType: 'image/png', data: image })
+    uploadServers.push(server)
+
+    const seededMedia = await payload.find({
+      collection: 'media',
+      limit: 1,
+      where: { title: { equals: 'Seeded media' } },
+    })
+    const file = JSON.stringify({
+      name: 'external-update.png',
+      source: 'externalURL',
+      url: `${server.url}/image.png`,
+    })
+
+    await cli(
+      `updateDocument --slug media --id ${seededMedia.docs[0]!.id} --data '{"title":"External media"}' --file '${file}'`,
+    )
+
+    const updatedMedia = await payload.findByID({
+      id: seededMedia.docs[0]!.id,
+      collection: 'media',
+    })
+
+    expect(updatedMedia).toMatchObject({
+      filename: 'external-update.png',
+      filesize: image.length,
+      mimeType: 'image/png',
+      title: 'External media',
+    })
   })
 
   test('deleteDocuments --slug pages --json', async ({ cli }) => {

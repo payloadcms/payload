@@ -4,7 +4,7 @@ import { expect } from 'vitest'
 import { test } from '../__helpers/int/vitest.js'
 import { folderSlug, postSlug } from './shared.js'
 
-test.suite({ config: './config.ts' })('Folders Helpers', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Folders Helpers', () => {
   test.describe('createFoldersCollection', () => {
     test('should create a collection with hierarchy enabled', ({ payload }) => {
       const foldersCollection = payload.collections[folderSlug].config

@@ -14,6 +14,7 @@ import { expect } from 'vitest'
 import type { Config } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
+import { uploadedTestFiles } from './buildPluginCloudStorageIntConfig.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
@@ -554,6 +555,90 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           }
         }
         createdIDs.length = 0
+        uploadedTestFiles.clear()
+      })
+
+      test('should upload the original and image sizes when create only selects id', async ({
+        payload,
+      }) => {
+        expect(uploadedTestFiles.size).toBe(0)
+
+        const original = await payload.create({
+          collection: testMetadataSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(original.id)
+
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+          select: {},
+        })
+
+        createdIDs.push(upload.id)
+
+        expect(upload).toEqual({ id: expect.anything() })
+
+        const saved = await payload.findByID({
+          id: upload.id,
+          collection: testMetadataSlug,
+        })
+
+        expect(saved.filename).toBeTruthy()
+        expect(saved.filename).not.toBe(original.filename)
+        expect(saved.mimeType).toBe('image/webp')
+        expect(saved.sizes?.thumbnail?.filename).toBeTruthy()
+        expect([...uploadedTestFiles.values()]).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              filename: saved.filename,
+              mimeType: saved.mimeType,
+              prefix: 'test-prefix',
+            }),
+            expect.objectContaining({
+              filename: saved.sizes?.thumbnail?.filename,
+              mimeType: saved.sizes?.thumbnail?.mimeType,
+              prefix: 'test-prefix',
+            }),
+          ]),
+        )
+      })
+
+      test('should keep overwritten files when update only selects id', async ({ payload }) => {
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        const originalFiles = [...uploadedTestFiles.values()]
+        const updated = await payload.update({
+          id: upload.id,
+          collection: testMetadataSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+          overwriteExistingFiles: true,
+          select: {},
+        })
+
+        expect(updated).toEqual({ id: upload.id })
+        expect(uploadedTestFiles.size).toBe(originalFiles.length)
+
+        for (const original of originalFiles) {
+          const replaced = uploadedTestFiles.get(original.filename)
+
+          expect(replaced).not.toBe(original)
+          expect(replaced).toMatchObject({
+            filename: original.filename,
+            mimeType: original.mimeType,
+            prefix: original.prefix,
+          })
+        }
       })
 
       test('should automatically persist metadata returned by custom adapters', async ({

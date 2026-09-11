@@ -97,6 +97,8 @@ export default buildConfigWithDefaults({
           },
         ],
         upload: {
+          // Exercise trusted local URL uploads without a pasteURL allow-list.
+          skipSafeFetch: [{ hostname: '127.0.0.1', protocol: 'http' }],
           staticDir: path.resolve(dirname, 'generated/media'),
         },
       },
