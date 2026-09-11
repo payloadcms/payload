@@ -42,7 +42,8 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       routes: { api },
     },
   } = useConfig()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { i18n, t } = useTranslation()
   const searchParams = useSearchParams()
   const router = useRouter()

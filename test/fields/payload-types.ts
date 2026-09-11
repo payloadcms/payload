@@ -213,6 +213,7 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'select-fields': SelectField;
     'slug-fields': SlugField;
+    'slug-field-access': SlugFieldAccess;
     'slug-autosave': SlugAutosave;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
@@ -257,6 +258,7 @@ export interface Config {
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
+    'slug-field-access': SlugFieldAccessSelect<false> | SlugFieldAccessSelect<true>;
     'slug-autosave': SlugAutosaveSelect<false> | SlugAutosaveSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
@@ -1750,6 +1752,20 @@ export interface SlugField {
   readOnlySlug?: string | null;
   sourcelessSlug?: string | null;
   test?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-field-access".
+ */
+export interface SlugFieldAccess {
+  id: string;
+  title?: string | null;
+  slug: string;
+  localizedTitle?: string | null;
+  localizedSlug: string;
+  sourcelessSlug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -3538,6 +3554,19 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   readOnlySlug?: T;
   sourcelessSlug?: T;
   test?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-field-access_select".
+ */
+export interface SlugFieldAccessSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  localizedTitle?: T;
+  localizedSlug?: T;
+  sourcelessSlug?: T;
   updatedAt?: T;
   createdAt?: T;
 }

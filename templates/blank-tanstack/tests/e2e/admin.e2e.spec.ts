@@ -25,6 +25,17 @@ test.describe('Admin Panel', () => {
     await expect(dashboardArtifact).toBeVisible()
   })
 
+  test('should load Payload admin styles and fonts', async () => {
+    await page.goto('http://localhost:3000/admin')
+
+    const payloadFontFamily = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--font-family-sans').trim(),
+    )
+
+    expect(payloadFontFamily).not.toBe('')
+    await expect(page.locator('link[href*="fonts.googleapis.com"]')).toHaveCount(2)
+  })
+
   test('can navigate to list view', async () => {
     await page.goto('http://localhost:3000/admin/collections/users')
     await expect(page).toHaveURL('http://localhost:3000/admin/collections/users')

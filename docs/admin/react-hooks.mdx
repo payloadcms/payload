@@ -928,7 +928,7 @@ const MyComponent: React.FC = () => {
 
 ## useLocale
 
-In any Custom Component you can get the selected locale object with the `useLocale` hook. `useLocale` gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
+In any Custom Component you can get the selected locale object with the `useLocale` hook. `useLocale` gives you the full locale object, consisting of a `label`, `rtl` (right-to-left) property, and `code`. It returns `null` when localization is disabled or configured without any locales. Here is a simple example:
 
 ```tsx
 'use client'
@@ -938,6 +938,10 @@ const Greeting: React.FC = () => {
   // highlight-start
   const locale = useLocale()
   // highlight-end
+
+  if (!locale) {
+    return null
+  }
 
   const trans = {
     en: 'Hello',

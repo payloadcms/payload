@@ -1,24 +1,15 @@
-import type { Payload } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
+import { expect } from 'vitest'
 
 import type { Page } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { pagesSlug } from './shared.js'
 
-let payload: Payload
 let page: Page
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('@payloadcms/plugin-redirects', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-
+test.suite({ config: './config.ts' })('@payloadcms/plugin-redirects', () => {
+  test.beforeEach(async ({ payload }) => {
     page = await payload.create({
       collection: 'pages',
       data: {
@@ -27,11 +18,7 @@ describe('@payloadcms/plugin-redirects', () => {
     })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should add a redirects collection', async () => {
+  test('should add a redirects collection', async ({ payload }) => {
     const redirect = await payload.find({
       collection: 'redirects',
       depth: 0,
@@ -41,7 +28,7 @@ describe('@payloadcms/plugin-redirects', () => {
     expect(redirect).toBeTruthy()
   })
 
-  it('should add a redirect with to internal page', async () => {
+  test('should add a redirect with to internal page', async ({ payload }) => {
     const redirect = await payload.create({
       collection: 'redirects',
       data: {
@@ -62,7 +49,7 @@ describe('@payloadcms/plugin-redirects', () => {
     expect(redirect.to.reference.value).toMatchObject(page)
   })
 
-  it('should add a redirect with to custom url', async () => {
+  test('should add a redirect with to custom url', async ({ payload }) => {
     const redirect = await payload.create({
       collection: 'redirects',
       data: {

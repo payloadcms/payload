@@ -43,7 +43,10 @@ const sanitizeJoinFieldQuery = async ({
   const joinCollectionConfig = req.payload.collections[collectionSlug]!.config
 
   const accessResult = !overrideAccess
-    ? await executeAccess({ disableErrors: true, req }, joinCollectionConfig.access.read)
+    ? await executeAccess(
+        { slug: joinCollectionConfig.slug, disableErrors: true, req },
+        joinCollectionConfig.access.read,
+      )
     : true
 
   if (accessResult === false) {

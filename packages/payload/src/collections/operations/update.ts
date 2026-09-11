@@ -131,7 +131,10 @@ export const updateOperation = async <
 
     let accessResult: AccessResult
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, collectionConfig.access.update)
+      accessResult = await executeAccess(
+        { slug: collectionConfig.slug, req },
+        collectionConfig.access.update,
+      )
     }
 
     await validateQueryPaths({
@@ -158,7 +161,7 @@ export const updateOperation = async <
     if (isTrashAttempt && !overrideAccess) {
       // Pass data so access function can check data.deletedAt to know it's a trash attempt
       const deleteAccessResult = await executeAccess(
-        { data: bulkUpdateData, req },
+        { slug: collectionConfig.slug, data: bulkUpdateData, req },
         collectionConfig.access.delete,
       )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
@@ -361,6 +364,13 @@ export const updateOperation = async <
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
+    await unlinkTempFiles({
+      collectionConfig: args.collection.config,
+      config: args.req.payload.config,
+      req: args.req,
+    }).catch((unlinkError) => {
+      args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
+    })
     await killTransaction(args.req)
     throw error
   }

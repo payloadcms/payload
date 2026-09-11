@@ -1,4 +1,4 @@
-import type { SQL, Table } from 'drizzle-orm'
+import type { SQL } from 'drizzle-orm'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
 import type {
   FlattenedBlock,
@@ -8,7 +8,7 @@ import type {
   TextField,
 } from 'payload'
 
-import { and, eq, getTableName, like, or, sql } from 'drizzle-orm'
+import { and, eq, getTableName, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath } from 'payload'
 import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
@@ -25,6 +25,7 @@ import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { resolveBlockTableName } from '../utilities/validateExistingBlockIsIdentical.js'
 import { addJoinTable } from './addJoinTable.js'
 import { getTableAlias } from './getTableAlias.js'
+import { appendFieldToStoragePath, resolveRelationshipPath } from './resolveRelationshipPath.js'
 
 type Constraint = {
   columnName: string
@@ -48,6 +49,7 @@ type TableColumn = {
 
 type Args = {
   adapter: DrizzleAdapter
+  /** The current table when a query is being built with an alias, such as inside a subquery. */
   aliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   collectionPath: string
   columnPrefix?: string
@@ -56,6 +58,7 @@ type Args = {
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
+  /** The aliased table that owns a field nested inside an array or block. */
   parentAliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   parentIsLocalized: boolean
   pathSegments: string[]
@@ -73,9 +76,16 @@ type Args = {
   value: unknown
 }
 /**
- * Transforms path to table and column name or to a list of OR columns
- * Adds tables to `join`
- * @returns TableColumn
+ * Resolves a field path to the database table and column that store its value.
+ *
+ * While walking through relationships, arrays, and blocks, the function adds the joins required
+ * to reach the final column. Table aliases are used when the path is resolved inside a subquery.
+ *
+ * @example
+ * Resolving `movies.name` adds joins from the parent collection to its relationship table and then
+ * to the `movies` table. The returned column is `movies.name`.
+ *
+ * @returns The final field and column, plus any extra constraints discovered while resolving it.
  */
 export const getTableColumnFromPath = ({
   adapter,
@@ -100,6 +110,7 @@ export const getTableColumnFromPath = ({
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
   const rootTableName = incomingRootTableName || tableName
+  const tableContainingField = parentAliasTable ?? aliasTable ?? adapter.tables[rootTableName]
   let constraintPath = incomingConstraintPath || ''
 
   const field = fields.find((fieldToFind) => fieldToFind.name === fieldPath)
@@ -121,6 +132,7 @@ export const getTableColumnFromPath = ({
   let localizedPathQuery = false
   if (field) {
     const pathSegments = [...incomingSegments]
+    const fieldStoragePath = appendFieldToStoragePath({ field, path: constraintPath })
 
     const isFieldLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
@@ -146,7 +158,7 @@ export const getTableColumnFromPath = ({
 
         const arrayParentTable = aliasTable || adapter.tables[tableName]
 
-        constraintPath = `${constraintPath}${field.name}.%.`
+        constraintPath = `${fieldStoragePath}.`
         if (locale && isFieldLocalized && adapter.payload.config.localization) {
           const conditions = [eq(arrayParentTable.id, adapter.tables[newTableName]._parentID)]
 
@@ -241,8 +253,6 @@ export const getTableColumnFromPath = ({
             adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
           )
 
-          constraintPath = `${constraintPath}${field.name}.%.`
-
           let result: TableColumn
           const blockConstraints = []
           const blockSelectFields = {}
@@ -281,7 +291,7 @@ export const getTableColumnFromPath = ({
             result = getTableColumnFromPath({
               adapter,
               collectionPath,
-              constraintPath,
+              constraintPath: `${fieldStoragePath}.`,
               constraints: blockConstraints,
               fields: block.flattenedFields,
               joins: newJoins,
@@ -348,7 +358,7 @@ export const getTableColumnFromPath = ({
           aliasTable,
           collectionPath,
           columnPrefix: `${columnPrefix}${field.name}_`,
-          constraintPath: `${constraintPath}${field.name}.`,
+          constraintPath: `${fieldStoragePath}.`,
           constraints,
           fields: field.flattenedFields,
           joins,
@@ -396,7 +406,7 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(
                 eq(
-                  adapter.tables[rootTableName].id,
+                  tableContainingField.id,
                   aliasRelationshipTable[
                     `${(relationshipField.field as RelationshipField).relationTo as string}ID`
                   ],
@@ -452,10 +462,10 @@ export const getTableColumnFromPath = ({
             aliasTable: relationshipTable,
             collectionPath: newCollectionPath,
             constraints,
-            // relationshipFields are fields from a different collection => no parentIsLocalized
             fields: relationshipFields,
             joins,
             locale,
+            // A join reads from a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
             rootTableName: relationshipTableName,
@@ -547,7 +557,8 @@ export const getTableColumnFromPath = ({
           fields: adapter.payload.collections[field.collection].config.flattenedFields,
           joins,
           locale,
-          parentIsLocalized: parentIsLocalized || field.localized,
+          // A join reads from a different collection, so localization does not carry over
+          parentIsLocalized: false,
           pathSegments: pathSegments.slice(1),
           selectFields,
           tableName: newTableName,
@@ -568,15 +579,15 @@ export const getTableColumnFromPath = ({
           }
           newTableName = `${rootTableName}_${tableType}`
 
-          const existingTable = joins.find((e) => e.queryPath === `${constraintPath}${field.name}`)
+          const existingTable = joins.find((e) => e.queryPath === fieldStoragePath)
 
           const table = (existingTable?.table ??
             getTableAlias({ adapter, tableName: newTableName })
               .newAliasTable) as PgTableWithColumns<any>
 
           const joinConstraints = [
-            eq(adapter.tables[rootTableName].id, table.parent),
-            like(table.path, `${constraintPath}${field.name}`),
+            eq(tableContainingField.id, table.parent),
+            like(table.path, fieldStoragePath),
           ]
 
           if (locale && isFieldLocalized && adapter.payload.config.localization) {
@@ -589,14 +600,14 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(...conditions),
               joins,
-              queryPath: `${constraintPath}${field.name}`,
+              queryPath: fieldStoragePath,
               table,
             })
           } else {
             addJoinTable({
               condition: and(...joinConstraints),
               joins,
-              queryPath: `${constraintPath}${field.name}`,
+              queryPath: fieldStoragePath,
               table,
             })
           }
@@ -615,6 +626,19 @@ export const getTableColumnFromPath = ({
         const newCollectionPath = pathSegments.slice(1).join('.')
 
         if (Array.isArray(field.relationTo) || field.hasMany) {
+          const relationshipPath = resolveRelationshipPath({
+            adapter,
+            fields,
+            locale,
+            parentIsLocalized,
+            path: field.name,
+            pathPrefix: constraintPath,
+          })
+
+          if (!relationshipPath) {
+            throw new APIError(`Relationship path could not be resolved: ${collectionPath}`)
+          }
+
           let relationshipFields: FlattenedField[]
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
 
@@ -634,23 +658,23 @@ export const getTableColumnFromPath = ({
             aliasRelationshipTableName = res.newAliasTableName
           }
 
-          if (selectLocale && isFieldLocalized && adapter.payload.config.localization) {
+          if (selectLocale && relationshipPath.isLocalized && adapter.payload.config.localization) {
             selectFields._locale = aliasRelationshipTable.locale
           }
 
           // Join in the relationships table
-          if (locale && isFieldLocalized && adapter.payload.config.localization) {
+          if (
+            relationshipPath.locale &&
+            relationshipPath.locale !== 'all' &&
+            relationshipPath.isLocalized &&
+            adapter.payload.config.localization
+          ) {
             const conditions = [
-              eq(
-                (parentAliasTable || aliasTable || adapter.tables[rootTableName]).id,
-                aliasRelationshipTable.parent,
-              ),
-              like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
+              eq(tableContainingField.id, aliasRelationshipTable.parent),
+              like(aliasRelationshipTable.path, relationshipPath.path),
             ]
 
-            if (locale !== 'all') {
-              conditions.push(eq(aliasRelationshipTable.locale, locale))
-            }
+            conditions.push(eq(aliasRelationshipTable.locale, relationshipPath.locale))
 
             addJoinTable({
               condition: and(...conditions),
@@ -662,11 +686,8 @@ export const getTableColumnFromPath = ({
             // Join in the relationships table
             addJoinTable({
               condition: and(
-                eq(
-                  (parentAliasTable || aliasTable || adapter.tables[rootTableName]).id,
-                  aliasRelationshipTable.parent,
-                ),
-                like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
+                eq(tableContainingField.id, aliasRelationshipTable.parent),
+                like(aliasRelationshipTable.path, relationshipPath.path),
               ),
               joins,
               queryPath: `${constraintPath}.${field.name}`,
@@ -834,10 +855,10 @@ export const getTableColumnFromPath = ({
             aliasTable: newAliasTable,
             collectionPath: newCollectionPath,
             constraints,
-            // relationshipFields are fields from a different collection => no parentIsLocalized
             fields: relationshipFields,
             joins,
             locale,
+            // A relationship jumps to a different collection, so localization does not carry over
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
             rootTableName: newTableName,
@@ -863,7 +884,7 @@ export const getTableColumnFromPath = ({
               tableName: `${rootTableName}${adapter.localesSuffix}`,
             })
 
-            const condtions = [eq(aliasLocaleTable._parentID, adapter.tables[rootTableName].id)]
+            const condtions = [eq(aliasLocaleTable._parentID, tableContainingField.id)]
 
             if (selectLocale) {
               selectFields._locale = aliasLocaleTable._locale
@@ -904,7 +925,8 @@ export const getTableColumnFromPath = ({
             fields: adapter.payload.collections[field.relationTo].config.flattenedFields,
             joins,
             locale,
-            parentIsLocalized: parentIsLocalized || field.localized,
+            // A relationship jumps to a different collection, so localization does not carry over
+            parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
             selectFields,
             tableName: newTableName,
@@ -962,7 +984,7 @@ export const getTableColumnFromPath = ({
             aliasTable,
             collectionPath,
             columnPrefix: `${columnPrefix}${field.name}_`,
-            constraintPath: `${constraintPath}${field.name}.`,
+            constraintPath: `${fieldStoragePath}.`,
             constraints,
             fields: field.flattenedFields,
             joins,

@@ -335,6 +335,7 @@ export interface TestMetadatum {
    * Test note to identify this upload
    */
   testNote?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -687,6 +688,7 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
  */
 export interface TestMetadataSelect<T extends boolean = true> {
   testNote?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

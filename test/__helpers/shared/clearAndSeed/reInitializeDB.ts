@@ -4,52 +4,40 @@ import * as qs from 'qs-esm'
 export const path = '/re-initialize'
 
 export const reInitializeDB = async ({
-  serverURL,
-  snapshotKey,
-  uploadsDir,
   deleteOnly,
+  serverURL,
 }: {
   deleteOnly?: boolean
   serverURL: string
-  snapshotKey: string
-  uploadsDir?: string | string[]
 }) => {
   const maxAttempts = 50
   let attempt = 1
   const startTime = Date.now()
 
   while (attempt <= maxAttempts) {
+    console.log(`Attempting to reinitialize DB (attempt ${attempt}/${maxAttempts})...`)
+
+    const queryParams = qs.stringify(
+      {
+        deleteOnly,
+      },
+      {
+        addQueryPrefix: true,
+      },
+    )
+
+    let response: Response
+
     try {
-      console.log(`Attempting to reinitialize DB (attempt ${attempt}/${maxAttempts})...`)
-
-      const queryParams = qs.stringify(
-        {
-          snapshotKey,
-          uploadsDir,
-          deleteOnly,
-        },
-        {
-          addQueryPrefix: true,
-        },
-      )
-
-      const response = await fetch(
+      response = await fetch(
         formatAdminURL({ apiRoute: '/api', path: `${path}${queryParams}`, serverURL }),
         {
-          method: 'get',
           headers: {
             'Content-Type': 'application/json',
           },
+          method: 'post',
         },
       )
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const timeTaken = Date.now() - startTime
-      console.log(`Successfully reinitialized DB (took ${timeTaken}ms)`)
-      return
     } catch (error) {
       console.error(`Failed to reinitialize DB`, error)
 
@@ -61,6 +49,36 @@ export const reInitializeDB = async ({
       console.log('Retrying in 3 seconds...')
       await new Promise((resolve) => setTimeout(resolve, 3000))
       attempt++
+      continue
     }
+
+    if (!response.ok) {
+      const message = await getErrorMessage(response)
+
+      throw new Error(`HTTP error! status: ${response.status}${message ? `; ${message}` : ''}`)
+    }
+
+    const timeTaken = Date.now() - startTime
+    console.log(`Successfully reinitialized DB (took ${timeTaken}ms)`)
+    return
   }
+}
+
+const getErrorMessage = async (response: Response): Promise<string | undefined> => {
+  try {
+    const body: unknown = await response.json()
+
+    if (
+      body !== null &&
+      typeof body === 'object' &&
+      'message' in body &&
+      typeof body.message === 'string'
+    ) {
+      return body.message
+    }
+  } catch {
+    // The response may not be JSON if the application server itself failed.
+  }
+
+  return undefined
 }
