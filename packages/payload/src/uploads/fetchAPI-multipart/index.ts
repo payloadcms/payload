@@ -1,5 +1,3 @@
-import path from 'path'
-
 import type { FetchAPIFileUploadOptions } from '../../config/types.js'
 
 import { APIError } from '../../errors/APIError.js'
@@ -8,11 +6,12 @@ import { processMultipart } from './processMultipart.js'
 import { debugLog } from './utilities.js'
 
 const DEFAULT_UPLOAD_OPTIONS: FetchAPIFileUploadOptions = {
-  abortOnLimit: false,
+  abortOnLimit: true,
   createParentPath: false,
   debug: false,
   defParamCharset: 'utf8',
   limitHandler: false,
+  limits: { fields: 20, fieldSize: 1024 * 1024, files: 3, fileSize: 20 * 1024 * 1024 },
   parseNested: false,
   preserveExtension: false,
   responseOnLimit: 'File size limit has been reached',
@@ -58,7 +57,18 @@ export const processMultipartFormdata: FetchAPIFileUpload = async ({
   options: incomingOptions,
   request,
 }) => {
-  const options: FetchAPIFileUploadOptions = { ...DEFAULT_UPLOAD_OPTIONS, ...incomingOptions }
+  const options: FetchAPIFileUploadOptions = {
+    ...DEFAULT_UPLOAD_OPTIONS,
+    ...incomingOptions,
+    abortOnLimit: incomingOptions?.abortOnLimit ?? DEFAULT_UPLOAD_OPTIONS.abortOnLimit,
+    limits: { ...DEFAULT_UPLOAD_OPTIONS.limits },
+  }
+
+  for (const [key, value] of Object.entries(incomingOptions?.limits || {})) {
+    if (value !== undefined) {
+      options.limits![key as keyof NonNullable<FetchAPIFileUploadOptions['limits']>] = value
+    }
+  }
 
   if (!isEligibleRequest(request)) {
     debugLog(options, 'Request is not eligible for file upload!')

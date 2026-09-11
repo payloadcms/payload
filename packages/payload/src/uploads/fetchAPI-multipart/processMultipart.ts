@@ -11,239 +11,189 @@ import { fileFactory } from './fileFactory.js'
 import { memHandler, tempFileHandler } from './handlers.js'
 import { processNested } from './processNested.js'
 import { createUploadTimer } from './uploadTimer.js'
-import { buildFields, debugLog, isFunc, parseFileName } from './utilities.js'
-
-const waitFlushProperty = Symbol('wait flush property symbol')
-
-declare global {
-  interface Request {
-    [waitFlushProperty]?: Promise<any>[]
-  }
-}
+import { buildFields, isFunc, parseFileName } from './utilities.js'
 
 type ProcessMultipart = (args: {
   options: FetchAPIFileUploadOptions
   request: Request
 }) => Promise<FetchAPIFileUploadResponse>
+
 export const processMultipart: ProcessMultipart = async ({ options, request }) => {
-  let parsingRequest = true
-
-  let shouldAbortProccessing = false
-  let fileCount = 0
-  let filesCompleted = 0
-  let allFilesHaveResolved: (value?: unknown) => void
-  let failedResolvingFiles: (err: Error) => void
-  let busboyFinishedResolve: () => void
-  let busboyFinishedReject: (err: Error) => void
-
-  const allFilesComplete = new Promise((res, rej) => {
-    allFilesHaveResolved = res
-    failedResolvingFiles = rej
-  })
-
-  // Busboy rejects these from a stream event before the awaits below attach, so
-  // Node reports them as unhandled and kills the process on oversize uploads.
-  allFilesComplete.catch(() => {})
-
-  const busboyFinished = new Promise<void>((resolve, reject) => {
-    busboyFinishedResolve = resolve
-    busboyFinishedReject = reject
-  })
-
-  busboyFinished.catch(() => {})
-
-  const result: FetchAPIFileUploadResponse = {
-    fields: undefined!,
-    files: undefined!,
-  }
-
-  const headersObject: Record<string, string> = {}
+  const result: FetchAPIFileUploadResponse = { fields: undefined!, files: undefined! }
+  const headers: Record<string, string> = {}
   request.headers.forEach((value, name) => {
-    headersObject[name] = value
+    headers[name] = value
+  })
+  const busboy = Busboy({ ...options, headers })
+  const reader = request.body!.getReader()
+  const uploads: { cleanup: () => Promise<void> | void; clear: () => void; file: Readable }[] = []
+  const writes: Promise<boolean>[] = []
+  let failure: Error | undefined
+  let rejectFinished: (err: Error) => void
+  let resolveFinished: () => void
+  const finished = new Promise<void>((resolve, reject) => {
+    resolveFinished = resolve
+    rejectFinished = reject
   })
 
-  const reader = request.body?.getReader()
-
-  const busboy = Busboy({ ...options, headers: headersObject })
-
-  function abortAndDestroyFile(file: Readable, err: APIError) {
-    file.destroy()
-    shouldAbortProccessing = true
-    failedResolvingFiles(err)
+  const fail = (err: Error) => {
+    if (failure) {
+      return
+    }
+    failure = err
+    rejectFinished(err)
+    // Busboy may still be updating its current file after emitting a limit event.
+    queueMicrotask(() => {
+      for (const upload of uploads) {
+        upload.clear()
+        upload.file.destroy()
+      }
+      busboy.destroy()
+      void reader.cancel(err).catch(() => {})
+    })
   }
+  const limitError = () =>
+    new APIError('Multipart limit has been reached', httpStatus.REQUEST_ENTITY_TOO_LARGE)
 
-  // Build multipart req.body fields
-  busboy.on('field', (field, val) => {
-    result.fields = buildFields(result.fields, field, val)
+  busboy.on('filesLimit', () => fail(limitError()))
+  busboy.on('fieldsLimit', () => fail(limitError()))
+  busboy.on('partsLimit', () => fail(limitError()))
+  busboy.on('error', fail)
+  busboy.on('field', (field, value, info) => {
+    if (info.valueTruncated || info.nameTruncated) {
+      fail(limitError())
+    } else if (!failure) {
+      result.fields = buildFields(result.fields, field, value)
+    }
   })
 
-  // Build req.files fields
   busboy.on('file', (field, file, info) => {
-    fileCount += 1
-    // Parse file name(cutting huge names, decoding, etc..).
+    if (failure) {
+      file.resume()
+      return
+    }
     const { encoding, filename: name, mimeType: mime } = info
     const filename = parseFileName(options, name)
-
-    const inferredMimeType =
-      (filename && filename.endsWith('.glb') && 'model/gltf-binary') ||
-      (filename && filename.endsWith('.gltf') && 'model/gltf+json') ||
+    const mimetype =
+      (filename.endsWith('.glb') && 'model/gltf-binary') ||
+      (filename.endsWith('.gltf') && 'model/gltf+json') ||
       mime
-
-    // Define methods and handlers for upload process.
-    const { cleanup, complete, dataHandler, getFilePath, getFileSize, getHash, getWritePromise } =
-      options.useTempFiles
-        ? tempFileHandler(options, field, filename) // Upload into temporary file.
-        : memHandler(options, field, filename) // Upload into RAM.
-
-    const writePromise = options.useTempFiles
-      ? getWritePromise().catch(() => {
-          busboy.end()
-          cleanup()
-        })
-      : getWritePromise()
-
-    const uploadTimer = createUploadTimer(options.uploadTimeout, () => {
-      return abortAndDestroyFile(
-        file,
-        new APIError(`Upload timeout for ${field}->${filename}, bytes:${getFileSize()}`),
-      )
+    const handler = options.useTempFiles
+      ? tempFileHandler(options, field, filename)
+      : memHandler(options, field, filename)
+    const timer = createUploadTimer(options.uploadTimeout, () => {
+      fail(new APIError(`Upload timeout for ${field}->${filename}, bytes:${handler.getFileSize()}`))
     })
+    uploads.push({ cleanup: handler.cleanup, clear: timer.clear, file })
+    // Observe write failures immediately, including failures before file end.
+    const write = handler.getWritePromise()
+    void write.catch(fail)
+    writes.push(write)
 
     file.on('limit', () => {
-      debugLog(options, `Size limit reached for ${field}->${filename}, bytes:${getFileSize()}`)
-      uploadTimer.clear()
-
-      if (isFunc(options.limitHandler)) {
-        options.limitHandler({ request, size: getFileSize() })
-      }
-
-      // Return error and cleanup files if abortOnLimit set.
-      if (options.abortOnLimit) {
-        debugLog(options, `Upload file size limit reached ${field}->${filename}.`)
-        cleanup()
-        abortAndDestroyFile(
-          file,
-          new APIError(options.responseOnLimit!, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
-            size: getFileSize(),
-          }),
-        )
-      }
-    })
-
-    file.on('data', (data) => {
-      uploadTimer.set()
-      dataHandler(data)
-    })
-
-    file.on('end', () => {
-      const size = getFileSize()
-      debugLog(options, `Upload finished ${field}->${filename}, bytes:${size}`)
-      uploadTimer.clear()
-
-      if (!name && size === 0) {
-        fileCount -= 1
-        if (options.useTempFiles) {
-          cleanup()
-          debugLog(options, `Removing the empty file ${field}->${filename}`)
+      timer.clear()
+      try {
+        if (isFunc(options.limitHandler)) {
+          options.limitHandler({ request, size: handler.getFileSize() })
         }
-        return debugLog(options, `Don't add file instance if original name and size are empty`)
+        if (options.abortOnLimit) {
+          fail(
+            new APIError(options.responseOnLimit!, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
+              size: handler.getFileSize(),
+            }),
+          )
+        }
+      } catch (err) {
+        fail(err as Error)
       }
-
-      filesCompleted += 1
-
+    })
+    file.on('data', (data: Buffer) => {
+      if (failure) {
+        return
+      }
+      timer.set()
+      const pending = handler.dataHandler(data)
+      if (pending) {
+        file.pause()
+        void pending.then(() => {
+          if (!failure) {
+            file.resume()
+          }
+        }, fail)
+      }
+    })
+    file.on('error', fail)
+    file.on('end', () => {
+      timer.clear()
+      if (failure) {
+        return
+      }
+      const size = handler.getFileSize()
+      const buffer = handler.complete()
+      if (!name && size === 0) {
+        const cleanup = Promise.resolve(handler.cleanup()).then(() => true)
+        void cleanup.catch(fail)
+        writes.push(cleanup)
+        return
+      }
       result.files = buildFields(
         result.files,
         field,
         fileFactory(
           {
             name: filename,
-            buffer: complete(),
+            buffer,
             encoding,
-            hash: getHash(),
-            mimetype: inferredMimeType,
+            hash: handler.getHash(),
+            mimetype,
             size,
-            tempFilePath: getFilePath(),
-            truncated: Boolean('truncated' in file && file.truncated) || false,
+            tempFilePath: handler.getFilePath(),
+            truncated: Boolean(file.truncated),
           },
           options,
         ),
       )
-
-      if (!request[waitFlushProperty]) {
-        request[waitFlushProperty] = []
-      }
-      request[waitFlushProperty].push(writePromise)
-
-      if (filesCompleted === fileCount) {
-        allFilesHaveResolved()
-      }
     })
-
-    file.on('error', (err) => {
-      uploadTimer.clear()
-      debugLog(options, `File Error: ${err.message}`)
-      cleanup()
-      failedResolvingFiles(err)
-    })
-
-    // Start upload process.
-    debugLog(options, `New upload started ${field}->${filename}, bytes:${getFileSize()}`)
-    uploadTimer.set()
+    timer.set()
+  })
+  busboy.on('finish', () => {
+    void Promise.all(writes).then(() => resolveFinished(), fail)
   })
 
-  busboy.on('finish', async () => {
-    debugLog(options, `Busboy finished parsing request.`)
+  // Waiting for each write callback bounds the parser queue and respects its backpressure.
+  const pump = async () => {
+    try {
+      while (!failure) {
+        const { done, value } = await reader.read()
+        if (failure) {
+          break
+        }
+        if (done) {
+          busboy.end()
+          break
+        }
+        await new Promise<void>((resolve, reject) => {
+          busboy.write(value, (err?: Error | null) => (err ? reject(err) : resolve()))
+        })
+      }
+    } finally {
+      reader.releaseLock()
+    }
+  }
+  void pump().catch(fail)
+
+  try {
+    await finished
     if (options.parseNested) {
       result.fields = processNested(result.fields)
       result.files = processNested(result.files)
     }
-
-    if (request[waitFlushProperty]) {
-      try {
-        await Promise.all(request[waitFlushProperty]).then(() => {
-          delete request[waitFlushProperty]
-        })
-      } catch (err) {
-        debugLog(options, `Error waiting for file write promises: ${err}`)
-      }
+    return result
+  } catch (err) {
+    for (const upload of uploads) {
+      upload.clear()
     }
-
-    busboyFinishedResolve()
-  })
-
-  busboy.on(
-    'error',
-    (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
-      debugLog(options, `Busboy error`)
-      const busboyError =
-        err instanceof Error
-          ? err
-          : new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
-
-      busboyFinishedReject(busboyError)
-    },
-  )
-
-  while (parsingRequest) {
-    const { done, value } = await reader!.read()
-
-    if (done) {
-      parsingRequest = false
-      busboy.end()
-    }
-
-    if (value && !shouldAbortProccessing) {
-      busboy.write(value)
-    }
+    await Promise.all(uploads.map(async ({ cleanup }) => cleanup()))
+    throw err
   }
-
-  if (fileCount !== 0) {
-    await allFilesComplete.catch((e) => {
-      throw e
-    })
-  }
-
-  await busboyFinished
-
-  return result
 }
