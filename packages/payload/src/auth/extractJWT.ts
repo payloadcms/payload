@@ -42,9 +42,15 @@ const extractionMethods: Record<string, ExtractionMethod> = {
 
     // No Origin with csrf configured — fall back to Sec-Fetch-Site
     const secFetchSite = headers.get('Sec-Fetch-Site')
+    const secFetchMode = headers.get('Sec-Fetch-Mode')
 
-    // Allow same-origin, same-site, and direct navigations (none)
-    if (secFetchSite === 'same-origin' || secFetchSite === 'same-site' || secFetchSite === 'none') {
+    // Allow same-origin, same-site, direct navigations (none), and cross-site navigation (e.g., email links)
+    if (
+      secFetchSite === 'same-origin' ||
+      secFetchSite === 'same-site' ||
+      secFetchSite === 'none' ||
+      secFetchMode === 'navigate'
+    ) {
       return cookieToken
     }
 
