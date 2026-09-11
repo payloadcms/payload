@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_104D6ABA".
+ * via the `definition` "LexicalNodes_8B572FD4".
  */
-export type LexicalNodes_104D6ABA =
+export type LexicalNodes_8B572FD4 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_104D6ABA>
+  | SerializedParagraphNode<LexicalNodes_8B572FD4>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_104D6ABA>
+  | SerializedHeadingNode<LexicalNodes_8B572FD4>
   | SerializedUploadNode<'gif-resize'>
   | SerializedUploadNode<'filename-compound-index'>
   | SerializedUploadNode<'no-image-sizes'>
@@ -121,17 +121,19 @@ export type LexicalNodes_104D6ABA =
   | SerializedUploadNode<'constructor-options'>
   | SerializedUploadNode<'bulk-uploads'>
   | SerializedUploadNode<'bulk-uploads-hook-error'>
+  | SerializedUploadNode<'client-upload-temp-file'>
   | SerializedUploadNode<'file-mime-type'>
   | SerializedUploadNode<'svg-only'>
   | SerializedUploadNode<'media-without-delete-access'>
+  | SerializedUploadNode<'media-without-write-access'>
   | SerializedUploadNode<'media-with-image-size-admin-props'>
   | SerializedUploadNode<'prefix-media'>
   | SerializedUploadNode<'media-with-fields'>
-  | SerializedQuoteNode<LexicalNodes_104D6ABA>
-  | SerializedListNode<LexicalNodes_104D6ABA>
-  | SerializedListItemNode<LexicalNodes_104D6ABA>
-  | SerializedAutoLinkNode<LexicalNodes_104D6ABA, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_104D6ABA, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_8B572FD4>
+  | SerializedListNode<LexicalNodes_8B572FD4>
+  | SerializedListItemNode<LexicalNodes_8B572FD4>
+  | SerializedAutoLinkNode<LexicalNodes_8B572FD4, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_8B572FD4, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -211,10 +213,12 @@ export interface Config {
     'constructor-options': ConstructorOption;
     'bulk-uploads': BulkUpload;
     'bulk-uploads-hook-error': BulkUploadsHookError;
+    'client-upload-temp-file': ClientUploadTempFile;
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
     'media-without-delete-access': MediaWithoutDeleteAccess;
+    'media-without-write-access': MediaWithoutWriteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
     'prefix-media': PrefixMedia;
     'media-with-fields': MediaWithField;
@@ -284,10 +288,12 @@ export interface Config {
     'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
     'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
     'bulk-uploads-hook-error': BulkUploadsHookErrorSelect<false> | BulkUploadsHookErrorSelect<true>;
+    'client-upload-temp-file': ClientUploadTempFileSelect<false> | ClientUploadTempFileSelect<true>;
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
+    'media-without-write-access': MediaWithoutWriteAccessSelect<false> | MediaWithoutWriteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
     'prefix-media': PrefixMediaSelect<false> | PrefixMediaSelect<true>;
     'media-with-fields': MediaWithFieldsSelect<false> | MediaWithFieldsSelect<true>;
@@ -559,7 +565,7 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_104D6ABA> | null;
+  richText?: LexicalRichText<LexicalNodes_8B572FD4> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1878,6 +1884,26 @@ export interface BulkUploadsHookError {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-upload-temp-file".
+ */
+export interface ClientUploadTempFile {
+  id: string;
+  title?: string | null;
+  shouldFail?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "file-mime-type".
  */
 export interface FileMimeType {
@@ -1918,6 +1944,24 @@ export interface SvgOnly {
  * via the `definition` "media-without-delete-access".
  */
 export interface MediaWithoutDeleteAccess {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-write-access".
+ */
+export interface MediaWithoutWriteAccess {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -2521,6 +2565,10 @@ export interface PayloadLockedDocument {
         value: string | BulkUploadsHookError;
       } | null)
     | ({
+        relationTo: 'client-upload-temp-file';
+        value: string | ClientUploadTempFile;
+      } | null)
+    | ({
         relationTo: 'simple-relationship';
         value: string | SimpleRelationship;
       } | null)
@@ -2535,6 +2583,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-without-delete-access';
         value: string | MediaWithoutDeleteAccess;
+      } | null)
+    | ({
+        relationTo: 'media-without-write-access';
+        value: string | MediaWithoutWriteAccess;
       } | null)
     | ({
         relationTo: 'media-with-image-size-admin-props';
@@ -4196,6 +4248,25 @@ export interface BulkUploadsHookErrorSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-upload-temp-file_select".
+ */
+export interface ClientUploadTempFileSelect<T extends boolean = true> {
+  title?: T;
+  shouldFail?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "simple-relationship_select".
  */
 export interface SimpleRelationshipSelect<T extends boolean = true> {
@@ -4243,6 +4314,23 @@ export interface SvgOnlySelect<T extends boolean = true> {
  * via the `definition` "media-without-delete-access_select".
  */
 export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-write-access_select".
+ */
+export interface MediaWithoutWriteAccessSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -4762,10 +4850,12 @@ export interface CollectionQueryWidget {
       | 'constructor-options'
       | 'bulk-uploads'
       | 'bulk-uploads-hook-error'
+      | 'client-upload-temp-file'
       | 'simple-relationship'
       | 'file-mime-type'
       | 'svg-only'
       | 'media-without-delete-access'
+      | 'media-without-write-access'
       | 'media-with-image-size-admin-props'
       | 'prefix-media'
       | 'media-with-fields'
@@ -4851,10 +4941,12 @@ export interface ActivityWidget {
           | 'constructor-options'
           | 'bulk-uploads'
           | 'bulk-uploads-hook-error'
+          | 'client-upload-temp-file'
           | 'simple-relationship'
           | 'file-mime-type'
           | 'svg-only'
           | 'media-without-delete-access'
+          | 'media-without-write-access'
           | 'media-with-image-size-admin-props'
           | 'prefix-media'
           | 'media-with-fields'

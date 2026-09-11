@@ -9,7 +9,6 @@ import {
   type GlobalSlug,
   type SanitizedGlobalConfig,
 } from '../../index.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
 
 export type Arguments = {
   disableErrors?: boolean
@@ -23,75 +22,70 @@ export type Arguments = {
 export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
   args: Arguments,
 ): Promise<{ totalDocs: number }> => {
-  try {
-    const { disableErrors, global, overrideAccess, where } = args
-    const req = args.req!
-    const { payload } = req
+  const { disableErrors, global, overrideAccess, where } = args
+  const req = args.req!
+  const { payload } = req
 
-    // /////////////////////////////////////
-    // beforeOperation - Global
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // beforeOperation - Global
+  // /////////////////////////////////////
 
-    if (global.hooks?.beforeOperation?.length) {
-      for (const hook of global.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            context: req.context,
-            global,
-            operation: 'countVersions',
-            overrideAccess,
-            req,
-          })) || args
-      }
+  if (global.hooks?.beforeOperation?.length) {
+    for (const hook of global.hooks.beforeOperation) {
+      args =
+        (await hook({
+          args,
+          context: req.context,
+          global,
+          operation: 'countVersions',
+          overrideAccess,
+          req,
+        })) || args
     }
-
-    // /////////////////////////////////////
-    // Access
-    // /////////////////////////////////////
-
-    let accessResult: AccessResult
-
-    if (!overrideAccess) {
-      accessResult = await executeAccess(
-        { slug: global.slug, disableErrors, req },
-        global.access.readVersions,
-      )
-
-      // If errors are disabled, and access returns false, return empty results
-      if (accessResult === false) {
-        return {
-          totalDocs: 0,
-        }
-      }
-    }
-
-    const fullWhere = combineQueries(where!, accessResult!)
-
-    const versionFields = buildVersionGlobalFields(payload.config, global, true)
-
-    await validateQueryPaths({
-      globalConfig: global,
-      overrideAccess: overrideAccess!,
-      req,
-      versionFields,
-      where: where!,
-    })
-
-    const result = await payload.db.countGlobalVersions({
-      global: global.slug,
-      locale: req?.locale || undefined,
-      req,
-      where: fullWhere,
-    })
-
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    return result
-  } catch (error: unknown) {
-    await killTransaction(args.req!)
-    throw error
   }
+
+  // /////////////////////////////////////
+  // Access
+  // /////////////////////////////////////
+
+  let accessResult: AccessResult
+
+  if (!overrideAccess) {
+    accessResult = await executeAccess(
+      { slug: global.slug, disableErrors, req },
+      global.access.readVersions,
+    )
+
+    // If errors are disabled, and access returns false, return empty results
+    if (accessResult === false) {
+      return {
+        totalDocs: 0,
+      }
+    }
+  }
+
+  const fullWhere = combineQueries(where!, accessResult!)
+
+  const versionFields = buildVersionGlobalFields(payload.config, global, true)
+
+  await validateQueryPaths({
+    globalConfig: global,
+    overrideAccess: overrideAccess!,
+    req,
+    versionFields,
+    where: where!,
+  })
+
+  const result = await payload.db.countGlobalVersions({
+    global: global.slug,
+    locale: req?.locale || undefined,
+    req,
+    where: fullWhere,
+  })
+
+  // /////////////////////////////////////
+  // Return results
+  // /////////////////////////////////////
+
+  return result
 }

@@ -31,88 +31,94 @@ export type CustomTranslationsObject = typeof customTranslationsObject.en
 export type CustomTranslationsKeys = NestedKeysStripped<CustomTranslationsObject>
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    components: {
-      afterDashboard: [
-        '/ComponentWithDefaultI18n.js#ComponentWithDefaultI18n',
-        '/ComponentWithCustomI18n.js#ComponentWithCustomI18n',
-      ],
-    },
-  },
-  collections: [
-    {
-      slug: 'collection1',
-      labels: {
-        singular: {
-          en: 'EN Collection 1',
-          es: 'ES Collection 1',
-        },
-        plural: {
-          en: 'EN Collection 1s',
-          es: 'ES Collection 1s',
-        },
+  suite: 'i18n',
+  config: {
+    admin: {
+      components: {
+        afterDashboard: [
+          '/ComponentWithDefaultI18n.js#ComponentWithDefaultI18n',
+          '/ComponentWithCustomI18n.js#ComponentWithCustomI18n',
+        ],
       },
-      fields: [
-        {
-          name: 'i18nFieldLabel',
-          type: 'text',
-          label: {
-            en: 'en-label',
-            es: 'es-label',
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      {
+        slug: 'collection1',
+        fields: [
+          {
+            name: 'i18nFieldLabel',
+            type: 'text',
+            label: {
+              en: 'en-label',
+              es: 'es-label',
+            },
+          },
+          {
+            name: 'fieldDefaultI18nValid',
+            type: 'text',
+            label: ({ t }) => t('fields:addLabel'),
+          },
+          {
+            name: 'fieldDefaultI18nInvalid',
+            type: 'text',
+            // @ts-expect-error // Keep the ts-expect-error comment. This NEEDS to throw an error
+            label: ({ t }) => t('fields:addLabel2'),
+          },
+          {
+            name: 'fieldCustomI18nValidDefault',
+            type: 'text',
+            label: ({ t }: { t: TFunction<CustomTranslationsKeys | DefaultTranslationKeys> }) =>
+              t('fields:addLabel'),
+          },
+          {
+            name: 'fieldCustomI18nValidCustom',
+            type: 'text',
+            label: ({ t }: { t: TFunction<CustomTranslationsKeys | DefaultTranslationKeys> }) =>
+              t('general:test'),
+          },
+          {
+            name: 'fieldCustomI18nInvalid',
+            type: 'text',
+            label: ({ t }: { t: TFunction<CustomTranslationsKeys | DefaultTranslationKeys> }) =>
+              // @ts-expect-error // Keep the ts-expect-error comment. This NEEDS to throw an error
+              t('fields:addLabel2'),
+          },
+        ],
+        labels: {
+          plural: {
+            en: 'EN Collection 1s',
+            es: 'ES Collection 1s',
+          },
+          singular: {
+            en: 'EN Collection 1',
+            es: 'ES Collection 1',
           },
         },
-        {
-          name: 'fieldDefaultI18nValid',
-          type: 'text',
-          label: ({ t }) => t('fields:addLabel'),
-        },
-        {
-          name: 'fieldDefaultI18nInvalid',
-          type: 'text',
-          // @ts-expect-error // Keep the ts-expect-error comment. This NEEDS to throw an error
-          label: ({ t }) => t('fields:addLabel2'),
-        },
-        {
-          name: 'fieldCustomI18nValidDefault',
-          type: 'text',
-          label: ({ t }: { t: TFunction<CustomTranslationsKeys | DefaultTranslationKeys> }) =>
-            t('fields:addLabel'),
-        },
-        {
-          name: 'fieldCustomI18nValidCustom',
-          type: 'text',
-          label: ({ t }: { t: TFunction<CustomTranslationsKeys | DefaultTranslationKeys> }) =>
-            t('general:test'),
-        },
-        {
-          name: 'fieldCustomI18nInvalid',
-          type: 'text',
-          label: ({ t }: { t: TFunction<CustomTranslationsKeys | DefaultTranslationKeys> }) =>
-            // @ts-expect-error // Keep the ts-expect-error comment. This NEEDS to throw an error
-            t('fields:addLabel2'),
-        },
-      ],
-      versions: false,
-    },
-  ],
-  globals: [
-    {
-      slug: 'global',
-      label: {
-        en: 'EN Global',
-        es: 'ES Global',
+        versions: false,
       },
-      fields: [{ name: 'text', type: 'text' }],
-      versions: false,
+    ],
+    globals: [
+      {
+        slug: 'global',
+        fields: [{ name: 'text', type: 'text' }],
+        label: {
+          en: 'EN Global',
+          es: 'ES Global',
+        },
+        versions: false,
+      },
+    ],
+    i18n: {
+      translations: customTranslationsObject,
     },
-  ],
-  i18n: {
-    translations: customTranslationsObject,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -120,8 +126,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

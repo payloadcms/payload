@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import type { CollectionConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { seed } from './seed.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -20,9 +20,9 @@ import {
 
 const openAccess = {
   create: () => true,
+  delete: () => true,
   read: () => true,
   update: () => true,
-  delete: () => true,
 }
 
 const defaultAccess = ({ req: { user } }) => Boolean(user)
@@ -42,10 +42,10 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
       {
         name: 'disableRelation', // used filteredRelation
         type: 'checkbox',
-        required: true,
         admin: {
           position: 'sidebar',
         },
+        required: true,
       },
     ],
     versions: false,
@@ -53,605 +53,560 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'relationships',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
-  },
-  localization: {
-    locales: ['en', 'de'],
-    defaultLocale: 'en',
-  },
-  collections: [
-    {
-      slug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'description',
-          type: 'text',
-        },
-        {
-          name: 'number',
-          type: 'number',
-        },
-        // Relationship
-        {
-          name: 'relationField',
-          type: 'relationship',
-          relationTo: relationSlug,
-        },
-        {
-          name: 'blocks',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'block',
-              fields: [
-                {
-                  name: 'relationField',
-                  type: 'relationship',
-                  relationTo: relationSlug,
-                },
-              ],
-            },
-          ],
-        },
-        // Relationship w/ default access
-        {
-          name: 'defaultAccessRelation',
-          type: 'relationship',
-          relationTo: defaultAccessRelSlug,
-        },
-        {
-          name: 'chainedRelation',
-          type: 'relationship',
-          relationTo: chainedRelSlug,
-        },
-        {
-          name: 'maxDepthRelation',
-          maxDepth: 0,
-          type: 'relationship',
-          relationTo: relationSlug,
-        },
-        {
-          name: 'customIdRelation',
-          type: 'relationship',
-          relationTo: customIdSlug,
-        },
-        {
-          name: 'customIdNumberRelation',
-          type: 'relationship',
-          relationTo: customIdNumberSlug,
-        },
-        {
-          name: 'filteredRelation',
-          type: 'relationship',
-          relationTo: relationSlug,
-          filterOptions: {
-            disableRelation: {
-              not_equals: true,
-            },
+    collections: [
+      {
+        slug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
           },
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: slugWithLocalizedRel,
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        // Relationship
-        {
-          name: 'relationField',
-          type: 'relationship',
-          relationTo: relationSlug,
-          localized: true,
-        },
-      ],
-      versions: false,
-    },
-    collectionWithName(relationSlug),
-    {
-      ...collectionWithName(defaultAccessRelSlug),
-      access: {
-        create: defaultAccess,
-        read: defaultAccess,
-        update: defaultAccess,
-        delete: defaultAccess,
-      },
-      versions: false,
-    },
-    {
-      slug: chainedRelSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'relation',
-          type: 'relationship',
-          relationTo: chainedRelSlug,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: customIdSlug,
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: customIdNumberSlug,
-      fields: [
-        {
-          name: 'id',
-          type: 'number',
-        },
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'screenings',
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'movie',
-          type: 'relationship',
-          relationTo: 'movies',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'movies',
-      versions: { drafts: true },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'select',
-          type: 'select',
-          hasMany: true,
-          options: ['a', 'b', 'c'],
-        },
-        {
-          name: 'director',
-          type: 'relationship',
-          relationTo: 'directors',
-        },
-        {
-          type: 'array',
-          name: 'array',
-          fields: [
-            {
-              name: 'director',
-              type: 'relationship',
-              relationTo: 'directors',
-              hasMany: true,
+          {
+            name: 'description',
+            type: 'text',
+          },
+          {
+            name: 'number',
+            type: 'number',
+          },
+          // Relationship
+          {
+            name: 'relationField',
+            type: 'relationship',
+            relationTo: relationSlug,
+          },
+          {
+            name: 'blocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'block',
+                fields: [
+                  {
+                    name: 'relationField',
+                    type: 'relationship',
+                    relationTo: relationSlug,
+                  },
+                ],
+              },
+            ],
+          },
+          // Relationship w/ default access
+          {
+            name: 'defaultAccessRelation',
+            type: 'relationship',
+            relationTo: defaultAccessRelSlug,
+          },
+          {
+            name: 'chainedRelation',
+            type: 'relationship',
+            relationTo: chainedRelSlug,
+          },
+          {
+            name: 'maxDepthRelation',
+            type: 'relationship',
+            maxDepth: 0,
+            relationTo: relationSlug,
+          },
+          {
+            name: 'customIdRelation',
+            type: 'relationship',
+            relationTo: customIdSlug,
+          },
+          {
+            name: 'customIdNumberRelation',
+            type: 'relationship',
+            relationTo: customIdNumberSlug,
+          },
+          {
+            name: 'filteredRelation',
+            type: 'relationship',
+            filterOptions: {
+              disableRelation: {
+                not_equals: true,
+              },
             },
-            {
-              name: 'polymorphic',
-              type: 'relationship',
-              relationTo: ['directors'],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      slug: 'directors',
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-        {
-          name: 'localized',
-          type: 'text',
-          localized: true,
-        },
-        {
-          name: 'movies',
-          type: 'relationship',
-          relationTo: 'movies',
-          hasMany: true,
-        },
-        {
-          name: 'movie',
-          type: 'relationship',
-          relationTo: 'movies',
-        },
-        {
-          name: 'directors',
-          type: 'relationship',
-          relationTo: 'directors',
-          hasMany: true,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'movieReviews',
-      fields: [
-        {
-          name: 'movieReviewer',
-          relationTo: 'users',
-          required: true,
-          type: 'relationship',
-        },
-        {
-          name: 'likes',
-          hasMany: true,
-          relationTo: 'users',
-          type: 'relationship',
-        },
-        {
-          name: 'visibility',
-          options: [
-            {
-              label: 'followers',
-              value: 'followers',
-            },
-            {
-              label: 'public',
-              value: 'public',
-            },
-          ],
-          required: true,
-          type: 'radio',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: polymorphicRelationshipsSlug,
-      fields: [
-        {
-          type: 'relationship',
-          name: 'polymorphic',
-          relationTo: ['movies'],
-        },
-        {
-          type: 'relationship',
-          name: 'polymorphicLocalized',
-          relationTo: ['movies'],
-          localized: true,
-        },
-        {
-          type: 'relationship',
-          name: 'polymorphicMany',
-          hasMany: true,
-          relationTo: ['movies'],
-        },
-        {
-          type: 'relationship',
-          hasMany: true,
-          name: 'polymorphicManyLocalized',
-          localized: true,
-          relationTo: ['movies'],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: treeSlug,
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-        },
-        {
-          name: 'parent',
-          type: 'relationship',
-          relationTo: 'tree',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'pages',
-      fields: [
-        {
-          type: 'array',
-          name: 'menu',
-          fields: [
-            {
-              name: 'label',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'rels-to-pages',
-      fields: [
-        {
-          name: 'page',
-          type: 'relationship',
-          relationTo: 'pages',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'rels-to-pages-and-custom-text-ids',
-      fields: [
-        {
-          name: 'rel',
-          type: 'relationship',
-          relationTo: ['pages', 'custom-id', 'custom-id-number'],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'object-writes',
-      fields: [
-        {
-          type: 'relationship',
-          relationTo: 'movies',
-          name: 'one',
-        },
-        {
-          type: 'relationship',
-          relationTo: 'movies',
-          name: 'many',
-          hasMany: true,
-        },
-        {
-          type: 'relationship',
-          relationTo: ['movies'],
-          name: 'onePoly',
-        },
-        {
-          type: 'relationship',
-          relationTo: ['movies'],
-          name: 'manyPoly',
-          hasMany: true,
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'deep-nested',
-      fields: [
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              name: 'content',
-              fields: [
-                {
-                  type: 'blocks',
-                  name: 'blocks',
-                  blocks: [
-                    {
-                      slug: 'testBlock',
-                      fields: [
-                        {
-                          type: 'tabs',
-                          tabs: [
-                            {
-                              name: 'meta',
-                              fields: [
-                                {
-                                  type: 'relationship',
-                                  relationTo: 'movies',
-                                  name: 'movie',
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'relations',
-      fields: [
-        {
-          name: 'item',
-          type: 'relationship',
-          relationTo: ['items'],
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'items',
-      fields: [
-        {
-          type: 'select',
-          options: ['completed', 'failed', 'pending'],
-          name: 'status',
-        },
-        {
-          type: 'join',
-          on: 'item',
-          collection: 'relations',
-          name: 'relation',
-        },
-      ],
-      versions: false,
-    },
-    {
-      slug: 'blocks',
-      fields: [
-        {
-          type: 'blocks',
-          name: 'blocks',
-          blocks: [
-            {
-              slug: 'some',
-              fields: [
-                {
-                  type: 'relationship',
-                  relationTo: 'directors',
-                  name: 'director',
-                },
-                {
-                  type: 'relationship',
-                  hasMany: true,
-                  name: 'directors',
-                  relationTo: 'directors',
-                  localized: true,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      versions: false,
-    },
-  ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
+            relationTo: relationSlug,
+          },
+        ],
+        versions: false,
       },
-    })
-
-    const rel1 = await payload.create({
-      collection: relationSlug,
-      data: {
-        name: 'name',
+      {
+        slug: slugWithLocalizedRel,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+          // Relationship
+          {
+            name: 'relationField',
+            type: 'relationship',
+            localized: true,
+            relationTo: relationSlug,
+          },
+          // Localized array wrapping a relationship to a collection that owns a non-localized hasMany relationship
+          {
+            name: 'localizedDirectors',
+            type: 'array',
+            fields: [
+              {
+                name: 'director',
+                type: 'relationship',
+                relationTo: 'directors',
+              },
+            ],
+            localized: true,
+          },
+        ],
+        versions: false,
       },
-    })
-
-    const filteredRelation = await payload.create({
-      collection: relationSlug,
-      data: {
-        name: 'filtered',
+      collectionWithName(relationSlug),
+      {
+        ...collectionWithName(defaultAccessRelSlug),
+        access: {
+          create: defaultAccess,
+          delete: defaultAccess,
+          read: defaultAccess,
+          update: defaultAccess,
+        },
+        versions: false,
       },
-    })
-
-    const defaultAccessRelation = await payload.create({
-      collection: defaultAccessRelSlug,
-      data: {
-        name: 'name',
+      {
+        slug: chainedRelSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'relation',
+            type: 'relationship',
+            relationTo: chainedRelSlug,
+          },
+        ],
+        versions: false,
       },
-    })
-
-    const chained3 = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain3',
+      {
+        slug: customIdSlug,
+        fields: [
+          {
+            name: 'id',
+            type: 'text',
+          },
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
       },
-    })
-
-    const chained2 = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain2',
-        relation: chained3.id,
+      {
+        slug: customIdNumberSlug,
+        fields: [
+          {
+            name: 'id',
+            type: 'number',
+          },
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
       },
-    })
-
-    const chained = await payload.create({
-      collection: chainedRelSlug,
-      data: {
-        name: 'chain1',
-        relation: chained2.id,
+      {
+        slug: 'screenings',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'movie',
+            type: 'relationship',
+            relationTo: 'movies',
+          },
+        ],
+        versions: false,
       },
-    })
-
-    await payload.update({
-      collection: chainedRelSlug,
-      id: chained3.id,
-      data: {
-        name: 'chain3',
-        relation: chained.id,
+      {
+        slug: 'movies',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'select',
+            type: 'select',
+            hasMany: true,
+            options: ['a', 'b', 'c'],
+          },
+          {
+            name: 'location',
+            type: 'point',
+          },
+          {
+            name: 'director',
+            type: 'relationship',
+            relationTo: 'directors',
+          },
+          {
+            name: 'array',
+            type: 'array',
+            fields: [
+              {
+                name: 'director',
+                type: 'relationship',
+                hasMany: true,
+                relationTo: 'directors',
+              },
+              {
+                name: 'polymorphic',
+                type: 'relationship',
+                relationTo: ['directors'],
+              },
+            ],
+          },
+        ],
+        versions: { drafts: true },
       },
-    })
-
-    const customIdRelation = await payload.create({
-      collection: customIdSlug,
-      data: {
-        id: 'custommmm',
-        name: 'custom-id',
+      {
+        slug: 'directors',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'localized',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'movies',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'movies',
+          },
+          {
+            name: 'movie',
+            type: 'relationship',
+            relationTo: 'movies',
+          },
+          {
+            name: 'directors',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'directors',
+          },
+        ],
+        versions: false,
       },
-    })
-
-    const customIdNumberRelation = await payload.create({
-      collection: customIdNumberSlug,
-      data: {
-        id: 908234892340,
-        name: 'custom-id',
+      {
+        slug: 'transitive-join-songs',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'albums',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'transitive-join-albums',
+          },
+        ],
       },
-    })
-
-    // Relationship
-    await payload.create({
-      collection: slug,
-      data: {
-        title: 'with relationship',
-        relationField: rel1.id,
-        defaultAccessRelation: defaultAccessRelation.id,
-        chainedRelation: chained.id,
-        maxDepthRelation: rel1.id,
-        customIdRelation: customIdRelation.id,
-        customIdNumberRelation: customIdNumberRelation.id,
-        filteredRelation: filteredRelation.id,
+      {
+        slug: 'transitive-join-albums',
+        fields: [
+          {
+            name: 'artist',
+            type: 'relationship',
+            relationTo: 'transitive-join-artists',
+          },
+          {
+            name: 'song',
+            type: 'join',
+            collection: 'transitive-join-songs',
+            on: 'albums',
+          },
+        ],
       },
-    })
-
-    const root = await payload.create({
-      collection: 'tree',
-      data: {
-        text: 'root',
+      {
+        slug: 'transitive-join-artists',
+        fields: [
+          {
+            name: 'album',
+            type: 'join',
+            collection: 'transitive-join-albums',
+            on: 'artist',
+          },
+        ],
       },
-    })
-
-    await payload.create({
-      collection: 'tree',
-      data: {
-        text: 'sub',
-        parent: root.id,
+      {
+        slug: 'movieReviews',
+        fields: [
+          {
+            name: 'movieReviewer',
+            type: 'relationship',
+            relationTo: 'users',
+            required: true,
+          },
+          {
+            name: 'likes',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'users',
+          },
+          {
+            name: 'visibility',
+            type: 'radio',
+            options: [
+              {
+                label: 'followers',
+                value: 'followers',
+              },
+              {
+                label: 'public',
+                value: 'public',
+              },
+            ],
+            required: true,
+          },
+        ],
+        versions: false,
       },
-    })
+      {
+        slug: polymorphicRelationshipsSlug,
+        fields: [
+          {
+            name: 'polymorphic',
+            type: 'relationship',
+            relationTo: ['movies'],
+          },
+          {
+            name: 'polymorphicLocalized',
+            type: 'relationship',
+            localized: true,
+            relationTo: ['movies'],
+          },
+          {
+            name: 'polymorphicMany',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: ['movies'],
+          },
+          {
+            name: 'polymorphicManyLocalized',
+            type: 'relationship',
+            hasMany: true,
+            localized: true,
+            relationTo: ['movies'],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: treeSlug,
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+          },
+          {
+            name: 'parent',
+            type: 'relationship',
+            relationTo: 'tree',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'pages',
+        fields: [
+          {
+            name: 'menu',
+            type: 'array',
+            fields: [
+              {
+                name: 'label',
+                type: 'text',
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'rels-to-pages',
+        fields: [
+          {
+            name: 'page',
+            type: 'relationship',
+            relationTo: 'pages',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'rels-to-pages-and-custom-text-ids',
+        fields: [
+          {
+            name: 'rel',
+            type: 'relationship',
+            relationTo: ['pages', 'custom-id', 'custom-id-number'],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'object-writes',
+        fields: [
+          {
+            name: 'one',
+            type: 'relationship',
+            relationTo: 'movies',
+          },
+          {
+            name: 'many',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: 'movies',
+          },
+          {
+            name: 'onePoly',
+            type: 'relationship',
+            relationTo: ['movies'],
+          },
+          {
+            name: 'manyPoly',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: ['movies'],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'deep-nested',
+        fields: [
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                name: 'content',
+                fields: [
+                  {
+                    name: 'blocks',
+                    type: 'blocks',
+                    blocks: [
+                      {
+                        slug: 'testBlock',
+                        fields: [
+                          {
+                            type: 'tabs',
+                            tabs: [
+                              {
+                                name: 'meta',
+                                fields: [
+                                  {
+                                    name: 'movie',
+                                    type: 'relationship',
+                                    relationTo: 'movies',
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'relations',
+        fields: [
+          {
+            name: 'item',
+            type: 'relationship',
+            relationTo: ['items'],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'items',
+        fields: [
+          {
+            name: 'status',
+            type: 'select',
+            options: ['completed', 'failed', 'pending'],
+          },
+          {
+            name: 'relation',
+            type: 'join',
+            collection: 'relations',
+            on: 'item',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'blocks',
+        fields: [
+          {
+            name: 'blocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'some',
+                fields: [
+                  {
+                    name: 'director',
+                    type: 'relationship',
+                    relationTo: 'directors',
+                  },
+                  {
+                    name: 'directors',
+                    type: 'relationship',
+                    hasMany: true,
+                    localized: true,
+                    relationTo: 'directors',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+    ],
+    localization: {
+      defaultLocale: 'en',
+      locales: ['en', 'de'],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

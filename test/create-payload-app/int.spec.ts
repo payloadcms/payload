@@ -9,9 +9,10 @@ import path from 'path'
 import shelljs from 'shelljs'
 import tempy from 'tempy'
 import { promisify } from 'util'
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import { configurePayloadConfig } from '../../packages/create-payload-app/src/lib/configure-payload-config.js'
+import { test } from '../__helpers/int/vitest.js'
 
 const readFile = promisify(fs.readFile)
 const writeFile = promisify(fs.writeFile)
@@ -45,15 +46,15 @@ const tanStackCreateArgs = [
   '--non-interactive',
 ]
 
-describe('create-payload-app', () => {
-  beforeAll(() => {
+test.suite({})('create-payload-app', () => {
+  test.beforeAll(() => {
     // Runs copyfiles copy app/(payload) -> dist/app/(payload)
     shelljs.exec('pnpm build:create-payload-app')
   })
 
-  describe.each(commandKeys)(`--init-next with %s`, (nextCmdKey) => {
+  test.describe.each(commandKeys)(`--init-next with %s`, (nextCmdKey) => {
     const projectDir = tempy.directory()
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       if (fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
@@ -84,13 +85,13 @@ describe('create-payload-app', () => {
       await writeFile(tsConfigPath, userTsConfigContent, { encoding: 'utf8' })
     }, 90000)
 
-    afterEach(() => {
+    test.afterEach(() => {
       if (fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
     })
 
-    it('should install payload app in Next.js project', async () => {
+    test('should install payload app in Next.js project', async () => {
       expect(fs.existsSync(projectDir)).toBe(true)
 
       const firstResult = await initNext({
@@ -163,7 +164,7 @@ describe('create-payload-app', () => {
       })
     })
 
-    it('should install payload app with postgres adapter', async () => {
+    test('should install payload app with postgres adapter', async () => {
       expect(fs.existsSync(projectDir)).toBe(true)
 
       const firstResult = await initNext({
@@ -232,16 +233,16 @@ describe('create-payload-app', () => {
     })
   })
 
-  describe('official TanStack generator', () => {
+  test.describe('official TanStack generator', () => {
     let projectDir: string
 
-    afterEach(() => {
+    test.afterEach(() => {
       if (projectDir && fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
     })
 
-    it('should initialize and build a generated TanStack Start project', async () => {
+    test('should initialize and build a generated TanStack Start project', async () => {
       projectDir = tempy.directory()
       await createTanStackProject({ projectDir })
 
@@ -293,7 +294,7 @@ describe('create-payload-app', () => {
       await execa('pnpm', ['build'], { cwd: projectDir, stdio: 'inherit' })
     }, 300_000)
 
-    it('should initialize and build a generated TanStack Router-only project', async () => {
+    test('should initialize and build a generated TanStack Router-only project', async () => {
       projectDir = tempy.directory()
       await createTanStackProject({ projectDir, routerOnly: true })
 
@@ -360,10 +361,10 @@ describe('create-payload-app', () => {
     }, 300_000)
   })
 
-  describe('adapter replacement', () => {
+  test.describe('adapter replacement', () => {
     const projectDir = tempy.directory()
 
-    beforeEach(async () => {
+    test.beforeEach(async () => {
       if (fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
@@ -390,13 +391,13 @@ describe('create-payload-app', () => {
       await writeFile(tsConfigPath, userTsConfigContent, { encoding: 'utf8' })
     })
 
-    afterEach(() => {
+    test.afterEach(() => {
       if (fs.existsSync(projectDir)) {
         fs.rmSync(projectDir, { recursive: true })
       }
     })
 
-    it('should replace mongodb with postgres adapter', async () => {
+    test('should replace mongodb with postgres adapter', async () => {
       // First install with mongodb
       const firstResult = await initNext({
         '--debug': true,
@@ -489,7 +490,7 @@ function expectRequiredTanStackFiles({ projectDir }: { projectDir: string }): vo
     'src/collections/Media.ts',
     'src/collections/Tags.ts',
     'src/collections/Users.ts',
-    'src/payload-foundation.css',
+    'src/payload.css',
     'src/payload.config.ts',
     'src/routes/_payload.tsx',
     'src/routes/_payload/admin.$.tsx',

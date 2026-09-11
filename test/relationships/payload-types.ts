@@ -77,6 +77,9 @@ export interface Config {
     screenings: Screening;
     movies: Movie;
     directors: Director;
+    'transitive-join-songs': TransitiveJoinSong;
+    'transitive-join-albums': TransitiveJoinAlbum;
+    'transitive-join-artists': TransitiveJoinArtist;
     movieReviews: MovieReview;
     'polymorphic-relationships': PolymorphicRelationship;
     tree: Tree;
@@ -95,6 +98,12 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    'transitive-join-albums': {
+      song: 'transitive-join-songs';
+    };
+    'transitive-join-artists': {
+      album: 'transitive-join-albums';
+    };
     items: {
       relation: 'relations';
     };
@@ -110,6 +119,9 @@ export interface Config {
     screenings: ScreeningsSelect<false> | ScreeningsSelect<true>;
     movies: MoviesSelect<false> | MoviesSelect<true>;
     directors: DirectorsSelect<false> | DirectorsSelect<true>;
+    'transitive-join-songs': TransitiveJoinSongsSelect<false> | TransitiveJoinSongsSelect<true>;
+    'transitive-join-albums': TransitiveJoinAlbumsSelect<false> | TransitiveJoinAlbumsSelect<true>;
+    'transitive-join-artists': TransitiveJoinArtistsSelect<false> | TransitiveJoinArtistsSelect<true>;
     movieReviews: MovieReviewsSelect<false> | MovieReviewsSelect<true>;
     'polymorphic-relationships': PolymorphicRelationshipsSelect<false> | PolymorphicRelationshipsSelect<true>;
     tree: TreeSelect<false> | TreeSelect<true>;
@@ -136,6 +148,8 @@ export interface Config {
   locale: 'en' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -252,17 +266,26 @@ export interface PostsLocalized {
   id: string;
   title?: string | null;
   relationField?: (string | null) | Relation;
+  localizedDirectors?:
+    | {
+        director?: (string | null) | Director;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "screenings".
+ * via the `definition` "directors".
  */
-export interface Screening {
+export interface Director {
   id: string;
   name?: string | null;
+  localized?: string | null;
+  movies?: (string | Movie)[] | null;
   movie?: (string | null) | Movie;
+  directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -274,6 +297,11 @@ export interface Movie {
   id: string;
   name?: string | null;
   select?: ('a' | 'b' | 'c')[] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
   director?: (string | null) | Director;
   array?:
     | {
@@ -291,15 +319,52 @@ export interface Movie {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "directors".
+ * via the `definition` "screenings".
  */
-export interface Director {
+export interface Screening {
   id: string;
   name?: string | null;
-  localized?: string | null;
-  movies?: (string | Movie)[] | null;
   movie?: (string | null) | Movie;
-  directors?: (string | Director)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-songs".
+ */
+export interface TransitiveJoinSong {
+  id: string;
+  name?: string | null;
+  albums?: (string | TransitiveJoinAlbum)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-albums".
+ */
+export interface TransitiveJoinAlbum {
+  id: string;
+  artist?: (string | null) | TransitiveJoinArtist;
+  song?: {
+    docs?: (string | TransitiveJoinSong)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-artists".
+ */
+export interface TransitiveJoinArtist {
+  id: string;
+  album?: {
+    docs?: (string | TransitiveJoinAlbum)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -586,6 +651,18 @@ export interface PayloadLockedDocument {
         value: string | Director;
       } | null)
     | ({
+        relationTo: 'transitive-join-songs';
+        value: string | TransitiveJoinSong;
+      } | null)
+    | ({
+        relationTo: 'transitive-join-albums';
+        value: string | TransitiveJoinAlbum;
+      } | null)
+    | ({
+        relationTo: 'transitive-join-artists';
+        value: string | TransitiveJoinArtist;
+      } | null)
+    | ({
         relationTo: 'movieReviews';
         value: string | MovieReview;
       } | null)
@@ -711,6 +788,12 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PostsLocalizedSelect<T extends boolean = true> {
   title?: T;
   relationField?: T;
+  localizedDirectors?:
+    | T
+    | {
+        director?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -781,6 +864,7 @@ export interface ScreeningsSelect<T extends boolean = true> {
 export interface MoviesSelect<T extends boolean = true> {
   name?: T;
   select?: T;
+  location?: T;
   director?: T;
   array?:
     | T
@@ -803,6 +887,35 @@ export interface DirectorsSelect<T extends boolean = true> {
   movies?: T;
   movie?: T;
   directors?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-songs_select".
+ */
+export interface TransitiveJoinSongsSelect<T extends boolean = true> {
+  name?: T;
+  albums?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-albums_select".
+ */
+export interface TransitiveJoinAlbumsSelect<T extends boolean = true> {
+  artist?: T;
+  song?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "transitive-join-artists_select".
+ */
+export interface TransitiveJoinArtistsSelect<T extends boolean = true> {
+  album?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1020,6 +1133,92 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'postsLocalized'
+      | 'relation'
+      | 'strict-access'
+      | 'chained'
+      | 'custom-id'
+      | 'custom-id-number'
+      | 'screenings'
+      | 'movies'
+      | 'directors'
+      | 'transitive-join-songs'
+      | 'transitive-join-albums'
+      | 'transitive-join-artists'
+      | 'movieReviews'
+      | 'polymorphic-relationships'
+      | 'tree'
+      | 'pages'
+      | 'rels-to-pages'
+      | 'rels-to-pages-and-custom-text-ids'
+      | 'object-writes'
+      | 'deep-nested'
+      | 'relations'
+      | 'items'
+      | 'blocks'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'postsLocalized'
+          | 'relation'
+          | 'strict-access'
+          | 'chained'
+          | 'custom-id'
+          | 'custom-id-number'
+          | 'screenings'
+          | 'movies'
+          | 'directors'
+          | 'transitive-join-songs'
+          | 'transitive-join-albums'
+          | 'transitive-join-artists'
+          | 'movieReviews'
+          | 'polymorphic-relationships'
+          | 'tree'
+          | 'pages'
+          | 'rels-to-pages'
+          | 'rels-to-pages-and-custom-text-ids'
+          | 'object-writes'
+          | 'deep-nested'
+          | 'relations'
+          | 'items'
+          | 'blocks'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

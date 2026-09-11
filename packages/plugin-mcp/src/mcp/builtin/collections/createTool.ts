@@ -1,25 +1,24 @@
-import type { SelectType } from 'payload'
-
-import { z } from 'zod'
+import {
+  createDocumentsInputSchema,
+  getCollectionVirtualFieldNames,
+  hasDraftValidationEnabled,
+  stripVirtualFields,
+  transformPointDataToPayload,
+  validateCollectionData,
+} from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import {
-  getCollectionVirtualFieldNames,
-  stripVirtualFields,
-} from '../../../utils/getVirtualFieldNames.js'
-import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
-import { validateCollectionData } from '../validateEntityData.js'
+import { formatEntityError } from '../formatEntityError.js'
 import { fileInputSchema, resolveFile } from './fileInput.js'
-import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
   'Create one or more documents. Each can have different data or a file. Prefer uploadReference after upload, externalURL for URLs, or base64 for small local files.'
 
 export const createDocumentsTool = defineCollectionTool({
   access: (args) =>
-    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.create),
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.slug]?.create),
   annotations: {
     destructiveHint: false,
     idempotentHint: false,
@@ -28,112 +27,90 @@ export const createDocumentsTool = defineCollectionTool({
     title: 'Create Documents',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('How many levels deep to populate relationships in response')
-      .optional()
-      .default(0),
-    documents: z
-      .array(
-        z.object({
-          data: z
-            .record(z.string(), z.unknown())
-            .describe(
-              'The document fields to create. Only include fields permitted by the schema returned by getCollectionSchema.',
-            ),
-          file: fileInputSchema.optional(),
-        }),
-      )
-      .min(1)
-      .describe('The documents to create, in order'),
-    draft: z
-      .boolean()
-      .describe(
-        'Only if getCollectionSchema includes _status; otherwise _status does not exist. true forces data._status to "draft"; with false, data._status controls draft or published.',
-      )
-      .optional()
-      .default(false),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code to create the documents in (e.g., "en", "es"). Defaults to the default locale',
-      )
-      .optional(),
-    select: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: define exactly which fields you\'d like to return, e.g., {"title": true}',
-      )
-      .optional(),
-  }),
-}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
+  input: createDocumentsInputSchema({ file: fileInputSchema }),
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
+  const collectionConfig = payload.collections[slug]?.config
   const logger = getLogger({ payload })
-  const { depth, documents, draft, fallbackLocale, locale, select } = input
+  const {
+    depth,
+    documents,
+    draft,
+    fallbackLocale,
+    locale,
+    populate,
+    publishAllLocales,
+    returning,
+    select,
+  } = input
+  const shouldUsePartialSchema =
+    draft === true && collectionConfig !== undefined && !hasDraftValidationEnabled(collectionConfig)
 
-  logger.info(`Creating ${documents.length} documents in collection: ${collectionSlug}`)
+  logger.info(`Creating ${documents.length} documents in collection: ${slug}`)
 
   try {
-    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    const docs: Array<{ doc: Record<string, unknown>; index: number }> = []
+    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, slug)
+    const docs: Array<
+      { doc: Record<string, unknown>; index: number } | { id: number | string; index: number }
+    > = []
     const errors: Array<{ index: number; message: string }> = []
     let validationSchema: Record<string, unknown> | undefined
 
     for (const [index, document] of documents.entries()) {
       try {
         const inputData = stripVirtualFields(document.data, virtualFieldNames)
-        const validationError = validateCollectionData({ collectionSlug, data: inputData, req })
-
-        if (validationError) {
-          const firstContent = validationError.content[0]
-          const validationContent = validationError.structuredContent as
-            | Record<string, unknown>
-            | undefined
-          const schema = validationContent?.schema
-
-          if (!validationSchema && schema && typeof schema === 'object') {
-            validationSchema = schema as Record<string, unknown>
-          }
-
-          errors.push({
-            index,
-            message:
-              firstContent?.type === 'text'
-                ? (firstContent.text.split('\n\nUse this schema')[0] ?? 'Invalid document data')
-                : 'Invalid document data',
-          })
-          continue
-        }
+        validateCollectionData({
+          slug,
+          data: inputData,
+          partial: shouldUsePartialSchema,
+          req,
+        })
 
         const parsedData = transformPointDataToPayload(inputData)
-        const file = await resolveFile({ collectionSlug, input: document.file, req })
+        const file = await resolveFile({ slug, input: document.file, req })
         const result = await payload.create({
-          collection: collectionSlug,
+          collection: slug,
           data: parsedData,
           depth,
           draft,
           overrideAccess: authorizedMCP.overrideAccess,
+          populate,
+          publishAllLocales,
           req,
           ...(file ? { file } : {}),
           ...(locale ? { locale } : {}),
-          ...(fallbackLocale ? { fallbackLocale } : {}),
-          ...(select ? { select: select as SelectType } : {}),
+          ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),
+          select: returning ? select : { id: true },
         })
 
-        docs.push({ doc: result as Record<string, unknown>, index })
+        docs.push(
+          returning ? { doc: result as Record<string, unknown>, index } : { id: result.id, index },
+        )
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error'
+        const formattedError = formatEntityError({
+          slug,
+          action: 'creating',
+          entity: 'collection',
+          error,
+          req,
+        })
+        const structuredContent = formattedError.structuredContent as
+          | { schema?: unknown }
+          | undefined
+        const schema = structuredContent?.schema
+        const errorContent = formattedError.content[0]
+        const formattedMessage =
+          errorContent?.type === 'text'
+            ? (errorContent.text.split('\n\nUse this schema')[0] ?? message)
+            : message
 
-        logger.error(`Error creating document at index ${index} in ${collectionSlug}: ${message}`)
-        errors.push({ index, message })
+        if (!validationSchema && schema && typeof schema === 'object') {
+          validationSchema = schema as Record<string, unknown>
+        }
+
+        logger.error(`Error creating document at index ${index} in ${slug}: ${message}`)
+        errors.push({ index, message: formattedMessage })
       }
     }
 
@@ -146,13 +123,13 @@ export const createDocumentsTool = defineCollectionTool({
       ? { ...batchResult, schema: validationSchema }
       : batchResult
 
-    logger.info(`Created ${docs.length} of ${documents.length} documents in ${collectionSlug}`)
+    logger.info(`Created ${docs.length} of ${documents.length} documents in ${slug}`)
 
     return {
       content: [
         {
           type: 'text',
-          text: `Created ${docs.length} of ${documents.length} documents in collection "${collectionSlug}".${retryMessage}\nResults:\n\`\`\`json\n${JSON.stringify(batchResult)}\n\`\`\`${schemaMessage}`,
+          text: `Created ${docs.length} of ${documents.length} documents in collection "${slug}".${retryMessage}\nResults:\n\`\`\`json\n${JSON.stringify(batchResult)}\n\`\`\`${schemaMessage}`,
         },
       ],
       doc: structuredContent as unknown as Record<string, unknown>,
@@ -162,7 +139,7 @@ export const createDocumentsTool = defineCollectionTool({
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
 
-    logger.error(`Error creating documents in ${collectionSlug}: ${message}`)
-    return formatCollectionError({ action: 'creating', collectionSlug, error, req })
+    logger.error(`Error creating documents in ${slug}: ${message}`)
+    return formatEntityError({ slug, action: 'creating', entity: 'collection', error, req })
   }
 })

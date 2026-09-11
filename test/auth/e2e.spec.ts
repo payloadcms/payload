@@ -61,7 +61,6 @@ describe('Auth', () => {
       await reInitializeDB({
         deleteOnly: true,
         serverURL,
-        snapshotKey: 'create-first-user',
       })
 
       await payload.delete({
@@ -165,7 +164,6 @@ describe('Auth', () => {
       await reInitializeDB({
         deleteOnly: false,
         serverURL,
-        snapshotKey: 'auth',
       })
 
       await login({ page, serverURL })
@@ -533,7 +531,6 @@ describe('Auth', () => {
       await reInitializeDB({
         deleteOnly: false,
         serverURL,
-        snapshotKey: 'auth',
       })
 
       await page.context().clearCookies()
@@ -629,7 +626,6 @@ describe('Auth', () => {
       await reInitializeDB({
         deleteOnly: false,
         serverURL,
-        snapshotKey: 'auth',
       })
 
       await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })

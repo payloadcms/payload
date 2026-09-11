@@ -1,14 +1,12 @@
 /* eslint-disable no-console */
 'use client'
 
-import type { Column, SchedulePublish, Where } from 'payload'
+import type { Column, SchedulePublish } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { getTranslation } from '@payloadcms/translations'
 import { endOfToday, isToday, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
-import { formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
@@ -21,7 +19,6 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { requests } from '../../../utilities/api.js'
 import { Banner } from '../../Banner/index.js'
 import { Button } from '../../Button/index.js'
 import { DatePickerField } from '../../DatePicker/index.js'
@@ -33,7 +30,6 @@ import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Table } from '../../Table/index.js'
 import { TimezonePicker } from '../../TimezonePicker/index.js'
 import { buildUpcomingColumns } from './buildUpcomingColumns.js'
-import { buildUpcomingScheduleWhere } from './buildUpcomingScheduleWhere.js'
 
 const baseClass = 'schedule-publish'
 
@@ -62,13 +58,12 @@ export const ScheduleDrawer: React.FC<Props> = ({
         timezones: { defaultTimezone, supportedTimezones },
       },
       localization,
-      routes: { api },
     },
   } = useConfig()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const { title } = useDocumentTitle()
   const { i18n, t } = useTranslation()
-  const { schedulePublish } = useServerFunctions()
+  const { getUpcomingScheduledPublish, schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
   const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
@@ -98,21 +93,7 @@ export const ScheduleDrawer: React.FC<Props> = ({
   }, [localization, i18n])
 
   const fetchUpcoming = React.useCallback(async () => {
-    const query: { sort: string; where: Where } = {
-      sort: 'waitUntil',
-      where: buildUpcomingScheduleWhere({ id, collectionSlug, globalSlug }),
-    }
-
-    const { docs } = await requests
-      .post(formatAdminURL({ apiRoute: api, path: `/payload-jobs` }), {
-        body: qs.stringify(query),
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Payload-HTTP-Method-Override': 'GET',
-        },
-      })
-      .then((res) => res.json())
+    const docs = await getUpcomingScheduledPublish({ id, collectionSlug, globalSlug })
 
     setUpcomingColumns(
       buildUpcomingColumns({
@@ -131,7 +112,7 @@ export const ScheduleDrawer: React.FC<Props> = ({
   }, [
     collectionSlug,
     globalSlug,
-    api,
+    getUpcomingScheduledPublish,
     i18n,
     dateFormat,
     localization,
