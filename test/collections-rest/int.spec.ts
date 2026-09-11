@@ -1195,6 +1195,40 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         expect(emptyNotInResponse.status).toEqual(200)
       })
 
+      test.describe('text matching values', () => {
+        for (const operator of ['like', 'not_like', 'contains'] as const) {
+          test(`rejects object values for ${operator}`, async ({ restClient }) => {
+            const response = await restClient.GET(`/${postsSlug}`, {
+              query: {
+                where: {
+                  title: {
+                    [operator]: {
+                      pattern: 'title',
+                    },
+                  },
+                },
+              },
+            })
+
+            expect(response.status).toEqual(400)
+          })
+        }
+
+        test('rejects arrays containing object values', async ({ restClient }) => {
+          const response = await restClient.GET(`/${postsSlug}`, {
+            query: {
+              where: {
+                title: {
+                  like: [{ pattern: 'title' }],
+                },
+              },
+            },
+          })
+
+          expect(response.status).toEqual(400)
+        })
+      })
+
       test('like', async ({ restClient }) => {
         const post1 = await createPost({ restClient }, { title: 'prefix-value' })
 

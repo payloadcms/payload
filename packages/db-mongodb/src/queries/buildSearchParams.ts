@@ -140,6 +140,14 @@ export async function buildSearchParam({
     })
   }
 
+  if (
+    (operator === 'contains' || operator === 'like' || operator === 'not_like') &&
+    (isNestedRelationshipQuery(val) ||
+      (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry))))
+  ) {
+    throw new APIError(`Invalid value for "${operator}" on path "${path}": expected a string.`, 400)
+  }
+
   if (path) {
     const sanitizedQueryValue = sanitizeQueryValue({
       field,

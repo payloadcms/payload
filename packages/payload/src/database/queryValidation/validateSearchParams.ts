@@ -104,6 +104,18 @@ export async function validateSearchParam({
     hasNestedWhere &&
     Boolean(relatedCollectionSlug)
 
+  if (operator === 'like' || operator === 'not_like' || operator === 'contains') {
+    const isLegitimateNestedContains = operator === 'contains' && isNestedHasManyQuery
+    const containsPlainObject =
+      hasNestedWhere ||
+      (Array.isArray(val) && val.some((entry) => isNestedRelationshipQuery(entry)))
+
+    if (containsPlainObject && !isLegitimateNestedContains) {
+      errors.push({ path: incomingPath })
+      return
+    }
+  }
+
   if (isNestedHasManyQuery && relatedCollectionSlug) {
     // Validate the nested query against the related collection.
     promises.push(
