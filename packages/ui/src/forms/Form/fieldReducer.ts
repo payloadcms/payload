@@ -132,6 +132,28 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     /**
+     * Clears all rows from an array or blocks field at once.
+     * `separateRows` strips every `${path}.*` subfield key into the discarded `rows` array, so
+     * nested subfields at any depth are removed automatically - we simply don't re-flatten them.
+     */
+    case 'CLEAR_ROWS': {
+      const { path } = action
+      const { remainingFields } = separateRows(path, state)
+
+      const newState: FormState = {
+        ...remainingFields,
+        [path]: {
+          ...state[path],
+          disableFormData: false,
+          rows: [],
+          value: 0,
+        },
+      }
+
+      return newState
+    }
+
+    /**
      * Duplicates a row in an array or blocks field.
      * It needs to manipulate two distinct parts of the form state:
      *   - The `rows` property of the parent field, e.g. `array.rows`, `blocks.rows`, etc.
