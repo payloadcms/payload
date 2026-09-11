@@ -66,6 +66,8 @@ const response = await fetch('http://localhost:3000/api/pages', {
 
 Payload ensures that the same, uniform [Access Control](../access-control/overview) is used across all authentication strategies. This enables you to utilize your existing Access Control configurations with both API keys and the standard email/password authentication. This consistency can aid in maintaining granular control over your API keys.
 
+If a request with a valid API key receives a `403` response, first check the target collection's Access Control. API key authentication identifies the user and assigns them to `req.user`, but it does not bypass collection-level `read`, `create`, `update`, or `delete` access functions. For example, `GET /api/users` must still pass the `read` access function on the `users` collection for the user that owns the API key.
+
 ### API Key Only Auth
 
 If you want to use API keys as the only authentication method for a collection, you can disable the default local strategy by setting `disableLocalStrategy` to `true` on the collection's `auth` property. This will disable the ability to authenticate with email and password, and will only allow for authentication via API key.
