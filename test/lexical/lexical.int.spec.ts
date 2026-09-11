@@ -13,6 +13,8 @@ import {
   LinkFeature,
   type SerializedBlockNode,
   type SerializedLinkNode,
+  type SerializedListItemNode,
+  type SerializedListNode,
   type SerializedRelationshipNode,
   type SerializedUploadNode,
   UploadFeature,
@@ -22,7 +24,7 @@ import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
 import { expect } from 'vitest'
 
-import type { LexicalField, RichTextField } from './payload-types.js'
+import type { LexicalField, LexicalListsFeature, RichTextField } from './payload-types.js'
 
 // Sync converters
 import {
@@ -44,8 +46,12 @@ import {
   UploadHTMLConverterAsync,
 } from '@payloadcms/richtext-lexical/html-async'
 
-// Diff converter
+import { convertLexicalNodesToHTMLAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/index.js'
+import { convertLexicalNodesToHTML } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/index.js'
+
+// Diff converters
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
+import { ListItemDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/listitem/index.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
@@ -57,6 +63,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
+  lexicalListsFeatureSlug,
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
@@ -124,6 +131,83 @@ test.suite({ config: './config.ts' })('Lexical', () => {
   })
 
   test.describe('basic', () => {
+    test('should reject a REST update with a nonnumeric list item value', async ({
+      payload,
+      restClient,
+    }) => {
+      const listData: NonNullable<LexicalListsFeature['onlyOrderedList']> = {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'list',
+              children: [
+                {
+                  type: 'listitem',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'List item',
+                      version: 1,
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  value: 1,
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              listType: 'number',
+              start: 1,
+              tag: 'ol',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      }
+      const doc = await payload.create({
+        collection: lexicalListsFeatureSlug,
+        data: { onlyOrderedList: listData },
+      })
+      const invalidData = JSON.parse(JSON.stringify(listData))
+
+      invalidData.root.children[0].children[0].value = 'not-a-number'
+
+      const response = await restClient.PATCH(`/${lexicalListsFeatureSlug}/${doc.id}`, {
+        body: JSON.stringify({ onlyOrderedList: invalidData }),
+      })
+      const body = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(body.errors[0].data.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: 'listitem node failed to validate: List item value must be a finite number.',
+            path: 'onlyOrderedList',
+          }),
+        ]),
+      )
+
+      const savedDoc = await payload.findByID({
+        id: doc.id,
+        collection: lexicalListsFeatureSlug,
+      })
+
+      expect(savedDoc.onlyOrderedList).toEqual(listData)
+    })
+
     test('should allow querying on lexical content', async ({ payload }) => {
       const richTextDoc: RichTextField = (
         await payload.find({
@@ -1175,6 +1259,55 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           expect(result).toContain('Cell content')
         })
       })
+    })
+  }
+
+  for (const variant of [
+    { converters: ListHTMLConverter, label: 'Sync', listTypes: ['number', 'check'] },
+    { converters: ListHTMLConverterAsync, label: 'Async', listTypes: ['number', 'check'] },
+    {
+      converters: ListItemDiffHTMLConverterAsync,
+      label: 'Admin version diff',
+      listTypes: ['number'],
+    },
+  ] as const) {
+    test.describe(`List item escaping (${variant.label})`, () => {
+      test.each(variant.listTypes)(
+        'should escape stored malformed values in %s list items',
+        async (listType) => {
+          const storedValue = 'List item " & < >'
+          const node: SerializedListItemNode = {
+            type: 'listitem',
+            children: [],
+            direction: null,
+            format: '',
+            indent: 0,
+            // Older stored content can contain strings despite the numeric type.
+            value: storedValue as unknown as number,
+            version: 1,
+          }
+          const parent: SerializedListNode = {
+            type: 'list',
+            children: [node],
+            direction: null,
+            format: '',
+            indent: 0,
+            listType,
+            start: 1,
+            tag: listType === 'number' ? 'ol' : 'ul',
+            version: 1,
+          }
+          const args = { nodes: [node], parent }
+          const result = (
+            variant.label === 'Sync'
+              ? convertLexicalNodesToHTML({ ...args, converters: variant.converters })
+              : await convertLexicalNodesToHTMLAsync({ ...args, converters: variant.converters })
+          ).join('')
+
+          expect(result).toContain('value="List item &quot; &amp; &lt; &gt;"')
+          expect(result).not.toContain(storedValue)
+        },
+      )
     })
   }
 
