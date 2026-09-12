@@ -1,0 +1,46 @@
+version: 1
+concurrency: 1
+jobs:
+  - id: verify-contract-and-boundaries
+    runtime: internal
+    agent: aki-maker
+    task: fix
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding,pattern (brief) | missing: none
+      Verify the template boundaries, type generation, and import map:
+      1. Run check-boundary script to ensure templates/fullstack does not import test/_community or test suite files.
+      2. Run generate:types and generate:importmap for templates/fullstack.
+      3. Verify the standalone nature of the template vs workspace monorepo package resolution.
+    timeout: 10m
+    expected_output: "Boundary verified, types generated cleanly, and importmap validated."
+
+  - id: run-test-matrix
+    depends_on: [verify-contract-and-boundaries]
+    runtime: internal
+    agent: tester
+    task: test
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding (brief) | missing: none
+      Run the full verification test suite on templates/fullstack:
+      1. Unit tests (tests/template.spec.ts) via vitest.
+      2. ESLint code standards check via eslint.
+      3. Prettier formatting check.
+    timeout: 10m
+    expected_output: "All unit tests, linting, and formatting checks passing cleanly."
+
+  - id: reconcile-and-phase-update
+    depends_on: [run-test-matrix]
+    runtime: internal
+    agent: doc-git-manager
+    task: ship
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,docs (brief) | missing: none
+      Update Phase 4 status and reconcile documentation:
+      1. Update plans/260905-1546-fullstack-template-extraction/phase-04-verification-release.md and plan.md with verified evidence.
+      2. Reconcile README.md and docs/template-guide.md.
+      3. Prepare release readiness report.
+    timeout: 10m
+    expected_output: "Updated phase tracking and verified documentation ready for release."

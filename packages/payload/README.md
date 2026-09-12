@@ -49,6 +49,35 @@ pnpx create-payload-app@latest
 
 **If you're new to Payload, you should start with the website template** (`pnpx create-payload-app@latest -t website`). It shows how to do _everything_ - including custom Rich Text blocks, on-demand revalidation, live preview, and more. It comes with a frontend built with Tailwind all in one `/app` folder.
 
+---
+
+### 🚀 Production-Ready Fullstack Starter Template (`v0.2.0`)
+
+This monorepo comes pre-configured with a complete, end-to-end fullstack template featuring:
+
+- **🎨 Linear / Vercel UI Reskin**: Dark carbon palette (`#08090a`), hairline borders (`#232528`), 6px rounded corners, and subdued status badges across all admin controls (see [`DESIGN.md`](./DESIGN.md)).
+- **🧩 Modular Page Builder Blocks**: Ready-to-use schemas and React Server Components for `Hero`, `FeatureGrid`, and `CallToAction` blocks.
+- **⚡ Next.js 15 App Router Frontend**: Fully typed public post renderer (`/posts/[slug]`) powered by Payload Local API and Server Components.
+- **🛡️ Secure By Default**: Public endpoints filtered to published documents only, preventing draft leakage.
+
+#### Run the Starter Locally:
+
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Start development server (with in-memory MongoDB & seeded layout blocks)
+pnpm run dev
+
+# 3. Open Admin Panel & Public Frontend:
+# Admin:    http://localhost:3000/admin (auto-login enabled)
+# Frontend: http://localhost:3000/posts/example-post
+```
+
+📖 Read the comprehensive [**Template Guide & Architecture Spec**](docs/template-guide.md) for full details on customizing blocks, collections, and styling tokens.
+
+---
+
 ## One-click deployment options
 
 You can deploy Payload serverlessly in one-click via Vercel and Cloudflare—giving everything you need without the hassle of the plumbing.
