@@ -235,13 +235,17 @@ function generateLocaleEntitySchemas(localization: SanitizedConfig['localization
   if (localization && 'locales' in localization && localization?.locales) {
     const localesFromConfig = localization?.locales
 
-    const locales = [...localesFromConfig].map((locale) => {
-      return locale.code
-    }, [])
+    const locales = [...localesFromConfig]
+      .map((locale) => {
+        return typeof locale === 'string' ? locale : locale?.code
+      })
+      .filter((code): code is string => typeof code === 'string' && code.length > 0)
 
-    return {
-      type: 'string',
-      enum: locales,
+    if (locales.length > 0) {
+      return {
+        type: 'string',
+        enum: locales,
+      }
     }
   }
 
@@ -254,18 +258,20 @@ function generateFallbackLocaleEntitySchemas(
   localization: SanitizedConfig['localization'],
 ): JSONSchema4 {
   if (localization && 'localeCodes' in localization && localization?.localeCodes) {
-    const localeCodes = [...localization.localeCodes].map((localeCode) => {
-      return localeCode
-    }, [])
+    const localeCodes = [...localization.localeCodes].filter(
+      (localeCode): localeCode is string => typeof localeCode === 'string' && localeCode.length > 0,
+    )
 
-    return {
-      oneOf: [
-        { type: 'string', enum: ['false', 'none', 'null'] },
-        { type: 'boolean', enum: [false] },
-        { type: 'null' },
-        { type: 'string', enum: localeCodes },
-        { type: 'array', items: { type: 'string', enum: localeCodes } },
-      ],
+    if (localeCodes.length > 0) {
+      return {
+        oneOf: [
+          { type: 'string', enum: ['false', 'none', 'null'] },
+          { type: 'boolean', enum: [false] },
+          { type: 'null' },
+          { type: 'string', enum: localeCodes },
+          { type: 'array', items: { type: 'string', enum: localeCodes } },
+        ],
+      }
     }
   }
 

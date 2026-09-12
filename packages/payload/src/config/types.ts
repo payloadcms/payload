@@ -510,11 +510,15 @@ export type Locale = {
    * label of supported locale
    * @example "English"
    */
-  label: Record<string, string> | string
+  label?: Record<string, string> | string
   /**
    * if true, defaults textAligmnent on text fields to RTL
    */
   rtl?: boolean
+  /**
+   * @deprecated Use `code` instead.
+   */
+  value?: string
 }
 
 export type BaseLocalizationConfig = {
@@ -563,11 +567,11 @@ export type LocalizationConfigWithLabels = Prettify<
      * List of supported locales with labels
      * @example {
      *  label: 'English',
-     *  value: 'en',
+     *  code: 'en',
      *  rtl: false
      * }
      */
-    locales: Locale[]
+    locales: (({ value: string } & Record<string, any>) | Locale)[]
   } & BaseLocalizationConfig
 >
 
@@ -578,7 +582,8 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & LocalizationConfigWithLabels
+    locales: Locale[]
+  } & BaseLocalizationConfig
 >
 
 /**
