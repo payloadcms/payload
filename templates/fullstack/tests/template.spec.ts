@@ -108,6 +108,11 @@ describe('fullstack template boundaries and contracts', () => {
     expect(safeHref('/\\evil.com/path')).toBeNull()
     expect(safeHref('\\\\evil.com')).toBeNull()
     expect(safeHref('\\evil.com')).toBeNull()
+    expect(safeHref('https:\\evil.com')).toBeNull()
+    expect(safeHref('http:\\evil.com')).toBeNull()
+    expect(safeHref('https:/\\evil.com')).toBeNull()
+    expect(safeHref('http:/\\evil.com')).toBeNull()
+    expect(safeHref('https://evil.com\\bypass')).toBeNull()
     expect(safeHref('javascript:alert(1)')).toBeNull()
     expect(safeHref('data:text/html,<script>')).toBeNull()
     expect(safeHref('not a url')).toBeNull()
@@ -118,7 +123,7 @@ describe('fullstack template boundaries and contracts', () => {
   })
 
   it('should not render anchor tags in Hero and CallToAction when link is unsafe', () => {
-    for (const unsafeLink of ['//external.example/evil', '/\\evil.com']) {
+    for (const unsafeLink of ['//external.example/evil', '/\\evil.com', 'https:\\evil.com']) {
       const heroMarkup = renderToStaticMarkup(
         HeroBlockComponent({
           headline: 'Safe Hero',
@@ -229,6 +234,8 @@ describe('fullstack template boundaries and contracts', () => {
       '//external.example/evil',
       '/\\evil.com',
       '\\evil.com',
+      'https:\\evil.com',
+      'https:/\\evil.com',
       'data:text/html,<script>',
       '',
       null,

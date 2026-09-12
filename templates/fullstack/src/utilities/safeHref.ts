@@ -8,8 +8,8 @@ export function safeHref(value: string | null | undefined): string | null {
   const trimmed = value.trim()
   if (!trimmed) return null
 
-  // Reject backslashes or protocol-relative variations (e.g., //, /\, \\)
-  if (trimmed.startsWith('//') || trimmed.startsWith('/\\') || trimmed.startsWith('\\')) {
+  // Reject any string containing backslashes (RFC 3986 violation / open redirect bypass) or protocol-relative slashes
+  if (trimmed.includes('\\') || trimmed.startsWith('//')) {
     return null
   }
 

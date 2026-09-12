@@ -51,30 +51,25 @@ pnpx create-payload-app@latest
 
 ---
 
-### 🚀 Production-Ready Fullstack Starter Template (`v0.2.0`)
+### 🚀 Production-Ready Fullstack Starter Template
 
-This monorepo comes pre-configured with a complete, end-to-end fullstack template featuring:
+This repository includes a canonical fullstack template (`templates/fullstack`) featuring:
 
-- **🎨 Linear / Vercel UI Reskin**: Dark carbon palette (`#08090a`), hairline borders (`#232528`), 6px rounded corners, and subdued status badges across all admin controls (see [`DESIGN.md`](./DESIGN.md)).
+- **🎨 Linear / Vercel UI Design Tokens**: Refined typography, hairline borders, and dark/light system integration.
 - **🧩 Modular Page Builder Blocks**: Ready-to-use schemas and React Server Components for `Hero`, `FeatureGrid`, and `CallToAction` blocks.
-- **⚡ Next.js 15 App Router Frontend**: Fully typed public post renderer (`/posts/[slug]`) powered by Payload Local API and Server Components.
-- **🛡️ Secure By Default**: Public endpoints filtered to published documents only, preventing draft leakage.
+- **⚡ Next.js 16 App Router Frontend**: Fully typed public post renderer (`/posts/[slug]`) powered by Payload Local API and Server Components.
+- **🛡️ Secure By Default**: Public endpoints filtered to published documents only, and URL sanitization rejecting protocol-relative, backslash, and unsafe schemes.
 
 #### Run the Starter Locally:
 
 ```bash
-# 1. Install dependencies
+cd templates/fullstack
+cp .env.example .env
 pnpm install
-
-# 2. Start development server (with in-memory MongoDB & seeded layout blocks)
-pnpm run dev
-
-# 3. Open Admin Panel & Public Frontend:
-# Admin:    http://localhost:3000/admin (auto-login enabled)
-# Frontend: http://localhost:3000/posts/example-post
+pnpm dev
 ```
 
-📖 Read the comprehensive [**Template Guide & Architecture Spec**](docs/template-guide.md) for full details on customizing blocks, collections, and styling tokens.
+📖 Read the comprehensive [**Template Guide**](../../templates/fullstack/README.md) for full details on customizing blocks, collections, and deployment.
 
 ---
 
