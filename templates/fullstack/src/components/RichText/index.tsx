@@ -1,19 +1,9 @@
 import React from 'react'
 import type { LexicalNodes_C9C3FC1A, LexicalRichText } from '../../payload-types.js'
+import { safeHref } from '../../utilities/safeHref.js'
 
 type RichTextNode = LexicalNodes_C9C3FC1A
 export type RichTextData = LexicalRichText<LexicalNodes_C9C3FC1A> | null | undefined
-
-function safeHref(value: string | undefined): string | null {
-  if (!value) return null
-  if (value.startsWith('/')) return value
-  try {
-    const url = new URL(value)
-    return url.protocol === 'http:' || url.protocol === 'https:' ? value : null
-  } catch {
-    return null
-  }
-}
 
 function renderNodes(nodes: RichTextNode[] | undefined): React.ReactNode {
   return (

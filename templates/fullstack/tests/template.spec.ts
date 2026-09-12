@@ -13,7 +13,10 @@ import { Posts } from '../src/collections/Posts/index.js'
 import { Users } from '../src/collections/Users/index.js'
 import { CallToActionBlock } from '../src/blocks/CallToAction.js'
 import { HeroBlock } from '../src/blocks/Hero.js'
+import { CallToActionBlockComponent } from '../src/components/blocks/CallToAction/index.js'
+import { HeroBlockComponent } from '../src/components/blocks/Hero/index.js'
 import { RenderBlocks } from '../src/components/blocks/RenderBlocks.js'
+import { safeHref } from '../src/utilities/safeHref.js'
 
 const execFileAsync = promisify(execFile)
 const templateRoot = path.resolve(import.meta.dirname, '..')
@@ -85,5 +88,42 @@ describe('fullstack template boundaries and contracts', () => {
       expect(requiredLink(value, {} as never)).toMatch(/relative path|HTTP\(S\)/)
     }
     expect(requiredLink('', {} as never)).toBe('A valid link is required.')
+  })
+
+  it('should sanitize URLs via safeHref and reject protocol-relative and unsafe URLs', () => {
+    expect(safeHref('/posts/example')).toBe('/posts/example')
+    expect(safeHref('https://example.com/test')).toBe('https://example.com/test')
+    expect(safeHref('http://localhost:3000')).toBe('http://localhost:3000')
+
+    expect(safeHref('//external.example/attack')).toBeNull()
+    expect(safeHref('javascript:alert(1)')).toBeNull()
+    expect(safeHref('data:text/html,<script>')).toBeNull()
+    expect(safeHref('not a url')).toBeNull()
+    expect(safeHref('')).toBeNull()
+    expect(safeHref('   ')).toBeNull()
+    expect(safeHref(null)).toBeNull()
+    expect(safeHref(undefined)).toBeNull()
+  })
+
+  it('should not render anchor tags in Hero and CallToAction when link is unsafe', () => {
+    const heroMarkup = renderToStaticMarkup(
+      HeroBlockComponent({
+        headline: 'Safe Hero',
+        ctaText: 'Click Me',
+        ctaLink: '//external.example/evil',
+      }),
+    )
+    expect(heroMarkup).not.toContain('<a')
+    expect(heroMarkup).not.toContain('//external.example/evil')
+
+    const ctaMarkup = renderToStaticMarkup(
+      CallToActionBlockComponent({
+        title: 'Safe CTA',
+        buttonText: 'Action',
+        buttonLink: '//external.example/evil',
+      }),
+    )
+    expect(ctaMarkup).not.toContain('<a')
+    expect(ctaMarkup).not.toContain('//external.example/evil')
   })
 })

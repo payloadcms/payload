@@ -1,0 +1,47 @@
+version: 1
+concurrency: 1
+jobs:
+  - id: fix-url-sanitization
+    runtime: internal
+    agent: aki-maker
+    task: fix
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding,pattern (brief) | missing: none
+      Fix URL sanitization in Hero, CallToAction, and RichText:
+      1. Create templates/fullstack/src/utilities/safeHref.ts with robust protocol validation (disallowing //evil.com, javascript:, data:).
+      2. Update Hero/index.tsx and CallToAction/index.tsx to sanitize links via safeHref.
+      3. Update RichText/index.tsx to import and use shared safeHref.
+      4. Add unit test suite for safeHref in templates/fullstack/tests/template.spec.ts.
+    timeout: 10m
+    expected_output: "Shared safeHref utility implemented, applied across all blocks, and verified with unit tests."
+
+  - id: verify-tests-and-formatting
+    depends_on: [fix-url-sanitization]
+    runtime: internal
+    agent: tester
+    task: test
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding (brief) | missing: none
+      Run verification suite on templates/fullstack:
+      1. pnpm --filter fullstack test (unit tests + boundary check).
+      2. pnpm --filter fullstack lint.
+      3. Format importMap.js and check with prettier.
+    timeout: 10m
+    expected_output: "All unit tests, boundary check, and linting passing cleanly."
+
+  - id: reconcile-phase4-status
+    depends_on: [verify-tests-and-formatting]
+    runtime: internal
+    agent: doc-git-manager
+    task: ship
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,docs (brief) | missing: none
+      Reconcile Phase 4 evidence and commit changes:
+      1. Keep Phase 4 status explicitly as Partial in plan.md and phase-04-verification-release.md.
+      2. Document exact standalone verification gap in reports and plan.
+      3. Commit changes with Conventional Commit format.
+    timeout: 10m
+    expected_output: "Phase 4 updated with honest partial status and clean commit recorded."

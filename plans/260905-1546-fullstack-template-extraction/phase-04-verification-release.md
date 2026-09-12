@@ -58,12 +58,13 @@ Prove the template works from a clean install, update documentation to match sup
 
 ## Current Evidence
 
-- Pass: `pnpm --filter fullstack test` (6 unit contract tests and boundary check - run `orchestrate-260912-1825`).
+- Pass: `pnpm --filter fullstack test` (8 unit contract tests including URL sanitization and boundary check - run `orchestrate-260912-1847`).
 - Pass: `pnpm --filter fullstack lint` (clean ESLint run).
 - Pass: `pnpm --filter fullstack exec prettier --check .` (clean formatting).
 - Pass: `pnpm --filter fullstack generate:types` and `generate:importmap`.
 - Pass: `git diff --check`.
-- Verified monorepo boundary: `next build` on templates in the monorepo encounters workspace unbuilt source packages (`@payloadcms/ui`, `@payloadcms/richtext-lexical`), identical to `templates/website` and `templates/blank`. Full template validation for end consumers occurs upon standalone tarball/package generation (`create-payload-app`).
+- Security fix applied: Implemented shared `safeHref` utility in `templates/fullstack/src/utilities/safeHref.ts` to sanitize links across `Hero`, `CallToAction`, and `RichText`, rejecting protocol-relative (`//evil.com`) and unsafe schemes (`javascript:`, `data:`).
+- Status: Retained as `Partial` pending standalone packaging / fresh-install production build evidence outside the monorepo boundary.
 
 ## Risk Assessment
 

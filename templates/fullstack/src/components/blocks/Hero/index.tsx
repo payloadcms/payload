@@ -1,4 +1,5 @@
 import React from 'react'
+import { safeHref } from '../../../utilities/safeHref.js'
 
 export type HeroBlockProps = {
   headline: string
@@ -29,6 +30,7 @@ export function HeroBlockComponent({
   const imageUrl = safeImageUrl(
     typeof backgroundImage === 'object' && backgroundImage ? backgroundImage.url : null,
   )
+  const href = safeHref(ctaLink)
   return (
     <section
       className="block-hero"
@@ -43,8 +45,8 @@ export function HeroBlockComponent({
       <div className="block-hero__inner">
         <h1>{headline}</h1>
         {subheadline ? <p>{subheadline}</p> : null}
-        {ctaText && ctaLink ? (
-          <a className="template-button" href={ctaLink}>
+        {ctaText && href ? (
+          <a className="template-button" href={href}>
             {ctaText}
           </a>
         ) : null}
