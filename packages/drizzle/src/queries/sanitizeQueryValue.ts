@@ -10,6 +10,7 @@ import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { isRawConstraint } from '../utilities/rawConstraint.js'
+import { UnmatchableValue } from '../utilities/unmatchableValue.js'
 
 type SanitizeQueryValueArgs = {
   adapter: DrizzleAdapter
@@ -97,16 +98,41 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if (field.type === 'number' && typeof formattedValue === 'string') {
-    formattedValue = Number(val)
+  // Only `equals`/`not_equals` are reported as unmatchable, because they are the only operators
+  // parseParams compiles to IS NULL / IS NOT NULL when the value is null - the conflation this
+  // fixes. Every other operator keeps coercing to null as before, so the pre-existing failure
+  // modes stay exactly as they were: `contains` against a native uuid column, for instance,
+  // still surfaces Postgres' own "cannot ILIKE a uuid" error rather than quietly matching
+  // nothing. Returning early keeps the symbol out of the branches below, which inspect the
+  // value.
+  const reportsUnmatchable = operator === 'equals' || operator === 'not_equals'
 
-    if (Number.isNaN(formattedValue)) {
+  if (field.type === 'number' && typeof formattedValue === 'string') {
+    if (val === 'null') {
       formattedValue = null
+    } else {
+      formattedValue = Number(val)
+
+      if (Number.isNaN(formattedValue)) {
+        if (reportsUnmatchable) {
+          return { operator, value: UnmatchableValue }
+        }
+
+        formattedValue = null
+      }
     }
   }
 
   if (isUUID && typeof formattedValue === 'string') {
-    if (!uuidValidate(val)) {
+    // `'null'` and `''` are how a null check arrives as a query string, as the date branch
+    // above also reads them.
+    if (val === 'null' || val === '') {
+      formattedValue = null
+    } else if (!uuidValidate(val)) {
+      if (reportsUnmatchable) {
+        return { operator, value: UnmatchableValue }
+      }
+
       formattedValue = null
     }
   }
