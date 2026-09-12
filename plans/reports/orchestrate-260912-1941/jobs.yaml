@@ -1,0 +1,46 @@
+﻿version: 1
+concurrency: 1
+jobs:
+  - id: smoke-test-standalone
+    runtime: internal
+    agent: tester
+    task: test
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding (brief) | missing: none
+      Verify template standalone integrity and create-payload-app template mapping:
+      1. Run node templates/fullstack/scripts/verify-standalone.mjs
+      2. Verify packages/create-payload-app/src/lib/templates.ts exports fullstack correctly
+      3. Verify boundary check passes
+    timeout: 5m
+    expected_output: "Standalone verification script and boundary check pass with exit code 0."
+
+  - id: enhance-fullstack-readme
+    depends_on: [smoke-test-standalone]
+    runtime: internal
+    agent: docs-specialist
+    task: implement
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,docs (brief) | missing: none
+      Enhance templates/fullstack/README.md to match official template standards:
+      1. Detail collections (Users, Posts, Categories, Media)
+      2. Detail layout blocks (Hero, FeatureGrid, CallToAction) and Menu global
+      3. Document local setup, environment variables (.env.example), and development workflow
+    timeout: 5m
+    expected_output: "Comprehensive and professional templates/fullstack/README.md matching official starter standards."
+
+  - id: pre-release-readiness-audit
+    depends_on: [enhance-fullstack-readme]
+    runtime: internal
+    agent: arbiter
+    task: review
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,release,coding (brief) | missing: none
+      Perform full pre-release readiness audit:
+      1. Run fullstack test suite (12 unit tests + boundary check)
+      2. Verify git log for last commits has NO AI model trailers (Rule 5/B4)
+      3. Verify code formatting and linting
+    timeout: 5m
+    expected_output: "Pre-release audit passes all checks."

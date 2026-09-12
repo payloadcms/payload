@@ -1,0 +1,25 @@
+﻿{
+  "run_id": "orchestrate-260912-1941",
+  "status": "completed",
+  "current_stage": 3,
+  "jobs": {
+    "smoke-test-standalone": {
+      "status": "success",
+      "runtime": "internal",
+      "agent": "tester",
+      "durationMs": 3000
+    },
+    "enhance-fullstack-readme": {
+      "status": "success",
+      "runtime": "internal",
+      "agent": "docs-specialist",
+      "durationMs": 4000
+    },
+    "pre-release-readiness-audit": {
+      "status": "success",
+      "runtime": "internal",
+      "agent": "arbiter",
+      "durationMs": 8000
+    }
+  }
+}
