@@ -1,0 +1,51 @@
+{
+  "name": "fullstack",
+  "version": "1.0.0",
+  "description": "A Payload fullstack starter with posts, categories, media, and modular page blocks",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation payload build",
+    "check:boundary": "node scripts/check-boundary.mjs",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "test": "pnpm run test:unit && pnpm run check:boundary",
+    "test:unit": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@payloadcms/db-mongodb": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "cross-env": "10.1.0",
+    "next": "16.3.3",
+    "payload": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sharp": "0.34.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.12.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "16.3.3",
+    "typescript": "catalog:",
+    "vitest": "4.1.6"
+  },
+  "engines": {
+    "node": ">=24.15.0",
+    "pnpm": "^9 || ^10 || ^11"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
+}

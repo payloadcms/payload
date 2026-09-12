@@ -1,0 +1,91 @@
+:root {
+  --template-bg: #08090a;
+  --template-surface: #101113;
+  --template-surface-muted: #16181d;
+  --template-text: #f7f8f8;
+  --template-text-muted: #8a8f98;
+  --template-border: #232528;
+  --template-border-strong: #282a2e;
+  --template-brand: #5e6ad2;
+  --template-space-2: 8px;
+  --template-space-3: 16px;
+  --template-space-4: 24px;
+  --template-space-5: 32px;
+  --template-space-6: 40px;
+  --template-space-8: 64px;
+  --template-space-10: 80px;
+  --template-radius: 6px;
+  --template-content-width: 1100px;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--template-bg);
+  color: var(--template-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+a {
+  color: inherit;
+}
+.template-post__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--template-space-3);
+  padding: var(--template-space-3) var(--template-space-4);
+  border-block-end: 1px solid var(--template-border);
+}
+.template-post__back {
+  color: var(--template-text-muted);
+  font-size: 13px;
+  text-decoration: none;
+}
+.template-post__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--template-space-2);
+  justify-content: end;
+}
+.template-post__tag {
+  padding: 3px var(--template-space-2);
+  border: 1px solid var(--template-border-strong);
+  border-radius: 4px;
+  color: var(--template-text-muted);
+  font-size: 12px;
+}
+.template-post__intro {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--template-space-10) var(--template-space-4) var(--template-space-4);
+  text-align: center;
+}
+.template-post__intro h1 {
+  margin: 0 0 var(--template-space-3);
+  font-size: 42px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.template-post__meta {
+  color: #62666d;
+  font-size: 14px;
+}
+.template-post__content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--template-space-8) var(--template-space-4);
+  color: var(--template-text-muted);
+  line-height: 1.7;
+}
+.template-post__content :is(h1, h2, h3, h4) {
+  color: var(--template-text);
+}
+.template-post__content img {
+  max-width: 100%;
+  height: auto;
+}
+.layout-blocks {
+  margin-block-start: var(--template-space-4);
+}
