@@ -1,0 +1,48 @@
+version: 1
+concurrency: 1
+jobs:
+  - id: optimize-richtext-and-expand-coverage
+    runtime: internal
+    agent: aki-maker
+    task: fix
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding,pattern (brief) | missing: none
+      Optimize RichText link handling and expand component tests:
+      1. In templates/fullstack/src/components/RichText/index.tsx, compute safeHref once and gracefully fallback to rendering children if link is unsafe.
+      2. In templates/fullstack/tests/template.spec.ts, add comprehensive test cases:
+         - Hero and CTA render <a> when href is valid (/internal, https://).
+         - Hero and CTA hide <a> for javascript:, data:, null, and empty string.
+         - RichText renders <a> for valid links and fallback children for unsafe links.
+      3. Verify with pnpm --filter fullstack test.
+    timeout: 10m
+    expected_output: "Optimized RichText and expanded component test suite passing 100%."
+
+  - id: verify-lint-and-prettier
+    depends_on: [optimize-richtext-and-expand-coverage]
+    runtime: internal
+    agent: tester
+    task: test
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding (brief) | missing: none
+      Run linting and style verification:
+      1. pnpm --filter fullstack lint.
+      2. pnpm --filter fullstack exec prettier --check .
+    timeout: 5m
+    expected_output: "Zero lint errors and clean prettier formatting."
+
+  - id: commit-and-reconcile-report
+    depends_on: [verify-lint-and-prettier]
+    runtime: internal
+    agent: doc-git-manager
+    task: ship
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,docs (brief) | missing: none
+      Document results and commit changes:
+      1. Update phase-04-verification-release.md with expanded test evidence.
+      2. Write orchestrate report.md.
+      3. Create conventional commit.
+    timeout: 10m
+    expected_output: "Clean conventional commit and updated report."

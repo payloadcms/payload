@@ -19,17 +19,21 @@ function renderNodes(nodes: RichTextNode[] | undefined): React.ReactNode {
         if (node.format & 16) formatted = <code>{formatted}</code>
         return <React.Fragment key={index}>{formatted}</React.Fragment>
       }
-      if ((node.type === 'link' || node.type === 'autolink') && safeHref(node.fields.url)) {
-        return (
-          <a
-            key={index}
-            href={safeHref(node.fields.url)!}
-            target={node.fields.newTab ? '_blank' : undefined}
-            rel={node.fields.newTab ? 'noopener noreferrer' : undefined}
-          >
-            {children}
-          </a>
-        )
+      if (node.type === 'link' || node.type === 'autolink') {
+        const href = safeHref(node.fields.url)
+        if (href) {
+          return (
+            <a
+              key={index}
+              href={href}
+              target={node.fields.newTab ? '_blank' : undefined}
+              rel={node.fields.newTab ? 'noopener noreferrer' : undefined}
+            >
+              {children}
+            </a>
+          )
+        }
+        return <React.Fragment key={index}>{children}</React.Fragment>
       }
       if (node.type === 'heading' && /^h[1-6]$/.test(node.tag ?? ''))
         return React.createElement(node.tag!, { key: index }, children)

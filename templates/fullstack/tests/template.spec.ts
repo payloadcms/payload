@@ -16,6 +16,7 @@ import { HeroBlock } from '../src/blocks/Hero.js'
 import { CallToActionBlockComponent } from '../src/components/blocks/CallToAction/index.js'
 import { HeroBlockComponent } from '../src/components/blocks/Hero/index.js'
 import { RenderBlocks } from '../src/components/blocks/RenderBlocks.js'
+import { RichText } from '../src/components/RichText/index.js'
 import { safeHref } from '../src/utilities/safeHref.js'
 
 const execFileAsync = promisify(execFile)
@@ -125,5 +126,84 @@ describe('fullstack template boundaries and contracts', () => {
     )
     expect(ctaMarkup).not.toContain('<a')
     expect(ctaMarkup).not.toContain('//external.example/evil')
+  })
+
+  it('should render anchor tags with valid href in Hero and CallToAction', () => {
+    const heroMarkup = renderToStaticMarkup(
+      HeroBlockComponent({
+        headline: 'Hero Title',
+        ctaText: 'Explore',
+        ctaLink: '/posts/first-post',
+      }),
+    )
+    expect(heroMarkup).toContain('<a class="template-button" href="/posts/first-post">Explore</a>')
+
+    const ctaMarkup = renderToStaticMarkup(
+      CallToActionBlockComponent({
+        title: 'CTA Title',
+        buttonText: 'Join Now',
+        buttonLink: 'https://payloadcms.com',
+      }),
+    )
+    expect(ctaMarkup).toContain(
+      '<a class="template-button" href="https://payloadcms.com">Join Now</a>',
+    )
+  })
+
+  it('should hide anchor tags in Hero and CallToAction for javascript:, data:, empty, and null', () => {
+    for (const badLink of ['javascript:alert(1)', 'data:text/html,<script>', '', null]) {
+      const hero = renderToStaticMarkup(
+        HeroBlockComponent({
+          headline: 'Hero',
+          ctaText: 'Button',
+          ctaLink: badLink,
+        }),
+      )
+      expect(hero).not.toContain('<a')
+
+      const cta = renderToStaticMarkup(
+        CallToActionBlockComponent({
+          title: 'CTA',
+          buttonText: 'Button',
+          buttonLink: badLink as string,
+        }),
+      )
+      expect(cta).not.toContain('<a')
+    }
+  })
+
+  it('should sanitize links and preserve fallback content in RichText', () => {
+    const validData = {
+      root: {
+        children: [
+          {
+            type: 'link' as const,
+            version: 1,
+            fields: { url: '/safe-link', newTab: false, linkType: 'custom' as const },
+            children: [{ type: 'text' as const, version: 1, text: 'Click Here', format: 0 }],
+          },
+        ],
+      },
+    }
+    const validMarkup = renderToStaticMarkup(RichText({ data: validData as never }))
+    expect(validMarkup).toContain('<a href="/safe-link"')
+    expect(validMarkup).toContain('Click Here')
+
+    const unsafeData = {
+      root: {
+        children: [
+          {
+            type: 'link' as const,
+            version: 1,
+            fields: { url: 'javascript:alert(1)', newTab: false, linkType: 'custom' as const },
+            children: [{ type: 'text' as const, version: 1, text: 'Malicious Link', format: 0 }],
+          },
+        ],
+      },
+    }
+    const unsafeMarkup = renderToStaticMarkup(RichText({ data: unsafeData as never }))
+    expect(unsafeMarkup).not.toContain('<a')
+    expect(unsafeMarkup).not.toContain('javascript:')
+    expect(unsafeMarkup).toContain('Malicious Link')
   })
 })

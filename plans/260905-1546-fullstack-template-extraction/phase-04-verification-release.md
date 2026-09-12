@@ -58,12 +58,12 @@ Prove the template works from a clean install, update documentation to match sup
 
 ## Current Evidence
 
-- Pass: `pnpm --filter fullstack test` (8 unit contract tests including URL sanitization and boundary check - run `orchestrate-260912-1847`).
-- Pass: `pnpm --filter fullstack lint` (clean ESLint run).
+- Pass: `pnpm --filter fullstack test` (11 unit contract tests including comprehensive URL sanitization, block components, RichText fallback, and boundary check - run `orchestrate-260912-1857`).
+- Pass: `pnpm --filter fullstack lint` (clean ESLint run, 0 errors).
 - Pass: `pnpm --filter fullstack exec prettier --check .` (clean formatting).
 - Pass: `pnpm --filter fullstack generate:types` and `generate:importmap`.
 - Pass: `git diff --check`.
-- Security fix applied: Implemented shared `safeHref` utility in `templates/fullstack/src/utilities/safeHref.ts` to sanitize links across `Hero`, `CallToAction`, and `RichText`, rejecting protocol-relative (`//evil.com`) and unsafe schemes (`javascript:`, `data:`).
+- Security & quality fixes: Refactored `RichText` link parsing to eliminate duplicate `safeHref` calls and preserve text content on invalid links. Added test suites directly validating `Hero`, `CallToAction`, and `RichText` DOM markup against valid, protocol-relative, `javascript:`, `data:`, empty, and null URLs.
 - Status: Retained as `Partial` pending standalone packaging / fresh-install production build evidence outside the monorepo boundary.
 
 ## Risk Assessment
