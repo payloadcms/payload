@@ -41,10 +41,10 @@ The template organizes data models, layout blocks, and frontend views into clean
 
 ### Collections
 
-- **Users (`src/collections/Users.ts`)**: Auth-enabled collection managing administrator credentials and access control for the Payload admin panel.
-- **Posts (`src/collections/Posts.ts`)**: Editorial collection supporting draft/published workflow, categories, author relationships, slugs, and modular block layouts.
-- **Categories (`src/collections/Categories.ts`)**: Taxonomy collection for organizing and filtering editorial posts.
-- **Media (`src/collections/Media.ts`)**: Uploads collection for static assets with responsive image sizes and focal point selection.
+- **Users (`src/collections/Users/index.ts`)**: Auth-enabled collection managing administrator credentials and access control for the Payload admin panel.
+- **Posts (`src/collections/Posts/index.ts`)**: Editorial collection supporting draft/published workflow, categories, author relationships, slugs, and modular block layouts.
+- **Categories (`src/collections/Categories/index.ts`)**: Taxonomy collection for organizing and filtering editorial posts.
+- **Media (`src/collections/Media/index.ts`)**: Uploads collection for static assets with responsive image sizes and focal point selection.
 
 ### Layout Blocks
 
@@ -54,7 +54,7 @@ The template organizes data models, layout blocks, and frontend views into clean
 
 ### Globals & Components
 
-- **Menu (`src/globals/Menu.ts`)**: Site-wide navigation global configuring header navigation items and destinations.
+- **Menu (`src/globals/Menu/index.ts`)**: Site-wide navigation global configuring header navigation items and destinations.
 - **RichText (`src/components/RichText`)**: Lexical-powered rich text renderer with integrated URL sanitization (`safeHref`) protecting against protocol-relative, `javascript:`, and malformed URIs.
 
 ---

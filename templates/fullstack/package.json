@@ -4,6 +4,14 @@
   "description": "A Payload fullstack starter with posts, categories, media, and modular page blocks",
   "license": "MIT",
   "type": "module",
+  "files": [
+    "src",
+    "public",
+    ".env.example",
+    "next.config.ts",
+    "tsconfig.json",
+    "README.md"
+  ],
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation payload build",
     "check:boundary": "node scripts/check-boundary.mjs",
@@ -26,7 +34,7 @@
     "payload": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "sharp": "0.34.2"
+    "sharp": "0.35.4"
   },
   "devDependencies": {
     "@types/node": "24.12.3",

@@ -104,6 +104,10 @@ describe('fullstack template boundaries and contracts', () => {
     expect(safeHref('http://localhost:3000')).toBe('http://localhost:3000')
 
     expect(safeHref('//external.example/attack')).toBeNull()
+    expect(safeHref('/\\evil.com')).toBeNull()
+    expect(safeHref('/\\evil.com/path')).toBeNull()
+    expect(safeHref('\\\\evil.com')).toBeNull()
+    expect(safeHref('\\evil.com')).toBeNull()
     expect(safeHref('javascript:alert(1)')).toBeNull()
     expect(safeHref('data:text/html,<script>')).toBeNull()
     expect(safeHref('not a url')).toBeNull()
@@ -114,25 +118,27 @@ describe('fullstack template boundaries and contracts', () => {
   })
 
   it('should not render anchor tags in Hero and CallToAction when link is unsafe', () => {
-    const heroMarkup = renderToStaticMarkup(
-      HeroBlockComponent({
-        headline: 'Safe Hero',
-        ctaText: 'Click Me',
-        ctaLink: '//external.example/evil',
-      }),
-    )
-    expect(heroMarkup).not.toContain('<a')
-    expect(heroMarkup).not.toContain('//external.example/evil')
+    for (const unsafeLink of ['//external.example/evil', '/\\evil.com']) {
+      const heroMarkup = renderToStaticMarkup(
+        HeroBlockComponent({
+          headline: 'Safe Hero',
+          ctaText: 'Click Me',
+          ctaLink: unsafeLink,
+        }),
+      )
+      expect(heroMarkup).not.toContain('<a')
+      expect(heroMarkup).not.toContain(unsafeLink)
 
-    const ctaMarkup = renderToStaticMarkup(
-      CallToActionBlockComponent({
-        title: 'Safe CTA',
-        buttonText: 'Action',
-        buttonLink: '//external.example/evil',
-      }),
-    )
-    expect(ctaMarkup).not.toContain('<a')
-    expect(ctaMarkup).not.toContain('//external.example/evil')
+      const ctaMarkup = renderToStaticMarkup(
+        CallToActionBlockComponent({
+          title: 'Safe CTA',
+          buttonText: 'Action',
+          buttonLink: unsafeLink,
+        }),
+      )
+      expect(ctaMarkup).not.toContain('<a')
+      expect(ctaMarkup).not.toContain(unsafeLink)
+    }
   })
 
   it('should render anchor tags with valid href in Hero and CallToAction', () => {
@@ -221,6 +227,8 @@ describe('fullstack template boundaries and contracts', () => {
     for (const badUrl of [
       'javascript:alert(1)',
       '//external.example/evil',
+      '/\\evil.com',
+      '\\evil.com',
       'data:text/html,<script>',
       '',
       null,

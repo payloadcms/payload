@@ -8,11 +8,21 @@ export function safeHref(value: string | null | undefined): string | null {
   const trimmed = value.trim()
   if (!trimmed) return null
 
-  // Reject protocol-relative URLs
-  if (trimmed.startsWith('//')) return null
+  // Reject backslashes or protocol-relative variations (e.g., //, /\, \\)
+  if (trimmed.startsWith('//') || trimmed.startsWith('/\\') || trimmed.startsWith('\\')) {
+    return null
+  }
 
-  // Allow internal relative paths
-  if (trimmed.startsWith('/')) return trimmed
+  // Validate internal relative paths
+  if (trimmed.startsWith('/')) {
+    try {
+      const parsed = new URL(trimmed, 'http://localhost')
+      if (parsed.origin !== 'http://localhost') return null
+      return trimmed
+    } catch {
+      return null
+    }
+  }
 
   // Validate absolute URLs
   try {
