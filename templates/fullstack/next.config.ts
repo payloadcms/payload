@@ -24,8 +24,7 @@ const nextConfig = {
     localPatterns: [{ pathname: '/api/media/file/**' }],
   },
   reactStrictMode: true,
-  // Include the pnpm workspace store in Turbopack's filesystem boundary.
-  turbopack: { root: path.resolve(dirname, '../..') },
+  turbopack: { root: path.resolve(dirname) },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

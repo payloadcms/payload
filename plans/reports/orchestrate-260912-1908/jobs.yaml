@@ -1,0 +1,42 @@
+version: 1
+concurrency: 1
+jobs:
+  - id: expand-richtext-coverage
+    runtime: internal
+    agent: aki-maker
+    task: test
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding (brief) | missing: none
+      Add exhaustive edge-case test coverage for RichText links in template.spec.ts:
+      1. HTTPS links with newTab and rel="noopener noreferrer".
+      2. Protocol-relative, data, empty, and null URLs.
+    timeout: 5m
+    expected_output: "12/12 unit tests passing."
+
+  - id: standalone-verification-and-registry
+    depends_on: [expand-richtext-coverage]
+    runtime: internal
+    agent: tester
+    task: implement
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,coding,docs (brief) | missing: none
+      Implement standalone verification and register starter in create-payload-app:
+      1. Create templates/fullstack/scripts/verify-standalone.mjs.
+      2. Fix next.config.ts Turbopack root to path.resolve(dirname).
+      3. Register fullstack starter in packages/create-payload-app/src/lib/templates.ts.
+    timeout: 10m
+    expected_output: "Standalone integrity verified and template registered in create-payload-app."
+
+  - id: finalize-phase4-and-ship
+    depends_on: [standalone-verification-and-registry]
+    runtime: internal
+    agent: doc-git-manager
+    task: ship
+    cwd: F:/payload-monorepo-template
+    prompt: |
+      [RULES] agent,docs (brief) | missing: none
+      Finalize Phase 4 status to Completed and create conventional commit.
+    timeout: 5m
+    expected_output: "Phase 4 marked Completed with full verification evidence."

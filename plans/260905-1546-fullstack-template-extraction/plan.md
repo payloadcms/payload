@@ -31,16 +31,16 @@ Extract the current `app/` + `test/_community/` fullstack prototype into a canon
 | 1   | [Phase 1: Schema and Template Boundary](./phase-01-start.md)            | Completed |
 | 2   | [Phase 2: Frontend Extraction](./phase-02-frontend-extraction.md)       | Completed |
 | 3   | [Phase 3: Security Defaults](./phase-03-security-defaults.md)           | Completed |
-| 4   | [Phase 4: Verification and Release](./phase-04-verification-release.md) | Partial   |
+| 4   | [Phase 4: Verification and Release](./phase-04-verification-release.md) | Completed |
 
 ## Success Criteria
 
-- [ ] A fresh `templates/fullstack` install boots independently without importing `test/_community`.
-- [ ] `posts`, `categories`, `media`, `hero`, `featureGrid`, and `callToAction` contracts remain compatible.
-- [ ] Public pages expose published content only; drafts and unknown slugs return 404.
-- [ ] Authenticated admin writes work; unauthenticated destructive collection operations do not.
-- [ ] Unit, integration, E2E, production-build, and fresh-template smoke tests pass.
-- [ ] README and template guide document the same supported versions and commands.
+- [x] A fresh `templates/fullstack` install boots independently without importing `test/_community`.
+- [x] `posts`, `categories`, `media`, `hero`, `featureGrid`, and `callToAction` contracts remain compatible.
+- [x] Public pages expose published content only; drafts and unknown slugs return 404.
+- [x] Authenticated admin writes work; unauthenticated destructive collection operations do not.
+- [x] Unit, integration, E2E, production-build, and fresh-template smoke tests pass.
+- [x] README and template guide document the same supported versions and commands.
 
 ## Data Flow
 

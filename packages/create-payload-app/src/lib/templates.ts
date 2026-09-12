@@ -40,6 +40,13 @@ export function getValidTemplates(): ProjectTemplate[] {
       url: 'https://github.com/payloadcms/payload/templates/ecommerce#main',
     },
     {
+      name: 'fullstack',
+      type: 'starter',
+      description:
+        'Fullstack Starter Template with posts, categories, media, and modular layout blocks',
+      url: 'https://github.com/payloadcms/payload/templates/fullstack#main',
+    },
+    {
       name: 'with-cloudflare-d1',
       type: 'starter',
       dbType: 'd1-sqlite',

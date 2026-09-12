@@ -41,6 +41,13 @@ describe('fullstack template boundaries and contracts', () => {
     expect(stdout).toContain('Template boundary check passed.')
   })
 
+  it('should pass standalone integrity check without monorepo coupling', async () => {
+    const { stdout } = await execFileAsync(process.execPath, ['scripts/verify-standalone.mjs'], {
+      cwd: templateRoot,
+    })
+    expect(stdout).toContain('Fullstack Template Standalone Integrity Verified Successfully')
+  })
+
   it('should allow destructive access only to administrators', () => {
     expect(adminOnly(request())).toBe(false)
     expect(adminOnly(request({ role: 'editor' }))).toBe(false)
@@ -189,21 +196,53 @@ describe('fullstack template boundaries and contracts', () => {
     expect(validMarkup).toContain('<a href="/safe-link"')
     expect(validMarkup).toContain('Click Here')
 
-    const unsafeData = {
+    const httpsData = {
       root: {
         children: [
           {
             type: 'link' as const,
             version: 1,
-            fields: { url: 'javascript:alert(1)', newTab: false, linkType: 'custom' as const },
-            children: [{ type: 'text' as const, version: 1, text: 'Malicious Link', format: 0 }],
+            fields: {
+              url: 'https://payloadcms.com/docs',
+              newTab: true,
+              linkType: 'custom' as const,
+            },
+            children: [{ type: 'text' as const, version: 1, text: 'Documentation', format: 0 }],
           },
         ],
       },
     }
-    const unsafeMarkup = renderToStaticMarkup(RichText({ data: unsafeData as never }))
-    expect(unsafeMarkup).not.toContain('<a')
-    expect(unsafeMarkup).not.toContain('javascript:')
-    expect(unsafeMarkup).toContain('Malicious Link')
+    const httpsMarkup = renderToStaticMarkup(RichText({ data: httpsData as never }))
+    expect(httpsMarkup).toContain('<a href="https://payloadcms.com/docs"')
+    expect(httpsMarkup).toContain('target="_blank"')
+    expect(httpsMarkup).toContain('rel="noopener noreferrer"')
+    expect(httpsMarkup).toContain('Documentation')
+
+    for (const badUrl of [
+      'javascript:alert(1)',
+      '//external.example/evil',
+      'data:text/html,<script>',
+      '',
+      null,
+      undefined,
+    ]) {
+      const unsafeData = {
+        root: {
+          children: [
+            {
+              type: 'link' as const,
+              version: 1,
+              fields: { url: badUrl, newTab: false, linkType: 'custom' as const },
+              children: [
+                { type: 'text' as const, version: 1, text: 'Fallback Content', format: 0 },
+              ],
+            },
+          ],
+        },
+      }
+      const unsafeMarkup = renderToStaticMarkup(RichText({ data: unsafeData as never }))
+      expect(unsafeMarkup).not.toContain('<a')
+      expect(unsafeMarkup).toContain('Fallback Content')
+    }
   })
 })

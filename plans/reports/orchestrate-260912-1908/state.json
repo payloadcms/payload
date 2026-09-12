@@ -1,0 +1,23 @@
+{
+  "runId": "orchestrate-260912-1908",
+  "startedAt": "2026-09-12T19:08:00+07:00",
+  "completedAt": "2026-09-12T19:09:00+07:00",
+  "status": "completed",
+  "jobs": {
+    "expand-richtext-coverage": {
+      "status": "completed",
+      "exitCode": 0,
+      "durationMs": 8000
+    },
+    "standalone-verification-and-registry": {
+      "status": "completed",
+      "exitCode": 0,
+      "durationMs": 12000
+    },
+    "finalize-phase4-and-ship": {
+      "status": "completed",
+      "exitCode": 0,
+      "durationMs": 5000
+    }
+  }
+}
