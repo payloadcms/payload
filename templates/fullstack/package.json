@@ -22,6 +22,7 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:unit && pnpm run check:boundary",
+    "test:e2e": "playwright test --config=playwright.config.ts",
     "test:unit": "cross-env NODE_OPTIONS=--no-deprecation NODE_NO_WARNINGS=1 vitest run --config vitest.config.ts"
   },
   "dependencies": {
@@ -37,6 +38,7 @@
     "sharp": "0.35.4"
   },
   "devDependencies": {
+    "@playwright/test": "1.59.1",
     "@types/node": "24.12.3",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
