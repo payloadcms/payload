@@ -5,7 +5,11 @@ import path from 'path'
 import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import { fileURLToPath } from 'url'
 
-const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): string => `import {
+const migrationTemplate = ({
+  downSQL,
+  imports,
+  upSQL,
+}: MigrationTemplateArgs): string => `import type {
   MigrateDownArgs,
   MigrateUpArgs,
 } from '@payloadcms/db-mongodb'
