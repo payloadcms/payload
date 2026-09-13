@@ -5,12 +5,12 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 
-import { Categories } from './collections/Categories/index.js'
-import { Media } from './collections/Media/index.js'
-import { Posts } from './collections/Posts/index.js'
-import { Users } from './collections/Users/index.js'
-import { Menu } from './globals/Menu/index.js'
-import { adminOnly, authenticated } from './access/index.js'
+import { Categories } from './collections/Categories'
+import { Media } from './collections/Media'
+import { Posts } from './collections/Posts'
+import { Users } from './collections/Users'
+import { Menu } from './globals/Menu'
+import { adminOnly, authenticated } from './access'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

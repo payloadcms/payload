@@ -1,7 +1,7 @@
 import React from 'react'
-import { CallToActionBlockComponent, type CallToActionBlockProps } from './CallToAction/index.js'
-import { FeatureGridBlockComponent, type FeatureGridBlockProps } from './FeatureGrid/index.js'
-import { HeroBlockComponent, type HeroBlockProps } from './Hero/index.js'
+import { CallToActionBlockComponent, type CallToActionBlockProps } from './CallToAction'
+import { FeatureGridBlockComponent, type FeatureGridBlockProps } from './FeatureGrid'
+import { HeroBlockComponent, type HeroBlockProps } from './Hero'
 
 export type LayoutBlock =
   | (HeroBlockProps & { blockType: 'hero'; id?: string | null })

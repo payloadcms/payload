@@ -1,10 +1,10 @@
 import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { CallToActionBlock, FeatureGridBlock, HeroBlock } from '../../blocks/index.js'
-import { adminOnly, authenticatedOrPublished } from '../../access/index.js'
-import { categoriesSlug } from '../Categories/index.js'
-import { mediaSlug } from '../Media/index.js'
+import { CallToActionBlock, FeatureGridBlock, HeroBlock } from '../../blocks'
+import { adminOnly, authenticatedOrPublished } from '../../access'
+import { categoriesSlug } from '../Categories'
+import { mediaSlug } from '../Media'
 
 export const postsSlug = 'posts'
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { safeHref } from '../../../utilities/safeHref.js'
+import { safeHref } from '../../../utilities/safeHref'
 
 export type HeroBlockProps = {
   headline: string

@@ -82,6 +82,11 @@ function checkNoMonorepoCoupling(dir) {
         console.error(`FAIL: Coupled monorepo import found in ${path.relative(templateRoot, full)}`)
         process.exit(1)
       }
+      const jsImportMatch = content.match(/from\s+['"]\.[^'"]*?\.js['"]/g)
+      if (jsImportMatch && !jsImportMatch.every((m) => m.includes('importMap.js'))) {
+        console.error(`FAIL: Relative .js import found in ${path.relative(templateRoot, full)} - Next.js bundler requires extensionless imports`)
+        process.exit(1)
+      }
     }
   }
 }

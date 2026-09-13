@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
-import { adminOnly, authenticated } from '../../access/index.js'
+import { adminOnly, authenticated } from '../../access'
 
 export const menuSlug = 'menu'
 

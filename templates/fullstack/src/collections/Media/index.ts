@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminOnly, authenticated } from '../../access/index.js'
+import { adminOnly, authenticated } from '../../access'
 
 export const mediaSlug = 'media'
 

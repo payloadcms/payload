@@ -1,2 +1,2 @@
-export { RenderBlocks } from './RenderBlocks.js'
-export type { LayoutBlock } from './RenderBlocks.js'
+export { RenderBlocks } from './RenderBlocks'
+export type { LayoutBlock } from './RenderBlocks'

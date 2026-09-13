@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import { mediaSlug } from '../collections/Media/index.js'
+import { mediaSlug } from '../collections/Media'
 
 export const HeroBlock: Block = {
   slug: 'hero',

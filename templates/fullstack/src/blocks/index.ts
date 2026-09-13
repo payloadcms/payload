@@ -1,3 +1,3 @@
-export { CallToActionBlock } from './CallToAction.js'
-export { FeatureGridBlock } from './FeatureGrid.js'
-export { HeroBlock } from './Hero.js'
+export { CallToActionBlock } from './CallToAction'
+export { FeatureGridBlock } from './FeatureGrid'
+export { HeroBlock } from './Hero'

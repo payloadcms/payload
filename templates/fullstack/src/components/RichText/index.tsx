@@ -1,6 +1,6 @@
 import React from 'react'
-import type { LexicalNodes_C9C3FC1A, LexicalRichText } from '../../payload-types.js'
-import { safeHref } from '../../utilities/safeHref.js'
+import type { LexicalNodes_C9C3FC1A, LexicalRichText } from '../../payload-types'
+import { safeHref } from '../../utilities/safeHref'
 
 type RichTextNode = LexicalNodes_C9C3FC1A
 export type RichTextData = LexicalRichText<LexicalNodes_C9C3FC1A> | null | undefined
