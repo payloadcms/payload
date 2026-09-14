@@ -37,8 +37,6 @@ export async function resolveSignedURLKey({
   req,
   useCompositePrefixes = false,
 }: Args) {
-  // Sanitize with the same helper generateFileData uses for the DB filename so the storage key
-  // and doc.filename stay in sync (#16694).
   const sanitizedFilename = await getSafeFileName({
     collectionSlug,
     desiredFilename: getSanitizedUploadFilename(filename),
