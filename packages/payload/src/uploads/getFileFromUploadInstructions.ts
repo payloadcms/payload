@@ -14,6 +14,7 @@ import type { SanitizedUploadConfig, UploadEdits, UploadInstructions } from './t
 import { APIError } from '../errors/APIError.js'
 import { sanitizeFilename } from '../utilities/sanitizeFilename.js'
 import { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
+import { verifyClientUploadReceipt } from './clientUploadReceipt.js'
 import { docWithFilenameExists } from './docWithFilenameExists.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
@@ -50,6 +51,29 @@ export const getFileFromUploadInstructions = async ({
     return getStagedFile({ collectionSlug, req, uploadReference: file.uploadReference })
   }
 
+  const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
+  let allowOverwrite = false
+
+  if (uploadConfig?.uploadInstructions?.requiresUploadReceipt) {
+    const signedReceipt =
+      'signedReceipt' in file.uploadReference ? file.uploadReference.signedReceipt : undefined
+    const receipt = verifyClientUploadReceipt({
+      collectionSlug,
+      filename: file.filename,
+      req,
+      signedReceipt,
+    })
+    allowOverwrite = receipt.allowOverwrite === true
+    file = {
+      ...file,
+      uploadReference: {
+        _objectKey: receipt._objectKey,
+        prefix: receipt.filePrefix,
+        signedReceipt,
+      },
+    }
+  }
+
   const prefix =
     'prefix' in file.uploadReference && typeof file.uploadReference.prefix === 'string'
       ? file.uploadReference.prefix
@@ -74,19 +98,18 @@ export const getFileFromUploadInstructions = async ({
   // new object identity; existing top-level and generated filenames already belong to another
   // document and must continue through that document's read access checks.
   if (
-    await docWithFilenameExists({
+    !allowOverwrite &&
+    (await docWithFilenameExists({
       collectionSlug,
       filename: file.filename,
       matchAnyPrefix: true,
       path: '',
       prefix,
       req,
-    })
+    }))
   ) {
     throw new APIError('Invalid upload reference.', 400)
   }
-
-  const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
   if (!uploadConfig || !uploadConfig.handlers) {
     throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
@@ -122,6 +145,8 @@ export const getFileFromUploadInstructions = async ({
   const response = await fetchUploadResponse({ collectionSlug, file, req, uploadConfig })
 
   const tempFilePath = await streamResponseToTempFile({ req, response })
+  req.context ??= {}
+  req.context._payloadClientUploadTempFile = true
 
   return {
     name: file.filename,

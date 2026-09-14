@@ -48,6 +48,7 @@ export function createGcsAdapter({
         getStorageClient,
         useCompositePrefixes,
       }),
+      requiresUploadReceipt: true,
       useInAdmin: true,
     },
 
@@ -79,13 +80,14 @@ export function createGcsAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { doc, headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         bucket,
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,

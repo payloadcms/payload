@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
     fileKey: 'reference-1.png',
     sanitizedDocPrefix: '',
     sanitizedFilename: 'reference-1.png',
+    uploadReference: { prefix: '', signedReceipt: 'upload-receipt' },
   })),
 }))
 
@@ -51,11 +52,12 @@ const generateInstructions = async ({ hasOwner }: { hasOwner: boolean }) => {
       find: vi.fn(async () => ({
         docs: hasOwner ? [{ filename: 'reference.png', id: 1 }] : [],
       })),
+      secret: 'secret',
     },
     t: vi.fn(),
   } as unknown as PayloadRequest
 
-  return generatedAdapter.uploadInstructions.generate({
+  return generatedAdapter.uploadInstructions?.generate({
     collectionSlug: 'media',
     filename: 'reference.png',
     filesize: 100,

@@ -10,6 +10,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getFileFromUploadInstructions } from './getFileFromUploadInstructions.js'
 
+vi.mock('./clientUploadReceipt.js', () => ({
+  verifyClientUploadReceipt: vi.fn(({ signedReceipt }: { signedReceipt: unknown }) => {
+    if (typeof signedReceipt !== 'string') {
+      throw new Error('Invalid upload reference.')
+    }
+    return JSON.parse(signedReceipt)
+  }),
+}))
+
 // A minimal valid 1x1 transparent PNG, small enough that a header-only fetch gets all of it.
 const MINIMAL_PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
@@ -29,6 +38,7 @@ const createReq = (
             upload: {
               disableLocalStorage: true,
               handlers,
+              uploadInstructions: { requiresUploadReceipt: true },
               ...uploadConfigOverrides,
             },
           },
@@ -49,14 +59,27 @@ const createReq = (
 
 const createUploadReferenceFile = (
   overrides: Partial<UploadInstructions['file']> = {},
-): UploadInstructions['file'] =>
-  ({
+): UploadInstructions['file'] => {
+  const filename = overrides.filename ?? 'video.mp4'
+  const uploadReference = overrides.uploadReference ?? {}
+  const prefix = typeof uploadReference.prefix === 'string' ? uploadReference.prefix : ''
+  const fileKey = prefix ? `${prefix}/${filename}` : `media/${filename}`
+  return {
     filename: 'video.mp4',
     mimeType: 'video/mp4',
     size: 18,
-    uploadReference: { key: 'media/video.mp4' },
     ...overrides,
-  }) as UploadInstructions['file']
+    uploadReference: {
+      ...uploadReference,
+      signedReceipt: JSON.stringify({
+        collectionSlug: 'media',
+        fileKey,
+        filePrefix: prefix,
+        filename,
+      }),
+    },
+  } as UploadInstructions['file']
+}
 
 describe('getFileFromUploadInstructions', () => {
   const tempFilesToClean: string[] = []
@@ -100,7 +123,10 @@ describe('getFileFromUploadInstructions', () => {
 
     expect(file.data.length).toBe(0)
     expect(fs.readFileSync(file.tempFilePath!, 'utf8')).toBe('some file contents')
-    expect(file.uploadReference).toBe(uploadReferenceFile.uploadReference)
+    expect(file.uploadReference).toEqual({
+      prefix: '',
+      signedReceipt: expect.any(String),
+    })
     expect(file.mimetype).toBe('video/mp4')
     expect(arrayBufferTripwire).not.toHaveBeenCalled()
   })
@@ -136,12 +162,56 @@ describe('getFileFromUploadInstructions', () => {
     ).rejects.toThrow()
   })
 
-  it('rejects an upload reference that matches an existing generated filename', async () => {
+  it('should require receipts only when configured by the upload adapter', async () => {
+    const customHandler = vi.fn(
+      async () =>
+        new Response(MINIMAL_PNG, {
+          headers: { 'Content-Type': 'image/png' },
+          status: 200,
+        }),
+    )
+    const customReq = createReq([customHandler], {
+      imageSizes: [{ height: 100, name: 'preview', width: 100 }],
+      mimeTypes: ['image/*'],
+      uploadInstructions: undefined,
+    })
+
+    const customFile = await getFileFromUploadInstructions({
+      collectionSlug: 'media',
+      file: {
+        filename: 'reference.png',
+        mimeType: 'image/png',
+        size: MINIMAL_PNG.length,
+        uploadReference: { prefix: '' },
+      },
+      req: customReq,
+    })
+
+    tempFilesToClean.push(customFile.tempFilePath!)
+    expect(customHandler).toHaveBeenCalled()
+
     const handler = vi.fn(async () => new Response('existing file', { status: 200 }))
     const req = createReq([handler], {
       imageSizes: [{ height: 100, name: 'preview', width: 100 }],
       mimeTypes: ['image/*'],
     })
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: {
+          filename: 'reference.png',
+          mimeType: 'image/png',
+          size: 18,
+          uploadReference: { prefix: 'private' },
+        },
+        req,
+      }),
+    ).rejects.toThrow('Invalid upload reference.')
+
+    expect(handler).not.toHaveBeenCalled()
+    expect(req.payload.db.findOne).not.toHaveBeenCalled()
+
     vi.mocked(req.payload.db.findOne).mockResolvedValueOnce({ id: 'existing' })
 
     await expect(
@@ -167,6 +237,24 @@ describe('getFileFromUploadInstructions', () => {
         },
       }),
     )
+
+    const overwriteReq = createReq([handler])
+    vi.mocked(overwriteReq.payload.db.findOne).mockResolvedValueOnce({ id: 'existing' })
+    const overwriteFile = createUploadReferenceFile()
+    overwriteFile.uploadReference.signedReceipt = JSON.stringify({
+      ...JSON.parse(overwriteFile.uploadReference.signedReceipt as string),
+      allowOverwrite: true,
+    })
+
+    await expect(
+      getFileFromUploadInstructions({
+        collectionSlug: 'media',
+        file: overwriteFile,
+        req: overwriteReq,
+      }),
+    ).resolves.toMatchObject({ name: 'video.mp4' })
+
+    expect(overwriteReq.payload.db.findOne).not.toHaveBeenCalled()
   })
 
   it.each([

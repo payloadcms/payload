@@ -7,7 +7,7 @@ import type {
 import { getFileKey, resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
 import { Forbidden } from 'payload'
-import { assertClientUploadAllowed } from 'payload/internal'
+import { assertClientUploadAllowed, createClientUploadReceipt } from 'payload/internal'
 
 import type { VercelBlobCollectionSource } from './authorizeFileOverwrite.js'
 
@@ -80,7 +80,20 @@ export function createVercelBlobAdapter({
           requestedCollectionSlug: collectionSlug,
         })
         const resolved = allowOverwrite
-          ? requested
+          ? {
+              ...requested,
+              uploadReference: {
+                prefix: requested.sanitizedDocPrefix,
+                signedReceipt: createClientUploadReceipt({
+                  allowOverwrite: true,
+                  collectionSlug,
+                  fileKey: requested.fileKey,
+                  filename: requested.sanitizedFilename,
+                  filePrefix: requested.sanitizedDocPrefix,
+                  req,
+                }),
+              },
+            }
           : await resolveSignedURLKey({
               collectionPrefix: prefix,
               collectionSlug,
@@ -96,7 +109,7 @@ export function createVercelBlobAdapter({
           data: {
             pathname: resolved.fileKey,
             token: await generateClientTokenFromReadWriteToken({
-              addRandomSuffix,
+              addRandomSuffix: false,
               allowedContentTypes: mimeType ? [mimeType] : undefined,
               ...(allowOverwrite && { allowOverwrite: true }),
               cacheControlMaxAge,
@@ -109,10 +122,11 @@ export function createVercelBlobAdapter({
             filename: resolved.sanitizedFilename,
             mimeType,
             size: filesize,
-            uploadReference: { prefix: resolved.sanitizedDocPrefix },
+            uploadReference: resolved.uploadReference,
           },
         }
       },
+      requiresUploadReceipt: true,
       useInAdmin: true,
     },
 
@@ -158,13 +172,14 @@ export function createVercelBlobAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { doc, headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,

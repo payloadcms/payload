@@ -5,10 +5,26 @@ import { deepMergeWithSourceArrays } from 'payload'
 import type { GeneratedAdapter } from '../types.js'
 
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
+import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
 
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
+}
+
+// The object's folder: semantic prefix + `_objectKey` segment.
+const getObjectFolder = (data: unknown): string => {
+  const record = (data ?? {}) as Record<string, unknown>
+  const safePrefix = sanitizePrefix(typeof record.prefix === 'string' ? record.prefix : '')
+  const safeObjectKey = sanitizePrefix(
+    typeof record._objectKey === 'string' ? record._objectKey : '',
+  )
+
+  if (safePrefix && safeObjectKey) {
+    return `${safePrefix}/${safeObjectKey}`
+  }
+
+  return safePrefix || safeObjectKey
 }
 
 export const getAfterChangeHook =
@@ -29,13 +45,16 @@ export const getAfterChangeHook =
       const files = getIncomingFiles({ data: uploadData, req })
 
       if (files.length > 0) {
+        // Fold `_objectKey` so generated sizes land in the same folder as the original.
+        const dataForUpload = { ...uploadData, prefix: getObjectFolder(uploadData) }
+
         const uploadResults = await Promise.all(
           files
             .filter((file) => !file.uploadReference)
             .map((file) =>
               adapter.handleUpload({
                 collection,
-                data: uploadData,
+                data: dataForUpload,
                 file,
                 req,
               }),
@@ -51,6 +70,10 @@ export const getAfterChangeHook =
             (acc, metadata) => ({ ...acc, ...metadata }),
             {} as Partial<FileData & TypeWithID>,
           )
+
+        // Adapters may echo `data` back as metadata; keep the document's own `prefix`/`_objectKey`.
+        delete (uploadMetadata as Record<string, unknown>).prefix
+        delete (uploadMetadata as Record<string, unknown>)._objectKey
 
         let docWithMetadata = doc
 

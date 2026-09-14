@@ -2,9 +2,23 @@ import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID 
 
 import type { GeneratedAdapter, TypeWithPrefix } from '../types.js'
 
+import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
+
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
+}
+
+// Fold `_objectKey` into the prefix so deletes target the real object folder.
+const withObjectFolder = <T extends { _objectKey?: unknown } & TypeWithPrefix>(doc: T): T => {
+  const safePrefix = sanitizePrefix(typeof doc.prefix === 'string' ? doc.prefix : '')
+  const safeObjectKey = sanitizePrefix(typeof doc._objectKey === 'string' ? doc._objectKey : '')
+
+  if (!safeObjectKey) {
+    return doc
+  }
+
+  return { ...doc, prefix: safePrefix ? `${safePrefix}/${safeObjectKey}` : safeObjectKey }
 }
 
 export const getAfterDeleteHook = ({
@@ -13,6 +27,8 @@ export const getAfterDeleteHook = ({
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
   return async ({ doc, req }) => {
     try {
+      const docForDelete = withObjectFolder(doc)
+
       const filesToDelete: string[] = [
         doc.filename,
         ...Object.values(doc?.sizes || []).map(
@@ -22,7 +38,7 @@ export const getAfterDeleteHook = ({
 
       const promises = filesToDelete.map(async (filename) => {
         if (filename) {
-          await adapter.handleDelete({ collection, doc, filename, req })
+          await adapter.handleDelete({ collection, doc: docForDelete, filename, req })
         }
       })
 

@@ -22,6 +22,17 @@ export interface File {
 
 export type ClientUploadsConfig = { access?: UploadInstructionsAccess } | boolean
 
+/**
+ * Reference to a client-uploaded object, returned by an upload handler and
+ * submitted with the document. Always carries the signed receipt; `prefix`
+ * locates the stored object.
+ */
+export type UploadReference = {
+  _objectKey?: string
+  prefix: string
+  signedReceipt: `${string}.${string}`
+}
+
 export type HandleUpload = (args: {
   collection: CollectionConfig
   data: any

@@ -50,6 +50,7 @@ export function createR2Adapter({
         uploadReference: {},
       },
     }),
+    requiresUploadReceipt: true,
     useInAdmin: true,
   }
 
@@ -79,11 +80,12 @@ export function createR2Adapter({
 
     staticHandler: (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { doc, headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         bucket,
         collection,
+        doc,
         filename,
         incomingHeaders: headers,
         prefix,

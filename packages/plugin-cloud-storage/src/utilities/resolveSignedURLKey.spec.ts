@@ -1,9 +1,10 @@
-import { getSafeFileName } from 'payload/internal'
+import { createClientUploadReceipt, getSafeFileName } from 'payload/internal'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { resolveSignedURLKey } from './resolveSignedURLKey.js'
 
 vi.mock('payload/internal', () => ({
+  createClientUploadReceipt: vi.fn(() => 'receipt'),
   getSafeFileName: vi.fn(async ({ desiredFilename }) => desiredFilename),
 }))
 
@@ -18,7 +19,7 @@ describe('resolveSignedURLKey', () => {
     const result = await resolveSignedURLKey({
       collectionPrefix: 'media',
       collectionSlug: 'uploads',
-      filename: 'nested/photo.png',
+      filename: 'nested\\folder/photo.png',
       req: {} as never,
     })
 
@@ -27,10 +28,23 @@ describe('resolveSignedURLKey', () => {
       desiredFilename: 'photo.png',
       req: {},
     })
+    expect(createClientUploadReceipt).toHaveBeenCalledWith({
+      _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+      collectionSlug: 'uploads',
+      fileKey: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1\.png$/),
+      filePrefix: 'media',
+      filename: 'photo-1.png',
+      req: {},
+    })
     expect(result).toEqual({
-      fileKey: 'media/photo-1.png',
-      sanitizedDocPrefix: '',
+      fileKey: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1\.png$/),
+      sanitizedDocPrefix: 'media',
       sanitizedFilename: 'photo-1.png',
+      uploadReference: {
+        _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+        prefix: 'media',
+        signedReceipt: 'receipt',
+      },
     })
   })
 })

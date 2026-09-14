@@ -1158,6 +1158,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             ...query,
             multipartId: upload.uploadId,
             multipartKey: upload.key,
+            signedReceipt: upload.uploadReference.signedReceipt,
           }
           const multipartURL = `${endpoint}?${new URLSearchParams(multipartQuery)}` as const
           const part = await restClient.POST(`${multipartURL}&multipartNumber=1`, {

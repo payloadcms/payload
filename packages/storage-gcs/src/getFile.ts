@@ -1,5 +1,5 @@
 import type { Storage } from '@google-cloud/storage'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import { ApiError } from '@google-cloud/storage'
 import {
@@ -13,6 +13,7 @@ interface GetFileArgs {
   client: Storage
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
@@ -26,6 +27,7 @@ export async function getFile({
   client,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
   prefixQueryParam,
@@ -36,6 +38,7 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      doc,
       filename,
       prefixQueryParam,
       req,

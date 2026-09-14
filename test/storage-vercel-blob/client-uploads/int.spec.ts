@@ -54,12 +54,19 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob clientUpl
     const instructions = (await instructionsResponse.json()) as VercelBlobUploadInstructions
     expect(instructions.type).toBe('dispatch')
     expect(instructions.name).toBe('uploadToVercelBlob')
-    expect(instructions.file).toEqual({
-      uploadReference: { prefix: '' },
-      filename: 'image.png',
+    expect(instructions.file).toMatchObject({
       mimeType: 'image/png',
       size: file.length,
+      uploadReference: {
+        _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+        prefix: '',
+        signedReceipt: expect.any(String),
+      },
     })
+    expect(instructions.file.filename).toBe('image.png')
+    expect(instructions.data.pathname).toBe(
+      `${(instructions.file.uploadReference as { _objectKey: string })._objectKey}/${instructions.file.filename}`,
+    )
 
     const result = await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
@@ -68,10 +75,10 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob clientUpl
     })
 
     expect(result.url).toBeDefined()
-    expect(result.url).toContain('image.png')
+    expect(result.url).toContain(instructions.file.filename)
 
     const { blobs } = await list()
-    const uploaded = blobs.find((b) => b.pathname === 'image.png')
+    const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
     expect(uploaded).toBeDefined()
   })
 
@@ -115,10 +122,10 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob clientUpl
 
     expect(result.url).toBeDefined()
     expect(result.url).toContain(prefix)
-    expect(result.url).toContain('image.png')
+    expect(result.url).toContain(instructions.file.filename)
 
     const { blobs } = await list()
-    const uploaded = blobs.find((b) => b.pathname === `${prefix}/image.png`)
+    const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
     expect(uploaded).toBeDefined()
   })
 })

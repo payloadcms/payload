@@ -192,7 +192,7 @@ describe('generateFileData', () => {
         mimetype: 'image/png',
         name: 'photo.png',
         size: fullFileSize,
-        uploadReference: { key: 'media/photo.png' },
+        uploadReference: { prefix: 'media' },
       },
       payload: {
         config: { sharp },

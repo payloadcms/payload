@@ -71,7 +71,11 @@ describe('generateUploadInstructions', () => {
         req: createRequest(true),
       }),
     ).resolves.toMatchObject({
-      file: { filename: 'reference.png', mimeType: 'image/png', size: 1 },
+      file: {
+        filename: 'reference.png',
+        mimeType: 'image/png',
+        size: 1,
+      },
       name: 'uploadToAzure',
       type: 'dispatch',
     })

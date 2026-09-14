@@ -88,7 +88,8 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
   /**
    * When a doc with the same filename already exists, the upload-instructions
-   * endpoint should sanitize the filename (e.g. `duplicate-target-1.png`) so the
+   * endpoint dedupes the filename (duplicate-target-1.png) and issues an
+   * prefixed key (e.g. `<uuid>/duplicate-target-1.png`) so the
    * browser SDK upload lands on a fresh blob instead of overwriting the existing one.
    */
   test('sanitizes the filename when a duplicate already exists', async ({
@@ -121,7 +122,11 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     const instructions = (await signedURLRes.json()) as UploadInstructions
     expect(instructions.type).toBe('dispatch')
     expect(instructions.file).toEqual({
-      uploadReference: { prefix: '' },
+      uploadReference: {
+        _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+        prefix: '',
+        signedReceipt: expect.any(String),
+      },
       filename: 'duplicate-target-1.png',
       mimeType: 'image/png',
       size: fileBuffer.length,
@@ -138,7 +143,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
     )
 
-    expect(blobKey).toBe('duplicate-target-1.png')
+    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1\.png$/)
 
     await payload.delete({ id: seedDoc.id, collection: mediaSlug })
   })

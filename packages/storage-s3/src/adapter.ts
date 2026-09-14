@@ -52,6 +52,7 @@ export function createS3Adapter({
         getStorageClient,
         useCompositePrefixes,
       }),
+      requiresUploadReceipt: true,
       useInAdmin: true,
     },
 
@@ -89,7 +90,7 @@ export function createS3Adapter({
 
     staticHandler: async (
       req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
+      { doc, headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) => {
       const { getFile } = await import('./getFile.js')
       return getFile({
@@ -97,6 +98,7 @@ export function createS3Adapter({
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,

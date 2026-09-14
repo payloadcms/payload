@@ -7,6 +7,10 @@ export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export { assertClientUploadAllowed } from '../uploads/assertClientUploadAllowed.js'
+export {
+  createClientUploadReceipt,
+  verifyClientUploadReceipt,
+} from '../uploads/clientUploadReceipt.js'
 export { downloadFileToBuffer } from '../uploads/downloadFileToBuffer.js'
 export { getUploadInstructions } from '../uploads/endpoints/uploadInstructions.js'
 export { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'

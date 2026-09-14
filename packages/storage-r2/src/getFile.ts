@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import {
   getFilePrefix as getDocPrefix,
@@ -11,6 +11,7 @@ import type { R2Bucket } from './types.js'
 interface GetFileArgs {
   bucket: R2Bucket
   collection: CollectionConfig
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
   prefix: string
@@ -25,6 +26,7 @@ const isMiniflare = process.env.NODE_ENV === 'development'
 export async function getFile({
   bucket,
   collection,
+  doc,
   filename,
   incomingHeaders,
   prefix = '',
@@ -36,6 +38,7 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      doc,
       filename,
       prefixQueryParam,
       req,

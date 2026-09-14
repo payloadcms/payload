@@ -33,30 +33,35 @@ export const getExternalUploadSource = (data: unknown): ExternalUploadSource | u
   }
 }
 
-export const getUploadDestinationPrefix = (
-  data: unknown,
-  file: { uploadReference?: unknown } | null | undefined,
-): string | undefined => {
+// Resolves the server-owned upload destination for a document write. For provider uploads the
+// prefix and key segment come from the verified upload reference; for server uploads (including
+// staged uploads) the prefix falls back to the submitted document data and there is no key segment.
+export const getUploadDestination = ({
+  data,
+  file,
+}: {
+  data: unknown
+  file: { uploadReference?: unknown } | null | undefined
+}): { objectKey?: string; prefix?: string } => {
   if (!file) {
-    return undefined
+    return {}
   }
 
   const submittedPrefix =
     isRecord(data) && typeof data.prefix === 'string' ? data.prefix : undefined
   const { uploadReference } = file
 
-  if (!isRecord(uploadReference)) {
-    return submittedPrefix
+  // A staged upload only identifies server-owned temporary bytes, so its final destination still
+  // comes from the accompanying document data, the same as a plain server upload.
+  if (!isRecord(uploadReference) || 'uploadId' in uploadReference) {
+    return { prefix: submittedPrefix }
   }
 
-  // Provider uploads are already written to the destination encoded in their reference. A
-  // staged upload only identifies server-owned temporary bytes, so its final destination still
-  // comes from the accompanying document data.
-  if ('uploadId' in uploadReference) {
-    return submittedPrefix
+  return {
+    objectKey:
+      typeof uploadReference._objectKey === 'string' ? uploadReference._objectKey : undefined,
+    prefix: typeof uploadReference.prefix === 'string' ? uploadReference.prefix : undefined,
   }
-
-  return typeof uploadReference.prefix === 'string' ? uploadReference.prefix : undefined
 }
 
 const getDocumentProperty = (
@@ -121,11 +126,10 @@ export const sanitizeUploadData = <T>(data: T, operation: Operation): T => {
   delete sanitizedData.filename
   delete sanitizedData.sizes
   delete sanitizedData.url
+  // Server-owned; never accepted from the caller.
+  delete sanitizedData._objectKey
 
-  // On update, `prefix` is treated as file identity and restored from the stored document, so a
-  // collection that exposes a user-editable field named `prefix` cannot have it changed by an
-  // untrusted caller. The update operations restore a file-bound destination only when the same
-  // request also writes a new file. Kept on create, where the caller chooses the namespace.
+  // On update, `prefix` is restored from the stored document (file identity); kept on create.
   if (operation === 'update') {
     delete sanitizedData.prefix
   }
@@ -150,7 +154,7 @@ export const mergeUploadDataWithDocument = <T>(
 
   const mergedData: Record<string, unknown> = { ...data }
 
-  for (const property of ['filename', 'prefix', 'url']) {
+  for (const property of ['_objectKey', 'filename', 'prefix', 'url']) {
     if (!hasOwnProperty(data, property) && hasOwnProperty(document, property)) {
       mergedData[property] = getDocumentProperty(document, property, options)
     }
@@ -176,6 +180,7 @@ export const mergeUploadDataWithDocument = <T>(
 }
 
 const uploadDerivedProperties = [
+  '_objectKey',
   'filename',
   'filesize',
   'focalX',

@@ -260,6 +260,7 @@ export const generateFileData = async <T>({
         withMetadata: withMetadata!,
       })
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
+      delete file.uploadReference
       ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!)
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
@@ -369,6 +370,8 @@ export const generateFileData = async <T>({
         fileData.filesize = info.size
       }
 
+      delete file.uploadReference
+      delete fileForResize.uploadReference
       if (file.tempFilePath) {
         await fs.writeFile(file.tempFilePath, croppedImage)
       } else {

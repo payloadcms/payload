@@ -42,7 +42,7 @@ export const generateUploadInstructions = ({
       filename,
       mimeType,
     })
-    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
+    const { fileKey, sanitizedFilename, uploadReference } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,
       docPrefix,
@@ -68,7 +68,7 @@ export const generateUploadInstructions = ({
         filename: sanitizedFilename,
         mimeType,
         size: filesize,
-        uploadReference: { prefix: sanitizedDocPrefix },
+        uploadReference,
       },
       request: {
         headers: {

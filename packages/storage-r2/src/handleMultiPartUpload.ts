@@ -2,10 +2,14 @@ import type { PayloadHandler, UploadInstructionsAccess } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
+import {
+  assertClientUploadAccess,
+  assertClientUploadAllowed,
+  verifyClientUploadReceipt,
+} from 'payload/internal'
 
 import type { R2StorageOptions } from './index.js'
-import type { R2Bucket, R2StorageMultipartUploadHandlerParams } from './types.js'
+import type { R2Bucket, R2StorageMultipartUploadHandlerParams, R2UploadedPart } from './types.js'
 
 type Args = {
   access?: UploadInstructionsAccess
@@ -39,27 +43,28 @@ export const getHandleMultiPartUpload =
       mimeType: filetype,
     })
 
-    const collectionPrefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
-    const { fileKey, sanitizedFilename } = await resolveSignedURLKey({
-      collectionPrefix,
-      collectionSlug,
-      docPrefix: params.docPrefix ?? undefined,
-      filename: params.fileName,
-      req,
-      useCompositePrefixes,
-    })
-
     const multipartId = params.multipartId
     const multipartKey = params.multipartKey
     const multipartNumber = parseInt(params.multipartNumber || '')
+    const collectionPrefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
 
     if (multipartId && multipartKey) {
+      const receipt = verifyClientUploadReceipt({
+        collectionSlug,
+        req,
+        signedReceipt: params.signedReceipt,
+      })
+      // The receipt binds the full storage key (including the per-upload _objectKey segment), so
+      // compare against it directly rather than recomputing from prefix + filename.
+      if (receipt.fileKey !== multipartKey) {
+        throw new APIError('Invalid upload reference.', 400)
+      }
       const multipartUpload = bucket.resumeMultipartUpload(multipartKey, multipartId)
       const request = req as Request
 
       if (isNaN(multipartNumber)) {
         // Upload complete
-        const object = await multipartUpload.complete((await request.json()) as any)
+        const object = await multipartUpload.complete((await request.json()) as R2UploadedPart[])
         return new Response(object.key, { status: 200 })
       } else {
         // Upload part
@@ -70,11 +75,20 @@ export const getHandleMultiPartUpload =
         return Response.json(uploadedPart)
       }
     } else {
+      const { fileKey, sanitizedFilename, uploadReference } = await resolveSignedURLKey({
+        collectionPrefix,
+        collectionSlug,
+        docPrefix: params.docPrefix ?? undefined,
+        filename: params.fileName,
+        req,
+        useCompositePrefixes,
+      })
       const existing = await bucket.head(fileKey)
       if (existing) {
         return new Response('Object already exists', { status: 412 })
       }
 
+      // Create multipart upload
       const multipartUpload = await bucket.createMultipartUpload(fileKey, {
         httpMetadata: {
           contentType: filetype,
@@ -85,6 +99,7 @@ export const getHandleMultiPartUpload =
         filename: sanitizedFilename,
         key: multipartUpload.key,
         uploadId: multipartUpload.uploadId,
+        uploadReference,
       })
     }
   }

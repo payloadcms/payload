@@ -4,6 +4,15 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { addDataAndFileToRequest } from './addDataAndFileToRequest.js'
 
+vi.mock('../uploads/clientUploadReceipt.js', () => ({
+  verifyClientUploadReceipt: vi.fn(({ signedReceipt }: { signedReceipt: unknown }) => {
+    if (typeof signedReceipt !== 'string') {
+      throw new Error('Invalid upload reference.')
+    }
+    return JSON.parse(signedReceipt)
+  }),
+}))
+
 type MinimalReq = Pick<PayloadRequest, 'body' | 'headers' | 'method' | 'payload'> & {
   file?: PayloadRequest['file']
   routeParams?: PayloadRequest['routeParams']
@@ -59,6 +68,12 @@ describe('addDataAndFileToRequest', () => {
         size: 11,
         uploadReference: {
           key: 'example.txt',
+          signedReceipt: JSON.stringify({
+            collectionSlug: 'public-media',
+            fileKey: 'example.txt',
+            filePrefix: '',
+            filename: 'example.txt',
+          }),
         },
       }),
     )

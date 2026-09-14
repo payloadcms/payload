@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getExternalUploadSource,
   getLocalizedUploadProperties,
-  getUploadDestinationPrefix,
+  getUploadDestination,
   mergeUploadDataWithDocument,
   restoreUploadDataFromDocument,
   sanitizeUploadData,
@@ -63,29 +63,34 @@ describe('sanitizeUploadData', () => {
   })
 
   it('should use a submitted prefix when writing a new file', () => {
-    expect(getUploadDestinationPrefix({ prefix: 'articles' }, {})).toBe('articles')
+    expect(getUploadDestination({ data: { prefix: 'articles' }, file: {} })).toEqual({
+      prefix: 'articles',
+    })
     expect(
-      getUploadDestinationPrefix({ prefix: 'articles' }, { uploadReference: { uploadId: '1' } }),
-    ).toBe('articles')
+      getUploadDestination({
+        data: { prefix: 'articles' },
+        file: { uploadReference: { uploadId: '1' } },
+      }),
+    ).toEqual({ prefix: 'articles' })
   })
 
   it('should use the destination bound to a provider upload reference', () => {
     expect(
-      getUploadDestinationPrefix(
-        { prefix: 'submitted' },
-        { uploadReference: { prefix: 'provider' } },
-      ),
-    ).toBe('provider')
+      getUploadDestination({
+        data: { prefix: 'submitted' },
+        file: { uploadReference: { _objectKey: 'abc123', prefix: 'provider' } },
+      }),
+    ).toEqual({ objectKey: 'abc123', prefix: 'provider' })
     expect(
-      getUploadDestinationPrefix(
-        { prefix: 'submitted' },
-        { uploadReference: { key: 'provider/file.png' } },
-      ),
-    ).toBeUndefined()
+      getUploadDestination({
+        data: { prefix: 'submitted' },
+        file: { uploadReference: { signedReceipt: 'provider-receipt' } },
+      }),
+    ).toEqual({})
   })
 
   it('should not preserve a submitted prefix without a new file', () => {
-    expect(getUploadDestinationPrefix({ prefix: 'articles' }, undefined)).toBeUndefined()
+    expect(getUploadDestination({ data: { prefix: 'articles' }, file: undefined })).toEqual({})
   })
 
   it.each([

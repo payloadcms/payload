@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import { getFilePrefix as getDocPrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
@@ -11,6 +11,7 @@ interface GetFileArgs {
   cacheControlMaxAge: number
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
@@ -25,6 +26,7 @@ export async function getFile({
   cacheControlMaxAge,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
   prefixQueryParam,
@@ -36,6 +38,7 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      doc,
       filename,
       prefixQueryParam,
       req,

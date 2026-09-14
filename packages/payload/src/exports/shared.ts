@@ -112,7 +112,10 @@ export {
 } from '../types/constants.js'
 export type { HasManyRelationshipOperator } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
-export { uploadRequiresServerValidation } from '../uploads/getFileTypeIdentity.js'
+export {
+  getSanitizedUploadFilename,
+  uploadRequiresServerValidation,
+} from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'

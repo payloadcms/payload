@@ -54,7 +54,11 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
       filename: 'image.png',
       mimeType: 'image/png',
       size: file.length,
-      uploadReference: { prefix: '' },
+      uploadReference: {
+        _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+        prefix: '',
+        signedReceipt: expect.any(String),
+      },
     })
 
     if (instructions.type !== 'http') {
@@ -88,7 +92,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     const res = await getAWSClient()
       .headObject({
         Bucket: getTestBucketName(),
-        Key: 'image.png',
+        Key: decodeURIComponent(new URL(url).pathname.split('/').slice(2).join('/')),
       })
       .catch((e) => {
         console.error(e)
@@ -131,7 +135,9 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
 
     const stored = await getAWSClient().getObject({
       Bucket: getTestBucketName(),
-      Key: 'protected.png',
+      Key: decodeURIComponent(
+        new URL(instructions.request.url).pathname.split('/').slice(2).join('/'),
+      ),
     })
     expect(Buffer.from(await stored.Body!.transformToByteArray())).toEqual(file)
   })
@@ -392,6 +398,27 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
       expect(url).toContain('safe-image.png')
+    })
+
+    // Regression for #16694: trailing dots are stripped from the storage key the same way they
+    // are stripped from the DB filename, so the key and doc.filename stay in sync.
+    test('should strip trailing dots so the storage key matches the DB filename', async ({
+      restClient,
+    }) => {
+      const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+
+      const {
+        request: { url },
+      } = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody('media-with-prefix', 'report...png', file.length, 'image/png'),
+        })
+        .then((res) => res.json<{ request: { url: string } }>())
+
+      expect(url).toBeDefined()
+      expect(url).toContain('test-prefix')
+      expect(url).toContain('report.png')
+      expect(url).not.toContain('report...png')
     })
   })
 

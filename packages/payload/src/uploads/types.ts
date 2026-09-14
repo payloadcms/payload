@@ -406,6 +406,8 @@ export type GenerateUploadInstructions = (
 export type UploadInstructionsCapability = {
   /** Generates upload instructions. The generator or supporting endpoint must check access. */
   generate: GenerateUploadInstructions
+  /** Require a signed server-issued reference before invoking upload handlers. @internal */
+  requiresUploadReceipt?: boolean
   /**
    * Whether the Admin panel should use these instructions before saving a document.
    * This can still be useful when upload chunks pass through Payload.
