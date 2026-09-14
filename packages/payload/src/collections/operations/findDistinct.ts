@@ -225,9 +225,7 @@ export const findDistinctOperation = async (
         )
       }
     }
-  }
 
-  if (!overrideAccess) {
     await validateQueryPaths({
       collectionConfig,
       overrideAccess: false,
@@ -239,14 +237,14 @@ export const findDistinctOperation = async (
         },
       },
     })
-  }
 
-  await validateSortQuery({
-    collectionConfig,
-    overrideAccess: overrideAccess!,
-    req,
-    sort: args.sort,
-  })
+    await validateSortQuery({
+      collectionConfig,
+      overrideAccess: false,
+      req,
+      sort: args.sort,
+    })
+  }
 
   if ('virtual' in fieldResult.field && fieldResult.field.virtual) {
     if (typeof fieldResult.field.virtual !== 'string') {
