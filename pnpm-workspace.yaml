@@ -76,4 +76,3 @@ minimumReleaseAgeExclude:
   - next@16.3.3
   - mongoose@9.9.2
   - eslint-config-next@16.3.3
-  - zod@4.6.0
