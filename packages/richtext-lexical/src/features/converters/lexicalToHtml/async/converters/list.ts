@@ -4,7 +4,8 @@ import { v4 as uuidv4 } from 'uuid'
 import type { SerializedListItemNode, SerializedListNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConvertersAsync } from '../types.js'
 
-const ALLOWED_LIST_TAGS = new Set(['ol', 'ul'])
+import { ALLOWED_LIST_TAGS } from '../../../../lists/shared/constants.js'
+
 const ALLOWED_LIST_TYPES = new Set(['bullet', 'check', 'number'])
 
 export const ListHTMLConverterAsync: HTMLConvertersAsync<

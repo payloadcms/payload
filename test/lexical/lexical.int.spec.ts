@@ -64,6 +64,7 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
+  lexicalHeadingFeatureSlug,
   lexicalListsFeatureSlug,
   lexicalRelationshipFieldsSlug,
   richTextFieldsSlug,
@@ -135,6 +136,66 @@ test.suite({ config: './config.ts' })('Lexical', () => {
   })
 
   test.describe('basic', () => {
+    test('should reject heading tags that are not enabled', async ({ restClient }) => {
+      const response = await restClient.POST(`/${lexicalHeadingFeatureSlug}`, {
+        body: JSON.stringify({
+          richText: buildEditorState({
+            nodes: [
+              {
+                type: 'heading',
+                tag: 'h1',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+          }),
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(result.errors[0].data.errors).toEqual([
+        expect.objectContaining({
+          message: 'heading node failed to validate: Heading tag must be one of h2, h4.',
+          path: 'richText',
+        }),
+      ])
+    })
+
+    test('should reject list tags that are not supported', async ({ restClient }) => {
+      const response = await restClient.POST(`/${lexicalListsFeatureSlug}`, {
+        body: JSON.stringify({
+          onlyOrderedList: buildEditorState({
+            nodes: [
+              {
+                type: 'list',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                listType: 'number',
+                start: 1,
+                tag: 'style',
+                version: 1,
+              },
+            ],
+          }),
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(result.errors[0].data.errors).toEqual([
+        expect.objectContaining({
+          message: 'list node failed to validate: List tag must be one of ol, ul.',
+          path: 'onlyOrderedList',
+        }),
+      ])
+    })
+
     test('should reject a REST update with a nonnumeric list item value', async ({
       payload,
       restClient,

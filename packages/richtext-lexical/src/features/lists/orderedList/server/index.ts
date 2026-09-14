@@ -5,7 +5,7 @@ import { createServerFeature } from '../../../../utilities/createServerFeature.j
 import { createNode } from '../../../typeUtilities.js'
 import { listItemNodeJSONSchema, listNodeJSONSchema } from '../../shared/schema.js'
 import { shouldRegisterListBaseNodes } from '../../shared/shouldRegisterListBaseNodes.js'
-import { listItemValidation } from '../../shared/validate.js'
+import { listItemValidation, listValidation } from '../../shared/validate.js'
 import { i18n } from './i18n.js'
 
 export const OrderedListFeature = createServerFeature({
@@ -19,6 +19,7 @@ export const OrderedListFeature = createServerFeature({
             createNode({
               jsonSchema: listNodeJSONSchema,
               node: ListNode,
+              validations: [listValidation],
             }),
             createNode({
               jsonSchema: listItemNodeJSONSchema,
