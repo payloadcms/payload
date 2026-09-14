@@ -303,10 +303,25 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: unrestrictedSlug,
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'restrictedName',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
         },
         {
           name: 'reference',
@@ -332,6 +347,32 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'relationship',
           hasMany: true,
           relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'userRestrictedDoc',
+          type: 'relationship',
+          relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'fullyRestrictedDocs',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: fullyRestrictedSlug,
+        },
+        {
+          name: 'restrictedUserDocs',
+          type: 'relationship',
+          access: {
+            read: () => false,
+          },
+          hasMany: true,
+          relationTo: createNotUpdateCollectionSlug,
+        },
+        {
+          name: 'restrictedRelatedItems',
+          type: 'join',
+          collection: fullyRestrictedSlug,
+          on: 'unrestrictedDoc',
         },
         {
           name: 'createNotUpdateDocs',
@@ -385,6 +426,23 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'restrictedName',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'unrestrictedDoc',
+          type: 'relationship',
+          relationTo: unrestrictedSlug,
+        },
       ],
     },
     {
@@ -407,7 +465,14 @@ export const getConfig: () => Partial<Config> = () => ({
       access: {
         create: () => true,
         delete: () => false,
-        read: () => true,
+        read: ({ req }) =>
+          req.user
+            ? true
+            : {
+                name: {
+                  not_equals: 'archived',
+                },
+              },
         update: ({ req }) => ({
           name: {
             equals: req.user?.email,
@@ -439,6 +504,11 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
         },
       ],
     },

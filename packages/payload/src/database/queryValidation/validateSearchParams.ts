@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest, Where, WhereField } from '../../types/index.js'
+import type { PayloadRequest, WhereField } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -10,6 +10,7 @@ import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEn
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { isNestedRelationshipQuery } from '../isNestedRelationshipQuery.js'
+import { prefixWherePaths } from '../prefixWherePaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
@@ -26,6 +27,7 @@ type Args = {
   policies: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
+  showHiddenFields?: boolean
   val: unknown
   versionFields?: FlattenedField[]
 }
@@ -46,6 +48,7 @@ export async function validateSearchParam({
   policies,
   polymorphicJoin,
   req,
+  showHiddenFields,
   val,
   versionFields,
 }: Args): Promise<void> {
@@ -82,6 +85,7 @@ export async function validateSearchParam({
       overrideAccess,
       parentIsLocalized,
       payload: req.payload,
+      showHiddenFields,
     })
   }
   const promises: Promise<void>[] = []
@@ -129,6 +133,7 @@ export async function validateSearchParam({
         overrideAccess,
         policies,
         req,
+        showHiddenFields,
         where: val,
       }),
     )
@@ -322,6 +327,7 @@ export async function validateSearchParam({
                   overrideAccess,
                   policies,
                   req,
+                  showHiddenFields,
                   where: {
                     [subPath]: {
                       [operator]: val,
@@ -336,20 +342,4 @@ export async function validateSearchParam({
     }),
   )
   await Promise.all(promises)
-}
-
-const prefixWherePaths = ({ prefix, where }: { prefix: string; where: Where }): Where => {
-  const prefixedWhere: Where = {}
-
-  for (const [key, value] of Object.entries(where)) {
-    if (['and', 'or'].includes(key.toLowerCase()) && Array.isArray(value)) {
-      prefixedWhere[key] = value.map((nestedWhere) =>
-        prefixWherePaths({ prefix, where: nestedWhere }),
-      )
-    } else {
-      prefixedWhere[`${prefix}.${key}`] = value
-    }
-  }
-
-  return prefixedWhere
 }

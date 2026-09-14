@@ -21,6 +21,7 @@ import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
   authSlug,
+  createNotUpdateCollectionSlug,
   docLevelAccessSlug,
   firstArrayText,
   fullyRestrictedSlug,
@@ -36,6 +37,8 @@ import {
   secondArrayText,
   siblingDataSlug,
   slug,
+  unrestrictedSlug,
+  userRestrictedCollectionSlug,
 } from './shared.js'
 
 let payload: Payload
@@ -1267,6 +1270,247 @@ describe('Access Control', () => {
   })
 
   describe('Querying', () => {
+    describe('findDistinct', () => {
+      const createNotUpdateDocumentIDs: (number | string)[] = []
+      const parentDocumentIDs: (number | string)[] = []
+      const userRestrictedDocumentIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        await Promise.all(
+          parentDocumentIDs.map((id) => payload.delete({ id, collection: unrestrictedSlug })),
+        )
+        await Promise.all(
+          createNotUpdateDocumentIDs.map((id) =>
+            payload.delete({ id, collection: createNotUpdateCollectionSlug }),
+          ),
+        )
+        await Promise.all(
+          userRestrictedDocumentIDs.map((id) =>
+            payload.delete({ id, collection: userRestrictedCollectionSlug }),
+          ),
+        )
+
+        createNotUpdateDocumentIDs.length = 0
+        parentDocumentIDs.length = 0
+        userRestrictedDocumentIDs.length = 0
+      })
+
+      it('should constrain distinct paths by related collection read access', async () => {
+        const availableDocument = await payload.create({
+          collection: userRestrictedCollectionSlug,
+          data: { name: 'available' },
+        })
+        const archivedDocument = await payload.create({
+          collection: userRestrictedCollectionSlug,
+          data: { name: 'archived' },
+        })
+        userRestrictedDocumentIDs.push(availableDocument.id, archivedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { userRestrictedDocs: [availableDocument.id, archivedDocument.id] },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'userRestrictedDocs.name' as any,
+          limit: 1,
+          overrideAccess: false,
+        })
+
+        expect(result).toMatchObject({
+          totalDocs: 1,
+          values: [{ 'userRestrictedDocs.name': 'available' }],
+        })
+      })
+
+      it('should reject distinct paths through collections with denied read access', async () => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'fullyRestrictedDocs.name' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow('The following path cannot be queried: fullyRestrictedDocs.name')
+      })
+
+      it('should return no distinct values for denied related access when errors are disabled', async () => {
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          disableErrors: true,
+          field: 'fullyRestrictedDocs.name' as any,
+          overrideAccess: false,
+        })
+
+        expect(result).toMatchObject({ totalDocs: 0, values: [] })
+      })
+
+      it('should validate related access for terminal IDs reached through joins', async () => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'restrictedRelatedItems.id' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow('The following path cannot be queried: restrictedRelatedItems.id')
+      })
+
+      it('should reject distinct paths through unreadable relationship fields', async () => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'restrictedUserDocs.name' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow('The following path cannot be queried')
+      })
+
+      it('should find distinct values through readable relationships', async () => {
+        const relatedDocument = await payload.create({
+          collection: createNotUpdateCollectionSlug,
+          data: { name: 'available' },
+        })
+        createNotUpdateDocumentIDs.push(relatedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { createNotUpdateDocs: [relatedDocument.id] },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'createNotUpdateDocs.name' as any,
+          overrideAccess: false,
+        })
+
+        expect(result.values).toStrictEqual([{ 'createNotUpdateDocs.name': 'available' }])
+      })
+
+      it('should find distinct relationship IDs without reading the related collection', async () => {
+        const relatedDocument = await payload.create({
+          collection: userRestrictedCollectionSlug,
+          data: { name: 'archived' },
+        })
+        userRestrictedDocumentIDs.push(relatedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { userRestrictedDoc: relatedDocument.id },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'userRestrictedDoc.id' as any,
+          overrideAccess: false,
+        })
+
+        expect(result.values).toStrictEqual([{ 'userRestrictedDoc.id': relatedDocument.id }])
+      })
+
+      it('should allow distinct paths through constrained relationships when overriding access', async () => {
+        const relatedDocument = await payload.create({
+          collection: userRestrictedCollectionSlug,
+          data: { name: 'archived' },
+        })
+        userRestrictedDocumentIDs.push(relatedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { userRestrictedDocs: [relatedDocument.id] },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'userRestrictedDocs.name' as any,
+          overrideAccess: true,
+        })
+
+        expect(result.values).toStrictEqual([{ 'userRestrictedDocs.name': 'archived' }])
+      })
+
+      it('should find distinct hidden values when hidden fields are explicitly shown', async () => {
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { hiddenName: 'visible by request' } as any,
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'hiddenName' as any,
+          overrideAccess: false,
+          showHiddenFields: true,
+        })
+
+        expect(result.values).toStrictEqual([{ hiddenName: 'visible by request' }])
+      })
+
+      it('should find distinct nested hidden values when hidden fields are explicitly shown', async () => {
+        const relatedDocument = await payload.create({
+          collection: createNotUpdateCollectionSlug,
+          data: { name: 'available', hiddenName: 'visible by request' } as any,
+        })
+        createNotUpdateDocumentIDs.push(relatedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { createNotUpdateDocs: [relatedDocument.id] },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'createNotUpdateDocs.hiddenName' as any,
+          overrideAccess: false,
+          showHiddenFields: true,
+        })
+
+        expect(result.values).toStrictEqual([
+          { 'createNotUpdateDocs.hiddenName': 'visible by request' },
+        ])
+      })
+
+      it('should preserve forbidden errors for hidden distinct fields', async () => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'hiddenName' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+
+      it('should preserve forbidden errors for unreadable distinct fields', async () => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'restrictedName' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+
+      it('should preserve forbidden errors for nested hidden distinct fields', async () => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'fullyRestrictedDocs.hiddenName' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+
+      it('should preserve forbidden errors for nested unreadable fields when errors are disabled', async () => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            disableErrors: true,
+            field: 'fullyRestrictedDocs.restrictedName' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+    })
+
     it('should respect query constraint using hidden field', async () => {
       await payload.create({
         collection: hiddenAccessSlug,
