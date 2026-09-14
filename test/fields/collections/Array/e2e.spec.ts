@@ -526,7 +526,7 @@ describe('Array', () => {
 
     test('should disable paste when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-items .popup.clipboard-action__popup button.popup-button')
@@ -551,7 +551,7 @@ describe('Array', () => {
 
     test('should enable paste after copying a compatible field', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-items .popup.clipboard-action__popup button.popup-button')
@@ -837,7 +837,7 @@ describe('Array', () => {
 
     test('should disable paste on a nested array row when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       await addArrayRow(page, { fieldName: 'items__0__subArray' })
 

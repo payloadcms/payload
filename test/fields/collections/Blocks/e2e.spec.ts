@@ -546,7 +546,7 @@ describe('Block fields', () => {
 
     test('should disable paste when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
@@ -571,7 +571,7 @@ describe('Block fields', () => {
 
     test('should enable paste after copying a compatible field', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
@@ -850,7 +850,7 @@ describe('Block fields', () => {
 
     test('should disable paste on a nested block row when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const rowPopupBtn = page
         .locator('#blocks-2-subBlocks-row-0 .collapsible__actions button.array-actions__button')
