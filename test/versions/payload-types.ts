@@ -412,6 +412,9 @@ export interface DraftWithValidatePost {
 export interface ErrorOnUnpublish {
   id: string;
   title: string;
+  group?: {
+    textInGroup?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1216,6 +1219,11 @@ export interface DraftWithValidatePostsSelect<T extends boolean = true> {
  */
 export interface ErrorOnUnpublishSelect<T extends boolean = true> {
   title?: T;
+  group?:
+    | T
+    | {
+        textInGroup?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

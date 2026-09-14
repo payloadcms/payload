@@ -34,6 +34,7 @@ import { deepCopyObjectSimple, getLatestCollectionVersion, saveVersion } from '.
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import { getTopLevelFieldNames } from '../../../utilities/getTopLevelFieldNames.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -160,6 +161,12 @@ export const updateDocument = async <
   })
 
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
+  const shouldLimitValidationToSubmittedFields =
+    (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
+    unpublishAllLocales
+  const submittedTopLevelFieldNames = shouldLimitValidationToSubmittedFields
+    ? getTopLevelFieldNames(data)
+    : undefined
 
   if (collectionConfig.auth) {
     ensureUsernameOrEmail<TSlug>({
@@ -299,17 +306,13 @@ export const updateDocument = async <
     data: { ...data, id },
     doc: publicationHookDoc,
     docWithLocales,
+    fieldsToValidate: submittedTopLevelFieldNames,
     global: null,
     operation: 'update',
     overrideAccess,
     req,
-    skipValidation:
-      // only skip validation for drafts when draft validation is false
-      (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
-      // Skip validation for trash operations since they're just metadata updates
-      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
-      // Skip validation for unpublish operations — they only change _status, not document data
-      unpublishAllLocales,
+    // only skip validation for drafts when draft validation is false
+    skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
   }
 
   // /////////////////////////////////////

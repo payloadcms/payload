@@ -14,6 +14,11 @@ export type Args<T extends JsonObject> = {
   data: T
   doc: T
   docWithLocales: JsonObject
+  /**
+   * Names of the top-level fields submitted by the caller. When present, validation skips other
+   * top-level fields and validates all nested fields below each submitted field.
+   */
+  fieldsToValidate?: ReadonlySet<string>
   global: null | SanitizedGlobalConfig
   id?: number | string
   onDataProcessed?: (data: T) => void
@@ -39,6 +44,7 @@ export const beforeChange = async <T extends JsonObject>({
   data: incomingData,
   doc,
   docWithLocales,
+  fieldsToValidate: submittedTopLevelFieldNames,
   global,
   onDataProcessed,
   operation,
@@ -73,6 +79,7 @@ export const beforeChange = async <T extends JsonObject>({
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
     skipValidation,
+    submittedTopLevelFieldNames,
   })
 
   if (errors.length > 0) {

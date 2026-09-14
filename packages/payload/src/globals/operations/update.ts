@@ -27,6 +27,7 @@ import { deepCopyObjectSimple } from '../../index.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
+import { getTopLevelFieldNames } from '../../utilities/getTopLevelFieldNames.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -171,6 +172,10 @@ export const updateOperation = async <
     if (isSavingDraft) {
       data._status = 'draft'
     }
+
+    const submittedTopLevelFieldNames = unpublishAllLocales
+      ? getTopLevelFieldNames(data)
+      : undefined
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -334,13 +339,11 @@ export const updateOperation = async <
       data,
       doc: publicationHookDoc,
       docWithLocales: globalJSON,
+      fieldsToValidate: submittedTopLevelFieldNames,
       global: globalConfig,
       operation: 'update' as Operation,
       req,
-      skipValidation:
-        (isSavingDraft && !hasDraftValidationEnabled(globalConfig)) ||
-        // Skip validation for unpublish operations — they only change _status, not document data
-        unpublishAllLocales,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
     }
 
     let statusFieldValue: unknown
