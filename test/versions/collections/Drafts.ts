@@ -5,14 +5,17 @@ import { draftCollectionSlug } from '../slugs.js'
 const DraftPosts: CollectionConfig = {
   slug: draftCollectionSlug,
   access: {
-    update: () => {
-      return {
-        restrictedToUpdate: {
-          not_equals: true,
-        },
+    read: ({ req }) => {
+      if (typeof req.context.draftAccessDescription === 'string') {
+        return {
+          description: {
+            equals: req.context.draftAccessDescription,
+          },
+        }
       }
-    },
-    read: ({ req: { user } }) => {
+
+      const { user } = req
+
       if (user) {
         return true
       }
@@ -33,6 +36,13 @@ const DraftPosts: CollectionConfig = {
       }
     },
     readVersions: ({ req: { user } }) => Boolean(user),
+    update: () => {
+      return {
+        restrictedToUpdate: {
+          not_equals: true,
+        },
+      }
+    },
   },
   admin: {
     components: {
