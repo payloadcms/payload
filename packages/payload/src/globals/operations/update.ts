@@ -251,7 +251,7 @@ export const updateOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    let statusFieldAccessDenied = false
+    let statusFieldAccess = false
     const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
       doc: originalDoc,
       docWithLocales: globalJSON,
@@ -266,9 +266,9 @@ export const updateOperation = async <
       doc: originalDoc,
       docForHooks: publicationFieldPolicyDoc,
       global: globalConfig,
-      onFieldAccessDenied: (path) => {
+      onFieldAccess: ({ accessResult, path }) => {
         if (path === '_status') {
-          statusFieldAccessDenied = true
+          statusFieldAccess = accessResult
         }
       },
       operation: 'update',
@@ -280,7 +280,7 @@ export const updateOperation = async <
       doc: originalDoc,
       docWithLocales: globalJSON,
       status:
-        !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
+        statusFieldAccess && data._status === allLocalesPublicationStatus
           ? allLocalesPublicationStatus
           : undefined,
     })
@@ -353,7 +353,7 @@ export const updateOperation = async <
 
     const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
       data: publicationData,
-      fieldAccessDenied: statusFieldAccessDenied,
+      fieldAccessDenied: !statusFieldAccess,
       fieldValue: statusFieldValue,
       status: allLocalesPublicationStatus,
     })

@@ -30,7 +30,7 @@ type Args<T> = {
   fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
-  onFieldAccessDenied?: (path: string) => void
+  onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
@@ -64,7 +64,7 @@ export const promise = async <T>({
   field,
   fieldIndex,
   global,
-  onFieldAccessDenied,
+  onFieldAccess,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -324,11 +324,11 @@ export const promise = async <T>({
       }
     }
 
-    let isAccessAllowed = true
+    let accessResult = true
 
     // Execute access control
     if (field.access && field.access[operation]) {
-      const result = overrideAccess
+      accessResult = overrideAccess
         ? true
         : await field.access[operation](
             collection
@@ -352,15 +352,15 @@ export const promise = async <T>({
                 },
           )
 
-      if (!result) {
-        isAccessAllowed = false
-        onFieldAccessDenied?.(path)
+      if (!accessResult) {
         delete siblingData[field.name!]
       }
     }
 
+    onFieldAccess?.({ accessResult, path })
+
     if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
-      const isDocumentValueAllowed = operation === 'update' || isAccessAllowed
+      const isDocumentValueAllowed = operation === 'update' || accessResult
 
       siblingData[field.name!] =
         !fallbackResult.executed || !isDocumentValueAllowed
@@ -395,7 +395,7 @@ export const promise = async <T>({
               doc,
               fields: field.fields,
               global,
-              onFieldAccessDenied,
+              onFieldAccess,
               operation,
               overrideAccess,
               parentIndexPath: '',
@@ -450,7 +450,7 @@ export const promise = async <T>({
                 doc,
                 fields: block.fields,
                 global,
-                onFieldAccessDenied,
+                onFieldAccess,
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
@@ -482,7 +482,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
-        onFieldAccessDenied,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
@@ -525,7 +525,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
-        onFieldAccessDenied,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath: isNamedGroup ? '' : indexPath,
@@ -612,7 +612,7 @@ export const promise = async <T>({
         doc,
         fields: field.fields,
         global,
-        onFieldAccessDenied,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
@@ -637,7 +637,7 @@ export const promise = async <T>({
         doc,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
-        onFieldAccessDenied,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath: indexPath,

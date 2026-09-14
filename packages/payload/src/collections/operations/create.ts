@@ -238,7 +238,7 @@ export const createOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    let statusFieldAccessDenied = false
+    let statusFieldAccess = false
     const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
       doc: duplicatedFromDoc,
       docWithLocales: duplicatedFromDocWithLocales,
@@ -253,9 +253,9 @@ export const createOperation = async <
       doc: duplicatedFromDoc,
       docForHooks: publicationFieldPolicyDoc,
       global: null,
-      onFieldAccessDenied: (path) => {
+      onFieldAccess: ({ accessResult, path }) => {
         if (path === '_status') {
-          statusFieldAccessDenied = true
+          statusFieldAccess = accessResult
         }
       },
       operation: 'create',
@@ -267,7 +267,7 @@ export const createOperation = async <
       doc: duplicatedFromDoc,
       docWithLocales: duplicatedFromDocWithLocales,
       status:
-        !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
+        statusFieldAccess && data._status === allLocalesPublicationStatus
           ? allLocalesPublicationStatus
           : undefined,
     })
@@ -315,7 +315,7 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     let statusFieldValue: unknown
-    const docWithLocalesForFields = statusFieldAccessDenied
+    const docWithLocalesForFields = !statusFieldAccess
       ? { ...duplicatedFromDocWithLocales, _status: {} }
       : duplicatedFromDocWithLocales
 
@@ -337,7 +337,7 @@ export const createOperation = async <
 
     const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
       data: publicationData,
-      fieldAccessDenied: statusFieldAccessDenied,
+      fieldAccessDenied: !statusFieldAccess,
       fieldValue: statusFieldValue,
       status: allLocalesPublicationStatus,
     })
@@ -345,7 +345,7 @@ export const createOperation = async <
     if (
       allLocalesPublicationStatus &&
       !hasAuthorizedPublicationStatus &&
-      !statusFieldAccessDenied &&
+      statusFieldAccess &&
       typeof statusFieldValue === 'undefined' &&
       typeof duplicatedFromDocWithLocales._status === 'object' &&
       duplicatedFromDocWithLocales._status !== null
