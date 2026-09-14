@@ -6,6 +6,7 @@ import { afterAll, beforeAll, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { describe } from '../__helpers/int/vitest.js'
+import { customSchemaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -126,6 +127,43 @@ describe(
       expect(res.totalDocs).toBe(1)
       expect(res.docs[0].id).toBe(simpleLocalizedDoc.id)
       expect(res.docs[0].text).toBe('Test')
+    })
+
+    it('should batch array row inserts by the table columns, not the row keys, if limitedBoundParameters: true', async () => {
+      const defaultExecute = payload.db.drizzle.$client.execute.bind(payload.db.drizzle.$client)
+
+      // Limit bounds parameters length, as D1 does
+      payload.db.drizzle.$client.execute = async function execute(...args) {
+        const res = await defaultExecute(...args)
+        const [{ args: boundParameters }] = args as [{ args: any[] }]
+
+        if (boundParameters.length > 100) {
+          throw new Error('Exceeded limit of bound parameters!')
+        }
+        return res
+      }
+
+      payload.db.limitedBoundParameters = true
+
+      // The version copy of an array row carries no `id` key (the column's generated
+      // default is bound instead), so batches sized from the row's keys overshoot:
+      // 4 keys → 25 rows per batch × 5 bound columns = 125 parameters.
+      const rows = Array.from({ length: 60 }, (_, i) => ({ text: `row ${i}` }))
+
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: { array: rows, text: 'batched' },
+      })
+
+      expect(doc.array).toHaveLength(60)
+
+      const { docs: versions } = await payload.findVersions({
+        collection: customSchemaSlug,
+        where: { parent: { equals: doc.id } },
+      })
+
+      expect(versions[0]?.version.array).toHaveLength(60)
+      expect(versions[0]?.version.array?.map((row) => row.text)).toEqual(rows.map((row) => row.text))
     })
   },
 )
