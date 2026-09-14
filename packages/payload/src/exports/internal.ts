@@ -2,6 +2,7 @@
  * Modules exported here are not part of the public API and are subject to change without notice and without a major version bump.
  */
 
+export { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 export { assertClientUploadAccess } from '../uploads/assertClientUploadAccess.js'
 export {
   assertClientUploadAllowed,

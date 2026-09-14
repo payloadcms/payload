@@ -613,6 +613,32 @@ describe('Auth', () => {
       expect(data.token).toBeDefined()
     })
 
+    it('should return a user with read access from the login operation', async () => {
+      const testEmail = `login-field-access-${uuid()}@example.com`
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: testEmail,
+          password,
+          restrictedField: 'restricted value',
+          roles: ['editor'],
+        } as any,
+      })
+
+      try {
+        const response = await restClient.POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: testEmail, password }),
+        })
+        const authenticated = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(authenticated.user.id).toBe(user.id)
+        expect(authenticated.user).not.toHaveProperty('restrictedField')
+      } finally {
+        await payload.delete({ id: user.id, collection: slug })
+      }
+    })
+
     it('should not lose data if login throws', async () => {
       const testEmail = 'transaction-rollback-test@example.com'
       const testPassword = 'test123'
@@ -1810,6 +1836,67 @@ describe('Auth', () => {
         .catch((e) => console.error(e))
 
       expect(result).toBeTruthy()
+    })
+
+    it('should return a user with read access from the password reset operation', async () => {
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: `reset-field-access-${uuid()}@example.com`,
+          password,
+          restrictedField: 'restricted value',
+        } as any,
+      })
+
+      try {
+        const token = await payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+          disableEmail: true,
+        })
+        const response = await restClient.POST(`/${slug}/reset-password`, {
+          auth: false,
+          body: JSON.stringify({ password, token }),
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.user.id).toBe(user.id)
+        expect(result.user).not.toHaveProperty('restrictedField')
+      } finally {
+        await payload.delete({ id: user.id, collection: slug })
+      }
+    })
+
+    it('should return a user with read access from the first user registration operation', async () => {
+      // session-users has no seeded users, so first-register succeeds. The created
+      // user is deleted afterward to keep the collection empty for other tests.
+      const sessionUsersSlug = 'session-users'
+      const email = `first-register-field-access-${uuid()}@example.com`
+      let createdUserID: number | string | undefined
+
+      try {
+        const response = await restClient.POST(`/${sessionUsersSlug}/first-register`, {
+          body: JSON.stringify({
+            'confirm-password': password,
+            email,
+            password,
+            restrictedField: 'restricted value',
+          }),
+        })
+        const registered = await response.json()
+
+        createdUserID = registered.user?.id
+
+        expect(response.status).toBe(200)
+        expect(registered.token).toBeDefined()
+        expect(registered.user.email).toBe(email)
+        expect(registered.user).not.toHaveProperty('restrictedField')
+      } finally {
+        if (createdUserID) {
+          await payload.delete({ id: createdUserID, collection: sessionUsersSlug })
+        }
+      }
     })
 
     it('should enforce access control on the me route', async () => {

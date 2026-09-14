@@ -14,11 +14,11 @@ import {
   UnverifiedEmail,
   ValidationError,
 } from '../../errors/index.js'
-import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction, Forbidden, initTransaction } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { applyUserReadAccess } from '../applyUserReadAccess.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
@@ -96,8 +96,6 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     overrideAccess = false,
     req,
     req: {
-      fallbackLocale,
-      locale,
       payload,
       payload: { secret },
     },
@@ -383,42 +381,19 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     // afterRead - Fields
     // /////////////////////////////////////
 
-    user = await afterRead({
+    const userWithReadAccess = await applyUserReadAccess({
       collection: collectionConfig,
-      context: req.context,
       depth: depth!,
-      doc: user,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      draft: undefined,
-      fallbackLocale: fallbackLocale!,
-      global: null,
-      locale: locale!,
       overrideAccess,
       req,
       showHiddenFields: showHiddenFields!,
+      user,
     })
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    if (collectionConfig.hooks?.afterRead?.length) {
-      for (const hook of collectionConfig.hooks.afterRead) {
-        user =
-          (await hook({
-            collection: args.collection?.config,
-            context: req.context,
-            doc: user,
-            overrideAccess,
-            req,
-          })) || user
-      }
-    }
 
     let result: LoginResult<TSlug> = {
       exp,
       token,
-      user,
+      user: userWithReadAccess,
     }
 
     // /////////////////////////////////////

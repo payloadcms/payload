@@ -67,6 +67,7 @@ export const renderDocument = async ({
   redirectAfterDuplicate,
   redirectAfterRestore,
   searchParams,
+  user: userWithReadAccess,
   versions,
   viewType,
 }: {
@@ -239,6 +240,7 @@ export const renderDocument = async ({
       req,
       schemaPath: collectionSlug || globalSlug,
       skipValidation: true,
+      user: userWithReadAccess,
     }),
   ])
 
@@ -253,7 +255,7 @@ export const renderDocument = async ({
     permissions,
     routeSegments: segments,
     searchParams,
-    user,
+    user: userWithReadAccess,
     versions,
   }
 
@@ -366,6 +368,7 @@ export const renderDocument = async ({
     locale,
     permissions,
     req,
+    user: userWithReadAccess,
   })
 
   // Extract Description from documentSlots to pass to DocumentHeader
@@ -447,6 +450,7 @@ export const renderDocument = async ({
               globalConfig={globalConfig}
               permissions={permissions}
               req={req}
+              user={userWithReadAccess}
             />
           )}
           <HydrateAuthProvider permissions={permissions} />

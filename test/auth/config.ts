@@ -45,7 +45,13 @@ export default buildConfigWithDefaults({
     {
       slug: 'session-users',
       auth: true,
-      fields: [],
+      fields: [
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: { read: () => false },
+        },
+      ],
     },
     {
       slug,
@@ -78,6 +84,11 @@ export default buildConfigWithDefaults({
               return user?.roles?.includes('admin')
             },
           },
+        },
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: { read: () => false },
         },
         {
           name: 'roles',

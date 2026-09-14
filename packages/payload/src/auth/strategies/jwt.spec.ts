@@ -2,7 +2,7 @@ import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Payload, PayloadRequest } from '../../types/index.js'
 
 import { SignJWT } from 'jose'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
@@ -63,13 +63,27 @@ const createPayload = (): Payload =>
       },
     },
     config: {
-      admin: {},
+      admin: {
+        autoLogin: {
+          email: 'dev@example.com',
+        },
+        user: 'users',
+      },
       auth: {
         jwtOrder: ['Bearer'],
       },
       cookiePrefix: 'payload',
       csrf: [],
     },
+    find: vi.fn(async ({ depth, req }: { depth: number; req?: PayloadRequest }) => {
+      if (req?.query) {
+        req.query.depth = depth
+      }
+
+      return {
+        docs: [{ id: 'auto-login-user' }],
+      }
+    }),
     findByID: async ({ collection, id }) => ({
       id,
       role: collection === 'posts' ? 'admin' : 'user',
@@ -88,6 +102,44 @@ const authenticate = async (token: string, payload = createPayload()) => {
 }
 
 describe('JWTAuthentication', () => {
+  it.each([
+    { expectedDepth: 2, isGraphQL: false, label: 'REST' },
+    { expectedDepth: 0, isGraphQL: true, label: 'GraphQL' },
+  ])(
+    'should use the expected auth depth for $label auto-login',
+    async ({ expectedDepth, isGraphQL }) => {
+      const payload = createPayload()
+      const req = {
+        fallbackLocale: false,
+        locale: 'en',
+        query: { depth: 9 },
+      } as PayloadRequest
+      payload.collections.users.config.auth.depth = 2
+
+      const result = await JWTAuthentication({
+        headers: new Headers(),
+        isGraphQL,
+        payload,
+        req,
+      })
+
+      expect(payload.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          depth: expectedDepth,
+          fallbackLocale: false,
+          locale: 'en',
+          req,
+        }),
+      )
+      expect(req.query.depth).toBe(9)
+      expect(result.user).toMatchObject({
+        _strategy: 'local-jwt',
+        collection: 'users',
+        id: 'auto-login-user',
+      })
+    },
+  )
+
   it('should authenticate flat v3 token data with a protected-header version marker', async () => {
     const { token } = await jwtSign({
       fieldsToSign: {

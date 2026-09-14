@@ -7,7 +7,7 @@ import type { AuthStrategyFunction } from '../index.js'
 
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
-  async ({ headers, isGraphQL = false, payload }) => {
+  async ({ headers, isGraphQL = false, payload, req }) => {
     const authHeader = headers.get('Authorization')
 
     if (authHeader?.startsWith(`${collectionConfig.slug} API-Key `)) {
@@ -34,6 +34,10 @@ export const APIKeyAuthentication =
         },
       ]
 
+      const requestFallbackLocale = req?.fallbackLocale
+      const requestLocale = req?.locale
+      const requestDepth = req?.query?.depth
+
       try {
         const where: Where = {}
         if (collectionConfig.auth?.verify) {
@@ -54,9 +58,12 @@ export const APIKeyAuthentication =
         const userQuery = await payload.find({
           collection: collectionConfig.slug,
           depth: isGraphQL ? 0 : collectionConfig.auth.depth,
+          fallbackLocale: requestFallbackLocale,
           limit: 1,
+          locale: requestLocale,
           overrideAccess: true,
           pagination: false,
+          req,
           where,
         })
 
@@ -71,6 +78,15 @@ export const APIKeyAuthentication =
         }
       } catch (ignore) {
         return { user: null }
+      } finally {
+        if (req) {
+          req.fallbackLocale = requestFallbackLocale!
+          req.locale = requestLocale!
+
+          if (req.query) {
+            req.query.depth = requestDepth
+          }
+        }
       }
     }
 

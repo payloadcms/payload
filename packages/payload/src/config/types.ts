@@ -454,6 +454,10 @@ export type ServerProps = {
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: Params
+  /**
+   * Authenticated user with field read access applied. Use for values sent to the client.
+   * For access-control checks use the full principal at `req.user`.
+   */
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
