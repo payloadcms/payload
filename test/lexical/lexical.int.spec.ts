@@ -65,6 +65,7 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
+  lexicalHeadingFeatureSlug,
   lexicalListsFeatureSlug,
   lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
@@ -88,8 +89,8 @@ const dirname = path.dirname(filename)
 
 describe('Lexical', () => {
   const createdCollectionRestrictionDocs: {
-    id: number | string
     collection: typeof lexicalRelationshipFieldsSlug | typeof usersSlug
+    id: number | string
   }[] = []
 
   afterEach(async () => {
@@ -161,6 +162,66 @@ describe('Lexical', () => {
   })
 
   describe('basic', () => {
+    it('should reject heading tags that are not enabled', async () => {
+      const response = await restClient.POST(`/${lexicalHeadingFeatureSlug}`, {
+        body: JSON.stringify({
+          richText: buildEditorState({
+            nodes: [
+              {
+                type: 'heading',
+                tag: 'h1',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+          }),
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(result.errors[0].data.errors).toEqual([
+        expect.objectContaining({
+          message: 'heading node failed to validate: Heading tag must be one of h2, h4.',
+          path: 'richText',
+        }),
+      ])
+    })
+
+    it('should reject list tags that are not supported', async () => {
+      const response = await restClient.POST(`/${lexicalListsFeatureSlug}`, {
+        body: JSON.stringify({
+          onlyOrderedList: buildEditorState({
+            nodes: [
+              {
+                type: 'list',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                listType: 'number',
+                start: 1,
+                tag: 'style',
+                version: 1,
+              },
+            ],
+          }),
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(result.errors[0].data.errors).toEqual([
+        expect.objectContaining({
+          message: 'list node failed to validate: List tag must be one of ol, ul.',
+          path: 'onlyOrderedList',
+        }),
+      ])
+    })
+
     it('should reject a REST update with a nonnumeric list item value', async () => {
       const listData: NonNullable<LexicalListsFeature['onlyOrderedList']> = {
         root: {
