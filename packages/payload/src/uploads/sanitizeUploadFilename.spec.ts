@@ -29,7 +29,10 @@ describe('sanitizeUploadFilename', () => {
     expect(sanitizeUploadFilename('archive.tar.gz')).toBe('archive.tar.gz')
   })
 
-  it('should handle filenames with path separators by removing them', () => {
-    expect(sanitizeUploadFilename('path/name.png')).toBe('pathname.png')
+  it('should strip path components before sanitizing the base name', () => {
+    expect(sanitizeUploadFilename('path/name.png')).toBe('name.png')
+    expect(sanitizeUploadFilename('../photo.png')).toBe('photo.png')
+    expect(sanitizeUploadFilename('../../other-prefix/document.png')).toBe('document.png')
+    expect(sanitizeUploadFilename('..\\..\\photo.png')).toBe('photo.png')
   })
 })
