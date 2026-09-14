@@ -67,6 +67,9 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'access-join-articles': AccessJoinArticle;
+    'access-join-notes': AccessJoinNote;
+    'access-join-parents': AccessJoinParent;
     users: User;
     posts: Post;
     categories: Category;
@@ -100,6 +103,10 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    'access-join-parents': {
+      articles: 'access-join-articles';
+      children: 'access-join-articles' | 'access-join-notes';
+    };
     users: {
       posts: 'posts';
     };
@@ -162,6 +169,9 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    'access-join-articles': AccessJoinArticlesSelect<false> | AccessJoinArticlesSelect<true>;
+    'access-join-notes': AccessJoinNotesSelect<false> | AccessJoinNotesSelect<true>;
+    'access-join-parents': AccessJoinParentsSelect<false> | AccessJoinParentsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -227,6 +237,131 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-join-articles".
+ */
+export interface AccessJoinArticle {
+  id: string;
+  parent?: (string | null) | AccessJoinParent;
+  title?: string | null;
+  availability?: string | null;
+  score?: number | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  coordinates?: [number, number] | null;
+  tags?: ('allowed-marker' | 'available' | 'not-permitted' | 'unavailable')[] | null;
+  mixedTags?: ('available' | 'not-permitted')[] | null;
+  variantValue?: string | null;
+  variantSelect?: ('available' | 'unavailable') | null;
+  localizedTags?: ('available' | 'unavailable')[] | null;
+  articleTags?: ('available' | 'unavailable')[] | null;
+  owner?: (string | null) | User;
+  settings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  items?:
+    | {
+        tags?: ('available' | 'unavailable')[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  details?: {
+    articleTags?: ('available' | 'unavailable')[] | null;
+    status?: string | null;
+    tags?: ('available' | 'not-permitted')[] | null;
+    mixedTags?: ('available' | 'not-permitted')[] | null;
+  };
+  articleMeta?: {
+    articleTags?: ('available' | 'unavailable')[] | null;
+    status?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-join-parents".
+ */
+export interface AccessJoinParent {
+  id: string;
+  children?: {
+    docs?: (
+      | {
+          relationTo?: 'access-join-articles';
+          value: string | AccessJoinArticle;
+        }
+      | {
+          relationTo?: 'access-join-notes';
+          value: string | AccessJoinNote;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  articles?: {
+    docs?: (string | AccessJoinArticle)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-join-notes".
+ */
+export interface AccessJoinNote {
+  id: string;
+  parent?: (string | null) | AccessJoinParent;
+  title?: string | null;
+  availability?: string | null;
+  score?: number | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  coordinates?: [number, number] | null;
+  tags?: ('allowed-marker' | 'available' | 'not-permitted' | 'unavailable')[] | null;
+  mixedTags?: ('available' | 'not-permitted') | null;
+  variantValue?: number | null;
+  variantSelect?: ('available' | 'unavailable') | null;
+  localizedTags?: ('available' | 'unavailable')[] | null;
+  owner?: (string | null) | User;
+  settings?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  details_status?: string | null;
+  items?:
+    | {
+        tags?: ('available' | 'unavailable')[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  details?: {
+    tags?: ('available' | 'not-permitted')[] | null;
+    mixedTags?: ('available' | 'not-permitted') | null;
+  };
+  articleMeta?: {
+    status?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -887,6 +1022,18 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'access-join-articles';
+        value: string | AccessJoinArticle;
+      } | null)
+    | ({
+        relationTo: 'access-join-notes';
+        value: string | AccessJoinNote;
+      } | null)
+    | ({
+        relationTo: 'access-join-parents';
+        value: string | AccessJoinParent;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
@@ -1035,6 +1182,95 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-join-articles_select".
+ */
+export interface AccessJoinArticlesSelect<T extends boolean = true> {
+  parent?: T;
+  title?: T;
+  availability?: T;
+  score?: T;
+  coordinates?: T;
+  tags?: T;
+  mixedTags?: T;
+  variantValue?: T;
+  variantSelect?: T;
+  localizedTags?: T;
+  articleTags?: T;
+  owner?: T;
+  settings?: T;
+  items?:
+    | T
+    | {
+        tags?: T;
+        id?: T;
+      };
+  details?:
+    | T
+    | {
+        articleTags?: T;
+        status?: T;
+        tags?: T;
+        mixedTags?: T;
+      };
+  articleMeta?:
+    | T
+    | {
+        articleTags?: T;
+        status?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-join-notes_select".
+ */
+export interface AccessJoinNotesSelect<T extends boolean = true> {
+  parent?: T;
+  title?: T;
+  availability?: T;
+  score?: T;
+  coordinates?: T;
+  tags?: T;
+  mixedTags?: T;
+  variantValue?: T;
+  variantSelect?: T;
+  localizedTags?: T;
+  owner?: T;
+  settings?: T;
+  details_status?: T;
+  items?:
+    | T
+    | {
+        tags?: T;
+        id?: T;
+      };
+  details?:
+    | T
+    | {
+        tags?: T;
+        mixedTags?: T;
+      };
+  articleMeta?:
+    | T
+    | {
+        status?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-join-parents_select".
+ */
+export interface AccessJoinParentsSelect<T extends boolean = true> {
+  children?: T;
+  articles?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
