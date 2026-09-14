@@ -23,7 +23,7 @@ type Args<T> = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
-  onFieldAccessDenied?: (path: string) => void
+  onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
@@ -51,7 +51,7 @@ export const traverseFields = async <T>({
   docForHooks,
   fields,
   global,
-  onFieldAccessDenied,
+  onFieldAccess,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -78,7 +78,7 @@ export const traverseFields = async <T>({
         field,
         fieldIndex,
         global,
-        onFieldAccessDenied,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath,

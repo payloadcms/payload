@@ -205,11 +205,11 @@ export const updateDocument = async <
   // beforeValidate - Fields
   // /////////////////////////////////////
 
-  let statusFieldAccessDenied = false
+  let statusFieldAccess = false
   const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
     doc: originalDoc,
     docWithLocales,
-    status: data._status === allLocalesPublicationStatus ? allLocalesPublicationStatus : undefined,
+    status: allLocalesPublicationStatus,
   })
 
   data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
@@ -220,9 +220,9 @@ export const updateDocument = async <
     doc: originalDoc,
     docForHooks: publicationFieldPolicyDoc,
     global: null,
-    onFieldAccessDenied: (path) => {
+    onFieldAccess: ({ accessResult, path }) => {
       if (path === '_status') {
-        statusFieldAccessDenied = true
+        statusFieldAccess = accessResult
       }
     },
     operation: 'update',
@@ -240,13 +240,13 @@ export const updateDocument = async <
       !isSavingDraft,
   )
 
+  const publicationStatusIsAuthorized =
+    statusFieldAccess && data._status === allLocalesPublicationStatus
+
   const publicationHookDoc = buildAllLocalesPublicationHookDoc({
     doc: originalDoc,
     docWithLocales,
-    status:
-      !statusFieldAccessDenied && data._status === allLocalesPublicationStatus
-        ? allLocalesPublicationStatus
-        : undefined,
+    status: publicationStatusIsAuthorized ? allLocalesPublicationStatus : undefined,
   })
 
   // /////////////////////////////////////
@@ -330,7 +330,7 @@ export const updateDocument = async <
 
   const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
     data: publicationData,
-    fieldAccessDenied: statusFieldAccessDenied,
+    fieldAccessDenied: !statusFieldAccess,
     fieldValue: statusFieldValue,
     status: allLocalesPublicationStatus,
   })
