@@ -38,7 +38,7 @@ export const generateSlug =
   async ({ collection, data, global, operation, originalDoc, req, value: isChecked }) => {
     if (operation === 'create') {
       if (data) {
-        data[slugFieldName] = slugify({
+        const slugified = slugify({
           customSlugify,
           data,
           req,
@@ -46,6 +46,8 @@ export const generateSlug =
           // Use a generic falsy check here to include empty strings
           valueToSlugify: data?.[slugFieldName] || data?.[useAsSlug],
         })
+
+        data[slugFieldName] = slugified || undefined
       }
 
       return Boolean(!data?.[slugFieldName])
