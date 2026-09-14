@@ -119,4 +119,81 @@ describe('builds sort params', () => {
 
     expect(result).toStrictEqual({ order: 'asc' })
   })
+
+  it('does not add a fallback on descending unique field', () => {
+    const result = buildSortParam({
+      config,
+      parentIsLocalized: false,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'order',
+          type: 'number',
+          unique: true,
+        },
+      ],
+      locale: 'en',
+      sort: '-order',
+      timestamps: true,
+      adapter: {
+        disableFallbackSort: false,
+      } as MongooseAdapter,
+    })
+
+    expect(result).toStrictEqual({ order: 'desc' })
+  })
+
+  it('adds a fallback on descending non-unique field', () => {
+    const result = buildSortParam({
+      config,
+      parentIsLocalized: false,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'order',
+          type: 'number',
+        },
+      ],
+      locale: 'en',
+      sort: '-title',
+      timestamps: true,
+      adapter: {
+        disableFallbackSort: false,
+      } as MongooseAdapter,
+    })
+
+    expect(result).toStrictEqual({ title: 'desc', createdAt: 'desc' })
+  })
+
+  it('does not add a fallback when any key of a multi-key descending sort is unique', () => {
+    const result = buildSortParam({
+      config,
+      parentIsLocalized: false,
+      fields: [
+        {
+          name: 'status',
+          type: 'text',
+        },
+        {
+          name: 'order',
+          type: 'number',
+          unique: true,
+        },
+      ],
+      locale: 'en',
+      sort: ['-status', '-order'],
+      timestamps: true,
+      adapter: {
+        disableFallbackSort: false,
+      } as MongooseAdapter,
+    })
+
+    expect(result).toStrictEqual({ status: 'desc', order: 'desc' })
+  })
 })
