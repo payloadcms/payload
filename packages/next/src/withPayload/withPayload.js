@@ -59,7 +59,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     experimental: {
       ...(nextConfig.experimental || {}),
       // Server fast refresh breaks HMR
-      turbopackServerFastRefresh: false,
+      // turbopackServerFastRefresh: false,
     },
     sassOptions: {
       ...(nextConfig.sassOptions || {}),
