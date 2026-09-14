@@ -41,6 +41,7 @@ export type RenderFieldArgs = {
   req: PayloadRequest
   schemaPath: string
   siblingData: Data
+  user?: PayloadRequest['user']
 }
 
 export type RenderFieldMethod = (args: RenderFieldArgs) => void

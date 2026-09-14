@@ -667,6 +667,35 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       expect(data.token).toBeDefined()
     })
 
+    test('should return a user with read access from the login operation', async ({
+      payload,
+      restClient,
+    }) => {
+      const testEmail = `login-field-access-${uuid()}@example.com`
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: testEmail,
+          password,
+          restrictedField: 'restricted value',
+          roles: ['editor'],
+        } as any,
+      })
+
+      try {
+        const response = await restClient.POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: testEmail, password }),
+        })
+        const authenticated = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(authenticated.user.id).toBe(user.id)
+        expect(authenticated.user).not.toHaveProperty('restrictedField')
+      } finally {
+        await payload.delete({ id: user.id, collection: slug })
+      }
+    })
+
     test('should not lose data if login throws', async ({ payload, restClient }) => {
       const testEmail = 'transaction-rollback-test@example.com'
       const testPassword = 'test123'
@@ -1938,6 +1967,39 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         .catch((e) => console.error(e))
 
       expect(result).toBeTruthy()
+    })
+
+    test('should return a user with read access from the password reset operation', async ({
+      payload,
+      restClient,
+    }) => {
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: `reset-field-access-${uuid()}@example.com`,
+          password,
+          restrictedField: 'restricted value',
+        },
+      })
+
+      try {
+        const token = await payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+          disableEmail: true,
+        })
+        const response = await restClient.POST(`/${slug}/reset-password`, {
+          auth: false,
+          body: JSON.stringify({ password, token }),
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.user.id).toBe(user.id)
+        expect(result.user).not.toHaveProperty('restrictedField')
+      } finally {
+        await payload.delete({ id: user.id, collection: slug })
+      }
     })
 
     test('should enforce access control on the me route', async ({ payload, restClient }) => {

@@ -45,7 +45,7 @@ export const _internal_renderFieldHandler: ServerFunction<
   RenderFieldServerFnArgs,
   Promise<RenderFieldServerFnReturnType>
   // eslint-disable-next-line @typescript-eslint/require-await
-> = async ({ name, hidden, initialValue, label, path, req, schemaPath }) => {
+> = async ({ name, hidden, initialValue, label, path, req, schemaPath, user }) => {
   if (!req.user) {
     throw new UnauthorizedError()
   }
@@ -122,6 +122,7 @@ export const _internal_renderFieldHandler: ServerFunction<
     req,
     schemaPath: `${entitySlug}.${fieldPath.join('.')}`,
     siblingData: data,
+    user,
   })
 
   return fieldState.customComponents ?? {}

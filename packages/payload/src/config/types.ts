@@ -589,6 +589,10 @@ export type ServerProps = {
    * Optional because non-framework contexts (jobs, scripts, tests) may not have an adapter attached.
    */
   readonly server: ServerAdapter
+  /**
+   * Authenticated user with field read access applied. Use for values sent to the client.
+   * For access-control checks use the full principal at `req.user`.
+   */
   readonly user?: User
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities

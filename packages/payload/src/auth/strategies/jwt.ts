@@ -1,6 +1,6 @@
 import { jwtVerify } from 'jose'
 
-import type { Payload, Where } from '../../types/index.js'
+import type { Payload, PayloadRequest, Where } from '../../types/index.js'
 import type { AuthStrategyFunction, AuthStrategyResult } from '../index.js'
 
 import { extractJWT } from '../extractJWT.js'
@@ -52,12 +52,18 @@ async function verifyWithKeyring({ payload, token }: { payload: Payload; token: 
 }
 
 async function autoLogin({
+  fallbackLocale,
   isGraphQL,
+  locale,
   payload,
+  req,
   strategyName = 'local-jwt',
 }: {
+  fallbackLocale?: PayloadRequest['fallbackLocale']
   isGraphQL: boolean
+  locale?: PayloadRequest['locale']
   payload: Payload
+  req?: PayloadRequest
   strategyName?: string
 }): Promise<{
   user: AuthStrategyResult['user']
@@ -94,8 +100,11 @@ async function autoLogin({
     await payload.find({
       collection: collection!.config.slug,
       depth: isGraphQL ? 0 : collection!.config.auth.depth,
+      fallbackLocale,
       limit: 1,
+      locale,
       pagination: false,
+      req,
       where,
     })
   ).docs[0] as AuthStrategyResult['user']
@@ -118,14 +127,26 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
   headers,
   isGraphQL = false,
   payload,
+  req,
   strategyName = 'local-jwt',
 }) => {
+  const requestFallbackLocale = req?.fallbackLocale
+  const requestLocale = req?.locale
+  const requestDepth = req?.query?.depth
+
   try {
     const token = extractJWT({ headers, payload })
 
     if (!token) {
       if (headers.get('DisableAutologin') !== 'true') {
-        return await autoLogin({ isGraphQL, payload, strategyName })
+        return await autoLogin({
+          fallbackLocale: requestFallbackLocale,
+          isGraphQL,
+          locale: requestLocale,
+          payload,
+          req,
+          strategyName,
+        })
       }
       return { user: null }
     }
@@ -160,6 +181,10 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       id: authenticationReference.id,
       collection: authenticationReference.collection,
       depth: isGraphQL ? 0 : collection.config.auth.depth,
+      fallbackLocale: requestFallbackLocale,
+      locale: requestLocale,
+      overrideAccess: true,
+      req,
     })) as AuthStrategyResult['user']
 
     if (user && (!collection.config.auth.verify || user._verified)) {
@@ -184,14 +209,37 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       }
     } else {
       if (headers.get('DisableAutologin') !== 'true') {
-        return await autoLogin({ isGraphQL, payload, strategyName })
+        return await autoLogin({
+          fallbackLocale: requestFallbackLocale,
+          isGraphQL,
+          locale: requestLocale,
+          payload,
+          req,
+          strategyName,
+        })
       }
       return { user: null }
     }
   } catch (ignore) {
     if (headers.get('DisableAutologin') !== 'true') {
-      return await autoLogin({ isGraphQL, payload, strategyName })
+      return await autoLogin({
+        fallbackLocale: requestFallbackLocale,
+        isGraphQL,
+        locale: requestLocale,
+        payload,
+        req,
+        strategyName,
+      })
     }
     return { user: null }
+  } finally {
+    if (req) {
+      req.fallbackLocale = requestFallbackLocale!
+      req.locale = requestLocale!
+
+      if (req.query) {
+        req.query.depth = requestDepth
+      }
+    }
   }
 }

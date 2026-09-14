@@ -139,9 +139,8 @@ export type AuthRuntimeFields = {
  * from a read `User` doc, so a `never`-typed `password` would break those assignments
  */
 /**
- * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`). This is
- * what `req.user`, `payload.auth()`, the `me` operation, auth strategies, and `useAuth().user`
- * return.
+ * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`).
+ * Server authentication APIs may retain complete fields, while response boundaries apply read access.
  */
 export type AuthenticatedUser = AuthRuntimeFields & User
 
@@ -182,6 +181,8 @@ export type AuthStrategyFunctionArgs = {
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
+  /** The request that initiated authentication, when available. */
+  req?: PayloadRequest
   /**
    * The AuthStrategy name property from the payload config.
    */

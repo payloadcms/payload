@@ -2,7 +2,7 @@ import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Payload, PayloadRequest } from '../../types/index.js'
 
 import { SignJWT } from 'jose'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
@@ -58,7 +58,7 @@ const createPayload = (): Payload =>
       users: {
         config: {
           auth: {
-            depth: 0,
+            depth: 2,
             useSessions: false,
             verify: false,
           },
@@ -67,7 +67,9 @@ const createPayload = (): Payload =>
       },
     },
     config: {
-      admin: {},
+      admin: {
+        user: 'users',
+      },
       auth: {
         jwtOrder: ['Bearer'],
       },
@@ -77,6 +79,7 @@ const createPayload = (): Payload =>
     encryptionKeyring: {
       all: [{ legacyKey: secret }],
     },
+    find: async () => ({ docs: [] }),
     findByID: async ({ collection, id }) => ({
       id,
       role: collection === 'posts' ? 'admin' : 'user',
@@ -105,6 +108,33 @@ const authenticateToken = async (token: string) =>
   })
 
 describe('JWTAuthentication', () => {
+  it('should use the configured depth for auto-login and restore req.query.depth', async () => {
+    for (const { depth, isGraphQL } of [
+      { depth: 2, isGraphQL: false },
+      { depth: 0, isGraphQL: true },
+    ]) {
+      const payload = createPayload()
+      payload.config.admin.autoLogin = { email: 'dev@example.com' }
+      const req = {
+        fallbackLocale: false,
+        locale: 'en',
+        query: { depth: '3' },
+      } as PayloadRequest
+      const find = vi.spyOn(payload, 'find').mockImplementation(async (args) => {
+        req.query.depth = args.depth
+
+        return { docs: [{ id: 'auto-login-user' }] } as Awaited<ReturnType<Payload['find']>>
+      })
+
+      await JWTAuthentication({ headers: new Headers(), isGraphQL, payload, req })
+
+      expect(find).toHaveBeenCalledWith(
+        expect.objectContaining({ depth, fallbackLocale: false, locale: 'en', req }),
+      )
+      expect(req.query.depth).toBe('3')
+    }
+  })
+
   it('should authenticate a flat JWT issued by jwtSign', async () => {
     const { token } = await jwtSign({
       fieldsToSign: {

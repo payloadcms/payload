@@ -88,6 +88,11 @@ export default buildConfigWithDefaults({
             },
           },
           {
+            name: 'restrictedField',
+            type: 'text',
+            access: { read: () => false },
+          },
+          {
             name: 'roles',
             type: 'select',
             defaultValue: ['user'],
