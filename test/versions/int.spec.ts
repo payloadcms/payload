@@ -28,6 +28,7 @@ import {
   draftUnlimitedGlobalSlug,
   draftWithUploadCloudStorageCollectionSlug,
   draftWithUploadCollectionSlug,
+  errorOnUnpublishSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
@@ -1737,6 +1738,90 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(unpublished._status).toBe('draft')
 
         await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+      })
+
+      test('should validate submitted collection fields when unpublishing', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'Valid description',
+            title: 'Validate collection unpublish',
+          },
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: doc.id,
+              collection: draftCollectionSlug,
+              data: {
+                _status: 'draft',
+                description: '',
+              },
+              unpublishAllLocales: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await payload.delete({ id: doc.id, collection: draftCollectionSlug })
+        }
+      })
+
+      test('should validate submitted dotted field paths when unpublishing', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: errorOnUnpublishSlug,
+          data: {
+            _status: 'published',
+            group: {
+              textInGroup: 'Valid nested value',
+            },
+            title: 'Validate nested collection unpublish',
+          },
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: doc.id,
+              collection: errorOnUnpublishSlug,
+              data: {
+                _status: 'draft',
+                // @ts-expect-error dotted field paths are accepted at runtime
+                'group.textInGroup': '',
+              },
+              unpublishAllLocales: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await payload.delete({ id: doc.id, collection: errorOnUnpublishSlug })
+        }
+      })
+
+      test('should validate submitted global fields when unpublishing', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            _status: 'published',
+            title: 'Validate global unpublish',
+          },
+        })
+
+        try {
+          await expect(
+            payload.updateGlobal({
+              slug: draftGlobalSlug,
+              data: {
+                _status: 'draft',
+                title: '',
+              },
+              unpublishAllLocales: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await cleanupGlobal({ globalSlug: draftGlobalSlug, payload })
+        }
       })
     })
 

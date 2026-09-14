@@ -58,6 +58,7 @@ type Args = {
   siblingDocWithLocales?: JsonObject
   siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
+  submittedTopLevelFieldNames?: ReadonlySet<string>
 }
 
 // This function is responsible for the following actions, in order:
@@ -94,6 +95,7 @@ export const promise = async ({
   siblingDocWithLocales,
   siblingFields,
   skipValidation,
+  submittedTopLevelFieldNames,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -121,7 +123,11 @@ export const promise = async ({
         }),
       )
     : true
-  let skipValidationFromHere = skipValidation || !passesCondition
+  const isOutsideSubmittedFieldScope =
+    submittedTopLevelFieldNames !== undefined &&
+    fieldAffectsData(field) &&
+    !submittedTopLevelFieldNames.has(pathSegments[0]!)
+  let skipValidationFromHere = skipValidation || isOutsideSubmittedFieldScope || !passesCondition
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -344,6 +350,7 @@ export const promise = async ({
                 siblingDocWithLocales?.[field.name],
               ),
               skipValidation: skipValidationFromHere,
+              submittedTopLevelFieldNames,
             }),
           )
         })
@@ -410,6 +417,7 @@ export const promise = async ({
                 siblingDoc: rowSiblingDoc,
                 siblingDocWithLocales: rowSiblingDocWithLocales,
                 skipValidation: skipValidationFromHere,
+                submittedTopLevelFieldNames,
               }),
             )
           }
@@ -453,6 +461,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -523,6 +532,7 @@ export const promise = async ({
         siblingDoc: groupSiblingDoc,
         siblingDocWithLocales: groupSiblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -588,7 +598,7 @@ export const promise = async ({
             schemaPath: schemaPathSegments,
             siblingData,
             siblingDocWithLocales,
-            skipValidation,
+            skipValidation: skipValidationFromHere,
             value: siblingData[field.name],
           })
 
@@ -656,6 +666,7 @@ export const promise = async ({
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
@@ -689,6 +700,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales: siblingDocWithLocales!,
         skipValidation: skipValidationFromHere,
+        submittedTopLevelFieldNames,
       })
 
       break
