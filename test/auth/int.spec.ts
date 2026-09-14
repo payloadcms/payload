@@ -11,7 +11,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { getFieldsToSign, traverseFields } from 'payload'
+import { createLocalReq, Forbidden, getFieldsToSign, traverseFields } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
@@ -2263,6 +2263,11 @@ describe('Auth', () => {
     })
 
     describe('Login Attempts', () => {
+      const createdLoginAttemptUsers: Array<{
+        collection: typeof publicUsersSlug | typeof slug
+        id: number | string
+      }> = []
+
       async function attemptLogin(email: string, password: string) {
         return payload.login({
           collection: slug,
@@ -2273,6 +2278,72 @@ describe('Auth', () => {
           overrideAccess: false,
         })
       }
+
+      async function createLoginAttemptUser({
+        id,
+        collection = slug,
+        email,
+      }: {
+        collection?: typeof publicUsersSlug | typeof slug
+        email: string
+        id?: string
+      }) {
+        const user = await payload.create({
+          collection,
+          data: {
+            ...(id ? { id } : {}),
+            email,
+            password,
+          },
+        })
+
+        createdLoginAttemptUsers.push({ id: user.id, collection })
+
+        return user
+      }
+
+      async function getLoginAttemptUser({
+        id,
+        collection = slug,
+      }: {
+        collection?: typeof publicUsersSlug | typeof slug
+        id: number | string
+      }) {
+        return await payload.findByID({
+          id,
+          collection,
+          overrideAccess: true,
+          showHiddenFields: true,
+        })
+      }
+
+      async function setLoginAttemptLock({
+        id,
+        collection = slug,
+      }: {
+        collection?: typeof publicUsersSlug | typeof slug
+        id: number | string
+      }) {
+        await payload.db.updateOne({
+          id,
+          collection,
+          data: {
+            lockUntil: new Date(Date.now() + 600 * 1000).toISOString(),
+            loginAttempts: 2,
+          },
+        })
+      }
+
+      afterEach(async () => {
+        for (const { id, collection } of createdLoginAttemptUsers) {
+          await payload.delete({
+            id,
+            collection,
+          })
+        }
+
+        createdLoginAttemptUsers.length = 0
+      })
 
       it('should reset the login attempts after a successful login', async () => {
         // fail 1
@@ -2388,6 +2459,69 @@ describe('Auth', () => {
         const user = userQuery.docs[0]
         expect(user!.loginAttempts).toBe(0)
         expect(user!.lockUntil).toBeNull()
+      })
+
+      it('should allow admin auth users to unlock any auth collection user by default', async () => {
+        const adminUser = await createLoginAttemptUser({ email: `admin-${uuid()}@example.com` })
+        const publicUser = await createLoginAttemptUser({
+          collection: publicUsersSlug,
+          email: `public-${uuid()}@example.com`,
+        })
+
+        await setLoginAttemptLock({ id: publicUser.id, collection: publicUsersSlug })
+
+        const req = await createLocalReq({ user: adminUser }, payload)
+
+        await payload.unlock({
+          collection: publicUsersSlug,
+          data: {
+            email: publicUser.email,
+          } as any,
+          overrideAccess: false,
+          req,
+        })
+
+        const unlockedUser = await getLoginAttemptUser({
+          id: publicUser.id,
+          collection: publicUsersSlug,
+        })
+
+        expect(unlockedUser.loginAttempts).toBe(0)
+        expect(unlockedUser.lockUntil).toBeNull()
+      })
+
+      it('should deny default unlock access to non-admin auth users', async () => {
+        const currentUser = await createLoginAttemptUser({
+          collection: publicUsersSlug,
+          email: `current-${uuid()}@example.com`,
+        })
+        const selectedUser = await createLoginAttemptUser({
+          collection: publicUsersSlug,
+          email: `selected-${uuid()}@example.com`,
+        })
+
+        await setLoginAttemptLock({ id: selectedUser.id, collection: publicUsersSlug })
+
+        const req = await createLocalReq({ user: currentUser }, payload)
+
+        await expect(
+          payload.unlock({
+            collection: publicUsersSlug,
+            data: {
+              email: selectedUser.email,
+            } as any,
+            overrideAccess: false,
+            req,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const lockedUser = await getLoginAttemptUser({
+          id: selectedUser.id,
+          collection: publicUsersSlug,
+        })
+
+        expect(lockedUser.loginAttempts).toBe(2)
+        expect(lockedUser.lockUntil).toBeDefined()
       })
 
       it('should always unlock after password reset', async () => {

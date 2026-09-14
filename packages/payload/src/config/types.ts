@@ -341,6 +341,8 @@ export type InitOptions = {
 export type AccessResult = boolean | Where
 
 export type AccessArgs<TData = any> = {
+  /** The collection whose access control is being evaluated */
+  collectionConfig?: SanitizedCollectionConfig
   /**
    * The relevant resource that is being accessed.
    *
