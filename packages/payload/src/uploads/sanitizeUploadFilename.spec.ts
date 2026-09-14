@@ -11,6 +11,8 @@ describe('sanitizeUploadFilename', () => {
 
   it('should strip trailing dots and spaces from the base name', () => {
     expect(sanitizeUploadFilename('file.  .png')).toBe('file.png')
+    // Issue #16694: browsers/OS dialogs can produce literal ellipses before the extension
+    expect(sanitizeUploadFilename('My Photo...png')).toBe('My Photo.png')
   })
 
   it('should handle files without an extension', () => {
