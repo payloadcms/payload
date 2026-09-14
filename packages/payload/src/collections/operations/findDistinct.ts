@@ -132,11 +132,18 @@ export const findDistinctOperation = async (
       path: args.field,
     })
 
-    if (fieldResult?.field.hidden && !showHiddenFields) {
+    if (!fieldResult) {
+      throw new APIError(
+        `Field ${args.field} was not found in the collection ${collectionConfig.slug}`,
+        httpStatus.BAD_REQUEST,
+      )
+    }
+
+    if (fieldResult.field.hidden && !showHiddenFields) {
       throw new Forbidden(req.t)
     }
 
-    if (fieldResult?.field.access?.read) {
+    if (fieldResult.field.access?.read) {
       const hasAccess = await fieldResult.field.access.read({ req })
       if (!hasAccess) {
         throw new Forbidden(req.t)
@@ -214,13 +221,6 @@ export const findDistinctOperation = async (
           )
         }
       }
-    }
-
-    if (!fieldResult) {
-      throw new APIError(
-        `Field ${args.field} was not found in the collection ${collectionConfig.slug}`,
-        httpStatus.BAD_REQUEST,
-      )
     }
 
     if (!overrideAccess) {
