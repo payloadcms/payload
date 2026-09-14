@@ -46,13 +46,13 @@ import {
   convertPathToJSONTraversal,
   countDistinct,
   createJSONQuery,
+  createRequireDrizzleKit,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
   init,
   insert,
-  requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
@@ -63,6 +63,11 @@ import type { Args, SQLiteAdapter, WalConfig } from './types.js'
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
+
+const requireDrizzleKit = createRequireDrizzleKit({
+  from: import.meta.url,
+  packageName: '@payloadcms/db-sqlite',
+})
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const sqliteIDType = args.idType || 'number'
