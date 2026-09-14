@@ -14,7 +14,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import { createClientUploadPayload, prefix } from '../shared.js'
+import { prefix } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -27,6 +27,32 @@ let httpServer: Server
 let handleUploadUrl: string
 
 const serverHandlerPath = '/vercel-blob-client-upload-route'
+
+const issueClientUpload = async ({
+  collectionSlug,
+  docPrefix,
+  filename,
+  mimeType,
+}: {
+  collectionSlug: string
+  docPrefix?: string
+  filename: string
+  mimeType: string
+}) =>
+  restClient
+    .POST(`${serverHandlerPath}?issue-client-upload=1`, {
+      body: JSON.stringify({ collectionSlug, docPrefix, filename, mimeType }),
+    })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error('Failed to initialize client upload')
+      }
+      return res.json<{
+        clientUploadContext: { prefix: string; signedReceipt: string }
+        filename: string
+        pathname: string
+      }>()
+    })
 
 describe('@payloadcms/storage-vercel-blob clientUploads', () => {
   beforeAll(async () => {
@@ -73,35 +99,46 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
 
   it('should upload a file via client upload flow', async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
-    const pathname = 'image.png'
+    const issued = await issueClientUpload({
+      collectionSlug: 'media',
+      filename: 'image.png',
+      mimeType: 'image/png',
+    })
 
-    const result = await upload(pathname, new Blob([file], { type: 'image/png' }), {
+    const result = await upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
-      clientPayload: createClientUploadPayload({
+      clientPayload: JSON.stringify({
         collectionSlug: 'media',
         mimeType: 'image/png',
+        signedReceipt: issued.clientUploadContext.signedReceipt,
       }),
       contentType: 'image/png',
       handleUploadUrl,
     })
 
     expect(result.url).toBeDefined()
-    expect(result.url).toContain(pathname)
+    expect(result.url).toContain(issued.pathname)
 
     const { blobs } = await list()
-    const uploaded = blobs.find((b) => b.pathname === pathname)
+    const uploaded = blobs.find((b) => b.pathname === issued.pathname)
     expect(uploaded).toBeDefined()
   })
 
   it("should reject upload when 'x-disallow-access' header is set", async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const issued = await issueClientUpload({
+      collectionSlug: 'media',
+      filename: 'image.png',
+      mimeType: 'image/png',
+    })
 
     await expect(
-      upload('image.png', new Blob([file], { type: 'image/png' }), {
+      upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
         access: 'public',
-        clientPayload: createClientUploadPayload({
+        clientPayload: JSON.stringify({
           collectionSlug: 'media',
           mimeType: 'image/png',
+          signedReceipt: issued.clientUploadContext.signedReceipt,
         }),
         contentType: 'image/png',
         handleUploadUrl,
@@ -121,7 +158,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     ).rejects.toThrow()
   })
 
-  it('should preserve legacy payloads only for explicit opt-out collections', async () => {
+  it('should reject legacy payloads without an issued receipt', async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
     await expect(
@@ -140,7 +177,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
         contentType: 'image/png',
         handleUploadUrl,
       }),
-    ).resolves.toMatchObject({ pathname: 'legacy-image.png' })
+    ).rejects.toThrow()
   })
 
   it.each([
@@ -148,24 +185,28 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     ['XML', 'reference.xml', 'application/xml'],
   ])('should keep %s files in the document upload path', async (_, filename, mimeType) => {
     await expect(
-      upload(filename, new Blob(['<document />'], { type: mimeType }), {
-        access: 'public',
-        clientPayload: createClientUploadPayload({ collectionSlug: 'media', mimeType }),
-        contentType: mimeType,
-        handleUploadUrl,
+      issueClientUpload({
+        collectionSlug: 'media',
+        filename,
+        mimeType,
       }),
     ).rejects.toThrow()
   })
 
   it('should upload a file with prefix via client upload flow', async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
-    const pathname = `${prefix}/image.png`
+    const issued = await issueClientUpload({
+      collectionSlug: 'media-with-prefix',
+      filename: 'image.png',
+      mimeType: 'image/png',
+    })
 
-    const result = await upload(pathname, new Blob([file], { type: 'image/png' }), {
+    const result = await upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
-      clientPayload: createClientUploadPayload({
+      clientPayload: JSON.stringify({
         collectionSlug: 'media-with-prefix',
         mimeType: 'image/png',
+        signedReceipt: issued.clientUploadContext.signedReceipt,
       }),
       contentType: 'image/png',
       handleUploadUrl,
@@ -176,7 +217,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     expect(result.url).toContain('image.png')
 
     const { blobs } = await list()
-    const uploaded = blobs.find((b) => b.pathname === pathname)
+    const uploaded = blobs.find((b) => b.pathname === issued.pathname)
     expect(uploaded).toBeDefined()
   })
 })

@@ -295,6 +295,8 @@ export type UploadConfig = {
         allowList: AllowList
       }
     | false
+  /** @internal Require a server-issued receipt before invoking client-upload handlers. */
+  requiresClientUploadReceipt?: boolean
   /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize

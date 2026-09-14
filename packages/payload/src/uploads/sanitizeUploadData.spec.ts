@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getExternalUploadSource,
   getLocalizedUploadProperties,
-  getUploadDestinationPrefix,
+  getUploadDestination,
   mergeUploadDataWithDocument,
   restoreUploadDataFromDocument,
   sanitizeUploadData,
@@ -63,26 +63,28 @@ describe('sanitizeUploadData', () => {
   })
 
   it('should use a submitted prefix when writing a new file', () => {
-    expect(getUploadDestinationPrefix({ prefix: 'articles' }, {})).toBe('articles')
+    expect(getUploadDestination({ data: { prefix: 'articles' }, file: {} })).toEqual({
+      prefix: 'articles',
+    })
   })
 
   it('should use the destination bound to a client upload context', () => {
     expect(
-      getUploadDestinationPrefix(
-        { prefix: 'submitted' },
-        { clientUploadContext: { prefix: 'provider' } },
-      ),
-    ).toBe('provider')
+      getUploadDestination({
+        data: { prefix: 'submitted' },
+        file: { clientUploadContext: { _objectKey: 'abc123', prefix: 'provider' } },
+      }),
+    ).toEqual({ objectKey: 'abc123', prefix: 'provider' })
     expect(
-      getUploadDestinationPrefix(
-        { prefix: 'submitted' },
-        { clientUploadContext: { key: 'provider/file.png' } },
-      ),
-    ).toBeUndefined()
+      getUploadDestination({
+        data: { prefix: 'submitted' },
+        file: { clientUploadContext: { key: 'provider/file.png' } },
+      }),
+    ).toEqual({})
   })
 
   it('should not preserve a submitted prefix without a new file', () => {
-    expect(getUploadDestinationPrefix({ prefix: 'articles' }, undefined)).toBeUndefined()
+    expect(getUploadDestination({ data: { prefix: 'articles' }, file: undefined })).toEqual({})
   })
 
   it.each([

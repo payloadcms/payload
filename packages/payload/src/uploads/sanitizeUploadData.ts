@@ -33,12 +33,18 @@ export const getExternalUploadSource = (data: unknown): ExternalUploadSource | u
   }
 }
 
-export const getUploadDestinationPrefix = (
-  data: unknown,
-  file: { clientUploadContext?: unknown } | null | undefined,
-): string | undefined => {
+// Resolves the server-owned upload destination for a document write. For client uploads the prefix
+// and key segment come from the verified upload context; for server uploads the prefix falls back
+// to the submitted document data and there is no key segment.
+export const getUploadDestination = ({
+  data,
+  file,
+}: {
+  data: unknown
+  file: { clientUploadContext?: unknown } | null | undefined
+}): { objectKey?: string; prefix?: string } => {
   if (!file) {
-    return undefined
+    return {}
   }
 
   const submittedPrefix =
@@ -46,12 +52,16 @@ export const getUploadDestinationPrefix = (
   const { clientUploadContext } = file
 
   if (!isRecord(clientUploadContext)) {
-    return submittedPrefix
+    return { prefix: submittedPrefix }
   }
 
-  // Client uploads are already written to the destination encoded in their context, so that
-  // destination takes precedence over separately submitted document data.
-  return typeof clientUploadContext.prefix === 'string' ? clientUploadContext.prefix : undefined
+  return {
+    objectKey:
+      typeof clientUploadContext._objectKey === 'string'
+        ? clientUploadContext._objectKey
+        : undefined,
+    prefix: typeof clientUploadContext.prefix === 'string' ? clientUploadContext.prefix : undefined,
+  }
 }
 
 const getDocumentProperty = (
@@ -116,11 +126,10 @@ export const sanitizeUploadData = <T>(data: T, operation: Operation): T => {
   delete sanitizedData.filename
   delete sanitizedData.sizes
   delete sanitizedData.url
+  // Server-owned; never accepted from the caller.
+  delete sanitizedData._objectKey
 
-  // On update, `prefix` is treated as file identity and restored from the stored document, so a
-  // collection that exposes a user-editable field named `prefix` cannot have it changed by an
-  // untrusted caller. The update operations restore a file-bound destination only when the same
-  // request also writes a new file. Kept on create, where the caller chooses the namespace.
+  // On update, `prefix` is restored from the stored document (file identity); kept on create.
   if (operation === 'update') {
     delete sanitizedData.prefix
   }
@@ -145,7 +154,7 @@ export const mergeUploadDataWithDocument = <T>(
 
   const mergedData: Record<string, unknown> = { ...data }
 
-  for (const property of ['filename', 'prefix', 'url']) {
+  for (const property of ['_objectKey', 'filename', 'prefix', 'url']) {
     if (!hasOwnProperty(data, property) && hasOwnProperty(document, property)) {
       mergedData[property] = getDocumentProperty(document, property, options)
     }
@@ -171,6 +180,7 @@ export const mergeUploadDataWithDocument = <T>(
 }
 
 const uploadDerivedProperties = [
+  '_objectKey',
   'filename',
   'filesize',
   'focalX',

@@ -1,8 +1,17 @@
 import type { PayloadHandler, PayloadRequest, UploadCollectionSlug } from 'payload'
 
+import {
+  getFileKey,
+  resolveSignedURLKey,
+  verifyClientUploadReceiptForFileKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
 import { APIError, Forbidden } from 'payload'
-import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
+import {
+  assertClientUploadAccess,
+  assertClientUploadAllowed,
+  createClientUploadReceipt,
+} from 'payload/internal'
 
 import type { VercelBlobCollectionOptions } from './authorizeFileOverwrite.js'
 
@@ -25,16 +34,89 @@ const defaultAccess: Args['access'] = ({ req }) => !!req.user
 export const getClientUploadRoute =
   ({
     access = defaultAccess,
-    addRandomSuffix,
     cacheControlMaxAge,
     collections,
     token,
     useCompositePrefixes,
   }: Args): PayloadHandler =>
   async (req) => {
-    const body = (await req.json!()) as HandleUploadBody
-
     try {
+      if (req.searchParams.get('issue-client-upload') === '1') {
+        const { collectionSlug, docPrefix, filename, mimeType } = (await req.json!()) as {
+          collectionSlug?: unknown
+          docPrefix?: unknown
+          filename?: unknown
+          mimeType?: unknown
+        }
+        if (
+          typeof collectionSlug !== 'string' ||
+          typeof filename !== 'string' ||
+          typeof mimeType !== 'string' ||
+          (docPrefix !== undefined && typeof docPrefix !== 'string') ||
+          !Object.hasOwn(collections, collectionSlug)
+        ) {
+          throw new APIError('Invalid upload payload', 400)
+        }
+
+        await assertClientUploadAccess({ collectionSlug, req })
+
+        if (!(await access({ collectionSlug, req }))) {
+          throw new Forbidden()
+        }
+        assertClientUploadAllowed({
+          collection: req.payload.collections[collectionSlug]?.config,
+          filename,
+          mimeType,
+        })
+        const collectionConfig = collections[collectionSlug]
+        const collectionPrefix =
+          (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
+        const requested = getFileKey({
+          collectionPrefix,
+          docPrefix,
+          filename,
+          useCompositePrefixes,
+        })
+        const allowOverwrite = await authorizeClientOverwrite({
+          collections,
+          fileKey: requested.fileKey,
+          req,
+          requestedCollectionSlug: collectionSlug,
+          useCompositePrefixes,
+        })
+        const resolved = allowOverwrite
+          ? {
+              ...requested,
+              clientUploadContext: {
+                allowOverwrite: true,
+                prefix: requested.sanitizedDocPrefix,
+                signedReceipt: createClientUploadReceipt({
+                  collectionSlug,
+                  context: {
+                    allowOverwrite: true,
+                    prefix: requested.sanitizedDocPrefix,
+                  },
+                  filename: requested.sanitizedFilename,
+                  req,
+                }),
+              },
+            }
+          : await resolveSignedURLKey({
+              collectionPrefix,
+              collectionSlug,
+              docPrefix,
+              filename,
+              req,
+              useCompositePrefixes,
+            })
+        return Response.json({
+          clientUploadContext: resolved.clientUploadContext,
+          filename: resolved.sanitizedFilename,
+          pathname: resolved.fileKey,
+        })
+      }
+
+      const body = (await req.json!()) as HandleUploadBody
       const jsonResponse = await handleUpload({
         body,
         onBeforeGenerateToken: async (pathname: string, clientPayload: null | string) => {
@@ -42,11 +124,12 @@ export const getClientUploadRoute =
             throw new APIError('No payload was provided')
           }
 
-          let parsed: { collectionSlug?: unknown; mimeType?: unknown }
+          let parsed: { collectionSlug?: unknown; mimeType?: unknown; signedReceipt?: unknown }
           try {
             parsed = JSON.parse(clientPayload) as {
               collectionSlug?: unknown
               mimeType?: unknown
+              signedReceipt?: unknown
             }
           } catch {
             parsed = { collectionSlug: clientPayload }
@@ -55,12 +138,13 @@ export const getClientUploadRoute =
           if (
             typeof parsed.collectionSlug !== 'string' ||
             !parsed.collectionSlug ||
-            (parsed.mimeType !== undefined && typeof parsed.mimeType !== 'string')
+            (parsed.mimeType !== undefined && typeof parsed.mimeType !== 'string') ||
+            typeof parsed.signedReceipt !== 'string'
           ) {
             throw new APIError('Invalid upload payload', 400)
           }
 
-          const { collectionSlug, mimeType } = parsed
+          const { collectionSlug, mimeType, signedReceipt } = parsed
 
           await assertClientUploadAccess({ collectionSlug, req })
 
@@ -71,6 +155,17 @@ export const getClientUploadRoute =
           if (!(await access({ collectionSlug, req }))) {
             throw new Forbidden()
           }
+          const collectionConfig = collections[collectionSlug]
+          const collectionPrefix =
+            (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
+          const receipt = verifyClientUploadReceiptForFileKey({
+            collectionPrefix,
+            collectionSlug,
+            expectedFileKey: pathname,
+            req,
+            signedReceipt,
+            useCompositePrefixes,
+          })
 
           assertClientUploadAllowed({
             collection: req.payload.collections[collectionSlug]?.config,
@@ -78,18 +173,10 @@ export const getClientUploadRoute =
             mimeType,
           })
 
-          const allowOverwrite = await authorizeClientOverwrite({
-            collections,
-            fileKey: pathname,
-            req,
-            requestedCollectionSlug: collectionSlug,
-            useCompositePrefixes,
-          })
-
           return {
-            addRandomSuffix,
+            addRandomSuffix: false,
             ...(mimeType ? { allowedContentTypes: [mimeType] } : {}),
-            ...(allowOverwrite && { allowOverwrite: true }),
+            ...(receipt.context.allowOverwrite === true && { allowOverwrite: true }),
             cacheControlMaxAge,
           }
         },

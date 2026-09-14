@@ -6,12 +6,16 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 
-const createRequest = (allowRestrictedFileTypes: boolean, mimeType: unknown): PayloadRequest =>
+const createRequest = (
+  allowRestrictedFileTypes: boolean,
+  mimeType: unknown,
+  filename = 'reference.png',
+): PayloadRequest =>
   ({
     json: () =>
       Promise.resolve({
         collectionSlug: 'media',
-        filename: 'reference.png',
+        filename,
         mimeType,
       }),
     payload: {
@@ -62,10 +66,12 @@ describe('Azure signed upload URLs', () => {
       getStorageClient,
     })
 
-    const response = await handler(createRequest(true, 'image/png'))
+    const response = await handler(createRequest(true, 'image/png', 'folder\\nested/reference.png'))
     const result = (await response.json()) as { filename: string; url: string }
 
     expect(result.filename).toBe('reference.png')
-    expect(result.url).toContain('https://account.blob.core.windows.net/media/reference.png?')
+    expect(result.url).toMatch(
+      /https:\/\/account\.blob\.core\.windows\.net\/media\/[0-9a-f-]+\/reference\.png\?/,
+    )
   })
 })

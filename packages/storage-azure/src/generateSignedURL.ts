@@ -64,14 +64,15 @@ export const getGenerateSignedURLHandler = ({
       mimeType,
     })
 
-    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
-      collectionPrefix,
-      collectionSlug,
-      docPrefix,
-      filename,
-      req,
-      useCompositePrefixes,
-    })
+    const { clientUploadContext, fileKey, sanitizedDocPrefix, sanitizedFilename } =
+      await resolveSignedURLKey({
+        collectionPrefix,
+        collectionSlug,
+        docPrefix,
+        filename,
+        req,
+        useCompositePrefixes,
+      })
 
     const blobClient = getStorageClient().getBlobClient(fileKey)
 
@@ -89,6 +90,7 @@ export const getGenerateSignedURLHandler = ({
     )
 
     return Response.json({
+      clientUploadContext,
       docPrefix: sanitizedDocPrefix,
       filename: sanitizedFilename,
       url: `${blobClient.url}?${sasToken.toString()}`,

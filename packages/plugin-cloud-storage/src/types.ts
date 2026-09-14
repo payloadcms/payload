@@ -7,6 +7,7 @@ import type {
   TypeWithID,
   UploadCollectionSlug,
 } from 'payload'
+import type { SignedClientUploadReceipt } from 'payload/internal'
 
 export interface File {
   buffer: Buffer
@@ -27,6 +28,16 @@ export type ClientUploadsConfig =
       access?: ClientUploadsAccess
     }
   | boolean
+
+/**
+ * Context returned by a client-upload handler and submitted with the document
+ * create request. `prefix` plus the server-owned `_objectKey` segment locate the object.
+ */
+export type ClientUploadContext = {
+  _objectKey?: string
+  prefix: string
+  signedReceipt: SignedClientUploadReceipt
+}
 
 export type HandleUpload = (args: {
   clientUploadContext: unknown
@@ -81,6 +92,7 @@ export interface GeneratedAdapter {
   handleUpload: HandleUpload
   name: string
   onInit?: () => Promise<void> | void
+  requiresClientUploadReceipt?: boolean
   staticHandler: StaticHandler
 }
 

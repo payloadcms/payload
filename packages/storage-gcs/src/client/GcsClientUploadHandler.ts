@@ -1,4 +1,6 @@
 'use client'
+import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
+
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
@@ -11,7 +13,7 @@ export const GcsClientUploadHandler = createClientUploadHandler({
     serverHandlerPath,
     serverURL,
     updateFilename,
-  }) => {
+  }): Promise<ClientUploadContext> => {
     const endpointRoute = formatAdminURL({
       apiRoute,
       path: serverHandlerPath,
@@ -29,12 +31,12 @@ export const GcsClientUploadHandler = createClientUploadHandler({
     })
 
     const {
-      docPrefix: sanitizedDocPrefix,
+      clientUploadContext,
       filename: sanitizedFilename,
       headers: extraHeaders,
       url,
     } = (await response.json()) as {
-      docPrefix: string
+      clientUploadContext: ClientUploadContext
       filename?: string
       headers?: Record<string, string>
       url: string
@@ -58,8 +60,6 @@ export const GcsClientUploadHandler = createClientUploadHandler({
       throw new Error('Failed to upload file to Google Cloud Storage')
     }
 
-    return {
-      prefix: sanitizedDocPrefix,
-    }
+    return { prefix: clientUploadContext.prefix, signedReceipt: clientUploadContext.signedReceipt }
   },
 })

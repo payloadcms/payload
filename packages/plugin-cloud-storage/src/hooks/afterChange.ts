@@ -3,10 +3,26 @@ import type { CollectionAfterChangeHook, CollectionConfig, FileData, TypeWithID 
 import type { GeneratedAdapter } from '../types.js'
 
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
+import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
 
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
+}
+
+// The object's folder: semantic prefix + `_objectKey` segment.
+const getObjectFolder = (doc: unknown): string => {
+  const record = (doc ?? {}) as Record<string, unknown>
+  const safePrefix = sanitizePrefix(typeof record.prefix === 'string' ? record.prefix : '')
+  const safeObjectKey = sanitizePrefix(
+    typeof record._objectKey === 'string' ? record._objectKey : '',
+  )
+
+  if (safePrefix && safeObjectKey) {
+    return `${safePrefix}/${safeObjectKey}`
+  }
+
+  return safePrefix || safeObjectKey
 }
 
 export const getAfterChangeHook =
@@ -25,14 +41,19 @@ export const getAfterChangeHook =
       const files = getIncomingFiles({ data: doc, req })
 
       if (files.length > 0) {
+        // Fold `_objectKey` so generated sizes land in the same folder as the original.
+        const dataForUpload = { ...doc, prefix: getObjectFolder(doc) }
+
         const uploadResults = await Promise.all(
           files
+            // Files with a clientUploadContext are already in storage (uploaded
+            // directly by the browser), so skip re-uploading them here.
             .filter((file) => !file.clientUploadContext)
             .map((file) =>
               adapter.handleUpload({
                 clientUploadContext: file.clientUploadContext,
                 collection,
-                data: doc,
+                data: dataForUpload,
                 file,
                 req,
               }),
@@ -48,6 +69,10 @@ export const getAfterChangeHook =
             (acc, metadata) => ({ ...acc, ...metadata }),
             {} as Partial<FileData & TypeWithID>,
           )
+
+        // Adapters may echo `data` back as metadata; keep the document's own `prefix`/`_objectKey`.
+        delete (uploadMetadata as Record<string, unknown>).prefix
+        delete (uploadMetadata as Record<string, unknown>)._objectKey
 
         let docWithMetadata = doc
 

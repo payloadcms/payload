@@ -52,6 +52,13 @@ export const getFields = ({
     },
   }
 
+  // Server-owned key segment; hidden from the API and admin, read internally via showHiddenFields.
+  const baseObjectKeyField: TextField = {
+    name: '_objectKey',
+    type: 'text',
+    hidden: true,
+  }
+
   const fields = [...collection.fields, ...(adapter?.fields || [])]
 
   // Inject a hook into all URL fields to generate URLs
@@ -205,6 +212,15 @@ export const getFields = ({
         (useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : ''),
     } as TextField)
   }
+
+  const existingObjectKeyFieldIndex = fields.findIndex(
+    (existingField) => 'name' in existingField && existingField.name === '_objectKey',
+  )
+  if (existingObjectKeyFieldIndex > -1) {
+    fields.splice(existingObjectKeyFieldIndex, 1)
+  }
+
+  fields.push({ ...baseObjectKeyField } as TextField)
 
   return fields
 }

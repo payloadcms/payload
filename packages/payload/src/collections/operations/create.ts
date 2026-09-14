@@ -27,7 +27,11 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
-import { getExternalUploadSource, sanitizeUploadData } from '../../uploads/sanitizeUploadData.js'
+import {
+  getExternalUploadSource,
+  getUploadDestination,
+  sanitizeUploadData,
+} from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -86,7 +90,19 @@ export const createOperation = async <
     // identity before persistence.
     if (args.collection.config.upload && !args.overrideAccess) {
       externalUploadSource = getExternalUploadSource(args.data)
-      args = { ...args, data: sanitizeUploadData(args.data, 'create') }
+      const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
+      const sanitizedData = sanitizeUploadData(args.data, 'create')
+      args = {
+        ...args,
+        data:
+          typeof sanitizedData === 'object' && sanitizedData !== null
+            ? {
+                ...sanitizedData,
+                ...(prefix !== undefined ? { prefix } : {}),
+                ...(objectKey !== undefined ? { _objectKey: objectKey } : {}),
+              }
+            : sanitizedData,
+      }
     }
 
     const initialCollectionConfig = args.collection.config

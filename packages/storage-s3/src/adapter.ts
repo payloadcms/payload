@@ -34,6 +34,7 @@ export function createS3Adapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
     clientUploads,
+    requiresClientUploadReceipt: true,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

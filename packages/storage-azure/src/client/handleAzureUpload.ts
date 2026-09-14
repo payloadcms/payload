@@ -1,4 +1,6 @@
 'use client'
+import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
+
 import { formatAdminURL } from 'payload/shared'
 
 // Balances upload parallelism against browser memory: `blockSize * concurrency`
@@ -31,7 +33,7 @@ export const handleAzureUpload = async ({
   serverHandlerPath,
   serverURL,
   updateFilename,
-}: HandleAzureUploadArgs): Promise<{ prefix: string }> => {
+}: HandleAzureUploadArgs): Promise<ClientUploadContext> => {
   const endpointRoute = formatAdminURL({
     apiRoute,
     path: serverHandlerPath,
@@ -54,13 +56,24 @@ export const handleAzureUpload = async ({
   }
 
   const {
-    docPrefix: sanitizedDocPrefix,
+    clientUploadContext,
     filename: sanitizedFilename,
     url,
   } = (await response.json()) as {
-    docPrefix: string
+    clientUploadContext?: unknown
     filename?: string
     url: string
+  }
+
+  if (
+    typeof clientUploadContext !== 'object' ||
+    clientUploadContext === null ||
+    !('prefix' in clientUploadContext) ||
+    typeof clientUploadContext.prefix !== 'string' ||
+    !('signedReceipt' in clientUploadContext) ||
+    typeof clientUploadContext.signedReceipt !== 'string'
+  ) {
+    throw new Error('Invalid Azure client upload reference')
   }
 
   if (sanitizedFilename && sanitizedFilename !== file.name) {
@@ -96,5 +109,9 @@ export const handleAzureUpload = async ({
     }
   }
 
-  return { prefix: sanitizedDocPrefix }
+  return {
+    prefix: clientUploadContext.prefix,
+    // Validated as a string above; re-typed to its branded receipt form for the return contract.
+    signedReceipt: clientUploadContext.signedReceipt as ClientUploadContext['signedReceipt'],
+  }
 }

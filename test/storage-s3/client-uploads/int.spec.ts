@@ -141,7 +141,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       .POST(signedURLEndpoint, {
         body: signedURLBody('media', 'image.png', file.length, 'image/png'),
       })
-      .then((res) => res.json<{ url: string }>())
+      .then((res) => res.json<{ filename: string; url: string }>())
 
     expect(url).toBeDefined()
 
@@ -159,7 +159,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     const res = await getAWSClient()
       .headObject({
         Bucket: getTestBucketName(),
-        Key: 'image.png',
+        Key: decodeURIComponent(new URL(url).pathname.split('/').slice(2).join('/')),
       })
       .catch((e) => {
         console.error(e)
@@ -261,7 +261,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       .POST(signedURLEndpoint, {
         body: signedURLBody('media', 'protected.png', file.length, 'image/png'),
       })
-      .then((res) => res.json<{ url: string }>())
+      .then((res) => res.json<{ filename: string; url: string }>())
     const upload = (body: Buffer) =>
       fetch(url, {
         body,
@@ -279,7 +279,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
 
     const stored = await getAWSClient().getObject({
       Bucket: getTestBucketName(),
-      Key: 'protected.png',
+      Key: decodeURIComponent(new URL(url).pathname.split('/').slice(2).join('/')),
     })
     expect(Buffer.from(await stored.Body!.transformToByteArray())).toEqual(file)
   })
@@ -441,6 +441,23 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
       expect(url).toContain('safe-image.png')
+    })
+
+    // Regression for #16694: trailing dots are stripped from the storage key the same way they
+    // are stripped from the DB filename, so the key and doc.filename stay in sync.
+    it('should strip trailing dots so the storage key matches the DB filename', async () => {
+      const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+
+      const { url } = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody('media-with-prefix', 'report...png', file.length, 'image/png'),
+        })
+        .then((res) => res.json<{ url: string }>())
+
+      expect(url).toBeDefined()
+      expect(url).toContain('test-prefix')
+      expect(url).toContain('report.png')
+      expect(url).not.toContain('report...png')
     })
   })
 

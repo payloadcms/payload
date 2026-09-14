@@ -33,6 +33,7 @@ export function createAzureAdapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
     clientUploads: isAzureClientUploadAllowed(collection) ? clientUploads : false,
+    requiresClientUploadReceipt: true,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

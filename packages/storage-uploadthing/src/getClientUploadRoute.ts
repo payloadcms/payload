@@ -5,7 +5,11 @@ import {
   type PayloadRequest,
   type UploadCollectionSlug,
 } from 'payload'
-import { assertClientUploadAccess, assertClientUploadAllowed } from 'payload/internal'
+import {
+  assertClientUploadAccess,
+  assertClientUploadAllowed,
+  createClientUploadReceipt,
+} from 'payload/internal'
 
 type Args = {
   access?: (args: {
@@ -67,9 +71,24 @@ export const getClientUploadRoute = ({
           })
         }
 
-        return {}
+        return {
+          collectionSlug,
+          filename: files[0]!.name,
+          user: {
+            userCollection: req.user?.collection ?? null,
+            userID: req.user?.id ?? null,
+          },
+        }
       })
-      .onUploadComplete(() => {}),
+      .onUploadComplete(({ file, metadata, req: rawReq }) => ({
+        signedReceipt: createClientUploadReceipt({
+          collectionSlug: metadata.collectionSlug,
+          context: { key: file.key },
+          filename: metadata.filename,
+          req: rawReq as PayloadRequest,
+          user: metadata.user,
+        }),
+      })),
   } satisfies FileRouter
 
   const { POST } = createRouteHandler({ config: { token }, router: uploadRouter })

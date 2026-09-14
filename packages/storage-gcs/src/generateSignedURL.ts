@@ -58,14 +58,15 @@ export const getGenerateSignedURLHandler = ({
       mimeType,
     })
 
-    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
-      collectionPrefix,
-      collectionSlug,
-      docPrefix,
-      filename,
-      req,
-      useCompositePrefixes,
-    })
+    const { clientUploadContext, fileKey, sanitizedDocPrefix, sanitizedFilename } =
+      await resolveSignedURLKey({
+        collectionPrefix,
+        collectionSlug,
+        docPrefix,
+        filename,
+        req,
+        useCompositePrefixes,
+      })
 
     const [url] = await getStorageClient()
       .bucket(bucket)
@@ -79,6 +80,7 @@ export const getGenerateSignedURLHandler = ({
       })
 
     return Response.json({
+      clientUploadContext,
       docPrefix: sanitizedDocPrefix,
       filename: sanitizedFilename,
       headers: { 'x-goog-if-generation-match': '0' },

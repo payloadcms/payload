@@ -11,71 +11,82 @@ const makeReq = (docs: unknown[] = []) =>
     },
   }) as unknown as PayloadRequest
 
-const makeCollection = (): CollectionConfig =>
-  ({ slug: 'media', upload: {} }) as unknown as CollectionConfig
+const makeCollection = ({
+  hasPrefixField = false,
+}: { hasPrefixField?: boolean } = {}): CollectionConfig =>
+  ({
+    slug: 'media',
+    fields: hasPrefixField ? [{ name: 'prefix', type: 'text' }] : [],
+    upload: {},
+  }) as unknown as CollectionConfig
+
+const whereOf = (req: PayloadRequest) =>
+  JSON.stringify(
+    (req.payload.find as unknown as { mock: { calls: [{ where: unknown }][] } }).mock.calls[0][0]
+      .where,
+  )
 
 describe('getFilePrefix', () => {
-  describe('prefixQueryParam shortcut', () => {
-    it('should return prefixQueryParam immediately without querying the database', async () => {
+  describe('verified clientUploadContext (trusted)', () => {
+    it('folds the server-owned object key into the prefix and skips the database', async () => {
       const req = makeReq()
 
       const result = await getFilePrefix({
+        clientUploadContext: { _objectKey: 'abc123', prefix: 'documents' },
         collection: makeCollection(),
-        prefixQueryParam: 'uuid-prefix',
         filename: 'logo.png',
         req,
       })
 
-      expect(result).toBe('uuid-prefix')
+      expect(result).toBe('documents/abc123')
       expect(req.payload.find).not.toHaveBeenCalled()
     })
 
-    it('should return an empty string when prefixQueryParam is an empty string', async () => {
+    it('returns the prefix alone when the context has no object key', async () => {
       const req = makeReq()
 
       const result = await getFilePrefix({
+        clientUploadContext: { prefix: 'documents' },
         collection: makeCollection(),
-        prefixQueryParam: '',
         filename: 'logo.png',
         req,
       })
 
-      expect(result).toBe('')
-      expect(req.payload.find).not.toHaveBeenCalled()
-    })
-
-    it('should reject multi-encoded values', async () => {
-      const req = makeReq()
-
-      const result = await getFilePrefix({
-        collection: makeCollection(),
-        prefixQueryParam: '%252e%252e%252fsecret%252f..%252fok',
-        filename: 'logo.png',
-        req,
-      })
-
-      expect(result).toBe('')
-      expect(req.payload.find).not.toHaveBeenCalled()
-    })
-
-    it('should reject malformed percent-encoding', async () => {
-      const req = makeReq()
-
-      const result = await getFilePrefix({
-        collection: makeCollection(),
-        prefixQueryParam: '%E0%A4%A',
-        filename: 'logo.png',
-        req,
-      })
-
-      expect(result).toBe('')
-      expect(req.payload.find).not.toHaveBeenCalled()
+      expect(result).toBe('documents')
     })
   })
 
-  describe('database fallback', () => {
-    it('should query the database when prefixQueryParam is not provided', async () => {
+  describe('access-controlled database resolution', () => {
+    it('does NOT short-circuit on a client-supplied prefix — the access-controlled query still runs', async () => {
+      const req = makeReq([{ _objectKey: 'abc123', prefix: 'documents' }])
+
+      await getFilePrefix({
+        collection: makeCollection({ hasPrefixField: true }),
+        filename: 'logo.png',
+        prefixQueryParam: 'documents',
+        req,
+      })
+
+      // A client-supplied prefix must not bypass the access-controlled lookup.
+      expect(req.payload.find).toHaveBeenCalledOnce()
+    })
+
+    it('queries with access control enabled and hidden fields', async () => {
       const req = makeReq([{ prefix: 'db-prefix' }])
+
+      await getFilePrefix({
+        collection: makeCollection(),
+        filename: 'logo.png',
+        req,
+      })
+
+      expect(req.payload.find).toHaveBeenCalledWith(
+        expect.objectContaining({ overrideAccess: false, req, showHiddenFields: true }),
+      )
+    })
+
+    it('folds the stored object key into the resolved prefix', async () => {
+      const req = makeReq([{ _objectKey: 'abc123', prefix: 'db-prefix' }])
 
       const result = await getFilePrefix({
         collection: makeCollection(),
@@ -83,11 +94,10 @@ describe('getFilePrefix', () => {
         req,
       })
 
-      expect(result).toBe('db-prefix')
-      expect(req.payload.find).toHaveBeenCalledOnce()
+      expect(result).toBe('db-prefix/abc123')
     })
 
-    it('should return empty string when no document is found', async () => {
+    it('returns an empty string when no document is found', async () => {
       const req = makeReq([])
 
       const result = await getFilePrefix({
@@ -99,7 +109,7 @@ describe('getFilePrefix', () => {
       expect(result).toBe('')
     })
 
-    it('should prioritize clientUploadContext prefix over database query', async () => {
+    it('prioritizes a verified clientUploadContext over the database query', async () => {
       const req = makeReq([{ prefix: 'db-prefix' }])
 
       const result = await getFilePrefix({
@@ -111,6 +121,34 @@ describe('getFilePrefix', () => {
 
       expect(result).toBe('context-prefix')
       expect(req.payload.find).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('client prefix as a disambiguation filter only', () => {
+    it('adds the prefix filter when the collection persists a prefix field', async () => {
+      const req = makeReq([{ prefix: 'documents' }])
+
+      await getFilePrefix({
+        collection: makeCollection({ hasPrefixField: true }),
+        filename: 'logo.png',
+        prefixQueryParam: 'documents',
+        req,
+      })
+
+      expect(whereOf(req)).toContain('prefix')
+    })
+
+    it('omits the prefix filter when the collection has no prefix field (avoids querying a missing field)', async () => {
+      const req = makeReq([{ prefix: '' }])
+
+      await getFilePrefix({
+        collection: makeCollection({ hasPrefixField: false }),
+        filename: 'logo.png',
+        prefixQueryParam: 'anything',
+        req,
+      })
+
+      expect(whereOf(req)).not.toContain('prefix')
     })
   })
 })

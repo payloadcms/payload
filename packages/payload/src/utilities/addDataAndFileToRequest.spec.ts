@@ -79,6 +79,9 @@ const createClientUploadReq = ({
         error: () => {},
       },
     } as unknown as PayloadRequest['payload'],
+    routeParams: {
+      collection: 'media',
+    },
   }
 }
 
@@ -95,93 +98,13 @@ describe('addDataAndFileToRequest', () => {
     expect(req.file?.mimetype).toBe('text/plain')
   })
 
-  describe('client uploads', () => {
-    const tempFilesToRemove: string[] = []
-
-    afterEach(async () => {
-      for (const tempFilePath of tempFilesToRemove) {
-        await fs.rm(tempFilePath, { force: true })
-      }
-      tempFilesToRemove.length = 0
-    })
-
-    it('materializes client-upload metadata without buffering an unused cloud file', async () => {
-      const handler = vi.fn(() => {
-        throw new Error('No-content handler was invoked')
-      })
-      const req = createClientUploadReq({
-        file: {
-          clientUploadContext: { prefix: '' },
-          collectionSlug: 'media',
-          filename: 'large.mp4',
-          mimeType: 'video/mp4',
-          size: 5_000_000_000,
-        },
-        handler,
-        upload: { disableLocalStorage: true },
-      })
-
-      await addDataAndFileToRequest(req as PayloadRequest)
-
-      expect(handler).not.toHaveBeenCalled()
-      expect(req.file).toMatchObject({
-        clientUploadContext: { prefix: '' },
-        mimetype: 'video/mp4',
-        name: 'large.mp4',
-        size: 5_000_000_000,
-      })
-      expect(req.file?.data.length).toBe(0)
-    })
-
-    it('streams a full-content client upload to a temp file without buffering the whole body', async () => {
-      const chunks = [Buffer.from('chunk-one-'), Buffer.from('chunk-two')]
-      const stream = new ReadableStream({
-        start(controller) {
-          for (const chunk of chunks) {
-            controller.enqueue(chunk)
-          }
-          controller.close()
-        },
-      })
-      const response = new Response(stream, {
-        headers: { 'Content-Type': 'video/mp4' },
-        status: 200,
-      })
-      const arrayBufferTripwire = vi.fn(async () => {
-        throw new Error('Unexpected whole-body buffering')
-      })
-      Object.defineProperty(response, 'arrayBuffer', { value: arrayBufferTripwire })
-
-      const handler = vi.fn(async () => response)
-      const req = createClientUploadReq({
-        file: {
-          clientUploadContext: { prefix: '' },
-          collectionSlug: 'media',
-          filename: 'clip.mp4',
-          mimeType: 'video/mp4',
-          size: 20,
-        },
-        handler,
-        upload: { disableLocalStorage: true, mimeTypes: ['video/*'] },
-      })
-
-      await addDataAndFileToRequest(req as PayloadRequest)
-      tempFilesToRemove.push(req.file!.tempFilePath!)
-
-      expect(arrayBufferTripwire).not.toHaveBeenCalled()
-      expect(req.file?.data.length).toBe(0)
-      expect(req.file?.tempFilePath).toBeDefined()
-      const written = await fs.readFile(req.file!.tempFilePath!)
-      expect(written.toString()).toBe(chunks.map((chunk) => chunk.toString()).join(''))
-    })
-  })
-
-  it('should handle upload instructions with the route collection', async () => {
+  it('should reject unsigned upload instructions before the route handler', async () => {
     const formData = new FormData()
     formData.append(
       'file',
       JSON.stringify({
         collectionSlug: 'private-media',
+        clientUploadContext: { prefix: 'private' },
         filename: 'example.txt',
         mimeType: 'text/plain',
         size: 11,
@@ -220,6 +143,7 @@ describe('addDataAndFileToRequest', () => {
             config: {
               upload: {
                 handlers: [publicHandler],
+                requiresClientUploadReceipt: true,
               },
             },
           },
@@ -237,20 +161,13 @@ describe('addDataAndFileToRequest', () => {
       },
     }
 
-    await addDataAndFileToRequest(req as PayloadRequest)
+    await expect(addDataAndFileToRequest(req as PayloadRequest)).rejects.toThrow(
+      'A verified client upload reference is required.',
+    )
 
     expect(privateHandler).not.toHaveBeenCalled()
-    expect(publicHandler).toHaveBeenCalledWith(
-      req,
-      expect.objectContaining({
-        params: expect.objectContaining({
-          collection: 'public-media',
-          filename: 'example.txt',
-        }),
-      }),
-    )
-    expect(req.file?.name).toBe('example.txt')
-    expect(req.file?.mimetype).toBe('text/plain')
+    expect(publicHandler).not.toHaveBeenCalled()
+    expect(req.file).toBeUndefined()
   })
 
   it('should require a route collection for upload instructions', async () => {
@@ -355,5 +272,86 @@ describe('addDataAndFileToRequest', () => {
     )
 
     expect(handler).not.toHaveBeenCalled()
+  })
+
+  describe('client uploads', () => {
+    const tempFilesToRemove: string[] = []
+
+    afterEach(async () => {
+      for (const tempFilePath of tempFilesToRemove) {
+        await fs.rm(tempFilePath, { force: true })
+      }
+      tempFilesToRemove.length = 0
+    })
+
+    it('materializes client-upload metadata without buffering an unused cloud file', async () => {
+      const handler = vi.fn(() => {
+        throw new Error('No-content handler was invoked')
+      })
+      const req = createClientUploadReq({
+        file: {
+          clientUploadContext: { prefix: '' },
+          collectionSlug: 'media',
+          filename: 'large.mp4',
+          mimeType: 'video/mp4',
+          size: 5_000_000_000,
+        },
+        handler,
+        upload: { disableLocalStorage: true },
+      })
+
+      await addDataAndFileToRequest(req as PayloadRequest)
+
+      expect(handler).not.toHaveBeenCalled()
+      expect(req.file).toMatchObject({
+        clientUploadContext: { prefix: '' },
+        mimetype: 'video/mp4',
+        name: 'large.mp4',
+        size: 5_000_000_000,
+      })
+      expect(req.file?.data.length).toBe(0)
+    })
+
+    it('streams a full-content client upload to a temp file without buffering the whole body', async () => {
+      const chunks = [Buffer.from('chunk-one-'), Buffer.from('chunk-two')]
+      const stream = new ReadableStream({
+        start(controller) {
+          for (const chunk of chunks) {
+            controller.enqueue(chunk)
+          }
+          controller.close()
+        },
+      })
+      const response = new Response(stream, {
+        headers: { 'Content-Type': 'video/mp4' },
+        status: 200,
+      })
+      const arrayBufferTripwire = vi.fn(async () => {
+        throw new Error('Unexpected whole-body buffering')
+      })
+      Object.defineProperty(response, 'arrayBuffer', { value: arrayBufferTripwire })
+
+      const handler = vi.fn(async () => response)
+      const req = createClientUploadReq({
+        file: {
+          clientUploadContext: { prefix: '' },
+          collectionSlug: 'media',
+          filename: 'clip.mp4',
+          mimeType: 'video/mp4',
+          size: 20,
+        },
+        handler,
+        upload: { disableLocalStorage: true, mimeTypes: ['video/*'] },
+      })
+
+      await addDataAndFileToRequest(req as PayloadRequest)
+      tempFilesToRemove.push(req.file!.tempFilePath!)
+
+      expect(arrayBufferTripwire).not.toHaveBeenCalled()
+      expect(req.file?.data.length).toBe(0)
+      expect(req.file?.tempFilePath).toBeDefined()
+      const written = await fs.readFile(req.file!.tempFilePath!)
+      expect(written.toString()).toBe(chunks.map((chunk) => chunk.toString()).join(''))
+    })
   })
 })

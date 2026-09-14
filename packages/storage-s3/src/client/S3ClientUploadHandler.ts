@@ -1,4 +1,6 @@
 'use client'
+import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
+
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
@@ -11,7 +13,7 @@ export const S3ClientUploadHandler = createClientUploadHandler({
     serverHandlerPath,
     serverURL,
     updateFilename,
-  }) => {
+  }): Promise<ClientUploadContext> => {
     const endpointRoute = formatAdminURL({
       apiRoute,
       path: serverHandlerPath,
@@ -40,12 +42,12 @@ export const S3ClientUploadHandler = createClientUploadHandler({
     }
 
     const {
-      docPrefix: sanitizedDocPrefix,
+      clientUploadContext,
       filename: sanitizedFilename,
       headers,
       url,
     } = (await response.json()) as {
-      docPrefix: string
+      clientUploadContext: ClientUploadContext
       filename?: string
       headers: Record<string, string>
       url: string
@@ -66,7 +68,7 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       throw new Error(`Upload failed with status ${upload.status}`)
     }
 
-    // return the docPrefix so the client can update the field value accordingly
-    return { prefix: sanitizedDocPrefix }
+    // Return the server-issued upload context for the document request.
+    return { prefix: clientUploadContext.prefix, signedReceipt: clientUploadContext.signedReceipt }
   },
 })

@@ -14,11 +14,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import {
-  collectionPrefix,
-  createClientUploadPayload,
-  mediaWithCompositePrefixesSlug,
-} from '../shared.js'
+import { mediaWithCompositePrefixesSlug } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -92,17 +88,32 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
 
   it('should fetch a client-uploaded file using collection and document prefixes', async () => {
     const docPrefix = 'document-prefix'
-    const uploadedFilename = 'client-composite-image.png'
-    const pathname = `${collectionPrefix}/${docPrefix}/${uploadedFilename}`
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const issued = await restClient
+      .POST(`${serverHandlerPath}?issue-client-upload=1`, {
+        body: JSON.stringify({
+          collectionSlug: mediaWithCompositePrefixesSlug,
+          docPrefix,
+          filename: 'client-composite-image.png',
+          mimeType: 'image/png',
+        }),
+      })
+      .then((res) =>
+        res.json<{
+          clientUploadContext: { prefix: string; signedReceipt: string }
+          filename: string
+          pathname: string
+        }>(),
+      )
 
     // Upload the file to Vercel Blob with the same collection and document prefixes that the client upload handler would use
     //
-    await upload(pathname, new Blob([file], { type: 'image/png' }), {
+    await upload(issued.pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
-      clientPayload: createClientUploadPayload({
+      clientPayload: JSON.stringify({
         collectionSlug: mediaWithCompositePrefixesSlug,
         mimeType: 'image/png',
+        signedReceipt: issued.clientUploadContext.signedReceipt,
       }),
       contentType: 'image/png',
       handleUploadUrl,
@@ -120,11 +131,9 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
     formData.append(
       'file',
       JSON.stringify({
-        clientUploadContext: {
-          prefix: docPrefix,
-        },
+        clientUploadContext: issued.clientUploadContext,
         collectionSlug: mediaWithCompositePrefixesSlug,
-        filename: uploadedFilename,
+        filename: issued.filename,
         mimeType: 'image/png',
         size: file.length,
       }),
@@ -138,10 +147,10 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
 
     const createdDoc = (await createResponse.json()) as Document
 
-    expect(createdDoc?.doc.prefix).toBe(docPrefix)
+    expect(createdDoc?.doc.prefix).toBe(issued.clientUploadContext.prefix)
 
     const fileResponse = await restClient.GET(
-      `/${mediaWithCompositePrefixesSlug}/file/${uploadedFilename}?prefix=${encodeURIComponent(docPrefix)}`,
+      `/${mediaWithCompositePrefixesSlug}/file/${issued.filename}?prefix=${encodeURIComponent(issued.clientUploadContext.prefix)}`,
     )
 
     expect(fileResponse.status).toBe(200)

@@ -28,6 +28,7 @@ export function createGcsAdapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'gcs',
     clientUploads,
+    requiresClientUploadReceipt: true,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

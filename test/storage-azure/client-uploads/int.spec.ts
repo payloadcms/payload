@@ -52,8 +52,8 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
   /**
    * When a doc with the same filename already exists, the signed-URL endpoint
-   * should sanitize the filename (e.g. `duplicate-target-1.png`) so the
-   * browser PUT lands on a fresh blob instead of overwriting the existing one.
+   * should issue a unique filename so the browser PUT lands on a fresh blob
+   * instead of overwriting the existing one.
    */
   it('sanitizes the filename when a duplicate already exists', async () => {
     const dupFilename = 'duplicate-target.png'
@@ -84,7 +84,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
     )
 
-    expect(blobKey).toBe('duplicate-target-1.png')
+    expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1\.png$/)
 
     await payload.delete({ id: seedDoc.id, collection: mediaSlug })
   })

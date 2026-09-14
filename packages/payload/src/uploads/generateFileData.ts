@@ -257,6 +257,7 @@ export const generateFileData = async <T>({
         withMetadata: withMetadata!,
       })
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
+      delete file.clientUploadContext
       ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
@@ -367,6 +368,8 @@ export const generateFileData = async <T>({
         fileData.filesize = info.size
       }
 
+      delete file.clientUploadContext
+      delete fileForResize.clientUploadContext
       if (file.tempFilePath) {
         await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
       } else {

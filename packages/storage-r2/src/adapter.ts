@@ -24,6 +24,7 @@ export function createR2Adapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'r2',
     clientUploads,
+    requiresClientUploadReceipt: true,
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
       deleteFile({

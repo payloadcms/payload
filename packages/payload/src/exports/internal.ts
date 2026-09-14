@@ -8,6 +8,14 @@ export {
   assertClientUploadAllowed,
   assertClientUploadFileSize,
 } from '../uploads/assertClientUploadAllowed.js'
+export {
+  createClientUploadReceipt,
+  verifyClientUploadReceipt,
+} from '../uploads/clientUploadReceipt.js'
+export type {
+  ClientUploadReceipt,
+  SignedClientUploadReceipt,
+} from '../uploads/clientUploadReceipt.js'
 export { getExternalFile } from '../uploads/getExternalFile.js'
 export { isSvgMimeType, isXmlMimeType } from '../uploads/getFileTypeIdentity.js'
 export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'

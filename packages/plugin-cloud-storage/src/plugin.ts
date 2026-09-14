@@ -179,6 +179,7 @@ export const cloudStoragePlugin =
                   ? options.disableLocalStorage
                   : true,
               handlers,
+              requiresClientUploadReceipt: adapter.requiresClientUploadReceipt,
               skipSafeFetch: getSkipSafeFetchSetting(),
             },
           }

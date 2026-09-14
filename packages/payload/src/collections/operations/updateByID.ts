@@ -24,7 +24,7 @@ import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
-  getUploadDestinationPrefix,
+  getUploadDestination,
   mergeUploadDataWithDocument,
   sanitizeUploadData,
 } from '../../uploads/sanitizeUploadData.js'
@@ -79,14 +79,18 @@ export const updateByIDOperation = async <
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     if (args.collection.config.upload && !args.overrideAccess) {
-      const uploadDestinationPrefix = getUploadDestinationPrefix(args.data, args.req.file)
+      const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
       const data = sanitizeUploadData(args.data, 'update')
 
       args = {
         ...args,
         data:
-          uploadDestinationPrefix !== undefined && typeof data === 'object' && data !== null
-            ? { ...data, prefix: uploadDestinationPrefix }
+          typeof data === 'object' && data !== null
+            ? {
+                ...data,
+                ...(prefix !== undefined ? { prefix } : {}),
+                ...(objectKey !== undefined ? { _objectKey: objectKey } : {}),
+              }
             : data,
       }
     }

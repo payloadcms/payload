@@ -31,6 +31,7 @@ export function createVercelBlobAdapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
     clientUploads,
+    requiresClientUploadReceipt: true,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

@@ -15,12 +15,13 @@ const serverURL = 'https://example.com'
 const apiRoute = '/api'
 const serverHandlerPath = '/storage-azure-generate-signed-url' as const
 const signedURL = 'https://account.blob.core.windows.net/container/file.png?sig=abc'
+const clientUploadContext = { prefix: 'docs', signedReceipt: 'receipt' }
 
 const createFile = () => new File([new Uint8Array([1, 2, 3])], 'file.png', { type: 'image/png' })
 
 const mockSignedURLResponse = (body: Record<string, unknown>, ok = true) => {
   const fetchMock = vi.fn().mockResolvedValue({
-    json: () => Promise.resolve(body),
+    json: () => Promise.resolve({ clientUploadContext, ...body }),
     ok,
   })
   vi.stubGlobal('fetch', fetchMock)
@@ -81,12 +82,13 @@ describe('handleAzureUpload', () => {
       expect(updateFilename).not.toHaveBeenCalled()
     })
 
-    it('should return the sanitized doc prefix', async () => {
-      mockSignedURLResponse({ docPrefix: 'sanitized-docs', url: signedURL })
+    it('should reject a missing upload reference before uploading', async () => {
+      mockSignedURLResponse({ clientUploadContext: undefined, docPrefix: 'docs', url: signedURL })
 
-      const result = await invoke()
+      await expect(invoke()).rejects.toThrow('Invalid Azure client upload reference')
 
-      expect(result).toEqual({ prefix: 'sanitized-docs' })
+      expect(uploadDataMock).not.toHaveBeenCalled()
+      expect(blockBlobClientMock).not.toHaveBeenCalled()
     })
 
     it('should throw when the signed URL request fails, before any upload', async () => {
@@ -164,7 +166,7 @@ describe('handleAzureUpload', () => {
     it('should throw when the raw PUT is rejected', async () => {
       const fetchMock = mockSignedURLResponse({ docPrefix: 'docs', url: signedURL })
       fetchMock.mockResolvedValueOnce({
-        json: () => Promise.resolve({ docPrefix: 'docs', url: signedURL }),
+        json: () => Promise.resolve({ clientUploadContext, docPrefix: 'docs', url: signedURL }),
         ok: true,
       })
       fetchMock.mockResolvedValueOnce({ ok: false })
