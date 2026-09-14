@@ -233,6 +233,7 @@ export async function resolveJoins({
             })
           : joinQuery.sort || joinDef.field.defaultSort || targetConfig.defaultSort,
         timestamps: true,
+        versions: useDrafts,
       })
 
       const projection = buildJoinProjection(dbFieldName, useDrafts, sort)

@@ -46,6 +46,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
       locale,
       sort: sortArg || '-updatedAt',
       timestamps: true,
+      versions: true,
     })
   }
 

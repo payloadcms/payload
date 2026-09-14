@@ -318,6 +318,7 @@ export const buildJoinAggregation = async ({
         locale,
         sort: useDrafts ? getQueryDraftsSort({ collectionConfig, sort: sortJoin }) : sortJoin,
         timestamps: true,
+        versions: useDrafts,
       })
       const sortProperty = Object.keys(sort)[0]!
       const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
