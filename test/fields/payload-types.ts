@@ -98,6 +98,8 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'select-fields': SelectField;
     'slug-fields': SlugField;
+    'slug-fields-async': SlugFieldsAsync;
+    'slug-fields-async-autosave': SlugFieldsAsyncAutosave;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
@@ -142,6 +144,8 @@ export interface Config {
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
+    'slug-fields-async': SlugFieldsAsyncSelect<false> | SlugFieldsAsyncSelect<true>;
+    'slug-fields-async-autosave': SlugFieldsAsyncAutosaveSelect<false> | SlugFieldsAsyncAutosaveSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -1648,6 +1652,37 @@ export interface SlugField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields-async".
+ */
+export interface SlugFieldsAsync {
+  id: string;
+  title?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields-async-autosave".
+ */
+export interface SlugFieldsAsyncAutosave {
+  id: string;
+  title?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields-2".
  */
 export interface TabsFields2 {
@@ -2094,6 +2129,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'slug-fields';
         value: string | SlugField;
+      } | null)
+    | ({
+        relationTo: 'slug-fields-async';
+        value: string | SlugFieldsAsync;
+      } | null)
+    | ({
+        relationTo: 'slug-fields-async-autosave';
+        value: string | SlugFieldsAsyncAutosave;
       } | null)
     | ({
         relationTo: 'tabs-fields-2';
@@ -3471,6 +3514,29 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   test?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields-async_select".
+ */
+export interface SlugFieldsAsyncSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields-async-autosave_select".
+ */
+export interface SlugFieldsAsyncAutosaveSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
