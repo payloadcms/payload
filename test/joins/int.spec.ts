@@ -1880,6 +1880,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             status: 'available',
             tags: ['available'],
           },
+          mixedTags: ['available'],
           owner: user,
           parent,
           score: 5,
@@ -1901,6 +1902,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             tags: ['available'],
           },
           details_status: 'available',
+          mixedTags: 'not-permitted',
           owner: user,
           parent,
           score: 15,
@@ -2382,21 +2384,31 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       },
     )
 
-    test('should reject polymorphic join constraints for incompatible field shapes', async ({
+    test('should filter has-many and single select fields that share option values', async ({
       payload,
     }) => {
-      const { parent } = await createConstrainedJoinDocuments(payload)
+      const { allowedChild, parent, restrictedChild } =
+        await createConstrainedJoinDocuments(payload)
 
-      await expect(
-        payload.findByID({
-          id: parent.id,
-          collection: accessJoinParentsSlug,
-          context: { useMixedFieldShapeAccessConstraint: true },
-          depth: 1,
-          overrideAccess: false,
-          user,
-        }),
-      ).rejects.toThrow('The following path cannot be queried: mixedTags.equals')
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useMixedFieldShapeAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const resultIDs = result.children.docs.map(({ value }) => value.id.toString())
+
+      expect(resultIDs).toContain(allowedChild.id.toString())
+      expect(resultIDs).not.toContain(restrictedChild.id.toString())
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.totalDocs).toBe(1)
     })
 
     test('should apply nested has-many select access constraints', async ({ payload }) => {
@@ -2501,21 +2513,27 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       },
     )
 
-    test('should reject polymorphic join constraints for incompatible nested field shapes', async ({
+    test('should filter nested has-many and single select fields that share option values', async ({
       payload,
     }) => {
-      const { parent } = await createConstrainedJoinDocuments(payload)
+      const { children, parent } = await createConstrainedJoinDocuments(payload)
 
-      await expect(
-        payload.findByID({
-          id: parent.id,
-          collection: accessJoinParentsSlug,
-          context: { useNestedMixedFieldShapeAccessConstraint: true },
-          depth: 1,
-          overrideAccess: false,
-          user,
-        }),
-      ).rejects.toThrow('The following path cannot be queried: details.mixedTags.equals')
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useNestedMixedFieldShapeAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(children.length)
+      expect(result.children.totalDocs).toBe(children.length)
     })
 
     test('should use exact matching for has-many select contains access constraints', async ({
