@@ -16,6 +16,7 @@ import './LexicalEditor.css'
 import { EditorPlugin } from './EditorPlugin.js'
 import { ClipboardPlugin } from './plugins/ClipboardPlugin/index.js'
 import { DecoratorPlugin } from './plugins/DecoratorPlugin/index.js'
+import { EnsureRootNotEmptyPlugin } from './plugins/EnsureRootNotEmpty/index.js'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/index.js'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
@@ -113,6 +114,7 @@ export const LexicalEditor: React.FC<
           ErrorBoundary={LexicalErrorBoundary}
         />
         <NormalizeSelectionPlugin />
+        <EnsureRootNotEmptyPlugin />
         {isEditable && <InsertParagraphAtEndPlugin />}
         <DecoratorPlugin />
         <ClipboardPlugin />
