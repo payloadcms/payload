@@ -1,5 +1,13 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { getPayload } from 'payload'
-import config from '../../../src/payload.config'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+if (typeof process.loadEnvFile === 'function' && !process.env.DATABASE_URL) {
+  try {
+    process.loadEnvFile(path.resolve(__dirname, '../../../.env'))
+  } catch {}
+}
 
 export const testUser = {
   email: 'dev@payloadcms.com',
@@ -10,6 +18,7 @@ export const publishedPostSlug = 'e2e-published-post'
 export const draftPostSlug = 'e2e-draft-post'
 
 export async function seedTestData(): Promise<void> {
+  const { default: config } = await import('../../../src/payload.config')
   const payload = await getPayload({ config })
 
   // Clean existing test posts
@@ -67,7 +76,7 @@ export async function seedTestData(): Promise<void> {
         },
         {
           blockType: 'featureGrid',
-          title: 'E2E Feature Grid Title',
+          sectionTitle: 'E2E Feature Grid Title',
           features: [
             {
               title: 'Feature Alpha',
@@ -102,6 +111,7 @@ export async function seedTestData(): Promise<void> {
 }
 
 export async function cleanupTestData(): Promise<void> {
+  const { default: config } = await import('../../../src/payload.config')
   const payload = await getPayload({ config })
   await payload.delete({
     collection: 'posts',

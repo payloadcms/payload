@@ -1,11 +1,21 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
-import 'dotenv/config'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+if (typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile(path.resolve(__dirname, '.env'))
+  } catch {}
+}
 
 export default defineConfig({
   testDir: './tests/e2e',
+  timeout: 60 * 1000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   reporter: 'html',
   use: {
     baseURL: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
@@ -18,9 +28,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm dev',
+    command: process.env.PORT ? `pnpm dev -p ${process.env.PORT}` : 'pnpm dev',
     reuseExistingServer: true,
-    url: 'http://localhost:3000',
+    url: process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000',
     timeout: 120 * 1000,
   },
 })

@@ -24,7 +24,7 @@ test.describe('Frontend & Content Delivery', () => {
     await page.goto(`/posts/${publishedPostSlug}`)
 
     // 1. Post Header & Title
-    await expect(page.locator('h1')).toHaveText('E2E Published Post Title')
+    await expect(page.locator('.template-post__intro h1')).toHaveText('E2E Published Post Title')
     await expect(page.locator('.template-post__back')).toBeVisible()
 
     // 2. RichText content
@@ -32,7 +32,9 @@ test.describe('Frontend & Content Delivery', () => {
 
     // 3. Modular Layout Blocks
     // Hero block
-    await expect(page.locator('h2', { hasText: 'E2E Hero Block Headline' })).toBeVisible()
+    await expect(
+      page.locator('.block-hero h1', { hasText: 'E2E Hero Block Headline' }),
+    ).toBeVisible()
     await expect(page.getByText('E2E Hero Subheadline text')).toBeVisible()
     const heroCta = page.locator('a', { hasText: 'Explore CTA' })
     await expect(heroCta).toBeVisible()
@@ -40,8 +42,8 @@ test.describe('Frontend & Content Delivery', () => {
 
     // FeatureGrid block
     await expect(page.locator('h2', { hasText: 'E2E Feature Grid Title' })).toBeVisible()
-    await expect(page.getByText('Feature Alpha')).toBeVisible()
-    await expect(page.getByText('Feature Beta')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Feature Alpha' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Feature Beta' })).toBeVisible()
 
     // CallToAction block
     await expect(page.locator('h2', { hasText: 'Ready for Action?' })).toBeVisible()
