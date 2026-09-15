@@ -29,7 +29,9 @@ import { Media2 } from './collections/Media2.js'
 import Posts from './collections/Posts.js'
 import RestoreAccess from './collections/RestoreAccess.js'
 import RestoreAccessLocalized from './collections/RestoreAccessLocalized.js'
+import { SecondaryAdminUsers } from './collections/SecondaryAdminUsers.js'
 import { TextCollection } from './collections/Text.js'
+import { Users } from './collections/Users.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
@@ -81,6 +83,8 @@ export default buildConfigWithDefaults({
     Media2,
     RestoreAccess,
     RestoreAccessLocalized,
+    Users,
+    SecondaryAdminUsers,
   ],
   globals: [
     AutosaveGlobal,

@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'secondary-admin-users': SecondaryAdminUserAuthOperations;
   };
   blocks: {};
   collections: {
@@ -89,8 +90,11 @@ export interface Config {
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
-    'payload-kv': PayloadKv;
+    'restore-access': RestoreAccess;
+    'restore-access-localized': RestoreAccessLocalized;
     users: User;
+    'secondary-admin-users': SecondaryAdminUser;
+    'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -120,8 +124,11 @@ export interface Config {
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'restore-access': RestoreAccessSelect<false> | RestoreAccessSelect<true>;
+    'restore-access-localized': RestoreAccessLocalizedSelect<false> | RestoreAccessLocalizedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'secondary-admin-users': SecondaryAdminUsersSelect<false> | SecondaryAdminUsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -161,7 +168,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | SecondaryAdminUser;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -174,6 +181,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface SecondaryAdminUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -290,6 +315,7 @@ export interface DraftPost {
     | null;
   relation?: (string | null) | DraftPost;
   restrictedToUpdate?: boolean | null;
+  restrictedToSecondaryCollection?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -765,6 +791,54 @@ export interface Media2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access".
+ */
+export interface RestoreAccess {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-localized".
+ */
+export interface RestoreAccessLocalized {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "secondary-admin-users".
+ */
+export interface SecondaryAdminUser {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'secondary-admin-users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -968,14 +1042,31 @@ export interface PayloadLockedDocument {
         value: string | Media2;
       } | null)
     | ({
+        relationTo: 'restore-access';
+        value: string | RestoreAccess;
+      } | null)
+    | ({
+        relationTo: 'restore-access-localized';
+        value: string | RestoreAccessLocalized;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -985,10 +1076,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      };
   key?: string | null;
   value?:
     | {
@@ -1109,6 +1205,7 @@ export interface DraftPostsSelect<T extends boolean = true> {
       };
   relation?: T;
   restrictedToUpdate?: T;
+  restrictedToSecondaryCollection?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1447,11 +1544,23 @@ export interface Media2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
+ * via the `definition` "restore-access_select".
  */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
+export interface RestoreAccessSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-localized_select".
+ */
+export interface RestoreAccessLocalizedSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1475,6 +1584,37 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "secondary-admin-users_select".
+ */
+export interface SecondaryAdminUsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1813,7 +1953,15 @@ export interface TaskSchedulePublish {
           value: string | DraftPostsWithChangeHook;
         } | null);
     global?: ('draft-global' | 'draft-unlimited-global') | null;
-    user?: (string | null) | User;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: string | User;
+        } | null)
+      | ({
+          relationTo: 'secondary-admin-users';
+          value: string | SecondaryAdminUser;
+        } | null);
   };
   output?: unknown;
 }
