@@ -12176,7 +12176,7 @@ const printReport = ({ findings, jsonPath, packagesAudited, scope, severity, }) 
             `${RED}${finding.vulnerable}${RESET} fixed in ` +
             `${GREEN}${finding.fixed_in}${RESET}${origin}`);
         for (const bump of finding.bumps) {
-            printBump(bump);
+            printBump({ bump, module: finding.package });
         }
     }
     console.log('');
@@ -12198,12 +12198,12 @@ const printAllowlistReview = (findings) => {
     for (const finding of resolvable) {
         console.log(`${BOLD}${finding.advisory}${RESET} (${finding.package}) — remove allowlist entry:`);
         for (const bump of finding.bumps.filter(isResolvableBump)) {
-            printBump(bump);
+            printBump({ bump, module: finding.package });
         }
     }
 };
-/** Prints the remediation for one direct dependency: the minimal bump, or why none applies. */
-const printBump = ({ currentSpec, dependency, fix, workspacePackages }) => {
+/** Prints the remediation for one direct dependency: the minimal bump, relock, or why none applies. */
+const printBump = ({ bump: { currentSpec, dependency, fix, workspacePackages }, module, }) => {
     const where = workspacePackages.length > 0 ? ` (in ${workspacePackages.join(', ')})` : '';
     if (fix.status === 'unknown') {
         const cause = fix.reason === 'registry'
@@ -12217,8 +12217,9 @@ const printBump = ({ currentSpec, dependency, fix, workspacePackages }) => {
         return;
     }
     if (fix.status === 'relock') {
-        console.log(`  ${dependency}: no bump needed — ${currentSpec ?? 'current range'} already resolves ` +
-            `${GREEN}>=${fix.version}${RESET}; refresh lockfile (pnpm update ${dependency})${where}`);
+        const range = currentSpec ?? 'current range';
+        console.log(`  ${dependency} ${range}: no bump needed — already allows a patched ${module}; ` +
+            `refresh lockfile: ${GREEN}pnpm update ${module}${RESET}${where}`);
         return;
     }
     const from = currentSpec ? `from ${currentSpec} ` : '';
