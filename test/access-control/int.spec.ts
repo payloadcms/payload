@@ -1352,7 +1352,9 @@ describe('Access Control', () => {
             field: 'restrictedRelatedItems.id' as any,
             overrideAccess: false,
           }),
-        ).rejects.toThrow('The following path cannot be queried: restrictedRelatedItems.id')
+        ).rejects.toThrow(
+          'Field restrictedRelatedItems.id was not found in the collection unrestricted',
+        )
       })
 
       it('should reject distinct paths through unreadable relationship fields', async () => {
