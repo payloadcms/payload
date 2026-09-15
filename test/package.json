@@ -62,6 +62,7 @@
     "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/plugin-nested-docs": "workspace:*",
+    "@payloadcms/plugin-realtime": "workspace:*",
     "@payloadcms/plugin-redirects": "workspace:*",
     "@payloadcms/plugin-search": "workspace:*",
     "@payloadcms/plugin-sentry": "workspace:*",
