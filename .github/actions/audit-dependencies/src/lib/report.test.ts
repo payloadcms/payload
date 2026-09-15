@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { AllowlistEntry } from './allowlist'
-import type { AdvisoryHit, PnpmAdvisory } from '../types'
+import type { AdvisoryHit, DirectDependency, PnpmAdvisory } from '../types'
 
 import { findStaleAllowlist, toFindings } from './report'
 
@@ -18,9 +18,16 @@ const advisory = (overrides: Partial<PnpmAdvisory>): PnpmAdvisory => ({
   ...overrides,
 })
 
-const hit = (overrides: Partial<PnpmAdvisory>, originPackages: string[] = []): AdvisoryHit => ({
+const hit = (
+  overrides: Partial<PnpmAdvisory>,
+  originPackages: string[] = [],
+  paths: string[] = [],
+  directDeps: DirectDependency[] = [],
+): AdvisoryHit => ({
   advisory: advisory(overrides),
+  directDeps,
   originPackages,
+  paths,
 })
 
 describe('toFindings', () => {
@@ -74,6 +81,26 @@ describe('toFindings', () => {
 
     expect(findings.map((finding) => finding.package)).toEqual(['alpha', 'beta', 'zeta'])
     expect(findings[0].originPackages).toEqual(['payload'])
+  })
+
+  it('carries dependency paths and direct-dep remediation through to findings', () => {
+    const findings = toFindings({
+      hits: [
+        hit(
+          { github_advisory_id: 'GHSA-0000-0000-0020' },
+          ['ui'],
+          ['ui > @monaco-editor/react > monaco-editor'],
+          [{ dependency: '@monaco-editor/react', workspacePackage: 'ui' }],
+        ),
+      ],
+      ignoreGhsas: [],
+      threshold: 'high',
+    })
+
+    expect(findings[0].paths).toEqual(['ui > @monaco-editor/react > monaco-editor'])
+    expect(findings[0].directDeps).toEqual([
+      { dependency: '@monaco-editor/react', workspacePackage: 'ui' },
+    ])
   })
 })
 

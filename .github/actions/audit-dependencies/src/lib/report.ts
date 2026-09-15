@@ -28,11 +28,13 @@ export const toFindings = ({
     .filter(({ advisory }) => isFixable(advisory.patched_versions))
     .filter(({ advisory }) => meetsThreshold({ advisorySeverity: advisory.severity, threshold }))
     .filter(({ advisory }) => !ignored.has(advisory.github_advisory_id))
-    .map(({ advisory, originPackages }) => ({
+    .map(({ advisory, directDeps, originPackages, paths }) => ({
       advisory: advisory.github_advisory_id,
+      directDeps,
       fixed_in: advisory.patched_versions,
       originPackages,
       package: advisory.module_name,
+      paths,
       severity: advisory.severity,
       title: advisory.title,
       url: advisory.url,
@@ -94,10 +96,33 @@ export const printReport = ({
         `${RED}${finding.vulnerable}${RESET} fixed in ` +
         `${GREEN}${finding.fixed_in}${RESET}${origin}`,
     )
+    printBumpSuggestions(finding.directDeps)
   }
 
   console.log('')
   console.log(`Output written to ${jsonPath}`)
+}
+
+/**
+ * Prints the remediation: bump the direct dependencies we declare that pull in the
+ * vulnerable module, grouped by dependency with the owning workspace packages.
+ */
+const printBumpSuggestions = (directDeps: Finding['directDeps']): void => {
+  const owners = new Map<string, Set<string>>()
+  for (const { dependency, workspacePackage } of directDeps) {
+    const where = owners.get(dependency) ?? new Set<string>()
+    if (workspacePackage) {
+      where.add(workspacePackage)
+    }
+    owners.set(dependency, where)
+  }
+
+  const entries = [...owners.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+  for (const [dependency, where] of entries) {
+    const list = [...where].sort()
+    const suffix = list.length > 0 ? ` (in ${list.join(', ')})` : ''
+    console.log(`  bump direct dependency: ${dependency}${suffix}`)
+  }
 }
 
 const compareFindings = (a: Finding, b: Finding): number => {

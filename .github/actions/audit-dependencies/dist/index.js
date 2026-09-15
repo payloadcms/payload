@@ -8878,28 +8878,114 @@ const parseAuditReport = (stdout) => {
 /** Turns an audit report into hits tagged with the originating package. */
 const toHits = ({ report, originPackage, }) => Object.values(report.advisories).map((advisory) => ({
     advisory,
+    directDeps: extractDirectDeps({ advisory, originPackage }),
     originPackages: originPackage === null ? [] : [originPackage],
+    paths: extractPaths(advisory),
 }));
-/** Dedupes hits by GHSA, unioning and sorting their origin packages. */
+/** Dedupes hits by GHSA, unioning and sorting their origin packages, paths, and direct deps. */
 const mergeHits = (hits) => {
     const byGhsa = new Map();
     for (const hit of hits) {
         const key = hit.advisory.github_advisory_id;
         const existing = byGhsa.get(key);
         if (!existing) {
-            byGhsa.set(key, { advisory: hit.advisory, originPackages: [...hit.originPackages] });
+            byGhsa.set(key, {
+                advisory: hit.advisory,
+                directDeps: [...hit.directDeps],
+                originPackages: [...hit.originPackages],
+                paths: [...hit.paths],
+            });
             continue;
         }
-        for (const origin of hit.originPackages) {
-            if (!existing.originPackages.includes(origin)) {
-                existing.originPackages.push(origin);
-            }
-        }
+        unionInto(existing.originPackages, hit.originPackages);
+        unionInto(existing.paths, hit.paths);
+        unionDirectDeps(existing.directDeps, hit.directDeps);
     }
     for (const hit of byGhsa.values()) {
         hit.originPackages.sort();
+        hit.paths.sort();
+        hit.directDeps.sort(compareDirectDeps);
     }
     return [...byGhsa.values()];
+};
+/**
+ * Derives readable dependency chains that introduce the vulnerable module from
+ * `advisory.findings[].paths`. Drops the trailing module (already named in the
+ * finding), normalizes the workspace importer (`packages__ui` → `ui`, `.` → root),
+ * and dedupes.
+ */
+const extractPaths = (advisory) => {
+    const chains = new Set();
+    for (const finding of advisory.findings) {
+        for (const raw of finding.paths ?? []) {
+            const chain = formatDependencyPath(raw);
+            if (chain) {
+                chains.add(chain);
+            }
+        }
+    }
+    return [...chains].sort();
+};
+/**
+ * Derives the direct dependencies we declare that pull in the vulnerable module —
+ * the second segment of each path (the first is the workspace importer). Bumping
+ * these in our own manifests is the remediation, not a transitive override.
+ */
+const extractDirectDeps = ({ advisory, originPackage, }) => {
+    const byKey = new Map();
+    for (const finding of advisory.findings) {
+        for (const raw of finding.paths ?? []) {
+            const direct = directDependencyFromPath({ originPackage, raw });
+            if (direct) {
+                byKey.set(`${direct.workspacePackage ?? ''} ${direct.dependency}`, direct);
+            }
+        }
+    }
+    return [...byKey.values()].sort(compareDirectDeps);
+};
+const directDependencyFromPath = ({ originPackage, raw, }) => {
+    const segments = raw.split('>');
+    if (segments.length < 2) {
+        return null;
+    }
+    const [root, dependency] = segments;
+    // Consumer-facing paths root at `.` (the temp resolve); their owner is the published package.
+    const workspacePackage = root === '.' ? originPackage : normalizeRoot(root);
+    return { dependency, workspacePackage };
+};
+const compareDirectDeps = (a, b) => a.dependency.localeCompare(b.dependency) ||
+    (a.workspacePackage ?? '').localeCompare(b.workspacePackage ?? '');
+const unionDirectDeps = (target, additions) => {
+    const keys = new Set(target.map((dep) => `${dep.workspacePackage ?? ''} ${dep.dependency}`));
+    for (const addition of additions) {
+        const key = `${addition.workspacePackage ?? ''} ${addition.dependency}`;
+        if (!keys.has(key)) {
+            keys.add(key);
+            target.push(addition);
+        }
+    }
+};
+const formatDependencyPath = (raw) => {
+    const segments = raw.split('>');
+    segments.pop(); // trailing segment is the vulnerable module itself
+    const introducers = segments
+        .map((segment, index) => (index === 0 ? normalizeRoot(segment) : segment))
+        .filter((segment) => segment !== null);
+    return introducers.join(' > ');
+};
+/** The first path segment is the pnpm importer: `.` is the audited root, `packages__x` is workspace `x`. */
+const normalizeRoot = (segment) => {
+    if (segment === '.') {
+        return null;
+    }
+    return segment.startsWith('packages__') ? segment.slice('packages__'.length) : segment;
+};
+const unionInto = (target, additions) => {
+    for (const addition of additions) {
+        if (!target.includes(addition)) {
+            target.push(addition);
+        }
+    }
 };
 const toAdvisory = (value) => {
     if (!auditReport_isRecord(value) ||
@@ -9154,11 +9240,13 @@ const toFindings = ({ hits, ignoreGhsas, threshold, }) => {
         .filter(({ advisory }) => isFixable(advisory.patched_versions))
         .filter(({ advisory }) => meetsThreshold({ advisorySeverity: advisory.severity, threshold }))
         .filter(({ advisory }) => !ignored.has(advisory.github_advisory_id))
-        .map(({ advisory, originPackages }) => ({
+        .map(({ advisory, directDeps, originPackages, paths }) => ({
         advisory: advisory.github_advisory_id,
+        directDeps,
         fixed_in: advisory.patched_versions,
         originPackages,
         package: advisory.module_name,
+        paths,
         severity: advisory.severity,
         title: advisory.title,
         url: advisory.url,
@@ -9191,9 +9279,30 @@ const printReport = ({ findings, jsonPath, packagesAudited, scope, severity, }) 
         console.log(`${BOLD}${finding.package}${RESET} [${finding.severity}] vulnerable in ` +
             `${RED}${finding.vulnerable}${RESET} fixed in ` +
             `${GREEN}${finding.fixed_in}${RESET}${origin}`);
+        printBumpSuggestions(finding.directDeps);
     }
     console.log('');
     console.log(`Output written to ${jsonPath}`);
+};
+/**
+ * Prints the remediation: bump the direct dependencies we declare that pull in the
+ * vulnerable module, grouped by dependency with the owning workspace packages.
+ */
+const printBumpSuggestions = (directDeps) => {
+    const owners = new Map();
+    for (const { dependency, workspacePackage } of directDeps) {
+        const where = owners.get(dependency) ?? new Set();
+        if (workspacePackage) {
+            where.add(workspacePackage);
+        }
+        owners.set(dependency, where);
+    }
+    const entries = [...owners.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    for (const [dependency, where] of entries) {
+        const list = [...where].sort();
+        const suffix = list.length > 0 ? ` (in ${list.join(', ')})` : '';
+        console.log(`  bump direct dependency: ${dependency}${suffix}`);
+    }
 };
 const compareFindings = (a, b) => {
     const severityDelta = severityRank(b.severity) - severityRank(a.severity);
