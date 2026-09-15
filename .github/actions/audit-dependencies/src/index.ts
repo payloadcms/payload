@@ -11,7 +11,14 @@ import { runConsumerAudit } from './lib/consumerAudit'
 import { runMonorepoAudit } from './lib/monorepoAudit'
 import { buildDeclaredIndex, scanPackages, selectConsumerPackages } from './lib/packages'
 import { createRegistryClient } from './lib/registry'
-import { findStaleAllowlist, printReport, toFindings } from './lib/report'
+import {
+  findStaleAllowlist,
+  printAllowlistReview,
+  printReport,
+  toFinding,
+  toFindings,
+} from './lib/report'
+import { isFixable } from './lib/severity'
 
 const ALLOWLIST_PATH = '.github/audit-dependencies-allowlist.json'
 
@@ -43,13 +50,7 @@ const main = async (): Promise<number> => {
     scanPackages({ repoRoot }),
     loadCatalogs({ repoRoot }),
   ])
-  const { hits, packagesAudited } = await audit({
-    catalogs,
-    ignoreGhsas,
-    manifests,
-    repoRoot,
-    scope,
-  })
+  const { hits, packagesAudited } = await audit({ catalogs, manifests, repoRoot, scope })
 
   for (const stale of findStaleAllowlist({ entries: allow.allowlist.entries, hits, scope })) {
     console.warn(
@@ -57,35 +58,44 @@ const main = async (): Promise<number> => {
     )
   }
 
-  const findings = toFindings({ hits, ignoreGhsas, threshold: severity })
+  const client = createRegistryClient()
   const index = buildDeclaredIndex(manifests, catalogs)
-  const reported = await annotateFindings({ client: createRegistryClient(), findings, index })
+
+  const findings = toFindings({ hits, ignoreGhsas, threshold: severity })
+  const reported = await annotateFindings({ client, findings, index })
 
   await writeFile(jsonPath, JSON.stringify(reported, null, 2))
   printReport({ findings: reported, jsonPath, packagesAudited, scope, severity })
+
+  // Re-review the allowlist: an advisory suppressed earlier may now be resolvable.
+  const allowlisted = new Set(ignoreGhsas)
+  const allowlistFindings = hits
+    .filter((hit) => allowlisted.has(hit.advisory.github_advisory_id))
+    .filter((hit) => isFixable(hit.advisory.patched_versions))
+    .map(toFinding)
+  const reviewed = await annotateFindings({ client, findings: allowlistFindings, index })
+  printAllowlistReview(reviewed)
 
   return reported.length > 0 ? 1 : 0
 }
 
 const audit = async ({
   catalogs,
-  ignoreGhsas,
   manifests,
   repoRoot,
   scope,
 }: {
   catalogs: Awaited<ReturnType<typeof loadCatalogs>>
-  ignoreGhsas: string[]
   manifests: Awaited<ReturnType<typeof scanPackages>>
   repoRoot: string
   scope: Scope
 }): Promise<{ hits: AdvisoryHit[]; packagesAudited: number }> => {
   if (scope === 'monorepo') {
-    return { hits: await runMonorepoAudit({ cwd: repoRoot, ignoreGhsas }), packagesAudited: 1 }
+    return { hits: await runMonorepoAudit({ cwd: repoRoot }), packagesAudited: 1 }
   }
 
   const packages = selectConsumerPackages(manifests, catalogs)
-  const hits = await runConsumerAudit({ ignoreGhsas, packages })
+  const hits = await runConsumerAudit({ packages })
   return { hits, packagesAudited: packages.length }
 }
 

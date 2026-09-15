@@ -35,7 +35,7 @@ describe('runConsumerAudit', () => {
   it('skips packages with no dependencies (no pnpm calls)', async () => {
     const run = vi.fn<(input: { args: string[]; cwd: string }) => Promise<PnpmResult>>()
 
-    const hits = await runConsumerAudit({ ignoreGhsas: [], packages: [pkg('empty', {})], run })
+    const hits = await runConsumerAudit({ packages: [pkg('empty', {})], run })
 
     expect(hits).toEqual([])
     expect(run).not.toHaveBeenCalled()
@@ -58,7 +58,6 @@ describe('runConsumerAudit', () => {
     })
 
     const hits = await runConsumerAudit({
-      ignoreGhsas: [],
       packages: [pkg('a', { lodash: '1' }), pkg('b', { lodash: '1' })],
       run,
     })
@@ -79,7 +78,6 @@ describe('runConsumerAudit', () => {
     })
 
     const hits = await runConsumerAudit({
-      ignoreGhsas: [],
       packages: [pkg('a', { foo: '1' })],
       run,
     })
@@ -93,7 +91,7 @@ describe('runConsumerAudit', () => {
     warn.mockRestore()
   })
 
-  it('passes allowlisted GHSAs to pnpm audit as --ignore args', async () => {
+  it('does not suppress advisories at pnpm level (allowlist handled in reporting)', async () => {
     const run = vi.fn(({ args }: { args: string[]; cwd: string }): Promise<PnpmResult> => {
       if (args[0] === 'install') {
         return Promise.resolve({ code: 0, stderr: '', stdout: '' })
@@ -101,15 +99,10 @@ describe('runConsumerAudit', () => {
       return Promise.resolve({ code: 0, stderr: '', stdout: auditJson([]) })
     })
 
-    await runConsumerAudit({
-      ignoreGhsas: ['GHSA-aaaa-bbbb-cccc'],
-      packages: [pkg('a', { lodash: '1' })],
-      run,
-    })
+    await runConsumerAudit({ packages: [pkg('a', { lodash: '1' })], run })
 
     const auditCall = run.mock.calls.find(([input]) => input.args[0] === 'audit')
 
-    expect(auditCall?.[0].args).toContain('--ignore')
-    expect(auditCall?.[0].args).toContain('GHSA-aaaa-bbbb-cccc')
+    expect(auditCall?.[0].args).not.toContain('--ignore')
   })
 })

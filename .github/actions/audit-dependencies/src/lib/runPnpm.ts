@@ -34,9 +34,6 @@ export const runPnpm: RunPnpm = ({ args, cwd }) =>
     )
   })
 
-/** GHSA ids as repeated `--ignore <id>` args for `pnpm audit`. */
-export const ignoreArgs = (ghsas: string[]): string[] => ghsas.flatMap((ghsa) => ['--ignore', ghsa])
-
 const exitCodeOf = (error: unknown): number => {
   if (error === null) {
     return 0

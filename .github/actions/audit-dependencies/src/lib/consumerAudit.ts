@@ -6,7 +6,7 @@ import type { AdvisoryHit } from '../types'
 import type { ConsumerPackage } from './packages'
 
 import { mergeHits, parseAuditReport, toHits } from './auditReport'
-import { ignoreArgs, runPnpm, type RunPnpm } from './runPnpm'
+import { runPnpm, type RunPnpm } from './runPnpm'
 
 const DEFAULT_CONCURRENCY = 4
 
@@ -14,30 +14,30 @@ const DEFAULT_CONCURRENCY = 4
  * Audits the consumer-facing surface by, for each published package, resolving
  * its production dependencies fresh in a temp dir (`pnpm install --lockfile-only`
  * — no node_modules, no repo lockfile) and auditing that. Results merge by GHSA.
+ *
+ * Allowlisted advisories are not suppressed here: pnpm returns every advisory so
+ * the reporting layer can both filter actionable findings and re-review the
+ * allowlist for newly available fixes.
  */
 export const runConsumerAudit = async ({
   concurrency = DEFAULT_CONCURRENCY,
-  ignoreGhsas,
   packages,
   run = runPnpm,
 }: {
   concurrency?: number
-  ignoreGhsas: string[]
   packages: ConsumerPackage[]
   run?: RunPnpm
 }): Promise<AdvisoryHit[]> => {
   const perPackage = await mapWithConcurrency(packages, concurrency, (pkg) =>
-    auditPackage({ ignoreGhsas, pkg, run }),
+    auditPackage({ pkg, run }),
   )
   return mergeHits(perPackage.flat())
 }
 
 const auditPackage = async ({
-  ignoreGhsas,
   pkg,
   run,
 }: {
-  ignoreGhsas: string[]
   pkg: ConsumerPackage
   run: RunPnpm
 }): Promise<AdvisoryHit[]> => {
@@ -78,7 +78,7 @@ const auditPackage = async ({
     }
 
     const result = await run({
-      args: ['audit', '--prod', '--json', '--ignore-registry-errors', ...ignoreArgs(ignoreGhsas)],
+      args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
       cwd: dir,
     })
     const report = parseAuditReport(result.stdout)

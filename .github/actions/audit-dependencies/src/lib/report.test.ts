@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { AllowlistEntry } from './allowlist'
-import type { AdvisoryHit, DirectDependency, PnpmAdvisory } from '../types'
+import type { AdvisoryHit, DirectDependency, PnpmAdvisory, ReportedFinding } from '../types'
 
-import { findStaleAllowlist, toFindings } from './report'
+import { findStaleAllowlist, isResolvableBump, printAllowlistReview, toFindings } from './report'
 
 const advisory = (overrides: Partial<PnpmAdvisory>): PnpmAdvisory => ({
   findings: [],
@@ -102,6 +102,67 @@ describe('toFindings', () => {
     expect(findings[0].directDeps).toEqual([
       { dependency: '@monaco-editor/react', workspacePackage: 'ui' },
     ])
+  })
+})
+
+const reported = (
+  advisoryId: string,
+  fix: ReportedFinding['bumps'][number]['fix'],
+): ReportedFinding => ({
+  advisory: advisoryId,
+  bumps: [{ currentSpec: '^1.0.0', dependency: 'dep', fix, workspacePackages: ['ui'] }],
+  chainPackages: [],
+  fixed_in: '>=1.0.1',
+  originPackages: [],
+  package: 'pkg',
+  paths: [],
+  severity: 'high',
+  title: 'title',
+  url: 'https://example.test',
+  vulnerable: '<1.0.1',
+})
+
+describe('printAllowlistReview', () => {
+  it('reports allowlisted advisories that a relock or bump now resolves', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+
+    printAllowlistReview([reported('GHSA-fix-fix-fix1', { status: 'relock', version: '1.5.0' })])
+
+    const output = log.mock.calls.map((call) => String(call[0])).join('\n')
+    expect(output).toContain('Allowlist review')
+    expect(output).toContain('GHSA-fix-fix-fix1')
+    log.mockRestore()
+  })
+
+  it('stays silent when no allowlisted advisory is resolvable', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined)
+
+    printAllowlistReview([
+      reported('GHSA-none-none-none', { status: 'none' }),
+      reported('GHSA-unk-unk-unk00', { reason: 'registry', status: 'unknown' }),
+    ])
+
+    expect(log).not.toHaveBeenCalled()
+    log.mockRestore()
+  })
+
+  it('isResolvableBump treats fix and relock as resolvable, not none/unknown', () => {
+    expect(
+      isResolvableBump({
+        currentSpec: null,
+        dependency: 'd',
+        fix: { status: 'none' },
+        workspacePackages: [],
+      }),
+    ).toBe(false)
+    expect(
+      isResolvableBump({
+        currentSpec: null,
+        dependency: 'd',
+        fix: { status: 'relock', version: '1.0.0' },
+        workspacePackages: [],
+      }),
+    ).toBe(true)
   })
 })
 

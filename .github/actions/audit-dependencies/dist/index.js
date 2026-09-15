@@ -11839,8 +11839,6 @@ const runPnpm = ({ args, cwd }) => new Promise((resolve) => {
         });
     });
 });
-/** GHSA ids as repeated `--ignore <id>` args for `pnpm audit`. */
-const ignoreArgs = (ghsas) => ghsas.flatMap((ghsa) => ['--ignore', ghsa]);
 const exitCodeOf = (error) => {
     if (error === null) {
         return 0;
@@ -11863,12 +11861,16 @@ const DEFAULT_CONCURRENCY = 4;
  * Audits the consumer-facing surface by, for each published package, resolving
  * its production dependencies fresh in a temp dir (`pnpm install --lockfile-only`
  * — no node_modules, no repo lockfile) and auditing that. Results merge by GHSA.
+ *
+ * Allowlisted advisories are not suppressed here: pnpm returns every advisory so
+ * the reporting layer can both filter actionable findings and re-review the
+ * allowlist for newly available fixes.
  */
-const runConsumerAudit = async ({ concurrency = DEFAULT_CONCURRENCY, ignoreGhsas, packages, run = runPnpm, }) => {
-    const perPackage = await mapWithConcurrency(packages, concurrency, (pkg) => auditPackage({ ignoreGhsas, pkg, run }));
+const runConsumerAudit = async ({ concurrency = DEFAULT_CONCURRENCY, packages, run = runPnpm, }) => {
+    const perPackage = await mapWithConcurrency(packages, concurrency, (pkg) => auditPackage({ pkg, run }));
     return mergeHits(perPackage.flat());
 };
-const auditPackage = async ({ ignoreGhsas, pkg, run, }) => {
+const auditPackage = async ({ pkg, run, }) => {
     if (Object.keys(pkg.dependencies).length === 0) {
         return [];
     }
@@ -11901,7 +11903,7 @@ const auditPackage = async ({ ignoreGhsas, pkg, run, }) => {
             return [];
         }
         const result = await run({
-            args: ['audit', '--prod', '--json', '--ignore-registry-errors', ...ignoreArgs(ignoreGhsas)],
+            args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
             cwd: dir,
         });
         const report = parseAuditReport(result.stdout);
@@ -11929,10 +11931,14 @@ const mapWithConcurrency = async (items, limit, task) => {
 ;// CONCATENATED MODULE: ./src/lib/monorepoAudit.ts
 
 
-/** Audits the whole workspace via `pnpm audit --prod` against the repo lockfile. */
-const runMonorepoAudit = async ({ cwd, ignoreGhsas, run = runPnpm, }) => {
+/**
+ * Audits the whole workspace via `pnpm audit --prod` against the repo lockfile.
+ * Every advisory is returned (allowlist filtering happens in the reporting layer)
+ * so the allowlist can be re-reviewed for newly available fixes.
+ */
+const runMonorepoAudit = async ({ cwd, run = runPnpm, }) => {
     const result = await run({
-        args: ['audit', '--prod', '--json', '--ignore-registry-errors', ...ignoreArgs(ignoreGhsas)],
+        args: ['audit', '--prod', '--json', '--ignore-registry-errors'],
         cwd,
     });
     const report = parseAuditReport(result.stdout);
@@ -12127,21 +12133,23 @@ const toFindings = ({ hits, ignoreGhsas, threshold, }) => {
         .filter(({ advisory }) => isFixable(advisory.patched_versions))
         .filter(({ advisory }) => meetsThreshold({ advisorySeverity: advisory.severity, threshold }))
         .filter(({ advisory }) => !ignored.has(advisory.github_advisory_id))
-        .map(({ advisory, chainPackages, directDeps, originPackages, paths }) => ({
-        advisory: advisory.github_advisory_id,
-        chainPackages,
-        directDeps,
-        fixed_in: advisory.patched_versions,
-        originPackages,
-        package: advisory.module_name,
-        paths,
-        severity: advisory.severity,
-        title: advisory.title,
-        url: advisory.url,
-        vulnerable: advisory.vulnerable_versions,
-    }))
+        .map(toFinding)
         .sort(compareFindings);
 };
+/** Maps a raw audit hit to the reportable Finding shape (no filtering). */
+const toFinding = ({ advisory, chainPackages, directDeps, originPackages, paths, }) => ({
+    advisory: advisory.github_advisory_id,
+    chainPackages,
+    directDeps,
+    fixed_in: advisory.patched_versions,
+    originPackages,
+    package: advisory.module_name,
+    paths,
+    severity: advisory.severity,
+    title: advisory.title,
+    url: advisory.url,
+    vulnerable: advisory.vulnerable_versions,
+});
 /**
  * Allowlist entries in scope that no longer match any advisory in the results —
  * candidates for removal. Non-fatal; surfaced as warnings so the list gets pruned.
@@ -12173,6 +12181,26 @@ const printReport = ({ findings, jsonPath, packagesAudited, scope, severity, }) 
     }
     console.log('');
     console.log(`Output written to ${jsonPath}`);
+};
+/** True when a resolution (relock or bump) is now available for this dependency. */
+const isResolvableBump = ({ fix }) => fix.status === 'fix' || fix.status === 'relock';
+/**
+ * Reviews allowlisted advisories that still appear: reports any whose vulnerability
+ * a bump or relock can now clear, so the exception can be removed and the fix applied.
+ */
+const printAllowlistReview = (findings) => {
+    const resolvable = findings.filter((finding) => finding.bumps.some(isResolvableBump));
+    if (resolvable.length === 0) {
+        return;
+    }
+    console.log('');
+    console.log('Allowlist review — these allowlisted advisories now have a resolution available:');
+    for (const finding of resolvable) {
+        console.log(`${BOLD}${finding.advisory}${RESET} (${finding.package}) — remove allowlist entry:`);
+        for (const bump of finding.bumps.filter(isResolvableBump)) {
+            printBump(bump);
+        }
+    }
 };
 /** Prints the remediation for one direct dependency: the minimal bump, or why none applies. */
 const printBump = ({ currentSpec, dependency, fix, workspacePackages }) => {
@@ -12219,6 +12247,7 @@ const compareFindings = (a, b) => {
 
 
 
+
 const ALLOWLIST_PATH = '.github/audit-dependencies-allowlist.json';
 const main = async () => {
     const parsed = parseArgs({ argv: process.argv.slice(2), env: process.env });
@@ -12243,29 +12272,32 @@ const main = async () => {
         scanPackages({ repoRoot }),
         loadCatalogs({ repoRoot }),
     ]);
-    const { hits, packagesAudited } = await audit({
-        catalogs,
-        ignoreGhsas,
-        manifests,
-        repoRoot,
-        scope,
-    });
+    const { hits, packagesAudited } = await audit({ catalogs, manifests, repoRoot, scope });
     for (const stale of findStaleAllowlist({ entries: allow.allowlist.entries, hits, scope })) {
         console.warn(`Warning: allowlist entry ${stale} no longer matches any advisory; consider removing it.`);
     }
-    const findings = toFindings({ hits, ignoreGhsas, threshold: severity });
+    const client = createRegistryClient();
     const index = buildDeclaredIndex(manifests, catalogs);
-    const reported = await annotateFindings({ client: createRegistryClient(), findings, index });
+    const findings = toFindings({ hits, ignoreGhsas, threshold: severity });
+    const reported = await annotateFindings({ client, findings, index });
     await (0,promises_namespaceObject.writeFile)(jsonPath, JSON.stringify(reported, null, 2));
     printReport({ findings: reported, jsonPath, packagesAudited, scope, severity });
+    // Re-review the allowlist: an advisory suppressed earlier may now be resolvable.
+    const allowlisted = new Set(ignoreGhsas);
+    const allowlistFindings = hits
+        .filter((hit) => allowlisted.has(hit.advisory.github_advisory_id))
+        .filter((hit) => isFixable(hit.advisory.patched_versions))
+        .map(toFinding);
+    const reviewed = await annotateFindings({ client, findings: allowlistFindings, index });
+    printAllowlistReview(reviewed);
     return reported.length > 0 ? 1 : 0;
 };
-const audit = async ({ catalogs, ignoreGhsas, manifests, repoRoot, scope, }) => {
+const audit = async ({ catalogs, manifests, repoRoot, scope, }) => {
     if (scope === 'monorepo') {
-        return { hits: await runMonorepoAudit({ cwd: repoRoot, ignoreGhsas }), packagesAudited: 1 };
+        return { hits: await runMonorepoAudit({ cwd: repoRoot }), packagesAudited: 1 };
     }
     const packages = selectConsumerPackages(manifests, catalogs);
-    const hits = await runConsumerAudit({ ignoreGhsas, packages });
+    const hits = await runConsumerAudit({ packages });
     return { hits, packagesAudited: packages.length };
 };
 main()

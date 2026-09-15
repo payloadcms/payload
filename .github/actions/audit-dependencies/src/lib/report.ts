@@ -28,21 +28,30 @@ export const toFindings = ({
     .filter(({ advisory }) => isFixable(advisory.patched_versions))
     .filter(({ advisory }) => meetsThreshold({ advisorySeverity: advisory.severity, threshold }))
     .filter(({ advisory }) => !ignored.has(advisory.github_advisory_id))
-    .map(({ advisory, chainPackages, directDeps, originPackages, paths }) => ({
-      advisory: advisory.github_advisory_id,
-      chainPackages,
-      directDeps,
-      fixed_in: advisory.patched_versions,
-      originPackages,
-      package: advisory.module_name,
-      paths,
-      severity: advisory.severity,
-      title: advisory.title,
-      url: advisory.url,
-      vulnerable: advisory.vulnerable_versions,
-    }))
+    .map(toFinding)
     .sort(compareFindings)
 }
+
+/** Maps a raw audit hit to the reportable Finding shape (no filtering). */
+export const toFinding = ({
+  advisory,
+  chainPackages,
+  directDeps,
+  originPackages,
+  paths,
+}: AdvisoryHit): Finding => ({
+  advisory: advisory.github_advisory_id,
+  chainPackages,
+  directDeps,
+  fixed_in: advisory.patched_versions,
+  originPackages,
+  package: advisory.module_name,
+  paths,
+  severity: advisory.severity,
+  title: advisory.title,
+  url: advisory.url,
+  vulnerable: advisory.vulnerable_versions,
+})
 
 /**
  * Allowlist entries in scope that no longer match any advisory in the results —
@@ -104,6 +113,30 @@ export const printReport = ({
 
   console.log('')
   console.log(`Output written to ${jsonPath}`)
+}
+
+/** True when a resolution (relock or bump) is now available for this dependency. */
+export const isResolvableBump = ({ fix }: Bump): boolean =>
+  fix.status === 'fix' || fix.status === 'relock'
+
+/**
+ * Reviews allowlisted advisories that still appear: reports any whose vulnerability
+ * a bump or relock can now clear, so the exception can be removed and the fix applied.
+ */
+export const printAllowlistReview = (findings: ReportedFinding[]): void => {
+  const resolvable = findings.filter((finding) => finding.bumps.some(isResolvableBump))
+  if (resolvable.length === 0) {
+    return
+  }
+
+  console.log('')
+  console.log('Allowlist review — these allowlisted advisories now have a resolution available:')
+  for (const finding of resolvable) {
+    console.log(`${BOLD}${finding.advisory}${RESET} (${finding.package}) — remove allowlist entry:`)
+    for (const bump of finding.bumps.filter(isResolvableBump)) {
+      printBump(bump)
+    }
+  }
 }
 
 /** Prints the remediation for one direct dependency: the minimal bump, or why none applies. */
