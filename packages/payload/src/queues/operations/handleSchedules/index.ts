@@ -11,7 +11,8 @@ import { getQueuesWithSchedules } from './getQueuesWithSchedules.js'
 
 export type HandleSchedulesResult = {
   errored: Queueable[]
-  queued: Queueable[]
+  /** Successfully queued schedules, including the job returned by `payload.jobs.queue()`. */
+  queued: ({ job: Job } & Queueable)[]
   skipped: Queueable[]
 }
 
@@ -89,7 +90,7 @@ export async function handleSchedules({
     }
   }
 
-  const queued: Queueable[] = []
+  const queued: HandleSchedulesResult['queued'] = []
   const skipped: Queueable[] = []
   const errored: Queueable[] = []
 
@@ -98,12 +99,12 @@ export async function handleSchedules({
    * Default constraint (= defaultBeforeSchedule): max. 1 running / scheduled task or workflow per queue
    */
   for (const queueable of queueables) {
-    const { status } = await scheduleQueueable({
+    const result = await scheduleQueueable({
       queueable,
       req,
       stats,
     })
-    switch (status) {
+    switch (result.status) {
       case 'error':
         errored.push(queueable)
         break
@@ -111,7 +112,7 @@ export async function handleSchedules({
         skipped.push(queueable)
         break
       case 'success':
-        queued.push(queueable)
+        queued.push({ ...queueable, job: result.job })
         break
     }
   }
@@ -162,10 +163,7 @@ export async function scheduleQueueable({
   queueable: Queueable
   req: PayloadRequest
   stats: JobStats
-}): Promise<{
-  job?: Job
-  status: 'error' | 'skipped' | 'success'
-}> {
+}): Promise<{ job: Job; status: 'success' } | { status: 'error' | 'skipped' }> {
   if (!queueable.taskConfig && !queueable.workflowConfig) {
     return {
       status: 'error',
@@ -222,6 +220,7 @@ export async function scheduleQueueable({
       status: 'success',
     })
     return {
+      job,
       status: 'success',
     }
   } catch (error) {
