@@ -14,13 +14,25 @@ export type ScalarWhereField = {
   type: 'scalar'
 }
 
-type CollectionWhereField = { field: FlattenedField; type: 'hasManySelect' } | ScalarWhereField
+export type JSONPathWhereField = {
+  field: FlattenedField
+  /** Flattened column path of the `json` field the remaining segments are read from. */
+  jsonColumnPath: string
+  /** Path segments below the `json` field, used to build the adapter's JSON traversal. */
+  jsonPathSegments: string[]
+  type: 'jsonPath'
+}
+
+type CollectionWhereField =
+  | { field: FlattenedField; type: 'hasManySelect' }
+  | JSONPathWhereField
+  | ScalarWhereField
 
 export type WherePathPlan = {
   columnPath: string
   fieldsByCollection: Map<string, CollectionWhereField>
   schemaPath: string
-  type: 'hasManySelect' | 'invalid' | 'mixedSelect' | 'scalar'
+  type: 'hasManySelect' | 'invalid' | 'jsonPath' | 'mixedSelect' | 'scalar'
 }
 
 export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
@@ -28,8 +40,9 @@ export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
 /**
  * Analyzes every leaf path in a polymorphic join where clause before SQL is built. Each plan entry
  * records the flattened column path, the compatible field shape for each target collection, and
- * whether the path uses a scalar column or a has-many select value table. A field may be absent
- * from some target collections; those branches compare against SQL NULL or an empty JSON array.
+ * whether the path uses a scalar column, a has-many select value table, or a `json` sub-path. A
+ * field may be absent from some target collections; those branches compare against SQL NULL, an
+ * empty JSON array, or a boolean constant derived from the operator.
  *
  * Paths are marked as invalid when their storage shapes conflict, require localized or separate-row
  * traversal, have no matching field, lack a required column, or collide after path flattening.
@@ -79,6 +92,7 @@ export const createPolymorphicJoinWherePlan = ({
     const columnPath = getColumnPath(schemaPath)
     const fieldsByCollection = new Map<string, CollectionWhereField>()
     let isFieldPresent = schemaPath === 'id' || schemaPath === 'relationTo'
+    let hasJSONPath = false
     let hasManySelect = false
     let hasScalarSelect = false
     let hasScalarNonOption = false
@@ -115,6 +129,28 @@ export const createPolymorphicJoinWherePlan = ({
       }
 
       if (!fieldAtPath) {
+        const jsonBoundary = getJSONFieldBoundary({
+          fields: collectionConfig.flattenedFields,
+          path: schemaPath,
+        })
+
+        if (jsonBoundary) {
+          if (!table[jsonBoundary.jsonColumnPath]) {
+            hasUnsupportedFieldShape = true
+            continue
+          }
+
+          isFieldPresent = true
+          hasJSONPath = true
+          fieldsByCollection.set(collection, {
+            type: 'jsonPath',
+            field: jsonBoundary.field,
+            jsonColumnPath: jsonBoundary.jsonColumnPath,
+            jsonPathSegments: jsonBoundary.jsonPathSegments,
+          })
+          continue
+        }
+
         if (
           pathHasUnsupportedNestedContainer({
             fields: collectionConfig.flattenedFields,
@@ -185,8 +221,14 @@ export const createPolymorphicJoinWherePlan = ({
       !hasScalarNonOption &&
       optionSignatures.size === 1
 
+    // A JSON sub-path is read out of the `json` column, so it cannot share a path with a target
+    // that stores the same path as a real column or as separate value rows.
+    const hasIncompatibleJSONPath =
+      hasJSONPath && (hasManySelect || scalarQueryValueSignatures.size > 0)
+
     const isInvalid =
       isBaseInvalid ||
+      hasIncompatibleJSONPath ||
       (!isMixedSelect &&
         ((hasManySelect && scalarQueryValueSignatures.size > 0) ||
           scalarQueryValueSignatures.size > 1))
@@ -194,11 +236,13 @@ export const createPolymorphicJoinWherePlan = ({
     plan.set(schemaPath, {
       type: isInvalid
         ? 'invalid'
-        : isMixedSelect
-          ? 'mixedSelect'
-          : hasManySelect
-            ? 'hasManySelect'
-            : 'scalar',
+        : hasJSONPath
+          ? 'jsonPath'
+          : isMixedSelect
+            ? 'mixedSelect'
+            : hasManySelect
+              ? 'hasManySelect'
+              : 'scalar',
       columnPath,
       fieldsByCollection,
       schemaPath,
@@ -263,6 +307,46 @@ const getColumnPath = (schemaPath: string): string =>
     .split('.')
     .map((segment) => sanitizePathSegment(segment))
     .join('_')
+
+/**
+ * Finds the `json` field a sub-path is read from, e.g. `settings.approved` where `settings` is a
+ * `json` field. Only `group` and `tab` containers may precede it, because every other container
+ * either stores its values in separate rows or needs a localized table join.
+ *
+ * @returns The boundary when the path reaches into a `json` column, otherwise undefined.
+ */
+const getJSONFieldBoundary = ({
+  fields,
+  path,
+}: {
+  fields: FlattenedField[]
+  path: string
+}): { field: FlattenedField; jsonColumnPath: string; jsonPathSegments: string[] } | undefined => {
+  const pathSegments = path.split('.')
+
+  for (let segmentIndex = 1; segmentIndex < pathSegments.length; segmentIndex++) {
+    const ancestorPath = pathSegments.slice(0, segmentIndex).join('.')
+    const fieldAtAncestorPath = getFieldByPath({ fields, path: ancestorPath })
+
+    if (!fieldAtAncestorPath || fieldAtAncestorPath.pathHasLocalized) {
+      return undefined
+    }
+
+    if (fieldAtAncestorPath.field.type === 'json') {
+      return {
+        field: fieldAtAncestorPath.field,
+        jsonColumnPath: getColumnPath(ancestorPath),
+        jsonPathSegments: pathSegments.slice(segmentIndex).map(sanitizePathSegment),
+      }
+    }
+
+    if (!['group', 'tab'].includes(fieldAtAncestorPath.field.type)) {
+      return undefined
+    }
+  }
+
+  return undefined
+}
 
 const pathHasSeparateRows = ({ fields, path }: { fields: FlattenedField[]; path: string }) => {
   const pathSegments = path.split('.')

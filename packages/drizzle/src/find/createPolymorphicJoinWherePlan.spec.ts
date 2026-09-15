@@ -18,7 +18,11 @@ type CollectionFixture = {
 
 const articlesTable = sqliteTable('join_articles', {
   id: integer('id').primaryKey(),
+  config: text('config'),
   details_status: text('details_status_flat'),
+  extras: text('extras'),
+  meta_settings: text('meta_settings'),
+  settings: text('settings'),
   score: integer('score'),
   status: text('status'),
   variantKind: text('variant_kind'),
@@ -32,7 +36,9 @@ const articlesTable = sqliteTable('join_articles', {
 
 const notesTable = sqliteTable('join_notes', {
   id: integer('id').primaryKey(),
+  config_mode: text('config_mode'),
   details_status: text('details_status_flat'),
+  settings: text('settings'),
   status: text('status'),
   variantKind: text('variant_kind'),
   variantRadio: integer('variant_radio'),
@@ -85,6 +91,11 @@ const articleFields: Field[] = [
   { name: 'variantSelect', options: ['available', 'reviewed'], type: 'select' },
   { name: 'variantSelectMismatch', options: ['available', 'reviewed'], type: 'select' },
   { name: 'variantValue', type: 'text' },
+  { name: 'settings', type: 'json' },
+  { name: 'extras', type: 'json' },
+  { name: 'config', type: 'json' },
+  { name: 'meta', type: 'group', fields: [{ name: 'settings', type: 'json' }] },
+  { localized: true, name: 'localizedSettings', type: 'json' },
   { localized: true, name: 'localizedTitle', type: 'text' },
   {
     name: 'entries',
@@ -126,6 +137,8 @@ const noteFields: Field[] = [
   { name: 'variantSelect', options: ['available', 'reviewed'], type: 'select' },
   { name: 'variantSelectMismatch', options: ['reviewed', 'available'], type: 'select' },
   { name: 'variantValue', type: 'number' },
+  { name: 'settings', type: 'json' },
+  { name: 'config', type: 'group', fields: [{ name: 'mode', type: 'text' }] },
 ]
 
 const articleEnumFields: Field[] = [
@@ -377,8 +390,59 @@ describe('createPolymorphicJoinWherePlan', () => {
     expect(variantTagsPlan.type).toBe('invalid')
   })
 
+  it('creates a jsonPath plan for a sub-path of a json field', () => {
+    const settingsPlan = createPlan({ 'settings.approved': { equals: true } }).get(
+      'settings.approved',
+    )
+
+    expect(settingsPlan).toMatchObject({
+      columnPath: 'settings_approved',
+      schemaPath: 'settings.approved',
+      type: 'jsonPath',
+    })
+    expect(settingsPlan.fieldsByCollection.get('articles')).toMatchObject({
+      jsonColumnPath: 'settings',
+      jsonPathSegments: ['approved'],
+      type: 'jsonPath',
+    })
+    expect(settingsPlan.fieldsByCollection.get('notes')).toMatchObject({
+      jsonColumnPath: 'settings',
+      jsonPathSegments: ['approved'],
+      type: 'jsonPath',
+    })
+  })
+
+  it('keeps a jsonPath plan valid when the json field is absent from one target collection', () => {
+    const extrasPlan = createPlan({ 'extras.flag': { equals: 1 } }).get('extras.flag')
+
+    expect(extrasPlan.type).toBe('jsonPath')
+    expect([...extrasPlan.fieldsByCollection.keys()]).toEqual(['articles'])
+  })
+
+  it('resolves a json field nested under a group container', () => {
+    const nestedPlan = createPlan({ 'meta.settings.approved': { equals: true } }).get(
+      'meta.settings.approved',
+    )
+
+    expect(nestedPlan.type).toBe('jsonPath')
+    expect(nestedPlan.fieldsByCollection.get('articles')).toMatchObject({
+      jsonColumnPath: 'meta_settings',
+      jsonPathSegments: ['approved'],
+    })
+  })
+
   it.each([
     ['a field that is absent from every collection', { unknown: { equals: 'value' } }, 'unknown'],
+    [
+      'a json sub-path that is a real column in another collection',
+      { 'config.mode': { equals: 'value' } },
+      'config.mode',
+    ],
+    [
+      'a sub-path of a localized json field',
+      { 'localizedSettings.approved': { equals: true } },
+      'localizedSettings.approved',
+    ],
     ['incompatible scalar field types', { variantValue: { equals: 'value' } }, 'variantValue'],
     [
       'select fields with differently ordered option values',
@@ -420,6 +484,22 @@ describe('createPolymorphicJoinWherePlan', () => {
       columnPath: 'details_status',
       type: 'invalid',
     })
+  })
+
+  it('marks a json sub-path as invalid when the json column is missing from the table', () => {
+    const tableWithoutSettings = sqliteTable('articles_without_settings', {
+      id: integer('id').primaryKey(),
+    })
+    const adapterWithoutSettings = createAdapter({
+      articles: { fields: [{ name: 'settings', type: 'json' }], table: tableWithoutSettings },
+    })
+    const plan = createPolymorphicJoinWherePlan({
+      adapter: adapterWithoutSettings,
+      collections: ['articles'],
+      where: { 'settings.approved': { equals: true } },
+    })
+
+    expect(plan.get('settings.approved')).toMatchObject({ type: 'invalid' })
   })
 
   it('marks a configured scalar field as invalid when its table column is missing', () => {

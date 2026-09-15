@@ -11,6 +11,7 @@ import type { DrizzleAdapter } from '../types.js'
 import type { PolymorphicJoinWherePlan } from './createPolymorphicJoinWherePlan.js'
 
 import { operatorMap } from '../queries/operatorMap.js'
+import { convertPathToJSONTraversal } from '../sqlite/createJSONQuery/convertPathToJSONTraversal.js'
 import { createJSONQuery } from '../sqlite/createJSONQuery/index.js'
 import { buildPolymorphicJoinWhere } from './buildPolymorphicJoinWhere.js'
 
@@ -18,6 +19,7 @@ const articlesTable = sqliteTable('join_articles', {
   id: integer('id').primaryKey(),
   parent: integer('parent_id'),
   score: integer('score'),
+  settings: text('settings'),
   title: text('title'),
 })
 
@@ -39,6 +41,7 @@ const hasManySelectField = {
 } as FlattenedField
 
 const adapter = {
+  convertPathToJSONTraversal,
   createJSONQuery,
   drizzle: db,
   idType: 'serial',
@@ -109,6 +112,35 @@ const hasManySelectPlan = (
       },
     ],
   ])
+
+const jsonPathPlan = (
+  collections = ['articles'],
+  schemaPath = 'settings.approved',
+): PolymorphicJoinWherePlan => {
+  const [jsonColumnPath, ...jsonPathSegments] = schemaPath.split('.')
+
+  return new Map([
+    [
+      schemaPath,
+      {
+        columnPath: schemaPath.replaceAll('.', '_'),
+        fieldsByCollection: new Map(
+          collections.map((collection) => [
+            collection,
+            {
+              field: { name: jsonColumnPath, type: 'json' } as FlattenedField,
+              jsonColumnPath,
+              jsonPathSegments,
+              type: 'jsonPath' as const,
+            },
+          ]),
+        ),
+        schemaPath,
+        type: 'jsonPath',
+      },
+    ],
+  ])
+}
 
 const renderWhere = ({
   collection = 'articles',
@@ -361,6 +393,85 @@ describe('buildPolymorphicJoinWhere', () => {
 
     expect(query.sql).toContain("json_each('[]')")
     expect(query.sql).not.toContain('join_notes_tags')
+  })
+
+  it.each([
+    ['equals', { equals: 'available' }, `"settings"->>'approved' = 'available'`],
+    ['a boolean equals', { equals: true }, `"settings"->>'approved' = true`],
+    ['contains', { contains: 'avail' }, `"settings"->>'approved' like '%avail%'`],
+    ['exists', { exists: true }, `"settings"->>'approved' is not null`],
+    ['a REST exists value', { exists: 'false' }, `"settings"->>'approved' is null`],
+    [
+      'a comma-delimited in value',
+      { in: 'available,reviewed' },
+      `"settings"->>'approved' in ('available','reviewed')`,
+    ],
+  ] as const)('builds %s against a json sub-path', (_description, constraint, expectedSQL) => {
+    const query = renderWhere({
+      where: { 'settings.approved': constraint } as unknown as Where,
+      wherePlan: jsonPathPlan(),
+    })
+
+    expect(query.sql).toContain(expectedSQL)
+  })
+
+  it.each([
+    ['matches nothing for equals', { equals: 'available' }, 'where false'],
+    ['matches nothing for exists true', { exists: true }, 'where false'],
+    ['matches every row for exists false', { exists: false }, 'where true'],
+  ] as const)(
+    'a json sub-path absent from this collection %s',
+    (_description, constraint, expectedSQL) => {
+      const query = renderWhere({
+        collection: 'notes',
+        table: notesTable,
+        where: { 'settings.approved': constraint } as unknown as Where,
+        wherePlan: jsonPathPlan(['articles']),
+      })
+
+      expect(query.sql).toContain(expectedSQL)
+      expect(query.sql).not.toContain('settings')
+    },
+  )
+
+  it.each([
+    ['a negated operator', { not_equals: 'available' }, 'settings.approved.not_equals'],
+    ['a null value', { equals: null }, 'settings.approved.equals'],
+    ['an object value', { equals: { nested: true } }, 'settings.approved.equals'],
+    ['a $raw constraint', { $raw: 'true' }, 'settings.approved.$raw'],
+  ] as const)('rejects %s on a json sub-path', (_description, constraint, expectedPath) => {
+    expect(() =>
+      renderWhere({
+        where: { 'settings.approved': constraint } as unknown as Where,
+        wherePlan: jsonPathPlan(),
+      }),
+    ).toThrow(expectedPath)
+  })
+
+  it('builds a false condition for an empty json sub-path in comparison', () => {
+    const query = renderWhere({
+      where: { 'settings.approved': { in: [] } },
+      wherePlan: jsonPathPlan(),
+    })
+
+    expect(query.sql).toContain('where false')
+  })
+
+  it('rejects a json sub-path when the adapter cannot traverse JSON', () => {
+    const adapterWithoutTraversal = {
+      ...adapter,
+      convertPathToJSONTraversal: undefined,
+    } as unknown as DrizzleAdapter
+
+    expect(() =>
+      buildPolymorphicJoinWhere({
+        adapter: adapterWithoutTraversal,
+        collection: 'articles',
+        table: articlesTable,
+        where: { 'settings.approved': { equals: 'available' } },
+        wherePlan: jsonPathPlan(),
+      }),
+    ).toThrow('settings.approved.equals')
   })
 
   it('builds a false condition for an empty has-many in comparison', () => {

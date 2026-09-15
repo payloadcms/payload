@@ -12,6 +12,7 @@ import type {
 } from './createPolymorphicJoinWherePlan.js'
 
 import { sanitizeQueryValue } from '../queries/sanitizeQueryValue.js'
+import { buildPolymorphicJSONPathConstraint } from './buildPolymorphicJSONPathConstraint.js'
 
 const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in', 'like'])
 
@@ -37,14 +38,20 @@ type ResolvedWherePath =
       type: 'hasManySelect'
     }
   | {
+      jsonColumnName: string | undefined
+      jsonPathSegments: string[]
+      pathPlan: WherePathPlan
+      type: 'jsonPath'
+    }
+  | {
       pathPlan: WherePathPlan
       type: 'invalid'
     }
 
 /**
  * Builds a where clause for one collection before the polymorphic branches are combined. A field
- * that is absent from this collection resolves to SQL NULL, and relationTo resolves to the current
- * collection slug.
+ * that is absent from this collection resolves to SQL NULL, a `json` sub-path that is absent
+ * resolves to a boolean constant, and relationTo resolves to the current collection slug.
  */
 export const buildPolymorphicJoinWhere = ({
   adapter,
@@ -133,6 +140,20 @@ export const buildPolymorphicJoinWhere = ({
               value,
             }),
           ),
+        )
+        continue
+      }
+
+      if (resolvedPath.type === 'jsonPath') {
+        constraints.push(
+          buildPolymorphicJSONPathConstraint({
+            adapter,
+            jsonColumnName: resolvedPath.jsonColumnName,
+            operator: payloadOperator,
+            path: `${key}.${originalOperator}`,
+            pathSegments: resolvedPath.jsonPathSegments,
+            value,
+          }),
         )
         continue
       }
@@ -261,6 +282,32 @@ const resolveWherePath = ({
   }
 
   const collectionFieldForBranch = pathPlan.fieldsByCollection.get(collection)
+
+  if (pathPlan.type === 'jsonPath') {
+    if (collectionFieldForBranch) {
+      if (collectionFieldForBranch.type !== 'jsonPath') {
+        return { type: 'invalid', pathPlan }
+      }
+
+      const { jsonColumnPath, jsonPathSegments } = collectionFieldForBranch
+      const jsonColumn = table[jsonColumnPath] as Column | undefined
+
+      if (!jsonColumn) {
+        return { type: 'invalid', pathPlan }
+      }
+
+      return {
+        type: 'jsonPath',
+        jsonColumnName: jsonColumn.name,
+        jsonPathSegments: [jsonColumnPath, ...jsonPathSegments],
+        pathPlan,
+      }
+    }
+
+    // No entry for this collection means the `json` column is absent here, so the sub-path reads as
+    // SQL NULL and the constraint resolves from the operator alone.
+    return { type: 'jsonPath', jsonColumnName: undefined, jsonPathSegments: [], pathPlan }
+  }
 
   // A `mixedSelect` path is a has-many select in some target collections and a single select column
   // in others. Each branch is resolved with its own storage handler: has-many branches use the JSON
