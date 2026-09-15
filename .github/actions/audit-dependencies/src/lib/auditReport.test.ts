@@ -18,9 +18,9 @@ const advisory = (overrides: Partial<PnpmAdvisory>): PnpmAdvisory => ({
 })
 
 describe('formatDependencyPath', () => {
-  it('strips the workspace importer prefix and drops the trailing module', () => {
-    expect(formatDependencyPath('packages__ui>@monaco-editor/react>monaco-editor>dompurify')).toBe(
-      'ui > @monaco-editor/react > monaco-editor',
+  it('decodes the workspace importer path and drops the trailing module', () => {
+    expect(formatDependencyPath('templates__website>next-sitemap>minimist')).toBe(
+      'templates/website > next-sitemap',
     )
   })
 
@@ -55,9 +55,9 @@ describe('toHits', () => {
       },
     })
 
-    expect(hit.paths).toEqual(['eslint-config > @typescript-eslint/parser > minimatch'])
+    expect(hit.paths).toEqual(['packages/eslint-config > @typescript-eslint/parser > minimatch'])
     expect(hit.directDeps).toEqual([
-      { dependency: '@typescript-eslint/parser', workspacePackage: 'eslint-config' },
+      { dependency: '@typescript-eslint/parser', workspacePackage: 'packages/eslint-config' },
     ])
     expect(hit.chainPackages).toEqual(['@typescript-eslint/parser', 'brace-expansion', 'minimatch'])
   })

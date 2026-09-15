@@ -11780,12 +11780,16 @@ const formatDependencyPath = (raw) => {
         .filter((segment) => segment !== null);
     return introducers.join(' > ');
 };
-/** The first path segment is the pnpm importer: `.` is the audited root, `packages__x` is workspace `x`. */
+/**
+ * The first path segment is the pnpm importer id: `.` is the audited root, and a
+ * workspace member is its path with `/` encoded as `__` (e.g. `templates__website`).
+ * Decode it back to the importer path so it matches the declared index keys.
+ */
 const normalizeRoot = (segment) => {
     if (segment === '.') {
         return null;
     }
-    return segment.startsWith('packages__') ? segment.slice('packages__'.length) : segment;
+    return segment.replaceAll('__', '/');
 };
 const unionInto = (target, additions) => {
     for (const addition of additions) {
@@ -11957,12 +11961,25 @@ const DEV_TOOLING_DENYLIST = [
     '@payloadcms/eslint-config',
     '@payloadcms/eslint-plugin',
 ];
-/** Reads every package.json under the packages directory into a manifest (IO). */
-const scanPackages = async ({ repoRoot, }) => {
-    const packagesDir = (0,external_node_path_namespaceObject.join)(repoRoot, 'packages');
-    const entries = await (0,promises_namespaceObject.readdir)(packagesDir, { withFileTypes: true });
+/** Top-level workspace directories that contain package.json manifests we may need to look up. */
+const WORKSPACE_GROUPS = ['packages', 'templates', 'examples', 'tools'];
+/** Reads every package.json under the given workspace groups into manifests (IO). */
+const scanWorkspaceManifests = async ({ groups = WORKSPACE_GROUPS, repoRoot, }) => {
+    const perGroup = await Promise.all(groups.map((group) => scanGroup({ group, repoRoot })));
+    return perGroup.flat();
+};
+const scanGroup = async ({ group, repoRoot, }) => {
+    const groupDir = (0,external_node_path_namespaceObject.join)(repoRoot, group);
+    let entries;
+    try {
+        entries = await (0,promises_namespaceObject.readdir)(groupDir, { withFileTypes: true });
+    }
+    catch {
+        // A group directory may not exist in every checkout (e.g. examples); skip it.
+        return [];
+    }
     const dirs = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
-    const manifests = await Promise.all(dirs.map((dir) => readManifest({ dir, packagesDir })));
+    const manifests = await Promise.all(dirs.map((dir) => readManifest({ dir, group, groupDir })));
     return manifests.filter((manifest) => manifest !== null);
 };
 /**
@@ -11994,14 +12011,19 @@ const buildDeclaredIndex = (manifests, catalogs) => {
                 resolved.set(name, resolveCatalogSpec({ catalogs, name, spec }));
             }
         }
-        index.set(manifest.shortName, resolved);
+        // Key by importer path (matches monorepo owner labels); also by short name for
+        // the packages group so consumer-facing owners (e.g. `ui`) resolve.
+        index.set(`${manifest.group}/${manifest.shortName}`, resolved);
+        if (manifest.group === 'packages') {
+            index.set(manifest.shortName, resolved);
+        }
     }
     return index;
 };
-const readManifest = async ({ dir, packagesDir, }) => {
+const readManifest = async ({ dir, group, groupDir, }) => {
     let raw;
     try {
-        raw = await (0,promises_namespaceObject.readFile)((0,external_node_path_namespaceObject.join)(packagesDir, dir, 'package.json'), 'utf8');
+        raw = await (0,promises_namespaceObject.readFile)((0,external_node_path_namespaceObject.join)(groupDir, dir, 'package.json'), 'utf8');
     }
     catch {
         return null;
@@ -12018,6 +12040,7 @@ const readManifest = async ({ dir, packagesDir, }) => {
             ...packages_toStringRecord(pkg.dependencies),
         },
         dependencies: packages_toStringRecord(pkg.dependencies),
+        group,
         isPrivate: pkg.private === true,
         name: pkg.name,
         shortName: dir,
@@ -12270,10 +12293,16 @@ const main = async () => {
     const ignoreGhsas = allow.allowlist.activeGhsas;
     console.log(`Auditing ${scope} for ${severity} vulnerabilities...`);
     const [manifests, catalogs] = await Promise.all([
-        scanPackages({ repoRoot }),
+        scanWorkspaceManifests({ repoRoot }),
         loadCatalogs({ repoRoot }),
     ]);
-    const { hits, packagesAudited } = await audit({ catalogs, manifests, repoRoot, scope });
+    const packageManifests = manifests.filter((manifest) => manifest.group === 'packages');
+    const { hits, packagesAudited } = await audit({
+        catalogs,
+        manifests: packageManifests,
+        repoRoot,
+        scope,
+    });
     for (const stale of findStaleAllowlist({ entries: allow.allowlist.entries, hits, scope })) {
         console.warn(`Warning: allowlist entry ${stale} no longer matches any advisory; consider removing it.`);
     }

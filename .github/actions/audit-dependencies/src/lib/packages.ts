@@ -14,16 +14,25 @@ export const DEV_TOOLING_DENYLIST: readonly string[] = [
   '@payloadcms/eslint-plugin',
 ]
 
+/** Top-level workspace directories that contain package.json manifests we may need to look up. */
+export const WORKSPACE_GROUPS: readonly string[] = ['packages', 'templates', 'examples', 'tools']
+
 export type PackageManifest = {
   /** Every declared dependency across all types (prod/dev/peer/optional), for remediation lookups. */
   allDependencies: Record<string, string>
   dependencies: Record<string, string>
+  /** The workspace group directory this manifest lives under, e.g. `packages` or `templates`. */
+  group: string
   isPrivate: boolean
   name: string
   shortName: string
 }
 
-/** Maps a workspace package's short name to its declared dependency specs (catalog-resolved). */
+/**
+ * Maps a workspace owner to its declared dependency specs (catalog-resolved).
+ * Keyed by importer path (`templates/website`) and, for the `packages` group, also
+ * by short name (`ui`) so consumer-facing owners resolve too.
+ */
 export type DeclaredIndex = Map<string, Map<string, string>>
 
 export type ConsumerPackage = {
@@ -32,17 +41,36 @@ export type ConsumerPackage = {
   shortName: string
 }
 
-/** Reads every package.json under the packages directory into a manifest (IO). */
-export const scanPackages = async ({
+/** Reads every package.json under the given workspace groups into manifests (IO). */
+export const scanWorkspaceManifests = async ({
+  groups = WORKSPACE_GROUPS,
   repoRoot,
 }: {
+  groups?: readonly string[]
   repoRoot: string
 }): Promise<PackageManifest[]> => {
-  const packagesDir = join(repoRoot, 'packages')
-  const entries = await readdir(packagesDir, { withFileTypes: true })
-  const dirs = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+  const perGroup = await Promise.all(groups.map((group) => scanGroup({ group, repoRoot })))
+  return perGroup.flat()
+}
 
-  const manifests = await Promise.all(dirs.map((dir) => readManifest({ dir, packagesDir })))
+const scanGroup = async ({
+  group,
+  repoRoot,
+}: {
+  group: string
+  repoRoot: string
+}): Promise<PackageManifest[]> => {
+  const groupDir = join(repoRoot, group)
+  let entries
+  try {
+    entries = await readdir(groupDir, { withFileTypes: true })
+  } catch {
+    // A group directory may not exist in every checkout (e.g. examples); skip it.
+    return []
+  }
+
+  const dirs = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+  const manifests = await Promise.all(dirs.map((dir) => readManifest({ dir, group, groupDir })))
   return manifests.filter((manifest): manifest is PackageManifest => manifest !== null)
 }
 
@@ -83,21 +111,28 @@ export const buildDeclaredIndex = (
         resolved.set(name, resolveCatalogSpec({ catalogs, name, spec }))
       }
     }
-    index.set(manifest.shortName, resolved)
+    // Key by importer path (matches monorepo owner labels); also by short name for
+    // the packages group so consumer-facing owners (e.g. `ui`) resolve.
+    index.set(`${manifest.group}/${manifest.shortName}`, resolved)
+    if (manifest.group === 'packages') {
+      index.set(manifest.shortName, resolved)
+    }
   }
   return index
 }
 
 const readManifest = async ({
   dir,
-  packagesDir,
+  group,
+  groupDir,
 }: {
   dir: string
-  packagesDir: string
+  group: string
+  groupDir: string
 }): Promise<null | PackageManifest> => {
   let raw: string
   try {
-    raw = await readFile(join(packagesDir, dir, 'package.json'), 'utf8')
+    raw = await readFile(join(groupDir, dir, 'package.json'), 'utf8')
   } catch {
     return null
   }
@@ -115,6 +150,7 @@ const readManifest = async ({
       ...toStringRecord(pkg.dependencies),
     },
     dependencies: toStringRecord(pkg.dependencies),
+    group,
     isPrivate: pkg.private === true,
     name: pkg.name,
     shortName: dir,

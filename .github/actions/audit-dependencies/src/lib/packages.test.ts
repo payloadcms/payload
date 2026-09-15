@@ -12,6 +12,7 @@ const manifest = (
 ): PackageManifest => ({
   allDependencies: {},
   dependencies: {},
+  group: 'packages',
   isPrivate: false,
   ...overrides,
 })

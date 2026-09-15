@@ -9,7 +9,9 @@ import { loadCatalogs } from './lib/catalog'
 import { parseArgs } from './lib/cli'
 import { runConsumerAudit } from './lib/consumerAudit'
 import { runMonorepoAudit } from './lib/monorepoAudit'
-import { buildDeclaredIndex, scanPackages, selectConsumerPackages } from './lib/packages'
+import type { PackageManifest } from './lib/packages'
+
+import { buildDeclaredIndex, scanWorkspaceManifests, selectConsumerPackages } from './lib/packages'
 import { createRegistryClient } from './lib/registry'
 import {
   findStaleAllowlist,
@@ -47,10 +49,16 @@ const main = async (): Promise<number> => {
   console.log(`Auditing ${scope} for ${severity} vulnerabilities...`)
 
   const [manifests, catalogs] = await Promise.all([
-    scanPackages({ repoRoot }),
+    scanWorkspaceManifests({ repoRoot }),
     loadCatalogs({ repoRoot }),
   ])
-  const { hits, packagesAudited } = await audit({ catalogs, manifests, repoRoot, scope })
+  const packageManifests = manifests.filter((manifest) => manifest.group === 'packages')
+  const { hits, packagesAudited } = await audit({
+    catalogs,
+    manifests: packageManifests,
+    repoRoot,
+    scope,
+  })
 
   for (const stale of findStaleAllowlist({ entries: allow.allowlist.entries, hits, scope })) {
     console.warn(
@@ -86,7 +94,7 @@ const audit = async ({
   scope,
 }: {
   catalogs: Awaited<ReturnType<typeof loadCatalogs>>
-  manifests: Awaited<ReturnType<typeof scanPackages>>
+  manifests: PackageManifest[]
   repoRoot: string
   scope: Scope
 }): Promise<{ hits: AdvisoryHit[]; packagesAudited: number }> => {
