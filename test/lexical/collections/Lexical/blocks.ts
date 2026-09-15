@@ -139,6 +139,7 @@ export const AsyncHooksBlock: Block = {
             return value?.toUpperCase()
           },
         ],
+        beforeValidate: [({ value }) => value?.trim()],
       },
     },
     {
