@@ -98,6 +98,39 @@ export const getFields = ({
     } as TextField)
   }
 
+  let existingThumbnailURLFieldIndex = -1
+
+  const existingThumbnailURLField = fields.find((existingField, i) => {
+    if ('name' in existingField && existingField.name === 'thumbnailURL') {
+      existingThumbnailURLFieldIndex = i
+      return true
+    }
+    return false
+  }) as TextField
+
+  if (existingThumbnailURLField && adapter) {
+    fields.splice(existingThumbnailURLFieldIndex, 1)
+
+    fields.push({
+      ...existingThumbnailURLField,
+      hooks: {
+        afterRead: [
+          getAfterReadHook({ adapter, collection, disablePayloadAccessControl, generateFileURL }),
+          ...(existingThumbnailURLField?.hooks?.afterRead || []),
+        ],
+        beforeChange: [
+          getBeforeChangeHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+          }),
+          ...(existingThumbnailURLField.hooks?.beforeChange || []),
+        ],
+      },
+    } as TextField)
+  }
+
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
     let existingSizesFieldIndex = -1
 
