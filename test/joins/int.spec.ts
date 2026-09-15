@@ -2192,11 +2192,12 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
             status: 'available',
             tags: ['available'],
           },
+          extras: { flag: 1 },
           mixedTags: ['available'],
           owner: user,
           parent,
           score: 5,
-          settings: { approved: true },
+          settings: { approved: true, title: 'json-only' },
           tags: ['available', 'allowed-marker'],
           title: 'available child',
           variantSelect: 'available',
@@ -2219,7 +2220,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
           owner: user,
           parent,
           score: 15,
-          settings: { approved: true },
+          settings: { approved: false },
           tags: ['available', 'not-permitted'],
           title: 'restricted child',
           variantSelect: 'available',
@@ -2262,7 +2263,6 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
           owner: user,
           parent,
           score: 25,
-          settings: { approved: true },
           tags: ['unavailable'],
           title: 'available child',
         },
@@ -3488,19 +3488,147 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       ).rejects.toThrow('The following path cannot be queried: owner.email.exists')
     })
 
-    test('should reject nested JSON paths in polymorphic join constraints', async ({ payload }) => {
+    test('should filter polymorphic join constraints on a JSON sub-path', async ({ payload }) => {
+      const { allowedChild, missingAvailabilityChild, parent, restrictedChild } =
+        await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useNestedJSONAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const resultKeys = result.children.docs.map(
+        ({ relationTo, value }) => `${relationTo}:${value.id}`,
+      )
+
+      expect(resultKeys).toContain(`${accessJoinArticlesSlug}:${allowedChild.id}`)
+      expect(resultKeys).toContain(`${accessJoinNotesSlug}:${missingAvailabilityChild.id}`)
+      expect(resultKeys).not.toContain(`${accessJoinNotesSlug}:${restrictedChild.id}`)
+      expect(result.children.totalDocs).toBe(2)
+    })
+
+    test('should apply an exists constraint on a JSON sub-path', async ({ payload }) => {
+      const { parent, partialTagChild } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useNestedJSONExistsAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const resultKeys = result.children.docs.map(
+        ({ relationTo, value }) => `${relationTo}:${value.id}`,
+      )
+
+      expect(resultKeys).not.toContain(`${accessJoinNotesSlug}:${partialTagChild.id}`)
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    test('should match nothing on a JSON sub-path for collections without the json field', async ({
+      payload,
+    }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+            where: { 'extras.flag': { equals: 1 } },
+          },
+        },
+        overrideAccess: true,
+      })
+      const resultKeys = result.children.docs.map(
+        ({ relationTo, value }) => `${relationTo}:${value.id}`,
+      )
+
+      expect(resultKeys).toEqual([`${accessJoinArticlesSlug}:${allowedChild.id}`])
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    test('should treat a JSON sub-path as absent for collections without the json field', async ({
+      payload,
+    }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+            where: { 'extras.flag': { exists: false } },
+          },
+        },
+        overrideAccess: true,
+      })
+      const resultKeys = result.children.docs.map(
+        ({ relationTo, value }) => `${relationTo}:${value.id}`,
+      )
+
+      expect(resultKeys).not.toContain(`${accessJoinArticlesSlug}:${allowedChild.id}`)
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    test('should resolve a JSON sub-path whose key matches another field name', async ({
+      payload,
+    }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+            where: { 'settings.title': { equals: 'json-only' } },
+          },
+        },
+        overrideAccess: true,
+      })
+      const resultKeys = result.children.docs.map(
+        ({ relationTo, value }) => `${relationTo}:${value.id}`,
+      )
+
+      expect(resultKeys).toEqual([`${accessJoinArticlesSlug}:${allowedChild.id}`])
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    test('should reject negated JSON sub-path operators in polymorphic join constraints', async ({
+      payload,
+    }) => {
       const { parent } = await createConstrainedJoinDocuments(payload)
 
       await expect(
         payload.findByID({
           id: parent.id,
           collection: accessJoinParentsSlug,
-          context: { useNestedJSONAccessConstraint: true },
+          context: { useUnsupportedJSONOperatorAccessConstraint: true },
           depth: 1,
           overrideAccess: false,
           user,
         }),
-      ).rejects.toThrow('The following path cannot be queried: settings.approved.exists')
+      ).rejects.toThrow('The following path cannot be queried: settings.approved.not_equals')
     })
 
     test('should reject a sub-path of a field that cannot be descended into', async ({
