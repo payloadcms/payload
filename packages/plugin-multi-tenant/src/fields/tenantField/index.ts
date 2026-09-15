@@ -9,9 +9,9 @@ import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
 
 const fieldValidation =
   (validateFunction?: RelationshipFieldValidation): RelationshipFieldValidation =>
-  (value, options) => {
+  async (value, options) => {
     if (validateFunction) {
-      const result = validateFunction(value, options)
+      const result = await validateFunction(value, options)
       if (result !== true) {
         return result
       }
