@@ -59,6 +59,7 @@ describe('toHits', () => {
     expect(hit.directDeps).toEqual([
       { dependency: '@typescript-eslint/parser', workspacePackage: 'eslint-config' },
     ])
+    expect(hit.chainPackages).toEqual(['@typescript-eslint/parser', 'brace-expansion', 'minimatch'])
   })
 
   it('attributes the consumer-facing temp root (`.`) to the origin package', () => {
@@ -80,12 +81,14 @@ describe('mergeHits', () => {
     const [merged] = mergeHits([
       {
         advisory: advisory({}),
+        chainPackages: ['a', 'a-dep'],
         directDeps: [{ dependency: 'a-dep', workspacePackage: 'ui' }],
         originPackages: ['ui'],
         paths: ['ui > a'],
       },
       {
         advisory: advisory({}),
+        chainPackages: ['b', 'b-dep'],
         directDeps: [
           { dependency: 'a-dep', workspacePackage: 'ui' },
           { dependency: 'b-dep', workspacePackage: 'payload' },
@@ -97,6 +100,7 @@ describe('mergeHits', () => {
 
     expect(merged.originPackages).toEqual(['payload', 'ui'])
     expect(merged.paths).toEqual(['payload > b', 'ui > a'])
+    expect(merged.chainPackages).toEqual(['a', 'a-dep', 'b', 'b-dep'])
     expect(merged.directDeps).toEqual([
       { dependency: 'a-dep', workspacePackage: 'ui' },
       { dependency: 'b-dep', workspacePackage: 'payload' },

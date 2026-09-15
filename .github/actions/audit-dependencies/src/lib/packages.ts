@@ -15,11 +15,16 @@ export const DEV_TOOLING_DENYLIST: readonly string[] = [
 ]
 
 export type PackageManifest = {
+  /** Every declared dependency across all types (prod/dev/peer/optional), for remediation lookups. */
+  allDependencies: Record<string, string>
   dependencies: Record<string, string>
   isPrivate: boolean
   name: string
   shortName: string
 }
+
+/** Maps a workspace package's short name to its declared dependency specs (catalog-resolved). */
+export type DeclaredIndex = Map<string, Map<string, string>>
 
 export type ConsumerPackage = {
   dependencies: Record<string, string>
@@ -61,6 +66,28 @@ export const selectConsumerPackages = (
     }))
 }
 
+/**
+ * Builds a lookup of each workspace package's declared dependency specs, with
+ * `catalog:` specs resolved to the concrete range. Used to report the version we
+ * currently declare and to detect when a fix crosses the current major.
+ */
+export const buildDeclaredIndex = (
+  manifests: PackageManifest[],
+  catalogs: Catalogs,
+): DeclaredIndex => {
+  const index: DeclaredIndex = new Map()
+  for (const manifest of manifests) {
+    const resolved = new Map<string, string>()
+    for (const [name, spec] of Object.entries(manifest.allDependencies)) {
+      if (!spec.startsWith('workspace:')) {
+        resolved.set(name, resolveCatalogSpec({ catalogs, name, spec }))
+      }
+    }
+    index.set(manifest.shortName, resolved)
+  }
+  return index
+}
+
 const readManifest = async ({
   dir,
   packagesDir,
@@ -81,6 +108,12 @@ const readManifest = async ({
   }
 
   return {
+    allDependencies: {
+      ...toStringRecord(pkg.optionalDependencies),
+      ...toStringRecord(pkg.peerDependencies),
+      ...toStringRecord(pkg.devDependencies),
+      ...toStringRecord(pkg.dependencies),
+    },
     dependencies: toStringRecord(pkg.dependencies),
     isPrivate: pkg.private === true,
     name: pkg.name,

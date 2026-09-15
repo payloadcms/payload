@@ -25,6 +25,7 @@ const hit = (
   directDeps: DirectDependency[] = [],
 ): AdvisoryHit => ({
   advisory: advisory(overrides),
+  chainPackages: [],
   directDeps,
   originPackages,
   paths,

@@ -1,5 +1,5 @@
 import type { AllowlistEntry } from './allowlist'
-import type { AdvisoryHit, Finding, Scope, Severity } from '../types'
+import type { AdvisoryHit, Bump, Finding, ReportedFinding, Scope, Severity } from '../types'
 
 import { isFixable, meetsThreshold, severityRank } from './severity'
 
@@ -28,8 +28,9 @@ export const toFindings = ({
     .filter(({ advisory }) => isFixable(advisory.patched_versions))
     .filter(({ advisory }) => meetsThreshold({ advisorySeverity: advisory.severity, threshold }))
     .filter(({ advisory }) => !ignored.has(advisory.github_advisory_id))
-    .map(({ advisory, directDeps, originPackages, paths }) => ({
+    .map(({ advisory, chainPackages, directDeps, originPackages, paths }) => ({
       advisory: advisory.github_advisory_id,
+      chainPackages,
       directDeps,
       fixed_in: advisory.patched_versions,
       originPackages,
@@ -72,7 +73,7 @@ export const printReport = ({
   scope,
   severity,
 }: {
-  findings: Finding[]
+  findings: ReportedFinding[]
   jsonPath: string
   packagesAudited: number
   scope: Scope
@@ -96,36 +97,52 @@ export const printReport = ({
         `${RED}${finding.vulnerable}${RESET} fixed in ` +
         `${GREEN}${finding.fixed_in}${RESET}${origin}`,
     )
-    printBumpSuggestions(finding.directDeps)
+    for (const bump of finding.bumps) {
+      printBump(bump)
+    }
   }
 
   console.log('')
   console.log(`Output written to ${jsonPath}`)
 }
 
-/**
- * Prints the remediation: bump the direct dependencies we declare that pull in the
- * vulnerable module, grouped by dependency with the owning workspace packages.
- */
-const printBumpSuggestions = (directDeps: Finding['directDeps']): void => {
-  const owners = new Map<string, Set<string>>()
-  for (const { dependency, workspacePackage } of directDeps) {
-    const where = owners.get(dependency) ?? new Set<string>()
-    if (workspacePackage) {
-      where.add(workspacePackage)
-    }
-    owners.set(dependency, where)
+/** Prints the remediation for one direct dependency: the minimal bump, or why none applies. */
+const printBump = ({ currentSpec, dependency, fix, workspacePackages }: Bump): void => {
+  const where = workspacePackages.length > 0 ? ` (in ${workspacePackages.join(', ')})` : ''
+
+  if (fix.status === 'unknown') {
+    const cause =
+      fix.reason === 'registry'
+        ? 'registry unreachable'
+        : 'current version unknown, declared outside packages/'
+    console.log(`  ${dependency}: fix availability unknown — ${cause}${where}`)
+    return
+  }
+  if (fix.status === 'none') {
+    console.log(`  no bump of ${dependency} clears this yet -> allowlist or escalate${where}`)
+    return
+  }
+  if (fix.status === 'relock') {
+    console.log(
+      `  ${dependency}: no bump needed — ${currentSpec ?? 'current range'} already resolves ` +
+        `${GREEN}>=${fix.version}${RESET}; refresh lockfile (pnpm update ${dependency})${where}`,
+    )
+    return
   }
 
-  const entries = [...owners.entries()].sort((a, b) => a[0].localeCompare(b[0]))
-  for (const [dependency, where] of entries) {
-    const list = [...where].sort()
-    const suffix = list.length > 0 ? ` (in ${list.join(', ')})` : ''
-    console.log(`  bump direct dependency: ${dependency}${suffix}`)
+  const from = currentSpec ? `from ${currentSpec} ` : ''
+  console.log(`  bump ${dependency} ${from}to ${GREEN}>=${fix.version}${RESET}${where}`)
+  if (fix.crossesMajor) {
+    console.log(
+      `    note: crosses major (${fix.fromMajor} -> ${fix.toMajor}), review for breaking changes`,
+    )
   }
 }
 
-const compareFindings = (a: Finding, b: Finding): number => {
+const compareFindings = (
+  a: Pick<Finding, 'package' | 'severity'>,
+  b: Pick<Finding, 'package' | 'severity'>,
+): number => {
   const severityDelta = severityRank(b.severity) - severityRank(a.severity)
   if (severityDelta !== 0) {
     return severityDelta

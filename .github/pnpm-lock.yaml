@@ -70,12 +70,18 @@ importers:
       '@types/node':
         specifier: ^20.16.5
         version: 20.16.5
+      '@types/semver':
+        specifier: ^7.5.8
+        version: 7.8.0
       '@vercel/ncc':
         specifier: 0.38.1
         version: 0.38.1
       rimraf:
         specifier: ^5.0.5
         version: 5.0.10
+      semver:
+        specifier: ^7.6.3
+        version: 7.6.3
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
@@ -999,6 +1005,9 @@ packages:
 
   '@types/retry@0.12.0':
     resolution: {integrity: sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==}
+
+  '@types/semver@7.8.0':
+    resolution: {integrity: sha512-1mAINjtQCXXeLkJ9ehXkwOcBpqtLxiVtKhpUf83DdRNdQKV0iXZpaHYqRr7nj+wvxuJzoAmAwXI+sCNMv1CzLQ==}
 
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
@@ -3591,6 +3600,8 @@ snapshots:
       undici-types: 6.19.8
 
   '@types/retry@0.12.0': {}
+
+  '@types/semver@7.8.0': {}
 
   '@types/stack-utils@2.0.3': {}
 

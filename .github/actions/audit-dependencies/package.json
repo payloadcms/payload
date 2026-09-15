@@ -15,8 +15,10 @@
   },
   "devDependencies": {
     "@types/node": "^20.16.5",
+    "@types/semver": "^7.5.8",
     "@vercel/ncc": "0.38.1",
     "rimraf": "^5.0.5",
+    "semver": "^7.6.3",
     "typescript": "^5.0.0",
     "vitest": "^3.0.0",
     "yaml": "^2.6.0"

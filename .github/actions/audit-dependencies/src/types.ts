@@ -31,6 +31,8 @@ export type DirectDependency = {
 /** An advisory tagged with the consumer-facing packages whose graph surfaced it. */
 export type AdvisoryHit = {
   advisory: PnpmAdvisory
+  /** Every package name on the introducing chains (intermediates + the vulnerable module), for metadata tracing. */
+  chainPackages: string[]
   /** Direct dependencies we declare that introduce the vulnerable module — the remediation targets. */
   directDeps: DirectDependency[]
   /** Empty for monorepo scope; short names (e.g. `payload`, `ui`) for consumer-facing. */
@@ -42,6 +44,8 @@ export type AdvisoryHit = {
 /** A reported, actionable vulnerability written to the JSON output and console. */
 export type Finding = {
   advisory: string
+  /** Every package name on the introducing chains, for metadata tracing. */
+  chainPackages: string[]
   /** Direct dependencies to bump to remediate, grouped by owning workspace package. */
   directDeps: DirectDependency[]
   fixed_in: string
@@ -54,3 +58,38 @@ export type Finding = {
   url: string
   vulnerable: string
 }
+
+/** The outcome of tracing whether bumping a direct dependency can clear the vulnerability. */
+export type FixResult =
+  | {
+      /** The bump crosses the current major, so it may carry breaking changes. */
+      crossesMajor: boolean
+      fromMajor: null | number
+      status: 'fix'
+      toMajor: number
+      /** The minimal version of the direct dependency whose metadata resolves the module into its patched range. */
+      version: string
+    }
+  | {
+      /** The declared range already permits a patched resolution; only the lockfile is stale. */
+      status: 'relock'
+      version: string
+    }
+  | { status: 'none' }
+  | {
+      /** `registry`: a packument was unreachable. `no-current-version`: the owner's declared version is unknown (e.g. declared outside packages/), so a safe minimal bump cannot be computed. */
+      reason: 'no-current-version' | 'registry'
+      status: 'unknown'
+    }
+
+/** A remediation suggestion for one direct dependency, grouped across the packages that declare it. */
+export type Bump = {
+  /** The resolved version range we currently declare (catalog-resolved); null when unknown/mixed. */
+  currentSpec: null | string
+  dependency: string
+  fix: FixResult
+  workspacePackages: string[]
+}
+
+/** A finding enriched with per-direct-dependency bump suggestions for reporting. */
+export type ReportedFinding = Omit<Finding, 'directDeps'> & { bumps: Bump[] }

@@ -10,6 +10,7 @@ const EMPTY_CATALOGS: Catalogs = { default: {}, named: {} }
 const manifest = (
   overrides: Partial<PackageManifest> & Pick<PackageManifest, 'name' | 'shortName'>,
 ): PackageManifest => ({
+  allDependencies: {},
   dependencies: {},
   isPrivate: false,
   ...overrides,
