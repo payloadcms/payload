@@ -11,6 +11,7 @@ import {
   useDebouncedEffect,
   useDocumentInfo,
   useField,
+  useForm,
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
@@ -25,9 +26,19 @@ import type {
 import type { ImportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
+import {
+  getFormStateSignature,
+  getSubmittedFormValues,
+} from '../../utilities/getSubmittedFormValues.js'
 import './index.css'
 
 const baseClass = 'import-preview'
+
+/**
+ * The upload field is left out of the forwarded form values: a `File` is not serializable, and
+ * the file contents already travel to the endpoint as `fileData`.
+ */
+const nonSerializableFormKeys = ['file']
 
 /**
  * Browser-native ArrayBuffer → base64. Avoids Node's `Buffer`, which is not
@@ -68,6 +79,13 @@ export const ImportPreview: React.FC = () => {
 
   // Access the file field directly from form fields
   const fileField = useFormFields(([fields]) => fields?.file || null)
+
+  const { getData } = useForm()
+  // The endpoint passes the request body to import.hooks.before as `importDoc`, so the whole
+  // form has to go with it — a field added via `overrideCollection` is not read above.
+  const formStateSignature = useFormFields(([fields]) =>
+    getFormStateSignature({ fields, omit: nonSerializableFormKeys }),
+  )
 
   const [dataToRender, setDataToRender] = useState<Record<string, unknown>[]>([])
   const [columns, setColumns] = useState<Column[]>([])
@@ -154,6 +172,10 @@ export const ImportPreview: React.FC = () => {
           // Fetch transformed data from the server
           const res = await fetch(`${routes.api}/${collectionSlug}/preview-data`, {
             body: JSON.stringify({
+              ...getSubmittedFormValues({
+                formData: getData(),
+                omit: nonSerializableFormKeys,
+              }),
               collectionSlug: targetCollectionSlug,
               fileData,
               format,
@@ -486,6 +508,8 @@ export const ImportPreview: React.FC = () => {
       filename,
       mimeType,
       fileField?.value,
+      formStateSignature,
+      getData,
       collectionConfig,
       config,
       i18n,

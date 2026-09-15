@@ -4,7 +4,7 @@
  */
 import type { PayloadRequest, SelectType, Sort, User, Where } from 'payload'
 
-import type { ExportAfterHook, ExportBeforeHook } from '../types.js'
+import type { ExportAfterHook, ExportBeforeHook, ExportDoc } from '../types.js'
 
 import { type BatchProcessorOptions } from '../utilities/useBatchProcessor.js'
 
@@ -40,6 +40,13 @@ export interface ExportProcessOptions<TDoc = unknown> {
    * The slug of the collection to export
    */
   collectionSlug: string
+  /**
+   * The export document that triggered this run — passed through to hook args.
+   *
+   * Supplied once by the caller at the start of processing and reused for every batch.
+   * Hooks should treat this shared object as read-only.
+   */
+  exportDoc: ExportDoc
   /**
    * Arguments to pass to payload.find()
    */
@@ -133,6 +140,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
     processOptions: ExportProcessOptions<TDoc>,
   ): Promise<ExportResult> => {
     const {
+      exportDoc,
       findArgs,
       format,
       hooks,
@@ -181,6 +189,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
           ? await hooks.before({
               batchNumber,
               data: batchData,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -205,6 +214,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
         await hooks.after({
           batchNumber,
           data: dataToWrite,
+          exportDoc,
           format,
           originalData: originalDocs,
           req,
@@ -241,6 +251,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
     processOptions: ExportProcessOptions<TDoc>,
   ): AsyncGenerator<{ columns: string[]; docs: Record<string, unknown>[] }> {
     const {
+      exportDoc,
       findArgs,
       format,
       hooks,
@@ -288,6 +299,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
           ? await hooks.before({
               batchNumber,
               data: batchData,
+              exportDoc,
               format,
               originalData: originalDocs,
               req,
@@ -312,6 +324,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
         await hooks.after({
           batchNumber,
           data: dataToWrite,
+          exportDoc,
           format,
           originalData: originalDocs,
           req,
