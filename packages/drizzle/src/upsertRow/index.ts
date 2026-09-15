@@ -2,7 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
-import { and, desc, eq, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, or } from 'drizzle-orm'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -47,6 +47,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   // Make a new argument in upsertRow.ts and pass the slug from every operation.
   customID,
   joinQuery: _joinQuery,
+  limit,
   operation,
   path = '',
   req,
@@ -62,7 +63,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   markWrite(adapter)
 
   let insertedRow: Record<string, unknown> = { id }
-  if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
+  if ((id || limit) && shouldUseOptimizedUpsertRow({ data, fields })) {
     try {
       const transformedForWrite = transformForWrite({
         adapter,
@@ -75,23 +76,46 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const { arraysToPush } = transformedForWrite
 
       const drizzle = db as LibSQLDatabase
+      const table = adapter.tables[tableName]
+      let updateWhere = id ? and(eq(table.id, id), where) : where
 
-      // First, handle $push arrays
+      if (limit && !id) {
+        // PostgreSQL doesn't support LIMIT directly on an UPDATE.
+        // Put LIMIT on a subquery (a SELECT inside the UPDATE) instead, so we update
+        // at most one row without making a separate database request.
+        const matchingID = drizzle.select({ id: table.id }).from(table).where(where).limit(limit)
 
-      if (arraysToPush && Object.keys(arraysToPush)?.length) {
-        await insertArrays({
-          adapter,
-          arrays: [arraysToPush],
-          db,
-          parentRows: [insertedRow],
-          uuidMap: {},
-        })
+        // Recheck the condition on the row being written in case another writer changed it.
+        updateWhere = and(where, inArray(table.id, matchingID))
+      }
+
+      // A conditional update must match before we append any array rows.
+      const pushArrays = async () => {
+        if (arraysToPush && Object.keys(arraysToPush)?.length) {
+          await insertArrays({
+            adapter,
+            arrays: [arraysToPush],
+            db,
+            parentRows: [insertedRow],
+            uuidMap: {},
+          })
+        }
       }
 
       // If row.updatedAt is not set, delete it to avoid triggering hasDataToUpdate. `updatedAt` may be explicitly set to null to
       // disable triggering hasDataToUpdate.
       if (typeof row.updatedAt === 'undefined' || row.updatedAt === null) {
         delete row.updatedAt
+      }
+
+      /**
+       * Array entries live in a separate table, so there may be no parent fields to update.
+       * We still need to check `where` on the parent document before adding those entries.
+       * Setting the parent's ID to its current value gives us a valid UPDATE that returns its ID.
+       * If nothing matches, we stop without adding any array entries.
+       */
+      if ((where || limit) && !Object.keys(row).length) {
+        row.id = id ?? table.id
       }
 
       const hasDataToUpdate = row && Object.keys(row)?.length
@@ -101,12 +125,18 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         if (hasDataToUpdate) {
           // Only update row if there is something to update.
           // Example: if the data only consists of a single $push, calling insertArrays is enough - we don't need to update the row.
-          await drizzle
+          ;[insertedRow] = await drizzle
             .update(adapter.tables[tableName])
             .set(row)
-            .where(eq(adapter.tables[tableName].id, id))
+            .where(updateWhere)
+            .returning({ id: table.id })
+
+          if (!insertedRow) {
+            return null
+          }
         }
-        return ignoreResult === 'idOnly' ? ({ id } as T) : null
+        await pushArrays()
+        return ignoreResult === 'idOnly' ? ({ id: insertedRow.id } as T) : null
       }
 
       const findManyArgs = buildFindManyArgs({
@@ -122,6 +152,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
 
       if (!hasDataToUpdate) {
+        await pushArrays()
         // Nothing to update => just fetch current row and return
         findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
@@ -153,8 +184,15 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         const docs = await drizzle
           .update(adapter.tables[tableName])
           .set(row)
-          .where(eq(adapter.tables[tableName].id, id))
+          .where(updateWhere)
           .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
+
+        if (!docs.length) {
+          return null
+        }
+
+        insertedRow = docs[0]
+        await pushArrays()
 
         return transform<T>({
           adapter,
@@ -168,10 +206,17 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       // DB Update that needs the result, potentially with joins => need to update first, then find. returning() does not work with joins.
 
-      await drizzle
+      ;[insertedRow] = await drizzle
         .update(adapter.tables[tableName])
         .set(row)
-        .where(eq(adapter.tables[tableName].id, id))
+        .where(updateWhere)
+        .returning({ id: table.id })
+
+      if (!insertedRow) {
+        return null
+      }
+
+      await pushArrays()
 
       findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
@@ -219,15 +264,22 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         rowKeys.length > 0 &&
         (hasLocalizedData || !rowKeys.every((key) => key === 'updatedAt' || key === 'createdAt'))
 
-      if (hasMainRowData) {
+      if (hasMainRowData || where) {
         if (id) {
+          const table = adapter.tables[tableName]
+
+          /**
+           * The caller supplied this ID or found it by looking up the document with `where`.
+           * We should update that document, keeping any fields the caller left out.
+           * The row may have been deleted since the lookup. In that case, UPDATE returns
+           * no match and we stop below, instead of recreating the document with an upsert.
+           */
           rowToInsert.row.id = id
-          ;[insertedRow] = await adapter.insert({
-            db,
-            onConflictDoUpdate: { set: rowToInsert.row, target },
-            tableName,
-            values: rowToInsert.row,
-          })
+          ;[insertedRow] = await (db as LibSQLDatabase)
+            .update(table)
+            .set(rowToInsert.row)
+            .where(and(eq(table.id, id), where))
+            .returning({ id: table.id })
         } else {
           ;[insertedRow] = await adapter.insert({
             db,
@@ -239,6 +291,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       } else {
         // No main row data to update, just use the existing ID
         insertedRow = { id }
+      }
+
+      if (!insertedRow) {
+        return null
       }
     } else {
       if (adapter.allowIDOnCreate && data.id) {

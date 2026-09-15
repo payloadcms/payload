@@ -8,6 +8,78 @@ import { test } from '../__helpers/int/vitest.js'
 test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') })(
   'database - postgres logs',
   () => {
+    /** A simple where update should find and update one record in a single database request. */
+    test('should update one matching record without a separate ID lookup', async ({ payload }) => {
+      await payload.create({ collection: 'simple', data: { text: 'Original', number: 1 } })
+      await payload.create({ collection: 'simple', data: { text: 'Original', number: 2 } })
+      const queries = vitest.spyOn(console, 'log').mockImplementation(() => {})
+
+      try {
+        const result = await payload.db.updateOne({
+          collection: 'simple',
+          data: { text: 'Updated' },
+          where: { text: { equals: 'Original' } },
+        })
+
+        expect(result.text).toBe('Updated')
+        expect(queries).toHaveBeenCalledTimes(1)
+      } finally {
+        queries.mockRestore()
+      }
+
+      const stored = await payload.find({ collection: 'simple', pagination: false })
+
+      expect(stored.docs.filter((doc) => doc.text === 'Updated')).toHaveLength(1)
+      expect(stored.docs.filter((doc) => doc.text === 'Original')).toHaveLength(1)
+    })
+
+    /** Returning a document with arrays needs an update and a read, but no separate ID lookup first. */
+    test('should return a complex document without a separate ID lookup', async ({ payload }) => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'Original' } })
+      const queries = vitest.spyOn(console, 'log').mockImplementation(() => {})
+
+      try {
+        const result = await payload.db.updateOne({
+          collection: 'posts',
+          data: { title: 'Updated' },
+          where: { title: { equals: 'Original' } },
+        })
+
+        expect(result).toMatchObject({ id: post.id, title: 'Updated' })
+        expect(queries).toHaveBeenCalledTimes(2)
+      } finally {
+        queries.mockRestore()
+      }
+
+      const stored = await payload.findByID({ collection: 'posts', id: post.id })
+
+      expect(stored.title).toBe('Updated')
+    })
+
+    /** Updating one field needs only one database request when the caller does not need the document back. */
+    test('should update without an ID lookup when returning is false', async ({ payload }) => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'Original' } })
+      const queries = vitest.spyOn(console, 'log').mockImplementation(() => {})
+
+      try {
+        const result = await payload.db.updateOne({
+          collection: 'posts',
+          data: { title: 'Updated' },
+          returning: false,
+          where: { title: { equals: 'Original' } },
+        })
+
+        expect(result).toBeNull()
+        expect(queries).toHaveBeenCalledTimes(1)
+      } finally {
+        queries.mockRestore()
+      }
+
+      const stored = await payload.findByID({ collection: 'posts', id: post.id })
+
+      expect(stored.title).toBe('Updated')
+    })
+
     test('ensure simple update uses optimized upsertRow with returning()', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'simple',
