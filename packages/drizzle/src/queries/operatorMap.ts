@@ -56,8 +56,8 @@ export const operatorMap: Operators = {
   like: ilike,
   not_equals: ne,
   not_like: notIlike,
-  // TODO: support this
-  // all: all,
+  // `all` is absent by design: it cannot be expressed as a single column comparison, so
+  // `parseParams` builds it from correlated `EXISTS` subqueries instead.
   not_in: notInArray,
   or,
 }

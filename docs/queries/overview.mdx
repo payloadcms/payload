@@ -51,7 +51,7 @@ The following operators are available for use in queries:
 | `contains`           | Must contain the value entered, case-insensitive. With a nested query on a non-polymorphic `hasMany` relationship, at least one related document must match.                     |
 | `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                      |
 | `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                        |
-| `all`                | The value must contain all values provided in the comma-delimited list. Note: currently this operator is supported only with the MongoDB adapter.                                |
+| `all`                | Every value in the provided comma-delimited list must be present. Intended for `hasMany` fields; on a field holding a single value it matches only when one value was queried.   |
 | `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                        |
 | `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.   |
 | `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)      |

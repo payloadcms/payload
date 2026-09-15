@@ -968,48 +968,86 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           },
         )
 
-        // all operator is not supported in Postgres yet for any fields
-        test.options({ db: 'mongo' })(
-          'should query using "all" by hasMany relationship field',
-          async ({ payload }) => {
-            const movie1 = await payload.create({
-              collection: 'movies',
-              data: {},
-            })
-            const movie2 = await payload.create({
-              collection: 'movies',
-              data: {},
-            })
+        test('should query using "all" by hasMany relationship field', async ({ payload }) => {
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
 
-            await payload.create({
-              collection: 'directors',
-              data: {
-                name: 'Quentin Tarantino',
-                movies: [movie2.id, movie1.id],
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id, movie1.id],
+            },
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id],
+            },
+          })
+
+          const query1 = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                all: [movie1.id],
               },
-            })
+            },
+          })
 
-            await payload.create({
-              collection: 'directors',
-              data: {
-                name: 'Quentin Tarantino',
-                movies: [movie2.id],
+          expect(query1.totalDocs).toStrictEqual(1)
+        })
+
+        test('should query using "all" with multiple values by hasMany relationship field', async ({
+          payload,
+        }) => {
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+
+          const both = await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Has both movies',
+              movies: [movie2.id, movie1.id],
+            },
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Has one movie',
+              movies: [movie2.id],
+            },
+          })
+
+          const { docs } = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                all: [movie1.id, movie2.id],
               },
-            })
+            },
+          })
 
-            const query1 = await payload.find({
-              collection: 'directors',
-              depth: 0,
-              where: {
-                movies: {
-                  all: [movie1.id],
-                },
-              },
-            })
-
-            expect(query1.totalDocs).toStrictEqual(1)
-          },
-        )
+          expect(docs).toHaveLength(1)
+          expect(docs[0]?.id).toStrictEqual(both.id)
+        })
 
         test('should query using "in" by hasMany relationship field', async ({ payload }) => {
           const tree1 = await payload.create({
@@ -2121,41 +2159,40 @@ test.suite({ config: './config.ts' })('Relationships', () => {
       expect(queryTwo.docs).toHaveLength(1)
     })
 
-    // all operator is not supported in Postgres yet for any fields
-    test.options({ db: 'mongo' })(
-      'should allow REST all querying on polymorphic relationships',
-      async ({ payload, restClient }) => {
-        const movie = await payload.create({
-          collection: 'movies',
-          data: {
-            name: 'Pulp Fiction 2',
+    test('should allow REST all querying on polymorphic relationships', async ({
+      payload,
+      restClient,
+    }) => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+      await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
           },
-        })
-        await payload.create({
-          collection: polymorphicRelationshipsSlug,
-          data: {
-            polymorphic: {
-              relationTo: 'movies',
-              value: movie.id,
-            },
-          },
-        })
+        },
+      })
 
-        const queryOne = await restClient
-          .GET(`/${polymorphicRelationshipsSlug}`, {
-            query: {
-              where: {
-                'polymorphic.value': {
-                  all: [movie.id],
-                },
+      const queryOne = await restClient
+        .GET(`/${polymorphicRelationshipsSlug}`, {
+          query: {
+            where: {
+              'polymorphic.value': {
+                all: [movie.id],
               },
             },
-          })
-          .then((res) => res.json())
+          },
+        })
+        .then((res) => res.json())
 
-        expect(queryOne.docs).toHaveLength(1)
-      },
-    )
+      expect(queryOne.docs).toHaveLength(1)
+    })
 
     test('should allow querying on polymorphic relationships with an object syntax', async ({
       payload,
