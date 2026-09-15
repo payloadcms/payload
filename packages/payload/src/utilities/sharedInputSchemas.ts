@@ -25,9 +25,9 @@ export const defaultPageSchema = z
 export const depthSchema = z
   ._default(z.int().check(z.minimum(0), z.maximum(10)), 0)
   .check(z.describe('How many levels deep to populate relationships.'))
-export const draftSchema = z
-  .optional(z.boolean())
-  .check(z.describe('Include or read draft content.'))
+export const createActionSchema = z
+  .optional(z.enum(['saveDraft', 'publish']))
+  .check(z.describe('Save a draft or publish the created document.'))
 export const fallbackLocaleSchema = z
   .optional(z.union([z.string(), z.literal(false)]))
   .check(z.describe('Optional fallback locale code, or false to disable fallback.'))
@@ -101,9 +101,15 @@ export const trashSchema = z
 export const unpublishAllLocalesSchema = z
   .optional(z.boolean())
   .check(z.describe('Unpublish all locales.'))
-export const writeDraftSchema = z
-  ._default(z.boolean(), false)
-  .check(z.describe('Write draft content.'))
+export const restoreActionSchema = z
+  .optional(z.enum(['saveDraft', 'publish']))
+  .check(z.describe('Save the restored version as a draft or publish it.'))
+export const updateActionSchema = z
+  .optional(z.enum(['saveDraft', 'publish', 'unpublish']))
+  .check(z.describe('Save a draft, publish, or unpublish the updated document.'))
+export const versionSchema = z
+  .optional(z.enum(['published', 'latest', 'draft']))
+  .check(z.describe('Select published, latest, or draft content.'))
 export const slugSchema = z.string().check(z.minLength(1), z.describe('The target slug.'))
 
 const whereFieldSchema = z.partialRecord(z.enum(validOperators), z.unknown())

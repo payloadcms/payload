@@ -23,7 +23,7 @@ export default async function SSRPage({ params: paramsPromise }: Args) {
   const data = await getDoc<Page>({
     slug,
     collection: ssrPagesSlug,
-    draft: true,
+    version: 'latest',
   })
 
   if (!data) {

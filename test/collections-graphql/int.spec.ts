@@ -31,7 +31,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
 
     test('should create', async ({ restClient }) => {
       const query = `mutation {
-          createPost(data: {title: "${title}"}) {
+          createPost(action: publish, data: {title: "${title}"}) {
           id
           title
         }
@@ -101,13 +101,29 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
     })
 
     test('should sort by multiple fields', async ({ payload, restClient }) => {
-      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 } })
-      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 } })
-      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 } })
-      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 } })
+      const doc1 = await payload.create({
+        action: 'publish',
+        collection: 'sort',
+        data: { title: 'a', number: 1 },
+      })
+      const doc2 = await payload.create({
+        action: 'publish',
+        collection: 'sort',
+        data: { title: 'b', number: 1 },
+      })
+      const doc3 = await payload.create({
+        action: 'publish',
+        collection: 'sort',
+        data: { title: 'a', number: 2 },
+      })
+      const doc4 = await payload.create({
+        action: 'publish',
+        collection: 'sort',
+        data: { title: 'b', number: 3 },
+      })
 
       const query = `query {
-        Sorts(sort: "title, number") {
+        Sorts(sort: "title,-number") {
           docs {
             id
             title
@@ -191,6 +207,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       const firstTitle = 'first title'
       const secondTitle = 'second title'
       const first = await payload.create({
+        action: 'publish',
         collection: errorOnHookSlug,
         data: {
           errorBeforeChange: true,
@@ -198,6 +215,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         },
       })
       const second = await payload.create({
+        action: 'publish',
         collection: errorOnHookSlug,
         data: {
           errorBeforeChange: true,
@@ -208,7 +226,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       const updated = 'updated title'
 
       const query = `mutation {
-          createPost(data: {title: "${title}"}) {
+          createPost(action: publish, data: {title: "${title}"}) {
               id
               title
             }
@@ -333,11 +351,13 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         restClient,
       }) => {
         const recalls = await payload.create({
+          action: 'publish',
           collection: relationSlug,
           data: { name: 'recalls' },
         })
 
         const electricCars = await payload.create({
+          action: 'publish',
           collection: relationSlug,
           data: { name: 'electric-cars' },
         })
@@ -732,6 +752,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
             // randomize the creation timestamp
             await wait(Math.random())
             await payload.create({
+              action: 'publish',
               collection: pointSlug,
               data: {
                 // only randomize longitude to make distance comparison easy
@@ -1010,6 +1031,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         restClient,
       }) => {
         const relation = await payload.create({
+          action: 'publish',
           collection: relationSlug,
           data: {
             name: 'test',
@@ -1017,6 +1039,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         })
 
         await payload.create({
+          action: 'publish',
           collection: slug,
           data: {
             relationField: relation.id,
@@ -1026,6 +1049,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
 
         await payload.delete({
           id: relation.id,
+          action: 'publish',
           collection: relationSlug,
         })
 
@@ -1062,6 +1086,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         })
 
         await payload.create({
+          action: 'publish',
           collection: slug,
           data: {
             relationHasManyField: [relation.id],
@@ -1097,6 +1122,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
 
       test('should query relationships with locale', async ({ payload, restClient }) => {
         const newDoc = await payload.create({
+          action: 'publish',
           collection: 'cyclical-relationship',
           data: {
             title: {
@@ -1105,6 +1131,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
             },
           },
           locale: '*',
+          publishAllLocales: true,
         })
 
         await payload.update({
@@ -1140,17 +1167,18 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         const relation_1_draft = await payload.create({
           collection: 'relation',
           data: { _status: 'draft', name: 'relation_1_draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const relation_2 = await payload.create({
+          action: 'publish',
           collection: 'relation',
           data: { name: 'relation_2', _status: 'published' },
         })
 
         await payload.create({
           collection: 'posts',
-          draft: true,
+          action: 'saveDraft',
           data: {
             _status: 'draft',
             title: 'post with relations in draft',
@@ -1161,7 +1189,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         await payload.delete({ collection: 'relation', id: relation_1_draft.id })
 
         const query = `query {
-          Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
+          Posts(version:latest,where: { title: { equals: "post with relations in draft" }}) {
             docs {
               id
               title
@@ -1200,7 +1228,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
 
         await payload.create({
           collection: 'posts',
-          draft: true,
+          action: 'saveDraft',
           data: {
             _status: 'draft',
             title: 'post with relation restricted',
@@ -1209,7 +1237,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         })
 
         const query = `query {
-          Posts(draft:true,where: { title: { equals: "post with relation restricted" }}) {
+          Posts(version:latest,where: { title: { equals: "post with relation restricted" }}) {
             docs {
               id
               title
@@ -1244,7 +1272,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       data: {
         title: publishValue,
       },
-      draft: false,
+      action: 'publish',
     })
 
     // create cyclical relationship
@@ -1263,14 +1291,14 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       data: {
         title: draftValue,
       },
-      draft: true,
+      action: 'saveDraft',
     })
 
     const draftParentPublishedChild = `{
-      CyclicalRelationships(draft: true) {
+      CyclicalRelationships(version: latest) {
         docs {
           title
-          relationToSelf(draft: false) {
+          relationToSelf(version: published) {
             title
           }
         }
@@ -1287,10 +1315,10 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
     expect(queriedDoc.relationToSelf.title).toEqual(publishValue)
 
     const publishedParentDraftChild = `{
-      CyclicalRelationships(draft: false) {
+      CyclicalRelationships(version: published) {
         docs {
           title
-          relationToSelf(draft: true) {
+          relationToSelf(version: latest) {
             title
           }
         }
@@ -1311,6 +1339,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
     const file = await getFileByPath(path.resolve(dirname, '../uploads/test-image.jpg'))
 
     const mediaDoc = await payload.create({
+      action: 'publish',
       collection: 'media',
       data: {
         title: 'example',
@@ -1320,6 +1349,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
 
     // doc with upload relation
     const newDoc = await payload.create({
+      action: 'publish',
       collection: 'cyclical-relationship',
       data: {
         media: mediaDoc.id,
@@ -1368,7 +1398,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       restClient,
     }) => {
       const query = `mutation {
-          createPost(data: {min: 1}) {
+          createPost(action: publish, data: {min: 1}) {
               id
               min
               createdAt
@@ -1470,6 +1500,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
 
 async function createPost({ payload }: { payload: Payload }, overrides?: Partial<Post>) {
   const doc = await payload.create({
+    action: 'publish',
     collection: slug,
     data: { title: 'title', ...overrides },
   })

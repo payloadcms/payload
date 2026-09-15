@@ -11,7 +11,7 @@ export const findByIDHandler: PayloadHandler = async (req) => {
   const { data: dataArg } = req
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const { data, depth, draft, flattenLocales, joins, populate, select, trash } = parseParams({
+  const { data, depth, flattenLocales, joins, populate, select, trash, version } = parseParams({
     ...req.query,
     ...dataArg,
   })
@@ -21,13 +21,13 @@ export const findByIDHandler: PayloadHandler = async (req) => {
     collection,
     data,
     depth,
-    draft,
     flattenLocales,
     joins,
     populate,
     req,
     select,
     trash,
+    version,
   })
 
   return Response.json(result, {

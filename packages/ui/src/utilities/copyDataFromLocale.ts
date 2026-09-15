@@ -9,7 +9,12 @@ import {
   type ServerFunction,
   traverseFields,
 } from 'payload'
-import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  hasDraftsEnabled,
+  tabHasName,
+} from 'payload/shared'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
@@ -250,42 +255,42 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
-          draft: true,
           locale: fromLocale,
           overrideAccess: false,
           user,
+          version: 'latest',
           // `select` would allow us to select only the fields we need in the future
         })
       : payload.findByID({
           id: docID,
           collection: collectionSlug,
           depth: 0,
-          draft: true,
           joins: false,
           locale: fromLocale,
           overrideAccess: false,
           user,
+          version: 'latest',
           // `select` would allow us to select only the fields we need in the future
         }),
     globalSlug
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
-          draft: true,
           locale: toLocale,
           overrideAccess: false,
           user,
+          version: 'latest',
           // `select` would allow us to select only the fields we need in the future
         })
       : payload.findByID({
           id: docID,
           collection: collectionSlug,
           depth: 0,
-          draft: true,
           joins: false,
           locale: toLocale,
           overrideAccess: false,
           user,
+          version: 'latest',
           // `select` would allow us to select only the fields we need in the future
         }),
   ])
@@ -311,11 +316,15 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
 
   const data = removeIdIfParentIsLocalized(dataWithID, fields)
 
+  const draftsEnabled = globalSlug
+    ? hasDraftsEnabled(globals[globalSlug].config)
+    : hasDraftsEnabled(collections[collectionSlug].config)
+
   return globalSlug
     ? await payload.updateGlobal({
         slug: globalSlug,
+        ...(draftsEnabled ? { action: 'saveDraft' as const } : {}),
         data,
-        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,
@@ -323,9 +332,9 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       })
     : await payload.update({
         id: docID,
+        ...(draftsEnabled ? { action: 'saveDraft' as const } : {}),
         collection: collectionSlug,
         data,
-        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,

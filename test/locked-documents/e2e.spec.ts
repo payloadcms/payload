@@ -270,7 +270,7 @@ describe('Locked Documents', () => {
       await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
       await page.locator('#unpublish-posts [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-        'Updated 10 Posts successfully.',
+        'Updated 11 Posts successfully.',
       )
     })
 

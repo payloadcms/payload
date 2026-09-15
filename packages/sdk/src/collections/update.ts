@@ -11,6 +11,7 @@ import type { DeepPartial } from 'ts-essentials'
 import type { PayloadSDK } from '../index.js'
 import type {
   BulkOperationResult,
+  CollectionUpdateActionOptions,
   PopulateType,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
@@ -42,10 +43,6 @@ export type UpdateBaseOptions<
    */
   depth?: number
   /**
-   * Update documents to a draft.
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale<T>
@@ -68,7 +65,7 @@ export type UpdateBaseOptions<
    * @default false
    */
   trash?: boolean
-}
+} & CollectionUpdateActionOptions<TSlug>
 
 export type UpdateByIDOptions<
   T extends PayloadTypesShape,

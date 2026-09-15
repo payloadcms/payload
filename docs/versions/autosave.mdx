@@ -67,7 +67,7 @@ export const Pages: CollectionConfig = {
 
 ## Autosave API
 
-When `autosave` is enabled, all `update` operations within Payload expose a new argument called `autosave`. When set to `true`, Payload will treat the incoming draft update as an `autosave`. This is primarily used by the Admin UI, but there may be some cases where you are building an app for your users and wish to implement `autosave` in your own app. To do so, use the `autosave` argument in your `update` operations.
+When `autosave` is enabled, all `update` operations within Payload expose a new argument called `autosave`. When set to `true`, Payload will treat the incoming `saveDraft` update as an `autosave`. `autosave` is valid only with resolved `saveDraft`. This is primarily used by the Admin UI, but there may be some cases where you are building an app for your users and wish to implement `autosave` in your own app. To do so, pass `action: 'saveDraft'` together with `autosave: true` on `update`.
 
 ### How autosaves are stored
 

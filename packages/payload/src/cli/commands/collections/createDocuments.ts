@@ -2,7 +2,6 @@ import type { EntityInputSchema } from '../../../utilities/entityInputSchema/typ
 
 import { createDocumentsLocalInputSchema } from '../../../collections/operations/inputSchemas.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { hasDraftValidationEnabled } from '../../../utilities/getVersionsConfig.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import {
   localFileSchema,
@@ -36,16 +35,10 @@ export const createCreateDocumentsCommand = defineCLICommand({
   handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const collection = args.slug
-    const collectionConfig = payload.collections[collection]?.config
     const docs: Array<{ doc: unknown; index: number } | { id: number | string; index: number }> = []
     const errors: Array<{ index: number; issues?: unknown[]; message: string }> = []
     let schema: EntityInputSchema | undefined
     const req = await createLocalReq({}, payload)
-    const shouldUsePartialSchema =
-      args.draft === true &&
-      collectionConfig !== undefined &&
-      !hasDraftValidationEnabled(collectionConfig)
-
     for (const [index, { data, file }] of args.documents.entries()) {
       const inputData = stripCollectionVirtualFields({ collection, data, payload })
 
@@ -53,17 +46,17 @@ export const createCreateDocumentsCommand = defineCLICommand({
         validateCollectionData({
           slug: collection,
           data: inputData,
-          partial: shouldUsePartialSchema,
+          partial: true,
           req,
         })
 
         const resolvedFile = await resolveCLIFile({ slug: collection, input: file, req })
 
         const doc = await payload.create({
+          action: args.action,
           collection,
           data: prepareCollectionData({ collection, data: inputData, payload }),
           depth: args.depth,
-          draft: args.draft,
           fallbackLocale: args.fallbackLocale,
           ...resolvedFile,
           locale: args.locale,

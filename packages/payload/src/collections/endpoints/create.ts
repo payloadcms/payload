@@ -5,20 +5,36 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { parseParams } from '../../utilities/parseParams/index.js'
+import {
+  createActionValues,
+  parseEnumParam,
+  parseParams,
+} from '../../utilities/parseParams/index.js'
 import { createOperation } from '../operations/create.js'
 
 export const createHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const { autosave, depth, draft, populate, publishAllLocales, select } = parseParams(req.query)
+  const {
+    action: requestedAction,
+    autosave,
+    depth,
+    populate,
+    publishAllLocales,
+    select,
+  } = parseParams(req.query)
+  const action = parseEnumParam({
+    allowed: createActionValues,
+    param: 'action',
+    value: requestedAction,
+  })
 
   const doc = await createOperation({
+    action,
     autosave,
     collection,
     data: req.data!,
     depth,
-    draft,
     populate,
     publishAllLocales,
     req,

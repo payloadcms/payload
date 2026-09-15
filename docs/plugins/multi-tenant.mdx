@@ -340,7 +340,7 @@ In your frontend you can query and constrain data by tenant with the following:
 const pagesBySlug = await payload.find({
   collection: 'pages',
   depth: 1,
-  draft: false,
+  version: 'published',
   limit: 1000,
   overrideAccess: false,
   where: {

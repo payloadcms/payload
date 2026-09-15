@@ -62,7 +62,7 @@ export async function createDraftDocument({
       ...additionalData,
     },
     depth: 0,
-    draft: true,
+    action: 'saveDraft',
     overrideAccess: true,
   })
 }
@@ -101,7 +101,7 @@ export async function createDocumentWithManyVersions({
     collection,
     data: initialData,
     depth: 0,
-    draft,
+    action: draft ? 'saveDraft' : 'publish',
     overrideAccess: true,
   })
 

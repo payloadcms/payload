@@ -1,75 +1,97 @@
+enum ReadVersion {
+  published
+  latest
+  draft
+}
+
+enum CreateAction {
+  publish
+  saveDraft
+}
+
+enum UpdateAction {
+  publish
+  saveDraft
+  unpublish
+}
+
+enum RestoreAction {
+  publish
+  saveDraft
+}
+
 type Query {
-  User(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): User
-  Users(draft: Boolean, where: User_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Users
-  countUsers(draft: Boolean, trash: Boolean, where: User_where, locale: LocaleInputType): countUsers
+  User(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): User
+  Users(version: ReadVersion, where: User_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Users
+  countUsers(trash: Boolean, where: User_where, locale: LocaleInputType): countUsers
   docAccessUser(id: Int!): usersDocAccess
-  meUser: usersMe
+  meUser(version: ReadVersion): usersMe
   initializedUser: Boolean
-  Point(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Point
-  Points(draft: Boolean, where: Point_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Points
-  countPoints(draft: Boolean, trash: Boolean, where: Point_where, locale: LocaleInputType): countPoints
+  Point(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Point
+  Points(version: ReadVersion, where: Point_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Points
+  countPoints(trash: Boolean, where: Point_where, locale: LocaleInputType): countPoints
   docAccessPoint(id: Int!): pointDocAccess
-  Post(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Post
-  Posts(draft: Boolean, where: Post_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Posts
-  countPosts(draft: Boolean, trash: Boolean, where: Post_where, locale: LocaleInputType): countPosts
+  Post(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Post
+  Posts(version: ReadVersion, where: Post_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Posts
+  countPosts(trash: Boolean, where: Post_where, locale: LocaleInputType): countPosts
   docAccessPost(id: Int!): postsDocAccess
   versionPost(id: Int, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, trash: Boolean): PostVersion
   versionsPosts(where: versionsPost_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): versionsPosts
-  CustomId(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): CustomId
-  CustomIds(draft: Boolean, where: CustomId_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): CustomIds
-  countCustomIds(draft: Boolean, trash: Boolean, where: CustomId_where, locale: LocaleInputType): countCustomIds
+  CustomId(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): CustomId
+  CustomIds(version: ReadVersion, where: CustomId_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): CustomIds
+  countCustomIds(trash: Boolean, where: CustomId_where, locale: LocaleInputType): countCustomIds
   docAccessCustomId(id: Int!): custom_idsDocAccess
-  Relation(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Relation
-  Relations(draft: Boolean, where: Relation_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Relations
-  countRelations(draft: Boolean, trash: Boolean, where: Relation_where, locale: LocaleInputType): countRelations
+  Relation(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Relation
+  Relations(version: ReadVersion, where: Relation_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Relations
+  countRelations(trash: Boolean, where: Relation_where, locale: LocaleInputType): countRelations
   docAccessRelation(id: Int!): relationDocAccess
   versionRelation(id: Int, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, trash: Boolean): RelationVersion
   versionsRelations(where: versionsRelation_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): versionsRelations
-  Dummy(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Dummy
-  Dummies(draft: Boolean, where: Dummy_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Dummies
-  countDummies(draft: Boolean, trash: Boolean, where: Dummy_where, locale: LocaleInputType): countDummies
+  Dummy(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Dummy
+  Dummies(version: ReadVersion, where: Dummy_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Dummies
+  countDummies(trash: Boolean, where: Dummy_where, locale: LocaleInputType): countDummies
   docAccessDummy(id: Int!): dummyDocAccess
-  ErrorOnHook(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): ErrorOnHook
-  ErrorOnHooks(draft: Boolean, where: ErrorOnHook_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): ErrorOnHooks
-  countErrorOnHooks(draft: Boolean, trash: Boolean, where: ErrorOnHook_where, locale: LocaleInputType): countErrorOnHooks
+  ErrorOnHook(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): ErrorOnHook
+  ErrorOnHooks(version: ReadVersion, where: ErrorOnHook_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): ErrorOnHooks
+  countErrorOnHooks(trash: Boolean, where: ErrorOnHook_where, locale: LocaleInputType): countErrorOnHooks
   docAccessErrorOnHook(id: Int!): error_on_hooksDocAccess
-  PayloadApiTestOne(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadApiTestOne
-  PayloadApiTestOnes(draft: Boolean, where: PayloadApiTestOne_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadApiTestOnes
-  countPayloadApiTestOnes(draft: Boolean, trash: Boolean, where: PayloadApiTestOne_where, locale: LocaleInputType): countPayloadApiTestOnes
+  PayloadApiTestOne(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadApiTestOne
+  PayloadApiTestOnes(version: ReadVersion, where: PayloadApiTestOne_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadApiTestOnes
+  countPayloadApiTestOnes(trash: Boolean, where: PayloadApiTestOne_where, locale: LocaleInputType): countPayloadApiTestOnes
   docAccessPayloadApiTestOne(id: Int!): payload_api_test_onesDocAccess
-  PayloadApiTestTwo(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadApiTestTwo
-  PayloadApiTestTwos(draft: Boolean, where: PayloadApiTestTwo_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadApiTestTwos
-  countPayloadApiTestTwos(draft: Boolean, trash: Boolean, where: PayloadApiTestTwo_where, locale: LocaleInputType): countPayloadApiTestTwos
+  PayloadApiTestTwo(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadApiTestTwo
+  PayloadApiTestTwos(version: ReadVersion, where: PayloadApiTestTwo_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadApiTestTwos
+  countPayloadApiTestTwos(trash: Boolean, where: PayloadApiTestTwo_where, locale: LocaleInputType): countPayloadApiTestTwos
   docAccessPayloadApiTestTwo(id: Int!): payload_api_test_twosDocAccess
-  ContentType(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): ContentType
-  ContentTypes(draft: Boolean, where: ContentType_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): ContentTypes
-  countContentTypes(draft: Boolean, trash: Boolean, where: ContentType_where, locale: LocaleInputType): countContentTypes
+  ContentType(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): ContentType
+  ContentTypes(version: ReadVersion, where: ContentType_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): ContentTypes
+  countContentTypes(trash: Boolean, where: ContentType_where, locale: LocaleInputType): countContentTypes
   docAccessContentType(id: Int!): content_typeDocAccess
-  CyclicalRelationship(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): CyclicalRelationship
-  CyclicalRelationships(draft: Boolean, where: CyclicalRelationship_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): CyclicalRelationships
-  countCyclicalRelationships(draft: Boolean, trash: Boolean, where: CyclicalRelationship_where, locale: LocaleInputType): countCyclicalRelationships
+  CyclicalRelationship(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): CyclicalRelationship
+  CyclicalRelationships(version: ReadVersion, where: CyclicalRelationship_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): CyclicalRelationships
+  countCyclicalRelationships(trash: Boolean, where: CyclicalRelationship_where, locale: LocaleInputType): countCyclicalRelationships
   docAccessCyclicalRelationship(id: Int!): cyclical_relationshipDocAccess
   versionCyclicalRelationship(id: Int, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, trash: Boolean): CyclicalRelationshipVersion
   versionsCyclicalRelationships(where: versionsCyclicalRelationship_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): versionsCyclicalRelationships
-  Media(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Media
-  allMedia(draft: Boolean, where: Media_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): allMedia
-  countallMedia(draft: Boolean, trash: Boolean, where: Media_where, locale: LocaleInputType): countallMedia
+  Media(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Media
+  allMedia(version: ReadVersion, where: Media_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): allMedia
+  countallMedia(trash: Boolean, where: Media_where, locale: LocaleInputType): countallMedia
   docAccessMedia(id: Int!): mediaDocAccess
-  Sort(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Sort
-  Sorts(draft: Boolean, where: Sort_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Sorts
-  countSorts(draft: Boolean, trash: Boolean, where: Sort_where, locale: LocaleInputType): countSorts
+  Sort(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): Sort
+  Sorts(version: ReadVersion, where: Sort_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Sorts
+  countSorts(trash: Boolean, where: Sort_where, locale: LocaleInputType): countSorts
   docAccessSort(id: Int!): sortDocAccess
-  PayloadKv(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadKv
-  PayloadKvs(draft: Boolean, where: PayloadKv_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadKvs
-  countPayloadKvs(draft: Boolean, trash: Boolean, where: PayloadKv_where, locale: LocaleInputType): countPayloadKvs
+  PayloadKv(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadKv
+  PayloadKvs(version: ReadVersion, where: PayloadKv_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadKvs
+  countPayloadKvs(trash: Boolean, where: PayloadKv_where, locale: LocaleInputType): countPayloadKvs
   docAccessPayloadKv(id: Int!): payload_kvDocAccess
-  PayloadLockedDocument(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadLockedDocument
-  PayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
-  countPayloadLockedDocuments(draft: Boolean, trash: Boolean, where: PayloadLockedDocument_where, locale: LocaleInputType): countPayloadLockedDocuments
+  PayloadLockedDocument(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadLockedDocument
+  PayloadLockedDocuments(version: ReadVersion, where: PayloadLockedDocument_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
+  countPayloadLockedDocuments(trash: Boolean, where: PayloadLockedDocument_where, locale: LocaleInputType): countPayloadLockedDocuments
   docAccessPayloadLockedDocument(id: Int!): payload_locked_documentsDocAccess
-  PayloadPreference(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadPreferences
-  countPayloadPreferences(draft: Boolean, trash: Boolean, where: PayloadPreference_where, locale: LocaleInputType): countPayloadPreferences
+  PayloadPreference(id: Int!, version: ReadVersion, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadPreference
+  PayloadPreferences(version: ReadVersion, where: PayloadPreference_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadPreferences
+  countPayloadPreferences(trash: Boolean, where: PayloadPreference_where, locale: LocaleInputType): countPayloadPreferences
   docAccessPayloadPreference(id: Int!): payload_preferencesDocAccess
   Access: Access
   QueryWithInternalError: QueryWithInternalError
@@ -681,11 +703,11 @@ type Post {
   description: String
   number: Float
   min: Float
-  relationField(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
+  relationField(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
   relationToCustomID(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CustomId
-  relationHasManyField(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Relation!]
-  relationMultiRelationTo(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Post_RelationMultiRelationTo_Relationship
-  relationMultiRelationToHasMany(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Post_RelationMultiRelationToHasMany_Relationship!]
+  relationHasManyField(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Relation!]
+  relationMultiRelationTo(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Post_RelationMultiRelationTo_Relationship
+  relationMultiRelationToHasMany(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Post_RelationMultiRelationToHasMany_Relationship!]
   A1: Post_A1
   B1: Post_B1
   C1: Post_C1
@@ -1676,7 +1698,7 @@ type PostsReadVersionsDocAccess {
 }
 
 type PostVersion {
-  parent(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Post
+  parent(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Post
   version: PostVersion_Version
   createdAt: DateTime
   updatedAt: DateTime
@@ -1691,11 +1713,11 @@ type PostVersion_Version {
   description: String
   number: Float
   min: Float
-  relationField(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
+  relationField(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
   relationToCustomID(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CustomId
-  relationHasManyField(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Relation!]
-  relationMultiRelationTo(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PostVersion_Version_RelationMultiRelationTo_Relationship
-  relationMultiRelationToHasMany(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [PostVersion_Version_RelationMultiRelationToHasMany_Relationship!]
+  relationHasManyField(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [Relation!]
+  relationMultiRelationTo(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PostVersion_Version_RelationMultiRelationTo_Relationship
+  relationMultiRelationToHasMany(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): [PostVersion_Version_RelationMultiRelationToHasMany_Relationship!]
   A1: PostVersion_Version_A1
   B1: PostVersion_Version_B1
   C1: PostVersion_Version_C1
@@ -2571,7 +2593,7 @@ type RelationReadVersionsDocAccess {
 }
 
 type RelationVersion {
-  parent(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
+  parent(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
   version: RelationVersion_Version
   createdAt: DateTime
   updatedAt: DateTime
@@ -3831,7 +3853,7 @@ type ContentTypeDeleteDocAccess {
 type CyclicalRelationship {
   id: Int!
   title: String
-  relationToSelf(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
+  relationToSelf(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
   media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Media
   updatedAt: DateTime
   createdAt: DateTime
@@ -4170,7 +4192,7 @@ type CyclicalRelationshipReadVersionsDocAccess {
 }
 
 type CyclicalRelationshipVersion {
-  parent(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
+  parent(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
   version: CyclicalRelationshipVersion_Version
   createdAt: DateTime
   updatedAt: DateTime
@@ -4182,7 +4204,7 @@ type CyclicalRelationshipVersion {
 
 type CyclicalRelationshipVersion_Version {
   title: String
-  relationToSelf(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
+  relationToSelf(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): CyclicalRelationship
   media(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Media
   updatedAt: DateTime
   createdAt: DateTime
@@ -5321,7 +5343,7 @@ type PayloadKvDeleteDocAccess {
 
 type PayloadLockedDocument {
   id: Int!
-  document(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadLockedDocument_Document_Relationship
+  document(version: ReadVersion, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadLockedDocument_Document_Relationship
   globalSlug: String
   user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadLockedDocument_User_Relationship!
   updatedAt: DateTime
@@ -8706,8 +8728,8 @@ type QueryWithInternalError {
 }
 
 type Mutation {
-  createUser(data: mutationUserInput!, draft: Boolean, locale: LocaleInputType): User
-  updateUser(id: Int!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): User
+  createUser(data: mutationUserInput!, action: CreateAction, locale: LocaleInputType): User
+  updateUser(id: Int!, autosave: Boolean, data: mutationUserUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): User
   deleteUser(id: Int!, trash: Boolean): User
   refreshTokenUser: usersRefreshedUser
   logoutUser(allSessions: Boolean): String
@@ -8716,69 +8738,69 @@ type Mutation {
   forgotPasswordUser(disableEmail: Boolean, expiration: Int, email: String!): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
-  createPoint(data: mutationPointInput!, draft: Boolean, locale: LocaleInputType): Point
-  updatePoint(id: Int!, autosave: Boolean, data: mutationPointUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): Point
+  createPoint(data: mutationPointInput!, action: CreateAction, locale: LocaleInputType): Point
+  updatePoint(id: Int!, autosave: Boolean, data: mutationPointUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): Point
   deletePoint(id: Int!, trash: Boolean): Point
-  duplicatePoint(id: Int!, data: mutationPointInput!): Point
-  createPost(data: mutationPostInput!, draft: Boolean, locale: LocaleInputType): Post
-  updatePost(id: Int!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): Post
+  duplicatePoint(id: Int!, action: CreateAction, data: mutationPointInput!): Point
+  createPost(data: mutationPostInput!, action: CreateAction, locale: LocaleInputType): Post
+  updatePost(id: Int!, autosave: Boolean, data: mutationPostUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): Post
   deletePost(id: Int!, trash: Boolean): Post
-  duplicatePost(id: Int!, data: mutationPostInput!): Post
-  restoreVersionPost(id: Int, draft: Boolean): Post
-  createCustomId(data: mutationCustomIdInput!, draft: Boolean, locale: LocaleInputType): CustomId
-  updateCustomId(id: Int!, autosave: Boolean, data: mutationCustomIdUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): CustomId
+  duplicatePost(id: Int!, action: CreateAction, data: mutationPostInput!): Post
+  restoreVersionPost(id: Int, action: RestoreAction): Post
+  createCustomId(data: mutationCustomIdInput!, action: CreateAction, locale: LocaleInputType): CustomId
+  updateCustomId(id: Int!, autosave: Boolean, data: mutationCustomIdUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): CustomId
   deleteCustomId(id: Int!, trash: Boolean): CustomId
-  duplicateCustomId(id: Int!, data: mutationCustomIdInput!): CustomId
-  createRelation(data: mutationRelationInput!, draft: Boolean, locale: LocaleInputType): Relation
-  updateRelation(id: Int!, autosave: Boolean, data: mutationRelationUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): Relation
+  duplicateCustomId(id: Int!, action: CreateAction, data: mutationCustomIdInput!): CustomId
+  createRelation(data: mutationRelationInput!, action: CreateAction, locale: LocaleInputType): Relation
+  updateRelation(id: Int!, autosave: Boolean, data: mutationRelationUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): Relation
   deleteRelation(id: Int!, trash: Boolean): Relation
-  duplicateRelation(id: Int!, data: mutationRelationInput!): Relation
-  restoreVersionRelation(id: Int, draft: Boolean): Relation
-  createDummy(data: mutationDummyInput!, draft: Boolean, locale: LocaleInputType): Dummy
-  updateDummy(id: Int!, autosave: Boolean, data: mutationDummyUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): Dummy
+  duplicateRelation(id: Int!, action: CreateAction, data: mutationRelationInput!): Relation
+  restoreVersionRelation(id: Int, action: RestoreAction): Relation
+  createDummy(data: mutationDummyInput!, action: CreateAction, locale: LocaleInputType): Dummy
+  updateDummy(id: Int!, autosave: Boolean, data: mutationDummyUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): Dummy
   deleteDummy(id: Int!, trash: Boolean): Dummy
-  duplicateDummy(id: Int!, data: mutationDummyInput!): Dummy
-  createErrorOnHook(data: mutationErrorOnHookInput!, draft: Boolean, locale: LocaleInputType): ErrorOnHook
-  updateErrorOnHook(id: Int!, autosave: Boolean, data: mutationErrorOnHookUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): ErrorOnHook
+  duplicateDummy(id: Int!, action: CreateAction, data: mutationDummyInput!): Dummy
+  createErrorOnHook(data: mutationErrorOnHookInput!, action: CreateAction, locale: LocaleInputType): ErrorOnHook
+  updateErrorOnHook(id: Int!, autosave: Boolean, data: mutationErrorOnHookUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): ErrorOnHook
   deleteErrorOnHook(id: Int!, trash: Boolean): ErrorOnHook
-  duplicateErrorOnHook(id: Int!, data: mutationErrorOnHookInput!): ErrorOnHook
-  createPayloadApiTestOne(data: mutationPayloadApiTestOneInput!, draft: Boolean, locale: LocaleInputType): PayloadApiTestOne
-  updatePayloadApiTestOne(id: Int!, autosave: Boolean, data: mutationPayloadApiTestOneUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): PayloadApiTestOne
+  duplicateErrorOnHook(id: Int!, action: CreateAction, data: mutationErrorOnHookInput!): ErrorOnHook
+  createPayloadApiTestOne(data: mutationPayloadApiTestOneInput!, action: CreateAction, locale: LocaleInputType): PayloadApiTestOne
+  updatePayloadApiTestOne(id: Int!, autosave: Boolean, data: mutationPayloadApiTestOneUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): PayloadApiTestOne
   deletePayloadApiTestOne(id: Int!, trash: Boolean): PayloadApiTestOne
-  duplicatePayloadApiTestOne(id: Int!, data: mutationPayloadApiTestOneInput!): PayloadApiTestOne
-  createPayloadApiTestTwo(data: mutationPayloadApiTestTwoInput!, draft: Boolean, locale: LocaleInputType): PayloadApiTestTwo
-  updatePayloadApiTestTwo(id: Int!, autosave: Boolean, data: mutationPayloadApiTestTwoUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): PayloadApiTestTwo
+  duplicatePayloadApiTestOne(id: Int!, action: CreateAction, data: mutationPayloadApiTestOneInput!): PayloadApiTestOne
+  createPayloadApiTestTwo(data: mutationPayloadApiTestTwoInput!, action: CreateAction, locale: LocaleInputType): PayloadApiTestTwo
+  updatePayloadApiTestTwo(id: Int!, autosave: Boolean, data: mutationPayloadApiTestTwoUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): PayloadApiTestTwo
   deletePayloadApiTestTwo(id: Int!, trash: Boolean): PayloadApiTestTwo
-  duplicatePayloadApiTestTwo(id: Int!, data: mutationPayloadApiTestTwoInput!): PayloadApiTestTwo
-  createContentType(data: mutationContentTypeInput!, draft: Boolean, locale: LocaleInputType): ContentType
-  updateContentType(id: Int!, autosave: Boolean, data: mutationContentTypeUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): ContentType
+  duplicatePayloadApiTestTwo(id: Int!, action: CreateAction, data: mutationPayloadApiTestTwoInput!): PayloadApiTestTwo
+  createContentType(data: mutationContentTypeInput!, action: CreateAction, locale: LocaleInputType): ContentType
+  updateContentType(id: Int!, autosave: Boolean, data: mutationContentTypeUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): ContentType
   deleteContentType(id: Int!, trash: Boolean): ContentType
-  duplicateContentType(id: Int!, data: mutationContentTypeInput!): ContentType
-  createCyclicalRelationship(data: mutationCyclicalRelationshipInput!, draft: Boolean, locale: LocaleInputType): CyclicalRelationship
-  updateCyclicalRelationship(id: Int!, autosave: Boolean, data: mutationCyclicalRelationshipUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): CyclicalRelationship
+  duplicateContentType(id: Int!, action: CreateAction, data: mutationContentTypeInput!): ContentType
+  createCyclicalRelationship(data: mutationCyclicalRelationshipInput!, action: CreateAction, locale: LocaleInputType): CyclicalRelationship
+  updateCyclicalRelationship(id: Int!, autosave: Boolean, data: mutationCyclicalRelationshipUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): CyclicalRelationship
   deleteCyclicalRelationship(id: Int!, trash: Boolean): CyclicalRelationship
-  duplicateCyclicalRelationship(id: Int!, data: mutationCyclicalRelationshipInput!): CyclicalRelationship
-  restoreVersionCyclicalRelationship(id: Int, draft: Boolean): CyclicalRelationship
-  createMedia(data: mutationMediaInput!, draft: Boolean, locale: LocaleInputType): Media
-  updateMedia(id: Int!, autosave: Boolean, data: mutationMediaUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): Media
+  duplicateCyclicalRelationship(id: Int!, action: CreateAction, data: mutationCyclicalRelationshipInput!): CyclicalRelationship
+  restoreVersionCyclicalRelationship(id: Int, action: RestoreAction): CyclicalRelationship
+  createMedia(data: mutationMediaInput!, action: CreateAction, locale: LocaleInputType): Media
+  updateMedia(id: Int!, autosave: Boolean, data: mutationMediaUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): Media
   deleteMedia(id: Int!, trash: Boolean): Media
-  duplicateMedia(id: Int!, data: mutationMediaInput!): Media
-  createSort(data: mutationSortInput!, draft: Boolean, locale: LocaleInputType): Sort
-  updateSort(id: Int!, autosave: Boolean, data: mutationSortUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): Sort
+  duplicateMedia(id: Int!, action: CreateAction, data: mutationMediaInput!): Media
+  createSort(data: mutationSortInput!, action: CreateAction, locale: LocaleInputType): Sort
+  updateSort(id: Int!, autosave: Boolean, data: mutationSortUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): Sort
   deleteSort(id: Int!, trash: Boolean): Sort
-  duplicateSort(id: Int!, data: mutationSortInput!): Sort
-  createPayloadKv(data: mutationPayloadKvInput!, draft: Boolean, locale: LocaleInputType): PayloadKv
-  updatePayloadKv(id: Int!, autosave: Boolean, data: mutationPayloadKvUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): PayloadKv
+  duplicateSort(id: Int!, action: CreateAction, data: mutationSortInput!): Sort
+  createPayloadKv(data: mutationPayloadKvInput!, action: CreateAction, locale: LocaleInputType): PayloadKv
+  updatePayloadKv(id: Int!, autosave: Boolean, data: mutationPayloadKvUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): PayloadKv
   deletePayloadKv(id: Int!, trash: Boolean): PayloadKv
-  duplicatePayloadKv(id: Int!, data: mutationPayloadKvInput!): PayloadKv
-  createPayloadLockedDocument(data: mutationPayloadLockedDocumentInput!, draft: Boolean, locale: LocaleInputType): PayloadLockedDocument
-  updatePayloadLockedDocument(id: Int!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): PayloadLockedDocument
+  duplicatePayloadKv(id: Int!, action: CreateAction, data: mutationPayloadKvInput!): PayloadKv
+  createPayloadLockedDocument(data: mutationPayloadLockedDocumentInput!, action: CreateAction, locale: LocaleInputType): PayloadLockedDocument
+  updatePayloadLockedDocument(id: Int!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): PayloadLockedDocument
   deletePayloadLockedDocument(id: Int!, trash: Boolean): PayloadLockedDocument
-  duplicatePayloadLockedDocument(id: Int!, data: mutationPayloadLockedDocumentInput!): PayloadLockedDocument
-  createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean, locale: LocaleInputType): PayloadPreference
-  updatePayloadPreference(id: Int!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): PayloadPreference
+  duplicatePayloadLockedDocument(id: Int!, action: CreateAction, data: mutationPayloadLockedDocumentInput!): PayloadLockedDocument
+  createPayloadPreference(data: mutationPayloadPreferenceInput!, action: CreateAction, locale: LocaleInputType): PayloadPreference
+  updatePayloadPreference(id: Int!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, action: UpdateAction, locale: LocaleInputType, trash: Boolean): PayloadPreference
   deletePayloadPreference(id: Int!, trash: Boolean): PayloadPreference
-  duplicatePayloadPreference(id: Int!, data: mutationPayloadPreferenceInput!): PayloadPreference
+  duplicatePayloadPreference(id: Int!, action: CreateAction, data: mutationPayloadPreferenceInput!): PayloadPreference
 }
 
 input mutationUserInput {

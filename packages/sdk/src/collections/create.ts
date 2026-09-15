@@ -8,8 +8,8 @@ import type {
 
 import type { PayloadSDK } from '../index.js'
 import type {
+  CollectionCreateWriteOptions,
   PopulateType,
-  RequiredDataFromCollectionSlug,
   TransformCollectionWithSelect,
 } from '../types.js'
 
@@ -25,17 +25,9 @@ export type CreateOptions<
    */
   collection: TSlug
   /**
-   * The data for the document to create.
-   */
-  data: RequiredDataFromCollectionSlug<T, TSlug>
-  /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -54,7 +46,7 @@ export type CreateOptions<
    * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
    */
   select?: TSelect
-}
+} & CollectionCreateWriteOptions<T, TSlug>
 
 export async function create<
   T extends PayloadTypesShape,

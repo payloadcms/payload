@@ -118,7 +118,6 @@ export const handleGroupBy = async ({
       const groupData = await req.payload.find({
         collection: collectionSlug,
         depth: 0,
-        draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
         limit: query?.queryByGroup?.[valueOrRelationshipID]?.limit
@@ -136,6 +135,7 @@ export const handleGroupBy = async ({
         sort: query?.sort,
         trash,
         user,
+        version: 'latest',
         where: {
           ...(whereWithMergedSearch || {}),
           [groupByFieldPath]: {

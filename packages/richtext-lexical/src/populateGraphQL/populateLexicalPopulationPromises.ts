@@ -20,7 +20,6 @@ export const populateLexicalPopulationPromises = ({
   context,
   currentDepth,
   depth,
-  draft,
   editorPopulationPromises,
   field,
   fieldPromises,
@@ -32,6 +31,7 @@ export const populateLexicalPopulationPromises = ({
   req,
   showHiddenFields,
   siblingDoc,
+  version,
 }: Args) => {
   const shouldPopulate = depth && currentDepth! <= depth
 
@@ -48,7 +48,6 @@ export const populateLexicalPopulationPromises = ({
             context,
             currentDepth: currentDepth!,
             depth,
-            draft,
             editorPopulationPromises,
             field,
             fieldPromises,
@@ -61,6 +60,7 @@ export const populateLexicalPopulationPromises = ({
             req,
             showHiddenFields,
             siblingDoc,
+            version,
           })
         }
       }

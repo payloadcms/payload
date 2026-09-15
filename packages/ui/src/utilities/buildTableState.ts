@@ -188,13 +188,13 @@ const buildTableState: ServerFunction<
       data = await payload.find({
         collection: collectionSlug,
         depth: 0,
-        draft: true,
         limit: query?.limit,
         locale: req.locale,
         overrideAccess: false,
         page: query?.page,
         sort: query?.sort,
         user: req.user,
+        version: 'latest',
         where: query?.where,
       })
     }

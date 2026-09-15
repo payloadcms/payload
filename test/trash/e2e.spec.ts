@@ -371,6 +371,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 title: { equals: 'Ready for restore' },
               },
@@ -383,6 +384,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 title: { equals: 'Ready for restore' },
               },
@@ -441,7 +443,7 @@ describe('Trash', () => {
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Ready for restore')
         await expect(page.locator('.row-2 .cell-title')).toHaveText('Ready for restore')
 
-        // Check that restored docs have `_status = "draft"`
+        // Check that restored docs have `_status = "published"`
         await expect
           .poll(async () => {
             const { docs } = await payload.find({
@@ -810,6 +812,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
@@ -822,6 +825,7 @@ describe('Trash', () => {
           .poll(async () => {
             const { docs } = await payload.find({
               collection: postsSlug,
+              version: 'latest',
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
@@ -1255,6 +1259,7 @@ describe('Trash', () => {
     const localizedFieldValueES = 'Localized Draft Content ES'
 
     const draftPost = await payload.create({
+      action: 'saveDraft',
       collection: postsSlug,
       data: {
         _status: 'draft',
@@ -1269,7 +1274,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      action: 'saveDraft',
       locale: 'en',
     })
 
@@ -1280,7 +1285,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      action: 'saveDraft',
       locale: 'es',
     })
 
@@ -1318,6 +1323,7 @@ describe('Trash', () => {
 
     // Create a draft post without localized data initially
     const draftPost = await payload.create({
+      action: 'saveDraft',
       collection: postsSlug,
       data: {
         _status: 'draft',
@@ -1334,7 +1340,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueEN,
       },
-      draft: true,
+      action: 'saveDraft',
       locale: 'en',
     })
 
@@ -1346,7 +1352,7 @@ describe('Trash', () => {
         _status: 'draft',
         localizedField: localizedFieldValueES,
       },
-      draft: true,
+      action: 'saveDraft',
       locale: 'es',
     })
 
@@ -1399,6 +1405,7 @@ describe('Trash', () => {
 
 async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Promise<Post> {
   return payload.create({
+    action: 'publish',
     collection: postsSlug,
     data,
   }) as unknown as Promise<Post>
@@ -1406,6 +1413,7 @@ async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Pro
 
 async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Promise<Post> {
   return payload.create({
+    action: 'publish',
     collection: postsSlug,
     data: {
       ...data,

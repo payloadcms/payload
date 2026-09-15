@@ -8,6 +8,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
+import type { ReadVersion } from '../../versions/types.js'
 import type {
   Collection,
   DataFromCollectionSlug,
@@ -28,7 +29,9 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { getPublishedStatusWhere } from '../../versions/read/getPublishedStatusWhere.js'
+import { replaceWithVersion } from '../../versions/read/replaceWithVersion.js'
+import { isVersionedRead, resolveReadVersion } from '../../versions/resolveReadVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -42,7 +45,6 @@ export type FindByIDArgs = {
   data?: Record<string, unknown>
   depth?: number
   disableErrors?: boolean
-  draft?: boolean
   id: number | string
   includeLockStatus?: boolean
   joins?: JoinQuery
@@ -51,6 +53,7 @@ export type FindByIDArgs = {
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
+  version?: ReadVersion
 } & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
   Pick<FindOptions<string, SelectType>, 'select'>
 
@@ -80,7 +83,6 @@ export const findByIDOperation = async <
     currentDepth,
     depth,
     disableErrors,
-    draft: replaceWithVersion = false,
     flattenLocales,
     includeLockStatus: includeLockStatusFromArgs,
     joins,
@@ -91,10 +93,18 @@ export const findByIDOperation = async <
     select: incomingSelect,
     showHiddenFields,
     trash = false,
+    version,
   } = args
 
   const includeLockStatus =
     includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+
+  const draftsEnabledOnCollection = hasDraftsEnabled(collectionConfig)
+  const readVersion = resolveReadVersion({
+    draftsEnabled: draftsEnabledOnCollection,
+    version,
+  })
+  const queryVersions = isVersionedRead({ version: readVersion }) && draftsEnabledOnCollection
 
   const select = sanitizeSelect({
     fields: collectionConfig.flattenedFields,
@@ -125,6 +135,19 @@ export const findByIDOperation = async <
   const where = { id: { equals: id } }
 
   let fullWhere = combineQueries(where, accessResult)
+
+  if (readVersion === 'published' && draftsEnabledOnCollection) {
+    fullWhere = {
+      and: [
+        ...(fullWhere.and ?? []),
+        getPublishedStatusWhere({
+          entity: collectionConfig,
+          locale: locale!,
+          payload: req.payload,
+        }),
+      ],
+    }
+  }
 
   // Exclude trashed documents when trash: false
   fullWhere = appendNonTrashedFilter({
@@ -164,7 +187,7 @@ export const findByIDOperation = async <
 
   if (
     collectionConfig.versions?.drafts &&
-    replaceWithVersion &&
+    queryVersions &&
     select &&
     getSelectMode(select) === 'include'
   ) {
@@ -173,7 +196,7 @@ export const findByIDOperation = async <
 
   const findOneArgs: FindOneArgs = {
     collection: collectionConfig.slug,
-    draftsEnabled: replaceWithVersion,
+    draftsEnabled: queryVersions,
     joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
     locale: locale!,
     req: {
@@ -189,7 +212,30 @@ export const findByIDOperation = async <
 
   const docWithLocales = await req.payload.db.findOne(findOneArgs)
 
-  if (!docWithLocales && !args.data) {
+  // A working draft can satisfy the requested filters even when the published
+  // main row does not (for example, restoring a trashed document as a draft).
+  // Fetch an ID/timestamp anchor so the version lookup can still run, but never
+  // use this unfiltered document as the published fallback.
+  const versionAnchor =
+    !docWithLocales && !args.data && queryVersions
+      ? await req.payload.db.findOne({
+          collection: collectionConfig.slug,
+          locale: locale!,
+          req: findOneArgs.req,
+          select: {
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          where: {
+            id: {
+              equals: id,
+            },
+          },
+        })
+      : docWithLocales
+
+  if (!versionAnchor && !args.data) {
     if (!disableErrors) {
       throw new NotFound(req.t)
     }
@@ -197,7 +243,7 @@ export const findByIDOperation = async <
   }
 
   let result: DataFromCollectionSlug<TSlug> =
-    (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!
+    (args.data as DataFromCollectionSlug<TSlug>) ?? versionAnchor!
 
   // /////////////////////////////////////
   // Add collection property for auth collections
@@ -262,20 +308,39 @@ export const findByIDOperation = async <
     result._userEditing = lockStatus?.user?.value ?? null
   }
 
+  if (readVersion === 'draft' && !draftsEnabledOnCollection) {
+    if (!disableErrors) {
+      throw new NotFound(req.t)
+    }
+    return null!
+  }
+
   // /////////////////////////////////////
-  // Replace document with draft if available
+  // Replace published document with the requested version
   // /////////////////////////////////////
 
-  if (replaceWithVersion && hasDraftsEnabled(collectionConfig)) {
-    result = await replaceWithDraftIfAvailable({
+  if (queryVersions) {
+    const versionedDoc = await replaceWithVersion({
       accessResult,
       doc: result,
       entity: collectionConfig,
       entityType: 'collection',
+      fallbackDoc: (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales,
       overrideAccess,
+      policy: readVersion === 'draft' ? 'draft' : 'latest',
       req,
       select,
+      where: fullWhere,
     })
+
+    if (!versionedDoc) {
+      if (!disableErrors) {
+        throw new NotFound(req.t)
+      }
+      return null!
+    }
+
+    result = versionedDoc
   }
 
   // /////////////////////////////////////
@@ -306,7 +371,7 @@ export const findByIDOperation = async <
     currentDepth,
     depth: depth!,
     doc: result,
-    draft: replaceWithVersion,
+    draft: isVersionedRead({ version: readVersion }),
     fallbackLocale: fallbackLocale!,
     flattenLocales,
     global: null,
@@ -316,6 +381,7 @@ export const findByIDOperation = async <
     req,
     select,
     showHiddenFields: showHiddenFields!,
+    version: readVersion,
   })
 
   // /////////////////////////////////////
@@ -332,6 +398,7 @@ export const findByIDOperation = async <
           overrideAccess,
           query: findOneArgs.where,
           req,
+          version: readVersion,
         })) || result
     }
   }

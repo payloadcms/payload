@@ -45,7 +45,7 @@ export function buildLocalizedPublishData({
 
   // Only carry forward locales that were previously published. The main doc can contain
   // stale draft-locale data written by the initial create (which always inserts into the
-  // main collection, even when draft:true). Restricting to published locales prevents that
+  // main collection, even for saveDraft). Restricting to published locales prevents that
   // data from leaking into the published doc.
   const previouslyPublishedLocales = Object.entries(currentDocStatus)
     .filter(([, status]) => status === 'published')

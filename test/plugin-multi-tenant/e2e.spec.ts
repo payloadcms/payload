@@ -658,6 +658,7 @@ test.describe('Multi Tenant', () => {
       const globalTenant = await getSelectedTenantFilterName({ page, payload })
       const autosaveGlobal = await payload.find({
         collection: autosaveGlobalSlug,
+        version: 'latest',
         where: {
           id: {
             equals: docID,

@@ -363,7 +363,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
           }),
           payload.find({
             collection: 'fields-and-top-access',
-            draft: true,
+            version: 'latest',
             overrideAccess: false,
             sort: 'secret',
           }),
@@ -708,14 +708,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
       payload,
     }) => {
       await payload.create({
+        action: 'publish',
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
       })
       const { id: hitID } = await payload.create({
+        action: 'publish',
         collection: 'fields-and-top-access',
         data: { secret: 'will-success-access-read' },
       })
       await payload.create({
+        action: 'publish',
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
       })
@@ -728,9 +731,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
       expect(resFind.docs[0].id).toBe(hitID)
       expect(resFind.docs).toHaveLength(1)
 
-      // assert find draft: true
+      // assert find version: 'latest'
       const resFindDraft = await payload.find({
-        draft: true,
+        version: 'latest',
         overrideAccess: false,
         collection: 'fields-and-top-access',
       })

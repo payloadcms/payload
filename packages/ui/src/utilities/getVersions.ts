@@ -221,6 +221,7 @@ export const getVersions = async ({
         publishedDoc = await payload.findGlobal({
           slug: globalConfig.slug,
           depth: 0,
+          disableErrors: true,
           locale,
           select: {
             updatedAt: true,

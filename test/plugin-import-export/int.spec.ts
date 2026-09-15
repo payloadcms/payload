@@ -205,6 +205,7 @@ test.suite({
         collection: 'pages',
         limit: 100,
         page: 1,
+        version: 'latest',
       })
 
       const firstDocOnPage1 = pages.docs?.[0]
@@ -240,6 +241,7 @@ test.suite({
         collection: 'pages',
         limit: 100,
         page: 2,
+        version: 'latest',
       })
 
       const firstDocOnPage2 = pages.docs?.[0]
@@ -2119,6 +2121,7 @@ test.suite({
         const updatedJson = { version: 2, data: 'updated', extra: [1, 2, 3] }
 
         const existingPage = await payload.create({
+          action: 'publish',
           collection: 'pages',
           data: {
             title: 'JSON Update Mode Test',
@@ -2183,6 +2186,7 @@ test.suite({
         const updatedExistingJson = { id: 'existing', value: 150, modified: true }
 
         const existingPage = await payload.create({
+          action: 'publish',
           collection: 'pages',
           data: {
             title: `JSON Upsert Existing ${timestamp}`,
@@ -2319,6 +2323,7 @@ test.suite({
         const jsonV3 = { version: 3, items: ['a', 'b', 'c'] }
 
         const page = await payload.create({
+          action: 'publish',
           collection: 'pages',
           data: {
             title: 'Sequential Import Test',
@@ -3191,6 +3196,7 @@ test.suite({
 
     test('should update existing documents in update mode', async ({ payload }) => {
       const page1 = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'Update Test 1',
@@ -3201,6 +3207,7 @@ test.suite({
       })
 
       const page2 = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'Update Test 2',
@@ -3269,8 +3276,8 @@ test.suite({
     test('should handle upsert mode correctly', async ({ payload }) => {
       const timestamp = Date.now()
       const existingPage = await payload.create({
+        action: 'publish',
         collection: 'pages',
-        draft: false,
         data: {
           title: `Upsert Test ${timestamp}`,
           excerpt: 'existing',
@@ -3329,7 +3336,7 @@ test.suite({
         collection: 'pages',
         id: existingPage.id,
         depth: 0,
-        draft: false, // Get published version
+        version: 'published', // Get published version
         overrideAccess: true,
       })
 
@@ -3337,7 +3344,7 @@ test.suite({
         collection: 'pages',
         id: existingPage.id,
         depth: 0,
-        draft: true, // Get draft version
+        version: 'latest', // Get draft version
         overrideAccess: true,
       })
 
@@ -3806,6 +3813,7 @@ test.suite({
       const postId = posts.docs[0]?.id
 
       const existingPage = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'Original Title',
@@ -4025,7 +4033,7 @@ test.suite({
         where: {
           title: { contains: 'Draft Import ' },
         },
-        draft: true,
+        version: 'latest',
       })
 
       expect(draftPages.docs).toHaveLength(2)
@@ -4036,7 +4044,7 @@ test.suite({
         where: {
           title: { contains: 'Published Import ' },
         },
-        draft: false, // Query for published documents only
+        version: 'published', // Query for published documents only
       })
 
       expect(publishedPages.docs).toHaveLength(1)
@@ -4085,7 +4093,7 @@ test.suite({
         where: {
           title: { contains: 'Default Status Test ' },
         },
-        draft: false, // Query for published documents
+        version: 'published', // Query for published documents
       })
 
       expect(pages.docs).toHaveLength(2)
@@ -4225,7 +4233,7 @@ test.suite({
 
       const validPage1 = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { equals: `Partial Valid ${timestamp}-1` },
@@ -4233,7 +4241,7 @@ test.suite({
       })
       const validPage2 = await payload.find({
         collection: 'pages',
-        draft: true,
+        version: 'latest',
         overrideAccess: true,
         where: {
           title: { equals: `Partial Valid ${timestamp}-2` },
@@ -4250,7 +4258,7 @@ test.suite({
 
         const allPages = await payload.find({
           collection: 'pages',
-          draft: true,
+          version: 'latest',
           overrideAccess: true,
           limit: 100,
         })
@@ -5009,7 +5017,7 @@ test.suite({
           where: {
             title: { contains: 'Default Status Test ' },
           },
-          draft: false,
+          version: 'published',
         })
 
         expect(publishedPages.totalDocs).toBe(2)
@@ -5063,7 +5071,7 @@ test.suite({
           where: {
             title: { contains: 'Explicit Draft Test ' },
           },
-          draft: true,
+          version: 'latest',
         })
 
         expect(draftPages.totalDocs).toBe(2)
@@ -5118,7 +5126,7 @@ test.suite({
           where: {
             title: { contains: 'Upsert New Published Test ' },
           },
-          draft: false,
+          version: 'published',
         })
 
         expect(publishedPages.totalDocs).toBe(2)
@@ -6160,6 +6168,7 @@ test.suite({
 
         const importedDocs = await payload.find({
           collection: 'posts-imports-only',
+          version: 'latest',
           where: {
             title: { contains: 'Sync Import Test' },
           },
@@ -6256,7 +6265,7 @@ test.suite({
           where: {
             title: { contains: 'Default Draft Config Test' },
           },
-          draft: true,
+          version: 'latest',
         })
 
         expect(draftDocs.totalDocs).toBe(2)
@@ -6269,7 +6278,7 @@ test.suite({
           where: {
             title: { equals: 'Default Draft Config Override Test' },
           },
-          draft: false,
+          version: 'published',
         })
 
         expect(publishedDocs.totalDocs).toBe(1)
@@ -6558,6 +6567,7 @@ test.suite({
         const unchangedPost = await payload.findByID({
           collection: 'posts-imports-only',
           id: post.id,
+          version: 'latest',
         })
 
         expect(previewResponse.status).toBe(400)
@@ -7245,6 +7255,7 @@ test.suite({
 
       const importedPage = await payload.find({
         collection: 'pages',
+        version: 'latest',
         where: {
           title: { equals: 'Rich Text JSON Test' },
         },
@@ -7813,6 +7824,7 @@ test.suite({
 
       const importedPage = await payload.find({
         collection: 'pages',
+        version: 'latest',
         where: {
           title: { equals: 'JSON Roundtrip Test' },
         },

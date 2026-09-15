@@ -3,16 +3,18 @@ import type {
   CollectionSlug,
   FindOptions,
   PayloadTypesShape,
+  ReadVersion,
   SelectType,
   TypedLocale,
 } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type {
+  CollectionVersionOptions,
   JoinQuery,
   PopulateType,
   SelectFromCollectionSlug,
-  TransformCollectionWithSelect,
+  TransformCollectionWithSelectByVersion,
 } from '../types.js'
 
 export type FindByIDOptions<
@@ -34,10 +36,6 @@ export type FindByIDOptions<
    * `null` will be returned instead, if the document on this ID was not found.
    */
   disableErrors?: TDisableErrors
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -64,18 +62,25 @@ export type FindByIDOptions<
    * @default false
    */
   trash?: boolean
-} & Pick<FindOptions<TSlug, SelectType & TSelect>, 'select'>
+} & CollectionVersionOptions<TSlug> &
+  Pick<FindOptions<TSlug, SelectType & TSelect>, 'select'>
 
 export async function findByID<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
+  TVersion extends ReadVersion | undefined = undefined,
 >(
   sdk: PayloadSDK<T>,
-  options: FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
+  options: { version?: TVersion } & FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
   init?: RequestInit,
-): Promise<ApplyDisableErrors<TransformCollectionWithSelect<T, TSlug, TSelect>, TDisableErrors>> {
+): Promise<
+  ApplyDisableErrors<
+    TransformCollectionWithSelectByVersion<T, TSlug, TSelect, TVersion>,
+    TDisableErrors
+  >
+> {
   try {
     const response = await sdk.request({
       args: options,

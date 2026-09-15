@@ -793,14 +793,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     })
 
     test('should populate joins when versions on both sides draft false', async ({ payload }) => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        action: 'publish',
+        collection: 'categories-versions',
+        data: {},
+      })
 
       const version = await payload.create({
+        action: 'publish',
         collection: 'versions',
         data: { title: 'version', categoryVersion: category.id },
       })
 
-      const res = await payload.find({ collection: 'categories-versions', draft: false })
+      const res = await payload.find({ collection: 'categories-versions', version: 'published' })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
@@ -808,14 +813,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should populate joins with hasMany relationships when versions on both sides draft false', async ({
       payload,
     }) => {
-      const category = await payload.create({ collection: 'categories-versions', data: {} })
+      const category = await payload.create({
+        action: 'publish',
+        collection: 'categories-versions',
+        data: {},
+      })
 
       const version = await payload.create({
+        action: 'publish',
         collection: 'versions',
         data: { title: 'version', categoryVersions: [category.id] },
       })
 
-      const res = await payload.find({ collection: 'categories-versions', draft: false })
+      const res = await payload.find({ collection: 'categories-versions', version: 'published' })
 
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
     })
@@ -832,7 +842,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       const res = await payload.find({
         collection: 'categories-versions',
-        draft: true,
+        version: 'latest',
       })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
@@ -844,25 +854,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       const category = await payload.create({
         collection: 'categories-versions',
         data: { _status: 'draft' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { title: 'original-title', _status: 'draft', categoryVersion: category.id },
-        draft: true,
+        action: 'saveDraft',
       })
 
       await payload.update({
         collection: 'versions',
         id: version.id,
         data: { title: 'updated-title' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const res = await payload.find({
         collection: 'categories-versions',
-        draft: true,
+        version: 'latest',
       })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
@@ -881,7 +891,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       const res = await payload.find({
         collection: 'categories-versions',
-        draft: true,
+        version: 'latest',
       })
 
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
@@ -1307,24 +1317,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       const category = await payload.create({
         collection: 'categories-versions',
         data: { _status: 'draft' },
-        draft: true,
+        action: 'saveDraft',
       })
 
       const version = await payload.create({
         collection: 'versions',
         data: { _status: 'draft', title: 'original-title', categoryVersion: category.id },
-        draft: true,
+        action: 'saveDraft',
       })
 
       await payload.update({
         collection: 'versions',
-        draft: true,
+        action: 'saveDraft',
         id: version.id,
         data: { title: 'updated-title' },
       })
 
       const query = `query {
-        CategoriesVersions(draft: true) {
+        CategoriesVersions(version: latest) {
               docs {
                   relatedVersions(
                     limit: 1

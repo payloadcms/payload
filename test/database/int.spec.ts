@@ -1049,6 +1049,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
         await payload.create({
+          action: 'publish',
           collection: 'posts',
           data: {
             number: numbers[titles.indexOf(entry)]! + Math.random(),
@@ -1086,14 +1087,22 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const categoriesIDS: { category: string }[] = []
 
     for (const { title } of categories) {
-      const doc = await payload.create({ collection: 'categories', data: { title } })
+      const doc = await payload.create({
+        action: 'publish',
+        collection: 'categories',
+        data: { title },
+      })
       categoriesIDS.push({ category: doc.id })
     }
 
     for (const { category } of categoriesIDS) {
       const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
       for (let i = 0; i < docsCount; i++) {
-        await payload.create({ collection: 'posts', data: { category, title: randomUUID() } })
+        await payload.create({
+          action: 'publish',
+          collection: 'posts',
+          data: { category, title: randomUUID() },
+        })
       }
     }
 
@@ -1132,11 +1141,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     const categoriesIDS: { categories: string }[] = []
 
     for (const { title } of categories) {
-      const doc = await payload.create({ collection: 'categories', data: { title } })
+      const doc = await payload.create({
+        action: 'publish',
+        collection: 'categories',
+        data: { title },
+      })
       categoriesIDS.push({ categories: doc.id })
     }
 
     await payload.create({
+      action: 'publish',
       collection: 'posts',
       data: {
         categories: [categoriesIDS[0]?.categories, categoriesIDS[1]?.categories],
@@ -1145,6 +1159,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     await payload.create({
+      action: 'publish',
       collection: 'posts',
       data: {
         categories: [
@@ -1157,6 +1172,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     await payload.create({
+      action: 'publish',
       collection: 'posts',
       data: {
         categories: [
@@ -1216,6 +1232,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     await payload.delete({ collection: 'categories', where: {} })
 
     const category_1 = await payload.create({
+      action: 'publish',
       collection: 'categories',
       data: { title: 'category_1' },
     })
@@ -2124,6 +2141,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     test('should create and read doc with custom db names', async ({ payload }) => {
       const relationA = await payload.create({
+        action: 'publish',
         collection: 'relation-a',
         data: {
           title: 'hello',
@@ -2131,6 +2149,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       })
 
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'custom-schema',
         data: {
           array: [
@@ -2174,6 +2193,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       payload,
     }) => {
       const doc = await payload.create({
+        action: 'publish',
         collection: customSchemaSlug,
         data: {
           array: [{ text: 'array row' }],
@@ -2182,6 +2202,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       })
 
       await payload.db.updateOne({
+        action: 'publish',
         collection: customSchemaSlug,
         id: doc.id,
         data: {
@@ -2207,6 +2228,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       payload,
     }) => {
       const doc = await payload.create({
+        action: 'publish',
         collection: customSchemaSlug,
         data: {
           select: ['a', 'b'],
@@ -2236,6 +2258,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     test('arrays should work with both long field names and dbName', async ({ payload }) => {
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'aliases',
         data: {
           thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName: [
@@ -3579,6 +3602,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
       await expect(
         payload.create({
+          action: 'publish',
           collection: 'places',
           data: {
             city: 'C',
@@ -3612,12 +3636,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   test.describe('virtual fields', () => {
     test('should not save a field with `virtual: true` to the db', async ({ payload }) => {
       const createRes = await payload.create({
+        action: 'publish',
         collection: 'fields-persistance',
         data: { array: [], text: 'asd', textHooked: 'asd' },
       })
 
       const resLocal = await payload.findByID({
         id: createRes.id,
+        action: 'publish',
         collection: 'fields-persistance',
       })
 
@@ -3653,6 +3679,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     test('should not save a virtual field inside a block to the db', async ({ payload }) => {
       const created = await payload.create({
+        action: 'publish',
         collection: fieldsPersistanceSlug,
         data: {
           blockWithVirtual: [
@@ -3678,8 +3705,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should allow virtual field with reference', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const post = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'my-title' },
+      })
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
@@ -3696,8 +3728,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should not break when using select', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
+      const post = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'my-title-10' },
+      })
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
@@ -3713,8 +3750,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should respect hidden: true for virtual fields with reference', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
+      const post = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'my-title-3' },
+      })
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
@@ -3733,8 +3775,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should allow virtual field as reference to ID', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const post = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'my-title' },
+      })
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
@@ -3747,8 +3794,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should allow virtual field as reference to custom ID', async ({ payload }) => {
-      const customID = await payload.create({ collection: 'custom-ids', data: {} })
+      const customID = await payload.create({
+        action: 'publish',
+        collection: 'custom-ids',
+        data: {},
+      })
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { customID: customID.id },
         depth: 0,
@@ -3766,14 +3818,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     test('should allow deep virtual field as reference to ID', async ({ payload }) => {
       const category = await payload.create({
+        action: 'publish',
         collection: 'categories',
         data: { title: 'category-3' },
       })
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: { category: category.id, title: 'my-title-3' },
       })
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
@@ -3787,6 +3842,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     test('should allow virtual field with reference localized', async ({ payload }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: { localized: 'localized en', title: 'my-title' },
       })
@@ -3799,6 +3855,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       })
 
       const { id } = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post.id },
         depth: 0,
@@ -3814,15 +3871,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     test('should allow to query by a virtual field with reference', async ({ payload }) => {
       await payload.delete({ collection: 'posts', where: {} })
       await payload.delete({ collection: 'virtual-relations', where: {} })
-      const post_1 = await payload.create({ collection: 'posts', data: { title: 'Dan' } })
-      const post_2 = await payload.create({ collection: 'posts', data: { title: 'Mr.Dan' } })
+      const post_1 = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'Dan' },
+      })
+      const post_2 = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'Mr.Dan' },
+      })
 
       const doc_1 = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post_1.id },
         depth: 0,
       })
       const doc_2 = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post_2.id },
         depth: 0,
@@ -3851,27 +3918,39 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     test('should allow virtual field 2x deep', async ({ payload }) => {
       const category = await payload.create({
+        action: 'publish',
         collection: 'categories',
         data: { title: '1-category' },
       })
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: { category: category.id, title: '1-post' },
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        action: 'publish',
+        collection: 'virtual-relations',
+        data: { post: post.id },
+      })
       expect(doc.postCategoryTitle).toBe('1-category')
     })
 
     test('should not break when using select 2x deep', async ({ payload }) => {
       const category = await payload.create({
+        action: 'publish',
         collection: 'categories',
         data: { title: '3-category' },
       })
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: { category: category.id, title: '3-post' },
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        action: 'publish',
+        collection: 'virtual-relations',
+        data: { post: post.id },
+      })
 
       const docWithSelect = await payload.findByID({
         id: doc.id,
@@ -3884,14 +3963,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
 
     test('should allow to query by virtual field 2x deep', async ({ payload }) => {
       const category = await payload.create({
+        action: 'publish',
         collection: 'categories',
         data: { title: '2-category' },
       })
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: { category: category.id, title: '2-post' },
       })
-      const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
+      const doc = await payload.create({
+        action: 'publish',
+        collection: 'virtual-relations',
+        data: { post: post.id },
+      })
       const found = await payload.find({
         collection: 'virtual-relations',
         where: { postCategoryTitle: { equals: '2-category' } },
@@ -3900,7 +3985,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       expect(found.docs[0].id).toBe(doc.id)
     })
 
-    test('should allow to query by virtual field 2x deep with draft:true', async ({ payload }) => {
+    test("should allow to query by virtual field 2x deep with version: 'latest'", async ({
+      payload,
+    }) => {
       await payload.delete({ collection: 'virtual-relations', where: {} })
       const category = await payload.create({
         collection: 'categories',
@@ -3913,7 +4000,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const doc = await payload.create({ collection: 'virtual-relations', data: { post: post.id } })
       const found = await payload.find({
         collection: 'virtual-relations',
-        draft: true,
+        version: 'latest',
         where: { postCategoryTitle: { equals: '3-category' } },
       })
       expect(found.docs).toHaveLength(1)
@@ -3921,7 +4008,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     test('should allow referenced virtual field in globals', async ({ payload }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
+      const post = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'post' },
+      })
       const globalData = await payload.updateGlobal({
         slug: 'virtual-relation-global',
         data: { post: post.id },
@@ -3933,8 +4024,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     test('should allow referenced virtual field in collection update response', async ({
       payload,
     }) => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'post-updated' } })
+      const post = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'post-updated' },
+      })
       const doc = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: {},
         depth: 0,
@@ -3955,26 +4051,32 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     }) => {
       await payload.delete({ collection: 'virtual-relations', where: {} })
       const category_1 = await payload.create({
+        action: 'publish',
         collection: 'categories-custom-id',
         data: { id: 1 },
       })
       const category_2 = await payload.create({
+        action: 'publish',
         collection: 'categories-custom-id',
         data: { id: 2 },
       })
       const post_1 = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: { categoryCustomID: category_1.id, title: 'p-1' },
       })
       const post_2 = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: { categoryCustomID: category_2.id, title: 'p-2' },
       })
       const virtual_1 = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post_1.id },
       })
       const virtual_2 = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post_2.id },
       })
@@ -4011,17 +4113,27 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         where: { email: { equals: devUser.email } },
       })
       if (existingUsers.length === 0) {
-        await payload.create({ collection: 'users', data: devUser })
+        await payload.create({ action: 'publish', collection: 'users', data: devUser })
       }
       await restClient.login({ slug: 'users', credentials: devUser })
 
-      const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
-      const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
+      const post_1 = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'A' },
+      })
+      const post_2 = await payload.create({
+        action: 'publish',
+        collection: 'posts',
+        data: { title: 'B' },
+      })
       const doc_1 = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post_1 },
       })
       const doc_2 = await payload.create({
+        action: 'publish',
         collection: 'virtual-relations',
         data: { post: post_2 },
       })
@@ -4823,14 +4935,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     }
   })
 
-  test('should allow to query like by ID with draft: true', async ({ payload }) => {
+  test("should allow to query like by ID with version: 'latest'", async ({ payload }) => {
     const category = await payload.create({
       collection: 'categories',
       data: { title: 'category123' },
     })
     const res = await payload.find({
       collection: 'categories',
-      draft: true,
+      version: 'latest',
       where: { id: { like: typeof category.id === 'number' ? `${category.id}` : category.id } },
     })
     expect(res.docs).toHaveLength(1)
@@ -6171,7 +6283,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         const doc = await payload.create({
           collection: 'categories',
           data: { name: `Category ${i}` },
-          draft: true,
+          action: 'saveDraft',
         })
         createdIds.push(doc.id)
       }
@@ -6183,7 +6295,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       const resultsNoSort = await payload.find({
         collection: 'categories',
         limit: 10,
-        draft: true,
+        version: 'latest',
         // No sort parameter
       })
 

@@ -18,6 +18,7 @@ import { migrateNextGenerateViewportExport } from './transforms/migrate-next-gen
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
 import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
+import { migrateVersionActionApi } from './transforms/migrate-version-action-api/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
 import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
 import { removeLocalizeStatusConfig } from './transforms/remove-localize-status-config/index.js'
@@ -52,6 +53,7 @@ export const transforms: Transform[] = [
   removeLocalizeStatusConfig,
   removeVersionsTrue,
   removePublishSpecificLocale,
+  migrateVersionActionApi,
   renameTypescriptSchemaToJsonSchema,
   renameExperimentalTableFeature,
 ]

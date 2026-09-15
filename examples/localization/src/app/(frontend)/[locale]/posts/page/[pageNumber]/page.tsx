@@ -80,7 +80,7 @@ export async function generateStaticParams() {
     collection: 'posts',
     depth: 0,
     limit: 10,
-    draft: false,
+    version: 'published',
     overrideAccess: false,
   })
 

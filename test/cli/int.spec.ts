@@ -494,7 +494,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     `createDocuments --slug pages --documents '[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]' --json`,
     async ({ cli, payload }) => {
       const output = await cli(
-        'createDocuments --slug pages --documents \'[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]\' --json',
+        'createDocuments --slug pages --documents \'[{"data":{"title":"one","location":{"longitude":1,"latitude":2}}},{"data":{"title":"two"}}]\' --action publish --json',
       )
       const pages = await payload.find({
         collection: 'pages',
@@ -535,7 +535,9 @@ test.suite({ config: './config.ts' })('CLI', () => {
       JSON.stringify([{ data: { title: 'file one' } }, { data: { title: 'file two' } }]),
     )
 
-    const output = await cli(`createDocuments --slug pages --documents @${documentsFile} --json`)
+    const output = await cli(
+      `createDocuments --slug pages --documents @${documentsFile} --action publish --json`,
+    )
     const pages = await payload.find({
       collection: 'pages',
       pagination: false,
@@ -560,6 +562,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     await writeFile(
       inputFile,
       JSON.stringify({
+        action: 'publish',
         slug: 'pages',
         documents: [{ data: { title: 'Merged input' } }],
         returning: false,
@@ -601,7 +604,9 @@ test.suite({ config: './config.ts' })('CLI', () => {
         },
       },
     ])
-    const output = await cli(`createDocuments --slug media --documents '${documents}' --json`)
+    const output = await cli(
+      `createDocuments --slug media --documents '${documents}' --action publish --json`,
+    )
     const response = JSON.parse(output.stdout)
     const createdMedia = await payload.findByID({
       id: response.result.docs[0].id,
@@ -621,11 +626,11 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
   })
 
-  test(`createDocuments --slug pages --documents '[{"data":{}}]' --draft --returning --json`, async ({
+  test(`createDocuments --slug pages --documents '[{"data":{}}]' --action saveDraft --returning --json`, async ({
     cli,
   }) => {
     const output = await cli({
-      command: `createDocuments --slug pages --documents '[{"data":{}}]' --draft --returning --json`,
+      command: `createDocuments --slug pages --documents '[{"data":{}}]' --action saveDraft --returning --json`,
       reject: false,
     })
     const response = JSON.parse(output.stdout)
@@ -646,7 +651,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
     payload,
   }) => {
     const output = await cli({
-      command: `createDocuments --slug pages --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --json`,
+      command: `createDocuments --slug pages --documents '[{"data":{"title":"created"}},{"data":{"title":null}}]' --action publish --json`,
       reject: false,
     })
     const response = JSON.parse(output.stdout)
@@ -974,8 +979,12 @@ test.suite({ config: './config.ts' })('CLI', () => {
     })
   })
 
-  test('findDocuments --slug pages --draft --trash --no-pagination --json', async ({ cli }) => {
-    const output = await cli('findDocuments --slug pages --draft --trash --no-pagination --json')
+  test('findDocuments --slug pages --version latest --trash --no-pagination --json', async ({
+    cli,
+  }) => {
+    const output = await cli(
+      'findDocuments --slug pages --version latest --trash --no-pagination --json',
+    )
 
     expect(JSON.parse(output.stdout)).toMatchObject({
       command: 'findDocuments',

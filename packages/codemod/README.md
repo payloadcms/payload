@@ -49,6 +49,26 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `migrate-build-script` — rewrites the `build` npm script in `package.json` from `next build` to `payload build`, so the Import Map (and types) are generated before the Next.js build. Matches the `next build` invocation only (leaves `next build-storybook` and the like untouched) and is a no-op when `build` is already `payload build`.
 - `migrate-slug-field` — converts the removed experimental `slugField()` helper (imported from `payload`) into the native `{ type: 'slug' }` field, mapping `useAsSlug`/`fieldToUse`, `slugify`, `required`, `localized`, `disableUnique` (→ `unique: false`), and `position` (→ `admin.position`), and dropping the obsolete `checkboxName`. Removes the now-unused `slugField` import. Calls using `overrides` (or other unrecognized options) are left in place with a note for manual migration.
 - `rename-experimental-table-feature` — renames imports of `EXPERIMENTAL_TableFeature` from `@payloadcms/richtext-lexical` to `TableFeature` (the table feature is now stable) and updates all local usages, e.g. `EXPERIMENTAL_TableFeature()` call sites.
+- `migrate-version-action-api` — rewrites leftover `draft` operation options to `version` on reads and `action` on writes, and removes `typescript.strictDraftTypes`. Automatic rewrites (only when the operation is statically identifiable):
+
+  - Read `draft: true` → `version: 'latest'`; `draft: false` → `version: 'published'`
+  - Write `draft: true` → `action: 'saveDraft'` when no static `_status: 'published'` or existing `action`/`version` changes its meaning
+  - Create/duplicate `draft: false` → `action: 'publish'`
+  - Restore `draft: false` → `action: 'publish'`; `draft: true` → `action: 'saveDraft'`
+  - Static `_status` + `draft` combinations that already resolve to one action drop the obsolete `draft` and keep `_status`
+  - Unambiguous REST `draft=true|false` query params and GraphQL `draft:` arguments
+  - `strictDraftTypes` is removed; `strictDraftTypes: false` also emits a note that Local API and SDK types are now always strict
+
+  Manual-review notes (not rewritten):
+
+  - Update `draft: false` without a static `_status` (old behavior depends on existing document state)
+  - Dynamic `draft` expressions such as `draft: shouldSaveDraft`
+  - Detached options objects and wrapper helpers whose operation cannot be identified
+  - Conflicting `action` / `version` / `draft` / `_status` values
+  - GraphQL strings and REST URLs without enough surrounding operation context
+  - Localized or computed `_status` values
+
+  The transform never rewrites a property solely because it is named `draft`. Document fields, `versions.drafts`, and UI copy are left untouched. `_status` in write data is preserved.
 
 ## Contributing
 

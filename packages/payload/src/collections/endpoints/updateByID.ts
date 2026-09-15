@@ -11,9 +11,9 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
   const {
+    action,
     autosave,
     depth,
-    draft,
     overrideLock,
     populate,
     publishAllLocales,
@@ -24,11 +24,11 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
 
   const doc = await updateByIDOperation({
     id,
+    action,
     autosave,
     collection,
     data: req.data!,
     depth,
-    draft,
     overrideLock: overrideLock ?? false,
     populate,
     publishAllLocales,
@@ -40,7 +40,7 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (draft) {
+  if (action === 'saveDraft') {
     message = req.t('version:draftSavedSuccessfully')
   }
   if (autosave) {

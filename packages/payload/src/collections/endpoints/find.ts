@@ -10,13 +10,12 @@ import { findOperation } from '../operations/find.js'
 export const findHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const { depth, draft, joins, limit, page, pagination, populate, select, sort, trash, where } =
+  const { depth, joins, limit, page, pagination, populate, select, sort, trash, version, where } =
     parseParams(req.query)
 
   const result = await findOperation({
     collection,
     depth,
-    draft,
     joins,
     limit,
     page,
@@ -26,6 +25,7 @@ export const findHandler: PayloadHandler = async (req) => {
     select,
     sort,
     trash,
+    version,
     where,
   })
 

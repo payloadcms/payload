@@ -91,8 +91,8 @@ export function PublishButton({
 
     const params = qs.stringify(
       {
+        action: 'saveDraft',
         depth: 0,
-        draft: true,
         'fallback-locale': 'null',
         locale: localeCode,
       },
@@ -147,6 +147,7 @@ export function PublishButton({
 
     const params = qs.stringify(
       {
+        action: 'publish',
         depth: 0,
         locale: localeCode,
         ...(localizeStatusEnabled && { publishAllLocales: true }),
@@ -195,6 +196,7 @@ export function PublishButton({
 
       const params = qs.stringify(
         {
+          action: 'publish',
           depth: 0,
           locale,
         },

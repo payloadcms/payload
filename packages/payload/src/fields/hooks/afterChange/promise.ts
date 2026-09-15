@@ -3,6 +3,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { WriteAction } from '../../../versions/actions/types.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -11,6 +12,7 @@ import { getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  action?: WriteAction
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
@@ -39,6 +41,7 @@ type Args = {
 // - Execute field hooks
 
 export const promise = async ({
+  action,
   blockData,
   collection,
   context,
@@ -82,6 +85,7 @@ export const promise = async ({
     if ('hooks' in field && field.hooks?.afterChange) {
       for (const hook of field.hooks.afterChange) {
         const hookedValue = await hook({
+          action,
           blockData,
           collection,
           context,
@@ -120,6 +124,7 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
+              action,
               blockData,
               collection,
               context,
@@ -164,6 +169,7 @@ export const promise = async ({
           if (block) {
             promises.push(
               traverseFields({
+                action,
                 blockData: siblingData?.[field.name]?.[rowIndex],
                 collection,
                 context,
@@ -195,6 +201,7 @@ export const promise = async ({
     case 'collapsible':
     case 'row': {
       await traverseFields({
+        action,
         blockData,
         collection,
         context,
@@ -220,6 +227,7 @@ export const promise = async ({
     case 'group': {
       if (fieldAffectsData(field)) {
         await traverseFields({
+          action,
           blockData,
           collection,
           context,
@@ -240,6 +248,7 @@ export const promise = async ({
         })
       } else {
         await traverseFields({
+          action,
           blockData,
           collection,
           context,
@@ -277,6 +286,7 @@ export const promise = async ({
       if (editor?.hooks?.afterChange?.length) {
         for (const hook of editor.hooks.afterChange) {
           const hookedValue = await hook({
+            action,
             collection,
             context,
             data,
@@ -319,6 +329,7 @@ export const promise = async ({
       }
 
       await traverseFields({
+        action,
         blockData,
         collection,
         context,
@@ -343,6 +354,7 @@ export const promise = async ({
 
     case 'tabs': {
       await traverseFields({
+        action,
         blockData,
         collection,
         context,

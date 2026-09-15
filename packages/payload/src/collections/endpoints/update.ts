@@ -12,8 +12,8 @@ export const updateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
   const {
+    action,
     depth,
-    draft,
     limit,
     overrideLock,
     populate,
@@ -26,10 +26,10 @@ export const updateHandler: PayloadHandler = async (req) => {
   } = parseParams(req.query)
 
   const result = await updateOperation({
+    action,
     collection,
     data: req.data!,
     depth,
-    draft,
     limit,
     overrideLock: overrideLock ?? false,
     populate,

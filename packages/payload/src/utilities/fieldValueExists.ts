@@ -25,7 +25,7 @@ type Args = {
  *
  * Runs the `find` operation outside the caller's transaction while preserving the rest of the
  * request. A committed read is what a uniqueness check wants, and isolating the transaction avoids
- * the "cursor on a session with a transaction in progress" error from a hook. `draft` includes
+ * the "cursor on a session with a transaction in progress" error from a hook. `version: 'latest'` includes
  * slugs that only exist in a draft version.
  */
 export const fieldValueExists = async ({
@@ -46,12 +46,12 @@ export const fieldValueExists = async ({
     collection,
     depth: 0,
     disableErrors: true,
-    draft: Boolean(draftsEnabled),
     limit: 2,
     locale: locale as Parameters<typeof req.payload.find>[0]['locale'],
     overrideAccess,
     pagination: false,
     req: queryReq,
+    version: draftsEnabled ? 'latest' : undefined,
     where: { [field]: { equals: value } },
   })
 

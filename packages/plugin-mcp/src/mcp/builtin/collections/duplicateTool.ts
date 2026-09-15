@@ -30,7 +30,7 @@ export const duplicateDocumentTool = defineCollectionTool({
 }).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { id, data, depth, draft, fallbackLocale, locale, populate, select, selectedLocales } =
+  const { id, action, data, depth, fallbackLocale, locale, populate, select, selectedLocales } =
     input
 
   logger.info(`Duplicating document in collection: ${slug} with ID: ${id}`)
@@ -52,9 +52,9 @@ export const duplicateDocumentTool = defineCollectionTool({
 
     const result = await payload.duplicate({
       id: parseDocumentID({ id, collectionSlug: slug, payload }),
+      action,
       collection: slug,
       depth,
-      draft,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
       ...(parsedData ? { data: parsedData } : {}),

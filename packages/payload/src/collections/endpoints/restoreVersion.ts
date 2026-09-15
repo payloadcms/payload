@@ -4,19 +4,28 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { parseParams } from '../../utilities/parseParams/index.js'
+import {
+  parseEnumParam,
+  parseParams,
+  restoreActionValues,
+} from '../../utilities/parseParams/index.js'
 import { restoreVersionOperation } from '../operations/restoreVersion.js'
 
 export const restoreVersionHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const { depth, draft, populate } = parseParams(req.query)
+  const { action: requestedAction, depth, populate } = parseParams(req.query)
+  const action = parseEnumParam({
+    allowed: restoreActionValues,
+    param: 'action',
+    value: requestedAction,
+  })
 
   const result = await restoreVersionOperation({
     id,
+    action,
     collection,
     depth,
-    draft,
     populate,
     req,
   })

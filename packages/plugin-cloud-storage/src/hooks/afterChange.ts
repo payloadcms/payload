@@ -11,9 +11,14 @@ interface Args {
   collection: CollectionConfig
 }
 
+type CloudStorageDocument = {
+  _status?: 'draft' | 'published' | Record<string, 'draft' | 'published'>
+} & FileData &
+  TypeWithID
+
 export const getAfterChangeHook =
-  ({ adapter, collection }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
-  async ({ data, doc, operation, previousDoc, req, select }) => {
+  ({ adapter, collection }: Args): CollectionAfterChangeHook<CloudStorageDocument> =>
+  async ({ action, data, doc, operation, previousDoc, req, select }) => {
     // Skip if this is an internal update to prevent infinite loop
     if (req.context?.skipCloudStorage) {
       return doc
@@ -21,9 +26,10 @@ export const getAfterChangeHook =
 
     // Restore upload metadata removed by select, including partially selected image sizes.
     const uploadData = select ? deepMergeWithSourceArrays<FileData & TypeWithID>(data, doc) : doc
-    const isDraftSave = (uploadData as { _status?: string })._status === 'draft'
+    const isDraftSave = action === 'saveDraft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
+    const metadataAction = action === 'saveDraft' || action === 'unpublish' ? action : 'publish'
 
     try {
       const files = getIncomingFiles({ data: uploadData, req })
@@ -67,16 +73,22 @@ export const getAfterChangeHook =
           try {
             const updatedDoc = await req.payload.update({
               id: doc.id,
+              action: metadataAction,
               collection: collection.slug,
               data: uploadMetadata,
               depth: 0,
-              draft: isDraftSave,
               req,
               select,
             })
 
             // Persist all adapter metadata, but do not add unselected fields to the response.
-            docWithMetadata = select ? { ...doc, ...updatedDoc } : { ...doc, ...uploadMetadata }
+            docWithMetadata = select
+              ? { ...doc, ...updatedDoc }
+              : {
+                  ...doc,
+                  ...uploadMetadata,
+                  ...(doc._status !== undefined ? { _status: doc._status } : {}),
+                }
           } finally {
             delete req.context.skipCloudStorage
           }

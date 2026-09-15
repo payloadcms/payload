@@ -10,12 +10,12 @@ export const relationshipPopulationPromiseHOC = (
   const relationshipPopulationPromise: PopulationPromise<SerializedRelationshipNode> = ({
     currentDepth,
     depth,
-    draft,
     node,
     overrideAccess,
     populationPromises,
     req,
     showHiddenFields,
+    version,
   }) => {
     if (node?.value) {
       // @ts-expect-error
@@ -34,11 +34,11 @@ export const relationshipPopulationPromiseHOC = (
             currentDepth,
             data: node,
             depth: populateDepth,
-            draft,
             key: 'value',
             overrideAccess,
             req,
             showHiddenFields,
+            version,
           }),
         )
       }

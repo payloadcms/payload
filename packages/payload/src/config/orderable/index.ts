@@ -312,12 +312,12 @@ export const addOrderableEndpoint = (
 
       await req.payload.update({
         id,
+        action: draft ? 'saveDraft' : 'publish',
         collection: collection.slug,
         data: {
           [orderableFieldName]: orderValues[index],
         },
         depth: 0,
-        draft,
         req,
       })
     }

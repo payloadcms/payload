@@ -15,6 +15,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { UpdateAction } from '../../../versions/actions/types.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -33,19 +34,19 @@ import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import {
-  hasDraftsEnabled,
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
+  action?: UpdateAction
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
   config: SanitizedConfig
   data: DeepPartial<DataFromCollectionSlug<TSlug>>
   depth: number
   docWithLocales: JsonObject & TypeWithID
-  draftArg: boolean
   fallbackLocale: TypedFallbackLocale
   filesToUpload: FileToSave[]
   id: number | string
@@ -79,13 +80,13 @@ export const updateDocument = async <
   TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
 >({
   id,
+  action,
   autosave,
   collectionConfig,
   config,
   data,
   depth,
   docWithLocales,
-  draftArg,
   fallbackLocale,
   filesToUpload,
   locale,
@@ -100,18 +101,17 @@ export const updateDocument = async <
   unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
+  const isSavingDraft = action === 'saveDraft'
+  const isUnpublishing = action === 'unpublish'
   const publishAllLocales =
-    !draftArg &&
+    !isSavingDraft &&
+    !isUnpublishing &&
     (publishAllLocalesArg ??
       (hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all' ? false : true))
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
       : !!unpublishAllLocalesArg
-  const isSavingDraft =
-    Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
-    data._status !== 'published' &&
-    !publishAllLocales
   const shouldSavePassword = Boolean(
     password &&
       collectionConfig.auth &&
@@ -120,10 +120,6 @@ export const updateDocument = async <
           collectionConfig.auth.disableLocalStrategy.enableFields)) &&
       !isSavingDraft,
   )
-
-  if (isSavingDraft) {
-    data._status = 'draft'
-  }
 
   // /////////////////////////////////////
   // Handle potentially locked documents
@@ -142,16 +138,16 @@ export const updateDocument = async <
     context: req.context,
     depth: 0,
     doc: deepCopyObjectSimple(docWithLocales),
-    draft: draftArg,
     fallbackLocale: id ? null : fallbackLocale,
     global: null,
     locale,
     overrideAccess: true,
     req,
     showHiddenFields: true,
+    version: isSavingDraft ? 'latest' : 'published',
   })
 
-  const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
+  const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && action !== 'publish'
 
   if (collectionConfig.auth) {
     ensureUsernameOrEmail<TSlug>({
@@ -266,8 +262,8 @@ export const updateDocument = async <
       (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
       // Skip validation for trash operations since they're just metadata updates
       (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
-      // Skip validation for unpublish operations — they only change _status, not document data
-      unpublishAllLocales,
+      // Skip validation for unpublish operations — they only change publication state
+      isUnpublishing,
   }
 
   // /////////////////////////////////////
@@ -366,7 +362,7 @@ export const updateDocument = async <
     dataToUpdate.updatedAt = new Date().toISOString()
     if (localizedPublishData) {
       // Single-locale publish: save filtered data to main doc but keep full locale data for
-      // the version so draft fetches (replaceWithDraftIfAvailable) return complete data.
+      // the version so latest/draft fetches (replaceWithVersion) return complete data.
       await req.payload.db.updateOne({
         id,
         collection: collectionConfig.slug,
@@ -400,7 +396,7 @@ export const updateDocument = async <
       operation: 'update',
       payload,
       req,
-      unpublish: unpublishAllLocales,
+      unpublish: isUnpublishing,
     })
   }
 
@@ -413,7 +409,6 @@ export const updateDocument = async <
     context: req.context,
     depth,
     doc: resultWithLocales,
-    draft: draftArg,
     fallbackLocale,
     global: null,
     locale,
@@ -422,6 +417,7 @@ export const updateDocument = async <
     req,
     select,
     showHiddenFields,
+    version: isSavingDraft ? 'latest' : 'published',
   })
 
   // /////////////////////////////////////
@@ -446,6 +442,7 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   result = await afterChange({
+    action,
     collection: collectionConfig,
     context: req.context,
     data,
@@ -464,6 +461,7 @@ export const updateDocument = async <
     for (const hook of collectionConfig.hooks.afterChange) {
       result =
         (await hook({
+          action,
           collection: collectionConfig,
           context: req.context,
           data,

@@ -8,8 +8,8 @@ import { populateBreadcrumbs } from '../utilities/populateBreadcrumbs.js'
 
 export const resaveChildren =
   (pluginConfig: NestedDocsPluginConfig): CollectionAfterChangeHook =>
-  async ({ collection, doc, req }) => {
-    if (collection?.versions?.drafts && doc._status !== 'published') {
+  async ({ action, collection, doc, req }) => {
+    if (collection?.versions?.drafts && action !== 'publish') {
       // If the parent is a draft, don't resave children
       return
     }
@@ -19,10 +19,10 @@ export const resaveChildren =
     const initialDraftChildren = await req.payload.find({
       collection: collection.slug,
       depth: 0,
-      draft: true,
       limit: 0,
       locale: req.locale,
       req,
+      version: 'latest',
       where: {
         [parentSlug]: {
           equals: doc.id,
@@ -35,10 +35,10 @@ export const resaveChildren =
     const publishedChildren = await req.payload.find({
       collection: collection.slug,
       depth: 0,
-      draft: false,
       limit: 0,
       locale: req.locale,
       req,
+      version: 'published',
       where: {
         [parentSlug]: {
           equals: doc.id,
@@ -70,6 +70,7 @@ export const resaveChildren =
 
           await req.payload.update({
             id: child.id,
+            action: isDraft ? 'saveDraft' : 'publish',
             collection: collection.slug,
             data: await populateBreadcrumbs({
               collection,
@@ -80,7 +81,6 @@ export const resaveChildren =
               req,
             }),
             depth: 0,
-            draft: isDraft,
             locale: req.locale,
             req,
           })

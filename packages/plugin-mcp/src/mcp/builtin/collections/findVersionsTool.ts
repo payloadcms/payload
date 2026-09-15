@@ -24,7 +24,6 @@ export const findVersionsTool = defineCollectionTool({
   const logger = getLogger({ payload })
   const {
     depth,
-    draft,
     fallbackLocale,
     limit,
     locale,
@@ -47,7 +46,6 @@ export const findVersionsTool = defineCollectionTool({
       overrideAccess: authorizedMCP.overrideAccess,
       page,
       req,
-      ...(draft !== undefined ? { draft } : {}),
       ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(pagination !== undefined ? { pagination } : {}),

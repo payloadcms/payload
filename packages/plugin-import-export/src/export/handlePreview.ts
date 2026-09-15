@@ -176,7 +176,6 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   const result = await req.payload.find({
     collection: collectionSlug,
     depth: 1,
-    draft,
     limit: previewLimit,
     locale,
     overrideAccess: false,
@@ -184,6 +183,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     req,
     select,
     sort,
+    version: draft ? 'latest' : 'published',
     where,
   })
 
