@@ -522,7 +522,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             }
           }
         } catch (_) {
-          // swallow
+          currentForms[i].errorCount = currentForms[i].errorCount || 1
         }
       }
 
