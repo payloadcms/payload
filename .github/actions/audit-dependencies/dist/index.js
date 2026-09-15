@@ -12059,6 +12059,75 @@ const packages_toStringRecord = (value) => {
     return result;
 };
 
+;// CONCATENATED MODULE: ./src/lib/plan.ts
+/**
+ * Builds a machine-readable remediation plan from the reported findings, grouping
+ * each direct-dependency bump into the concrete action an agent can apply: refresh
+ * the lockfile, edit a manifest, or escalate for a human decision.
+ */
+const buildPlan = ({ findings, scope, }) => {
+    const relock = new Map();
+    const bump = new Map();
+    const manual = [];
+    for (const finding of findings) {
+        for (const { dependency, fix, workspacePackages } of finding.bumps) {
+            if (fix.status === 'relock') {
+                relock.set(finding.package, {
+                    command: `pnpm update ${finding.package}`,
+                    module: finding.package,
+                    type: 'relock',
+                });
+                continue;
+            }
+            if (fix.status === 'fix') {
+                addBump({ bump, dependency, fix, workspacePackages });
+                continue;
+            }
+            manual.push({
+                advisory: finding.advisory,
+                dependency,
+                module: finding.package,
+                reason: manualReason(fix),
+                type: 'manual',
+            });
+        }
+    }
+    const actions = [
+        ...[...relock.values()].sort((a, b) => a.module.localeCompare(b.module)),
+        ...[...bump.values()].sort((a, b) => a.dependency.localeCompare(b.dependency) || a.toRange.localeCompare(b.toRange)),
+        ...manual.sort((a, b) => a.advisory.localeCompare(b.advisory) || a.dependency.localeCompare(b.dependency)),
+    ];
+    return { actions, scope, verify: verifyCommand(scope) };
+};
+const addBump = ({ bump, dependency, fix, workspacePackages, }) => {
+    const toRange = `>=${fix.version}`;
+    const key = `${dependency}\t${toRange}`;
+    const manifests = workspacePackages.map(manifestPath);
+    const existing = bump.get(key);
+    if (!existing) {
+        bump.set(key, { crossesMajor: fix.crossesMajor, dependency, manifests, toRange, type: 'bump' });
+        return;
+    }
+    for (const manifest of manifests) {
+        if (!existing.manifests.includes(manifest)) {
+            existing.manifests.push(manifest);
+        }
+    }
+};
+/** Maps a workspace owner label to its package.json path. */
+const manifestPath = (workspacePackage) => workspacePackage.includes('/')
+    ? `${workspacePackage}/package.json`
+    : `packages/${workspacePackage}/package.json`;
+const manualReason = (fix) => {
+    if (fix.status === 'none') {
+        return 'no published version clears the vulnerability; allowlist or escalate';
+    }
+    return fix.reason === 'registry'
+        ? 'registry unreachable; retry before deciding'
+        : 'current version undeclared in scanned workspaces; determine the owner manually';
+};
+const verifyCommand = (scope) => scope === 'monorepo' ? 'pnpm script:audit:deps:monorepo' : 'pnpm script:audit:deps:consumer';
+
 ;// CONCATENATED MODULE: ./src/lib/registry.ts
 const DEFAULT_REGISTRY = 'https://registry.npmjs.org';
 // Abbreviated packument: smaller payload that still carries per-version dependencies.
@@ -12262,6 +12331,7 @@ const compareFindings = (a, b) => {
 
 
 
+
 const ALLOWLIST_PATH = '.github/audit-dependencies-allowlist.json';
 const main = async () => {
     const parsed = parseArgs({ argv: process.argv.slice(2), env: process.env });
@@ -12300,7 +12370,8 @@ const main = async () => {
     const index = buildDeclaredIndex(manifests, catalogs);
     const findings = toFindings({ hits, ignoreGhsas, threshold: severity });
     const reported = await annotateFindings({ client, findings, index });
-    await (0,promises_namespaceObject.writeFile)(jsonPath, JSON.stringify(reported, null, 2));
+    const plan = buildPlan({ findings: reported, scope });
+    await (0,promises_namespaceObject.writeFile)(jsonPath, JSON.stringify({ findings: reported, plan }, null, 2));
     printReport({ findings: reported, jsonPath, packagesAudited, scope, severity });
     // Re-review the allowlist: an advisory suppressed earlier may now be resolvable.
     const allowlisted = new Set(ignoreGhsas);

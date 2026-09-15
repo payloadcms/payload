@@ -12,6 +12,7 @@ import { runMonorepoAudit } from './lib/monorepoAudit'
 import type { PackageManifest } from './lib/packages'
 
 import { buildDeclaredIndex, scanWorkspaceManifests, selectConsumerPackages } from './lib/packages'
+import { buildPlan } from './lib/plan'
 import { createRegistryClient } from './lib/registry'
 import {
   findStaleAllowlist,
@@ -71,8 +72,9 @@ const main = async (): Promise<number> => {
 
   const findings = toFindings({ hits, ignoreGhsas, threshold: severity })
   const reported = await annotateFindings({ client, findings, index })
+  const plan = buildPlan({ findings: reported, scope })
 
-  await writeFile(jsonPath, JSON.stringify(reported, null, 2))
+  await writeFile(jsonPath, JSON.stringify({ findings: reported, plan }, null, 2))
   printReport({ findings: reported, jsonPath, packagesAudited, scope, severity })
 
   // Re-review the allowlist: an advisory suppressed earlier may now be resolvable.

@@ -93,3 +93,43 @@ export type Bump = {
 
 /** A finding enriched with per-direct-dependency bump suggestions for reporting. */
 export type ReportedFinding = Omit<Finding, 'directDeps'> & { bumps: Bump[] }
+
+/**
+ * A single machine-applicable remediation step. An agent can turn each into a
+ * concrete change: `relock` runs a command, `bump` edits manifests, `manual`
+ * needs a human decision (no fix, or the fix could not be determined).
+ */
+export type PlanAction =
+  | {
+      /** True when the target range crosses the current major — flag for breaking-change review. */
+      crossesMajor: boolean
+      dependency: string
+      /** package.json files to edit, e.g. `packages/ui/package.json`. */
+      manifests: string[]
+      /** The minimal range to declare, e.g. `>=7.29.0`. */
+      toRange: string
+      type: 'bump'
+    }
+  | {
+      /** Shell command that refreshes the lockfile so the already-permitted patched version resolves. */
+      command: string
+      /** The vulnerable module whose resolution is stale. */
+      module: string
+      type: 'relock'
+    }
+  | {
+      advisory: string
+      dependency: string
+      module: string
+      /** Why this cannot be auto-remediated: no fix exists, or the fix could not be determined. */
+      reason: string
+      type: 'manual'
+    }
+
+/** A machine-readable remediation plan an agent can apply then re-verify. */
+export type Plan = {
+  actions: PlanAction[]
+  scope: Scope
+  /** Command to re-run the audit after applying the actions. */
+  verify: string
+}
