@@ -27,6 +27,7 @@ export const draftWithUploadCollectionSlug = 'draft-with-upload'
 export const draftWithUploadCloudStorageCollectionSlug = 'draft-with-upload-cloud-storage'
 
 export const versionCollectionSlug = 'version-posts'
+export const secondaryAdminUserCollectionSlug = 'secondary-admin-users'
 
 export const disablePublishSlug = 'disable-publish'
 export const errorOnUnpublishSlug = 'error-on-unpublish'

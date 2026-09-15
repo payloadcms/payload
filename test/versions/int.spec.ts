@@ -36,6 +36,7 @@ import {
   restoreAccessGlobalSlug,
   restoreAccessLocalizedCollectionSlug,
   restoreAccessNoVersionsGlobalSlug,
+  secondaryAdminUserCollectionSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -50,9 +51,10 @@ const formatGraphQLID = ({ payload }: { payload: Payload }, id: number | string)
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
 test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () => {
+  let secondaryAdminUser: JsonObject
   let user: JsonObject
 
-  test.beforeAll(async ({ restClientInstance: restClient }) => {
+  test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     const { user: loggedInUser } = await restClient.login({
       slug: 'users',
       credentials: devUser,
@@ -60,6 +62,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
     user = {
       ...loggedInUser,
       collection: 'users',
+    }
+
+    const newSecondaryAdminUser = await payload.create({
+      collection: secondaryAdminUserCollectionSlug,
+      data: {
+        email: 'secondary-admin@payloadcms.com',
+        password: devUser.password,
+      },
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    secondaryAdminUser = {
+      ...newSecondaryAdminUser,
+      collection: secondaryAdminUserCollectionSlug,
     }
   })
 
@@ -4297,7 +4314,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
-          user: user.id,
+          user: {
+            relationTo: 'users',
+            value: user.id,
+          },
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
@@ -4320,6 +4340,224 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
         payload,
       })
+    })
+
+    test('should preserve the scheduling user collection for scheduled publish jobs', async ({
+      payload,
+    }) => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          title: 'my doc to publish from a secondary admin-capable auth collection',
+        },
+        draft: true,
+      })
+
+      const req = await createLocalReq({ user: secondaryAdminUser }, payload)
+      const currentDate = new Date()
+
+      await schedulePublishHandler({
+        type: 'publish',
+        date: new Date(currentDate.getTime() + 3000),
+        doc: {
+          relationTo: draftCollectionSlug,
+          value: draft.id,
+        },
+        req,
+        user: secondaryAdminUser,
+      })
+
+      const queuedJob = (
+        await payload.find({
+          collection: 'payload-jobs',
+          where: {
+            'input.doc.value': {
+              equals: draft.id,
+            },
+          },
+        })
+      ).docs[0]
+
+      expect(queuedJob?.input?.user).toMatchObject({
+        relationTo: secondaryAdminUserCollectionSlug,
+        value: secondaryAdminUser.id,
+      })
+
+      await wait(4000)
+
+      const runResponse = await payload.jobs.run()
+
+      expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('success')
+
+      const published = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        draft: false,
+      })
+
+      expect(published._status).toBe('published')
+    })
+
+    test('should run scheduled publish as the scheduling user, not the admin collection', async ({
+      payload,
+    }) => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          restrictedToSecondaryCollection: true,
+          title: 'my doc restricted from the secondary auth collection',
+        },
+        draft: true,
+      })
+
+      const req = await createLocalReq({ user: secondaryAdminUser }, payload)
+      const currentDate = new Date()
+
+      await schedulePublishHandler({
+        type: 'publish',
+        date: new Date(currentDate.getTime() + 3000),
+        doc: {
+          relationTo: draftCollectionSlug,
+          value: draft.id,
+        },
+        req,
+        user: secondaryAdminUser,
+      })
+
+      const queuedJob = (
+        await payload.find({
+          collection: 'payload-jobs',
+          where: {
+            'input.doc.value': {
+              equals: draft.id,
+            },
+          },
+        })
+      ).docs[0]
+
+      await wait(4000)
+
+      const runResponse = await payload.jobs.run()
+
+      expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+      })
+
+      expect(retrieved._status).toBe('draft')
+    })
+
+    test('should fail scheduled publish jobs that omit the user auth collection', async ({
+      payload,
+    }) => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          title: 'my doc scheduled with a legacy bare user id',
+        },
+        draft: true,
+      })
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        input: {
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+          user: user.id,
+        },
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
+
+      const queuedJob = (
+        await payload.find({
+          collection: 'payload-jobs',
+          where: {
+            'input.doc.value': {
+              equals: draft.id,
+            },
+          },
+        })
+      ).docs[0]
+
+      await wait(4000)
+
+      const runResponse = await payload.jobs.run()
+
+      expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        draft: false,
+      })
+
+      expect(retrieved._status).toBe('draft')
+    })
+
+    test('should not skip a user id of 0 when running scheduled publish jobs', async ({
+      payload,
+    }) => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          title: 'my doc scheduled with a zero user id',
+        },
+        draft: true,
+      })
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        input: {
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+          user: {
+            relationTo: 'users',
+            value: 0,
+          },
+        },
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
+
+      const queuedJob = (
+        await payload.find({
+          collection: 'payload-jobs',
+          where: {
+            'input.doc.value': {
+              equals: draft.id,
+            },
+          },
+        })
+      ).docs[0]
+
+      await wait(4000)
+
+      const runResponse = await payload.jobs.run()
+
+      // A `0` id must reach findByID (which fails here) rather than being dropped to an
+      // overrideAccess publish, so the doc stays a draft.
+      expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        draft: false,
+      })
+
+      expect(retrieved._status).toBe('draft')
     })
 
     test('should allow collection scheduled unpublish', async ({ payload }) => {

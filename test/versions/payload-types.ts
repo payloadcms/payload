@@ -62,30 +62,31 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E98BC274".
+ * via the `definition` "LexicalNodes_29DD3EB9".
  */
-export type LexicalNodes_E98BC274 =
+export type LexicalNodes_29DD3EB9 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E98BC274>
+  | SerializedParagraphNode<LexicalNodes_29DD3EB9>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_E98BC274>
+  | SerializedHeadingNode<LexicalNodes_29DD3EB9>
   | SerializedUploadNode<'draft-with-upload'>
   | SerializedUploadNode<'draft-with-upload-cloud-storage'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_E98BC274>
-  | SerializedListNode<LexicalNodes_E98BC274>
-  | SerializedListItemNode<LexicalNodes_E98BC274>
-  | SerializedAutoLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_29DD3EB9>
+  | SerializedListNode<LexicalNodes_29DD3EB9>
+  | SerializedListItemNode<LexicalNodes_29DD3EB9>
+  | SerializedAutoLinkNode<LexicalNodes_29DD3EB9, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_29DD3EB9, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
       | 'autosave-posts'
       | 'autosave-with-draft-button-posts'
       | 'autosave-multi-select-posts'
+      | 'nested-array-select'
       | 'autosave-with-validate-posts'
       | 'draft-posts'
       | 'drafts-no-read-versions'
@@ -99,8 +100,50 @@ export type LexicalNodes_E98BC274 =
       | 'custom-ids'
       | 'diff'
       | 'text'
-      | 'payload-kv'
+      | 'restore-access'
+      | 'restore-access-localized'
       | 'users'
+      | 'secondary-admin-users'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_AB595D72".
+ */
+export type LexicalNodes_AB595D72 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_AB595D72>
+  | SerializedRelationshipNode<
+      | 'disable-publish'
+      | 'posts'
+      | 'autosave-posts'
+      | 'autosave-with-draft-button-posts'
+      | 'autosave-multi-select-posts'
+      | 'nested-array-select'
+      | 'autosave-with-validate-posts'
+      | 'draft-posts'
+      | 'drafts-no-read-versions'
+      | 'draft-with-max-posts'
+      | 'draft-posts-with-change-hook'
+      | 'drafts-with-custom-unpublish'
+      | 'draft-with-validate-posts'
+      | 'error-on-unpublish'
+      | 'localized-posts'
+      | 'version-posts'
+      | 'custom-ids'
+      | 'diff'
+      | 'text'
+      | 'restore-access'
+      | 'restore-access-localized'
+      | 'users'
+      | 'secondary-admin-users'
+      | 'payload-kv'
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -110,6 +153,7 @@ export type LexicalNodes_E98BC274 =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'secondary-admin-users': SecondaryAdminUserAuthOperations;
   };
   blocks: {};
   collections: {
@@ -118,6 +162,7 @@ export interface Config {
     'autosave-posts': AutosavePost;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPost;
     'autosave-multi-select-posts': AutosaveMultiSelectPost;
+    'nested-array-select': NestedArraySelect;
     'autosave-with-validate-posts': AutosaveWithValidatePost;
     'draft-posts': DraftPost;
     'drafts-no-read-versions': DraftsNoReadVersion;
@@ -135,8 +180,11 @@ export interface Config {
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
-    'payload-kv': PayloadKv;
+    'restore-access': RestoreAccess;
+    'restore-access-localized': RestoreAccessLocalized;
     users: User;
+    'secondary-admin-users': SecondaryAdminUser;
+    'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -149,6 +197,7 @@ export interface Config {
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPostsSelect<false> | AutosaveWithDraftButtonPostsSelect<true>;
     'autosave-multi-select-posts': AutosaveMultiSelectPostsSelect<false> | AutosaveMultiSelectPostsSelect<true>;
+    'nested-array-select': NestedArraySelectSelect<false> | NestedArraySelectSelect<true>;
     'autosave-with-validate-posts': AutosaveWithValidatePostsSelect<false> | AutosaveWithValidatePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'drafts-no-read-versions': DraftsNoReadVersionsSelect<false> | DraftsNoReadVersionsSelect<true>;
@@ -166,8 +215,11 @@ export interface Config {
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'restore-access': RestoreAccessSelect<false> | RestoreAccessSelect<true>;
+    'restore-access-localized': RestoreAccessLocalizedSelect<false> | RestoreAccessLocalizedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'secondary-admin-users': SecondaryAdminUsersSelect<false> | SecondaryAdminUsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -187,6 +239,9 @@ export interface Config {
     'max-versions': MaxVersion;
     'draft-unlimited-global': DraftUnlimitedGlobal;
     'simple-draft-global': SimpleDraftGlobal;
+    'restore-access-global': RestoreAccessGlobal;
+    'restore-access-no-versions-global': RestoreAccessNoVersionsGlobal;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -198,6 +253,9 @@ export interface Config {
     'max-versions': MaxVersionsSelect<false> | MaxVersionsSelect<true>;
     'draft-unlimited-global': DraftUnlimitedGlobalSelect<false> | DraftUnlimitedGlobalSelect<true>;
     'simple-draft-global': SimpleDraftGlobalSelect<false> | SimpleDraftGlobalSelect<true>;
+    'restore-access-global': RestoreAccessGlobalSelect<false> | RestoreAccessGlobalSelect<true>;
+    'restore-access-no-versions-global': RestoreAccessNoVersionsGlobalSelect<false> | RestoreAccessNoVersionsGlobalSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
   widgets: {
@@ -205,7 +263,7 @@ export interface Config {
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
   };
-  user: User;
+  user: User | SecondaryAdminUser;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -218,6 +276,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface SecondaryAdminUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -267,7 +343,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_E98BC274> | null;
+  richText?: LexicalRichText<LexicalNodes_29DD3EB9> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -313,6 +389,7 @@ export interface DraftPost {
   relation?: (string | null) | DraftPost;
   relationWithFilterOptions?: (string | DraftPost)[] | null;
   restrictedToUpdate?: boolean | null;
+  restrictedToSecondaryCollection?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -347,6 +424,27 @@ export interface AutosaveMultiSelectPost {
   id: string;
   title: string;
   tag?: ('blog' | 'essay' | 'portfolio')[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-array-select".
+ */
+export interface NestedArraySelect {
+  id: string;
+  outer?:
+    | {
+        inner?:
+          | {
+              days?: ('monday' | 'tuesday' | 'wednesday')[] | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -569,9 +667,9 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_E98BC274> | null;
-  richtextWithConstrainedRelationship?: LexicalRichText<LexicalNodes_E98BC274> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_E98BC274> | null;
+  richtext?: LexicalRichText<LexicalNodes_29DD3EB9> | null;
+  richtextWithConstrainedRelationship?: LexicalRichText<LexicalNodes_AB595D72> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_29DD3EB9> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -615,6 +713,32 @@ export interface Text {
   owner?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -667,31 +791,6 @@ export interface TabsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'TabsBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -771,6 +870,54 @@ export interface Media2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access".
+ */
+export interface RestoreAccess {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-localized".
+ */
+export interface RestoreAccessLocalized {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "secondary-admin-users".
+ */
+export interface SecondaryAdminUser {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'secondary-admin-users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -813,6 +960,15 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   completedAt?: string | null;
   totalTried?: number | null;
   /**
@@ -840,7 +996,7 @@ export interface PayloadJob {
         completedAt: string;
         taskSlug: 'inline' | 'schedulePublish';
         taskID: string;
-        input?:
+        input:
           | {
               [k: string]: unknown;
             }
@@ -868,13 +1024,22 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
+        parent?: {
+          taskSlug?: ('inline' | 'schedulePublish') | null;
+          taskID?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
   taskSlug?: ('inline' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -904,6 +1069,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave-multi-select-posts';
         value: string | AutosaveMultiSelectPost;
+      } | null)
+    | ({
+        relationTo: 'nested-array-select';
+        value: string | NestedArraySelect;
       } | null)
     | ({
         relationTo: 'autosave-with-validate-posts';
@@ -974,14 +1143,31 @@ export interface PayloadLockedDocument {
         value: string | Media2;
       } | null)
     | ({
+        relationTo: 'restore-access';
+        value: string | RestoreAccess;
+      } | null)
+    | ({
+        relationTo: 'restore-access-localized';
+        value: string | RestoreAccessLocalized;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -991,10 +1177,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'secondary-admin-users';
+        value: string | SecondaryAdminUser;
+      };
   key?: string | null;
   value?:
     | {
@@ -1084,6 +1275,26 @@ export interface AutosaveMultiSelectPostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-array-select_select".
+ */
+export interface NestedArraySelectSelect<T extends boolean = true> {
+  outer?:
+    | T
+    | {
+        inner?:
+          | T
+          | {
+              days?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-with-validate-posts_select".
  */
 export interface AutosaveWithValidatePostsSelect<T extends boolean = true> {
@@ -1116,6 +1327,7 @@ export interface DraftPostsSelect<T extends boolean = true> {
   relation?: T;
   relationWithFilterOptions?: T;
   restrictedToUpdate?: T;
+  restrictedToSecondaryCollection?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1453,11 +1665,23 @@ export interface Media2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
+ * via the `definition` "restore-access_select".
  */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
+export interface RestoreAccessSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-localized_select".
+ */
+export interface RestoreAccessLocalizedSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1471,6 +1695,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1483,11 +1708,43 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "secondary-admin-users_select".
+ */
+export interface SecondaryAdminUsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
   input?: T;
   taskStatus?: T;
+  meta?: T;
   completedAt?: T;
   totalTried?: T;
   hasError?: T;
@@ -1503,12 +1760,20 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         output?: T;
         state?: T;
         error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
         id?: T;
       };
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
+  processingUntil?: T;
+  processingToken?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1646,6 +1911,45 @@ export interface SimpleDraftGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-global".
+ */
+export interface RestoreAccessGlobal {
+  id: string;
+  title: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-no-versions-global".
+ */
+export interface RestoreAccessNoVersionsGlobal {
+  id: string;
+  title: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: string;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
@@ -1746,6 +2050,37 @@ export interface SimpleDraftGlobalSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-global_select".
+ */
+export interface RestoreAccessGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restore-access-no-versions-global_select".
+ */
+export interface RestoreAccessNoVersionsGlobalSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -1767,6 +2102,7 @@ export interface CollectionQueryWidget {
       | 'autosave-posts'
       | 'autosave-with-draft-button-posts'
       | 'autosave-multi-select-posts'
+      | 'nested-array-select'
       | 'autosave-with-validate-posts'
       | 'draft-posts'
       | 'drafts-no-read-versions'
@@ -1784,7 +2120,10 @@ export interface CollectionQueryWidget {
       | 'draft-with-upload-cloud-storage'
       | 'media'
       | 'media2'
-      | 'users';
+      | 'restore-access'
+      | 'restore-access-localized'
+      | 'users'
+      | 'secondary-admin-users';
     where?:
       | {
           [k: string]: unknown;
@@ -1813,6 +2152,7 @@ export interface ActivityWidget {
           | 'autosave-posts'
           | 'autosave-with-draft-button-posts'
           | 'autosave-multi-select-posts'
+          | 'nested-array-select'
           | 'autosave-with-validate-posts'
           | 'draft-posts'
           | 'drafts-no-read-versions'
@@ -1830,7 +2170,10 @@ export interface ActivityWidget {
           | 'draft-with-upload-cloud-storage'
           | 'media'
           | 'media2'
+          | 'restore-access'
+          | 'restore-access-localized'
           | 'users'
+          | 'secondary-admin-users'
         )[]
       | null;
   };
@@ -1858,7 +2201,15 @@ export interface TaskSchedulePublish {
           value: string | DraftPostsWithChangeHook;
         } | null);
     global?: ('draft-global' | 'draft-unlimited-global') | null;
-    user?: (string | null) | User;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: string | User;
+        } | null)
+      | ({
+          relationTo: 'secondary-admin-users';
+          value: string | SecondaryAdminUser;
+        } | null);
   };
   output?: unknown;
 }
