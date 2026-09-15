@@ -37,6 +37,7 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -60,44 +61,39 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-  const {
-    slug,
-    autosave,
-    depth,
-    disableTransaction,
-    draft: draftArg,
-    globalConfig,
-    overrideAccess,
-    overrideLock,
-    populate,
-    publishAllLocales: publishAllLocalesArg,
-    req: { fallbackLocale, locale, payload, payload: { config } = {} },
-    req,
-    select: incomingSelect,
-    showHiddenFields,
-    unpublishAllLocales: unpublishAllLocalesArg,
-  } = args
+  let req = args.req
 
   try {
-    const shouldCommit = !disableTransaction && (await initTransaction(req))
+    const shouldCommit = !args.disableTransaction && (await initTransaction(req))
 
     // /////////////////////////////////////
     // beforeOperation - Global
     // /////////////////////////////////////
 
-    if (globalConfig.hooks?.beforeOperation?.length) {
-      for (const hook of globalConfig.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            context: args.req.context,
-            global: globalConfig,
-            operation: 'update',
-            overrideAccess,
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      global: args.globalConfig,
+      operation: 'update',
+      overrideAccess: args.overrideAccess,
+    })
+
+    req = args.req
+
+    const {
+      slug,
+      autosave,
+      depth,
+      draft: draftArg,
+      globalConfig,
+      overrideAccess,
+      overrideLock,
+      populate,
+      publishAllLocales: publishAllLocalesArg,
+      req: { fallbackLocale, locale, payload, payload: { config } = {} },
+      select: incomingSelect,
+      showHiddenFields,
+      unpublishAllLocales: unpublishAllLocalesArg,
+    } = args
 
     let { data } = args
 
