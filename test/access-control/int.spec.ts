@@ -1445,7 +1445,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
             field: 'restrictedRelatedItems.id' as any,
             overrideAccess: false,
           }),
-        ).rejects.toThrow('The following path cannot be queried: restrictedRelatedItems.id')
+        ).rejects.toThrow(
+          'Field restrictedRelatedItems.id was not found in the collection unrestricted',
+        )
       })
 
       test('should reject distinct paths through unreadable relationship fields', async ({
