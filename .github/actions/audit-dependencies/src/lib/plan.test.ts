@@ -35,7 +35,7 @@ describe('buildPlan', () => {
     })
 
     expect(plan.actions).toEqual([
-      { command: 'pnpm update undici', module: 'undici', type: 'relock' },
+      { command: 'pnpm update -r undici', module: 'undici', type: 'relock' },
     ])
     expect(plan.verify).toBe('pnpm script:audit:deps:monorepo')
   })

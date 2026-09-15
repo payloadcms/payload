@@ -20,7 +20,7 @@ export const buildPlan = ({
     for (const { dependency, fix, workspacePackages } of finding.bumps) {
       if (fix.status === 'relock') {
         relock.set(finding.package, {
-          command: `pnpm update ${finding.package}`,
+          command: `pnpm update -r ${finding.package}`,
           module: finding.package,
           type: 'relock',
         })

@@ -162,10 +162,10 @@ const printBump = ({
     return
   }
   if (fix.status === 'relock') {
-    const range = currentSpec ?? 'current range'
+    const range = currentSpec ?? 'its current range'
     console.log(
-      `  ${dependency} ${range}: no bump needed — already allows a patched ${module}; ` +
-        `refresh lockfile: ${GREEN}pnpm update ${module}${RESET}${where}`,
+      `  refresh lockfile: ${GREEN}pnpm update -r ${module}${RESET} — re-resolves ${module} to a ` +
+        `patched version already permitted by ${dependency} ${range}${where}; no manifest edit needed`,
     )
     return
   }

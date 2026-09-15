@@ -12073,7 +12073,7 @@ const buildPlan = ({ findings, scope, }) => {
         for (const { dependency, fix, workspacePackages } of finding.bumps) {
             if (fix.status === 'relock') {
                 relock.set(finding.package, {
-                    command: `pnpm update ${finding.package}`,
+                    command: `pnpm update -r ${finding.package}`,
                     module: finding.package,
                     type: 'relock',
                 });
@@ -12299,9 +12299,9 @@ const printBump = ({ bump: { currentSpec, dependency, fix, workspacePackages }, 
         return;
     }
     if (fix.status === 'relock') {
-        const range = currentSpec ?? 'current range';
-        console.log(`  ${dependency} ${range}: no bump needed — already allows a patched ${module}; ` +
-            `refresh lockfile: ${GREEN}pnpm update ${module}${RESET}${where}`);
+        const range = currentSpec ?? 'its current range';
+        console.log(`  refresh lockfile: ${GREEN}pnpm update -r ${module}${RESET} — re-resolves ${module} to a ` +
+            `patched version already permitted by ${dependency} ${range}${where}; no manifest edit needed`);
         return;
     }
     const from = currentSpec ? `from ${currentSpec} ` : '';
