@@ -310,7 +310,7 @@ export const updateOperation = async <
     }
 
     const sharedGeneratedFileData =
-      !collectionConfig.upload || overrideAccess
+      !collectionConfig.upload || (overrideAccess && Boolean(req.file))
         ? await generateFileData({
             collection,
             config,
@@ -347,7 +347,7 @@ export const updateOperation = async <
         }
 
         let documentReq = req
-        if (collectionConfig.upload && !overrideAccess) {
+        if (collectionConfig.upload && sharedGeneratedFileData === null) {
           documentReq = isolateObjectProperty(req, ['file', 'payloadUploadSizes'])
           documentReq.file = documentFile
           documentReq.payloadUploadSizes = {}
@@ -367,6 +367,7 @@ export const updateOperation = async <
               localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
             }),
             operation: 'update',
+            originalDoc: docWithLocales,
             overwriteExistingFiles,
             req: documentReq,
             throwOnMissingFile: false,

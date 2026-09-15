@@ -44,10 +44,10 @@ type Result<T> = Promise<{
 }>
 
 const shouldReupload = (
-  uploadEdits: UploadEdits,
+  uploadEdits: undefined | UploadEdits,
   fileData: Record<string, unknown> | undefined,
 ) => {
-  if (!fileData) {
+  if (!fileData || !uploadEdits) {
     return false
   }
 
@@ -105,7 +105,9 @@ export const generateFileData = async <T>({
     data,
     isDuplicating,
     operation,
-    originalDoc,
+    // Only a duplication source informs edit parsing. Updates now also pass `originalDoc` so the
+    // stored file can be reprocessed, and that must not change which edits are applied.
+    originalDoc: isDuplicating ? originalDoc : undefined,
     req,
   })
 
@@ -124,16 +126,18 @@ export const generateFileData = async <T>({
   const staticPath = staticDir
 
   const incomingFileData: Document = isDuplicating ? originalDoc : data
+  const fileSourceData =
+    externalUploadSource ?? (operation === 'update' ? originalDoc : incomingFileData)
   let isLocalFile = false
 
   if (
     !file &&
+    fileSourceData &&
     (externalUploadSource ||
       isDuplicating ||
       shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
   ) {
-    const fileSourceData = externalUploadSource ?? (incomingFileData as unknown as FileData)
-    const { filename, url } = fileSourceData
+    const { filename, url } = fileSourceData as unknown as FileData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
     }
@@ -152,7 +156,7 @@ export const generateFileData = async <T>({
       } else if (filename && url) {
         // File is remote
         file = await getExternalFile({
-          data: fileSourceData,
+          data: fileSourceData as unknown as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
@@ -511,7 +515,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
     // If no change in focal point, return undefined.
     // This prevents a refocal operation triggered from admin, because it always sends the focal point.
-    if (incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+    if (incomingData?.focalX === origDoc.focalX && incomingData?.focalY === origDoc.focalY) {
       return undefined!
     }
 

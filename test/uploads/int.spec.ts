@@ -1453,6 +1453,199 @@ describe('Collections - Uploads', () => {
     })
 
     describe('update', () => {
+      it('should reprocess the existing file when upload metadata changes', async () => {
+        const sourceFile = await getFileByPath(path.resolve(dirname, './small.png'))
+        const targetFile = await getFileByPath(path.resolve(dirname, './image.png'))
+        const uniqueID = randomUUID()
+        sourceFile.name = `source-${uniqueID}.png`
+        targetFile.name = `target-${uniqueID}.png`
+
+        const sourceDoc = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file: sourceFile,
+        })
+        const targetDoc = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file: targetFile,
+        })
+        const targetPath = path.join(dirname, './media', targetDoc.filename)
+        const targetContents = await fs.promises.readFile(targetPath)
+
+        try {
+          const response = await restClient.PATCH(`/${mediaSlug}/${sourceDoc.id}`, {
+            body: JSON.stringify({
+              filename: targetDoc.filename,
+              url: targetDoc.url,
+            }),
+            query: {
+              uploadEdits: {
+                crop: {
+                  height: 50,
+                  unit: '%',
+                  width: 50,
+                  x: 0,
+                  y: 0,
+                },
+                heightInPixels: 40,
+                widthInPixels: 40,
+              },
+            },
+          })
+          const { doc } = await response.json()
+
+          expect((await fs.promises.readFile(targetPath)).equals(targetContents)).toBe(true)
+          expect(response.status).toBe(200)
+          expect(doc.filename).toBe(sourceDoc.filename)
+        } finally {
+          await payload.delete({ collection: mediaSlug, id: sourceDoc.id })
+          await payload.delete({ collection: mediaSlug, id: targetDoc.id })
+        }
+      })
+
+      it('should reprocess existing files during a where-based update', async () => {
+        const sourceFile = await getFileByPath(path.resolve(dirname, './image.png'))
+        sourceFile.name = `where-update-${randomUUID()}.png`
+
+        const sourceDoc = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file: sourceFile,
+        })
+        const sourcePath = path.join(dirname, './media', sourceDoc.filename)
+
+        try {
+          const response = await restClient.PATCH(`/${mediaSlug}`, {
+            body: JSON.stringify({}),
+            query: {
+              uploadEdits: {
+                crop: {
+                  height: 50,
+                  unit: '%',
+                  width: 50,
+                  x: 0,
+                  y: 0,
+                },
+                heightInPixels: 40,
+                widthInPixels: 40,
+              },
+              where: {
+                id: {
+                  equals: sourceDoc.id,
+                },
+              },
+            },
+          })
+          const metadata = await payload.config.sharp!(sourcePath).metadata()
+
+          expect(response.status).toBe(200)
+          expect(metadata).toMatchObject({ height: 40, width: 40 })
+        } finally {
+          await payload.delete({ collection: mediaSlug, id: sourceDoc.id })
+        }
+      })
+
+      it('should isolate upload state for each document in a where-based update', async () => {
+        const observationValue = `request-state-${randomUUID()}`
+        const collectionHooks = payload.collections[mediaSlug].config.hooks
+        const originalBeforeChange = collectionHooks.beforeChange
+        const createdDocIDs: Media['id'][] = []
+        const observedStates: Array<{
+          documentFilename: string
+          requestFilename: string | undefined
+          uploadSizes: Record<string, Buffer> | undefined
+        }> = []
+        let resolveHooksStarted!: () => void
+        const hooksStarted = new Promise<void>((resolve) => {
+          resolveHooksStarted = resolve
+        })
+        let startedHookCount = 0
+        // Adapters that wrap each document in its own transaction process bulk updates one at a
+        // time, so holding the first hook until a second one starts would deadlock there.
+        const processesDocumentsInParallel = !payload.db.bulkOperationsSingleTransaction
+
+        collectionHooks.beforeChange = [
+          ...(originalBeforeChange ?? []),
+          async ({ data, operation, originalDoc, req }) => {
+            if (operation !== 'update' || data.alt !== observationValue) {
+              return data
+            }
+
+            startedHookCount += 1
+            if (startedHookCount === 2) {
+              resolveHooksStarted()
+            }
+            if (processesDocumentsInParallel) {
+              await hooksStarted
+            }
+            observedStates.push({
+              documentFilename: originalDoc.filename,
+              requestFilename: req.file?.name,
+              uploadSizes: req.payloadUploadSizes,
+            })
+            return data
+          },
+        ]
+
+        try {
+          const docs = await Promise.all(
+            ['./small.png', './image.png'].map(async (filePath) => {
+              const file = await getFileByPath(path.resolve(dirname, filePath))
+              file.name = `request-state-${randomUUID()}.png`
+              const doc = await payload.create({
+                collection: mediaSlug,
+                data: {},
+                file,
+              })
+              createdDocIDs.push(doc.id)
+              return doc
+            }),
+          )
+
+          const result = await payload.update({
+            collection: mediaSlug,
+            data: {
+              alt: observationValue,
+            },
+            req: {
+              query: {
+                uploadEdits: {
+                  crop: {
+                    height: 50,
+                    unit: '%',
+                    width: 50,
+                    x: 0,
+                    y: 0,
+                  },
+                  heightInPixels: 40,
+                  widthInPixels: 40,
+                },
+              },
+            },
+            where: {
+              id: {
+                in: docs.map(({ id }) => id),
+              },
+            },
+          })
+
+          expect(result.errors).toEqual([])
+          expect(result.docs).toHaveLength(2)
+          expect(observedStates).toHaveLength(2)
+          for (const state of observedStates) {
+            expect(state.requestFilename).toBe(state.documentFilename)
+            expect(Object.keys(state.uploadSizes ?? {})).toContain('icon')
+          }
+          expect(observedStates[0]?.uploadSizes).not.toBe(observedStates[1]?.uploadSizes)
+        } finally {
+          collectionHooks.beforeChange = originalBeforeChange
+          await Promise.all(
+            createdDocIDs.map((id) => payload.delete({ collection: mediaSlug, id })),
+          )
+        }
+      })
+
       it('should remove existing media on re-upload - by ID', async () => {
         // Create temp file
         const filePath = path.resolve(dirname, './temp.png')

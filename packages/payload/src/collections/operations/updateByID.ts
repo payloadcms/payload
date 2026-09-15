@@ -278,6 +278,7 @@ export const updateByIDOperation = async <
       config,
       data,
       operation: 'update',
+      originalDoc: docWithLocales,
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
