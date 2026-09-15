@@ -325,6 +325,8 @@ export const updateOperation = async <
       collectionConfig,
       config,
       req,
+    }).catch((unlinkError) => {
+      req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
 
     // Process sequentially when using single transaction mode to avoid shared state issues
