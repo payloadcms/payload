@@ -1,0 +1,24 @@
+{
+  "name": "audit-dependencies",
+  "version": "0.0.0",
+  "private": true,
+  "description": "GitHub Action to audit dependencies monorepo-wide or across the consumer-facing (published) surface.",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "pnpm build:typecheck && pnpm build:ncc",
+    "build:ncc": "ncc build src/index.ts -t -o dist",
+    "build:typecheck": "tsc",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "@vercel/ncc": "0.38.1",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0",
+    "yaml": "^2.6.0"
+  }
+}

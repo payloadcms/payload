@@ -1,0 +1,4 @@
+{
+  "$comment": "Advisories intentionally ignored by .github/actions/audit-dependencies. Each entry needs a rationale and an ISO expiry; an expired entry fails the audit so exceptions get re-reviewed. appliesTo is monorepo | consumer | both.",
+  "entries": []
+}
