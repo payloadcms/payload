@@ -51,6 +51,20 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'categories',
       fields: [
         {
+          name: '_status',
+          type: 'select',
+          options: [
+            {
+              label: 'Draft',
+              value: 'draft',
+            },
+            {
+              label: 'Published',
+              value: 'published',
+            },
+          ],
+        },
+        {
           name: 'title',
           type: 'text',
         },
