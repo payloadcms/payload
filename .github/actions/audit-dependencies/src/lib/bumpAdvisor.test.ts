@@ -130,6 +130,52 @@ describe('annotateFindings', () => {
     expect(reported.bumps[0].fix).toEqual({ reason: 'registry', status: 'unknown' })
   })
 
+  it('splits owners declaring the same dependency at different specs into separate bumps', async () => {
+    const mixedIndex: DeclaredIndex = new Map([
+      ['eslint-config', new Map([['@typescript-eslint/parser', '^8.20.0']])],
+      ['eslint-plugin', new Map([['@typescript-eslint/parser', '~8.20.0']])],
+    ])
+    const client = fakeClient({
+      '@typescript-eslint/parser': packument({
+        '8.20.0': { minimatch: '3.0.0' },
+        '8.42.0': { minimatch: '9.0.5' },
+      }),
+      'brace-expansion': packument({ '1.0.0': {}, '2.1.2': {} }),
+      minimatch: packument({
+        '3.0.0': { 'brace-expansion': '1.0.0' },
+        '9.0.5': { 'brace-expansion': '2.1.2' },
+      }),
+    })
+    const mixedFinding = finding({
+      directDeps: [
+        { dependency: '@typescript-eslint/parser', workspacePackage: 'eslint-config' },
+        { dependency: '@typescript-eslint/parser', workspacePackage: 'eslint-plugin' },
+      ],
+    })
+
+    const [reported] = await annotateFindings({
+      client,
+      findings: [mixedFinding],
+      index: mixedIndex,
+    })
+
+    // ^8.20.0 admits 8.42.0 -> relock; ~8.20.0 forbids it -> minimal fix bump.
+    expect(reported.bumps).toEqual([
+      {
+        currentSpec: '^8.20.0',
+        dependency: '@typescript-eslint/parser',
+        fix: { status: 'relock', version: '8.42.0' },
+        workspacePackages: ['eslint-config'],
+      },
+      {
+        currentSpec: '~8.20.0',
+        dependency: '@typescript-eslint/parser',
+        fix: { crossesMajor: false, fromMajor: 8, status: 'fix', toMajor: 8, version: '8.42.0' },
+        workspacePackages: ['eslint-plugin'],
+      },
+    ])
+  })
+
   it('refuses to suggest a bump when the current version is unknown', async () => {
     const emptyIndex: DeclaredIndex = new Map()
     const client = fakeClient({

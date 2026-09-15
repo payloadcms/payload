@@ -11373,64 +11373,54 @@ var semver = __nccwpck_require__(6546);
  * smallest safe bump rather than jumping to latest.
  */
 const annotateFindings = async ({ client, findings, index, }) => Promise.all(findings.map(async ({ directDeps, ...finding }) => {
-    const grouped = groupByDependency(directDeps);
-    const bumps = await Promise.all([...grouped.entries()].map(([dependency, workspacePackages]) => buildBump({
+    const groups = groupByDependencyAndSpec({ directDeps, index });
+    const bumps = await Promise.all(groups.map((group) => buildBump({
         chainPackages: new Set(finding.chainPackages),
         client,
-        dependency,
-        index,
+        group,
         module: finding.package,
         patchedRange: finding.fixed_in,
-        workspacePackages,
     })));
-    return { ...finding, bumps: bumps.sort((a, b) => a.dependency.localeCompare(b.dependency)) };
+    return { ...finding, bumps: bumps.sort(compareBumps) };
 }));
-const groupByDependency = (directDeps) => {
-    const grouped = new Map();
+/**
+ * Groups owners by (dependency, declared spec) so each suggestion targets a single
+ * spec. Owners that declare the same dependency at different ranges get separate
+ * bumps — a version that only relocks one range must not be reported as relocking
+ * a stricter range that still forbids it.
+ */
+const groupByDependencyAndSpec = ({ directDeps, index, }) => {
+    const groups = new Map();
     for (const { dependency, workspacePackage } of directDeps) {
-        const owners = grouped.get(dependency) ?? [];
-        if (workspacePackage && !owners.includes(workspacePackage)) {
-            owners.push(workspacePackage);
+        const spec = workspacePackage ? (index.get(workspacePackage)?.get(dependency) ?? null) : null;
+        const key = `${dependency}\t${spec ?? ''}`;
+        const group = groups.get(key) ?? { dependency, spec, workspacePackages: [] };
+        if (workspacePackage && !group.workspacePackages.includes(workspacePackage)) {
+            group.workspacePackages.push(workspacePackage);
         }
-        grouped.set(dependency, owners.sort());
+        groups.set(key, group);
     }
-    return grouped;
+    for (const group of groups.values()) {
+        group.workspacePackages.sort();
+    }
+    return [...groups.values()];
 };
-const buildBump = async ({ chainPackages, client, dependency, index, module, patchedRange, workspacePackages, }) => {
-    const declared = declaredSpecs({ dependency, index, workspacePackages });
+const compareBumps = (a, b) => a.dependency.localeCompare(b.dependency) ||
+    (a.currentSpec ?? '').localeCompare(b.currentSpec ?? '');
+const buildBump = async ({ chainPackages, client, group, module, patchedRange, }) => {
+    const { dependency, spec, workspacePackages } = group;
+    const min = spec ? (0,semver.minVersion)(spec) : null;
     const fix = await findMinimalFix({
         chainPackages,
         client,
-        currentMajor: declared.currentMajor,
-        currentSpec: declared.currentSpec,
+        currentMajor: min ? (0,semver.major)(min) : null,
+        currentSpec: spec,
         dependency,
-        floorVersion: declared.floorVersion,
+        floorVersion: min?.version ?? null,
         module,
         patchedRange,
     });
-    return { currentSpec: declared.currentSpec, dependency, fix, workspacePackages };
-};
-/** Reads what version(s) of the dependency the owning packages declare (catalog-resolved). */
-const declaredSpecs = ({ dependency, index, workspacePackages, }) => {
-    const specs = new Set();
-    const mins = [];
-    for (const owner of workspacePackages) {
-        const spec = index.get(owner)?.get(dependency);
-        if (!spec) {
-            continue;
-        }
-        specs.add(spec);
-        const min = (0,semver.minVersion)(spec);
-        if (min) {
-            mins.push(min.version);
-        }
-    }
-    const sortedMins = (0,semver.sort)(mins);
-    const floorVersion = sortedMins[0] ?? null;
-    // Highest current major across owners: a fix at that major does not "cross" for anyone already there.
-    const currentMajor = mins.length > 0 ? Math.max(...mins.map((min) => (0,semver.major)(min))) : null;
-    const currentSpec = specs.size === 1 ? [...specs][0] : null;
-    return { currentMajor, currentSpec, floorVersion };
+    return { currentSpec: spec, dependency, fix, workspacePackages };
 };
 const findMinimalFix = async ({ chainPackages, client, currentMajor, currentSpec, dependency, floorVersion, module, patchedRange, }) => {
     if (floorVersion === null) {

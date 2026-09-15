@@ -1,5 +1,12 @@
 import { gte, major, maxSatisfying, minVersion, prerelease, satisfies, sort, valid } from 'semver'
 
+type DependencyGroup = {
+  dependency: string
+  /** The single resolved spec shared by every owner in this group; null when undeclared. */
+  spec: null | string
+  workspacePackages: string[]
+}
+
 import type { Bump, Finding, FixResult, ReportedFinding } from '../types'
 import type { DeclaredIndex } from './packages'
 import type { RegistryClient } from './registry'
@@ -21,97 +28,81 @@ export const annotateFindings = async ({
 }): Promise<ReportedFinding[]> =>
   Promise.all(
     findings.map(async ({ directDeps, ...finding }) => {
-      const grouped = groupByDependency(directDeps)
+      const groups = groupByDependencyAndSpec({ directDeps, index })
       const bumps = await Promise.all(
-        [...grouped.entries()].map(([dependency, workspacePackages]) =>
+        groups.map((group) =>
           buildBump({
             chainPackages: new Set(finding.chainPackages),
             client,
-            dependency,
-            index,
+            group,
             module: finding.package,
             patchedRange: finding.fixed_in,
-            workspacePackages,
           }),
         ),
       )
-      return { ...finding, bumps: bumps.sort((a, b) => a.dependency.localeCompare(b.dependency)) }
+      return { ...finding, bumps: bumps.sort(compareBumps) }
     }),
   )
 
-const groupByDependency = (directDeps: Finding['directDeps']): Map<string, string[]> => {
-  const grouped = new Map<string, string[]>()
+/**
+ * Groups owners by (dependency, declared spec) so each suggestion targets a single
+ * spec. Owners that declare the same dependency at different ranges get separate
+ * bumps — a version that only relocks one range must not be reported as relocking
+ * a stricter range that still forbids it.
+ */
+const groupByDependencyAndSpec = ({
+  directDeps,
+  index,
+}: {
+  directDeps: Finding['directDeps']
+  index: DeclaredIndex
+}): DependencyGroup[] => {
+  const groups = new Map<string, DependencyGroup>()
   for (const { dependency, workspacePackage } of directDeps) {
-    const owners = grouped.get(dependency) ?? []
-    if (workspacePackage && !owners.includes(workspacePackage)) {
-      owners.push(workspacePackage)
+    const spec = workspacePackage ? (index.get(workspacePackage)?.get(dependency) ?? null) : null
+    const key = `${dependency}\t${spec ?? ''}`
+    const group = groups.get(key) ?? { dependency, spec, workspacePackages: [] }
+    if (workspacePackage && !group.workspacePackages.includes(workspacePackage)) {
+      group.workspacePackages.push(workspacePackage)
     }
-    grouped.set(dependency, owners.sort())
+    groups.set(key, group)
   }
-  return grouped
+  for (const group of groups.values()) {
+    group.workspacePackages.sort()
+  }
+  return [...groups.values()]
 }
+
+const compareBumps = (a: Bump, b: Bump): number =>
+  a.dependency.localeCompare(b.dependency) ||
+  (a.currentSpec ?? '').localeCompare(b.currentSpec ?? '')
 
 const buildBump = async ({
   chainPackages,
   client,
-  dependency,
-  index,
+  group,
   module,
   patchedRange,
-  workspacePackages,
 }: {
   chainPackages: Set<string>
   client: RegistryClient
-  dependency: string
-  index: DeclaredIndex
+  group: DependencyGroup
   module: string
   patchedRange: string
-  workspacePackages: string[]
 }): Promise<Bump> => {
-  const declared = declaredSpecs({ dependency, index, workspacePackages })
+  const { dependency, spec, workspacePackages } = group
+  const min = spec ? minVersion(spec) : null
   const fix = await findMinimalFix({
     chainPackages,
     client,
-    currentMajor: declared.currentMajor,
-    currentSpec: declared.currentSpec,
+    currentMajor: min ? major(min) : null,
+    currentSpec: spec,
     dependency,
-    floorVersion: declared.floorVersion,
+    floorVersion: min?.version ?? null,
     module,
     patchedRange,
   })
-  return { currentSpec: declared.currentSpec, dependency, fix, workspacePackages }
-}
-
-/** Reads what version(s) of the dependency the owning packages declare (catalog-resolved). */
-const declaredSpecs = ({
-  dependency,
-  index,
-  workspacePackages,
-}: {
-  dependency: string
-  index: DeclaredIndex
-  workspacePackages: string[]
-}): { currentMajor: null | number; currentSpec: null | string; floorVersion: null | string } => {
-  const specs = new Set<string>()
-  const mins: string[] = []
-  for (const owner of workspacePackages) {
-    const spec = index.get(owner)?.get(dependency)
-    if (!spec) {
-      continue
-    }
-    specs.add(spec)
-    const min = minVersion(spec)
-    if (min) {
-      mins.push(min.version)
-    }
-  }
-
-  const sortedMins = sort(mins)
-  const floorVersion = sortedMins[0] ?? null
-  // Highest current major across owners: a fix at that major does not "cross" for anyone already there.
-  const currentMajor = mins.length > 0 ? Math.max(...mins.map((min) => major(min))) : null
-  const currentSpec = specs.size === 1 ? [...specs][0] : null
-  return { currentMajor, currentSpec, floorVersion }
+  return { currentSpec: spec, dependency, fix, workspacePackages }
 }
 
 const findMinimalFix = async ({
