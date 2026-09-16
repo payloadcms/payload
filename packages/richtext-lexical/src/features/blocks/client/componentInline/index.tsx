@@ -40,6 +40,7 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 export type InlineBlockComponentProps<
@@ -98,20 +99,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       return false
     }
 
-    // Merge current formData values into the cached form state
-    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
-    return Object.fromEntries(
-      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
-        fieldName,
-        fieldName in formData
-          ? {
-              ...fieldState,
-              initialValue: formData[fieldName],
-              value: formData[fieldName],
-            }
-          : fieldState,
-      ]),
-    )
+    return getCachedFormStateIfDataMatches({ cachedFormState, formData })
   })
 
   const hasMounted = useRef(false)
