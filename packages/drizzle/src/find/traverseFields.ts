@@ -404,7 +404,9 @@ export const traverseFields = ({
       case 'tab': {
         const fieldSelect = select?.[field.name]
 
-        if (fieldSelect === false) {
+        // An include-mode select that omits this group must skip it like the blocks branch does,
+        // otherwise it recurses with no select and joins every table inside the group.
+        if (fieldSelect === false || (select && selectMode === 'include' && !fieldSelect)) {
           break
         }
 
