@@ -854,7 +854,7 @@ await payload.update({
 })
 ```
 
-Hierarchy paths are virtual fields computed on read when requested, using the same `version` context as the document. When `locale: 'all'` is requested, localized title or slug fields produce per-locale path maps. Publishing a single locale is appropriate only when intentionally publishing a subset; the non-localized parent change still applies to the document as a whole.
+Hierarchy paths are virtual fields computed on read when requested, using the same `version` context as the document. When `locale: 'all'` is requested for a collection whose `useAsTitle` field is localized, both path fields are returned as per-locale maps. Publishing a single locale is appropriate only when intentionally publishing a subset; the non-localized parent change still applies to the document as a whole.
 
 ## Best Practices
 
