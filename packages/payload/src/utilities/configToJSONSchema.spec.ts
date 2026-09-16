@@ -65,6 +65,87 @@ describe('configToJSONSchema', () => {
     })
   })
 
+  it('should make required fields optional beneath conditional non-data layouts', () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              type: 'row',
+              admin: { condition: () => true },
+              fields: [{ name: 'rowField', type: 'text', required: true }],
+            },
+            {
+              type: 'collapsible',
+              label: 'Conditional collapsible',
+              admin: { condition: () => true },
+              fields: [{ name: 'collapsibleField', type: 'text', required: true }],
+            },
+            {
+              type: 'group',
+              admin: { condition: () => true },
+              fields: [{ name: 'groupField', type: 'text', required: true }],
+            },
+            {
+              type: 'tabs',
+              admin: { condition: () => true },
+              tabs: [
+                {
+                  label: 'Conditional tabs field',
+                  fields: [{ name: 'tabsField', type: 'text', required: true }],
+                },
+                {
+                  name: 'namedTab',
+                  label: 'Named tab beneath conditional tabs',
+                  fields: [{ name: 'namedTabField', type: 'text', required: true }],
+                },
+              ],
+            },
+            {
+              type: 'tabs',
+              tabs: [
+                {
+                  label: 'Conditional unnamed tab',
+                  admin: { condition: () => true },
+                  fields: [{ name: 'unnamedTabField', type: 'text', required: true }],
+                },
+                {
+                  name: 'conditionallyNamedTab',
+                  label: 'Conditional named tab',
+                  admin: { condition: () => true },
+                  fields: [{ name: 'conditionallyNamedTabField', type: 'text', required: true }],
+                },
+              ],
+            },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
+    const testSchema = schema?.$defs?.test as JSONSchema4
+
+    expect(testSchema.required).toStrictEqual(['id'])
+    expect(testSchema.properties?.rowField).toStrictEqual({ type: ['string', 'null'] })
+    expect(testSchema.properties?.collapsibleField).toStrictEqual({ type: ['string', 'null'] })
+    expect(testSchema.properties?.groupField).toStrictEqual({ type: ['string', 'null'] })
+    expect(testSchema.properties?.tabsField).toStrictEqual({ type: ['string', 'null'] })
+    expect(testSchema.properties?.unnamedTabField).toStrictEqual({ type: ['string', 'null'] })
+    expect(testSchema.properties?.namedTab).toMatchObject({
+      required: ['namedTabField'],
+      type: 'object',
+    })
+    expect(testSchema.properties?.conditionallyNamedTab).toMatchObject({
+      required: ['conditionallyNamedTabField'],
+      type: 'object',
+    })
+  })
+
   it('should generate separate input types when generateInputTypes is enabled', () => {
     // @ts-expect-error partial config
     const config: Config = {
