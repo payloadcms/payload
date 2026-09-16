@@ -318,8 +318,8 @@ export const ecommercePlugin = definePlugin<EcommercePluginConfig | undefined>({
     /**
      * Merge plugin translations — only for languages the user has enabled.
      * Plugins run before sanitize, so `supportedLanguages` may be undefined; sanitize will
-     * default it to `{ en }`, so we mirror that here. Plugin-ecommerce translations always
-     * win over user-provided ones for the `plugin-ecommerce` namespace.
+     * default it to `{ en }`, so we mirror that here. User-provided translations for the
+     * `plugin-ecommerce` namespace win over the plugin defaults.
      */
     const supportedLanguageKeys = incomingConfig.i18n?.supportedLanguages
       ? Object.keys(incomingConfig.i18n.supportedLanguages)
@@ -337,7 +337,10 @@ export const ecommercePlugin = definePlugin<EcommercePluginConfig | undefined>({
       >
       incomingConfig.i18n.translations[typedLocale] = {
         ...existing,
-        'plugin-ecommerce': pluginEntry.translations['plugin-ecommerce'],
+        'plugin-ecommerce': {
+          ...pluginEntry.translations['plugin-ecommerce'],
+          ...(existing['plugin-ecommerce'] as object | undefined),
+        },
       } as PluginDefaultTranslationsObject
     }
 
