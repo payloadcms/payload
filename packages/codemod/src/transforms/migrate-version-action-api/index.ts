@@ -17,6 +17,20 @@ type StaticStatus = 'computed' | 'draft' | 'localized' | 'published'
 
 type PublicationAction = 'publish' | 'unpublish'
 
+type GraphqlArgument = {
+  name: string
+  nameStart: number
+  valueEnd: number
+  valueStart: number
+}
+
+type GraphqlFieldArguments = {
+  argsEnd: number
+  argsStart: number
+  fieldName: string
+  fieldStart: number
+}
+
 const READ_METHODS = new Set(['count', 'find', 'findByID', 'findDistinct', 'findGlobal', 'findOne'])
 
 const CREATE_METHODS = new Set(['create', 'duplicate'])
@@ -126,6 +140,13 @@ function rewriteAllLocaleOptionsObject({
 }): boolean {
   const flagProperties = getAllLocaleProperties(options)
   if (flagProperties.length === 0) {
+    return false
+  }
+
+  if (hasUnresolvedObjectOverride(options)) {
+    notes.push(
+      `${filePath}: spread or computed property can override all-locale publication options — set an explicit publication \`action\` and \`locale\` manually.`,
+    )
     return false
   }
 
@@ -239,6 +260,19 @@ function rewriteAllLocaleOptionsObject({
   }
 
   return true
+}
+
+function hasUnresolvedObjectOverride(options: ObjectLiteralExpression): boolean {
+  return options.getProperties().some((property) => {
+    if (Node.isSpreadAssignment(property)) {
+      return true
+    }
+
+    return (
+      Node.isPropertyAssignment(property) &&
+      property.getNameNode().getKind() === SyntaxKind.ComputedPropertyName
+    )
+  })
 }
 
 function getAllLocaleProperties(options: ObjectLiteralExpression): Array<{
@@ -1273,7 +1307,11 @@ function rewriteAllLocaleQuery(text: string, kind: OperationKind): { note?: stri
     }
   }
 
-  const actionMatch = next.match(/\baction=([^&#`'"\s]+)/)
+  let actionMatch = next.match(/\baction=([^&#`'"\s]+)/)
+  if (!actionMatch && activeFlag.action === 'publish' && /\bdraft=false\b/.test(next)) {
+    next = next.replace(/\bdraft=false\b/, 'action=publish')
+    actionMatch = next.match(/\baction=([^&#`'"\s]+)/)
+  }
   if (!actionMatch) {
     return {
       note: `REST \`${activeFlag.name}\` requires an explicit \`action=${activeFlag.action}\` with \`locale=all\` — add both manually.`,
@@ -1392,31 +1430,26 @@ function rewriteGraphqlAllLocaleArgs(text: string): {
 
   let ambiguous = false
   let changed = false
-  const next = text.replace(
-    /\b([a-z_]\w*)\s*\(([^()]*)\)/g,
-    (fieldCall, fieldName: string, args: string, offset: number) => {
-      if (!hasGraphqlAllLocaleArg(args)) {
-        return fieldCall
-      }
+  let next = text
 
-      if (
-        graphqlOperationBefore({ offset, text }) !== 'mutation' ||
-        !/^(?:create|duplicate|update)/i.test(fieldName)
-      ) {
-        ambiguous = true
-        return fieldCall
-      }
+  for (const field of findGraphqlFieldArguments(text).reverse()) {
+    const args = text.slice(field.argsStart, field.argsEnd)
+    if (!hasTopLevelGraphqlAllLocaleArg(args)) {
+      continue
+    }
 
-      const rewritten = rewriteGraphqlPublicationArgs({ args, fieldName })
-      ambiguous ||= rewritten.ambiguous
-      changed ||= rewritten.changed
+    if (
+      graphqlOperationBefore({ offset: field.fieldStart, text }) !== 'mutation' ||
+      !/^(?:create|duplicate|update)/i.test(field.fieldName)
+    ) {
+      ambiguous = true
+      continue
+    }
 
-      return fieldCall.replace(args, rewritten.args)
-    },
-  )
-
-  if (hasGraphqlAllLocaleArg(next)) {
-    ambiguous = true
+    const rewritten = rewriteGraphqlPublicationArgs({ args, fieldName: field.fieldName })
+    ambiguous ||= rewritten.ambiguous
+    changed ||= rewritten.changed
+    next = `${next.slice(0, field.argsStart)}${rewritten.args}${next.slice(field.argsEnd)}`
   }
 
   return { ambiguous, changed, text: next }
@@ -1427,16 +1460,24 @@ function rewriteGraphqlPublicationArgs({ args, fieldName }: { args: string; fiel
   args: string
   changed: boolean
 } {
-  const flagMatches = [...args.matchAll(/\b(publishAllLocales|unpublishAllLocales):\s*([^,}\s]+)/g)]
+  const graphqlArgs = findTopLevelGraphqlArguments(args)
+  const flagArguments = graphqlArgs.filter(
+    ({ name }) => name === 'publishAllLocales' || name === 'unpublishAllLocales',
+  )
   let next = args
   const activeFlags: Array<{ action: PublicationAction; name: string }> = []
 
-  for (const match of flagMatches) {
-    const name = match[1]!
-    const value = match[2]
+  for (const argument of flagArguments) {
+    const name = argument.name
+    const value = args.slice(argument.valueStart, argument.valueEnd)
 
     if (value === 'false') {
-      next = removeGraphqlArgument(next, name, 'false')
+      const currentArgument = findTopLevelGraphqlArguments(next).find(
+        (candidate) => candidate.name === name,
+      )
+      if (currentArgument) {
+        next = removeGraphqlArgument(next, currentArgument)
+      }
       continue
     }
 
@@ -1463,36 +1504,275 @@ function rewriteGraphqlPublicationArgs({ args, fieldName }: { args: string; fiel
     return { ambiguous: true, args: next, changed: next !== args }
   }
 
-  const actionMatch = next.match(/\baction:\s*([^,}\s]+)/)
-  if (!actionMatch) {
+  const currentArguments = findTopLevelGraphqlArguments(next)
+  const actionArgument = currentArguments.find(({ name }) => name === 'action')
+  if (!actionArgument) {
     return { ambiguous: true, args: next, changed: next !== args }
   }
-  if (actionMatch && actionMatch[1] !== activeFlag.action) {
-    return { ambiguous: true, args: next, changed: next !== args }
-  }
-
-  const localeMatch = next.match(/\blocale:\s*([^,}\s]+)/)
-  if (localeMatch?.[1]?.startsWith('$')) {
+  const action = next.slice(actionArgument.valueStart, actionArgument.valueEnd)
+  if (action !== activeFlag.action) {
     return { ambiguous: true, args: next, changed: next !== args }
   }
 
-  if (localeMatch) {
-    next = next.replace(/\blocale:\s*[^,}\s]+/, 'locale: all')
-    next = removeGraphqlArgument(next, activeFlag.name, 'true')
+  const localeArgument = currentArguments.find(({ name }) => name === 'locale')
+  const locale = localeArgument
+    ? next.slice(localeArgument.valueStart, localeArgument.valueEnd)
+    : undefined
+  if (locale?.startsWith('$')) {
+    return { ambiguous: true, args: next, changed: next !== args }
+  }
+
+  if (localeArgument) {
+    next = replaceRange({
+      end: localeArgument.valueEnd,
+      replacement: 'all',
+      start: localeArgument.valueStart,
+      text: next,
+    })
+    const currentFlag = findTopLevelGraphqlArguments(next).find(
+      ({ name }) => name === activeFlag.name,
+    )
+    if (currentFlag) {
+      next = removeGraphqlArgument(next, currentFlag)
+    }
   } else {
-    next = next.replace(new RegExp(`\\b${activeFlag.name}:\\s*true\\b`), `locale: all`)
+    const currentFlag = findTopLevelGraphqlArguments(next).find(
+      ({ name }) => name === activeFlag.name,
+    )
+    if (currentFlag) {
+      next = replaceRange({
+        end: currentFlag.valueEnd,
+        replacement: 'locale: all',
+        start: currentFlag.nameStart,
+        text: next,
+      })
+    }
   }
 
   return { ambiguous: false, args: next, changed: next !== args }
 }
 
-function removeGraphqlArgument(args: string, name: string, value: string): string {
-  const followedByComma = new RegExp(`\\b${name}:\\s*${value}\\s*,\\s*`)
-  if (followedByComma.test(args)) {
-    return args.replace(followedByComma, '')
+function findGraphqlFieldArguments(text: string): GraphqlFieldArguments[] {
+  const fields: GraphqlFieldArguments[] = []
+
+  for (let index = 0; index < text.length; index++) {
+    const skipped = skipGraphqlIgnored({ index, text })
+    if (skipped !== index) {
+      index = skipped - 1
+      continue
+    }
+
+    if (!/[a-z_]/.test(text[index] ?? '')) {
+      continue
+    }
+
+    const fieldStart = index
+    while (/\w/.test(text[index] ?? '')) {
+      index++
+    }
+    const fieldName = text.slice(fieldStart, index)
+    if (fieldName === 'mutation' || fieldName === 'query' || fieldName === 'subscription') {
+      index--
+      continue
+    }
+
+    const openParen = skipGraphqlWhitespace({ index, text })
+    if (text[openParen] !== '(') {
+      index--
+      continue
+    }
+
+    const closeParen = findClosingGraphqlParen({ openParen, text })
+    if (closeParen === undefined) {
+      break
+    }
+
+    fields.push({
+      argsEnd: closeParen,
+      argsStart: openParen + 1,
+      fieldName,
+      fieldStart,
+    })
+    index = closeParen
   }
 
-  return args.replace(new RegExp(`\\s*,\\s*\\b${name}:\\s*${value}\\b`), '')
+  return fields
+}
+
+function findTopLevelGraphqlArguments(args: string): GraphqlArgument[] {
+  const argumentsFound: GraphqlArgument[] = []
+  let bracketDepth = 0
+
+  for (let index = 0; index < args.length; index++) {
+    const skipped = skipGraphqlIgnored({ index, text: args })
+    if (skipped !== index) {
+      index = skipped - 1
+      continue
+    }
+
+    const char = args[index]
+    if (char === '{' || char === '[' || char === '(') {
+      bracketDepth++
+      continue
+    }
+    if (char === '}' || char === ']' || char === ')') {
+      bracketDepth--
+      continue
+    }
+    if (bracketDepth !== 0 || !/[a-z_]/i.test(char ?? '')) {
+      continue
+    }
+
+    const nameStart = index
+    while (/\w/.test(args[index] ?? '')) {
+      index++
+    }
+    const name = args.slice(nameStart, index)
+    const colon = skipGraphqlWhitespace({ index, text: args })
+    if (args[colon] !== ':') {
+      index--
+      continue
+    }
+
+    const valueStart = skipGraphqlWhitespace({ index: colon + 1, text: args })
+    const valueEnd = findGraphqlSimpleValueEnd({ index: valueStart, text: args })
+    argumentsFound.push({ name, nameStart, valueEnd, valueStart })
+    index = valueEnd - 1
+  }
+
+  return argumentsFound
+}
+
+function findGraphqlSimpleValueEnd({ index, text }: { index: number; text: string }): number {
+  if (text.startsWith('"""', index) || text[index] === '"') {
+    return skipGraphqlString({ index, text })
+  }
+
+  let end = index
+  while (/[$\w.-]/.test(text[end] ?? '')) {
+    end++
+  }
+  return end
+}
+
+function findClosingGraphqlParen({
+  openParen,
+  text,
+}: {
+  openParen: number
+  text: string
+}): number | undefined {
+  let depth = 1
+
+  for (let index = openParen + 1; index < text.length; index++) {
+    const skipped = skipGraphqlIgnored({ index, text })
+    if (skipped !== index) {
+      index = skipped - 1
+      continue
+    }
+
+    if (text[index] === '(') {
+      depth++
+    } else if (text[index] === ')') {
+      depth--
+      if (depth === 0) {
+        return index
+      }
+    }
+  }
+
+  return undefined
+}
+
+function skipGraphqlIgnored({ index, text }: { index: number; text: string }): number {
+  if (text.startsWith('"""', index) || text[index] === '"') {
+    return skipGraphqlString({ index, text })
+  }
+
+  if (text[index] === '#') {
+    const newline = text.indexOf('\n', index)
+    return newline === -1 ? text.length : newline
+  }
+
+  return index
+}
+
+function skipGraphqlString({ index, text }: { index: number; text: string }): number {
+  if (text.startsWith('"""', index)) {
+    const end = text.indexOf('"""', index + 3)
+    return end === -1 ? text.length : end + 3
+  }
+
+  for (let cursor = index + 1; cursor < text.length; cursor++) {
+    if (text[cursor] === '\\') {
+      cursor++
+    } else if (text[cursor] === '"') {
+      return cursor + 1
+    }
+  }
+
+  return text.length
+}
+
+function skipGraphqlWhitespace({ index, text }: { index: number; text: string }): number {
+  while (/\s|,/.test(text[index] ?? '')) {
+    index++
+  }
+  return index
+}
+
+function removeGraphqlArgument(args: string, argument: GraphqlArgument): string {
+  const lineStart = args.lastIndexOf('\n', argument.nameStart - 1) + 1
+  const lineEnd = args.indexOf('\n', argument.valueEnd)
+  const lineRemainder = args.slice(argument.valueEnd, lineEnd === -1 ? args.length : lineEnd).trim()
+
+  if (
+    /^\s*$/.test(args.slice(lineStart, argument.nameStart)) &&
+    (lineRemainder === '' || lineRemainder === ',')
+  ) {
+    return replaceRange({
+      end: lineEnd === -1 ? args.length : lineEnd + 1,
+      replacement: '',
+      start: lineStart,
+      text: args,
+    })
+  }
+
+  let end = argument.valueEnd
+  while (/\s/.test(args[end] ?? '')) {
+    end++
+  }
+  if (args[end] === ',') {
+    end++
+    while (/\s/.test(args[end] ?? '')) {
+      end++
+    }
+    return replaceRange({ end, replacement: '', start: argument.nameStart, text: args })
+  }
+
+  let start = argument.nameStart
+  while (/\s/.test(args[start - 1] ?? '')) {
+    start--
+  }
+  if (args[start - 1] === ',') {
+    start--
+  }
+
+  return replaceRange({ end, replacement: '', start, text: args })
+}
+
+function replaceRange({
+  end,
+  replacement,
+  start,
+  text,
+}: {
+  end: number
+  replacement: string
+  start: number
+  text: string
+}): string {
+  return `${text.slice(0, start)}${replacement}${text.slice(end)}`
 }
 
 function enclosingBracket({
@@ -1571,4 +1851,10 @@ function hasAllLocaleQueryParam(value: string): boolean {
 
 function hasGraphqlAllLocaleArg(value: string): boolean {
   return /\b(?:publishAllLocales|unpublishAllLocales):/.test(value)
+}
+
+function hasTopLevelGraphqlAllLocaleArg(value: string): boolean {
+  return findTopLevelGraphqlArguments(value).some(
+    ({ name }) => name === 'publishAllLocales' || name === 'unpublishAllLocales',
+  )
 }

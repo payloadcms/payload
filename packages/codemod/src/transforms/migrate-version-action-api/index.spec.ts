@@ -97,6 +97,42 @@ describe('migrate-version-action-api', () => {
     expect(await apply('all-locales-graphql.input.ts')).toBe(output)
   })
 
+  it('should only rewrite top-level GraphQL operation arguments', async () => {
+    const output = await fixture('all-locales-graphql-nested.output.ts')
+
+    expect(await apply('all-locales-graphql-nested.input.ts')).toBe(output)
+  })
+
+  it('should remove comma-free static false GraphQL operation arguments', async () => {
+    const output = await fixture('all-locales-graphql-comma-free.output.ts')
+
+    expect(await apply('all-locales-graphql-comma-free.input.ts')).toBe(output)
+  })
+
+  it('should complete compatible mixed REST draft and all-locale rewrites in one run', async () => {
+    const output = await fixture('all-locales-mixed-rest.output.ts')
+
+    expect(await apply('all-locales-mixed-rest.input.ts')).toBe(output)
+  })
+
+  it('should not rewrite object options with unresolved spreads or computed properties', async () => {
+    const input = await fixture('all-locales-object-ambiguous.input.ts')
+    const output = await fixture('all-locales-object-ambiguous.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/all-locales-object-ambiguous.ts', input)
+
+    const result = await migrateVersionActionApi.apply({ packageJsons: [], project })
+
+    expect(project.getSourceFileOrThrow('/all-locales-object-ambiguous.ts').getFullText()).toBe(
+      output,
+    )
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([
+      expect.stringContaining('spread or computed property'),
+      expect.stringContaining('spread or computed property'),
+    ])
+  })
+
   it('should drop obsolete draft when static _status already infers the action', async () => {
     const output = await fixture('status.output.ts')
 
@@ -147,6 +183,10 @@ describe('migrate-version-action-api', () => {
       'all-locales.output.ts',
       'all-locales-rest.output.ts',
       'all-locales-graphql.output.ts',
+      'all-locales-graphql-nested.output.ts',
+      'all-locales-graphql-comma-free.output.ts',
+      'all-locales-mixed-rest.output.ts',
+      'all-locales-object-ambiguous.output.ts',
       'all-locales-unsafe.output.ts',
     ]) {
       const output = await fixture(name)

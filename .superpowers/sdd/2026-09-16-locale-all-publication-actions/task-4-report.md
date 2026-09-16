@@ -88,3 +88,65 @@ clean
 
 - Package-wide lint reports six existing warnings in unrelated codemod transforms; it reports zero errors and no warnings in the changed production file.
 - The repository's pnpm launcher attempted an unavailable registry signature check without `--pm-on-fail=ignore`; the local pinned pnpm invocation with that flag completed typecheck and lint successfully.
+
+## Fix round 1
+
+### Implementation
+
+- Replaced the GraphQL publication regex's whole-argument matching with a small structure-aware scanner that:
+  - identifies mutation field argument lists while skipping quoted and block-string contents;
+  - considers only top-level field arguments for `action`, `locale`, and the legacy flags;
+  - preserves nested `data.locale`, nested `data.publishAllLocales`, and matching text inside string values;
+  - removes static false arguments whether GraphQL commas are present or omitted.
+- Added an object safety gate for unresolved spread assignments and computed properties, leaving the object unchanged and emitting a manual-review note because they may override `action`, `locale`, or either legacy flag.
+- Added a compatible mixed REST migration: `draft=false` plus `publishAllLocales=true` on a proven write becomes `action=publish` plus `locale=all` in the same run.
+
+### RED evidence
+
+All reviewer cases were added before production edits and the focused suite failed as expected:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 failed (1)
+Tests       5 failed | 28 passed (33)
+```
+
+The failures were the four new regression tests plus the idempotency loop, which caught the nested-only GraphQL field being rewritten on a second run.
+
+### GREEN evidence
+
+Each regression was run independently after its fix, followed by the full focused suite:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 passed (1)
+Tests       33 passed (33)
+```
+
+```text
+pnpm --pm-on-fail=ignore --filter @payloadcms/codemod typecheck
+$ tsc
+
+node_modules/.bin/eslint packages/codemod/src/transforms/migrate-version-action-api/index.ts
+0 errors, 0 warnings
+```
+
+### Tests and fixtures
+
+- `all-locales-graphql-nested.*` proves only top-level operation arguments change while nested object fields and a string containing legacy-looking text remain byte-for-byte intact.
+- `all-locales-graphql-comma-free.*` proves a false top-level flag is removed from comma-free GraphQL.
+- `all-locales-mixed-rest.*` proves both compatible legacy REST arguments migrate in one run and the output is idempotent.
+- `all-locales-object-ambiguous.*` proves unresolved spreads and computed properties remain unchanged, produce notes, and do not count as changed files.
+- All four outputs were added to the existing idempotency loop.
+
+### Self-review
+
+- Confirmed nested-only GraphQL legacy-looking fields no longer trigger a rewrite or note in a proven Payload operation string.
+- Confirmed GraphQL scanning ignores quoted strings, nested objects, lists, and nested parentheses when locating field argument boundaries.
+- Confirmed object ambiguity is checked before static false removal, preventing partial rewrites when a later override may change effective values.
+- Confirmed the mixed REST path consumes `draft=false` before the existing draft pass, leaving no second-run work.
+- Confirmed the 29 pre-fix tests remain green alongside the four new regressions.
+
+### Concerns
+
+- None specific to the fix round. The GraphQL scanner remains intentionally conservative and only rewrites statically recognizable create/duplicate/update mutation fields in proven Payload GraphQL requests.
