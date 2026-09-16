@@ -63,7 +63,9 @@ const getApiKey = async (
   globalFind: boolean = false,
   globalUpdate: boolean = false,
 ): Promise<string> => {
-  const doc = await payload.create({
+  const apiKey = randomUUID()
+
+  await payload.create({
     collection: 'payload-mcp-api-keys',
     data: {
       enableAPIKey: true,
@@ -73,12 +75,12 @@ const getApiKey = async (
       ...(globalFind || globalUpdate
         ? { siteSettings: { find: globalFind, update: globalUpdate } }
         : {}),
-      apiKey: randomUUID(),
+      apiKey,
       user: userId,
     },
   })
 
-  return doc.apiKey as string
+  return apiKey
 }
 
 describe('@payloadcms/plugin-mcp', () => {
@@ -228,8 +230,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(doc.products?.delete).toBe(false)
       expect(doc.media?.find).toBe(false)
       expect(doc.media?.update).toBe(false)
-      expect(typeof doc.apiKey).toBe('string')
-      expect(doc.apiKey).toHaveLength(36)
+      expect(doc.apiKey).toBeUndefined()
       expect(doc.override).toBe('This field added by overrideApiKeyCollection')
     })
 
@@ -1326,7 +1327,9 @@ describe('@payloadcms/plugin-mcp', () => {
     const createdPageIds: (number | string)[] = []
 
     const getPagesApiKey = async (enableUpdate = false) => {
-      const doc = await payload.create({
+      const apiKey = randomUUID()
+
+      await payload.create({
         collection: 'payload-mcp-api-keys',
         data: {
           enableAPIKey: true,
@@ -1334,11 +1337,12 @@ describe('@payloadcms/plugin-mcp', () => {
           pages: { create: true, find: true, update: enableUpdate, delete: true },
           posts: { create: false, find: false },
           products: { find: false },
-          apiKey: randomUUID(),
+          apiKey,
           user: userId,
         },
       })
-      return doc.apiKey as string
+
+      return apiKey
     }
 
     it('should create a page with a block', async () => {
@@ -2223,7 +2227,9 @@ describe('@payloadcms/plugin-mcp', () => {
     const createdFieldTypeIds: (number | string)[] = []
 
     const getFieldTypesApiKey = async (enableUpdate = false, enableDelete = false) => {
-      const doc = await payload.create({
+      const apiKey = randomUUID()
+
+      await payload.create({
         collection: 'payload-mcp-api-keys',
         data: {
           enableAPIKey: true,
@@ -2234,11 +2240,12 @@ describe('@payloadcms/plugin-mcp', () => {
             update: enableUpdate,
             delete: enableDelete,
           },
-          apiKey: randomUUID(),
+          apiKey,
           user: userId,
         },
       })
-      return doc.apiKey as string
+
+      return apiKey
     }
 
     describe('Schema validation', () => {

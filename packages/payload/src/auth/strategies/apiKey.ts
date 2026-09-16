@@ -69,6 +69,7 @@ export const APIKeyAuthentication =
 
         if (userQuery.docs && userQuery.docs.length > 0) {
           const user = userQuery.docs[0]
+
           user!.collection = collectionConfig.slug
           user!._strategy = 'api-key'
 

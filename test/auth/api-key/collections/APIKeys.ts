@@ -1,15 +1,29 @@
 import type { CollectionConfig } from 'payload'
 
-import { apiKeysSlug, restrictedRelationshipsSlug } from '../shared.js'
+import { adminUsersSlug, apiKeysSlug, restrictedRelationshipsSlug } from '../shared.js'
 
 export const APIKeys: CollectionConfig = {
   slug: apiKeysSlug,
+  access: {
+    update: ({ req }) =>
+      req.user?.collection === adminUsersSlug && req.user.canUpdateAPIKeys === true,
+  },
   auth: {
     depth: 1,
     disableLocalStrategy: true,
     useAPIKey: true,
   },
   fields: [
+    {
+      name: 'apiKey',
+      type: 'text',
+      access: {
+        create: ({ req }) =>
+          req.user?.collection === adminUsersSlug && req.user.canManageAPIKeys === true,
+        update: ({ req }) =>
+          req.user?.collection === adminUsersSlug && req.user.canManageAPIKeys === true,
+      },
+    },
     {
       name: 'restrictedField',
       type: 'text',
@@ -28,6 +42,8 @@ export const APIKeys: CollectionConfig = {
       ({ doc, req }) => ({
         ...doc,
         authReadHookFallbackLocale: req.fallbackLocale,
+        authReadHookHasAPIKey: Object.prototype.hasOwnProperty.call(doc, 'apiKey'),
+        authReadHookHasAPIKeyIndex: Object.prototype.hasOwnProperty.call(doc, 'apiKeyIndex'),
         authReadHookLocale: req.locale,
         authReadHookRan: doc.restrictedField === 'restricted value',
         authReadHookRelationshipValue:
@@ -36,5 +52,13 @@ export const APIKeys: CollectionConfig = {
             : undefined,
       }),
     ],
+    beforeRead: [
+      ({ doc }) => ({
+        ...doc,
+        authBeforeReadHookHasAPIKey: Object.prototype.hasOwnProperty.call(doc, 'apiKey'),
+        authBeforeReadHookHasAPIKeyIndex: Object.prototype.hasOwnProperty.call(doc, 'apiKeyIndex'),
+      }),
+    ],
   },
+  versions: true,
 }

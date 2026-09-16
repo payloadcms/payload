@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { restrictedRelationshipsSlug } from '../shared.js'
+import { apiKeysSlug, restrictedRelationshipsSlug } from '../shared.js'
 
 export const RestrictedRelationships: CollectionConfig = {
   slug: restrictedRelationshipsSlug,
@@ -12,6 +12,11 @@ export const RestrictedRelationships: CollectionConfig = {
     }),
   },
   fields: [
+    {
+      name: 'apiKeyOwner',
+      type: 'relationship',
+      relationTo: apiKeysSlug,
+    },
     {
       name: 'isPublic',
       type: 'checkbox',

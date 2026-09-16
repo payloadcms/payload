@@ -18,7 +18,6 @@ import { v4 as uuid } from 'uuid'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-import type { ApiKey } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
@@ -848,15 +847,16 @@ describe('Auth', () => {
 
         const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            Authorization: `${slug} API-Key ${user?.apiKey}`,
+            Authorization: `${slug} API-Key ${apiKey}`,
           },
         })
 
         const data = await response.json()
 
         expect(response.status).toBe(200)
+        expect(data.user.id).toStrictEqual(user.id)
         expect(data.user.email).toBeDefined()
-        expect(data.user.apiKey).toStrictEqual(apiKey)
+        expect(data.user).not.toHaveProperty('apiKey')
       })
 
       it('should refresh a token and reset its expiration', async () => {
@@ -1002,7 +1002,7 @@ describe('Auth', () => {
         expect(raw?.apiKey).not.toContain('-') // still ciphertext
       })
 
-      it('returns a user with decrypted apiKey after refresh', async () => {
+      it('omits apiKey after refresh', async () => {
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
@@ -1014,7 +1014,7 @@ describe('Auth', () => {
           })
           .then((r) => r.json())
 
-        expect(res.user.apiKey).toMatch(/[0-9a-f-]{36}/) // UUID string
+        expect(res.user).not.toHaveProperty('apiKey')
       })
 
       it('should allow a user to be created', async () => {
@@ -2042,42 +2042,48 @@ describe('Auth', () => {
 
   describe('API Key', () => {
     it('should authenticate via the correct API key user', async () => {
-      const usersQuery = await payload.find({
+      const firstAPIKey = uuid()
+      const secondAPIKey = uuid()
+      const user1 = await payload.create({
         collection: apiKeysSlug,
+        data: { apiKey: firstAPIKey, enableAPIKey: true },
       })
-
-      const [user1, user2] = usersQuery.docs
+      const user2 = await payload.create({
+        collection: apiKeysSlug,
+        data: { apiKey: secondAPIKey, enableAPIKey: true },
+      })
 
       const success = await restClient
         .GET(`/${apiKeysSlug}/${user2.id}`, {
           headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${secondAPIKey}`,
           },
         })
         .then((res) => res.json())
 
-      expect(success.apiKey).toStrictEqual(user2.apiKey)
+      expect(success.id).toStrictEqual(user2.id)
+      expect(success).not.toHaveProperty('apiKey')
 
       const fail = await restClient.GET(`/${apiKeysSlug}/${user1.id}`, {
         headers: {
-          Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
+          Authorization: `${apiKeysSlug} API-Key ${secondAPIKey}`,
         },
       })
 
       expect(fail.status).toStrictEqual(404)
+
+      await payload.delete({ id: user1.id, collection: apiKeysSlug })
+      await payload.delete({ id: user2.id, collection: apiKeysSlug })
     })
 
     it('should allow authentication with an API key saved with sha1', async () => {
-      const usersQuery = await payload.find({
+      const apiKey = uuid()
+      const user = await payload.create({
         collection: apiKeysSlug,
+        data: { apiKey, enableAPIKey: true },
       })
 
-      const [user] = usersQuery.docs as [ApiKey]
-
-      const sha1Index = crypto
-        .createHmac('sha256', payload.secret)
-        .update(user.apiKey as string)
-        .digest('hex')
+      const sha1Index = crypto.createHmac('sha1', payload.secret).update(apiKey).digest('hex')
 
       await payload.db.updateOne({
         id: user.id,
@@ -2090,12 +2096,15 @@ describe('Auth', () => {
       const response = await restClient
         .GET(`/${apiKeysSlug}/${user?.id}`, {
           headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user?.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
         })
         .then((res) => res.json())
 
       expect(response.id).toStrictEqual(user.id)
+      expect(response).not.toHaveProperty('apiKey')
+
+      await payload.delete({ id: user.id, collection: apiKeysSlug })
     })
 
     it('should not remove an API key from a user when updating other fields', async () => {
@@ -2115,6 +2124,14 @@ describe('Auth', () => {
           enableAPIKey: true,
         },
       })
+      const storedUser = await payload.db.findOne({
+        collection: apiKeysSlug,
+        where: {
+          id: {
+            equals: user.id,
+          },
+        },
+      })
 
       const userResult = await payload.find({
         collection: apiKeysSlug,
@@ -2124,9 +2141,47 @@ describe('Auth', () => {
           },
         },
       })
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
-      expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
+      expect(updatedUser).not.toHaveProperty('apiKey')
+      expect(payload.decrypt(storedUser?.apiKey as string)).toBe(apiKey)
+      expect(userResult.docs[0]).not.toHaveProperty('apiKey')
+      expect(response.user.id).toStrictEqual(user.id)
+    })
+
+    it('should preserve an API key when enableAPIKey is null', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          enableAPIKey: null,
+        },
+      })
+
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.user.id).toStrictEqual(user.id)
     })
 
     it('should disable api key after updating apiKey: null', async () => {
@@ -2156,7 +2211,37 @@ describe('Auth', () => {
         })
         .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toBeNull()
+      expect(updatedUser).not.toHaveProperty('apiKey')
+      expect(response.user).toBeNull()
+    })
+
+    it('should disable api key after updating apiKey to an empty string', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          apiKey: '',
+        },
+      })
+
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updatedUser).not.toHaveProperty('apiKey')
       expect(response.user).toBeNull()
     })
 
@@ -2187,7 +2272,7 @@ describe('Auth', () => {
         })
         .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toStrictEqual(apiKey)
+      expect(updatedUser).not.toHaveProperty('apiKey')
       expect(response.user).toBeNull()
     })
   })
