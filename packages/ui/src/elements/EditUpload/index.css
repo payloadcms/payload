@@ -10,7 +10,6 @@
     display: flex;
     flex-direction: column;
     overflow: visible;
-    border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
 
   .edit-upload__content {
