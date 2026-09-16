@@ -79,6 +79,24 @@ describe('migrate-version-action-api', () => {
     expect(await apply('graphql.input.ts')).toBe(output)
   })
 
+  it('should rewrite static Local API and SDK all-locale publication flags', async () => {
+    const output = await fixture('all-locales.output.ts')
+
+    expect(await apply('all-locales.input.ts')).toBe(output)
+  })
+
+  it('should rewrite static REST all-locale publication flags', async () => {
+    const output = await fixture('all-locales-rest.output.ts')
+
+    expect(await apply('all-locales-rest.input.ts')).toBe(output)
+  })
+
+  it('should rewrite static GraphQL all-locale publication flags', async () => {
+    const output = await fixture('all-locales-graphql.output.ts')
+
+    expect(await apply('all-locales-graphql.input.ts')).toBe(output)
+  })
+
   it('should drop obsolete draft when static _status already infers the action', async () => {
     const output = await fixture('status.output.ts')
 
@@ -126,6 +144,10 @@ describe('migrate-version-action-api', () => {
       'status.output.ts',
       'alias.output.ts',
       'strict-draft-types-false.output.ts',
+      'all-locales.output.ts',
+      'all-locales-rest.output.ts',
+      'all-locales-graphql.output.ts',
+      'all-locales-unsafe.output.ts',
     ]) {
       const output = await fixture(name)
 
@@ -224,6 +246,30 @@ describe('migrate-version-action-api', () => {
     ])
   })
 
+  it('should not guess dynamic, conflicting, detached, or ambiguous all-locale publication intent', async () => {
+    const input = await fixture('all-locales-unsafe.input.ts')
+    const output = await fixture('all-locales-unsafe.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/all-locales-unsafe.ts', input)
+
+    const result = await migrateVersionActionApi.apply({ packageJsons: [], project })
+
+    expect(project.getSourceFileOrThrow('/all-locales-unsafe.ts').getFullText()).toBe(output)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([
+      expect.stringContaining('dynamic `publishAllLocales`'),
+      expect.stringContaining('dynamic `locale`'),
+      expect.stringContaining('conflicting all-locale publication flags'),
+      expect.stringContaining('conflicting `action` and `publishAllLocales`'),
+      expect.stringContaining('requires an explicit `publish` action'),
+      expect.stringContaining('REST all-locale publication query without enough operation context'),
+      expect.stringContaining(
+        'GraphQL all-locale publication argument without enough operation context',
+      ),
+      expect.stringContaining('detached options object with all-locale publication flags'),
+    ])
+  })
+
   it('should not rewrite localized or computed _status combinations and emits a note', async () => {
     const input = await fixture('localized-status.input.ts')
 
@@ -244,13 +290,17 @@ describe('migrate-version-action-api', () => {
 
   it('should report exact filesChanged for rewritten files only', async () => {
     const read = await fixture('read.input.ts')
+    const allLocales = await fixture('all-locales.input.ts')
+    const unsafeAllLocales = await fixture('all-locales-unsafe.input.ts')
     const untouched = await fixture('already-migrated.input.ts')
     const result = await applyProject({
+      '/all-locales.ts': allLocales,
+      '/all-locales-unsafe.ts': unsafeAllLocales,
       '/migrated.ts': untouched,
       '/posts.ts': read,
     })
 
-    expect(result.filesChanged).toEqual(['/posts.ts'])
+    expect(result.filesChanged).toEqual(['/all-locales.ts', '/posts.ts'])
   })
 
   it('should not touch the filesystem', async () => {

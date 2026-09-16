@@ -3,6 +3,7 @@ import type {
   Node as MorphNode,
   ObjectLiteralExpression,
   PropertyAssignment,
+  ShorthandPropertyAssignment,
   SourceFile,
 } from 'ts-morph'
 
@@ -13,6 +14,8 @@ import type { Transform } from '../../types.js'
 type OperationKind = 'create' | 'read' | 'restore' | 'update'
 
 type StaticStatus = 'computed' | 'draft' | 'localized' | 'published'
+
+type PublicationAction = 'publish' | 'unpublish'
 
 const READ_METHODS = new Set(['count', 'find', 'findByID', 'findDistinct', 'findGlobal', 'findOne'])
 
@@ -36,6 +39,10 @@ export const migrateVersionActionApi: Transform = {
         mutated = true
       }
 
+      if (rewriteAllLocaleStrings({ filePath, notes, sourceFile })) {
+        mutated = true
+      }
+
       if (rewriteStrictDraftTypes({ filePath, notes, sourceFile })) {
         mutated = true
       }
@@ -45,6 +52,7 @@ export const migrateVersionActionApi: Transform = {
       }
 
       noteUnhandledDraftOptions({ filePath, notes, sourceFile })
+      noteUnhandledAllLocaleOptions({ filePath, notes, sourceFile })
 
       if (mutated) {
         filesChanged.add(filePath)
@@ -57,7 +65,7 @@ export const migrateVersionActionApi: Transform = {
     }
   },
   description:
-    'Rewrites leftover `draft` operation options to `version` on reads and `action` on writes, removes `typescript.strictDraftTypes`, and rewrites unambiguous REST/GraphQL `draft` arguments. Emits notes for update `draft: false` without static `_status`, dynamic values, detached options, wrappers, conflicts, ambiguous strings/URLs, localized/computed `_status`, and `strictDraftTypes: false`.',
+    "Rewrites leftover `draft` operation options to `version` on reads and `action` on writes, replaces static all-locale publication flags with `locale: 'all'`, removes `typescript.strictDraftTypes`, and rewrites unambiguous REST/GraphQL arguments. Emits notes for dynamic values, detached options, wrappers, conflicts, ambiguous strings/URLs, localized/computed `_status`, and `strictDraftTypes: false`.",
 }
 
 function rewriteCallOptions({
@@ -81,6 +89,11 @@ function rewriteCallOptions({
           `${filePath}: wrapper or unclassified call with \`draft\` could not be mapped — set \`version\` or \`action\` at the Payload operation call site.`,
         )
       }
+      if (options && hasAllLocaleProperty(options) && looksLikeOperationOptions(options)) {
+        notes.push(
+          `${filePath}: wrapper or unclassified call with all-locale publication flags could not be mapped — set an explicit publication \`action\` and \`locale\` at the Payload operation call site.`,
+        )
+      }
       continue
     }
 
@@ -91,9 +104,171 @@ function rewriteCallOptions({
     if (rewriteOptionsObject({ filePath, kind, notes, options })) {
       mutated = true
     }
+
+    if (rewriteAllLocaleOptionsObject({ filePath, kind, notes, options })) {
+      mutated = true
+    }
   }
 
   return mutated
+}
+
+function rewriteAllLocaleOptionsObject({
+  filePath,
+  kind,
+  notes,
+  options,
+}: {
+  filePath: string
+  kind: OperationKind
+  notes: string[]
+  options: ObjectLiteralExpression
+}): boolean {
+  const flagProperties = getAllLocaleProperties(options)
+  if (flagProperties.length === 0) {
+    return false
+  }
+
+  let mutated = false
+  let hasDynamicFlag = false
+  const activeFlags: Array<{
+    action: PublicationAction
+    name: string
+    property: PropertyAssignment
+  }> = []
+
+  for (const { name, action, property } of flagProperties) {
+    if (!Node.isPropertyAssignment(property)) {
+      hasDynamicFlag = true
+      notes.push(
+        `${filePath}: dynamic \`${name}\` value cannot be rewritten safely — use an explicit publication \`action\` and \`locale\` manually.`,
+      )
+      continue
+    }
+
+    const value = getStaticBoolean(property.getInitializer())
+
+    if (value === false) {
+      property.remove()
+      mutated = true
+      continue
+    }
+
+    if (value === undefined) {
+      hasDynamicFlag = true
+      notes.push(
+        `${filePath}: dynamic \`${name}\` value cannot be rewritten safely — use an explicit publication \`action\` and \`locale\` manually.`,
+      )
+      continue
+    }
+
+    activeFlags.push({ name, action, property })
+  }
+
+  if (activeFlags.length > 1) {
+    notes.push(
+      `${filePath}: conflicting all-locale publication flags — choose an explicit \`publish\` or \`unpublish\` action with \`locale: 'all'\` manually.`,
+    )
+    return mutated
+  }
+
+  if (hasDynamicFlag) {
+    return mutated
+  }
+
+  const activeFlag = activeFlags[0]
+  if (!activeFlag) {
+    return mutated
+  }
+
+  if (
+    kind === 'read' ||
+    kind === 'restore' ||
+    (activeFlag.action === 'unpublish' && kind === 'create')
+  ) {
+    notes.push(
+      `${filePath}: \`${activeFlag.name}\` is not valid for the detected operation — set an explicit publication \`action\` and \`locale\` manually.`,
+    )
+    return mutated
+  }
+
+  const actionProperty = options.getProperty('action')
+  const actionAssignment = getNamedPropertyAssignment(options, 'action')
+  const action = getStaticString(actionAssignment?.getInitializer())
+
+  if (actionProperty && action === undefined) {
+    notes.push(
+      `${filePath}: dynamic \`action\` combined with \`${activeFlag.name}\` cannot be rewritten safely — set the publication action and \`locale: 'all'\` manually.`,
+    )
+    return mutated
+  }
+
+  if (action && action !== activeFlag.action) {
+    notes.push(
+      `${filePath}: conflicting \`action\` and \`${activeFlag.name}\` values — choose an explicit publication action with \`locale: 'all'\` manually.`,
+    )
+    return mutated
+  }
+
+  const localeProperty = options.getProperty('locale')
+  const localeAssignment = getNamedPropertyAssignment(options, 'locale')
+  const locale = getStaticString(localeAssignment?.getInitializer())
+
+  if (localeProperty && locale === undefined) {
+    notes.push(
+      `${filePath}: dynamic \`locale\` combined with \`${activeFlag.name}\` cannot be rewritten safely — set the publication action and locale manually.`,
+    )
+    return mutated
+  }
+
+  if (!actionProperty) {
+    notes.push(
+      `${filePath}: \`${activeFlag.name}\` requires an explicit \`${activeFlag.action}\` action with \`locale: 'all'\` — add both manually.`,
+    )
+    return mutated
+  }
+
+  if (localeAssignment) {
+    localeAssignment.setInitializer("'all'")
+    activeFlag.property.remove()
+  } else {
+    activeFlag.property.set({
+      name: 'locale',
+      initializer: "'all'",
+    })
+  }
+
+  return true
+}
+
+function getAllLocaleProperties(options: ObjectLiteralExpression): Array<{
+  action: PublicationAction
+  name: string
+  property: PropertyAssignment | ShorthandPropertyAssignment
+}> {
+  const properties: Array<{
+    action: PublicationAction
+    name: string
+    property: PropertyAssignment | ShorthandPropertyAssignment
+  }> = []
+
+  for (const [name, action] of [
+    ['publishAllLocales', 'publish'],
+    ['unpublishAllLocales', 'unpublish'],
+  ] as const) {
+    const property = getNamedPropertyAssignment(options, name)
+    if (property) {
+      properties.push({ name, action, property })
+      continue
+    }
+
+    const shorthand = options.getProperty(name)
+    if (shorthand && Node.isShorthandPropertyAssignment(shorthand)) {
+      properties.push({ name, action, property: shorthand })
+    }
+  }
+
+  return properties
 }
 
 function rewriteOptionsObject({
@@ -366,6 +541,115 @@ function rewriteStringDrafts({
   return mutated
 }
 
+function rewriteAllLocaleStrings({
+  filePath,
+  notes,
+  sourceFile,
+}: {
+  filePath: string
+  notes: string[]
+  sourceFile: SourceFile
+}): boolean {
+  let mutated = false
+  const handled = new Set<MorphNode>()
+
+  for (const call of sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    if (getCallMethodName(call) !== 'fetch') {
+      continue
+    }
+
+    const urlArg = call.getArguments()[0]
+    if (!urlArg || !isStringLike(urlArg)) {
+      continue
+    }
+
+    if (!isPayloadRestUrl({ node: urlArg })) {
+      if (hasAllLocaleQueryParam(getStringLikeText({ node: urlArg }))) {
+        notes.push(
+          `${filePath}: REST all-locale publication query without enough operation context — replace it with an explicit publication \`action\` and \`locale=all\` manually.`,
+        )
+      }
+      handled.add(urlArg)
+      continue
+    }
+
+    const rewritten = rewriteAllLocaleQuery(urlArg.getText(), getFetchOperationKind(call))
+
+    if (rewritten.note) {
+      notes.push(`${filePath}: ${rewritten.note}`)
+    }
+
+    if (rewritten.text !== urlArg.getText()) {
+      urlArg.replaceWithText(rewritten.text)
+      mutated = true
+    }
+
+    handled.add(urlArg)
+
+    if (isPayloadGraphqlUrl({ node: urlArg })) {
+      const initArg = call.getArguments()[1]
+      if (initArg) {
+        for (const literal of getStringLikeDescendants({ node: initArg })) {
+          const rewrittenGraphql = rewriteGraphqlAllLocaleArgs(literal.getText())
+          if (rewrittenGraphql.changed) {
+            literal.replaceWithText(rewrittenGraphql.text)
+            mutated = true
+          }
+          if (rewrittenGraphql.ambiguous) {
+            notes.push(
+              `${filePath}: GraphQL all-locale publication argument could not be rewritten safely — use an explicit publication \`action\` and \`locale: all\` manually.`,
+            )
+          }
+          handled.add(literal)
+        }
+      }
+    }
+  }
+
+  for (const literal of [
+    ...sourceFile.getDescendantsOfKind(SyntaxKind.StringLiteral),
+    ...sourceFile.getDescendantsOfKind(SyntaxKind.NoSubstitutionTemplateLiteral),
+  ]) {
+    if (handled.has(literal) || literal.wasForgotten()) {
+      continue
+    }
+
+    if (Node.isTaggedTemplateExpression(literal.getParent())) {
+      continue
+    }
+
+    const rewrittenGraphql = rewriteGraphqlAllLocaleArgs(literal.getText())
+    if (rewrittenGraphql.changed || rewrittenGraphql.ambiguous) {
+      notes.push(
+        `${filePath}: GraphQL all-locale publication argument without enough operation context — replace it with an explicit publication \`action\` and \`locale: all\` manually.`,
+      )
+      continue
+    }
+
+    if (hasAllLocaleQueryParam(literal.getLiteralText())) {
+      notes.push(
+        `${filePath}: REST all-locale publication query without enough operation context — replace it with an explicit publication \`action\` and \`locale=all\` manually.`,
+      )
+    }
+  }
+
+  for (const tagged of sourceFile.getDescendantsOfKind(SyntaxKind.TaggedTemplateExpression)) {
+    const tagName = tagged.getTag().getText()
+    if (tagName !== 'gql' && tagName !== 'graphql' && !tagName.endsWith('.gql')) {
+      continue
+    }
+
+    const rewrittenGraphql = rewriteGraphqlAllLocaleArgs(tagged.getTemplate().getText())
+    if (rewrittenGraphql.changed || rewrittenGraphql.ambiguous) {
+      notes.push(
+        `${filePath}: GraphQL all-locale publication argument without enough operation context — replace it with an explicit publication \`action\` and \`locale: all\` manually.`,
+      )
+    }
+  }
+
+  return mutated
+}
+
 function isPayloadRestUrl({ node }: { node: MorphNode }): boolean {
   if (!Node.isTemplateExpression(node)) {
     return false
@@ -443,6 +727,31 @@ function noteUnhandledDraftOptions({
         `${filePath}: detached options object with \`draft\` is not at a Payload call site — inline it or set \`version\`/\`action\` on the call.`,
       )
     }
+  }
+}
+
+function noteUnhandledAllLocaleOptions({
+  filePath,
+  notes,
+  sourceFile,
+}: {
+  filePath: string
+  notes: string[]
+  sourceFile: SourceFile
+}): void {
+  for (const options of sourceFile.getDescendantsOfKind(SyntaxKind.ObjectLiteralExpression)) {
+    if (
+      !hasAllLocaleProperty(options) ||
+      isInsideDataObject(options) ||
+      isCallOptionsObject(options) ||
+      !looksLikeOperationOptions(options)
+    ) {
+      continue
+    }
+
+    notes.push(
+      `${filePath}: detached options object with all-locale publication flags is not at a Payload call site — inline it or set an explicit publication \`action\` and \`locale\` on the call.`,
+    )
   }
 }
 
@@ -696,6 +1005,10 @@ function hasDraftProperty(obj: ObjectLiteralExpression): boolean {
   return obj.getProperty('draft') !== undefined
 }
 
+function hasAllLocaleProperty(obj: ObjectLiteralExpression): boolean {
+  return Boolean(obj.getProperty('publishAllLocales') || obj.getProperty('unpublishAllLocales'))
+}
+
 function looksLikeOperationOptions(obj: ObjectLiteralExpression): boolean {
   if (obj.getProperty('collection')) {
     return true
@@ -715,6 +1028,19 @@ function isCallOptionsObject(obj: ObjectLiteralExpression): boolean {
 
 function isInsideDataProperty(prop: PropertyAssignment): boolean {
   let current: MorphNode | undefined = prop.getParent()
+
+  while (current) {
+    if (Node.isPropertyAssignment(current) && current.getName() === 'data') {
+      return true
+    }
+    current = current.getParent()
+  }
+
+  return false
+}
+
+function isInsideDataObject(options: ObjectLiteralExpression): boolean {
+  let current: MorphNode | undefined = options.getParent()
 
   while (current) {
     if (Node.isPropertyAssignment(current) && current.getName() === 'data') {
@@ -784,6 +1110,19 @@ function getStaticBoolean(node: MorphNode | undefined): boolean | undefined {
   }
   if (inner.getKind() === SyntaxKind.FalseKeyword) {
     return false
+  }
+
+  return undefined
+}
+
+function getStaticString(node: MorphNode | undefined): string | undefined {
+  const inner = unwrap(node)
+  if (!inner) {
+    return undefined
+  }
+
+  if (Node.isStringLiteral(inner) || Node.isNoSubstitutionTemplateLiteral(inner)) {
+    return inner.getLiteralValue()
   }
 
   return undefined
@@ -884,6 +1223,95 @@ function rewriteQueryDraft(text: string, kind: OperationKind): { note?: string; 
   }
 }
 
+function rewriteAllLocaleQuery(text: string, kind: OperationKind): { note?: string; text: string } {
+  const flagMatches = [...text.matchAll(/\b(publishAllLocales|unpublishAllLocales)=([^&#`'"\s]+)/g)]
+  if (flagMatches.length === 0) {
+    return { text }
+  }
+
+  let next = text
+  const activeFlags: Array<{ action: PublicationAction; name: string }> = []
+
+  for (const match of flagMatches) {
+    const name = match[1]!
+    const value = match[2]
+
+    if (value === 'false') {
+      next = removeQueryParam(next, name, 'false')
+      continue
+    }
+
+    if (value !== 'true') {
+      return {
+        note: `dynamic \`${name}\` REST query cannot be rewritten safely — use an explicit publication \`action\` and \`locale=all\` manually.`,
+        text: next,
+      }
+    }
+
+    activeFlags.push({
+      name,
+      action: name === 'publishAllLocales' ? 'publish' : 'unpublish',
+    })
+  }
+
+  if (activeFlags.length > 1) {
+    return {
+      note: 'conflicting all-locale publication REST query flags — choose an explicit publication `action` with `locale=all` manually.',
+      text: next,
+    }
+  }
+
+  const activeFlag = activeFlags[0]
+  if (!activeFlag) {
+    return { text: next }
+  }
+
+  if (kind === 'read' || (activeFlag.action === 'unpublish' && kind !== 'update')) {
+    return {
+      note: `REST \`${activeFlag.name}\` query is not valid for the detected operation — set an explicit publication \`action\` and \`locale=all\` manually.`,
+      text: next,
+    }
+  }
+
+  const actionMatch = next.match(/\baction=([^&#`'"\s]+)/)
+  if (!actionMatch) {
+    return {
+      note: `REST \`${activeFlag.name}\` requires an explicit \`action=${activeFlag.action}\` with \`locale=all\` — add both manually.`,
+      text: next,
+    }
+  }
+  if (actionMatch && actionMatch[1] !== activeFlag.action) {
+    return {
+      note: `conflicting REST \`action\` and \`${activeFlag.name}\` values — choose an explicit publication action with \`locale=all\` manually.`,
+      text: next,
+    }
+  }
+
+  const localeMatch = next.match(/\blocale=([^&#`'"\s]+)/)
+  if (localeMatch?.[1]?.includes('${')) {
+    return {
+      note: `dynamic REST \`locale\` combined with \`${activeFlag.name}\` cannot be rewritten safely — set the publication action and locale manually.`,
+      text: next,
+    }
+  }
+
+  if (localeMatch) {
+    next = next.replace(/\blocale=[^&#`'"\s]+/, 'locale=all')
+    next = removeQueryParam(next, activeFlag.name, 'true')
+  } else {
+    next = next.replace(`${activeFlag.name}=true`, 'locale=all')
+  }
+
+  return { text: next }
+}
+
+function removeQueryParam(text: string, name: string, value: string): string {
+  return text.replace(
+    new RegExp(`([?&])${name}=${value}(&?)`, 'g'),
+    (_match, prefix: string, suffix: string) => (suffix ? prefix : ''),
+  )
+}
+
 function rewriteGraphqlDraftArgs(text: string): {
   ambiguous: boolean
   changed: boolean
@@ -951,6 +1379,120 @@ function rewriteGraphqlDraftArgs(text: string): {
   )
 
   return { ambiguous, changed, text: next }
+}
+
+function rewriteGraphqlAllLocaleArgs(text: string): {
+  ambiguous: boolean
+  changed: boolean
+  text: string
+} {
+  if (!hasGraphqlAllLocaleArg(text)) {
+    return { ambiguous: false, changed: false, text }
+  }
+
+  let ambiguous = false
+  let changed = false
+  const next = text.replace(
+    /\b([a-z_]\w*)\s*\(([^()]*)\)/g,
+    (fieldCall, fieldName: string, args: string, offset: number) => {
+      if (!hasGraphqlAllLocaleArg(args)) {
+        return fieldCall
+      }
+
+      if (
+        graphqlOperationBefore({ offset, text }) !== 'mutation' ||
+        !/^(?:create|duplicate|update)/i.test(fieldName)
+      ) {
+        ambiguous = true
+        return fieldCall
+      }
+
+      const rewritten = rewriteGraphqlPublicationArgs({ args, fieldName })
+      ambiguous ||= rewritten.ambiguous
+      changed ||= rewritten.changed
+
+      return fieldCall.replace(args, rewritten.args)
+    },
+  )
+
+  if (hasGraphqlAllLocaleArg(next)) {
+    ambiguous = true
+  }
+
+  return { ambiguous, changed, text: next }
+}
+
+function rewriteGraphqlPublicationArgs({ args, fieldName }: { args: string; fieldName: string }): {
+  ambiguous: boolean
+  args: string
+  changed: boolean
+} {
+  const flagMatches = [...args.matchAll(/\b(publishAllLocales|unpublishAllLocales):\s*([^,}\s]+)/g)]
+  let next = args
+  const activeFlags: Array<{ action: PublicationAction; name: string }> = []
+
+  for (const match of flagMatches) {
+    const name = match[1]!
+    const value = match[2]
+
+    if (value === 'false') {
+      next = removeGraphqlArgument(next, name, 'false')
+      continue
+    }
+
+    if (value !== 'true') {
+      return { ambiguous: true, args, changed: false }
+    }
+
+    activeFlags.push({
+      name,
+      action: name === 'publishAllLocales' ? 'publish' : 'unpublish',
+    })
+  }
+
+  if (activeFlags.length > 1) {
+    return { ambiguous: true, args: next, changed: next !== args }
+  }
+
+  const activeFlag = activeFlags[0]
+  if (!activeFlag) {
+    return { ambiguous: false, args: next, changed: next !== args }
+  }
+
+  if (activeFlag.action === 'unpublish' && !/^update/i.test(fieldName)) {
+    return { ambiguous: true, args: next, changed: next !== args }
+  }
+
+  const actionMatch = next.match(/\baction:\s*([^,}\s]+)/)
+  if (!actionMatch) {
+    return { ambiguous: true, args: next, changed: next !== args }
+  }
+  if (actionMatch && actionMatch[1] !== activeFlag.action) {
+    return { ambiguous: true, args: next, changed: next !== args }
+  }
+
+  const localeMatch = next.match(/\blocale:\s*([^,}\s]+)/)
+  if (localeMatch?.[1]?.startsWith('$')) {
+    return { ambiguous: true, args: next, changed: next !== args }
+  }
+
+  if (localeMatch) {
+    next = next.replace(/\blocale:\s*[^,}\s]+/, 'locale: all')
+    next = removeGraphqlArgument(next, activeFlag.name, 'true')
+  } else {
+    next = next.replace(new RegExp(`\\b${activeFlag.name}:\\s*true\\b`), `locale: all`)
+  }
+
+  return { ambiguous: false, args: next, changed: next !== args }
+}
+
+function removeGraphqlArgument(args: string, name: string, value: string): string {
+  const followedByComma = new RegExp(`\\b${name}:\\s*${value}\\s*,\\s*`)
+  if (followedByComma.test(args)) {
+    return args.replace(followedByComma, '')
+  }
+
+  return args.replace(new RegExp(`\\s*,\\s*\\b${name}:\\s*${value}\\b`), '')
 }
 
 function enclosingBracket({
@@ -1021,4 +1563,12 @@ function hasDynamicDraftQuery(value: string): boolean {
 
 function hasDynamicGraphqlDraft(value: string): boolean {
   return /\bdraft:\s*(?!true\b|false\b)[^\s,)]+/.test(value)
+}
+
+function hasAllLocaleQueryParam(value: string): boolean {
+  return /\b(?:publishAllLocales|unpublishAllLocales)=/.test(value)
+}
+
+function hasGraphqlAllLocaleArg(value: string): boolean {
+  return /\b(?:publishAllLocales|unpublishAllLocales):/.test(value)
 }
