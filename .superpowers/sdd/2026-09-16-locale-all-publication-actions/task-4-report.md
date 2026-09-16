@@ -150,3 +150,50 @@ node_modules/.bin/eslint packages/codemod/src/transforms/migrate-version-action-
 ### Concerns
 
 - None specific to the fix round. The GraphQL scanner remains intentionally conservative and only rewrites statically recognizable create/duplicate/update mutation fields in proven Payload GraphQL requests.
+
+## Fix round 2
+
+### Implementation
+
+- Preserved the preceding whitespace separator when removing a single-line, comma-free GraphQL argument. The transform now produces `action: publish data: {}` instead of concatenating the adjacent tokens as `publishdata`.
+- Scanned the literal content of double-quoted JavaScript strings rather than their outer source quotes, then used the AST string-literal setter to preserve valid JavaScript escaping and quote syntax after rewriting.
+
+### RED evidence
+
+The two exact regression fixtures were added before production edits:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 failed (1)
+Tests       2 failed | 33 passed (35)
+```
+
+The failures showed the invalid `action: publishdata: {}` result and the unchanged double-quoted GraphQL operation.
+
+### GREEN evidence
+
+Both regressions passed in isolation, followed by the full focused suite and typecheck:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 passed (1)
+Tests       35 passed (35)
+
+pnpm --pm-on-fail=ignore --filter @payloadcms/codemod typecheck
+$ tsc
+```
+
+### Tests and fixtures
+
+- `all-locales-graphql-inline-comma-free.*` verifies exact valid output and second-run idempotency for a single-line comma-free false flag.
+- `all-locales-graphql-double-quoted.*` verifies a top-level true flag migrates inside a double-quoted JavaScript GraphQL string and that the output is idempotent.
+
+### Self-review
+
+- The separator change is limited to the no-comma inline removal branch; comma-delimited and full-line removals retain their existing behavior.
+- Only ordinary JavaScript string literals use `setLiteralValue`; template literals continue through their established source-text path.
+- Existing nested GraphQL string preservation remains covered and green.
+
+### Concerns
+
+- None.

@@ -109,6 +109,18 @@ describe('migrate-version-action-api', () => {
     expect(await apply('all-locales-graphql-comma-free.input.ts')).toBe(output)
   })
 
+  it('should preserve a separator when removing an inline comma-free GraphQL argument', async () => {
+    const output = await fixture('all-locales-graphql-inline-comma-free.output.ts')
+
+    expect(await apply('all-locales-graphql-inline-comma-free.input.ts')).toBe(output)
+  })
+
+  it('should rewrite GraphQL operations stored in double-quoted JavaScript strings', async () => {
+    const output = await fixture('all-locales-graphql-double-quoted.output.ts')
+
+    expect(await apply('all-locales-graphql-double-quoted.input.ts')).toBe(output)
+  })
+
   it('should complete compatible mixed REST draft and all-locale rewrites in one run', async () => {
     const output = await fixture('all-locales-mixed-rest.output.ts')
 
@@ -185,6 +197,8 @@ describe('migrate-version-action-api', () => {
       'all-locales-graphql.output.ts',
       'all-locales-graphql-nested.output.ts',
       'all-locales-graphql-comma-free.output.ts',
+      'all-locales-graphql-inline-comma-free.output.ts',
+      'all-locales-graphql-double-quoted.output.ts',
       'all-locales-mixed-rest.output.ts',
       'all-locales-object-ambiguous.output.ts',
       'all-locales-unsafe.output.ts',

@@ -624,9 +624,13 @@ function rewriteAllLocaleStrings({
       const initArg = call.getArguments()[1]
       if (initArg) {
         for (const literal of getStringLikeDescendants({ node: initArg })) {
-          const rewrittenGraphql = rewriteGraphqlAllLocaleArgs(literal.getText())
+          const rewrittenGraphql = rewriteGraphqlAllLocaleArgs(getGraphqlStringText(literal))
           if (rewrittenGraphql.changed) {
-            literal.replaceWithText(rewrittenGraphql.text)
+            if (Node.isStringLiteral(literal)) {
+              literal.setLiteralValue(rewrittenGraphql.text)
+            } else {
+              literal.replaceWithText(rewrittenGraphql.text)
+            }
             mutated = true
           }
           if (rewrittenGraphql.ambiguous) {
@@ -652,7 +656,7 @@ function rewriteAllLocaleStrings({
       continue
     }
 
-    const rewrittenGraphql = rewriteGraphqlAllLocaleArgs(literal.getText())
+    const rewrittenGraphql = rewriteGraphqlAllLocaleArgs(getGraphqlStringText(literal))
     if (rewrittenGraphql.changed || rewrittenGraphql.ambiguous) {
       notes.push(
         `${filePath}: GraphQL all-locale publication argument without enough operation context — replace it with an explicit publication \`action\` and \`locale: all\` manually.`,
@@ -735,6 +739,14 @@ function getStringLikeDescendants({ node }: { node: MorphNode }) {
     ...node.getDescendantsOfKind(SyntaxKind.StringLiteral),
     ...node.getDescendantsOfKind(SyntaxKind.NoSubstitutionTemplateLiteral),
   ]
+}
+
+function getGraphqlStringText(node: MorphNode): string {
+  if (Node.isStringLiteral(node)) {
+    return node.getLiteralText()
+  }
+
+  return node.getText()
 }
 
 function noteUnhandledDraftOptions({
@@ -1750,13 +1762,11 @@ function removeGraphqlArgument(args: string, argument: GraphqlArgument): string 
     return replaceRange({ end, replacement: '', start: argument.nameStart, text: args })
   }
 
-  let start = argument.nameStart
-  while (/\s/.test(args[start - 1] ?? '')) {
-    start--
+  let precedingSeparator = argument.nameStart
+  while (/\s/.test(args[precedingSeparator - 1] ?? '')) {
+    precedingSeparator--
   }
-  if (args[start - 1] === ',') {
-    start--
-  }
+  const start = args[precedingSeparator - 1] === ',' ? precedingSeparator - 1 : argument.nameStart
 
   return replaceRange({ end, replacement: '', start, text: args })
 }
