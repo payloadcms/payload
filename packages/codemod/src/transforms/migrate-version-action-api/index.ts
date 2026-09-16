@@ -1282,6 +1282,10 @@ function hasPotentialFetchWriteBody(call: CallExpression): boolean {
   }
 
   if (Node.isCallExpression(body) && body.getExpression().getText() === 'JSON.stringify') {
+    if (body.getArguments().length !== 1) {
+      return true
+    }
+
     const value = unwrap(body.getArguments()[0])
     return !Node.isObjectLiteralExpression(value) || value.getProperties().length > 0
   }

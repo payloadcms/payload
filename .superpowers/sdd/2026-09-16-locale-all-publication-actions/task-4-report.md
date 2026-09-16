@@ -381,3 +381,57 @@ production transform.
 
 - None. The transform intentionally requests manual separation of the localized write from the
   all-locale publication when one equivalent write cannot be proven.
+
+## Final review fix: JSON.stringify option safety
+
+### Root cause
+
+The REST body proof inspected only `JSON.stringify` argument zero. Consequently,
+`JSON.stringify({}, replacer)` was classified as an empty body even though the replacer can
+replace the root object, and unresolved spread options were ignored.
+
+### Implementation
+
+- `JSON.stringify` is now considered a proven empty request body only when it has exactly one
+  argument and that argument is a statically empty object literal.
+- Any explicit or spread serialization option is treated as unresolved, leaving the REST URL
+  unchanged and emitting the established manual-review note.
+
+### RED evidence
+
+The exact replacer/spread-options fixture and its idempotency entry were added before production
+edits:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 failed (1)
+Tests       2 failed | 38 passed (40)
+```
+
+Both unsafe URLs were rewritten to `locale=all`, and the output-idempotency assertion failed
+independently.
+
+### GREEN evidence
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 passed (1)
+Tests       40 passed (40)
+
+pnpm --pm-on-fail=ignore --filter @payloadcms/codemod typecheck
+$ tsc
+```
+
+Prettier, ESLint, and diff whitespace checks also passed.
+
+### Tests and fixtures
+
+- `all-locales-rest-stringify-options.*` covers a root-replacing function and unresolved spread
+  options. It asserts exact unchanged output, zero TypeScript syntax diagnostics, no changed file,
+  two manual-review notes, and second-run idempotency.
+- Existing `JSON.stringify({})`, empty/no-body, non-empty, and dynamic-body coverage remains green.
+
+### Concerns
+
+- None. Optional serialization arguments are intentionally conservative unless a future transform
+  can prove they are inert.

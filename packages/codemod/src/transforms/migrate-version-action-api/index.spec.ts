@@ -150,6 +150,26 @@ describe('migrate-version-action-api', () => {
     ])
   })
 
+  it('should not treat JSON.stringify with replacer or unresolved options as an empty body', async () => {
+    const input = await fixture('all-locales-rest-stringify-options.input.ts')
+    const output = await fixture('all-locales-rest-stringify-options.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/all-locales-rest-stringify-options.ts', input)
+
+    const result = await migrateVersionActionApi.apply({ packageJsons: [], project })
+    const transformed = project
+      .getSourceFileOrThrow('/all-locales-rest-stringify-options.ts')
+      .getFullText()
+
+    expect(transformed).toBe(output)
+    expect(getSyntacticDiagnosticMessages(transformed)).toEqual([])
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([
+      expect.stringContaining('non-empty or unresolved request body'),
+      expect.stringContaining('non-empty or unresolved request body'),
+    ])
+  })
+
   it('should rewrite static GraphQL all-locale publication flags', async () => {
     const output = await fixture('all-locales-graphql.output.ts')
 
@@ -287,6 +307,7 @@ describe('migrate-version-action-api', () => {
       'all-locales-localized-data.output.ts',
       'all-locales-rest.output.ts',
       'all-locales-rest-localized-data.output.ts',
+      'all-locales-rest-stringify-options.output.ts',
       'all-locales-graphql.output.ts',
       'all-locales-graphql-localized-data.output.ts',
       'all-locales-graphql-nested.output.ts',
