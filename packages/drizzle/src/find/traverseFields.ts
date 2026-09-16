@@ -413,6 +413,7 @@ export const traverseFields = ({
             currentTableName,
             field,
             limit,
+            locale,
             page,
             path,
             shouldCount,

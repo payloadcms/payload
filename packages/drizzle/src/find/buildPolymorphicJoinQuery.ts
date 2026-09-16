@@ -18,6 +18,7 @@ type BuildPolymorphicJoinQueryArgs = {
   currentTableName: string
   field: FlattenedJoinField
   limit: number
+  locale?: string
   page?: number
   path: string
   shouldCount: boolean
@@ -51,6 +52,7 @@ export const buildPolymorphicJoinQuery = ({
   currentTableName,
   field,
   limit,
+  locale,
   page,
   path,
   shouldCount,
@@ -116,6 +118,7 @@ export const buildPolymorphicJoinQuery = ({
         ? buildPolymorphicJoinWhere({
             adapter,
             collection,
+            locale,
             table,
             where,
             wherePlan,

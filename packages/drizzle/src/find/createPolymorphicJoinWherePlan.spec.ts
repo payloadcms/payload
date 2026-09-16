@@ -16,6 +16,38 @@ type CollectionFixture = {
   table: GenericTable
 }
 
+/** Child tables a localized or separate-row path is correlated through. */
+const articlesLocalesTable = sqliteTable('join_articles_locales', {
+  id: integer('id').primaryKey(),
+  _locale: text('_locale'),
+  _parentID: integer('_parent_id'),
+  localizedTitle: text('localized_title'),
+})
+
+const articlesEntriesTable = sqliteTable('join_articles_entries', {
+  id: integer('id').primaryKey(),
+  _parentID: integer('_parent_id'),
+  label: text('label'),
+})
+
+const articlesEntriesTagsTable = sqliteTable('join_articles_entries_tags', {
+  id: integer('id').primaryKey(),
+  parent: integer('parent_id'),
+  value: text('value'),
+})
+
+const articlesBlocksHeroTable = sqliteTable('join_articles_blocks_hero', {
+  id: integer('id').primaryKey(),
+  _parentID: integer('_parent_id'),
+  _path: text('_path'),
+})
+
+const articlesBlocksHeroTagsTable = sqliteTable('join_articles_blocks_hero_tags', {
+  id: integer('id').primaryKey(),
+  parent: integer('parent_id'),
+  value: text('value'),
+})
+
 const articlesTable = sqliteTable('join_articles', {
   id: integer('id').primaryKey(),
   config: text('config'),
@@ -100,7 +132,10 @@ const articleFields: Field[] = [
   {
     name: 'entries',
     type: 'array',
-    fields: [{ hasMany: true, name: 'tags', options: ['available'], type: 'select' }],
+    fields: [
+      { name: 'label', type: 'text' },
+      { hasMany: true, name: 'tags', options: ['available'], type: 'select' },
+    ],
   },
   {
     name: 'content',
@@ -166,7 +201,10 @@ const noteEnumFields: Field[] = [
   },
 ]
 
-const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdapter => {
+const createAdapter = (
+  fixtures: Record<string, CollectionFixture>,
+  childTables: GenericTable[] = [],
+): DrizzleAdapter => {
   const collections: Record<
     string,
     { config: { fields: Field[]; flattenedFields: FlattenedField[] } }
@@ -187,18 +225,35 @@ const createAdapter = (fixtures: Record<string, CollectionFixture>): DrizzleAdap
     tables[tableName] = fixture.table
   }
 
+  for (const childTable of childTables) {
+    const childTableName = getTableName(childTable)
+
+    tableNameMap.set(childTableName, childTableName)
+    tables[childTableName] = childTable
+  }
+
   return {
     idType: 'serial',
+    localesSuffix: '_locales',
     payload: { collections },
     tableNameMap,
     tables,
   } as unknown as DrizzleAdapter
 }
 
-const adapter = createAdapter({
-  articles: { fields: articleFields, table: articlesTable },
-  notes: { fields: noteFields, table: notesTable },
-})
+const adapter = createAdapter(
+  {
+    articles: { fields: articleFields, table: articlesTable },
+    notes: { fields: noteFields, table: notesTable },
+  },
+  [
+    articlesLocalesTable,
+    articlesEntriesTable,
+    articlesEntriesTagsTable,
+    articlesBlocksHeroTable,
+    articlesBlocksHeroTagsTable,
+  ],
+)
 
 const createPlan = (where: Where, collections = ['articles', 'notes']) =>
   createPolymorphicJoinWherePlan({ adapter, collections, where })
@@ -390,6 +445,113 @@ describe('createPolymorphicJoinWherePlan', () => {
     expect(variantTagsPlan.type).toBe('invalid')
   })
 
+  it('creates a separateRows plan for a localized field', () => {
+    const localizedPlan = createPlan({ localizedTitle: { equals: 'value' } }).get('localizedTitle')
+
+    expect(localizedPlan.type).toBe('separateRows')
+    expect(localizedPlan.fieldsByCollection.get('articles')).toMatchObject({
+      chain: {
+        hops: [
+          {
+            isLocalesTable: true,
+            localeColumnKey: '_locale',
+            parentColumnKey: '_parentID',
+            tableName: 'join_articles_locales',
+          },
+        ],
+        leafColumnKey: 'localizedTitle',
+      },
+      type: 'separateRows',
+    })
+  })
+
+  it('creates a separateRows plan for a has-many select inside an array', () => {
+    const arrayPlan = createPlan({ 'entries.tags': { equals: 'value' } }).get('entries.tags')
+
+    expect(arrayPlan.type).toBe('separateRows')
+    expect(arrayPlan.fieldsByCollection.get('articles')).toMatchObject({
+      chain: {
+        hops: [
+          {
+            isLocalesTable: false,
+            parentColumnKey: '_parentID',
+            tableName: 'join_articles_entries',
+          },
+          {
+            isLocalesTable: false,
+            parentColumnKey: 'parent',
+            tableName: 'join_articles_entries_tags',
+          },
+        ],
+        leafColumnKey: 'value',
+      },
+    })
+  })
+
+  it('creates a separateRows plan for a scalar column inside an array', () => {
+    const arrayPlan = createPlan({ 'entries.label': { equals: 'value' } }).get('entries.label')
+
+    expect(arrayPlan.type).toBe('separateRows')
+    expect(arrayPlan.fieldsByCollection.get('articles')?.chain).toMatchObject({
+      hops: [{ tableName: 'join_articles_entries' }],
+      leafColumnKey: 'label',
+    })
+  })
+
+  it('scopes a separateRows plan for block rows by the blocks field path', () => {
+    const blockPlan = createPlan({ 'content.hero.tags': { equals: 'value' } }).get(
+      'content.hero.tags',
+    )
+
+    expect(blockPlan.type).toBe('separateRows')
+    expect(blockPlan.fieldsByCollection.get('articles')?.chain).toMatchObject({
+      hops: [
+        { pathValue: 'content', tableName: 'join_articles_blocks_hero' },
+        { tableName: 'join_articles_blocks_hero_tags' },
+      ],
+      leafColumnKey: 'value',
+    })
+  })
+
+  it('marks a separateRows path as invalid when a target stores it as a plain column', () => {
+    const notesWithPlainTitle = [...noteFields, { name: 'localizedTitle', type: 'text' }] as Field[]
+    const mixedAdapter = createAdapter(
+      {
+        articles: { fields: articleFields, table: articlesTable },
+        notes: {
+          fields: notesWithPlainTitle,
+          table: sqliteTable('join_notes_plain', {
+            id: integer('id').primaryKey(),
+            localizedTitle: text('localized_title'),
+          }),
+        },
+      },
+      [articlesLocalesTable],
+    )
+
+    expect(
+      createPolymorphicJoinWherePlan({
+        adapter: mixedAdapter,
+        collections: ['articles', 'notes'],
+        where: { localizedTitle: { equals: 'value' } },
+      }).get('localizedTitle'),
+    ).toMatchObject({ type: 'invalid' })
+  })
+
+  it('marks a localized path as invalid when its locales table is not mapped', () => {
+    const adapterWithoutLocales = createAdapter({
+      articles: { fields: articleFields, table: articlesTable },
+    })
+
+    expect(
+      createPolymorphicJoinWherePlan({
+        adapter: adapterWithoutLocales,
+        collections: ['articles'],
+        where: { localizedTitle: { equals: 'value' } },
+      }).get('localizedTitle'),
+    ).toMatchObject({ type: 'invalid' })
+  })
+
   it('creates a jsonPath plan for a sub-path of a json field', () => {
     const settingsPlan = createPlan({ 'settings.approved': { equals: true } }).get(
       'settings.approved',
@@ -476,13 +638,6 @@ describe('createPolymorphicJoinWherePlan', () => {
       'a select field mixed with a radio field',
       { variantKind: { equals: 'available' } },
       'variantKind',
-    ],
-    ['a localized field', { localizedTitle: { equals: 'value' } }, 'localizedTitle'],
-    ['a field stored in array rows', { 'entries.tags': { equals: 'value' } }, 'entries.tags'],
-    [
-      'a field stored in block rows',
-      { 'content.hero.tags': { equals: 'value' } },
-      'content.hero.tags',
     ],
   ] as const)('marks %s as invalid', (_description, where, schemaPath) => {
     expect(createPlan(where as Where).get(schemaPath)).toMatchObject({ type: 'invalid' })

@@ -29,6 +29,31 @@ const notesTable = sqliteTable('join_notes', {
   title: text('title'),
 })
 
+const articlesLocalesTable = sqliteTable('join_articles_locales', {
+  id: integer('id').primaryKey(),
+  _locale: text('_locale'),
+  _parentID: integer('_parent_id'),
+  localizedTitle: text('localized_title'),
+})
+
+const articlesEntriesTable = sqliteTable('join_articles_entries', {
+  id: integer('id').primaryKey(),
+  _parentID: integer('_parent_id'),
+})
+
+const articlesEntriesTagsTable = sqliteTable('join_articles_entries_tags', {
+  id: integer('id').primaryKey(),
+  parent: integer('parent_id'),
+  value: text('value'),
+})
+
+const articlesBlocksHeroTable = sqliteTable('join_articles_blocks_hero', {
+  id: integer('id').primaryKey(),
+  _parentID: integer('_parent_id'),
+  _path: text('_path'),
+  label: text('label'),
+})
+
 const client: Client = createClient({ url: 'file::memory:' })
 const db = drizzle(client, { schema: { articlesTable, notesTable } })
 const textField = { name: 'title', type: 'text' } as FlattenedField
@@ -60,6 +85,10 @@ const adapter = {
   ]),
   tables: {
     join_articles: articlesTable,
+    join_articles_blocks_hero: articlesBlocksHeroTable,
+    join_articles_entries: articlesEntriesTable,
+    join_articles_entries_tags: articlesEntriesTagsTable,
+    join_articles_locales: articlesLocalesTable,
     join_notes: notesTable,
   },
 } as unknown as DrizzleAdapter
@@ -142,13 +171,75 @@ const jsonPathPlan = (
   ])
 }
 
+const localizedScalarChain = {
+  hops: [
+    {
+      isLocalesTable: true,
+      localeColumnKey: '_locale',
+      parentColumnKey: '_parentID',
+      tableName: 'join_articles_locales',
+    },
+  ],
+  leafColumnKey: 'localizedTitle',
+}
+
+const arraySelectChain = {
+  hops: [
+    { isLocalesTable: false, parentColumnKey: '_parentID', tableName: 'join_articles_entries' },
+    { isLocalesTable: false, parentColumnKey: 'parent', tableName: 'join_articles_entries_tags' },
+  ],
+  leafColumnKey: 'value',
+}
+
+const blockChain = {
+  hops: [
+    {
+      isLocalesTable: false,
+      parentColumnKey: '_parentID',
+      pathValue: 'content',
+      tableName: 'join_articles_blocks_hero',
+    },
+  ],
+  leafColumnKey: 'label',
+}
+
+const separateRowsPlan = ({
+  chain,
+  collections = ['articles'],
+  field = textField,
+  schemaPath,
+}: {
+  chain: unknown
+  collections?: string[]
+  field?: FlattenedField
+  schemaPath: string
+}): PolymorphicJoinWherePlan =>
+  new Map([
+    [
+      schemaPath,
+      {
+        columnPath: schemaPath.replaceAll('.', '_'),
+        fieldsByCollection: new Map(
+          collections.map((collection) => [
+            collection,
+            { chain, field, type: 'separateRows' as const },
+          ]),
+        ),
+        schemaPath,
+        type: 'separateRows',
+      },
+    ],
+  ]) as unknown as PolymorphicJoinWherePlan
+
 const renderWhere = ({
   collection = 'articles',
+  locale = 'en',
   table = articlesTable,
   where,
   wherePlan,
 }: {
   collection?: string
+  locale?: string
   table?: typeof articlesTable | typeof notesTable
   where: Where
   wherePlan: PolymorphicJoinWherePlan
@@ -156,6 +247,7 @@ const renderWhere = ({
   const condition = buildPolymorphicJoinWhere({
     adapter,
     collection,
+    locale,
     table,
     where,
     wherePlan,
@@ -447,6 +539,142 @@ describe('buildPolymorphicJoinWhere', () => {
       }),
     ).toThrow(expectedPath)
   })
+
+  it('correlates a localized path to the branch row and filters by locale', () => {
+    const query = renderWhere({
+      where: { localizedTitle: { equals: 'available' } },
+      wherePlan: separateRowsPlan({ chain: localizedScalarChain, schemaPath: 'localizedTitle' }),
+    })
+
+    expect(query.sql).toContain('exists (select 1 from "join_articles_locales"')
+    expect(query.sql).toContain('"_parent_id" = "join_articles"."id"')
+    expect(query.sql).toContain('"_locale" = ?')
+    expect(query.sql).toContain('"localized_title" = ?')
+    expect(query.params).toEqual(['en', 'available'])
+  })
+
+  it('omits the locale filter when every locale is requested', () => {
+    const query = renderWhere({
+      locale: 'all',
+      where: { localizedTitle: { equals: 'available' } },
+      wherePlan: separateRowsPlan({ chain: localizedScalarChain, schemaPath: 'localizedTitle' }),
+    })
+
+    expect(query.sql).not.toContain('"_locale" = ?')
+    expect(query.params).toEqual(['available'])
+  })
+
+  it('rejects a localized path when no locale is available', () => {
+    expect(() =>
+      buildPolymorphicJoinWhere({
+        adapter,
+        collection: 'articles',
+        table: articlesTable,
+        where: { localizedTitle: { equals: 'available' } },
+        wherePlan: separateRowsPlan({ chain: localizedScalarChain, schemaPath: 'localizedTitle' }),
+      }),
+    ).toThrow('localizedTitle.equals')
+  })
+
+  it('negates a single-locale path with NOT EXISTS around the positive comparison', () => {
+    const query = renderWhere({
+      where: { localizedTitle: { not_equals: 'available' } },
+      wherePlan: separateRowsPlan({ chain: localizedScalarChain, schemaPath: 'localizedTitle' }),
+    })
+
+    expect(query.sql).toContain('not exists (select 1 from "join_articles_locales"')
+    expect(query.sql).toContain('"localized_title" = ?')
+    expect(query.sql).not.toContain('<>')
+    expect(query.params).toEqual(['en', 'available'])
+  })
+
+  it('nests one correlated subquery per hop for a path stored under an array', () => {
+    const query = renderWhere({
+      where: { 'entries.tags': { equals: 'available' } },
+      wherePlan: separateRowsPlan({
+        chain: arraySelectChain,
+        field: hasManySelectField,
+        schemaPath: 'entries.tags',
+      }),
+    })
+
+    expect(query.sql).toContain('exists (select 1 from "join_articles_entries"')
+    expect(query.sql).toContain('"_parent_id" = "join_articles"."id"')
+    expect(query.sql).toContain('exists (select 1 from "join_articles_entries_tags"')
+    expect(query.sql).toContain('"value" = ?')
+    expect(query.params).toEqual(['available'])
+  })
+
+  it('treats exists false on a many-row path as an absence check', () => {
+    const query = renderWhere({
+      where: { 'entries.tags': { exists: false } },
+      wherePlan: separateRowsPlan({
+        chain: arraySelectChain,
+        field: hasManySelectField,
+        schemaPath: 'entries.tags',
+      }),
+    })
+
+    expect(query.sql).toContain('not exists (select 1 from "join_articles_entries"')
+    expect(query.sql).toContain('"value" is not null')
+  })
+
+  it.each([
+    ['not_equals', { not_equals: 'available' }, 'entries.tags.not_equals'],
+    ['not_in', { not_in: ['available'] }, 'entries.tags.not_in'],
+    ['not_like', { not_like: 'available' }, 'entries.tags.not_like'],
+  ] as const)('rejects %s on a path stored in many rows', (_description, constraint, errorPath) => {
+    expect(() =>
+      renderWhere({
+        where: { 'entries.tags': constraint } as unknown as Where,
+        wherePlan: separateRowsPlan({
+          chain: arraySelectChain,
+          field: hasManySelectField,
+          schemaPath: 'entries.tags',
+        }),
+      }),
+    ).toThrow(errorPath)
+  })
+
+  it('filters block rows by the blocks field path', () => {
+    const query = renderWhere({
+      where: { 'content.hero.label': { equals: 'available' } },
+      wherePlan: separateRowsPlan({ chain: blockChain, schemaPath: 'content.hero.label' }),
+    })
+
+    expect(query.sql).toContain('exists (select 1 from "join_articles_blocks_hero"')
+    expect(query.sql).toContain('"_path" = ?')
+    expect(query.params).toEqual(['content', 'available'])
+  })
+
+  it.each([
+    ['equals', { equals: 'available' }, 'where false'],
+    ['exists true', { exists: true }, 'where false'],
+    ['exists false', { exists: false }, 'where true'],
+    ['a REST exists false value', { exists: 'false' }, 'where true'],
+    ['not_equals', { not_equals: 'available' }, 'where true'],
+    ['not_equals null', { not_equals: null }, 'where false'],
+    ['in without null', { in: ['available'] }, 'where false'],
+    ['in with null', { in: ['available', null] }, 'where true'],
+    ['not_in', { not_in: ['available'] }, 'where false'],
+  ] as const)(
+    'resolves %s from the operator when the path is absent from this collection',
+    (_description, constraint, expectedSQL) => {
+      const query = renderWhere({
+        collection: 'notes',
+        table: notesTable,
+        where: { localizedTitle: constraint } as unknown as Where,
+        wherePlan: separateRowsPlan({
+          chain: localizedScalarChain,
+          collections: ['articles'],
+          schemaPath: 'localizedTitle',
+        }),
+      })
+
+      expect(query.sql).toContain(expectedSQL)
+      expect(query.sql).not.toContain('join_articles_locales')
+    },
+  )
 
   it('builds a false condition for an empty json sub-path in comparison', () => {
     const query = renderWhere({

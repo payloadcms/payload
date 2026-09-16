@@ -1,10 +1,11 @@
 import type { Column, SQL } from 'drizzle-orm'
 
-import { and, getTableName, isNotNull, isNull, or, sql } from 'drizzle-orm'
+import { and, getTableName, or, sql } from 'drizzle-orm'
 import { type FlattenedField, QueryError, type Where } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericTable } from '../types.js'
+import type { PolymorphicJoinStorageChain } from './createPolymorphicJoinStorageChain.js'
 import type {
   PolymorphicJoinWherePlan,
   ScalarWhereField,
@@ -12,6 +13,11 @@ import type {
 } from './createPolymorphicJoinWherePlan.js'
 
 import { sanitizeQueryValue } from '../queries/sanitizeQueryValue.js'
+import { buildPolymorphicJoinColumnConstraint } from './buildPolymorphicJoinColumnConstraint.js'
+import {
+  buildPolymorphicJoinAbsentPathConstraint,
+  buildPolymorphicJoinSeparateRowsConstraint,
+} from './buildPolymorphicJoinSeparateRowsConstraint.js'
 import { buildPolymorphicJSONPathConstraint } from './buildPolymorphicJSONPathConstraint.js'
 
 const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in', 'like'])
@@ -19,12 +25,20 @@ const supportedJSONQueryOperators = new Set(['contains', 'equals', 'exists', 'in
 type BuildPolymorphicJoinWhereArgs = {
   adapter: DrizzleAdapter
   collection: string
+  locale?: string
   table: GenericTable
   where: Where
   wherePlan: PolymorphicJoinWherePlan
 }
 
 type ResolvedWherePath =
+  | {
+      /** Undefined when the path is absent from the current collection. */
+      chain: PolymorphicJoinStorageChain | undefined
+      field: FlattenedField | undefined
+      pathPlan: WherePathPlan
+      type: 'separateRows'
+    }
   | {
       column: Column
       pathPlan: WherePathPlan
@@ -56,6 +70,7 @@ type ResolvedWherePath =
 export const buildPolymorphicJoinWhere = ({
   adapter,
   collection,
+  locale,
   table,
   where,
   wherePlan,
@@ -73,6 +88,7 @@ export const buildPolymorphicJoinWhere = ({
         buildPolymorphicJoinWhere({
           adapter,
           collection,
+          locale,
           table,
           where: nestedWhere,
           wherePlan,
@@ -95,7 +111,7 @@ export const buildPolymorphicJoinWhere = ({
       wherePlan,
     })
 
-    for (let payloadOperator of Object.keys(where[key])) {
+    for (const payloadOperator of Object.keys(where[key])) {
       const originalOperator = payloadOperator
       let value = where[key][payloadOperator]
 
@@ -158,6 +174,27 @@ export const buildPolymorphicJoinWhere = ({
         continue
       }
 
+      if (resolvedPath.type === 'separateRows') {
+        const { chain, field } = resolvedPath
+
+        constraints.push(
+          chain && field
+            ? buildPolymorphicJoinSeparateRowsConstraint({
+                adapter,
+                chain,
+                errorPath: `${key}.${originalOperator}`,
+                field,
+                locale,
+                operator: payloadOperator,
+                parentTable: table,
+                schemaPath: key,
+                value,
+              })
+            : buildPolymorphicJoinAbsentPathConstraint({ operator: payloadOperator, value }),
+        )
+        continue
+      }
+
       if (payloadOperator === '$raw') {
         if (typeof value !== 'string') {
           throw new QueryError([{ path: `${key}.${payloadOperator}` }])
@@ -167,82 +204,18 @@ export const buildPolymorphicJoinWhere = ({
         continue
       }
 
-      const { column, queryValueContext } = resolvedPath
-
-      if (
-        payloadOperator === 'like' &&
-        (queryValueContext.field.type === 'number' ||
-          queryValueContext.field.type === 'relationship' ||
-          queryValueContext.field.type === 'upload' ||
-          queryValueContext.isUUID)
-      ) {
-        payloadOperator = 'equals'
-      }
-
-      const sanitizedQueryValue = sanitizeQueryValue({
-        adapter,
-        field: queryValueContext.field,
-        isUUID: queryValueContext.isUUID,
-        operator: payloadOperator,
-        relationOrPath: key,
-        val: value,
-      })
-
-      if (sanitizedQueryValue === null || sanitizedQueryValue.columns) {
-        throw new QueryError([{ path: `${key}.${originalOperator}` }])
-      }
-
-      payloadOperator = sanitizedQueryValue.operator
-      value = sanitizedQueryValue.value
-
-      if (!(payloadOperator in adapter.operators)) {
-        throw new QueryError([{ path: `${key}.${originalOperator}` }])
-      }
-
-      const operator = adapter.operators[payloadOperator as keyof typeof adapter.operators]
-
-      if (originalOperator === 'equals' && value === null) {
-        constraints.push(isNull(column))
-        continue
-      }
-
-      if (originalOperator === 'not_equals') {
-        if (value === null) {
-          constraints.push(isNotNull(column))
-        } else {
-          const notEqualsConstraint = or(isNull(column), operator(column, value))
-
-          if (notEqualsConstraint) {
-            constraints.push(notEqualsConstraint)
-          }
-        }
-        continue
-      }
-
-      if (originalOperator === 'in' && Array.isArray(value) && value.includes(null)) {
-        const nonNullValues = value.filter((item) => item !== null)
-        const inConstraint = nonNullValues.length ? operator(column, nonNullValues) : undefined
-        const nullAwareInConstraint = inConstraint
-          ? or(isNull(column), inConstraint)
-          : isNull(column)
-
-        if (nullAwareInConstraint) {
-          constraints.push(nullAwareInConstraint)
-        }
-        continue
-      }
-
-      if (payloadOperator === 'like' && typeof value === 'string') {
-        const wordConstraints = value.split(' ').map((word) => operator(column, `%${word}%`))
-        const wordCondition = and(...wordConstraints)
-
-        if (wordCondition) {
-          constraints.push(wordCondition)
-        }
-        continue
-      }
-
-      constraints.push(operator(column, value))
+      constraints.push(
+        buildPolymorphicJoinColumnConstraint({
+          adapter,
+          column: resolvedPath.column,
+          errorPath: `${key}.${originalOperator}`,
+          field: resolvedPath.queryValueContext.field,
+          isUUID: resolvedPath.queryValueContext.isUUID,
+          operator: payloadOperator,
+          schemaPath: key,
+          value,
+        }),
+      )
     }
   }
 
@@ -282,6 +255,24 @@ const resolveWherePath = ({
   }
 
   const collectionFieldForBranch = pathPlan.fieldsByCollection.get(collection)
+
+  if (pathPlan.type === 'separateRows') {
+    if (collectionFieldForBranch) {
+      if (collectionFieldForBranch.type !== 'separateRows') {
+        return { type: 'invalid', pathPlan }
+      }
+
+      return {
+        type: 'separateRows',
+        chain: collectionFieldForBranch.chain,
+        field: collectionFieldForBranch.field,
+        pathPlan,
+      }
+    }
+
+    // No entry for this collection means the path is absent here, so it reads as SQL NULL.
+    return { type: 'separateRows', chain: undefined, field: undefined, pathPlan }
+  }
 
   if (pathPlan.type === 'jsonPath') {
     if (collectionFieldForBranch) {
