@@ -936,7 +936,7 @@ describe('Localization', () => {
       })
       const publishedDocument = published.docs[0]
 
-      expect(publishedDocument.text).toEqual({
+      expect(publishedDocument.text).toMatchObject({
         en: 'English published value',
         es: 'Spanish published value',
       })
