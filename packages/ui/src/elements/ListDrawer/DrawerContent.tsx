@@ -142,7 +142,14 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }, [refresh, ListView, selectedOption.value])
 
   const onCreateNew = useCallback(
-    ({ doc }) => {
+    ({ context, doc }) => {
+      // Autosave triggers `onSave` on every interval. Only select the document
+      // and close the drawers on an explicit save, otherwise the entire drawer
+      // stack would collapse while the user is still editing.
+      if (context?.isAutosave) {
+        return
+      }
+
       if (typeof onSelect === 'function') {
         onSelect({
           collectionSlug: selectedOption?.value,
