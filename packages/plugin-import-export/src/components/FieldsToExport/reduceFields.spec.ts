@@ -1,3 +1,4 @@
+import type { I18nClient } from '@payloadcms/translations'
 import type { ClientField } from 'payload'
 
 import { describe, expect, it } from 'vitest'
@@ -144,6 +145,88 @@ describe('reduceFields', () => {
 
       expect(result).toContain('meta.title')
       expect(result).not.toContain('meta.description')
+    })
+  })
+
+  describe('labels', () => {
+    const i18n = {
+      fallbackLanguage: 'en',
+      language: 'de',
+      t: (key: string) => key,
+    } as unknown as I18nClient
+
+    it('should translate localized labels into the current admin language', () => {
+      const fields: ClientField[] = [
+        { name: 'title', type: 'text', label: { de: 'Titel', en: 'Title' } },
+      ]
+
+      const [option] = reduceFields({ fields, i18n })
+
+      expect(option?.fieldLabel).toBe('Titel')
+      expect(option?.displayLabel).toBe('Titel')
+    })
+
+    it('should fall back to the fallback language when the current language is missing', () => {
+      const fields: ClientField[] = [{ name: 'title', type: 'text', label: { en: 'Title' } }]
+
+      const [option] = reduceFields({ fields, i18n })
+
+      expect(option?.fieldLabel).toBe('Title')
+    })
+
+    it('should keep string labels and fall back to the field name without a label', () => {
+      const fields: ClientField[] = [
+        { name: 'title', type: 'text', label: 'Headline' },
+        { name: 'slug', type: 'text' },
+      ]
+
+      const result = reduceFields({ fields, i18n })
+
+      expect(result.map((f) => f.fieldLabel)).toEqual(['Headline', 'slug'])
+    })
+
+    it('should use the field name for localized labels when no i18n is provided', () => {
+      const fields: ClientField[] = [
+        { name: 'title', type: 'text', label: { de: 'Titel', en: 'Title' } },
+      ]
+
+      const [option] = reduceFields({ fields })
+
+      expect(option?.fieldLabel).toBe('title')
+    })
+
+    it('should translate group and named tab prefixes', () => {
+      const fields: ClientField[] = [
+        {
+          name: 'meta',
+          type: 'group',
+          label: { de: 'Meta', en: 'Meta' },
+          fields: [{ name: 'title', type: 'text', label: { de: 'Titel', en: 'Title' } }],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'seo',
+              label: { de: 'Suchmaschinen', en: 'SEO' },
+              fields: [
+                {
+                  name: 'description',
+                  type: 'text',
+                  label: { de: 'Beschreibung', en: 'Description' },
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      const result = reduceFields({ fields, i18n })
+
+      expect(result.map((f) => [f.value, f.displayLabel, f.fieldLabel])).toEqual([
+        ['meta.title', 'Meta > Titel', 'Titel'],
+        ['seo.description', 'Suchmaschinen > Beschreibung', 'Beschreibung'],
+      ])
     })
   })
 })
