@@ -624,7 +624,11 @@ function rewriteAllLocaleStrings({
       continue
     }
 
-    const rewritten = rewriteAllLocaleQuery(urlArg.getText(), getFetchOperationKind(call))
+    const rewritten = rewriteAllLocaleQuery(
+      urlArg.getText(),
+      getFetchOperationKind(call),
+      hasPotentialFetchWriteBody(call),
+    )
 
     if (rewritten.note) {
       notes.push(`${filePath}: ${rewritten.note}`)
@@ -656,7 +660,9 @@ function rewriteAllLocaleStrings({
           }
           if (rewrittenGraphql.ambiguous) {
             notes.push(
-              `${filePath}: GraphQL all-locale publication argument could not be rewritten safely — use an explicit publication \`action\` and \`locale: all\` manually.`,
+              rewrittenGraphql.unsafeLocalizedData
+                ? `${filePath}: non-empty or unresolved \`data\` with an explicit GraphQL locale and all-locale publication flag cannot be rewritten safely — keep the localized data write and perform the all-locale publication as a separate operation manually.`
+                : `${filePath}: GraphQL all-locale publication argument could not be rewritten safely — use an explicit publication \`action\` and \`locale: all\` manually.`,
             )
           }
           handled.add(literal)
@@ -1246,6 +1252,43 @@ function getFetchMethod(initArg: MorphNode | undefined): string | undefined {
   return value.getLiteralValue().toUpperCase()
 }
 
+function hasPotentialFetchWriteBody(call: CallExpression): boolean {
+  const initArg = call.getArguments()[1]
+  if (!initArg || !Node.isObjectLiteralExpression(initArg)) {
+    return false
+  }
+
+  if (hasUnresolvedObjectOverride(initArg)) {
+    return true
+  }
+
+  const bodyProperty = getNamedPropertyAssignment(initArg, 'body')
+  if (!bodyProperty) {
+    return initArg.getProperty('body') !== undefined
+  }
+
+  const body = unwrap(bodyProperty.getInitializer())
+  if (!body) {
+    return true
+  }
+
+  if (body.getKind() === SyntaxKind.NullKeyword) {
+    return false
+  }
+
+  if (Node.isStringLiteral(body) || Node.isNoSubstitutionTemplateLiteral(body)) {
+    const value = body.getLiteralValue().trim()
+    return value !== '' && value !== '{}'
+  }
+
+  if (Node.isCallExpression(body) && body.getExpression().getText() === 'JSON.stringify') {
+    const value = unwrap(body.getArguments()[0])
+    return !Node.isObjectLiteralExpression(value) || value.getProperties().length > 0
+  }
+
+  return true
+}
+
 function isStringLike(node: MorphNode): boolean {
   return (
     Node.isStringLiteral(node) ||
@@ -1290,7 +1333,11 @@ function rewriteQueryDraft(text: string, kind: OperationKind): { note?: string; 
   }
 }
 
-function rewriteAllLocaleQuery(text: string, kind: OperationKind): { note?: string; text: string } {
+function rewriteAllLocaleQuery(
+  text: string,
+  kind: OperationKind,
+  hasPotentialWriteBody: boolean,
+): { note?: string; text: string } {
   const flagMatches = [...text.matchAll(/\b(publishAllLocales|unpublishAllLocales)=([^&#`'"\s]+)/g)]
   if (flagMatches.length === 0) {
     return { text }
@@ -1363,6 +1410,13 @@ function rewriteAllLocaleQuery(text: string, kind: OperationKind): { note?: stri
     return {
       note: `dynamic REST \`locale\` combined with \`${activeFlag.name}\` cannot be rewritten safely — set the publication action and locale manually.`,
       text: next,
+    }
+  }
+
+  if (hasPotentialWriteBody && localeMatch?.[1] !== 'all' && localeMatch?.[1]) {
+    return {
+      note: `non-empty or unresolved request body with explicit REST \`locale=${localeMatch[1]}\` and \`${activeFlag.name}\` cannot be rewritten safely — keep the localized body write and perform the all-locale publication as a separate operation manually.`,
+      text,
     }
   }
 
@@ -1456,6 +1510,7 @@ function rewriteGraphqlAllLocaleArgs(text: string): {
   ambiguous: boolean
   changed: boolean
   text: string
+  unsafeLocalizedData?: boolean
 } {
   if (!hasGraphqlAllLocaleArg(text)) {
     return { ambiguous: false, changed: false, text }
@@ -1464,6 +1519,7 @@ function rewriteGraphqlAllLocaleArgs(text: string): {
   let ambiguous = false
   let changed = false
   let next = text
+  let unsafeLocalizedData = false
 
   for (const field of findGraphqlFieldArguments(text).reverse()) {
     const args = text.slice(field.argsStart, field.argsEnd)
@@ -1482,16 +1538,18 @@ function rewriteGraphqlAllLocaleArgs(text: string): {
     const rewritten = rewriteGraphqlPublicationArgs({ args, fieldName: field.fieldName })
     ambiguous ||= rewritten.ambiguous
     changed ||= rewritten.changed
+    unsafeLocalizedData ||= rewritten.unsafeLocalizedData === true
     next = `${next.slice(0, field.argsStart)}${rewritten.args}${next.slice(field.argsEnd)}`
   }
 
-  return { ambiguous, changed, text: next }
+  return { ambiguous, changed, text: next, unsafeLocalizedData }
 }
 
 function rewriteGraphqlPublicationArgs({ args, fieldName }: { args: string; fieldName: string }): {
   ambiguous: boolean
   args: string
   changed: boolean
+  unsafeLocalizedData?: boolean
 } {
   const graphqlArgs = findTopLevelGraphqlArguments(args)
   const flagArguments = graphqlArgs.filter(
@@ -1555,6 +1613,21 @@ function rewriteGraphqlPublicationArgs({ args, fieldName }: { args: string; fiel
     return { ambiguous: true, args: next, changed: next !== args }
   }
 
+  const dataArgument = currentArguments.find(({ name }) => name === 'data')
+  if (
+    localeArgument &&
+    locale !== 'all' &&
+    dataArgument &&
+    hasPotentialGraphqlWriteData({ args: next, argument: dataArgument })
+  ) {
+    return {
+      ambiguous: true,
+      args,
+      changed: false,
+      unsafeLocalizedData: true,
+    }
+  }
+
   if (localeArgument) {
     next = replaceRange({
       end: localeArgument.valueEnd,
@@ -1583,6 +1656,55 @@ function rewriteGraphqlPublicationArgs({ args, fieldName }: { args: string; fiel
   }
 
   return { ambiguous: false, args: next, changed: next !== args }
+}
+
+function hasPotentialGraphqlWriteData({
+  args,
+  argument,
+}: {
+  args: string
+  argument: GraphqlArgument
+}): boolean {
+  if (args[argument.valueStart] !== '{') {
+    return true
+  }
+
+  const end = findClosingGraphqlBrace({ openBrace: argument.valueStart, text: args })
+  if (end === undefined) {
+    return true
+  }
+
+  const contents = args.slice(argument.valueStart + 1, end).replace(/#[^\n\r]*/g, '')
+  return !/^[\s,]*$/.test(contents)
+}
+
+function findClosingGraphqlBrace({
+  openBrace,
+  text,
+}: {
+  openBrace: number
+  text: string
+}): number | undefined {
+  let depth = 1
+
+  for (let index = openBrace + 1; index < text.length; index++) {
+    const skipped = skipGraphqlIgnored({ index, text })
+    if (skipped !== index) {
+      index = skipped - 1
+      continue
+    }
+
+    if (text[index] === '{') {
+      depth++
+    } else if (text[index] === '}') {
+      depth--
+      if (depth === 0) {
+        return index
+      }
+    }
+  }
+
+  return undefined
 }
 
 function findGraphqlFieldArguments(text: string): GraphqlFieldArguments[] {

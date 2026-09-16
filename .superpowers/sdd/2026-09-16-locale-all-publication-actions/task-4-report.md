@@ -308,3 +308,76 @@ $ tsc
 
 - None. The transform intentionally asks for manual review rather than synthesizing a second
   write or guessing whether localized data can be redirected.
+
+## Final review fix: REST and GraphQL localized data safety
+
+### Root cause
+
+The string migrations proved the operation context but did not inspect write data. GraphQL
+rewrote a concrete top-level locale whenever action and flag were static, regardless of the
+top-level `data` argument. REST used only the URL and HTTP method, regardless of the `fetch`
+request body. Both paths could therefore redirect a localized write while migrating its
+all-locale publication flag.
+
+### Implementation
+
+- GraphQL now treats a top-level `data` argument as safe only when it is absent or a statically
+  empty object. A concrete locale plus non-empty object or variable data remains unchanged and
+  emits a document-scoped manual-review note.
+- REST now inspects the proven Payload `fetch` init. A concrete locale plus a non-empty or
+  unresolved body remains unchanged and emits a per-call note. No body, `null`, an empty string,
+  a literal `{}` body, or `JSON.stringify({})` remains eligible for migration.
+- GraphQL operations with absent data and REST calls with statically empty or absent bodies retain
+  automatic migration. Unsafe fields/calls remain byte-for-byte unchanged.
+
+### RED evidence
+
+The exact GraphQL/REST fixtures and idempotency entries were added before production edits:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 failed (1)
+Tests       3 failed | 36 passed (39)
+```
+
+The failures showed both non-empty and dynamic request data being rewritten to `locale=all` or
+`locale: all`; the output-idempotency assertion independently caught the unsafe REST rewrite.
+
+### GREEN evidence
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 passed (1)
+Tests       39 passed (39)
+
+pnpm --pm-on-fail=ignore --filter @payloadcms/codemod typecheck
+$ tsc
+```
+
+Prettier checks passed for every changed codemod source/fixture, and ESLint passed for the
+production transform.
+
+### Tests and fixtures
+
+- `all-locales-graphql-localized-data.*` covers a concrete locale with both static non-empty data
+  and variable data, exact unchanged source, zero TypeScript syntax diagnostics, no changed file,
+  a clear note, and idempotency.
+- `all-locales-rest-localized-data.*` covers POST with static non-empty JSON, PATCH with dynamic
+  JSON, PATCH with empty JSON, and PATCH with no body. Unsafe calls remain unchanged; safe calls
+  migrate in the same run; the result has zero TypeScript syntax diagnostics and is idempotent.
+- `all-locales-graphql.*` now also covers the safe absent-data case, alongside its existing empty
+  object coverage.
+
+### Self-review
+
+- REST body safety is conservative: shorthand, computed, spread, non-literal, and unfamiliar
+  serialization forms are unresolved rather than guessed safe.
+- GraphQL data inspection is limited to top-level mutation arguments and skips quoted strings and
+  nested braces while proving an empty object.
+- Existing Local API/SDK, REST, GraphQL, draft, syntax, notes, and exact `filesChanged` coverage
+  remains green.
+
+### Concerns
+
+- None. The transform intentionally requests manual separation of the localized write from the
+  all-locale publication when one equivalent write cannot be proven.

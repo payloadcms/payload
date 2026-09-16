@@ -130,10 +130,47 @@ describe('migrate-version-action-api', () => {
     expect(await apply('all-locales-rest.input.ts')).toBe(output)
   })
 
+  it('should preserve REST localized writes with non-empty or unresolved request bodies', async () => {
+    const input = await fixture('all-locales-rest-localized-data.input.ts')
+    const output = await fixture('all-locales-rest-localized-data.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/all-locales-rest-localized-data.ts', input)
+
+    const result = await migrateVersionActionApi.apply({ packageJsons: [], project })
+    const transformed = project
+      .getSourceFileOrThrow('/all-locales-rest-localized-data.ts')
+      .getFullText()
+
+    expect(transformed).toBe(output)
+    expect(getSyntacticDiagnosticMessages(transformed)).toEqual([])
+    expect(result.filesChanged).toEqual(['/all-locales-rest-localized-data.ts'])
+    expect(result.notes).toEqual([
+      expect.stringContaining('non-empty or unresolved request body'),
+      expect.stringContaining('non-empty or unresolved request body'),
+    ])
+  })
+
   it('should rewrite static GraphQL all-locale publication flags', async () => {
     const output = await fixture('all-locales-graphql.output.ts')
 
     expect(await apply('all-locales-graphql.input.ts')).toBe(output)
+  })
+
+  it('should preserve GraphQL localized writes with non-empty or unresolved data', async () => {
+    const input = await fixture('all-locales-graphql-localized-data.input.ts')
+    const output = await fixture('all-locales-graphql-localized-data.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/all-locales-graphql-localized-data.ts', input)
+
+    const result = await migrateVersionActionApi.apply({ packageJsons: [], project })
+    const transformed = project
+      .getSourceFileOrThrow('/all-locales-graphql-localized-data.ts')
+      .getFullText()
+
+    expect(transformed).toBe(output)
+    expect(getSyntacticDiagnosticMessages(transformed)).toEqual([])
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([expect.stringContaining('non-empty or unresolved `data`')])
   })
 
   it('should only rewrite top-level GraphQL operation arguments', async () => {
@@ -249,7 +286,9 @@ describe('migrate-version-action-api', () => {
       'all-locales.output.ts',
       'all-locales-localized-data.output.ts',
       'all-locales-rest.output.ts',
+      'all-locales-rest-localized-data.output.ts',
       'all-locales-graphql.output.ts',
+      'all-locales-graphql-localized-data.output.ts',
       'all-locales-graphql-nested.output.ts',
       'all-locales-graphql-comma-free.output.ts',
       'all-locales-graphql-inline-comma-free.output.ts',

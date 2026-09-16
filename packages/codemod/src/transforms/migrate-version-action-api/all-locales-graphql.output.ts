@@ -9,6 +9,7 @@ export async function updateAllLocales(payload: Payload) {
           updatePost(id: "1", action: publish, locale: all, data: {}) { id }
           updatePage(id: "2", locale: all, action: unpublish, data: {}) { id }
           updateArticle(id: "3", action: publish, data: {}) { id }
+          updateProduct(id: "4", locale: all, action: publish) { id }
         }
       `,
     }),
