@@ -120,7 +120,26 @@ describe('migrate-version-action-api', () => {
     )
     expect(result.filesChanged).toEqual([])
     expect(result.notes).toEqual([
-      expect.stringContaining("non-empty `data` with explicit `locale: 'es'`"),
+      expect.stringContaining('write locale is not provably preserved'),
+    ])
+  })
+
+  it('should preserve non-empty object writes when locale may be inherited', async () => {
+    const input = await fixture('all-locales-inherited-locale.input.ts')
+    const output = await fixture('all-locales-inherited-locale.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/all-locales-inherited-locale.ts', input)
+
+    const result = await migrateVersionActionApi.apply({ packageJsons: [], project })
+    const transformed = project
+      .getSourceFileOrThrow('/all-locales-inherited-locale.ts')
+      .getFullText()
+
+    expect(transformed).toBe(output)
+    expect(getSyntacticDiagnosticMessages(transformed)).toEqual([])
+    expect(result.filesChanged).toEqual(['/all-locales-inherited-locale.ts'])
+    expect(result.notes).toEqual([
+      expect.stringContaining('write locale is not provably preserved'),
     ])
   })
 
@@ -145,6 +164,7 @@ describe('migrate-version-action-api', () => {
     expect(getSyntacticDiagnosticMessages(transformed)).toEqual([])
     expect(result.filesChanged).toEqual(['/all-locales-rest-localized-data.ts'])
     expect(result.notes).toEqual([
+      expect.stringContaining('non-empty or unresolved request body'),
       expect.stringContaining('non-empty or unresolved request body'),
       expect.stringContaining('non-empty or unresolved request body'),
     ])
@@ -190,7 +210,9 @@ describe('migrate-version-action-api', () => {
     expect(transformed).toBe(output)
     expect(getSyntacticDiagnosticMessages(transformed)).toEqual([])
     expect(result.filesChanged).toEqual([])
-    expect(result.notes).toEqual([expect.stringContaining('non-empty or unresolved `data`')])
+    expect(result.notes).toHaveLength(1)
+    expect(result.notes?.[0]).toContain('non-empty or unresolved `data`')
+    expect(result.notes?.[0]).toContain('write locale is not provably preserved')
   })
 
   it('should only rewrite top-level GraphQL operation arguments', async () => {
@@ -305,6 +327,7 @@ describe('migrate-version-action-api', () => {
       'strict-draft-types-false.output.ts',
       'all-locales.output.ts',
       'all-locales-localized-data.output.ts',
+      'all-locales-inherited-locale.output.ts',
       'all-locales-rest.output.ts',
       'all-locales-rest-localized-data.output.ts',
       'all-locales-rest-stringify-options.output.ts',

@@ -435,3 +435,87 @@ Prettier, ESLint, and diff whitespace checks also passed.
 
 - None. Optional serialization arguments are intentionally conservative unless a future transform
   can prove they are inert.
+
+## Final review fix: centralized write-locale safety
+
+### Safety rule
+
+For a static true all-locale publication flag, the transform may rewrite a call containing
+non-empty or unresolved write data only when the original write locale is provably preserved:
+
+- explicit `locale: 'all'` / `locale: all` is preserved;
+- an absent Local API or SDK locale is the default only when there is no `req`, spread, or computed
+  source that can supply or override it;
+- an absent GraphQL mutation locale is inherited from the request and is therefore unknown;
+- an absent REST locale is the default only when the URL query has no dynamic fragment that could
+  supply it.
+
+Empty or absent data/body remains publication-only and can migrate. Any other locale state is left
+unchanged with a manual-review note.
+
+### Root cause
+
+The previous surface guards only rejected explicit concrete locales. They did not model where an
+absent locale comes from. Local API calls can inherit `req.locale` or `req.query.locale`, GraphQL
+resolvers inherit `context.req.locale`, and a dynamic REST query fragment can supply a locale.
+Replacing the true flag with `locale: all` in those cases redirected the write.
+
+### Implementation
+
+- Added one `isWriteLocalePreserved` predicate shared by Local/SDK object, REST, and GraphQL
+  migrations. It combines potential write data, the explicit locale, and whether an absent locale
+  is proven default or inherited/unknown.
+- Object migration marks `req` as inherited. The existing spread/computed ambiguity guard remains
+  ahead of mutation; no-`req` Local/SDK calls remain proven default, matching `createLocalReq`'s
+  default-locale fallback.
+- GraphQL marks an absent mutation argument as inherited. REST marks absent locale as inherited
+  when the query includes a dynamic template fragment, otherwise default.
+- Updated manual-review notes to state that the write locale is not provably preserved.
+
+### RED evidence
+
+The Local/SDK inherited-locale fixture, GraphQL inherited-locale field, spread/computed data, safe
+controls, and idempotency entry were added before the central predicate:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 failed (1)
+Tests       3 failed | 38 passed (41)
+```
+
+The failures showed the Local `req` call and GraphQL absent-locale field rewritten to `all`; the
+idempotency loop independently caught the unsafe Local rewrite.
+
+A second TDD cycle covered a dynamic REST query fragment that could hide an inherited locale:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts -t "REST localized writes"
+Test Files  1 failed (1)
+Tests       1 failed | 40 skipped (41)
+```
+
+### GREEN evidence
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 passed (1)
+Tests       41 passed (41)
+
+pnpm --pm-on-fail=ignore --filter @payloadcms/codemod typecheck
+$ tsc
+```
+
+### Tests and fixtures
+
+- `all-locales-inherited-locale.*` covers unsafe Local `req` inheritance, safe SDK default locale,
+  explicit `all`, exact `filesChanged`, syntax, note, and idempotency behavior.
+- `all-locales-graphql-localized-data.*` now covers absent operation locale inherited from
+  `/graphql?locale=es` in addition to explicit and variable data cases.
+- `all-locales-rest-localized-data.*` now covers a dynamic query fragment that can hide locale.
+- `all-locales-object-ambiguous.*` now uses non-empty data for its spread/computed cases.
+- Nested and escaped-string GraphQL fixtures use explicit `locale: all`, preserving their original
+  structure/escaping assertions under the stricter safety rule.
+
+### Concerns
+
+- None. Inability to prove default or `all` is intentionally treated as inherited/unknown.

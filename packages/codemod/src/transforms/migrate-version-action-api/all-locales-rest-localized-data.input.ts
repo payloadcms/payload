@@ -4,6 +4,7 @@ export async function updateAllLocales(
   payload: Payload,
   id: string,
   data: { title: string },
+  query: string,
 ) {
   const created = await fetch(
     `${payload.config.serverURL}${payload.config.routes.api}/posts?locale=es&action=publish&publishAllLocales=true`,
@@ -21,6 +22,10 @@ export async function updateAllLocales(
     `${payload.config.serverURL}${payload.config.routes.api}/posts/${id}?locale=it&action=publish&publishAllLocales=true`,
     { method: 'PATCH' },
   )
+  const inherited = await fetch(
+    `${payload.config.serverURL}${payload.config.routes.api}/posts/${id}?${query}&action=publish&publishAllLocales=true`,
+    { method: 'PATCH', body: JSON.stringify({ title: 'Inherited locale' }) },
+  )
 
-  return { created, empty, noBody, updated }
+  return { created, empty, inherited, noBody, updated }
 }

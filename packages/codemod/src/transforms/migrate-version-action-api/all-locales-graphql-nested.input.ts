@@ -9,6 +9,7 @@ export async function updateNestedData(payload: Payload) {
           updatePost(
             id: "1"
             action: publish
+            locale: all
             publishAllLocales: true
             data: {
               locale: "nested-value"

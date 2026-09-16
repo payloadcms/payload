@@ -17,6 +17,8 @@ type StaticStatus = 'computed' | 'draft' | 'localized' | 'published'
 
 type PublicationAction = 'publish' | 'unpublish'
 
+type AbsentWriteLocaleSource = 'default' | 'inherited'
+
 type GraphqlArgument = {
   name: string
   nameStart: number
@@ -249,9 +251,15 @@ function rewriteAllLocaleOptionsObject({
     return mutated
   }
 
-  if (localeAssignment && locale !== 'all' && hasPotentialWriteData(options)) {
+  if (
+    !isWriteLocalePreserved({
+      absentLocaleSource: options.getProperty('req') ? 'inherited' : 'default',
+      hasPotentialWriteData: hasPotentialWriteData(options),
+      locale,
+    })
+  ) {
     notes.push(
-      `${filePath}: non-empty \`data\` with explicit \`locale: '${locale}'\` and \`${activeFlag.name}\` cannot be rewritten safely — keep the localized data write and perform the all-locale publication as a separate operation manually.`,
+      `${filePath}: non-empty or unresolved \`data\` with \`${activeFlag.name}\` cannot be rewritten safely because the write locale is not provably preserved — keep the localized data write and perform the all-locale publication as a separate operation manually.`,
     )
     return mutated
   }
@@ -277,6 +285,26 @@ function hasPotentialWriteData(options: ObjectLiteralExpression): boolean {
 
   const data = unwrap(dataProperty.getInitializer())
   return !Node.isObjectLiteralExpression(data) || data.getProperties().length > 0
+}
+
+function isWriteLocalePreserved({
+  absentLocaleSource,
+  hasPotentialWriteData,
+  locale,
+}: {
+  absentLocaleSource: AbsentWriteLocaleSource
+  hasPotentialWriteData: boolean
+  locale: string | undefined
+}): boolean {
+  if (!hasPotentialWriteData || locale === 'all') {
+    return true
+  }
+
+  if (locale !== undefined) {
+    return false
+  }
+
+  return absentLocaleSource === 'default'
 }
 
 function hasUnresolvedObjectOverride(options: ObjectLiteralExpression): boolean {
@@ -660,8 +688,8 @@ function rewriteAllLocaleStrings({
           }
           if (rewrittenGraphql.ambiguous) {
             notes.push(
-              rewrittenGraphql.unsafeLocalizedData
-                ? `${filePath}: non-empty or unresolved \`data\` with an explicit GraphQL locale and all-locale publication flag cannot be rewritten safely — keep the localized data write and perform the all-locale publication as a separate operation manually.`
+              rewrittenGraphql.unsafeWriteLocale
+                ? `${filePath}: non-empty or unresolved \`data\` with an all-locale publication flag cannot be rewritten safely because the write locale is not provably preserved — keep the localized data write and perform the all-locale publication as a separate operation manually.`
                 : `${filePath}: GraphQL all-locale publication argument could not be rewritten safely — use an explicit publication \`action\` and \`locale: all\` manually.`,
             )
           }
@@ -1417,9 +1445,15 @@ function rewriteAllLocaleQuery(
     }
   }
 
-  if (hasPotentialWriteBody && localeMatch?.[1] !== 'all' && localeMatch?.[1]) {
+  if (
+    !isWriteLocalePreserved({
+      absentLocaleSource: getRestAbsentLocaleSource(next),
+      hasPotentialWriteData: hasPotentialWriteBody,
+      locale: localeMatch?.[1],
+    })
+  ) {
     return {
-      note: `non-empty or unresolved request body with explicit REST \`locale=${localeMatch[1]}\` and \`${activeFlag.name}\` cannot be rewritten safely — keep the localized body write and perform the all-locale publication as a separate operation manually.`,
+      note: `non-empty or unresolved request body with \`${activeFlag.name}\` cannot be rewritten safely because the write locale is not provably preserved — keep the localized body write and perform the all-locale publication as a separate operation manually.`,
       text,
     }
   }
@@ -1432,6 +1466,15 @@ function rewriteAllLocaleQuery(
   }
 
   return { text: next }
+}
+
+function getRestAbsentLocaleSource(text: string): AbsentWriteLocaleSource {
+  const queryStart = text.indexOf('?')
+  if (queryStart !== -1 && text.slice(queryStart + 1).includes('${')) {
+    return 'inherited'
+  }
+
+  return 'default'
 }
 
 function removeQueryParam(text: string, name: string, value: string): string {
@@ -1514,7 +1557,7 @@ function rewriteGraphqlAllLocaleArgs(text: string): {
   ambiguous: boolean
   changed: boolean
   text: string
-  unsafeLocalizedData?: boolean
+  unsafeWriteLocale?: boolean
 } {
   if (!hasGraphqlAllLocaleArg(text)) {
     return { ambiguous: false, changed: false, text }
@@ -1523,7 +1566,7 @@ function rewriteGraphqlAllLocaleArgs(text: string): {
   let ambiguous = false
   let changed = false
   let next = text
-  let unsafeLocalizedData = false
+  let unsafeWriteLocale = false
 
   for (const field of findGraphqlFieldArguments(text).reverse()) {
     const args = text.slice(field.argsStart, field.argsEnd)
@@ -1542,18 +1585,18 @@ function rewriteGraphqlAllLocaleArgs(text: string): {
     const rewritten = rewriteGraphqlPublicationArgs({ args, fieldName: field.fieldName })
     ambiguous ||= rewritten.ambiguous
     changed ||= rewritten.changed
-    unsafeLocalizedData ||= rewritten.unsafeLocalizedData === true
+    unsafeWriteLocale ||= rewritten.unsafeWriteLocale === true
     next = `${next.slice(0, field.argsStart)}${rewritten.args}${next.slice(field.argsEnd)}`
   }
 
-  return { ambiguous, changed, text: next, unsafeLocalizedData }
+  return { ambiguous, changed, text: next, unsafeWriteLocale }
 }
 
 function rewriteGraphqlPublicationArgs({ args, fieldName }: { args: string; fieldName: string }): {
   ambiguous: boolean
   args: string
   changed: boolean
-  unsafeLocalizedData?: boolean
+  unsafeWriteLocale?: boolean
 } {
   const graphqlArgs = findTopLevelGraphqlArguments(args)
   const flagArguments = graphqlArgs.filter(
@@ -1619,16 +1662,19 @@ function rewriteGraphqlPublicationArgs({ args, fieldName }: { args: string; fiel
 
   const dataArgument = currentArguments.find(({ name }) => name === 'data')
   if (
-    localeArgument &&
-    locale !== 'all' &&
-    dataArgument &&
-    hasPotentialGraphqlWriteData({ args: next, argument: dataArgument })
+    !isWriteLocalePreserved({
+      absentLocaleSource: 'inherited',
+      hasPotentialWriteData:
+        dataArgument !== undefined &&
+        hasPotentialGraphqlWriteData({ args: next, argument: dataArgument }),
+      locale,
+    })
   ) {
     return {
       ambiguous: true,
       args,
       changed: false,
-      unsafeLocalizedData: true,
+      unsafeWriteLocale: true,
     }
   }
 

@@ -8,7 +8,7 @@ declare const payload: Payload
 void payload.update({
   action: 'publish',
   collection: 'posts',
-  data: {},
+  data: { title: 'Spread locale' },
   publishAllLocales: true,
   ...options,
 })
@@ -16,7 +16,7 @@ void payload.update({
 void payload.update({
   action: 'publish',
   collection: 'posts',
-  data: {},
+  data: { title: 'Computed locale' },
   publishAllLocales: true,
   [computedKey]: computedValue,
 })
