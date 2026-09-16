@@ -10,38 +10,15 @@ The `@payloadcms/ui` package contains the React components used throughout the P
 
 Each component guide includes working examples for the selected version of Payload, common props, accessibility guidance, and any providers or setup the component requires.
 
-## Components
+### Actions & navigation
 
-<CardGroup variant="compact">
-  <Card
-    title="AnimateHeight"
-    description="Animate a container as its content changes height."
-    link="/docs/ui-components/animate-height"
-  />
-  <Card
-    title="Banner"
-    description="Display contextual notices, warnings, and errors."
-    link="/docs/ui-components/banner"
-  />
+Trigger actions and help users move through custom Admin Panel interfaces.
+
+<CardGroup>
   <Card
     title="Button"
     description="Trigger actions with Payload's standard button styles."
     link="/docs/ui-components/button"
-  />
-  <Card
-    title="Card"
-    description="Present content in a clickable or navigable card."
-    link="/docs/ui-components/card"
-  />
-  <Card
-    title="CodeEditor"
-    description="Display and edit code with Payload's Monaco-based editor."
-    link="/docs/ui-components/code-editor"
-  />
-  <Card
-    title="Collapsible"
-    description="Show and hide a section beneath a collapsible header."
-    link="/docs/ui-components/collapsible"
   />
   <Card
     title="CopyToClipboard"
@@ -49,49 +26,9 @@ Each component guide includes working examples for the selected version of Paylo
     link="/docs/ui-components/copy-to-clipboard"
   />
   <Card
-    title="DatePicker"
-    description="Select calendar dates and times."
-    link="/docs/ui-components/date-picker"
-  />
-  <Card
-    title="Document Actions"
-    description="Save, publish, and perform bulk operations with Admin-aware controls."
-    link="/docs/ui-components/document-actions"
-  />
-  <Card
-    title="Document State"
-    description="Handle document locks, takeovers, and unsaved changes."
-    link="/docs/ui-components/document-state"
-  />
-  <Card
-    title="Draggable Sortable"
-    description="Reorder custom interface content with pointer and keyboard controls."
-    link="/docs/ui-components/draggable-sortable"
-  />
-  <Card
-    title="Dropzone"
-    description="Accept files through drag, drop, and paste interactions."
-    link="/docs/ui-components/dropzone"
-  />
-  <Card
-    title="ErrorPill"
-    description="Show a compact validation or error indicator."
-    link="/docs/ui-components/error-pill"
-  />
-  <Card
-    title="Gutter"
-    description="Align content with the Admin Panel's responsive gutters."
-    link="/docs/ui-components/gutter"
-  />
-  <Card
     title="Hamburger"
     description="Render Payload's animated menu toggle."
     link="/docs/ui-components/hamburger"
-  />
-  <Card
-    title="Icons"
-    description="Use Payload's interface icons in custom Admin Panel UI."
-    link="/docs/ui-components/icons"
   />
   <Card
     title="Link"
@@ -99,39 +36,36 @@ Each component guide includes working examples for the selected version of Paylo
     link="/docs/ui-components/link"
   />
   <Card
-    title="List and Pagination Controls"
-    description="Add pagination, sorting, and selection to Admin lists."
-    link="/docs/ui-components/list-and-pagination-controls"
-  />
-  <Card
-    title="Modals and Drawers"
-    description="Present focused actions and supporting content in overlays."
-    link="/docs/ui-components/modals-and-drawers"
-  />
-  <Card
-    title="Motion and Loading"
-    description="Communicate loading and animate layout changes."
-    link="/docs/ui-components/motion-and-loading"
-  />
-  <Card
     title="Navigation Controls"
     description="Compose Admin menu and step navigation controls."
     link="/docs/ui-components/navigation-controls"
   />
   <Card
-    title="Pill"
-    description="Display compact metadata, statuses, and actions."
-    link="/docs/ui-components/pill"
+    title="Step Navigation"
+    description="Set the Admin header breadcrumbs from a Custom View."
+    link="/docs/ui-components/step-navigation"
+  />
+</CardGroup>
+
+### Inputs & selection
+
+Collect, edit, search, and select values with Admin-styled controls.
+
+<CardGroup>
+  <Card
+    title="CodeEditor"
+    description="Display and edit code with Payload's Monaco-based editor."
+    link="/docs/ui-components/code-editor"
+  />
+  <Card
+    title="DatePicker"
+    description="Select calendar dates and times."
+    link="/docs/ui-components/date-picker"
   />
   <Card
     title="PillSelector"
     description="Choose from a compact group of pill-shaped options."
     link="/docs/ui-components/pill-selector"
-  />
-  <Card
-    title="Popup and PopupList"
-    description="Build contextual menus and lists of actions."
-    link="/docs/ui-components/popup"
   />
   <Card
     title="ReactSelect and Select"
@@ -144,14 +78,85 @@ Each component guide includes working examples for the selected version of Paylo
     link="/docs/ui-components/search-filter"
   />
   <Card
+    title="TimezonePicker"
+    description="Select from a configured list of timezones."
+    link="/docs/ui-components/timezone-picker"
+  />
+</CardGroup>
+
+### Layout & structure
+
+Arrange content and create expandable, responsive interface sections.
+
+<CardGroup>
+  <Card
+    title="AnimateHeight"
+    description="Animate a container as its content changes height."
+    link="/docs/ui-components/animate-height"
+  />
+  <Card
+    title="Card"
+    description="Present content in a clickable or navigable card."
+    link="/docs/ui-components/card"
+  />
+  <Card
+    title="Collapsible"
+    description="Show and hide a section beneath a collapsible header."
+    link="/docs/ui-components/collapsible"
+  />
+  <Card
+    title="Gutter"
+    description="Align content with the Admin Panel's responsive gutters."
+    link="/docs/ui-components/gutter"
+  />
+</CardGroup>
+
+### Feedback & status
+
+Communicate outcomes, validation, loading states, and contextual information.
+
+<CardGroup>
+  <Card
+    title="Banner"
+    description="Display contextual notices, warnings, and errors."
+    link="/docs/ui-components/banner"
+  />
+  <Card
+    title="ErrorPill"
+    description="Show a compact validation or error indicator."
+    link="/docs/ui-components/error-pill"
+  />
+  <Card
+    title="Motion and Loading"
+    description="Communicate loading and animate layout changes."
+    link="/docs/ui-components/motion-and-loading"
+  />
+  <Card
+    title="Pill"
+    description="Display compact metadata, statuses, and actions."
+    link="/docs/ui-components/pill"
+  />
+  <Card
     title="ShimmerEffect"
     description="Show a loading placeholder while content resolves."
     link="/docs/ui-components/shimmer-effect"
   />
+</CardGroup>
+
+### Data display & lists
+
+Present structured data, media, and collection controls.
+
+<CardGroup>
   <Card
-    title="Step Navigation"
-    description="Set the Admin header breadcrumbs from a Custom View."
-    link="/docs/ui-components/step-navigation"
+    title="Icons"
+    description="Use Payload's interface icons in custom Admin Panel UI."
+    link="/docs/ui-components/icons"
+  />
+  <Card
+    title="List and Pagination Controls"
+    description="Add pagination, sorting, and selection to Admin lists."
+    link="/docs/ui-components/list-and-pagination-controls"
   />
   <Card
     title="Table"
@@ -168,15 +173,54 @@ Each component guide includes working examples for the selected version of Paylo
     description="Render media thumbnails with file-type fallbacks."
     link="/docs/ui-components/thumbnail"
   />
+</CardGroup>
+
+### Interaction & overlays
+
+Build reorderable interfaces and contextual layers for focused interactions.
+
+<CardGroup>
   <Card
-    title="TimezonePicker"
-    description="Select from a configured list of timezones."
-    link="/docs/ui-components/timezone-picker"
+    title="Draggable Sortable"
+    description="Reorder custom interface content with pointer and keyboard controls."
+    link="/docs/ui-components/draggable-sortable"
+  />
+  <Card
+    title="Modals and Drawers"
+    description="Present focused actions and supporting content in overlays."
+    link="/docs/ui-components/modals-and-drawers"
+  />
+  <Card
+    title="Popup and PopupList"
+    description="Build contextual menus and lists of actions."
+    link="/docs/ui-components/popup"
   />
   <Card
     title="Tooltip"
     description="Provide contextual labels on hover or focus."
     link="/docs/ui-components/tooltip"
+  />
+</CardGroup>
+
+### Documents & uploads
+
+Extend document editing and upload-enabled Collection workflows.
+
+<CardGroup>
+  <Card
+    title="Document Actions"
+    description="Save, publish, and perform bulk operations with Admin-aware controls."
+    link="/docs/ui-components/document-actions"
+  />
+  <Card
+    title="Document State"
+    description="Handle document locks, takeovers, and unsaved changes."
+    link="/docs/ui-components/document-state"
+  />
+  <Card
+    title="Dropzone"
+    description="Accept files through drag, drop, and paste interactions."
+    link="/docs/ui-components/dropzone"
   />
   <Card
     title="Upload"
