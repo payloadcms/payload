@@ -202,7 +202,7 @@ Run `remove-versions-true` to clean up any bare `versions: true` that is now the
 
 There is no v4 compatibility shim for the public `draft` boolean on read and write operations. Reads use `version`. Writes use `action`. `_status` remains on returned documents and in typed write inputs.
 
-The `migrate-version-action-api` transform in `@payloadcms/codemod` rewrites unambiguous Local, REST, GraphQL, and SDK call sites and removes `typescript.strictDraftTypes`. It emits notes rather than guessing for dynamic `draft` values, update `draft: false` without a static `_status`, wrapper helpers, and conflicting `draft` / `_status` / `action` combinations.
+The `migrate-version-action-api` transform in `@payloadcms/codemod` rewrites unambiguous Local, REST, GraphQL, and SDK call sites and removes `typescript.strictDraftTypes`. It also rewrites static all-locale publication flags when they have a matching explicit action. It emits notes rather than guessing for dynamic `draft` values, update `draft: false` without a static `_status`, wrapper helpers, and conflicting `draft` / `_status` / `action` combinations.
 
 **Reads**
 
@@ -214,12 +214,16 @@ The `migrate-version-action-api` transform in `@payloadcms/codemod` rewrites una
 
 **Writes** — precedence is explicit `action`, then recognized `_status`, then the operation default. `_status: 'draft'` infers `saveDraft`; `_status: 'published'` infers `publish`; `_status` never infers `unpublish`. Create and duplicate default to `saveDraft`. Update and restore default to `publish`.
 
+All-locale publication uses `locale: 'all'` with an explicit action. The former `publishAllLocales` and `unpublishAllLocales` write options were removed in v4. An omitted update action and `_status: 'published'` inference are rejected when `locale: 'all'`; use `action: 'publish'` or `action: 'unpublish'` to make the all-locale transition explicit. `action: 'saveDraft'` with `locale: 'all'` remains valid.
+
 ```ts
 // Local API
 await payload.find({ collection: 'posts', version: 'latest' })
 await payload.create({ collection: 'posts', data: { title: 'Draft' }, action: 'saveDraft' })
 await payload.update({ collection: 'posts', id, data: { title: 'Live' }, action: 'publish' })
 await payload.update({ collection: 'posts', id, action: 'unpublish' })
+await payload.update({ collection: 'posts', id, locale: 'all', action: 'publish', data: {} })
+await payload.update({ collection: 'posts', id, locale: 'all', action: 'unpublish' })
 
 // REST
 GET /api/posts?version=latest
@@ -245,6 +249,7 @@ Cases the codemod will not rewrite, which you must migrate by hand:
 - Update `draft: false` without a static `_status` (old behavior depended on existing document state)
 - Detached options objects and wrappers whose operation cannot be identified
 - Conflicting `draft` + `_status` values
+- Dynamic or conflicting `publishAllLocales` / `unpublishAllLocales` values, which must be replaced manually with `locale: 'all'` and a matching explicit publication action
 - REST URLs and GraphQL strings without enough surrounding operation context
 
 Search leftover operation arguments with:

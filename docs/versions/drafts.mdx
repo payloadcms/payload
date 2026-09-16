@@ -124,7 +124,7 @@ On collections and globals **without** drafts, omitted and `'published'` are ord
 | `'published'`           | `publish`                                |
 | omitted / anything else | Operation default                        |
 
-Localized `_status` inference uses the active write locale. Publishing or unpublishing every locale requires explicit `action` plus `publishAllLocales` / `unpublishAllLocales`. `autosave: true` is valid only with `saveDraft`.
+Localized `_status` inference uses the active write locale. Publishing or unpublishing every locale requires `locale: 'all'` plus an explicit `action: 'publish'` or `action: 'unpublish'`. An omitted action and `_status: 'published'` inference are rejected for all-locale publication transitions. `action: 'saveDraft'` with `locale: 'all'` remains valid. `autosave: true` is valid only with `saveDraft`.
 
 **Required fields:** `_status: 'draft'` infers `saveDraft` and therefore skips required-field validation. Setting `_status: 'published'` infers `publish` and enforces them. To save incomplete documents, use `action: 'saveDraft'` or omit action with `_status: 'draft'` / omitted status on create.
 

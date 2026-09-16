@@ -267,6 +267,21 @@ await payload.update({
   action: 'unpublish',
 })
 
+// Publish or unpublish every locale — an explicit publication action is required
+await payload.update({
+  collection: 'posts',
+  id: '123',
+  locale: 'all',
+  action: 'publish',
+  data: {},
+})
+await payload.update({
+  collection: 'posts',
+  id: '123',
+  locale: 'all',
+  action: 'unpublish',
+})
+
 // Reads
 await payload.findByID({ collection: 'posts', id: '123' }) // published (default)
 await payload.findByID({ collection: 'posts', id: '123', version: 'latest' }) // newest draft, else published
@@ -302,6 +317,8 @@ await sdk.find({ collection: 'posts', version: 'latest' })
 | Restore            | `saveDraft`, `publish`              | `publish`   |
 
 `_status: 'draft'` infers `saveDraft`. `_status: 'published'` infers `publish`. Localized `_status` uses the active write locale. Non-draft collections accept omitted/`publish` only; `saveDraft`/`unpublish` throw. `afterChange.action` is the resolved action, or `undefined` without drafts.
+
+The removed `publishAllLocales` and `unpublishAllLocales` options are replaced by `locale: 'all'` with an explicit `action: 'publish'` or `action: 'unpublish'`. An omitted action or `_status: 'published'` cannot implicitly publish all locales. `action: 'saveDraft'` with `locale: 'all'` remains valid.
 
 Local API and SDK types are always strict. `typescript.strictDraftTypes` is gone — do not add a replacement flag.
 

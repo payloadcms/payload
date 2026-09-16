@@ -842,9 +842,9 @@ Unlike stored paths, computed paths don't require updating draft versions when a
 
 ## Limitations
 
-### Locale 'all' Not Supported
+### Locale 'all' and hierarchy processing
 
-Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually.
+Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually when the update needs hierarchy processing. `locale: 'all'` remains available for explicit publication transitions, but it should not be used when the hierarchy needs to recalculate paths.
 
 ### Parent Changes When Publishing a Single Locale
 
@@ -879,22 +879,22 @@ await payload.update({
   collection: 'pages',
   id: 'doc-id',
   locale: 'fr',
-  data: { _status: 'published' },
   action: 'publish',
 })
 // Result: parent changed to 'parent-2' for ALL locales
 // Paths computed on next read will reflect new parent for all locales
 ```
 
-**Recommendation:** When moving documents in the hierarchy (changing parent), prefer `publishAllLocales` (default) to make the intent clear:
+**Recommendation:** When moving documents in the hierarchy (changing parent), publish each locale individually so hierarchy processing can run:
 
 ```ts
 // ✅ Clear: publishes parent change for all locales
 await payload.update({
   collection: 'pages',
   id: 'doc-id',
+  locale: 'fr',
+  action: 'publish',
   data: { parent: 'new-parent' },
-  // publishAllLocales is default
 })
 ```
 
