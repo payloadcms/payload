@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { Project } from 'ts-morph'
+import { Project, SyntaxKind, ts } from 'ts-morph'
 import { describe, expect, it } from 'vitest'
 
 import { runTransform } from '../../utils/test-helpers.js'
@@ -21,6 +21,28 @@ async function applyProject(files: Record<string, string>) {
     project.createSourceFile(path, contents)
   }
   return migrateVersionActionApi.apply({ packageJsons: [], project })
+}
+
+function getSyntacticDiagnosticMessages(source: string): string[] {
+  const result = ts.transpileModule(source, {
+    compilerOptions: { target: ts.ScriptTarget.ESNext },
+    fileName: 'fixture.ts',
+    reportDiagnostics: true,
+  })
+
+  return (result.diagnostics ?? []).map((diagnostic) =>
+    ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
+  )
+}
+
+function getEscapedTitleGraphqlValue(source: string): string {
+  const project = new Project({ useInMemoryFileSystem: true })
+  const sourceFile = project.createSourceFile('/fixture.ts', source)
+  const query = sourceFile
+    .getDescendantsOfKind(SyntaxKind.StringLiteral)
+    .find((literal) => literal.getLiteralValue().includes('mutation EscapedTitle'))
+
+  return query?.getLiteralValue() ?? ''
 }
 
 describe('migrate-version-action-api', () => {
@@ -121,6 +143,21 @@ describe('migrate-version-action-api', () => {
     expect(await apply('all-locales-graphql-double-quoted.input.ts')).toBe(output)
   })
 
+  it('should preserve escaped nested quotes in double-quoted GraphQL strings', async () => {
+    const input = await fixture('all-locales-graphql-escaped-string.input.ts')
+    const output = await fixture('all-locales-graphql-escaped-string.output.ts')
+    const transformed = await apply('all-locales-graphql-escaped-string.input.ts')
+
+    expect(getSyntacticDiagnosticMessages(input)).toEqual([])
+    expect(getSyntacticDiagnosticMessages(output)).toEqual([])
+    expect(transformed).toBe(output)
+    expect(getSyntacticDiagnosticMessages(transformed)).toEqual([])
+    expect(getEscapedTitleGraphqlValue(transformed)).toContain('title: "hello \\"world\\""')
+    expect(await runTransform({ source: transformed, transform: migrateVersionActionApi })).toBe(
+      transformed,
+    )
+  })
+
   it('should complete compatible mixed REST draft and all-locale rewrites in one run', async () => {
     const output = await fixture('all-locales-mixed-rest.output.ts')
 
@@ -199,6 +236,7 @@ describe('migrate-version-action-api', () => {
       'all-locales-graphql-comma-free.output.ts',
       'all-locales-graphql-inline-comma-free.output.ts',
       'all-locales-graphql-double-quoted.output.ts',
+      'all-locales-graphql-escaped-string.output.ts',
       'all-locales-mixed-rest.output.ts',
       'all-locales-object-ambiguous.output.ts',
       'all-locales-unsafe.output.ts',

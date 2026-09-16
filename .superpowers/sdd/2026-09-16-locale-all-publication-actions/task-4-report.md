@@ -197,3 +197,50 @@ $ tsc
 ### Concerns
 
 - None.
+
+## Fix round 3
+
+### Implementation
+
+- Corrected double-quoted JavaScript string emission for GraphQL values containing escaped nested quotes.
+- The transform now reads the decoded AST string value, performs the GraphQL rewrite on that value, and serializes changed double-quoted literals with `JSON.stringify`. This preserves the backslash-plus-quote pairs required by GraphQL while producing syntactically valid JavaScript.
+- Single-quoted strings and template literals retain their existing write paths.
+
+### RED evidence
+
+The exact escaped-string fixture and parse/content/idempotency assertions were added before the production edit:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts -t "escaped nested quotes"
+Test Files  1 failed (1)
+Tests       1 failed | 35 skipped (36)
+```
+
+The transformed source reported four TypeScript syntactic diagnostics and emitted too few backslashes around the nested `world` quotes.
+
+### GREEN evidence
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 passed (1)
+Tests       36 passed (36)
+
+pnpm --pm-on-fail=ignore --filter @payloadcms/codemod typecheck
+$ tsc
+```
+
+### Tests and fixtures
+
+- `all-locales-graphql-escaped-string.input.ts`
+- `all-locales-graphql-escaped-string.output.ts`
+- The regression asserts zero TypeScript transpile diagnostics for input, expected output, and actual transformed output; exact fixture equality; preserved runtime GraphQL nested-string content; top-level flag migration; and second-run idempotency.
+
+### Self-review
+
+- Confirmed the serializer change is limited to changed double-quoted `StringLiteral` nodes.
+- Confirmed the exact output retains `title: \"hello \\\"world\\\"\"` in JavaScript source while the parsed literal retains `title: "hello \\"world\\""` in GraphQL content.
+- Confirmed all prior GraphQL structure, comma-free, double-quoted, REST, object-safety, draft, notes, and `filesChanged` tests remain green.
+
+### Concerns
+
+- None.

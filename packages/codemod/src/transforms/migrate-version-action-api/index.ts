@@ -627,7 +627,11 @@ function rewriteAllLocaleStrings({
           const rewrittenGraphql = rewriteGraphqlAllLocaleArgs(getGraphqlStringText(literal))
           if (rewrittenGraphql.changed) {
             if (Node.isStringLiteral(literal)) {
-              literal.setLiteralValue(rewrittenGraphql.text)
+              if (literal.getText().startsWith('"')) {
+                literal.replaceWithText(JSON.stringify(rewrittenGraphql.text))
+              } else {
+                literal.setLiteralValue(rewrittenGraphql.text)
+              }
             } else {
               literal.replaceWithText(rewrittenGraphql.text)
             }
@@ -743,7 +747,7 @@ function getStringLikeDescendants({ node }: { node: MorphNode }) {
 
 function getGraphqlStringText(node: MorphNode): string {
   if (Node.isStringLiteral(node)) {
-    return node.getLiteralText()
+    return node.getLiteralValue()
   }
 
   return node.getText()
