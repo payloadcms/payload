@@ -4110,6 +4110,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           })
 
           expect(esDoc._status).toContain('published')
+          expect(doc._status).not.toHaveProperty('xx')
         })
 
         test('should allow default saveDraft creation for all locales', async ({ payload }) => {
@@ -4392,19 +4393,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
 
         test('should publish and unpublish all', async ({ payload }) => {
           const doc = await payload.create({
-            collection: localizedDraftsSlug,
+            collection: allFieldsLocalizedSlug,
             data: {
-              title: 'en draft',
+              checkbox: true,
+              date: '2026-01-01T00:00:00.000Z',
+              email: 'draft-en@example.com',
+              number: 1,
+              radio: 'radio1',
+              text: 'en draft',
               _status: 'draft',
             },
             locale: defaultLocale,
           })
 
           await payload.update({
-            collection: localizedDraftsSlug,
+            collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
-              title: 'es draft',
+              checkbox: false,
+              date: '2026-02-01T00:00:00.000Z',
+              email: 'draft-es@example.com',
+              number: 2,
+              radio: 'radio2',
+              text: 'es draft',
               _status: 'draft',
             },
             locale: spanishLocale,
@@ -4412,7 +4423,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
 
           await payload.update({
             action: 'publish',
-            collection: localizedDraftsSlug,
+            collection: allFieldsLocalizedSlug,
             id: doc.id,
             data: {
               _status: 'published',
@@ -4423,17 +4434,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           const mainDocument = await payload.findByID({
             locale: 'all',
             id: doc.id,
-            collection: localizedDraftsSlug,
+            collection: allFieldsLocalizedSlug,
             version: 'published',
           })
 
           expect(mainDocument._status!.en).toBe('published')
-          expect(mainDocument.title!.en).toBe('en draft')
+          expect(mainDocument.email!.en).toBe('draft-en@example.com')
+          expect(mainDocument.number!.en).toBe(1)
+          expect(mainDocument.text!.en).toBe('en draft')
           expect(mainDocument._status!.es).toBe('published')
-          expect(mainDocument.title!.es).toBe('es draft')
+          expect(mainDocument.email!.es).toBe('draft-es@example.com')
+          expect(mainDocument.number!.es).toBe(2)
+          expect(mainDocument.text!.es).toBe('es draft')
 
           await payload.update({
-            collection: localizedDraftsSlug,
+            collection: allFieldsLocalizedSlug,
             id: doc.id,
             action: 'unpublish',
             data: {},
@@ -4443,7 +4458,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           const unpublishedDocument = await payload.findByID({
             locale: 'all',
             id: doc.id,
-            collection: localizedDraftsSlug,
+            collection: allFieldsLocalizedSlug,
             version: 'latest',
           })
 
@@ -4604,6 +4619,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           const doc = await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
+              email: 'draft-en@example.com',
               text: 'en draft',
               _status: 'draft',
             },
@@ -4613,6 +4629,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
+              email: 'draft-es@example.com',
               text: 'es draft',
               _status: 'draft',
             },
@@ -4635,8 +4652,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
           })
 
           expect(mainDocument._status!.en).toBe('published')
+          expect(mainDocument.email!.en).toBe('draft-en@example.com')
           expect(mainDocument.text!.en).toBe('en draft')
           expect(mainDocument._status!.es).toBe('published')
+          expect(mainDocument.email!.es).toBe('draft-es@example.com')
           expect(mainDocument.text!.es).toBe('es draft')
 
           await payload.updateGlobal({

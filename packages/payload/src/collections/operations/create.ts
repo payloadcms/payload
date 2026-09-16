@@ -137,6 +137,19 @@ export const createOperation = async <
     const isSavingDraft = resolvedAction === 'saveDraft'
     const isPublishingAllLocales = locale === 'all' && resolvedAction === 'publish'
 
+    const localization = config.localization
+    let publicationLocaleCodes = localization ? localization.localeCodes : []
+
+    if (isPublishingAllLocales && localization && localization.filterAvailableLocales) {
+      const filteredLocales = await localization.filterAvailableLocales({
+        locales: localization.locales,
+        req,
+      })
+      publicationLocaleCodes = filteredLocales.map((locale) =>
+        typeof locale === 'string' ? locale : locale.code,
+      )
+    }
+
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
 
@@ -266,7 +279,11 @@ export const createOperation = async <
     ) {
       const statusStr = dataWithLocales._status
       dataWithLocales._status = {}
-      for (const localeCode of config.localization.localeCodes) {
+      const statusLocaleCodes = isPublishingAllLocales
+        ? publicationLocaleCodes
+        : config.localization.localeCodes
+
+      for (const localeCode of statusLocaleCodes) {
         ;(dataWithLocales._status as Record<string, unknown>)[localeCode] = statusStr
       }
     }
@@ -276,23 +293,11 @@ export const createOperation = async <
       hasLocalizeStatusEnabled(collectionConfig) &&
       isPublishingAllLocales
     ) {
-      let accessibleLocaleCodes = config.localization.localeCodes
-
-      if (config.localization.filterAvailableLocales) {
-        const filteredLocales = await config.localization.filterAvailableLocales({
-          locales: config.localization.locales,
-          req,
-        })
-        accessibleLocaleCodes = filteredLocales.map((locale) =>
-          typeof locale === 'string' ? locale : locale.code,
-        )
-      }
-
       if (typeof dataWithLocales._status !== 'object' || dataWithLocales._status === null) {
         dataWithLocales._status = {}
       }
 
-      for (const localeCode of accessibleLocaleCodes) {
+      for (const localeCode of publicationLocaleCodes) {
         dataWithLocales._status[localeCode] = 'published'
       }
     }

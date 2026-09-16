@@ -33,6 +33,7 @@ import { deepCopyObjectSimple, saveVersion } from '../../../index.js'
 import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js'
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
+import { getRequestWithLocale } from '../../../utilities/getRequestWithLocale.js'
 import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
@@ -101,6 +102,9 @@ export const updateDocument = async <
   const isUnpublishing = action === 'unpublish'
   const isPublishingAllLocales = locale === 'all' && action === 'publish'
   const isUnpublishingAllLocales = locale === 'all' && action === 'unpublish'
+  const operationLocale =
+    locale === 'all' && config.localization ? config.localization.defaultLocale : locale
+  const operationReq = getRequestWithLocale({ locale: operationLocale, req })
   const shouldSavePassword = Boolean(
     password &&
       collectionConfig.auth &&
@@ -124,14 +128,14 @@ export const updateDocument = async <
 
   const originalDoc = await afterRead({
     collection: collectionConfig,
-    context: req.context,
+    context: operationReq.context,
     depth: 0,
     doc: deepCopyObjectSimple(docWithLocales),
     fallbackLocale: id ? null : fallbackLocale,
     global: null,
-    locale,
+    locale: operationLocale,
     overrideAccess: true,
-    req,
+    req: operationReq,
     showHiddenFields: true,
     version: isSavingDraft ? 'latest' : 'published',
   })
@@ -178,13 +182,13 @@ export const updateDocument = async <
   data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
     id,
     collection: collectionConfig,
-    context: req.context,
+    context: operationReq.context,
     data,
     doc: originalDoc,
     global: null,
     operation: 'update',
     overrideAccess,
-    req,
+    req: operationReq,
   })
 
   // /////////////////////////////////////
@@ -196,11 +200,11 @@ export const updateDocument = async <
       data =
         (await hook({
           collection: collectionConfig,
-          context: req.context,
+          context: operationReq.context,
           data,
           operation: 'update',
           originalDoc,
-          req,
+          req: operationReq,
         })) || data
     }
   }
@@ -222,11 +226,11 @@ export const updateDocument = async <
       data =
         (await hook({
           collection: collectionConfig,
-          context: req.context,
+          context: operationReq.context,
           data,
           operation: 'update',
           originalDoc,
-          req,
+          req: operationReq,
         })) || data
     }
   }
@@ -238,14 +242,14 @@ export const updateDocument = async <
   const beforeChangeArgs: Args<DataFromCollectionSlug<TSlug>> = {
     id,
     collection: collectionConfig,
-    context: req.context,
+    context: operationReq.context,
     data: { ...data, id },
     doc: originalDoc,
     docWithLocales,
     global: null,
     operation: 'update',
     overrideAccess,
-    req,
+    req: operationReq,
     skipValidation:
       // only skip validation for drafts when draft validation is false
       (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||

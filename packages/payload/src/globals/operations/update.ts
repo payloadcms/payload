@@ -26,6 +26,7 @@ import { deepCopyObjectSimple } from '../../index.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
+import { getRequestWithLocale } from '../../utilities/getRequestWithLocale.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -121,6 +122,9 @@ export const updateOperation = async <
     const isUnpublishing = resolvedAction === 'unpublish'
     const isPublishingAllLocales = locale === 'all' && resolvedAction === 'publish'
     const isUnpublishingAllLocales = locale === 'all' && resolvedAction === 'unpublish'
+    const operationLocale =
+      locale === 'all' && config?.localization ? config.localization.defaultLocale : locale!
+    const operationReq = getRequestWithLocale({ locale: operationLocale, req })
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -168,14 +172,14 @@ export const updateOperation = async <
 
     const originalDoc = await afterRead({
       collection: null,
-      context: req.context,
+      context: operationReq.context,
       depth: 0,
       doc: deepCopyObjectSimple(globalJSON),
       fallbackLocale: fallbackLocale!,
       global: globalConfig,
-      locale: locale!,
+      locale: operationLocale,
       overrideAccess: true,
-      req,
+      req: operationReq,
       showHiddenFields: showHiddenFields!,
       version: isSavingDraft ? 'latest' : 'published',
     })
@@ -197,13 +201,13 @@ export const updateOperation = async <
 
     data = await beforeValidate({
       collection: null,
-      context: req.context,
+      context: operationReq.context,
       data,
       doc: originalDoc,
       global: globalConfig,
       operation: 'update',
       overrideAccess: overrideAccess!,
-      req,
+      req: operationReq,
     })
 
     // /////////////////////////////////////
@@ -214,12 +218,12 @@ export const updateOperation = async <
       for (const hook of globalConfig.hooks.beforeValidate) {
         data =
           (await hook({
-            context: req.context,
+            context: operationReq.context,
             data,
             global: globalConfig,
             originalDoc,
             overrideAccess,
-            req,
+            req: operationReq,
           })) || data
       }
     }
@@ -232,12 +236,12 @@ export const updateOperation = async <
       for (const hook of globalConfig.hooks.beforeChange) {
         data =
           (await hook({
-            context: req.context,
+            context: operationReq.context,
             data,
             global: globalConfig,
             originalDoc,
             overrideAccess,
-            req,
+            req: operationReq,
           })) || data
       }
     }
@@ -248,13 +252,13 @@ export const updateOperation = async <
 
     const beforeChangeArgs = {
       collection: null,
-      context: req.context,
+      context: operationReq.context,
       data,
       doc: originalDoc,
       docWithLocales: globalJSON,
       global: globalConfig,
       operation: 'update' as Operation,
-      req,
+      req: operationReq,
       skipValidation: (isSavingDraft && !hasDraftValidationEnabled(globalConfig)) || isUnpublishing,
     }
 
