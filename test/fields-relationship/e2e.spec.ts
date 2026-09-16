@@ -634,6 +634,16 @@ describe('Relationship Field', () => {
     await expect(documentDrawer).toBeVisible()
   })
 
+  test('should translate localized labels for create document drawer togglers', async () => {
+    await loadCreatePage()
+
+    const createDrawerTrigger = page.locator(
+      '#field-relationship .relationship-add-new__add-button',
+    )
+
+    await expect(createDrawerTrigger).toHaveAttribute('aria-label', 'Add new Relation One')
+  })
+
   test('should open document from drawer by clicking on ID Label', async () => {
     const relatedDoc = await payload.create({
       collection: relationOneSlug,
