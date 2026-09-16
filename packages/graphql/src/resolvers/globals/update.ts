@@ -38,12 +38,21 @@ export function update<TSlug extends GlobalSlug>(
             ? localization.defaultLocale
             : undefined
         : undefined
+    const req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale'])
 
     if (args.locale) {
-      context.req.locale = args.locale
+      req.locale = args.locale
     }
     if (args.fallbackLocale) {
-      context.req.fallbackLocale = args.fallbackLocale
+      req.fallbackLocale = args.fallbackLocale
+    }
+
+    if (args.locale === 'all') {
+      context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale'])
+      context.req.locale = returningLocale
+      context.req.fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
+    } else {
+      context.req = req
     }
 
     const { slug } = globalConfig
@@ -54,7 +63,7 @@ export function update<TSlug extends GlobalSlug>(
       data: args.data,
       depth: 0,
       globalConfig,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      req: isolateObjectProperty(req, 'transactionID'),
       returningLocale,
     }
 

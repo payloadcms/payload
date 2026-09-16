@@ -30,18 +30,31 @@ export function updateResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
-    let { req } = context
-    const locale = req.locale
-    const fallbackLocale = req.fallbackLocale
-    req = isolateObjectProperty(req, 'locale')
-    req = isolateObjectProperty(req, 'fallbackLocale')
+    const originalReq = context.req
+    const locale = originalReq.locale
+    const fallbackLocale = originalReq.fallbackLocale
+    const returningLocale =
+      args.locale === 'all'
+        ? locale !== 'all' && locale
+          ? locale
+          : originalReq.payload.config.localization
+            ? originalReq.payload.config.localization.defaultLocale
+            : undefined
+        : undefined
+    const req = isolateObjectProperty(originalReq, ['locale', 'fallbackLocale'])
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     if (!req.query) {
       req.query = {}
     }
 
-    context.req = req
+    if (args.locale === 'all') {
+      context.req = isolateObjectProperty(originalReq, ['locale', 'fallbackLocale'])
+      context.req.locale = returningLocale
+      context.req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    } else {
+      context.req = req
+    }
 
     const options = {
       id: args.id,
@@ -51,14 +64,7 @@ export function updateResolver<TSlug extends CollectionSlug>(
       data: args.data as any,
       depth: 0,
       req: isolateObjectProperty(req, 'transactionID'),
-      returningLocale:
-        args.locale === 'all'
-          ? locale !== 'all' && locale
-            ? locale
-            : req.payload.config.localization
-              ? req.payload.config.localization.defaultLocale
-              : undefined
-          : undefined,
+      returningLocale,
       trash: args.trash,
     }
 

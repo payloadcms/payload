@@ -36,9 +36,17 @@ export function createResolver<TSlug extends CollectionSlug>(
             ? localization.defaultLocale
             : undefined
         : undefined
+    const req = isolateObjectProperty(context.req, 'locale')
 
     if (args.locale) {
-      context.req.locale = args.locale
+      req.locale = args.locale
+    }
+
+    if (args.locale === 'all') {
+      context.req = isolateObjectProperty(context.req, 'locale')
+      context.req.locale = returningLocale
+    } else {
+      context.req = req
     }
 
     const result = await createOperation({
@@ -46,7 +54,7 @@ export function createResolver<TSlug extends CollectionSlug>(
       collection,
       data: args.data,
       depth: 0,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      req: isolateObjectProperty(req, 'transactionID'),
       returningLocale,
     })
 

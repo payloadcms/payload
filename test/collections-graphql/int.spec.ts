@@ -50,25 +50,63 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       payload,
       restClient,
     }) => {
+      const relatedDocument = await payload.create({
+        action: 'publish',
+        collection: 'cyclical-relationship',
+        data: { title: 'English related title' },
+        locale: 'en',
+      })
+      await payload.update({
+        id: relatedDocument.id,
+        action: 'publish',
+        collection: 'cyclical-relationship',
+        data: { title: 'Spanish related title' },
+        locale: 'es',
+      })
       const document = await payload.create({
         action: 'saveDraft',
         collection: 'cyclical-relationship',
-        data: { title: 'Default locale title' },
+        data: { relationToSelf: relatedDocument.id, title: 'Default locale title' },
         locale: 'en',
+      })
+      await payload.update({
+        id: document.id,
+        action: 'saveDraft',
+        collection: 'cyclical-relationship',
+        data: { title: 'Spanish parent title' },
+        locale: 'es',
       })
       const documentID = idToString(document.id, payload)
       const query = `mutation {
         updateCyclicalRelationship(id: ${documentID}, action: publish, locale: all, data: {}) {
           id
           title
+          relationToSelf {
+            title
+          }
         }
       }`
       const response = await restClient
-        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .GRAPHQL_POST({ body: JSON.stringify({ query }), query: { locale: 'es' } })
         .then((res) => res.json())
 
       expect(response.errors).toBeUndefined()
-      expect(response.data.updateCyclicalRelationship.title).toBe('Default locale title')
+      expect(response.data.updateCyclicalRelationship.title).toBe('Spanish parent title')
+      expect(response.data.updateCyclicalRelationship.relationToSelf.title).toBe(
+        'Spanish related title',
+      )
+
+      const defaultLocaleResponse = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(defaultLocaleResponse.errors).toBeUndefined()
+      expect(defaultLocaleResponse.data.updateCyclicalRelationship.title).toBe(
+        'Default locale title',
+      )
+      expect(defaultLocaleResponse.data.updateCyclicalRelationship.relationToSelf.title).toBe(
+        'English related title',
+      )
 
       const created = await payload.findByID({
         id: response.data.updateCyclicalRelationship.id,
@@ -78,6 +116,46 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       })
 
       expect(created._status).toMatchObject({ en: 'published', es: 'published' })
+    })
+
+    test('should use the response locale for relationships created for all locales', async ({
+      payload,
+      restClient,
+    }) => {
+      const relatedDocument = await payload.create({
+        action: 'publish',
+        collection: 'cyclical-relationship',
+        data: { title: 'English related title' },
+        locale: 'en',
+      })
+      await payload.update({
+        id: relatedDocument.id,
+        action: 'publish',
+        collection: 'cyclical-relationship',
+        data: { title: 'Spanish related title' },
+        locale: 'es',
+      })
+
+      const relatedDocumentID = idToString(relatedDocument.id, payload)
+      const query = `mutation {
+        createCyclicalRelationship(
+          action: publish
+          locale: all
+          data: { relationToSelf: ${relatedDocumentID} }
+        ) {
+          relationToSelf {
+            title
+          }
+        }
+      }`
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(response.errors).toBeUndefined()
+      expect(response.data.createCyclicalRelationship.relationToSelf.title).toBe(
+        'English related title',
+      )
     })
 
     test('should create using graphql variables', async ({ restClient }) => {
