@@ -8,8 +8,8 @@ export function validateSvg(buffer: Buffer): boolean {
 
     const dangerousPatterns = [
       // Script tags
-      /<script[\s>]/i,
-      /<\/script>/i,
+      /<(?:[^<>\s/:]+:)?script[\s>]/i,
+      /<\/(?:[^<>\s/:]+:)?script\s*>/i,
 
       // Event handlers (onclick, onload, onerror, etc.)
       /\son\w+\s*=/i,
@@ -19,14 +19,14 @@ export function validateSvg(buffer: Buffer): boolean {
       /data:text\/html/i,
 
       // Foreign objects (can embed HTML)
-      /<foreignObject[\s>]/i,
+      /<(?:[^<>\s/:]+:)?foreignObject[\s>]/i,
 
       // Embedded iframes
-      /<iframe[\s>]/i,
+      /<(?:[^<>\s/:]+:)?iframe[\s>]/i,
 
       // Embedded objects and embeds
-      /<object[\s>]/i,
-      /<embed[\s>]/i,
+      /<(?:[^<>\s/:]+:)?object[\s>]/i,
+      /<(?:[^<>\s/:]+:)?embed[\s>]/i,
 
       // Base64 encoded scripts (common obfuscation technique)
       /data:image\/svg\+xml;base64,[\w+/]*PHNjcmlwdA/i, // <script in base64
