@@ -6,8 +6,7 @@ import { getSanitizedUploadFilename } from 'payload/shared'
 
 import type { UploadReference } from '../types.js'
 
-import { getFileKey } from './getFileKey.js'
-import { sanitizePrefix } from './sanitizePrefix.js'
+import { buildUploadPrefix, buildUploadStoragePathData } from './buildStoragePathData.js'
 
 type Args = {
   collectionPrefix?: string
@@ -23,12 +22,17 @@ type Args = {
  * the filename via {@link getSafeFileName} so a duplicate upload does not
  * overwrite an existing blob.
  *
- * A unique per-upload segment is included in the storage prefix so each issued
- * key is distinct. The stored `filename` stays clean — the per-upload entropy
- * lives in the prefix, not the filename.
+ * A unique per-upload segment is included in the storage key so each issued
+ * key is distinct. The stored `filename` stays clean and the semantic `prefix`
+ * stays exactly what the collection configured — the per-upload entropy is
+ * persisted separately in `_objectKey`.
  *
  * The resolved `sanitizedFilename` is returned so the browser-side handler
  * can update the form via `updateFilename`.
+ *
+ * The semantic prefix is resolved with {@link buildUploadPrefix} and the final
+ * key with {@link buildUploadStoragePathData}, so the receipt only ever signs a key
+ * beneath the configured collection prefix.
  */
 export async function resolveSignedURLKey({
   collectionPrefix = '',
@@ -38,9 +42,9 @@ export async function resolveSignedURLKey({
   req,
   useCompositePrefixes = false,
 }: Args): Promise<{
-  fileKey: string
   sanitizedDocPrefix: string
   sanitizedFilename: string
+  storageFilePath: string
   uploadReference: UploadReference
 }> {
   // Sanitize with the same helper generateFileData uses for the DB filename so the storage key
@@ -51,19 +55,23 @@ export async function resolveSignedURLKey({
     req,
   })
 
-  const _objectKey = randomUUID()
-  const baseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
-  // Per-upload segment lives in the key; it is persisted in `_objectKey`, keeping `prefix` semantic.
-  const keyedDocPrefix = baseDocPrefix ? `${baseDocPrefix}/${_objectKey}` : _objectKey
+  const rawBaseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
+  const { sanitizedDocPrefix } = buildUploadPrefix({
+    collectionPrefix,
+    docPrefix: rawBaseDocPrefix,
+    useCompositePrefixes,
+  })
 
-  const { fileKey } = getFileKey({
+  const _objectKey = randomUUID()
+  // Per-upload segment lives in the key; it is persisted in `_objectKey`, keeping `prefix` semantic.
+  const keyedDocPrefix = sanitizedDocPrefix ? `${sanitizedDocPrefix}/${_objectKey}` : _objectKey
+
+  const { storageFilePath } = buildUploadStoragePathData({
     collectionPrefix,
     docPrefix: keyedDocPrefix,
     filename: sanitizedFilename,
     useCompositePrefixes,
   })
-
-  const sanitizedDocPrefix = sanitizePrefix(baseDocPrefix || '')
 
   const uploadReference = {
     _objectKey,
@@ -71,12 +79,12 @@ export async function resolveSignedURLKey({
     signedReceipt: createClientUploadReceipt({
       _objectKey,
       collectionSlug,
-      fileKey,
       filename: sanitizedFilename,
       filePrefix: sanitizedDocPrefix,
       req,
+      storageFilePath,
     }),
   }
 
-  return { fileKey, sanitizedDocPrefix, sanitizedFilename, uploadReference }
+  return { sanitizedDocPrefix, sanitizedFilename, storageFilePath, uploadReference }
 }

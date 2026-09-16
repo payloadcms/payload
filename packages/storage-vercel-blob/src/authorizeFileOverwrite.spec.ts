@@ -46,9 +46,11 @@ describe('authorizeClientOverwrite', () => {
     await expect(
       authorizeClientOverwrite({
         collectionSources,
-        fileKey: 'shared/image.png',
+        requestedStorageFilePath: 'shared/image.png',
+        requestedFilename: 'image.png',
         req: createRequest(),
         requestedCollectionSlug: 'media',
+        collectionPrefix: '',
       }),
     ).resolves.toBe(true)
   })
@@ -57,9 +59,11 @@ describe('authorizeClientOverwrite', () => {
     await expect(
       authorizeClientOverwrite({
         collectionSources,
-        fileKey: 'shared/image.png',
+        requestedStorageFilePath: 'shared/image.png',
+        requestedFilename: 'image.png',
         req: createRequest({ mediaOwner: false, protectedOwner: true }),
         requestedCollectionSlug: 'media',
+        collectionPrefix: '',
       }),
     ).rejects.toMatchObject({ status: 403 })
   })
@@ -68,9 +72,11 @@ describe('authorizeClientOverwrite', () => {
     await expect(
       authorizeClientOverwrite({
         collectionSources,
-        fileKey: 'shared/image.png',
+        requestedStorageFilePath: 'shared/image.png',
+        requestedFilename: 'image.png',
         req: createRequest({ protectedOwner: true }),
         requestedCollectionSlug: 'media',
+        collectionPrefix: '',
       }),
     ).rejects.toMatchObject({ status: 403 })
   })

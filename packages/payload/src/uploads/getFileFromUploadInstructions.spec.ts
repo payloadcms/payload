@@ -63,7 +63,7 @@ const createUploadReferenceFile = (
   const filename = overrides.filename ?? 'video.mp4'
   const uploadReference = overrides.uploadReference ?? {}
   const prefix = typeof uploadReference.prefix === 'string' ? uploadReference.prefix : ''
-  const fileKey = prefix ? `${prefix}/${filename}` : `media/${filename}`
+  const storageFilePath = prefix ? `${prefix}/${filename}` : `media/${filename}`
   return {
     filename: 'video.mp4',
     mimeType: 'video/mp4',
@@ -73,9 +73,9 @@ const createUploadReferenceFile = (
       ...uploadReference,
       signedReceipt: JSON.stringify({
         collectionSlug: 'media',
-        fileKey,
         filePrefix: prefix,
         filename,
+        storageFilePath,
       }),
     },
   } as UploadInstructions['file']

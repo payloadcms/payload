@@ -14,7 +14,6 @@ interface GetFileArgs {
   doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   token: string
   uploadReference?: unknown
@@ -29,7 +28,6 @@ export async function getFile({
   doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   token,
   uploadReference,
@@ -38,11 +36,12 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      collectionPrefix,
       doc,
       filename,
-      prefixQueryParam,
       req,
       uploadReference,
+      useCompositePrefixes,
     })
 
     const fileUrl = generateURL({

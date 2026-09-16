@@ -56,7 +56,7 @@ export const getHandleMultiPartUpload =
       })
       // The receipt binds the full storage key (including the per-upload _objectKey segment), so
       // compare against it directly rather than recomputing from prefix + filename.
-      if (receipt.fileKey !== multipartKey) {
+      if (receipt.storageFilePath !== multipartKey) {
         throw new APIError('Invalid upload reference.', 400)
       }
       const multipartUpload = bucket.resumeMultipartUpload(multipartKey, multipartId)
@@ -75,7 +75,7 @@ export const getHandleMultiPartUpload =
         return Response.json(uploadedPart)
       }
     } else {
-      const { fileKey, sanitizedFilename, uploadReference } = await resolveSignedURLKey({
+      const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
         collectionPrefix,
         collectionSlug,
         docPrefix: params.docPrefix ?? undefined,
@@ -83,13 +83,13 @@ export const getHandleMultiPartUpload =
         req,
         useCompositePrefixes,
       })
-      const existing = await bucket.head(fileKey)
+      const existing = await bucket.head(storageFilePath)
       if (existing) {
         return new Response('Object already exists', { status: 412 })
       }
 
       // Create multipart upload
-      const multipartUpload = await bucket.createMultipartUpload(fileKey, {
+      const multipartUpload = await bucket.createMultipartUpload(storageFilePath, {
         httpMetadata: {
           contentType: filetype,
         },

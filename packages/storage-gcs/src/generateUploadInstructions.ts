@@ -42,7 +42,7 @@ export const generateUploadInstructions = ({
       filename,
       mimeType,
     })
-    const { fileKey, sanitizedFilename, uploadReference } = await resolveSignedURLKey({
+    const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,
       docPrefix,
@@ -53,7 +53,7 @@ export const generateUploadInstructions = ({
 
     const [url] = await getStorageClient()
       .bucket(bucket)
-      .file(fileKey)
+      .file(storageFilePath)
       .getSignedUrl({
         action: 'write',
         contentType: mimeType,

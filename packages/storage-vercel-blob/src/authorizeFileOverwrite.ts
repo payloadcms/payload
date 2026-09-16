@@ -1,6 +1,9 @@
 import type { FileData, PayloadRequest, TypeWithID, Where } from 'payload'
 
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import {
+  buildStoragePathData,
+  isStoragePathWithinCollectionPrefix,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { combineQueries, executeAccess, Forbidden } from 'payload'
 
 type OwnerDocument = { prefix?: string } & FileData & TypeWithID
@@ -29,26 +32,28 @@ function getDocumentFileKeys({
     .filter((filename): filename is string => typeof filename === 'string')
     .map(
       (filename) =>
-        getFileKey({
+        buildStoragePathData({
           collectionPrefix,
           docPrefix: doc.prefix,
           filename,
           useCompositePrefixes,
-        }).fileKey,
+        }).storageFilePath,
     )
 }
 
-async function findOwners({
+async function findMatchingDocs({
   collectionPrefix,
   collectionSlug,
-  fileKey,
   req,
+  requestedFilename,
+  requestedStorageFilePath,
   useCompositePrefixes,
 }: {
   collectionPrefix: string
   collectionSlug: string
-  fileKey: string
   req: PayloadRequest
+  requestedFilename: string
+  requestedStorageFilePath: string
   useCompositePrefixes: boolean
 }): Promise<OwnerDocument[]> {
   const collection = req.payload.collections[collectionSlug]
@@ -57,14 +62,15 @@ async function findOwners({
     return []
   }
 
-  const filename = fileKey.split('/').pop()!
   const imageSizes =
     collection.config.upload && typeof collection.config.upload === 'object'
       ? collection.config.upload.imageSizes || []
       : []
   const filenameQueries: Where[] = [
-    { filename: { equals: filename } },
-    ...imageSizes.map(({ name }) => ({ [`sizes.${name}.filename`]: { equals: filename } })),
+    { filename: { equals: requestedFilename } },
+    ...imageSizes.map(({ name }) => ({
+      [`sizes.${name}.filename`]: { equals: requestedFilename },
+    })),
   ]
   const result = await req.payload.find({
     collection: collectionSlug,
@@ -77,17 +83,19 @@ async function findOwners({
   })
 
   return (result.docs as OwnerDocument[]).filter((doc) =>
-    getDocumentFileKeys({ collectionPrefix, doc, useCompositePrefixes }).includes(fileKey),
+    getDocumentFileKeys({ collectionPrefix, doc, useCompositePrefixes }).includes(
+      requestedStorageFilePath,
+    ),
   )
 }
 
-async function canUpdateOwner({
+async function canUpdateDoc({
   collectionSlug,
-  owner,
+  doc,
   req,
 }: {
   collectionSlug: string
-  owner: OwnerDocument
+  doc: OwnerDocument
   req: PayloadRequest
 }): Promise<boolean> {
   const collection = req.payload.collections[collectionSlug]
@@ -97,7 +105,7 @@ async function canUpdateOwner({
   }
 
   const accessResult = await executeAccess(
-    { id: owner.id, slug: collectionSlug, disableErrors: true, req },
+    { id: doc.id, slug: collectionSlug, disableErrors: true, req },
     collection.config.access.update,
   )
 
@@ -113,34 +121,48 @@ async function canUpdateOwner({
     overrideAccess: true,
     pagination: false,
     req,
-    where: combineQueries({ id: { equals: owner.id } }, accessResult),
+    where: combineQueries({ id: { equals: doc.id } }, accessResult),
   })
 
   return result.docs.length === 1
 }
 
 export async function authorizeClientOverwrite({
+  collectionPrefix: collectionPrefixArg,
   collectionSources,
-  fileKey,
   overrideAccess = false,
   req,
   requestedCollectionSlug,
+  requestedFilename,
+  requestedStorageFilePath,
 }: {
+  collectionPrefix: string
   collectionSources: VercelBlobCollectionSource[]
-  fileKey: string
   overrideAccess?: boolean
   req: PayloadRequest
   requestedCollectionSlug: string
+  requestedFilename: string
+  requestedStorageFilePath: string
 }): Promise<boolean> {
-  const owners = (
+  if (
+    !isStoragePathWithinCollectionPrefix({
+      collectionPrefix: collectionPrefixArg,
+      docPrefix: requestedStorageFilePath,
+    })
+  ) {
+    throw new Forbidden(req.t)
+  }
+
+  const matchedDocs = (
     await Promise.all(
       collectionSources.map(
         async ({ collectionPrefix, collectionSlug, useCompositePrefixes }): Promise<Owner[]> => {
-          const docs = await findOwners({
+          const docs = await findMatchingDocs({
             collectionPrefix,
             collectionSlug,
-            fileKey,
             req,
+            requestedFilename,
+            requestedStorageFilePath,
             useCompositePrefixes,
           })
 
@@ -150,18 +172,18 @@ export async function authorizeClientOverwrite({
     )
   ).flat()
 
-  if (owners.length === 0) {
+  if (matchedDocs.length === 0) {
     return false
   }
 
-  const owner = owners[0]!
-  if (owners.length !== 1 || owner.collectionSlug !== requestedCollectionSlug) {
+  const matchedDoc = matchedDocs[0]!
+  if (matchedDocs.length !== 1 || matchedDoc.collectionSlug !== requestedCollectionSlug) {
     throw new Forbidden(req.t)
   }
 
   if (
     !overrideAccess &&
-    !(await canUpdateOwner({ collectionSlug: owner.collectionSlug, owner: owner.doc, req }))
+    !(await canUpdateDoc({ collectionSlug: matchedDoc.collectionSlug, doc: matchedDoc.doc, req }))
   ) {
     throw new Forbidden(req.t)
   }

@@ -4,7 +4,10 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
-import { getFileKey, resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import {
+  buildUploadStoragePathData,
+  resolveSignedURLKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
 import { Forbidden } from 'payload'
 import { assertClientUploadAllowed, createClientUploadReceipt } from 'payload/internal'
@@ -66,18 +69,20 @@ export function createVercelBlobAdapter({
 
         assertClientUploadAllowed({ collection, filename, mimeType })
 
-        const requested = getFileKey({
+        const requested = buildUploadStoragePathData({
           collectionPrefix: prefix,
           docPrefix,
           filename,
           useCompositePrefixes,
         })
         const allowOverwrite = await authorizeClientOverwrite({
+          collectionPrefix: prefix,
           collectionSources,
-          fileKey: requested.fileKey,
           overrideAccess,
           req,
           requestedCollectionSlug: collectionSlug,
+          requestedFilename: requested.sanitizedFilename,
+          requestedStorageFilePath: requested.storageFilePath,
         })
         const resolved = allowOverwrite
           ? {
@@ -87,10 +92,10 @@ export function createVercelBlobAdapter({
                 signedReceipt: createClientUploadReceipt({
                   allowOverwrite: true,
                   collectionSlug,
-                  fileKey: requested.fileKey,
                   filename: requested.sanitizedFilename,
                   filePrefix: requested.sanitizedDocPrefix,
                   req,
+                  storageFilePath: requested.storageFilePath,
                 }),
               },
             }
@@ -107,14 +112,14 @@ export function createVercelBlobAdapter({
           name: 'uploadToVercelBlob',
           type: 'dispatch',
           data: {
-            pathname: resolved.fileKey,
+            pathname: resolved.storageFilePath,
             token: await generateClientTokenFromReadWriteToken({
               addRandomSuffix: false,
               allowedContentTypes: mimeType ? [mimeType] : undefined,
               ...(allowOverwrite && { allowOverwrite: true }),
               cacheControlMaxAge,
               maximumSizeInBytes: filesize,
-              pathname: resolved.fileKey,
+              pathname: resolved.storageFilePath,
               token,
             }),
           },
@@ -139,28 +144,22 @@ export function createVercelBlobAdapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         baseUrl,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
+        storageFilePath,
         token,
-        useCompositePrefixes,
       }),
 
-    handleUpload: async ({ data, file: { buffer, filename, mimeType } }) => {
+    handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
       const result = await uploadFile({
         access,
         addRandomSuffix,
         buffer,
         cacheControlMaxAge,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename,
         mimeType,
+        storageFilePath,
         token,
-        useCompositePrefixes,
       })
 
       if (result.filename) {
@@ -170,10 +169,7 @@ export function createVercelBlobAdapter({
       return data
     },
 
-    staticHandler: (
-      req,
-      { doc, headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
@@ -182,7 +178,6 @@ export function createVercelBlobAdapter({
         doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
         token,
         uploadReference,

@@ -46,7 +46,7 @@ export const generateUploadInstructions = ({
 
     assertClientUploadAllowed({ collection, filename, mimeType })
 
-    const { fileKey, sanitizedFilename, uploadReference } = await resolveSignedURLKey({
+    const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,
       docPrefix,
@@ -55,11 +55,11 @@ export const generateUploadInstructions = ({
       useCompositePrefixes,
     })
 
-    const blobClient = getStorageClient().getBlobClient(fileKey)
+    const blobClient = getStorageClient().getBlobClient(storageFilePath)
 
     const sasToken = generateBlobSASQueryParameters(
       {
-        blobName: fileKey,
+        blobName: storageFilePath,
         containerName,
         contentType: mimeType,
         expiresOn: new Date(Date.now() + 3 * 60 * 60 * 1000),

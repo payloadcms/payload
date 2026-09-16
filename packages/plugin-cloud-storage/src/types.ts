@@ -38,6 +38,10 @@ export type HandleUpload = (args: {
   data: any
   file: File
   req: PayloadRequest
+  /**
+   * Pre-resolved storage path (`_objectKey` folded in, contained beneath the collection prefix).
+   */
+  storageFilePath: string
 }) =>
   | Partial<FileData & TypeWithID>
   | Promise<Partial<FileData & TypeWithID>>
@@ -53,6 +57,10 @@ export type HandleDelete = (args: {
   doc: FileData & TypeWithID & TypeWithPrefix
   filename: string
   req: PayloadRequest
+  /**
+   * Pre-resolved storage path of the object to delete.
+   */
+  storageFilePath: string
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {

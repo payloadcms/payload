@@ -48,7 +48,7 @@ export const generateUploadInstructions = ({
       filesizeLimit = undefined
     }
 
-    const { fileKey, sanitizedFilename, uploadReference } = await resolveSignedURLKey({
+    const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,
       docPrefix,
@@ -72,7 +72,7 @@ export const generateUploadInstructions = ({
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,
         ContentType: mimeType,
         IfNoneMatch: '*',
-        Key: fileKey,
+        Key: storageFilePath,
       }),
       {
         expiresIn: 600,

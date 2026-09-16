@@ -31,18 +31,49 @@ describe('resolveSignedURLKey', () => {
     expect(createClientUploadReceipt).toHaveBeenCalledWith({
       _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
       collectionSlug: 'uploads',
-      fileKey: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1\.png$/),
       filePrefix: 'media',
       filename: 'photo-1.png',
       req: {},
+      storageFilePath: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1\.png$/),
     })
     expect(result).toEqual({
-      fileKey: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1\.png$/),
       sanitizedDocPrefix: 'media',
       sanitizedFilename: 'photo-1.png',
+      storageFilePath: expect.stringMatching(/^media\/[0-9a-f-]+\/photo-1\.png$/),
       uploadReference: {
         _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
         prefix: 'media',
+        signedReceipt: 'receipt',
+      },
+    })
+  })
+
+  it('should mint the receipt for a key contained by the collection prefix', async () => {
+    vi.mocked(getSafeFileName).mockResolvedValueOnce('photo-1.jpg')
+
+    const result = await resolveSignedURLKey({
+      collectionPrefix: 'media',
+      collectionSlug: 'media',
+      docPrefix: 'media-archive',
+      filename: 'photo.jpg',
+      req: {} as never,
+    })
+
+    expect(createClientUploadReceipt).toHaveBeenCalledWith({
+      _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+      collectionSlug: 'media',
+      filePrefix: result.sanitizedDocPrefix,
+      filename: 'photo-1.jpg',
+      req: {},
+      storageFilePath: result.storageFilePath,
+    })
+    expect(result).toEqual({
+      sanitizedDocPrefix: 'media/media-archive',
+      sanitizedFilename: 'photo-1.jpg',
+      storageFilePath: expect.stringMatching(/^media\/media-archive\/[0-9a-f-]+\/photo-1\.jpg$/),
+      uploadReference: {
+        _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+        prefix: 'media/media-archive',
         signedReceipt: 'receipt',
       },
     })

@@ -9,9 +9,9 @@ type ClientUploadReceipt = {
   allowOverwrite?: boolean
   collectionSlug: string
   expiresAt: number
-  fileKey: string
   filename: string
   filePrefix: string
+  storageFilePath: string
   userCollection: null | string
   userID: null | number | string
 }
@@ -25,27 +25,27 @@ export const createClientUploadReceipt = ({
   _objectKey,
   allowOverwrite,
   collectionSlug,
-  fileKey,
   filename,
   filePrefix,
   req,
+  storageFilePath,
 }: {
   _objectKey?: string
   allowOverwrite?: boolean
   collectionSlug: string
-  fileKey: string
   filename: string
   filePrefix: string
   req: PayloadRequest
+  storageFilePath: string
 }): `${string}.${string}` => {
   const data: ClientUploadReceipt = {
     ...(_objectKey !== undefined && { _objectKey }),
     ...(allowOverwrite && { allowOverwrite: true }),
     collectionSlug,
     expiresAt: Date.now() + LIFETIME_MS,
-    fileKey,
     filename,
     filePrefix,
+    storageFilePath,
     ...getUser(req),
   }
   const encodedReceipt = Buffer.from(JSON.stringify(data)).toString('base64url')
@@ -128,7 +128,7 @@ const isReceipt = (value: unknown): value is ClientUploadReceipt => {
     typeof data.collectionSlug === 'string' &&
     typeof data.expiresAt === 'number' &&
     Number.isFinite(data.expiresAt) &&
-    typeof data.fileKey === 'string' &&
+    typeof data.storageFilePath === 'string' &&
     typeof data.filePrefix === 'string' &&
     typeof data.filename === 'string' &&
     (data.userCollection === null || typeof data.userCollection === 'string') &&

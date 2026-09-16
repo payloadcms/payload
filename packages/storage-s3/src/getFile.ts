@@ -5,8 +5,8 @@ import type { Readable } from 'stream'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import {
+  buildStoragePathData,
   getFilePrefix as getDocPrefix,
-  getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
@@ -30,7 +30,6 @@ interface GetFileArgs {
   doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   signedDownloads: SignedDownloadsConfig
   uploadReference?: unknown
@@ -73,7 +72,6 @@ export async function getFile({
   doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   signedDownloads,
   uploadReference,
@@ -92,14 +90,15 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      collectionPrefix,
       doc,
       filename,
-      prefixQueryParam,
       req,
       uploadReference,
+      useCompositePrefixes,
     })
 
-    const { fileKey: key } = getFileKey({
+    const { storageFilePath } = buildStoragePathData({
       collectionPrefix,
       docPrefix,
       filename,
@@ -116,7 +115,7 @@ export async function getFile({
       }
 
       if (useSignedURL) {
-        const command = new GetObjectCommand({ Bucket: bucket, Key: key })
+        const command = new GetObjectCommand({ Bucket: bucket, Key: storageFilePath })
         const signedUrl = await getSignedUrl(
           client,
           command,
@@ -129,7 +128,7 @@ export async function getFile({
     // Get file size first for range validation and to set Content-Length header before streaming
     const headObject = await client.headObject({
       Bucket: bucket,
-      Key: key,
+      Key: storageFilePath,
     })
     const fileSize = headObject.ContentLength
 
@@ -191,7 +190,7 @@ export async function getFile({
     object = await client.getObject(
       {
         Bucket: bucket,
-        Key: key,
+        Key: storageFilePath,
         Range: rangeForS3,
       },
       { abortSignal: abortController.signal },
@@ -203,7 +202,7 @@ export async function getFile({
 
     if (!isNodeReadableStream(object.Body)) {
       req.payload.logger.error({
-        key,
+        key: storageFilePath,
         msg: 'S3 object body is not a readable stream',
       })
       return new Response('Internal Server Error', { status: 500 })
@@ -213,7 +212,7 @@ export async function getFile({
     stream.on('error', (err: Error) => {
       req.payload.logger.error({
         err,
-        key,
+        key: storageFilePath,
         msg: 'Error while streaming S3 object (aborting)',
       })
       abortRequestAndDestroyStream({ abortController, object })

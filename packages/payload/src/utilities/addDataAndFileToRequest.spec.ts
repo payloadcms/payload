@@ -70,9 +70,9 @@ describe('addDataAndFileToRequest', () => {
           key: 'example.txt',
           signedReceipt: JSON.stringify({
             collectionSlug: 'public-media',
-            fileKey: 'example.txt',
             filePrefix: '',
             filename: 'example.txt',
+            storageFilePath: 'example.txt',
           }),
         },
       }),

@@ -1,42 +1,49 @@
 import type { CollectionConfig, PayloadRequest, TypeWithID, UploadConfig } from 'payload'
 
+import { buildPrefixWithObjectKey } from './buildPrefixWithObjectKey.js'
+import { buildUploadStoragePathData } from './buildStoragePathData.js'
 import { sanitizePrefix } from './sanitizePrefix.js'
-
-// Joins the semantic prefix and the `_objectKey` segment into the object's folder; either may be empty.
-const joinObjectFolder = (prefix: unknown, objectKey: unknown): string => {
-  const safePrefix = sanitizePrefix(typeof prefix === 'string' ? prefix : '')
-  const safeObjectKey = sanitizePrefix(typeof objectKey === 'string' ? objectKey : '')
-
-  if (safePrefix && safeObjectKey) {
-    return `${safePrefix}/${safeObjectKey}`
-  }
-
-  return safePrefix || safeObjectKey
-}
 
 /**
  * Resolves the folder a stored object lives under (semantic `prefix` plus `_objectKey`).
  *
- * A verified `uploadReference` or an already-authorized `doc` is used directly. Otherwise the
- * document is resolved with `overrideAccess: false`, any query-param prefix only narrows that
- * lookup, and `_objectKey` is read from the resolved document via `showHiddenFields`.
+ * An already-authorized `doc` wins outright. Otherwise an `uploadReference` is used (its
+ * `prefix` re-contained with {@link buildUploadStoragePathData}, since it hasn't been verified against
+ * a signed receipt by every adapter). Otherwise the document is resolved with
+ * `overrideAccess: false`, any query-param prefix only narrows that lookup, and `_objectKey`
+ * is read from the resolved document via `showHiddenFields`.
  */
 export async function getFilePrefix({
   collection,
+  collectionPrefix,
   doc,
   filename,
   prefixQueryParam,
   req,
   uploadReference,
+  useCompositePrefixes = false,
 }: {
   collection: CollectionConfig
+  collectionPrefix?: string
   doc?: { _objectKey?: string; prefix?: string } & TypeWithID
   filename: string
+  /**
+   * Only narrows the access-controlled fallback lookup below; never trusted or
+   * returned directly. Prefer passing the access-checked document as `doc` instead.
+   */
   prefixQueryParam?: string
   req: PayloadRequest
   uploadReference?: unknown
+  useCompositePrefixes?: boolean
 }): Promise<string> {
-  // Verified upload reference (server-issued receipt) takes precedence.
+  // The serve path already loaded and authorized this document — trust it over any
+  // client-supplied upload reference or query prefix.
+  if (doc) {
+    return buildPrefixWithObjectKey({ objectKey: doc._objectKey, prefix: doc.prefix })
+  }
+
+  // Upload instructions call handlers without a document yet. Re-contain the claimed
+  // prefix — it hasn't been verified against a signed receipt by every adapter.
   if (
     uploadReference &&
     typeof uploadReference === 'object' &&
@@ -45,16 +52,18 @@ export async function getFilePrefix({
   ) {
     const referenceObjectKey =
       '_objectKey' in uploadReference
-        ? (uploadReference as { _objectKey?: unknown })._objectKey
+        ? (uploadReference as { _objectKey?: string })._objectKey
         : undefined
-    return joinObjectFolder(uploadReference.prefix, referenceObjectKey)
+    const containedPrefix = buildUploadStoragePathData({
+      collectionPrefix,
+      docPrefix: uploadReference.prefix,
+      filename,
+      useCompositePrefixes,
+    }).sanitizedDocPrefix
+    return buildPrefixWithObjectKey({ objectKey: referenceObjectKey, prefix: containedPrefix })
   }
 
-  // The serve path already loaded and authorized this document.
-  if (doc) {
-    return joinObjectFolder(doc.prefix, doc._objectKey)
-  }
-
+  // Reads without a query prefix or read-access constraints skip the endpoint's document lookup.
   const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []
 
   const filenameClause = {
@@ -93,6 +102,6 @@ export async function getFilePrefix({
     where,
   })
 
-  const found = files?.docs?.[0]
-  return joinObjectFolder(found?.prefix, (found as { _objectKey?: unknown })?._objectKey)
+  const found = files?.docs?.[0] as { _objectKey?: string; prefix?: string } | undefined
+  return buildPrefixWithObjectKey({ objectKey: found?._objectKey, prefix: found?.prefix })
 }

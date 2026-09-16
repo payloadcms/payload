@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
-
 import type { CollectionConfig, PayloadRequest } from 'payload'
+
+import { describe, expect, it, vi } from 'vitest'
 
 import { getFilePrefix } from './getFilePrefix.js'
 
@@ -27,6 +27,54 @@ const whereOf = (req: PayloadRequest) =>
   )
 
 describe('getFilePrefix', () => {
+  it('prefers an already-authorized document over an upload reference or query prefix', async () => {
+    const req = makeReq([{ prefix: 'db-prefix' }])
+    const doc = { id: '1', prefix: 'invoices' }
+
+    const result = await getFilePrefix({
+      collection: makeCollection(),
+      collectionPrefix: 'media',
+      doc,
+      filename: 'logo.png',
+      prefixQueryParam: 'query-prefix',
+      req,
+      uploadReference: { prefix: 'reference-prefix' },
+    })
+
+    expect(result).toBe('invoices')
+    expect(req.payload.find).not.toHaveBeenCalled()
+  })
+
+  it('does not fall back to a lookup when the checked document has no prefix', async () => {
+    const req = makeReq([{ prefix: 'db-prefix' }])
+
+    const result = await getFilePrefix({
+      collection: makeCollection(),
+      collectionPrefix: 'media',
+      doc: { id: '1' },
+      filename: 'logo.png',
+      req,
+    })
+
+    expect(result).toBe('')
+    expect(req.payload.find).not.toHaveBeenCalled()
+  })
+
+  it('contains an upload reference prefix beneath the collection prefix', async () => {
+    const req = makeReq()
+
+    const result = await getFilePrefix({
+      collection: makeCollection(),
+      collectionPrefix: 'media',
+      filename: 'file.png',
+      req,
+      uploadReference: { prefix: 'invoices' },
+    })
+
+    expect(result).toBe('media/invoices')
+    expect(req.payload.find).not.toHaveBeenCalled()
+  })
+
   describe('verified upload reference (trusted)', () => {
     it('folds the object key into the prefix and skips the database', async () => {
       const req = makeReq()

@@ -4,14 +4,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   generateClientToken: vi.fn(async () => 'client-token'),
-  getFileKey: vi.fn(() => ({
-    fileKey: 'reference.png',
+  // Resolves the stored location of an owning document, so it matches the requested key.
+  buildStoragePathData: vi.fn(() => ({
+    storageFilePath: 'reference.png',
     sanitizedCollectionPrefix: '',
     sanitizedDocPrefix: '',
     sanitizedFilename: 'reference.png',
   })),
+  buildUploadStoragePathData: vi.fn(() => ({
+    storageFilePath: 'reference.png',
+    sanitizedCollectionPrefix: '',
+    sanitizedDocPrefix: '',
+    sanitizedFilename: 'reference.png',
+  })),
+  isStoragePathWithinCollectionPrefix: vi.fn(() => true),
   resolveSignedURLKey: vi.fn(async () => ({
-    fileKey: 'reference-1.png',
+    storageFilePath: 'reference-1.png',
     sanitizedDocPrefix: '',
     sanitizedFilename: 'reference-1.png',
     uploadReference: { prefix: '', signedReceipt: 'upload-receipt' },
@@ -19,7 +27,9 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@payloadcms/plugin-cloud-storage/utilities', () => ({
-  getFileKey: mocks.getFileKey,
+  buildStoragePathData: mocks.buildStoragePathData,
+  buildUploadStoragePathData: mocks.buildUploadStoragePathData,
+  isStoragePathWithinCollectionPrefix: mocks.isStoragePathWithinCollectionPrefix,
   resolveSignedURLKey: mocks.resolveSignedURLKey,
 }))
 

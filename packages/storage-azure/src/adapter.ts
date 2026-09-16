@@ -60,34 +60,25 @@ export function createAzureAdapter({
       useInAdmin: true,
     },
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    handleUpload: async ({ data, file }) => {
+    handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({
         buffer: file.buffer,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
+        storageFilePath,
         tempFilePath: file.tempFilePath,
-        useCompositePrefixes,
       })
 
       return data
     },
 
-    staticHandler: (
-      req,
-      { doc, headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>
       getFile({
         client: getStorageClient(),
         collection,
@@ -95,7 +86,6 @@ export function createAzureAdapter({
         doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
         uploadReference,
         useCompositePrefixes,

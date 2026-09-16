@@ -27,3 +27,15 @@ describe('Azure client uploads', () => {
     expect(adapter.uploadInstructions?.enabled).toBe(expected)
   })
 })
+
+it('should generate a public URL for the stored legacy prefix', () => {
+  const collection: CollectionConfig = { slug: 'media', fields: [] }
+  const adapter = createAdapter()({
+    collection,
+    prefix: 'uploads',
+  })
+
+  expect(
+    adapter.generateURL!({ collection, data: {}, filename: 'file.png', prefix: 'legacy' }),
+  ).toBe('https://account.blob.core.windows.net/media/legacy/file.png')
+})

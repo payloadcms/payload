@@ -66,10 +66,9 @@ test.describe('storage-azure client uploads E2E', () => {
 
   /**
    * Drives the actual admin form through a clientUploads submit and asserts
-   * that the user-defined `prefix.defaultValue` ends up on the saved doc — i.e.
-   * the plugin no longer clobbers the user's callback (see getFields.ts).
+   * that the saved document prefix identifies the contained upload destination.
    */
-  test('respects user-defined prefix.defaultValue when creating a doc via clientUploads', async () => {
+  test('should contain prefix.defaultValue beneath the collection prefix via clientUploads', async () => {
     await gotoAndWaitForForm(page, mediaWithDocPrefixURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
     await saveDocAndAssert(page)
@@ -90,10 +89,10 @@ test.describe('storage-azure client uploads E2E', () => {
 
     expect(blobNames).toEqual(
       expect.arrayContaining([
-        expect.stringMatching(/^doc-[a-z0-9]{1,8}\/[0-9a-f-]+\/image\.png$/),
+        expect.stringMatching(/^docprefix-collection\/doc-[a-z0-9]{1,8}\/[0-9a-f-]+\/image\.png$/),
       ]),
     )
 
-    expect(doc?.prefix).toMatch(/^doc-[a-z0-9]{1,8}$/)
+    expect(doc?.prefix).toMatch(/^docprefix-collection\/doc-[a-z0-9]{1,8}$/)
   })
 })

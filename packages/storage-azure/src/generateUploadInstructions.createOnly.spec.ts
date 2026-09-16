@@ -15,7 +15,7 @@ vi.mock('@azure/storage-blob', () => ({
 
 vi.mock('@payloadcms/plugin-cloud-storage/utilities', () => ({
   resolveSignedURLKey: vi.fn(async () => ({
-    fileKey: 'reference.png',
+    storageFilePath: 'reference.png',
     sanitizedDocPrefix: '',
     sanitizedFilename: 'reference.png',
   })),

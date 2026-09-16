@@ -58,30 +58,21 @@ export function createR2Adapter({
     name: 'r2',
     uploadInstructions,
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         bucket,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    handleUpload: ({ data, file }) =>
+    handleUpload: ({ file, storageFilePath }) =>
       uploadFile({
         bucket,
         buffer: file.buffer,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    staticHandler: (
-      req,
-      { doc, headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>
       getFile({
         bucket,
         collection,
@@ -89,7 +80,6 @@ export function createR2Adapter({
         filename,
         incomingHeaders: headers,
         prefix,
-        prefixQueryParam,
         req,
         uploadReference,
         useCompositePrefixes,

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('@payloadcms/plugin-cloud-storage/utilities', () => ({
   resolveSignedURLKey: vi.fn(async () => ({
-    fileKey: 'reference.png',
+    storageFilePath: 'reference.png',
     sanitizedDocPrefix: '',
     sanitizedFilename: 'reference.png',
   })),

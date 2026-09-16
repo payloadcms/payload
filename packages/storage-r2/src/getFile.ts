@@ -1,8 +1,8 @@
 import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import {
+  buildStoragePathData,
   getFilePrefix as getDocPrefix,
-  getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
@@ -15,7 +15,6 @@ interface GetFileArgs {
   filename: string
   incomingHeaders?: Headers
   prefix: string
-  prefixQueryParam?: string
   req: PayloadRequest
   uploadReference?: unknown
   useCompositePrefixes?: boolean
@@ -30,7 +29,6 @@ export async function getFile({
   filename,
   incomingHeaders,
   prefix = '',
-  prefixQueryParam,
   req,
   uploadReference,
   useCompositePrefixes = false,
@@ -38,14 +36,15 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      collectionPrefix: prefix,
       doc,
       filename,
-      prefixQueryParam,
       req,
       uploadReference,
+      useCompositePrefixes,
     })
 
-    const { fileKey } = getFileKey({
+    const { storageFilePath } = buildStoragePathData({
       collectionPrefix: prefix,
       docPrefix,
       filename,
@@ -53,7 +52,7 @@ export async function getFile({
     })
 
     // Get file size for range validation
-    const headObj = await bucket?.head(fileKey)
+    const headObj = await bucket?.head(storageFilePath)
     if (!headObj) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
     }
@@ -81,13 +80,13 @@ export async function getFile({
     // We cannot send a Headers instance to Miniflare
     const obj =
       rangeResult.type === 'partial' && !isMiniflare
-        ? await bucket?.get(fileKey, {
+        ? await bucket?.get(storageFilePath, {
             range: {
               length: rangeResult.rangeEnd - rangeResult.rangeStart + 1,
               offset: rangeResult.rangeStart,
             },
           })
-        : await bucket?.get(fileKey)
+        : await bucket?.get(storageFilePath)
 
     if (!obj || obj.body == undefined) {
       return new Response(null, { status: 404, statusText: 'Not Found' })

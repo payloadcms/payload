@@ -59,7 +59,7 @@ export default buildConfigWithDefaults({
           [mediaHeaderOnlyWithSizesSlug]: true,
           [mediaSlug]: true,
           // Configure a collection-level prefix on this slug to test that
-          // a custom `prefix.defaultValue` does override the static prefix
+          // a custom `prefix.defaultValue` is contained beneath the static prefix
           [mediaWithDocPrefixSlug]: {
             prefix: 'docprefix-collection',
           },
