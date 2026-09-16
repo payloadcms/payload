@@ -55,11 +55,9 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
   select: SelectType
   showHiddenFields: boolean
-  unpublishAllLocales?: boolean
 }
 
 /**
@@ -94,24 +92,15 @@ export const updateDocument = async <
   overrideLock,
   payload,
   populate,
-  publishAllLocales: publishAllLocalesArg,
   req,
   select,
   showHiddenFields,
-  unpublishAllLocales: unpublishAllLocalesArg,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const isSavingDraft = action === 'saveDraft'
   const isUnpublishing = action === 'unpublish'
-  const publishAllLocales =
-    !isSavingDraft &&
-    !isUnpublishing &&
-    (publishAllLocalesArg ??
-      (hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all' ? false : true))
-  const unpublishAllLocales =
-    typeof unpublishAllLocalesArg === 'string'
-      ? unpublishAllLocalesArg === 'true'
-      : !!unpublishAllLocalesArg
+  const isPublishingAllLocales = locale === 'all' && action === 'publish'
+  const isUnpublishingAllLocales = locale === 'all' && action === 'unpublish'
   const shouldSavePassword = Boolean(
     password &&
       collectionConfig.auth &&
@@ -288,7 +277,7 @@ export const updateDocument = async <
 
   if (config.localization && collectionConfig.versions) {
     if (hasLocalizeStatusEnabled(collectionConfig)) {
-      if (publishAllLocales || unpublishAllLocales) {
+      if (isPublishingAllLocales || isUnpublishingAllLocales) {
         let accessibleLocaleCodes = config.localization.localeCodes
 
         if (config.localization.filterAvailableLocales) {
@@ -306,7 +295,7 @@ export const updateDocument = async <
         }
 
         for (const localeCode of accessibleLocaleCodes) {
-          result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
+          result._status[localeCode] = isUnpublishingAllLocales ? 'draft' : 'published'
         }
       } else if (
         !isSavingDraft &&

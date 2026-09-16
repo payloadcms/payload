@@ -50,11 +50,9 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
-  unpublishAllLocales?: boolean
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateByIDOperation = async <
@@ -90,7 +88,6 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales,
       req: {
         fallbackLocale,
         locale,
@@ -101,7 +98,6 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
-      unpublishAllLocales,
     } = args
 
     if (!id) {
@@ -117,12 +113,10 @@ export const updateByIDOperation = async <
       locale,
       localizedStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
       operation: 'update',
-      publishAllLocales,
       status:
         data && typeof data === 'object' && data !== null && '_status' in data
           ? data._status
           : undefined,
-      unpublishAllLocales,
     })
     const isSavingDraft = resolvedAction === 'saveDraft'
 
@@ -130,8 +124,6 @@ export const updateByIDOperation = async <
       action: resolvedAction,
       data,
       locale,
-      publishAllLocales,
-      unpublishAllLocales,
     })
 
     // /////////////////////////////////////
@@ -254,11 +246,9 @@ export const updateByIDOperation = async <
       overrideLock: overrideLock!,
       payload,
       populate,
-      publishAllLocales,
       req,
       select: select!,
       showHiddenFields: showHiddenFields!,
-      unpublishAllLocales,
     })
 
     // /////////////////////////////////////

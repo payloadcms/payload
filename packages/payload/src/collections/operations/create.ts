@@ -57,7 +57,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
   selectedLocales?: string[]
   showHiddenFields?: boolean
@@ -104,7 +103,6 @@ export const createOperation = async <
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales: publishAllLocalesArg,
       req: {
         fallbackLocale,
         locale,
@@ -127,7 +125,6 @@ export const createOperation = async <
       locale,
       localizedStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
       operation: duplicateFromID ? 'duplicate' : 'create',
-      publishAllLocales: publishAllLocalesArg,
       status: data && typeof data === 'object' && '_status' in data ? data._status : undefined,
     })
 
@@ -135,14 +132,10 @@ export const createOperation = async <
       action: resolvedAction,
       data,
       locale,
-      publishAllLocales: publishAllLocalesArg,
     })
 
-    // For creates there is no existing doc — always publish all locales when not a draft.
     const isSavingDraft = resolvedAction === 'saveDraft'
-    const publishAllLocales =
-      !isSavingDraft &&
-      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    const isPublishingAllLocales = locale === 'all' && resolvedAction === 'publish'
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -278,7 +271,11 @@ export const createOperation = async <
       }
     }
 
-    if (config.localization && hasLocalizeStatusEnabled(collectionConfig) && publishAllLocales) {
+    if (
+      config.localization &&
+      hasLocalizeStatusEnabled(collectionConfig) &&
+      isPublishingAllLocales
+    ) {
       let accessibleLocaleCodes = config.localization.localeCodes
 
       if (config.localization.filterAvailableLocales) {

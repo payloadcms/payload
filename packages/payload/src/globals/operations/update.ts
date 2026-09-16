@@ -49,11 +49,9 @@ type Args<TSlug extends GlobalSlug> = {
   overrideAccess?: boolean
   overrideLock?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
   showHiddenFields?: boolean
   slug: string
-  unpublishAllLocales?: boolean
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const updateOperation = async <
@@ -71,12 +69,10 @@ export const updateOperation = async <
     overrideAccess,
     overrideLock,
     populate,
-    publishAllLocales: publishAllLocalesArg,
     req: { fallbackLocale, locale, payload, payload: { config } = {} },
     req,
     select: incomingSelect,
     showHiddenFields,
-    unpublishAllLocales: unpublishAllLocalesArg,
   } = args
 
   try {
@@ -109,30 +105,22 @@ export const updateOperation = async <
       locale,
       localizedStatusEnabled: hasLocalizeStatusEnabled(globalConfig),
       operation: 'update',
-      publishAllLocales: args.publishAllLocales,
       status:
         data && typeof data === 'object' && data !== null && '_status' in data
           ? data._status
           : undefined,
-      unpublishAllLocales: args.unpublishAllLocales,
     })
 
     data = canonicalizeWriteStatus({
       action: resolvedAction,
       data,
       locale,
-      publishAllLocales: publishAllLocalesArg,
-      unpublishAllLocales: unpublishAllLocalesArg,
     })
 
     const isSavingDraft = resolvedAction === 'saveDraft'
     const isUnpublishing = resolvedAction === 'unpublish'
-    const publishAllLocales =
-      !isSavingDraft &&
-      !isUnpublishing &&
-      (publishAllLocalesArg ??
-        (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true))
-    const unpublishAllLocales = !!unpublishAllLocalesArg
+    const isPublishingAllLocales = locale === 'all' && resolvedAction === 'publish'
+    const isUnpublishingAllLocales = locale === 'all' && resolvedAction === 'unpublish'
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -161,7 +149,7 @@ export const updateOperation = async <
     const globalVersionResult = await getLatestGlobalVersion({
       slug,
       config: globalConfig,
-      locale: publishAllLocales || unpublishAllLocales ? 'all' : locale!,
+      locale: locale!,
       payload,
       req,
       where: query,
@@ -292,7 +280,7 @@ export const updateOperation = async <
 
     if (config && config.localization && globalConfig.versions) {
       if (hasLocalizeStatusEnabled(globalConfig)) {
-        if (publishAllLocales || unpublishAllLocales) {
+        if (isPublishingAllLocales || isUnpublishingAllLocales) {
           let accessibleLocaleCodes = config.localization.localeCodes
 
           if (config.localization.filterAvailableLocales) {
@@ -310,7 +298,7 @@ export const updateOperation = async <
           }
 
           for (const localeCode of accessibleLocaleCodes) {
-            result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
+            result._status[localeCode] = isUnpublishingAllLocales ? 'draft' : 'published'
           }
         } else if (
           !isSavingDraft &&

@@ -76,7 +76,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   /**
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
-  locale?: TypedLocale
+  locale?: 'all' | TypedLocale
   /**
    * Skip access control.
    * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
@@ -99,13 +99,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   populate?: PopulateType
   /**
-   * Publish the document / documents in all locales. Only applies when localization is enabled
-   * and the collection has localized fields.
-   *
-   * @default undefined
-   */
-  publishAllLocales?: boolean
-  /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
@@ -123,11 +116,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * @default false
    */
   trash?: boolean
-  /**
-   * Unpublish the document / documents in all locales. Only applies when localization is enabled
-   * and the collection has localized fields.
-   */
-  unpublishAllLocales?: boolean
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -232,12 +220,10 @@ async function updateLocal<
     overrideLock,
     overwriteExistingFiles = false,
     populate,
-    publishAllLocales,
     select,
     showHiddenFields,
     sort,
     trash = false,
-    unpublishAllLocales,
     where,
   } = options
 
@@ -266,13 +252,11 @@ async function updateLocal<
     overwriteExistingFiles,
     payload,
     populate,
-    publishAllLocales,
     req,
     select,
     showHiddenFields,
     sort,
     trash,
-    unpublishAllLocales,
     where,
   }
 

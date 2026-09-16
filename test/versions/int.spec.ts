@@ -1815,10 +1815,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
-        expect(unpublished._status).toBe('draft')
+        expect(unpublished._status).toEqual({ de: 'draft', en: 'draft', es: 'draft' })
 
         const afterVersions = await payload.findVersions({
           collection: draftCollectionSlug,
@@ -1845,7 +1845,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           action: 'unpublish',
           slug: draftGlobalSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
         const afterVersions = await payload.findGlobalVersions({
@@ -1873,7 +1873,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
         const found = await payload.findByID({
@@ -1885,7 +1885,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(found._status).toBe('draft')
       })
 
-      test('should unpublish a collection document with localized required fields from a non-default locale', async ({
+      test('should unpublish all locales of a collection document with localized required fields', async ({
         payload,
       }) => {
         const doc = await payload.create({
@@ -1903,16 +1903,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
-          locale: 'es',
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
-        expect(unpublished._status).toBe('draft')
+        expect(unpublished._status).toEqual({ de: 'draft', en: 'draft', es: 'draft' })
 
         await payload.delete({ collection: draftCollectionSlug, id: doc.id })
       })
 
-      test('should unpublish a global with localized required fields from a non-default locale', async ({
+      test('should unpublish all locales of a global with localized required fields', async ({
         payload,
       }) => {
         await payload.updateGlobal({
@@ -1926,11 +1925,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           slug: draftGlobalSlug,
           data: { _status: 'draft' },
           fallbackLocale: false,
-          locale: 'es',
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
-        expect(unpublished._status).toBe('draft')
+        expect(unpublished._status).toEqual({ de: 'draft', en: 'draft', es: 'draft' })
 
         await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
       })
@@ -3433,17 +3431,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         payload,
       }) => {
         const doc = await payload.updateGlobal({
+          action: 'publish',
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
-          publishAllLocales: true,
         })
 
         await wait(10)
 
         const upd = await payload.updateGlobal({
+          action: 'publish',
           slug: autoSaveGlobalSlug,
           data: { title: 'asd2' },
-          publishAllLocales: true,
         })
 
         expect(upd.createdAt).toBe(doc.createdAt)
@@ -3649,11 +3647,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const title2 = 'Another updated title in EN'
 
         const updatedGlobal = await payload.updateGlobal({
+          action: 'publish',
           slug: autoSaveGlobalSlug,
           data: {
             title: title2,
           },
-          publishAllLocales: true,
         })
 
         expect(updatedGlobal.title).toBe(title2)
@@ -3690,13 +3688,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const originalTitle = 'Here is a published global'
 
         await payload.updateGlobal({
+          action: 'publish',
           slug: autoSaveGlobalSlug,
           data: {
             _status: 'published',
             description: 'kjnjyhbbdsfseankuhsjsfghb',
             title: originalTitle,
           },
-          publishAllLocales: true,
         })
 
         const publishedGlobal = await payload.findGlobal({
@@ -4690,7 +4688,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
           },
           action: 'publish',
-          publishAllLocales: true,
+          locale: 'all',
         })
 
         const publishedAll = await payload.findByID({
@@ -4959,11 +4957,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(publishedOnlyEN.title.en).toStrictEqual('Eng published')
 
         await payload.updateGlobal({
+          action: 'publish',
           slug: global,
           data: {
             _status: 'published',
           },
-          publishAllLocales: true,
+          locale: 'all',
         })
 
         const publishedAll = await payload.findGlobal({

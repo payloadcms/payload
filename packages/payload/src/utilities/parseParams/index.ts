@@ -61,12 +61,10 @@ export type RawParams = {
   page?: string
   pagination?: string
   populate?: unknown
-  publishAllLocales?: string
   select?: unknown
   selectedLocales?: string
   sort?: string | string[]
   trash?: string
-  unpublishAllLocales?: string
   version?: string | string[]
   where?: string | Where
 }
@@ -84,12 +82,10 @@ export type ParsedParams = {
   page?: number
   pagination?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   select?: SelectType
   selectedLocales?: string[]
   sort?: string[]
   trash?: boolean
-  unpublishAllLocales?: boolean
   version?: ReadVersion
   where?: Where
 } & Record<string, unknown>

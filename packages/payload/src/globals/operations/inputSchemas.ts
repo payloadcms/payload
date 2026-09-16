@@ -16,13 +16,11 @@ import {
   overrideLockSchema,
   paginationSchema,
   populateSchema,
-  publishAllLocalesSchema,
   restoreActionSchema,
   selectSchema,
   showHiddenFieldsSchema,
   slugSchema,
   sortSchema,
-  unpublishAllLocalesSchema,
   updateActionSchema,
   versionSchema,
   whereSchema,
@@ -137,9 +135,7 @@ const updateGlobalInputShape = {
   locale: localeSchema,
   overrideLock: overrideLockSchema,
   populate: populateSchema,
-  publishAllLocales: publishAllLocalesSchema,
   select: selectSchema,
-  unpublishAllLocales: unpublishAllLocalesSchema,
 }
 
 export const updateGlobalInputSchema = strictObject(updateGlobalInputShape)

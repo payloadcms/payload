@@ -24,7 +24,6 @@ import {
   pageSchema,
   paginationSchema,
   populateSchema,
-  publishAllLocalesSchema,
   requireIDOrWhere,
   requireReturningForSelect,
   restoreActionSchema,
@@ -35,7 +34,6 @@ import {
   slugSchema,
   sortSchema,
   trashSchema,
-  unpublishAllLocalesSchema,
   updateActionSchema,
   versionSchema,
   whereSchema,
@@ -90,7 +88,6 @@ const getCreateDocumentsInputShape = <TFile extends z.core.$ZodType>({
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
-  publishAllLocales: publishAllLocalesSchema,
   returning: returningSchema,
   select: selectSchema,
 })
@@ -292,12 +289,10 @@ const getUpdateDocumentInputShape = <TFile extends z.core.$ZodType>({ file }: { 
   locale: localeSchema,
   overrideLock: overrideLockSchema,
   populate: populateSchema,
-  publishAllLocales: publishAllLocalesSchema,
   returning: returningSchema,
   select: selectSchema,
   sort: sortSchema,
   trash: trashSchema,
-  unpublishAllLocales: unpublishAllLocalesSchema,
   where: whereSchema,
 })
 

@@ -73,9 +73,6 @@ export const populateSchema = z
       'Optional: control which fields to include from populated relationship or upload documents.',
     ),
   )
-export const publishAllLocalesSchema = z
-  .optional(z.boolean())
-  .check(z.describe('Publish all locales.'))
 export const returningSchema = z
   ._default(z.boolean(), false)
   .check(z.describe('Return complete documents instead of only their IDs.'))
@@ -98,9 +95,6 @@ export const sortSchema = z
 export const trashSchema = z
   .optional(z.boolean())
   .check(z.describe('Read from or include the trash.'))
-export const unpublishAllLocalesSchema = z
-  .optional(z.boolean())
-  .check(z.describe('Unpublish all locales.'))
 export const restoreActionSchema = z
   .optional(z.enum(['saveDraft', 'publish']))
   .check(z.describe('Save the restored version as a draft or publish it.'))

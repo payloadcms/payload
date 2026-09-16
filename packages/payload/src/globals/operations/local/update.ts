@@ -72,13 +72,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
-   * Publish the document / documents in all locales. Only applies when localization is enabled
-   * and the global has localized fields.
-   *
-   * @default undefined
-   */
-  publishAllLocales?: boolean
-  /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
@@ -92,11 +85,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * the Global slug to operate against.
    */
   slug: TSlug
-  /**
-   * Unpublish the document / documents in all locales. Only applies when localization is enabled
-   * and the global has localized fields.
-   */
-  unpublishAllLocales?: boolean
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -125,10 +113,8 @@ export async function updateGlobalLocal<
     overrideAccess = true,
     overrideLock,
     populate,
-    publishAllLocales,
     select,
     showHiddenFields,
-    unpublishAllLocales,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -147,10 +133,8 @@ export async function updateGlobalLocal<
     overrideAccess,
     overrideLock,
     populate,
-    publishAllLocales,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
-    unpublishAllLocales,
   })
 }
