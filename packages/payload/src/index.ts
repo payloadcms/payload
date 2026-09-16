@@ -304,18 +304,18 @@ export interface UntypedPayloadTypes {
     _verificationToken?: null | string
     /** Whether the email is verified. Only with `auth.verify`. */
     _verified?: boolean | null
-    /** The user's API key. Only with `auth.useAPIKey`, once enabled for this user. */
+    /** The user's API key. Write-only: accepted on `create`/`update`, never returned on reads. */
     apiKey?: null | string
-    /** Internal lookup index for the API key. Hidden (needs `showHiddenFields`). Only with `auth.useAPIKey`. */
+    /** Internal lookup index for the API key. Never returned on reads. */
     apiKeyIndex?: null | string
+    /** The API key's final four characters. Only with `auth.useAPIKey`. */
+    apiKeyLast4?: null | string
     /** Slug of the auth collection this user belongs to. Always present; identifies the source collection. */
     collection: string
     /** When the user was created. Not present when timestamps are disabled. */
     createdAt?: string
     /** The user's email. Absent if email login is disabled via `auth.loginWithUsername`. */
     email?: null | string
-    /** Whether API key auth is enabled for this user. Only with `auth.useAPIKey`. */
-    enableAPIKey?: boolean | null
     /** Hashed password. Hidden (needs `showHiddenFields`). Only with the local strategy. */
     hash?: null | string
     /** The user's ID. Always present. */

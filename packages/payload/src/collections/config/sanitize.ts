@@ -9,7 +9,8 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import { omitAPIKey } from '../../auth/baseFields/apiKey.js'
+import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
@@ -163,6 +164,14 @@ export const sanitizeCollection = (
     if (sanitized.auth) {
       for (const endpoint of authCollectionEndpoints) {
         sanitized.endpoints.push(endpoint)
+      }
+
+      if (
+        typeof sanitized.auth === 'object' &&
+        typeof sanitized.auth.useAPIKey === 'object' &&
+        sanitized.auth.useAPIKey.reveal === true
+      ) {
+        sanitized.endpoints.push(apiKeyRevealEndpoint)
       }
     }
 
@@ -335,7 +344,14 @@ export const sanitizeCollection = (
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
-    sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+    if (sanitized.auth.useAPIKey) {
+      sanitized.hooks!.beforeRead!.unshift(omitAPIKey)
+    }
+
+    sanitized.fields = mergeBaseFields(
+      sanitized.fields,
+      getBaseAuthFields(sanitized.auth, sanitized.fields),
+    )
   }
 
   if (collection?.admin?.pagination?.limits?.length) {

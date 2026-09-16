@@ -1925,3 +1925,10 @@ admin panel. See the [Stripe REST proxy documentation](../plugins/stripe#stripe-
 configuration and security guidance.
 
 If you previously used `rest: false`, remove the property; omitting `rest` disables the proxy.
+
+### API keys: v4-only changes on top of the shared 3.x/4 security fix
+
+- `apiKeyLast4` is a new persisted field on every `auth.useAPIKey` collection. Generate and run a schema migration. Legacy rows backfill on the next successful API-key authentication.
+- `enableAPIKey` is removed. Revoke by setting `apiKey: null`.
+- `hasAPIKey` (3.x virtual field) is removed. Use `apiKeyLast4` and `docPermissions.fields.apiKey`.
+- Custom `access.read` on the generated `apiKey` field is inert — reads are hardcoded to deny.

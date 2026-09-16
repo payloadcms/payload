@@ -24,7 +24,6 @@ import {
 process.env.NEXT_BASE_PATH = BASE_PATH
 
 export default buildConfigWithDefaults({
-  suite: 'auth',
   config: {
     admin: {
       autoLogin: {
@@ -374,17 +373,12 @@ export default buildConfigWithDefaults({
         },
         fields: [
           {
-            name: 'enableAPIKey',
-            type: 'checkbox',
-            access: {
-              read: () => false,
-            },
-          },
-          {
             name: 'apiKey',
             type: 'text',
             access: {
+              create: () => false,
               read: () => false,
+              update: () => false,
             },
           },
         ],
@@ -401,4 +395,5 @@ export default buildConfigWithDefaults({
     },
   },
   seed,
+  suite: 'auth',
 })

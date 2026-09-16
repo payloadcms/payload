@@ -51,6 +51,7 @@ import {
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
+  SuccessfulSubmitCountContext,
   useDocumentForm,
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
@@ -112,6 +113,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const [isMounted, setIsMounted] = useState(false)
 
   const [submitted, setSubmitted] = useState(false)
+  const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
   /**
    * Tracks wether the form state passes validation.
@@ -433,6 +435,8 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
+          setSuccessfulSubmitCount((count) => count + 1)
+
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json, {
               context,
@@ -914,7 +918,9 @@ export const Form: React.FC<FormProps> = (props) => {
                     <ModifiedContext value={modified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsReducer}>
-                        {children}
+                        <SuccessfulSubmitCountContext value={successfulSubmitCount}>
+                          {children}
+                        </SuccessfulSubmitCountContext>
                       </FormFieldsContext.Provider>
                     </ModifiedContext>
                   </BackgroundProcessingContext>

@@ -5,6 +5,9 @@ import type { User } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { AuthStrategyFunction } from '../index.js'
 
+import { getAPIKeyLast4 } from '../baseFields/apiKey/getAPIKeyLast4.js'
+import { legacyAPIKeyLast4 } from '../baseFields/apiKey/omitAPIKey.js'
+
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
   async ({ headers, isGraphQL = false, payload, req }) => {
@@ -56,6 +59,26 @@ export const APIKeyAuthentication =
 
         if (userQuery.docs && userQuery.docs.length > 0) {
           const user = userQuery.docs[0]
+          const apiKeyLast4 = getAPIKeyLast4(apiKey)
+
+          if (user?.apiKeyLast4 === legacyAPIKeyLast4 && apiKeyLast4 !== legacyAPIKeyLast4) {
+            try {
+              await payload.db.updateOne({
+                id: user.id,
+                collection: collectionConfig.slug,
+                data: { apiKeyLast4 },
+                req,
+                returning: false,
+              })
+              user.apiKeyLast4 = apiKeyLast4
+            } catch (err) {
+              payload.logger.error({
+                err,
+                msg: `Failed to backfill API key last four for ${collectionConfig.slug} ${user.id}`,
+              })
+            }
+          }
+
           user!.collection = collectionConfig.slug
           user!._strategy = 'api-key'
 

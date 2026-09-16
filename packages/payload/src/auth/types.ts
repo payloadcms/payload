@@ -297,7 +297,15 @@ export interface IncomingAuthType {
    * @default false
    * @link https://payloadcms.com/docs/authentication/api-keys
    */
-  useAPIKey?: boolean
+  useAPIKey?:
+    | {
+        /**
+         * Allows administrators to reveal stored API keys from the Admin Panel.
+         * @default false
+         */
+        reveal?: boolean
+      }
+    | boolean
 
   /**
    * Use sessions for authentication. Enabled by default.

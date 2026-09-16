@@ -23,7 +23,6 @@ import { v4 as uuid } from 'uuid'
 import { expect, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-import type { ApiKey } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
@@ -914,15 +913,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
 
         const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            Authorization: `${slug} API-Key ${user?.apiKey}`,
+            Authorization: `${slug} API-Key ${apiKey}`,
           },
         })
 
         const data = await response.json()
 
         expect(response.status).toBe(200)
+        expect(data.user.id).toStrictEqual(user.id)
         expect(data.user.email).toBeDefined()
-        expect(data.user.apiKey).toStrictEqual(apiKey)
+        expect(data.user).not.toHaveProperty('apiKey')
       })
 
       test('should refresh a token and reset its expiration', async ({ restClient }) => {
@@ -985,7 +985,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         const apiKey = '987e6543-e21b-12d3-a456-426614174999'
         const user = await payload.create({
           collection: slug,
-          data: { apiKey, email: 'user@example.com', enableAPIKey: true, password: 'Password123' },
+          data: { apiKey, email: 'user@example.com', password: 'Password123' },
         })
         const { token } = await payload.login({
           collection: 'users',
@@ -1002,10 +1002,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         expect(raw?.apiKey).not.toContain('-') // still ciphertext
       })
 
-      test('returns a user with decrypted apiKey after refresh', async ({
-        payload,
-        restClient,
-      }) => {
+      test('omits apiKey after refresh', async ({ payload, restClient }) => {
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
@@ -1017,7 +1014,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
           })
           .then((r) => r.json())
 
-        expect(res.user.apiKey).toMatch(/[0-9a-f-]{36}/) // UUID string
+        expect(res.user).not.toHaveProperty('apiKey')
       })
 
       test('should allow a user to be created', async ({ restClient }) => {
@@ -2153,45 +2150,51 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
 
   test.describe('API Key', () => {
     test('should authenticate via the correct API key user', async ({ payload, restClient }) => {
-      const usersQuery = await payload.find({
+      const firstAPIKey = uuid()
+      const secondAPIKey = uuid()
+      const user1 = await payload.create({
         collection: apiKeysSlug,
+        data: { apiKey: firstAPIKey },
       })
-
-      const [user1, user2] = usersQuery.docs
+      const user2 = await payload.create({
+        collection: apiKeysSlug,
+        data: { apiKey: secondAPIKey },
+      })
 
       const success = await restClient
         .GET(`/${apiKeysSlug}/${user2.id}`, {
           headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${secondAPIKey}`,
           },
         })
         .then((res) => res.json())
 
-      expect(success.apiKey).toStrictEqual(user2.apiKey)
+      expect(success.id).toStrictEqual(user2.id)
+      expect(success).not.toHaveProperty('apiKey')
 
       const fail = await restClient.GET(`/${apiKeysSlug}/${user1.id}`, {
         headers: {
-          Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
+          Authorization: `${apiKeysSlug} API-Key ${secondAPIKey}`,
         },
       })
 
       expect(fail.status).toStrictEqual(404)
+
+      await payload.delete({ id: user1.id, collection: apiKeysSlug })
+      await payload.delete({ id: user2.id, collection: apiKeysSlug })
     })
 
     test('should allow authentication with an API key saved with sha1', async ({
       payload,
       restClient,
     }) => {
-      const usersQuery = await payload.find({
+      const apiKey = uuid()
+      const user = await payload.create({
         collection: apiKeysSlug,
+        data: { apiKey },
       })
 
-      const [user] = usersQuery.docs as [ApiKey]
-
-      const sha1Index = crypto
-        .createHmac('sha256', payload.secret)
-        .update(user.apiKey as string)
-        .digest('hex')
+      const sha1Index = crypto.createHmac('sha256', payload.secret).update(apiKey).digest('hex')
 
       await payload.db.updateOne({
         id: user.id,
@@ -2204,32 +2207,32 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       const response = await restClient
         .GET(`/${apiKeysSlug}/${user?.id}`, {
           headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user?.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
         })
         .then((res) => res.json())
 
       expect(response.id).toStrictEqual(user.id)
+
+      await payload.delete({ id: user.id, collection: apiKeysSlug })
     })
 
     test('should not remove an API key from a user when updating other fields', async ({
       payload,
+      restClient,
     }) => {
       const apiKey = uuid()
       const user = await payload.create({
         collection: apiKeysSlug,
         data: {
           apiKey,
-          enableAPIKey: true,
         },
       })
 
       const updatedUser = await payload.update({
         id: user.id,
         collection: apiKeysSlug,
-        data: {
-          enableAPIKey: true,
-        },
+        data: {},
       })
 
       const userResult = await payload.find({
@@ -2241,8 +2244,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         },
       })
 
-      expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
-      expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updatedUser).not.toHaveProperty('apiKey')
+      expect(userResult.docs[0]).not.toHaveProperty('apiKey')
+      expect(response.user.id).toStrictEqual(user.id)
     })
 
     test('should disable api key after updating apiKey: null', async ({ payload, restClient }) => {
@@ -2251,7 +2263,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         collection: apiKeysSlug,
         data: {
           apiKey,
-          enableAPIKey: true,
         },
       })
 
@@ -2272,41 +2283,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         })
         .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toBeNull()
-      expect(response.user).toBeNull()
-    })
-
-    test('should disable api key after updating with enableAPIKey:false', async ({
-      payload,
-      restClient,
-    }) => {
-      const apiKey = uuid()
-      const user = await payload.create({
-        collection: apiKeysSlug,
-        data: {
-          apiKey,
-          enableAPIKey: true,
-        },
-      })
-
-      const updatedUser = await payload.update({
-        id: user.id,
-        collection: apiKeysSlug,
-        data: {
-          enableAPIKey: false,
-        },
-      })
-
-      // use the api key in a fetch to assert that it is disabled
-      const response = await restClient
-        .GET(`/${apiKeysSlug}/me`, {
-          headers: {
-            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
-          },
-        })
-        .then((res) => res.json())
-
-      expect(updatedUser.apiKey).toStrictEqual(apiKey)
+      expect(updatedUser).not.toHaveProperty('apiKey')
       expect(response.user).toBeNull()
     })
   })
@@ -2371,9 +2348,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
     test('should return collection property on api-keys auth collection', async ({ payload }) => {
       const createdApiKey = await payload.create({
         collection: apiKeysSlug,
-        data: {
-          enableAPIKey: true,
-        },
+        data: {},
       })
 
       expect(createdApiKey.collection).toBe(apiKeysSlug)
@@ -2395,7 +2370,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       const updatedApiKey = await payload.update({
         id: createdApiKey.id,
         collection: apiKeysSlug,
-        data: { enableAPIKey: false },
+        data: {},
       })
 
       expect(updatedApiKey.collection).toBe(apiKeysSlug)
@@ -3304,7 +3279,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
     ) => {
       const user = await payload.create({
         collection,
-        data: { apiKey: rawApiKey, enableAPIKey: true, ...data },
+        data: { apiKey: rawApiKey, ...data },
       })
       createdIDs.push({ id: user.id, collection })
 
@@ -3330,7 +3305,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       const rawApiKey = uuid()
       const user = await payload.create({
         collection,
-        data: { apiKey: rawApiKey, enableAPIKey: true },
+        data: { apiKey: rawApiKey },
       })
       createdIDs.push({ id: user.id, collection })
 
@@ -3529,7 +3504,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       const rawApiKey = uuid()
       const user = await payload.create({
         collection: rotateSecretSlug,
-        data: { apiKey: rawApiKey, enableAPIKey: true },
+        data: { apiKey: rawApiKey },
       })
       createdIDs.push({ id: user.id, collection: rotateSecretSlug })
 
@@ -3567,7 +3542,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       const rawApiKey = uuid()
       const user = await payload.create({
         collection: rotateSecretSlug,
-        data: { apiKey: rawApiKey, enableAPIKey: true },
+        data: { apiKey: rawApiKey },
       })
       createdIDs.push({ id: user.id, collection: rotateSecretSlug })
 
@@ -3581,7 +3556,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       // Reading through the Local API runs the afterRead decrypt hook, which must
       // mask the undecryptable field rather than failing the whole document read.
       const doc = await payload.findByID({ id: user.id, collection: rotateSecretSlug })
-      expect(doc.apiKey).toBeNull()
+      expect(doc).not.toHaveProperty('apiKey')
     })
 
     test('should leave password logins working on a rotated collection', async ({ payload }) => {
