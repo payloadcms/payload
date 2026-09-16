@@ -1,6 +1,7 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
 import type {
+  Cart,
   CurrenciesConfig,
   PaymentAdapter,
   ProductsValidation,
@@ -69,14 +70,16 @@ export const initiatePaymentHandler: InitiatePayment =
 
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID
-    let cart: any = undefined
+    let cart: Cart | undefined
     const billingAddress = data?.billingAddress
     const shippingAddress = data?.shippingAddress
     const cartSecret = data?.secret
 
-    let customerEmail: string = user?.email ?? ''
+    const isCustomer = user?.collection === customersSlug
 
-    if (user) {
+    let customerEmail: string = isCustomer ? (user?.email ?? '') : ''
+
+    if (isCustomer && user) {
       if (user.cart?.docs && Array.isArray(user.cart.docs) && user.cart.docs.length > 0) {
         if (!cartID && user.cart.docs[0]) {
           // Use the user's cart instead
@@ -89,7 +92,7 @@ export const initiatePaymentHandler: InitiatePayment =
         }
       }
     } else {
-      // Get the email from the data if user is not available
+      // Get the email from the data if the requester is not a customer
       if (data?.customerEmail && typeof data.customerEmail === 'string') {
         customerEmail = data.customerEmail
       } else {
@@ -215,7 +218,7 @@ export const initiatePaymentHandler: InitiatePayment =
         if (!product) {
           return Response.json(
             {
-              message: `Product with ID ${item.product} not found.`,
+              message: `Product with ID ${id} not found.`,
             },
             {
               status: 404,
