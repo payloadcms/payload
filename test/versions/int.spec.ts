@@ -721,6 +721,89 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       })
     })
 
+    test.describe('Draft read access', () => {
+      const createdDocumentIDs: (number | string)[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdDocumentIDs) {
+          await payload.delete({ id, collection: draftCollectionSlug })
+        }
+        createdDocumentIDs.length = 0
+      })
+
+      test('should evaluate findByID access against the latest draft when the base document is denied', async ({
+        payload,
+      }) => {
+        const document = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'base denied',
+            title: 'Draft access allowed',
+          },
+          draft: true,
+        })
+        createdDocumentIDs.push(document.id)
+
+        await payload.update({
+          id: document.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'draft allowed',
+          },
+          draft: true,
+        })
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'draft allowed',
+          },
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result?.description).toBe('draft allowed')
+      })
+
+      test('should deny findByID access when only the base document matches', async ({
+        payload,
+      }) => {
+        const document = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'base allowed',
+            title: 'Draft access denied',
+          },
+          draft: true,
+        })
+        createdDocumentIDs.push(document.id)
+
+        await payload.update({
+          id: document.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'draft denied',
+          },
+          draft: true,
+        })
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'base allowed',
+          },
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result).toBeNull()
+      })
+    })
+
     test.describe('Restore', () => {
       test.afterEach(async ({ payload }) => {
         await cleanupDocuments({

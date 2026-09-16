@@ -28,6 +28,9 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -160,34 +163,63 @@ export const findByIDOperation = async <
   // Find by ID
   // /////////////////////////////////////
 
-  let dbSelect = select
-
-  if (
-    collectionConfig.versions?.drafts &&
-    replaceWithVersion &&
-    select &&
-    getSelectMode(select) === 'include'
-  ) {
-    dbSelect = { ...select, createdAt: true, updatedAt: true }
-  }
-
-  const findOneArgs: FindOneArgs = {
-    collection: collectionConfig.slug,
-    draftsEnabled: replaceWithVersion,
-    joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
-    locale: locale!,
-    req: {
-      transactionID: req.transactionID,
-    } as PayloadRequest,
-    select: dbSelect,
-    where: fullWhere,
-  }
-
-  if (!findOneArgs.where?.and?.[0]?.id) {
+  if (!fullWhere?.and?.[0]?.id) {
     throw new NotFound(t)
   }
 
-  const docWithLocales = await req.payload.db.findOne(findOneArgs)
+  const shouldQueryDrafts = !args.data && replaceWithVersion && hasDraftsEnabled(collectionConfig)
+  let docWithLocales: DataFromCollectionSlug<TSlug> | null | undefined
+  let query = fullWhere
+
+  if (shouldQueryDrafts) {
+    query = appendVersionToQueryKey(fullWhere)
+
+    await validateQueryPaths({
+      collectionConfig,
+      overrideAccess,
+      req,
+      versionFields: buildVersionCollectionFields(req.payload.config, collectionConfig, true),
+      where: appendVersionToQueryKey(where),
+    })
+
+    const { docs } = await req.payload.db.queryDrafts<DataFromCollectionSlug<TSlug>>({
+      collection: collectionConfig.slug,
+      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
+      limit: 1,
+      locale: locale!,
+      pagination: false,
+      req,
+      select: getQueryDraftsSelect({ select }),
+      where: query,
+    })
+
+    docWithLocales = docs[0]
+  } else {
+    let dbSelect = select
+
+    if (
+      collectionConfig.versions?.drafts &&
+      replaceWithVersion &&
+      select &&
+      getSelectMode(select) === 'include'
+    ) {
+      dbSelect = { ...select, createdAt: true, updatedAt: true }
+    }
+
+    const findOneArgs: FindOneArgs = {
+      collection: collectionConfig.slug,
+      draftsEnabled: replaceWithVersion,
+      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
+      locale: locale!,
+      req: {
+        transactionID: req.transactionID,
+      } as PayloadRequest,
+      select: dbSelect,
+      where: fullWhere,
+    }
+
+    docWithLocales = await req.payload.db.findOne(findOneArgs)
+  }
 
   if (!docWithLocales && !args.data) {
     if (!disableErrors) {
@@ -266,7 +298,7 @@ export const findByIDOperation = async <
   // Replace document with draft if available
   // /////////////////////////////////////
 
-  if (replaceWithVersion && hasDraftsEnabled(collectionConfig)) {
+  if (!shouldQueryDrafts && replaceWithVersion && hasDraftsEnabled(collectionConfig)) {
     result = await replaceWithDraftIfAvailable({
       accessResult,
       doc: result,
@@ -290,7 +322,7 @@ export const findByIDOperation = async <
           context: req.context,
           doc: result,
           overrideAccess,
-          query: findOneArgs.where,
+          query,
           req,
         })) || result
     }
@@ -330,7 +362,7 @@ export const findByIDOperation = async <
           context: req.context,
           doc: result,
           overrideAccess,
-          query: findOneArgs.where,
+          query,
           req,
         })) || result
     }
