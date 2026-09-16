@@ -811,6 +811,81 @@ test.describe('Folders', () => {
     })
   })
 
+  test.describe('Bulk move partial failure', () => {
+    test('should report only the documents that actually moved when one document in the batch fails', async () => {
+      // Documents only render in the folder-view UI once they're inside a
+      // folder — a collection's folder-view root never lists its own
+      // unfoldered documents (only subfolders). So the three Posts need a
+      // home folder before we can select them from the file-card grid.
+      const sourceFolder = await payload.create({
+        collection: 'payload-folders',
+        data: { name: 'Bulk Move Source', folderType: [postSlug] },
+        overrideAccess: true,
+      })
+
+      await payload.create({
+        collection: postSlug,
+        data: { title: 'Bulk Move Item 1', folder: sourceFolder.id },
+        overrideAccess: true,
+      })
+      await payload.create({
+        collection: postSlug,
+        data: { shouldFailMove: true, title: 'Bulk Move Item 2', folder: sourceFolder.id },
+        overrideAccess: true,
+      })
+      await payload.create({
+        collection: postSlug,
+        data: { title: 'Bulk Move Item 3', folder: sourceFolder.id },
+        overrideAccess: true,
+      })
+
+      await page.goto(postURL.byFolder)
+      await clickFolderCard({ folderName: 'Bulk Move Source', page, doubleClick: true })
+
+      // The move-to-folder drawer starts browsing from whatever folder is
+      // currently open (see `fromFolderID={folderID}` in ListSelection), so
+      // create the destination as a child of the source folder — that way
+      // it's listed immediately in the drawer without extra navigation.
+      await createFolder({ folderName: 'Bulk Move Destination', fromDropdown: true, page })
+
+      const firstOkCard = page.locator('.folder-file-card', { hasText: 'Bulk Move Item 1' })
+      const failingCard = page.locator('.folder-file-card', { hasText: 'Bulk Move Item 2' })
+      const secondOkCard = page.locator('.folder-file-card', { hasText: 'Bulk Move Item 3' })
+
+      // Shift-click from the first to the last card selects all three,
+      // including the failing one in the middle.
+      await page.keyboard.up('Shift')
+      await firstOkCard.click()
+      await page.keyboard.down('Shift')
+      await secondOkCard.click()
+      await page.keyboard.up('Shift')
+
+      const moveButton = page.locator('.list-selection__actions button', {
+        hasText: 'Move',
+      })
+      await moveButton.click()
+      const destinationFolder = page.locator('dialog#move-to-folder--list .folder-file-card', {
+        hasText: 'Bulk Move Destination',
+      })
+      await destinationFolder.click()
+      await selectFolderAndConfirmMove({ page })
+
+      // The toast must report only what the server confirmed moved (2 of the
+      // 3 selected) — never the originally selected count. This is the exact
+      // regression this test guards: a bulk move reporting success on
+      // partial failure.
+      await expect(page.locator('.payload-toast-container')).toContainText('2 items moved')
+      await expect(page.locator('.payload-toast-container')).not.toContainText('3 items moved')
+      await closeAllToasts(page)
+
+      // The document whose hook threw must still be in the source folder —
+      // it was never actually moved, regardless of what the toast said.
+      await expect(failingCard).toBeVisible()
+      await expect(firstOkCard).toBeHidden()
+      await expect(secondOkCard).toBeHidden()
+    })
+  })
+
   test.describe('should inherit folderType select values from parent folder', () => {
     test('should scope folderType select options for: scoped > child folder', async () => {
       await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
