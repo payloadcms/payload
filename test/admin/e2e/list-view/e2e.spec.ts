@@ -406,6 +406,24 @@ describe('List View', () => {
   })
 
   describe('filters', () => {
+    test('should expose accessible names for condition controls', async () => {
+      await page.goto(postsUrl.list)
+      await openListFilters(page, {})
+
+      const whereBuilder = page.locator('.where-builder')
+
+      await expect(whereBuilder.getByRole('combobox', { name: 'Filter field' })).toHaveCount(1)
+      await expect(whereBuilder.getByRole('combobox', { name: 'Filter operator' })).toHaveCount(1)
+      await expect(whereBuilder.getByRole('button', { name: 'Remove filter' })).toHaveCount(1)
+
+      await whereBuilder.getByRole('button', { name: 'Add Filter' }).click()
+
+      await expect(whereBuilder.getByRole('combobox', { name: 'Filter join' })).toHaveCount(1)
+      await expect(whereBuilder.getByRole('combobox', { name: 'Filter field' })).toHaveCount(2)
+      await expect(whereBuilder.getByRole('combobox', { name: 'Filter operator' })).toHaveCount(2)
+      await expect(whereBuilder.getByRole('button', { name: 'Remove filter' })).toHaveCount(2)
+    })
+
     test('should close where builder when clearing final condition', async () => {
       await page.goto(postsUrl.list)
 
