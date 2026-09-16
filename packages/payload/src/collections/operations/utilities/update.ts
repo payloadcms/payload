@@ -300,6 +300,20 @@ export const updateDocument = async <
           result._status = {}
         }
 
+        const currentStatus = docWithLocales._status
+        if (
+          typeof currentStatus === 'object' &&
+          currentStatus !== null &&
+          !Array.isArray(currentStatus)
+        ) {
+          result._status = { ...currentStatus }
+        } else if (typeof currentStatus === 'string') {
+          result._status = {}
+          for (const localeCode of config.localization.localeCodes) {
+            result._status[localeCode] = currentStatus
+          }
+        }
+
         for (const localeCode of accessibleLocaleCodes) {
           result._status[localeCode] = isUnpublishingAllLocales ? 'draft' : 'published'
         }

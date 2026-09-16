@@ -31,6 +31,7 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { getRequestWithLocale } from '../../utilities/getRequestWithLocale.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -140,6 +141,8 @@ export const createOperation = async <
     const isPublishingAllLocales = locale === 'all' && resolvedAction === 'publish'
 
     const localization = config.localization
+    const operationLocale = locale === 'all' && localization ? localization.defaultLocale : locale!
+    const operationReq = getRequestWithLocale({ locale: operationLocale, req })
     let publicationLocaleCodes = localization ? localization.localeCodes : []
 
     if (isPublishingAllLocales && localization && localization.filterAvailableLocales) {
@@ -209,13 +212,13 @@ export const createOperation = async <
 
     data = await beforeValidate({
       collection: collectionConfig,
-      context: req.context,
+      context: operationReq.context,
       data,
       doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
       overrideAccess: overrideAccess!,
-      req,
+      req: operationReq,
     })
 
     // /////////////////////////////////////
@@ -227,11 +230,11 @@ export const createOperation = async <
         data =
           (await hook({
             collection: collectionConfig,
-            context: req.context,
+            context: operationReq.context,
             data,
             operation: 'create',
             originalDoc: duplicatedFromDoc,
-            req,
+            req: operationReq,
           })) || data
       }
     }
@@ -245,11 +248,11 @@ export const createOperation = async <
         data =
           (await hook({
             collection: collectionConfig,
-            context: req.context,
+            context: operationReq.context,
             data,
             operation: 'create',
             originalDoc: duplicatedFromDoc,
-            req,
+            req: operationReq,
           })) || data
       }
     }
@@ -260,14 +263,14 @@ export const createOperation = async <
 
     const dataWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
-      context: req.context,
+      context: operationReq.context,
       data,
       doc: duplicatedFromDoc,
       docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
       overrideAccess,
-      req,
+      req: operationReq,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
@@ -290,17 +293,17 @@ export const createOperation = async <
       }
     }
 
-    if (
-      config.localization &&
-      hasLocalizeStatusEnabled(collectionConfig) &&
-      isPublishingAllLocales
-    ) {
+    if (config.localization && hasLocalizeStatusEnabled(collectionConfig) && locale === 'all') {
       if (typeof dataWithLocales._status !== 'object' || dataWithLocales._status === null) {
         dataWithLocales._status = {}
       }
 
-      for (const localeCode of publicationLocaleCodes) {
-        dataWithLocales._status[localeCode] = 'published'
+      const statusLocaleCodes = isPublishingAllLocales
+        ? publicationLocaleCodes
+        : config.localization.localeCodes
+
+      for (const localeCode of statusLocaleCodes) {
+        dataWithLocales._status[localeCode] = isPublishingAllLocales ? 'published' : 'draft'
       }
     }
 
