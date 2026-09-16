@@ -85,6 +85,18 @@ describe('resolveAction', () => {
       ).toBe('publish')
     })
 
+    it('should infer saveDraft for all locales from a draft status', () => {
+      expect(
+        resolveAction({
+          draftsEnabled: true,
+          localizedStatusEnabled: true,
+          locale: 'all',
+          operation: 'update',
+          status: 'draft',
+        }),
+      ).toBe('saveDraft')
+    })
+
     it('should require an explicit action for all-locale publication transitions', () => {
       expect(draftOps({ action: 'publish', locale: 'all', operation: 'update' })).toBe('publish')
       expect(draftOps({ action: 'unpublish', locale: 'all', operation: 'update' })).toBe(
