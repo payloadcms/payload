@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig, Data, FormState } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import {
@@ -33,6 +33,40 @@ import './index.css'
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
 const minimumAnimationTime = 1000
+
+/**
+ * Reduces form state to only the values that can represent a user edit, so that autosave can tell
+ * a real change apart from one the server made to its own response.
+ *
+ * Excludes `updatedAt` and virtual fields (including anything nested beneath one). The server
+ * recomputes both on every autosave and merges them back into form state. Comparing them would
+ * make each autosave response look like a new change and schedule another, redundant autosave.
+ */
+const reduceFieldsToComparableValues = (formState: FormState): Data => {
+  const virtualPathPrefixes: string[] = []
+
+  for (const [path, field] of Object.entries(formState)) {
+    if (field.isVirtual) {
+      virtualPathPrefixes.push(`${path}.`)
+    }
+  }
+
+  const comparableState: FormState = {}
+
+  for (const [path, field] of Object.entries(formState)) {
+    if (path === 'updatedAt' || field.isVirtual) {
+      continue
+    }
+
+    if (virtualPathPrefixes.some((prefix) => path.startsWith(prefix))) {
+      continue
+    }
+
+    comparableState[path] = field
+  }
+
+  return reduceFieldsToValues(comparableState)
+}
 
 export type Props = {
   collection?: ClientCollectionConfig
@@ -188,7 +222,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   const didMount = useRef(false)
-  const previousDebouncedData = useRef(reduceFieldsToValues(debouncedFormState))
+  const previousDebouncedData = useRef(reduceFieldsToComparableValues(debouncedFormState))
 
   // When debounced fields change, autosave
   useEffect(() => {
@@ -202,12 +236,10 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
     /**
      * Ensure autosave only runs if the form data changes, not every time the entire form state changes
-     * Remove `updatedAt` from comparison as it changes on every autosave interval.
      */
-    const { updatedAt: _, ...formData } = reduceFieldsToValues(debouncedFormState)
-    const { updatedAt: __, ...prevFormData } = previousDebouncedData.current
+    const formData = reduceFieldsToComparableValues(debouncedFormState)
 
-    if (dequal(formData, prevFormData)) {
+    if (dequal(formData, previousDebouncedData.current)) {
       return
     }
 

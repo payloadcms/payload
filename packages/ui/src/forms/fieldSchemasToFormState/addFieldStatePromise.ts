@@ -182,6 +182,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   }
 
   // Append only if true to avoid sending '$undefined' through the network
+  if ('virtual' in field && field.virtual) {
+    fieldState.isVirtual = true
+  }
+
+  // Append only if true to avoid sending '$undefined' through the network
   if (includeSchema) {
     fieldState.fieldSchema = field
   }

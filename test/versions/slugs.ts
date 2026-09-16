@@ -7,6 +7,8 @@ export const autosaveWithDraftButtonSlug = 'autosave-with-draft-button-posts'
 
 export const autosaveWithDraftValidateSlug = 'autosave-with-validate-posts'
 
+export const autosaveWithVirtualSlug = 'autosave-with-virtual-posts'
+
 export const customIDSlug = 'custom-ids'
 
 export const draftCollectionSlug = 'draft-posts'
@@ -38,6 +40,7 @@ export const textCollectionSlug = 'text'
 export const collectionSlugs = [
   autosaveCollectionSlug,
   autosaveWithMultiSelectCollectionSlug,
+  autosaveWithVirtualSlug,
   nestedArraySelectCollectionSlug,
   draftCollectionSlug,
   draftWithChangeHookCollectionSlug,
