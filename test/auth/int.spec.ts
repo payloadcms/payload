@@ -2054,6 +2054,51 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
       expect(user2.docs[0]?.sessions).toHaveLength(1)
     })
 
+    test('should keep all sessions when logging in concurrently', async ({ payload }) => {
+      const concurrentLogins = 8
+
+      const results = await Promise.allSettled(
+        Array.from({ length: concurrentLogins }, () =>
+          payload.login({
+            collection: slug,
+            data: {
+              email,
+              password,
+            },
+          }),
+        ),
+      )
+
+      const sids = []
+
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          sids.push(jwtDecode<{ sid: string }>(String(result.value.token)).sid)
+        }
+      }
+
+      expect(sids.length).toBeGreaterThan(0)
+      expect(new Set(sids).size).toBe(sids.length)
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: email,
+          },
+        },
+      })
+
+      const storedSessions = user.docs[0]?.sessions ?? []
+
+      for (const sid of sids) {
+        expect(
+          storedSessions.some(({ id }) => id === sid),
+          `session ${sid} was lost after concurrent logins`,
+        ).toBe(true)
+      }
+    })
+
     test('should not update updatedAt when creating a session', async ({ payload }) => {
       // Create a user
       const testUser = await payload.create({
