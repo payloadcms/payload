@@ -1706,6 +1706,97 @@ describe('Relationships', () => {
         expect(result.blocks[0]?.directors[1].id).toBe(director2.id)
       })
     })
+
+    describe('With array rows that hold hasMany fields', () => {
+      let directors: Director[]
+
+      beforeEach(async () => {
+        directors = await Promise.all(
+          ['a', 'b', 'c'].map((name) =>
+            payload.create({ collection: 'directors', data: { name } }),
+          ),
+        )
+      })
+
+      it('should not let a row appended at a removed row index inherit its relationships', async () => {
+        const movie = await payload.create({
+          collection: 'movies',
+          data: {
+            array: directors.map((director) => ({ director: [director.id] })),
+          },
+        })
+
+        // Remove the middle row, leaving index 2 unoccupied
+        await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          data: {
+            array: [{ director: [directors[0].id] }, { director: [directors[2].id] }],
+          },
+        })
+
+        const result = await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          data: {
+            array: [{ director: [directors[0].id] }, { director: [directors[2].id] }, {}],
+          },
+          depth: 0,
+        })
+
+        // Mongo omits the key entirely for a row that was never given a value, Postgres returns []
+        expect(result.array[2].director ?? []).toStrictEqual([])
+      })
+
+      it('should not let a row appended at a removed row index inherit its hasMany texts', async () => {
+        const movie = await payload.create({
+          collection: 'movies',
+          data: {
+            array: [{ tags: ['a'] }, { tags: ['b'] }, { tags: ['c'] }],
+          },
+        })
+
+        await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          data: {
+            array: [{ tags: ['a'] }, { tags: ['c'] }],
+          },
+        })
+
+        const result = await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          data: {
+            array: [{ tags: ['a'] }, { tags: ['c'] }, {}],
+          },
+        })
+
+        expect(result.array[2].tags ?? []).toStrictEqual([])
+      })
+
+      it('should keep relationships of surviving rows when a row is removed', async () => {
+        const movie = await payload.create({
+          collection: 'movies',
+          data: {
+            array: directors.map((director) => ({ director: [director.id] })),
+          },
+        })
+
+        const result = await payload.update({
+          id: movie.id,
+          collection: 'movies',
+          data: {
+            array: [{ director: [directors[0].id] }, { director: [directors[2].id] }],
+          },
+          depth: 0,
+        })
+
+        expect(result.array).toHaveLength(2)
+        expect(result.array[0].director).toStrictEqual([directors[0].id])
+        expect(result.array[1].director).toStrictEqual([directors[2].id])
+      })
+    })
   })
 
   describe('Polymorphic Relationships', () => {
