@@ -38,6 +38,11 @@ export const getTranslationString = <
       return acc
     }
 
+    // Unresolved segment, e.g. a namespace a plugin does not translate for this language
+    if (acc === null || typeof acc !== 'object') {
+      return undefined
+    }
+
     if (typeof count === 'number') {
       if (count === 0 && `${key}_zero` in acc) {
         keySuffix = '_zero'
