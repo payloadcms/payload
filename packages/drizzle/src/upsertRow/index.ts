@@ -364,6 +364,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        pathPrefixesToDelete: rowToInsert.pathPrefixesToDelete,
         rows: [...relationsToInsert, ...generalRelationshipDeletes],
         tableName: relationshipsTableName,
       })
@@ -571,6 +572,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        pathPrefixesToDelete: rowToInsert.pathPrefixesToDelete,
         rows: [...textsToInsert, ...rowToInsert.textsToDelete],
         tableName: textsTableName,
       })
@@ -598,6 +600,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        pathPrefixesToDelete: rowToInsert.pathPrefixesToDelete,
         rows: [...numbersToInsert, ...rowToInsert.numbersToDelete],
         tableName: numbersTableName,
       })

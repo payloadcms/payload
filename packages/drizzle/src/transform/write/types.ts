@@ -64,6 +64,16 @@ export type RowToInsert = {
   }
   numbers: Record<string, unknown>[]
   numbersToDelete: NumberToDelete[]
+  /**
+   * Path prefixes (ex: `myArray.`) whose `_rels`, `_texts` and `_numbers` rows must all be deleted
+   * before the incoming rows are inserted.
+   *
+   * Array rows themselves are wiped and rewritten by `_parentID`, but path-keyed rows are only
+   * deleted for the exact paths the new data writes. Without a prefix delete, rows sitting at an
+   * index the new data no longer occupies survive the write and get adopted by whichever array row
+   * later takes that index.
+   */
+  pathPrefixesToDelete: Set<string>
   relationships: Record<string, unknown>[]
   relationshipsToAppend: RelationshipToAppend[]
   relationshipsToDelete: RelationshipToDelete[]
