@@ -4510,6 +4510,89 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
       })
 
+      test('should leave omitted locales empty when creating from a partial localized data map', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          data: {
+            // @ts-expect-error locale all accepts an explicit map of localized values at runtime
+            text: { es: 'Spanish only' },
+          },
+          locale: 'all',
+        })
+
+        expect(created.text).toMatchObject({
+          en: null,
+          es: 'Spanish only',
+        })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text).toMatchObject({
+          en: null,
+          es: 'Spanish only',
+        })
+      })
+
+      test('should preserve localized field hook transformations when creating from a locale map', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          context: { uppercaseLocalizedText: true },
+          data: {
+            // @ts-expect-error locale all accepts an explicit map of localized values at runtime
+            text: { en: 'English transformed', es: 'Spanish transformed' },
+          },
+          locale: 'all',
+        })
+
+        expect(created.text).toMatchObject({
+          en: 'ENGLISH TRANSFORMED',
+          es: 'SPANISH TRANSFORMED',
+        })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text).toMatchObject({
+          en: 'ENGLISH TRANSFORMED',
+          es: 'SPANISH TRANSFORMED',
+        })
+      })
+
+      test('should preserve scalar field hook behavior for a single-locale create', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          context: { uppercaseLocalizedText: true },
+          data: { text: 'Spanish transformed' },
+          locale: 'es',
+        })
+
+        expect(created.text).toBe('SPANISH TRANSFORMED')
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text).toMatchObject({ es: 'SPANISH TRANSFORMED' })
+      })
+
       test('should only publish filtered collection locales on create', async ({ payload }) => {
         const created = await payload.create({
           action: 'publish',

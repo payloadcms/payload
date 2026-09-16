@@ -39,7 +39,6 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { mergeLocalizedData } from '../../utilities/mergeLocalizedData.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -262,7 +261,8 @@ export const createOperation = async <
     // beforeChange - Fields
     // /////////////////////////////////////
 
-    let dataWithLocales = await beforeChange<JsonObject>({
+    const dataWithLocales = await beforeChange<JsonObject>({
+      allLocales: locale === 'all',
       collection: collectionConfig,
       context: operationReq.context,
       data,
@@ -274,24 +274,6 @@ export const createOperation = async <
       req: operationReq,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
-
-    if (localization && locale === 'all') {
-      const dataWithExplicitLocales = mergeLocalizedData({
-        configBlockReferences: config.blocks,
-        dataWithLocales: data,
-        docWithLocales: dataWithLocales,
-        fields: collectionConfig.fields,
-        localesToUpdate: localization.localeCodes,
-      })
-
-      dataWithLocales = mergeLocalizedData({
-        configBlockReferences: config.blocks,
-        dataWithLocales,
-        docWithLocales: dataWithExplicitLocales,
-        fields: collectionConfig.fields,
-        localesToUpdate: [],
-      })
-    }
 
     // When locale='all' or when beforeChange doesn't convert the string (e.g. no locale hook ran),
     // the localized _status remains a plain string. Expand it to a per-locale object so MongoDB

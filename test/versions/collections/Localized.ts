@@ -11,6 +11,30 @@ const LocalizedPosts: CollectionConfig = {
     {
       name: 'text',
       type: 'text',
+      hooks: {
+        beforeChange: [
+          ({ req, value }) => {
+            if (!req.context.uppercaseLocalizedText) {
+              return value
+            }
+
+            if (typeof value === 'string') {
+              return value.toUpperCase()
+            }
+
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+              return Object.fromEntries(
+                Object.entries(value).map(([locale, localeValue]) => [
+                  locale,
+                  typeof localeValue === 'string' ? localeValue.toUpperCase() : localeValue,
+                ]),
+              )
+            }
+
+            return value
+          },
+        ],
+      },
       localized: true,
     },
     {

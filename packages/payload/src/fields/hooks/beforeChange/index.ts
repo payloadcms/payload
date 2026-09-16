@@ -9,6 +9,7 @@ import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { traverseFields } from './traverseFields.js'
 
 export type Args<T extends JsonObject> = {
+  allLocales?: boolean
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
@@ -33,6 +34,7 @@ export type Args<T extends JsonObject> = {
 
 export const beforeChange = async <T extends JsonObject>({
   id,
+  allLocales = false,
   collection,
   context,
   data: incomingData,
@@ -50,6 +52,7 @@ export const beforeChange = async <T extends JsonObject>({
 
   await traverseFields({
     id,
+    allLocales,
     collection,
     context,
     data,
