@@ -49,7 +49,10 @@ export const PAYLOAD_TABLE: (props: { allTransformers: Transformer[] }) => Eleme
         // It's TableCellNode, so it's just to make flow happy
         if ($isTableCellNode(cell)) {
           rowOutput.push(
-            $convertToMarkdownString(allTransformers, cell).replace(/\n/g, '\\n').trim(),
+            $convertToMarkdownString(allTransformers, cell)
+              .replace(/\n/g, '\\n')
+              .replace(/\|/g, '\\|')
+              .trim(),
           )
 
           if (cell.__headerState === TableCellHeaderStates.ROW) {
@@ -165,7 +168,7 @@ function getTableColumnsSize(table: TableNode) {
 }
 
 const $createTableCell = (textContent: string, allTransformers: Transformer[]): TableCellNode => {
-  textContent = textContent.replace(/\\n/g, '\n')
+  textContent = textContent.replace(/\\n/g, '\n').replace(/\\\|/g, '|')
   const cell = $createTableCellNode(TableCellHeaderStates.NO_STATUS)
   // shouldMergeAdjacentLines is true to preserve how cell content was parsed
   // before the exported $convertFromMarkdownString default changed to false.
@@ -181,5 +184,7 @@ const mapToTableCells = (
   if (!match || !match[1]) {
     return null
   }
-  return match[1].split('|').map((text) => $createTableCell(text, allTransformers))
+  return match[1]
+    .split(/(?<=(?<!\\)(?:\\\\)*)\|/)
+    .map((text) => $createTableCell(text, allTransformers))
 }
