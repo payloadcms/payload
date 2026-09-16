@@ -299,9 +299,7 @@ export const updateOperation = async <
             )
           }
 
-          if (typeof result._status !== 'object' || result._status === null) {
-            result._status = {}
-          }
+          result._status = {}
 
           const currentStatus = globalJSON._status
           if (
@@ -311,7 +309,6 @@ export const updateOperation = async <
           ) {
             result._status = { ...currentStatus }
           } else if (typeof currentStatus === 'string') {
-            result._status = {}
             for (const localeCode of config.localization.localeCodes) {
               result._status[localeCode] = currentStatus
             }

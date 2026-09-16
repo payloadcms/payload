@@ -4480,6 +4480,59 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
       })
 
+      test('should preserve explicit localized data maps when creating and publishing all locales', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          data: {
+            // @ts-expect-error locale all accepts an explicit map of localized values at runtime
+            text: { en: 'English published', es: 'Spanish published' },
+          },
+          locale: 'all',
+        })
+
+        expect(created.text).toMatchObject({
+          en: 'English published',
+          es: 'Spanish published',
+        })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text).toMatchObject({
+          en: 'English published',
+          es: 'Spanish published',
+        })
+      })
+
+      test('should only publish filtered collection locales on create', async ({ payload }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          context: { filterAvailableLocalesToSpanish: true },
+          data: { text: 'English content' },
+          locale: 'all',
+          overrideAccess: false,
+          user,
+        })
+
+        expect(created._status).toMatchObject({ en: 'draft', es: 'published' })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+          version: 'latest',
+        })
+
+        expect(persisted._status).toMatchObject({ en: 'draft', es: 'published' })
+      })
+
       test('should only publish collection locales allowed by filterAvailableLocales', async ({
         payload,
       }) => {
@@ -4987,6 +5040,30 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         expect(latest._status).toMatchObject({ en: 'draft', es: 'published' })
+      })
+
+      test('should only publish filtered global locales on the first write', async ({
+        payload,
+      }) => {
+        const published = await payload.updateGlobal({
+          slug: global,
+          action: 'publish',
+          context: { filterAvailableLocalesToSpanish: true },
+          data: { title: 'English content' },
+          locale: 'all',
+          overrideAccess: false,
+          user,
+        })
+
+        expect(published._status).toMatchObject({ en: 'draft', es: 'published' })
+
+        const persisted = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+          version: 'latest',
+        })
+
+        expect(persisted._status).toMatchObject({ en: 'draft', es: 'published' })
       })
 
       test('should only unpublish global locales allowed by filterAvailableLocales', async ({
