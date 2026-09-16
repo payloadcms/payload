@@ -53,19 +53,16 @@ const operationPolicies = {
  * Resolves the effective write action from explicit `action`, recognized `_status`, and the
  * operation default. Returns `undefined` for ordinary writes on entities without drafts.
  *
- * Modifier flags (`autosave`, `publishAllLocales`, `unpublishAllLocales`) are validated against
- * the resolved action so collection and global operations share one contract.
+ * The `autosave` modifier is validated against the resolved action so collection and global
+ * operations share one contract.
  */
 export function resolveAction({
   action: requestedAction,
   autosave,
   draftsEnabled,
   locale,
-  localizedStatusEnabled,
   operation,
-  publishAllLocales,
   status,
-  unpublishAllLocales,
 }: ResolveActionArgs): CreateAction | RestoreAction | undefined | UpdateAction {
   const explicitAction = parseExplicitAction({ action: requestedAction, operation })
 
@@ -73,31 +70,21 @@ export function resolveAction({
     return resolveNonDraftAction({
       action: explicitAction,
       autosave,
-      unpublishAllLocales,
     })
   }
-
-  validateAllLocaleTransition({
-    explicitAction,
-    locale,
-    localizedStatusEnabled,
-    operation,
-    publishAllLocales,
-    status,
-    unpublishAllLocales,
-  })
 
   const resolvedAction =
     explicitAction ??
     inferActionFromStatus({ locale, status }) ??
     operationPolicies[operation].defaultAction
 
-  validateModifiers({
-    action: resolvedAction,
-    autosave,
-    publishAllLocales,
-    unpublishAllLocales,
+  validateAllLocaleTransition({
+    explicitAction,
+    locale,
+    resolvedAction,
   })
+
+  validateModifiers({ action: resolvedAction, autosave })
 
   return resolvedAction
 }
@@ -110,8 +97,6 @@ export function canonicalizeWriteStatus<T extends object>({
   action,
   data,
   locale,
-  publishAllLocales,
-  unpublishAllLocales,
 }: CanonicalizeWriteStatusArgs<T>): T {
   const nextStatus = statusFromAction({ action })
 
@@ -125,7 +110,7 @@ export function canonicalizeWriteStatus<T extends object>({
   if (isLocalizedStatus(currentStatus)) {
     const localizedStatus = { ...currentStatus }
 
-    if (publishAllLocales || unpublishAllLocales || locale === 'all') {
+    if (locale === 'all') {
       for (const localeCode of Object.keys(localizedStatus)) {
         localizedStatus[localeCode] = nextStatus
       }
@@ -169,46 +154,23 @@ export function statusFromAction({
 function validateAllLocaleTransition({
   explicitAction,
   locale,
-  localizedStatusEnabled,
-  operation,
-  publishAllLocales,
-  status,
-  unpublishAllLocales,
+  resolvedAction,
 }: {
   explicitAction: undefined | WriteAction
   locale?: null | string
-  localizedStatusEnabled?: boolean
-  operation: WriteOperation
-  publishAllLocales?: boolean
-  status: unknown
-  unpublishAllLocales?: boolean
+  resolvedAction: WriteAction
 }): void {
   if (
     locale !== 'all' ||
-    operation === 'restore' ||
-    (!localizedStatusEnabled && !isLocalizedStatus(status)) ||
-    explicitAction === 'saveDraft'
+    resolvedAction === 'saveDraft' ||
+    explicitAction === 'publish' ||
+    explicitAction === 'unpublish'
   ) {
     return
   }
 
-  if (explicitAction === 'unpublish') {
-    if (unpublishAllLocales) {
-      return
-    }
-
-    throw new APIError(
-      'Unpublishing all locales requires an explicit "unpublish" action and unpublishAllLocales: true.',
-      httpStatus.BAD_REQUEST,
-    )
-  }
-
-  if (explicitAction === 'publish' && publishAllLocales) {
-    return
-  }
-
   throw new APIError(
-    'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+    'Publishing all locales requires an explicit "publish" action.',
     httpStatus.BAD_REQUEST,
   )
 }
@@ -242,11 +204,9 @@ function parseExplicitAction({
 function resolveNonDraftAction({
   action,
   autosave,
-  unpublishAllLocales,
 }: {
   action: undefined | WriteAction
   autosave?: boolean
-  unpublishAllLocales?: boolean
 }): undefined {
   if (action === 'saveDraft' || action === 'unpublish') {
     throw new APIError(
@@ -258,13 +218,6 @@ function resolveNonDraftAction({
   if (autosave) {
     throw new APIError(
       'autosave is only valid when the resolved action is "saveDraft".',
-      httpStatus.BAD_REQUEST,
-    )
-  }
-
-  if (unpublishAllLocales) {
-    throw new APIError(
-      'unpublishAllLocales is only valid when the resolved action is "unpublish".',
       httpStatus.BAD_REQUEST,
     )
   }
@@ -317,38 +270,13 @@ function recognizedStatus({
 function validateModifiers({
   action,
   autosave,
-  publishAllLocales,
-  unpublishAllLocales,
 }: {
   action: WriteAction
   autosave?: boolean
-  publishAllLocales?: boolean
-  unpublishAllLocales?: boolean
 }): void {
-  if (publishAllLocales && unpublishAllLocales) {
-    throw new APIError(
-      'publishAllLocales and unpublishAllLocales cannot both be true.',
-      httpStatus.BAD_REQUEST,
-    )
-  }
-
   if (autosave && action !== 'saveDraft') {
     throw new APIError(
       'autosave is only valid when the resolved action is "saveDraft".',
-      httpStatus.BAD_REQUEST,
-    )
-  }
-
-  if (publishAllLocales && action !== 'publish') {
-    throw new APIError(
-      'publishAllLocales is only valid when the resolved action is "publish".',
-      httpStatus.BAD_REQUEST,
-    )
-  }
-
-  if (unpublishAllLocales && action !== 'unpublish') {
-    throw new APIError(
-      'unpublishAllLocales is only valid when the resolved action is "unpublish".',
       httpStatus.BAD_REQUEST,
     )
   }

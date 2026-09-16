@@ -15,15 +15,11 @@ export type ResolveActionArgs = {
   locale?: null | string
   localizedStatusEnabled?: boolean
   operation: WriteOperation
-  publishAllLocales?: boolean
   status?: unknown
-  unpublishAllLocales?: boolean
 }
 
 export type CanonicalizeWriteStatusArgs<T extends object> = {
   action: undefined | WriteAction
   data: T
   locale?: null | string
-  publishAllLocales?: boolean
-  unpublishAllLocales?: boolean
 }

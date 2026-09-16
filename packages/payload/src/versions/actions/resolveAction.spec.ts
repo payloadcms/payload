@@ -85,81 +85,25 @@ describe('resolveAction', () => {
       ).toBe('publish')
     })
 
-    it('should require an explicit action and modifier for an all-locale transition', () => {
-      expect(() =>
-        draftOps({
-          action: 'publish',
-          locale: 'all',
-          localizedStatusEnabled: true,
-          operation: 'update',
-          status: 'published',
-        }),
-      ).toThrow(
-        'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+    it('should require an explicit action for all-locale publication transitions', () => {
+      expect(draftOps({ action: 'publish', locale: 'all', operation: 'update' })).toBe('publish')
+      expect(draftOps({ action: 'unpublish', locale: 'all', operation: 'update' })).toBe(
+        'unpublish',
+      )
+      expect(draftOps({ action: 'saveDraft', locale: 'all', operation: 'update' })).toBe(
+        'saveDraft',
       )
 
-      expect(() =>
-        draftOps({
-          locale: 'all',
-          operation: 'update',
-          status: localizedStatus,
-        }),
-      ).toThrow(
-        'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+      expect(() => draftOps({ locale: 'all', operation: 'update' })).toThrow(
+        'Publishing all locales requires an explicit "publish" action.',
       )
 
-      expect(() =>
-        draftOps({
-          locale: 'all',
-          operation: 'update',
-          publishAllLocales: true,
-          status: localizedStatus,
-        }),
-      ).toThrow(
-        'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
+      expect(() => draftOps({ locale: 'all', operation: 'update', status: 'published' })).toThrow(
+        'Publishing all locales requires an explicit "publish" action.',
       )
 
-      expect(() =>
-        draftOps({
-          action: 'publish',
-          locale: 'all',
-          operation: 'update',
-          status: localizedStatus,
-        }),
-      ).toThrow(
-        'Publishing all locales requires an explicit "publish" action and publishAllLocales: true.',
-      )
-
-      expect(
-        draftOps({
-          action: 'publish',
-          locale: 'all',
-          operation: 'update',
-          publishAllLocales: true,
-          status: localizedStatus,
-        }),
-      ).toBe('publish')
-
-      expect(() =>
-        draftOps({
-          action: 'unpublish',
-          locale: 'all',
-          operation: 'update',
-          status: localizedStatus,
-        }),
-      ).toThrow(
-        'Unpublishing all locales requires an explicit "unpublish" action and unpublishAllLocales: true.',
-      )
-
-      expect(
-        draftOps({
-          action: 'unpublish',
-          locale: 'all',
-          operation: 'update',
-          status: localizedStatus,
-          unpublishAllLocales: true,
-        }),
-      ).toBe('unpublish')
+      expect(draftOps({ locale: 'all', operation: 'create' })).toBe('saveDraft')
+      expect(draftOps({ locale: 'all', operation: 'create', status: 'draft' })).toBe('saveDraft')
     })
 
     it('should not infer from localized status when no locale is provided', () => {
@@ -357,75 +301,6 @@ describe('resolveAction', () => {
       ).toThrow('autosave is only valid when the resolved action is "saveDraft".')
     })
   })
-
-  describe('locale modifiers', () => {
-    it('should allow publishAllLocales with publish', () => {
-      expect(
-        draftOps({
-          action: 'publish',
-          operation: 'update',
-          publishAllLocales: true,
-        }),
-      ).toBe('publish')
-    })
-
-    it('should allow unpublishAllLocales with unpublish', () => {
-      expect(
-        draftOps({
-          action: 'unpublish',
-          operation: 'update',
-          unpublishAllLocales: true,
-        }),
-      ).toBe('unpublish')
-    })
-
-    it('should reject publishAllLocales when the resolved action is not publish', () => {
-      expect(() =>
-        draftOps({
-          action: 'saveDraft',
-          operation: 'update',
-          publishAllLocales: true,
-        }),
-      ).toThrow('publishAllLocales is only valid when the resolved action is "publish".')
-
-      expect(() =>
-        draftOps({
-          operation: 'create',
-          publishAllLocales: true,
-        }),
-      ).toThrow('publishAllLocales is only valid when the resolved action is "publish".')
-    })
-
-    it('should reject unpublishAllLocales when the resolved action is not unpublish', () => {
-      expect(() =>
-        draftOps({
-          operation: 'update',
-          unpublishAllLocales: true,
-        }),
-      ).toThrow('unpublishAllLocales is only valid when the resolved action is "unpublish".')
-    })
-
-    it('should reject combining both locale modifiers', () => {
-      expect(() =>
-        draftOps({
-          action: 'publish',
-          operation: 'update',
-          publishAllLocales: true,
-          unpublishAllLocales: true,
-        }),
-      ).toThrow('publishAllLocales and unpublishAllLocales cannot both be true.')
-    })
-
-    it('should not infer all-locale unpublish from status', () => {
-      expect(() =>
-        draftOps({
-          operation: 'update',
-          status: 'draft',
-          unpublishAllLocales: true,
-        }),
-      ).toThrow('unpublishAllLocales is only valid when the resolved action is "unpublish".')
-    })
-  })
 })
 
 describe('statusFromAction', () => {
@@ -506,52 +381,24 @@ describe('canonicalizeWriteStatus', () => {
     ).toBe(data)
   })
 
-  it('should write all locale keys when publishing or unpublishing all locales', () => {
-    const data = {
-      _status: {
-        en: 'draft',
-        es: 'draft',
-      },
-    }
-
+  it.each([
+    ['publish', 'published'],
+    ['unpublish', 'draft'],
+  ] as const)('should write every localized status key for all-locale %s', (action, expected) => {
     expect(
       canonicalizeWriteStatus({
-        action: 'publish',
-        data,
-        publishAllLocales: true,
-      })._status,
-    ).toEqual({
-      en: 'published',
-      es: 'published',
-    })
-
-    expect(
-      canonicalizeWriteStatus({
-        action: 'unpublish',
-        data,
-        unpublishAllLocales: true,
-      })._status,
-    ).toEqual({
-      en: 'draft',
-      es: 'draft',
-    })
-  })
-
-  it('should write all locale keys when locale is all', () => {
-    expect(
-      canonicalizeWriteStatus({
-        action: 'publish',
+        action,
         data: {
           _status: {
             en: 'draft',
-            es: 'draft',
+            es: 'published',
           },
         },
         locale: 'all',
       })._status,
     ).toEqual({
-      en: 'published',
-      es: 'published',
+      en: expected,
+      es: expected,
     })
   })
 })
