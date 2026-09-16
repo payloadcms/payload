@@ -42,28 +42,22 @@ export function createVercelBlobAdapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         baseUrl,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
+        storageFilePath,
         token,
-        useCompositePrefixes,
       }),
 
-    handleUpload: async ({ data, file: { buffer, filename, mimeType } }) => {
+    handleUpload: async ({ data, file: { buffer, mimeType }, storageFilePath }) => {
       const result = await uploadFile({
         access,
         addRandomSuffix,
         buffer,
         cacheControlMaxAge,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename,
         mimeType,
+        storageFilePath,
         token,
-        useCompositePrefixes,
       })
 
       if (result.filename) {
@@ -73,19 +67,16 @@ export function createVercelBlobAdapter({
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { clientUploadContext, filename } }) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
         clientUploadContext,
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
         token,
         useCompositePrefixes,

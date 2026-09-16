@@ -1,11 +1,8 @@
 import type { Storage } from '@google-cloud/storage'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import { ApiError } from '@google-cloud/storage'
-import {
-  getFilePrefix as getDocPrefix,
-  getFileKey,
-} from '@payloadcms/plugin-cloud-storage/utilities'
+import { getStorageFilePath } from '@payloadcms/plugin-cloud-storage/utilities'
 import {
   getRangeRequestInfo,
   isXmlMimeType,
@@ -18,9 +15,9 @@ interface GetFileArgs {
   clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   useCompositePrefixes?: boolean
 }
@@ -31,29 +28,24 @@ export async function getFile({
   clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
-    const docPrefix = await getDocPrefix({
+    const filePath = await getStorageFilePath({
       clientUploadContext,
       collection,
-      filename,
-      prefixQueryParam,
-      req,
-    })
-
-    const { fileKey } = getFileKey({
       collectionPrefix,
-      docPrefix,
+      doc,
       filename,
+      req,
       useCompositePrefixes,
     })
 
-    const file = client.bucket(bucket).file(fileKey)
+    const file = client.bucket(bucket).file(filePath)
 
     const [metadata] = await file.getMetadata()
 

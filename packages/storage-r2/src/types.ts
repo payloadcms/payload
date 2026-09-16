@@ -69,6 +69,7 @@ export interface R2UploadedPart {
 export type R2StorageClientUploadContext = { key: string } & ClientUploadContext
 export type R2StorageClientUploadHandlerParams = {
   chunkSize?: number
+  useCompositePrefixes?: boolean
 }
 
 export type R2StorageMultipartUploadHandlerParams = {

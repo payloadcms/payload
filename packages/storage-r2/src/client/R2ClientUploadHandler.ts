@@ -2,7 +2,10 @@
 
 import type { ClientUploadContext } from '@payloadcms/plugin-cloud-storage/types'
 
-import { createClientUploadHandler, getFileKey } from '@payloadcms/plugin-cloud-storage/client'
+import {
+  buildUploadStoragePathData,
+  createClientUploadHandler,
+} from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
 import type {
@@ -18,17 +21,18 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     apiRoute,
     collectionSlug,
     docPrefix,
-    extra: { chunkSize = 5 * 1024 * 1024 },
+    extra: { chunkSize = 5 * 1024 * 1024, useCompositePrefixes = false },
     file,
     prefix,
     serverHandlerPath,
     serverURL,
     updateFilename,
   }): Promise<R2StorageClientUploadContext | undefined> => {
-    const { sanitizedDocPrefix } = getFileKey({
+    const { sanitizedDocPrefix } = buildUploadStoragePathData({
       collectionPrefix: prefix,
       docPrefix,
       filename: file.name,
+      useCompositePrefixes,
     })
 
     const params: R2StorageMultipartUploadHandlerParams = {

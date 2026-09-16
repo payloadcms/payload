@@ -443,6 +443,8 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       expect(url).toContain('safe-image.png')
     })
 
+    // Regression for #16694: trailing dots are stripped from the storage key the same way they
+    // are stripped from the DB filename, so the key and doc.filename stay in sync.
     it('should strip trailing dots so the storage key matches the DB filename', async () => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 

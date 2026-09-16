@@ -31,7 +31,7 @@ const uploadImage = async (slug: string) => {
   data.append('file', new Blob([fileBuffer], { type: 'image/png' }), 'anon-probe.png')
 
   const response = await restClient.POST(`/${slug}`, { body: data })
-  const { doc } = (await response.json()) as { doc: { filename: string; url: string } }
+  const { doc } = await response.json()
 
   return doc
 }

@@ -6,8 +6,7 @@ import { getSanitizedUploadFilename } from 'payload/shared'
 
 import type { ClientUploadContext } from '../types.js'
 
-import { getFileKey } from './getFileKey.js'
-import { sanitizePrefix } from './sanitizePrefix.js'
+import { buildUploadPrefix, buildUploadStoragePathData } from './buildStoragePathData.js'
 
 type Args = {
   collectionPrefix?: string
@@ -28,6 +27,10 @@ type Args = {
  *
  * The resolved `sanitizedFilename` is returned so the browser-side handler
  * can update the form via `updateFilename`.
+ *
+ * The semantic prefix is resolved with {@link buildUploadPrefix} and the final key with
+ * {@link buildUploadStoragePathData}, so the receipt only ever signs a key beneath the configured
+ * collection prefix.
  */
 export async function resolveSignedURLKey({
   collectionPrefix = '',
@@ -37,25 +40,31 @@ export async function resolveSignedURLKey({
   req,
   useCompositePrefixes = false,
 }: Args) {
+  // Sanitize with the same helper generateFileData uses for the DB filename so the storage key
+  // and doc.filename stay in sync (#16694).
   const sanitizedFilename = await getSafeFileName({
     collectionSlug,
     desiredFilename: getSanitizedUploadFilename(filename),
     req,
   })
 
-  const _objectKey = randomUUID()
-  const baseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
-  // Persisted in `_objectKey`, keeping `prefix` semantic.
-  const keyedDocPrefix = baseDocPrefix ? `${baseDocPrefix}/${_objectKey}` : _objectKey
+  const rawBaseDocPrefix = useCompositePrefixes ? docPrefix : docPrefix || collectionPrefix
+  const { sanitizedDocPrefix } = buildUploadPrefix({
+    collectionPrefix,
+    docPrefix: rawBaseDocPrefix,
+    useCompositePrefixes,
+  })
 
-  const { fileKey } = getFileKey({
+  const _objectKey = randomUUID()
+  // Persisted in `_objectKey`, keeping `prefix` semantic.
+  const keyedDocPrefix = sanitizedDocPrefix ? `${sanitizedDocPrefix}/${_objectKey}` : _objectKey
+
+  const { storageFilePath } = buildUploadStoragePathData({
     collectionPrefix,
     docPrefix: keyedDocPrefix,
     filename: sanitizedFilename,
     useCompositePrefixes,
   })
-
-  const sanitizedDocPrefix = sanitizePrefix(baseDocPrefix || '')
 
   const context = {
     _objectKey,
@@ -71,5 +80,12 @@ export async function resolveSignedURLKey({
     }),
   }
 
-  return { _objectKey, clientUploadContext, fileKey, sanitizedDocPrefix, sanitizedFilename }
+  return {
+    _objectKey,
+    clientUploadContext,
+    fileKey: storageFilePath,
+    sanitizedDocPrefix,
+    sanitizedFilename,
+    storageFilePath,
+  }
 }

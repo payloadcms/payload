@@ -25,13 +25,28 @@ const createRequest = ({ protectedOwner = false }: { protectedOwner?: boolean } 
   }) as unknown as PayloadRequest
 
 describe('authorizeClientOverwrite', () => {
+  it('should reject a new key outside the requested collection prefix', async () => {
+    await expect(
+      authorizeClientOverwrite({
+        collections: { media: { prefix: 'media' } },
+        requestedFilename: 'image.png',
+        requestedStorageFilePath: 'media-archive/image.png',
+        req: createRequest(),
+        requestedCollectionSlug: 'media',
+        collectionPrefix: 'media',
+      }),
+    ).rejects.toMatchObject({ status: 403 })
+  })
+
   it('allows an update when the requested collection is the only owner', async () => {
     await expect(
       authorizeClientOverwrite({
         collections: { media: true, protected: true },
-        fileKey: 'shared/image.png',
+        requestedFilename: 'image.png',
+        requestedStorageFilePath: 'shared/image.png',
         req: createRequest(),
         requestedCollectionSlug: 'media',
+        collectionPrefix: '',
       }),
     ).resolves.toBe(true)
   })
@@ -40,9 +55,11 @@ describe('authorizeClientOverwrite', () => {
     await expect(
       authorizeClientOverwrite({
         collections: { media: true, protected: true },
-        fileKey: 'shared/image.png',
+        requestedFilename: 'image.png',
+        requestedStorageFilePath: 'shared/image.png',
         req: createRequest({ protectedOwner: true }),
         requestedCollectionSlug: 'media',
+        collectionPrefix: '',
       }),
     ).rejects.toMatchObject({ status: 403 })
   })

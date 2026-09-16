@@ -25,6 +25,8 @@ let containerClient: ContainerClient
 let TEST_CONTAINER: string
 
 describe('@payloadcms/storage-azure clientUploads', () => {
+  const trackedIDs: Array<number | string> = []
+  const trackedMediaIDs: Array<number | string> = []
   const clearContainer = async () => {
     for await (const blob of containerClient.listBlobsFlat()) {
       await containerClient.deleteBlob(blob.name)
@@ -47,7 +49,158 @@ describe('@payloadcms/storage-azure clientUploads', () => {
   })
 
   afterEach(async () => {
+    for (const id of trackedIDs) {
+      await payload.delete({
+        collection: mediaWithDocPrefixSlug,
+        where: { id: { equals: id } },
+      })
+    }
+    trackedIDs.length = 0
+    for (const id of trackedMediaIDs) {
+      await payload.delete({ collection: mediaSlug, where: { id: { equals: id } } })
+    }
+    trackedMediaIDs.length = 0
     await clearContainer()
+  })
+
+  const seedLegacyUpload = async ({ payload }: { payload: Payload }) => {
+    const file = await readFile(path.resolve(dirname, '../../uploads/image.png'))
+    const filename = 'legacy.png'
+    const prefix = 'legacy-invoices'
+
+    await containerClient.getBlockBlobClient(`${prefix}/${filename}`).uploadData(file, {
+      blobHTTPHeaders: { blobContentType: 'image/png' },
+    })
+
+    // Seed persisted pre-upgrade metadata directly; current upload hooks must not run.
+    const doc = await payload.db.create({
+      collection: mediaWithDocPrefixSlug,
+      data: { filename, filesize: file.length, mimeType: 'image/png', prefix },
+    })
+
+    trackedIDs.push(doc.id)
+
+    return { doc: { ...doc, filename, prefix }, file, key: `${prefix}/${filename}` }
+  }
+
+  it('should reject an unmatched query prefix for an existing legacy upload', async () => {
+    const { doc } = await seedLegacyUpload({ payload })
+    const response = await restClient.GET(
+      `/${mediaWithDocPrefixSlug}/file/${doc.filename}?prefix=unmatched-prefix`,
+    )
+
+    expect(response.status).toBe(403)
+  })
+
+  it('should reuse the access-checked document for an image-size filename without a second lookup', async () => {
+    const file = await readFile(path.resolve(dirname, '../../uploads/image.png'))
+    const sizeFilename = 'legacy-thumbnail.png'
+    const prefix = 'legacy-thumbnails'
+
+    await containerClient.getBlockBlobClient(`${prefix}/${sizeFilename}`).uploadData(file, {
+      blobHTTPHeaders: { blobContentType: 'image/png' },
+    })
+
+    const doc = await payload.db.create({
+      collection: mediaWithDocPrefixSlug,
+      data: {
+        filename: 'legacy-original.png',
+        mimeType: 'image/png',
+        prefix,
+        sizes: { thumbnail: { filename: sizeFilename, mimeType: 'image/png' } },
+      },
+    })
+    trackedIDs.push(doc.id)
+
+    const collection = payload.collections[mediaWithDocPrefixSlug].config
+    const readSpy = vi.spyOn(collection.access, 'read').mockReturnValue({ id: { equals: doc.id } })
+    const findSpy = vi.spyOn(payload, 'find')
+
+    try {
+      const response = await restClient.GET(`/${mediaWithDocPrefixSlug}/file/${sizeFilename}`)
+
+      expect(response.status).toBe(200)
+      expect(Buffer.from(await response.arrayBuffer())).toEqual(file)
+      expect(
+        findSpy.mock.calls.filter(([args]) => args.collection === mediaWithDocPrefixSlug),
+      ).toHaveLength(0)
+    } finally {
+      readSpy.mockRestore()
+      findSpy.mockRestore()
+    }
+  })
+
+  /**
+   * `prefix` is an ordinary writable field, so this locks in that a metadata-only request
+   * cannot repoint an existing document at an object outside the collection prefix.
+   * `sanitizeUploadData` drops an incoming `prefix` on update, and the containment hooks
+   * are the second line of defence if that ever changes.
+   */
+  it('should ignore a foreign document prefix supplied without a file', async () => {
+    const { doc, file } = await seedLegacyUpload({ payload })
+    const foreignKey = `tenant-b/private/${doc.filename}`
+
+    await containerClient
+      .getBlockBlobClient(foreignKey)
+      .uploadData(Buffer.from('another tenant object'), {
+        blobHTTPHeaders: { blobContentType: 'image/png' },
+      })
+
+    const response = await restClient.PATCH(`/${mediaWithDocPrefixSlug}/${doc.id}`, {
+      body: JSON.stringify({ prefix: 'tenant-b/private' }),
+    })
+
+    expect(response.status).toBe(200)
+
+    const updated = await payload.findByID({
+      id: doc.id,
+      collection: mediaWithDocPrefixSlug,
+    })
+
+    expect(updated.prefix).toBe(doc.prefix)
+
+    const fileResponse = await restClient.GET(`/${mediaWithDocPrefixSlug}/file/${doc.filename}`)
+
+    expect(Buffer.from(await fileResponse.arrayBuffer())).toEqual(file)
+    expect(await containerClient.getBlockBlobClient(foreignKey).exists()).toBe(true)
+  })
+
+  it('should prefer the exact legacy object when both old and contained keys exist', async () => {
+    const { doc, file, key } = await seedLegacyUpload({ payload })
+    await containerClient
+      .getBlockBlobClient(`docprefix-collection/${key}`)
+      .uploadData(Buffer.from('different object'))
+
+    const response = await restClient.GET(
+      `/${mediaWithDocPrefixSlug}/file/${doc.filename}?prefix=${doc.prefix}`,
+    )
+
+    expect(response.status).toBe(200)
+    expect(Buffer.from(await response.arrayBuffer())).toEqual(file)
+  })
+
+  it('should delete an existing upload at its pre-upgrade object key', async () => {
+    const { doc, key } = await seedLegacyUpload({ payload })
+
+    await payload.delete({ id: doc.id, collection: mediaWithDocPrefixSlug })
+
+    expect(await containerClient.getBlockBlobClient(key).exists()).toBe(false)
+  })
+
+  it('should replace a legacy upload inside the collection prefix and clean up its old object', async () => {
+    const { doc, key } = await seedLegacyUpload({ payload })
+    const updated = await payload.update({
+      id: doc.id,
+      collection: mediaWithDocPrefixSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../../uploads/image.png'),
+    })
+
+    expect(updated.prefix).toBe('docprefix-collection/legacy-invoices')
+    expect(
+      await containerClient.getBlockBlobClient(`${updated.prefix}/${updated.filename}`).exists(),
+    ).toBe(true)
+    expect(await containerClient.getBlockBlobClient(key).exists()).toBe(false)
   })
 
   /**
@@ -66,6 +219,8 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     expect(seedRes.status).toBe(201)
     const { doc: seedDoc }: { doc: { filename: string; id: number | string } } =
       await seedRes.json()
+
+    trackedMediaIDs.push(seedDoc.id)
 
     expect(seedDoc.filename).toBe(dupFilename)
 
@@ -89,14 +244,31 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     await payload.delete({ id: seedDoc.id, collection: mediaSlug })
   })
 
-  it('preserves a user-defined prefix.defaultValue across the plugin', async () => {
+  it('should preserve prefix.defaultValue while storing the file beneath the collection prefix', async () => {
     const upload = await payload.create({
       collection: mediaWithDocPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../../uploads/image.png'),
     })
+    trackedIDs.push(upload.id)
 
-    expect(upload.prefix).toMatch(/^doc-[a-z0-9]{1,8}$/)
+    expect(upload.prefix).toMatch(/^docprefix-collection\/doc-[a-z0-9]{1,8}$/)
+
+    const props = await containerClient
+      .getBlobClient(`${upload.prefix}/${upload.filename}`)
+      .getProperties()
+    expect(props.contentLength).toBeGreaterThan(0)
+  })
+
+  it('should keep an explicit document prefix within the configured storage prefix', async () => {
+    const upload = await payload.create({
+      collection: mediaWithDocPrefixSlug,
+      data: { prefix: 'request-folder' },
+      filePath: path.resolve(dirname, '../../uploads/image.png'),
+    })
+    trackedIDs.push(upload.id)
+
+    expect(upload.prefix).toBe('docprefix-collection/request-folder')
 
     const props = await containerClient
       .getBlobClient(`${upload.prefix}/${upload.filename}`)

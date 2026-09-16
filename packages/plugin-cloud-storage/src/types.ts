@@ -45,6 +45,12 @@ export type HandleUpload = (args: {
   data: any
   file: File
   req: PayloadRequest
+  /**
+   * Pre-resolved storage file path (`_objectKey` folded in, contained beneath the collection prefix).
+   * Path-based adapters upload to it; provider-id adapters (e.g. uploadthing) ignore it and assign
+   * their own key.
+   */
+  storageFilePath: string
 }) =>
   | Partial<FileData & TypeWithID>
   | Promise<Partial<FileData & TypeWithID>>
@@ -60,6 +66,11 @@ export type HandleDelete = (args: {
   doc: FileData & TypeWithID & TypeWithPrefix
   filename: string
   req: PayloadRequest
+  /**
+   * Pre-resolved storage file path of the object to delete. Path-based adapters delete it; provider-id
+   * adapters (e.g. uploadthing) ignore it and locate the object via `doc`.
+   */
+  storageFilePath: string
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {

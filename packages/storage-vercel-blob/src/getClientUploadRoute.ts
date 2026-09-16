@@ -1,7 +1,7 @@
 import type { PayloadHandler, PayloadRequest, UploadCollectionSlug } from 'payload'
 
 import {
-  getFileKey,
+  buildStoragePathData,
   resolveSignedURLKey,
   verifyClientUploadReceiptForFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -71,17 +71,19 @@ export const getClientUploadRoute =
         const collectionConfig = collections[collectionSlug]
         const collectionPrefix =
           (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
-        const requested = getFileKey({
+        const requested = buildStoragePathData({
           collectionPrefix,
           docPrefix,
           filename,
           useCompositePrefixes,
         })
         const allowOverwrite = await authorizeClientOverwrite({
+          collectionPrefix,
           collections,
-          fileKey: requested.fileKey,
           req,
           requestedCollectionSlug: collectionSlug,
+          requestedFilename: requested.sanitizedFilename,
+          requestedStorageFilePath: requested.storageFilePath,
           useCompositePrefixes,
         })
         const resolved = allowOverwrite
@@ -112,7 +114,7 @@ export const getClientUploadRoute =
         return Response.json({
           clientUploadContext: resolved.clientUploadContext,
           filename: resolved.sanitizedFilename,
-          pathname: resolved.fileKey,
+          pathname: resolved.storageFilePath,
         })
       }
 

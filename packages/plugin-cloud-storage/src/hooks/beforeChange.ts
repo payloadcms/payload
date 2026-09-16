@@ -2,7 +2,7 @@ import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
-import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
+import { buildPrefixWithObjectKey } from '../utilities/buildPrefixWithObjectKey.js'
 
 interface Args {
   adapter: GeneratedAdapter
@@ -14,17 +14,11 @@ interface Args {
 
 // The object's folder: semantic prefix + `_objectKey` segment.
 const getObjectFolder = (data: unknown, originalDoc: unknown): string => {
-  const source = (data ?? originalDoc ?? {}) as Record<string, unknown>
-  const safePrefix = sanitizePrefix(typeof source.prefix === 'string' ? source.prefix : '')
-  const safeObjectKey = sanitizePrefix(
-    typeof source._objectKey === 'string' ? source._objectKey : '',
-  )
-
-  if (safePrefix && safeObjectKey) {
-    return `${safePrefix}/${safeObjectKey}`
-  }
-
-  return safePrefix || safeObjectKey
+  const source = (data ?? originalDoc ?? {}) as { _objectKey?: string; prefix?: string }
+  return buildPrefixWithObjectKey({
+    objectKey: source._objectKey,
+    prefix: source.prefix,
+  })
 }
 
 export const getBeforeChangeHook =

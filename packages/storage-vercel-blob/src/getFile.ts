@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import { getFilePrefix as getDocPrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
@@ -16,9 +16,9 @@ interface GetFileArgs {
   clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   token: string
   useCompositePrefixes?: boolean
@@ -30,9 +30,9 @@ export async function getFile({
   clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   token,
   useCompositePrefixes = false,
@@ -41,9 +41,11 @@ export async function getFile({
     const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
+      collectionPrefix,
+      doc,
       filename,
-      prefixQueryParam,
       req,
+      useCompositePrefixes,
     })
 
     const fileUrl = generateURL({

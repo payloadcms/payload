@@ -2,32 +2,29 @@ import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID 
 
 import type { GeneratedAdapter, TypeWithPrefix } from '../types.js'
 
-import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
+import { buildPrefixWithObjectKey } from '../utilities/buildPrefixWithObjectKey.js'
+import { buildStoragePathData } from '../utilities/buildStoragePathData.js'
 
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
-}
-
-// Fold `_objectKey` into the prefix so deletes target the real object folder.
-const withObjectFolder = <T extends { _objectKey?: unknown } & TypeWithPrefix>(doc: T): T => {
-  const safePrefix = sanitizePrefix(typeof doc.prefix === 'string' ? doc.prefix : '')
-  const safeObjectKey = sanitizePrefix(typeof doc._objectKey === 'string' ? doc._objectKey : '')
-
-  if (!safeObjectKey) {
-    return doc
-  }
-
-  return { ...doc, prefix: safePrefix ? `${safePrefix}/${safeObjectKey}` : safeObjectKey }
+  collectionPrefix?: string
+  useCompositePrefixes?: boolean
 }
 
 export const getAfterDeleteHook = ({
   adapter,
   collection,
+  collectionPrefix,
+  useCompositePrefixes,
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
   return async ({ doc, req }) => {
     try {
-      const docForDelete = withObjectFolder(doc)
+      // Fold `_objectKey` so deletes target the real object folder.
+      const docPrefix = buildPrefixWithObjectKey({
+        objectKey: (doc as { _objectKey?: string })._objectKey,
+        prefix: doc.prefix,
+      })
 
       const filesToDelete: string[] = [
         doc.filename,
@@ -38,7 +35,13 @@ export const getAfterDeleteHook = ({
 
       const promises = filesToDelete.map(async (filename) => {
         if (filename) {
-          await adapter.handleDelete({ collection, doc: docForDelete, filename, req })
+          const { storageFilePath } = buildStoragePathData({
+            collectionPrefix,
+            docPrefix,
+            filename,
+            useCompositePrefixes,
+          })
+          await adapter.handleDelete({ collection, doc, filename, req, storageFilePath })
         }
       })
 

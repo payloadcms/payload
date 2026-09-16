@@ -26,7 +26,7 @@ const isValidMimeType = (mimeType: unknown): mimeType is string => {
   )
 }
 
-export const assertClientUploadFileSize = (filesize: unknown): asserts filesize is number => {
+export const assertClientUploadFileSize = (filesize: unknown) => {
   if (typeof filesize !== 'number' || !Number.isSafeInteger(filesize) || filesize < 0) {
     throw new APIError('A valid file size is required for client uploads.', 400)
   }
