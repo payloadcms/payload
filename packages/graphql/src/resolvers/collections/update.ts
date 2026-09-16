@@ -51,6 +51,14 @@ export function updateResolver<TSlug extends CollectionSlug>(
       data: args.data as any,
       depth: 0,
       req: isolateObjectProperty(req, 'transactionID'),
+      returningLocale:
+        args.locale === 'all'
+          ? locale !== 'all' && locale
+            ? locale
+            : req.payload.config.localization
+              ? req.payload.config.localization.defaultLocale
+              : undefined
+          : undefined,
       trash: args.trash,
     }
 

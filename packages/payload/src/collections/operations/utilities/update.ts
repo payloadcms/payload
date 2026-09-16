@@ -57,6 +57,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   payload: Payload
   populate?: PopulateType
   req: PayloadRequest
+  returningLocale?: string
   select: SelectType
   showHiddenFields: boolean
 }
@@ -94,6 +95,7 @@ export const updateDocument = async <
   payload,
   populate,
   req,
+  returningLocale,
   select,
   showHiddenFields,
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
@@ -404,7 +406,7 @@ export const updateDocument = async <
     doc: resultWithLocales,
     fallbackLocale,
     global: null,
-    locale,
+    locale: returningLocale || locale,
     overrideAccess,
     populate,
     req,

@@ -27,6 +27,16 @@ export function createResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
+    const localization = context.req.payload.config.localization
+    const returningLocale =
+      args.locale === 'all'
+        ? context.req.locale !== 'all' && context.req.locale
+          ? context.req.locale
+          : localization
+            ? localization.defaultLocale
+            : undefined
+        : undefined
+
     if (args.locale) {
       context.req.locale = args.locale
     }
@@ -37,6 +47,7 @@ export function createResolver<TSlug extends CollectionSlug>(
       data: args.data,
       depth: 0,
       req: isolateObjectProperty(context.req, 'transactionID'),
+      returningLocale,
     })
 
     return result

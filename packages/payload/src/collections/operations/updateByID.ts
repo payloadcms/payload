@@ -51,6 +51,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   req: PayloadRequest
+  returningLocale?: string
   showHiddenFields?: boolean
   trash?: boolean
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
@@ -95,6 +96,7 @@ export const updateByIDOperation = async <
         payload,
       },
       req,
+      returningLocale,
       select: incomingSelect,
       showHiddenFields,
       trash = false,
@@ -247,6 +249,7 @@ export const updateByIDOperation = async <
       payload,
       populate,
       req,
+      returningLocale,
       select: select!,
       showHiddenFields: showHiddenFields!,
     })

@@ -29,6 +29,16 @@ export function update<TSlug extends GlobalSlug>(
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
+    const localization = context.req.payload.config.localization
+    const returningLocale =
+      args.locale === 'all'
+        ? context.req.locale !== 'all' && context.req.locale
+          ? context.req.locale
+          : localization
+            ? localization.defaultLocale
+            : undefined
+        : undefined
+
     if (args.locale) {
       context.req.locale = args.locale
     }
@@ -45,6 +55,7 @@ export function update<TSlug extends GlobalSlug>(
       depth: 0,
       globalConfig,
       req: isolateObjectProperty(context.req, 'transactionID'),
+      returningLocale,
     }
 
     const result = await updateOperationGlobal<TSlug, SelectType>(options)

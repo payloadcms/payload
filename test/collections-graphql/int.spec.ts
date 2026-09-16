@@ -50,9 +50,17 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       payload,
       restClient,
     }) => {
+      const document = await payload.create({
+        action: 'saveDraft',
+        collection: 'cyclical-relationship',
+        data: { title: 'Default locale title' },
+        locale: 'en',
+      })
+      const documentID = idToString(document.id, payload)
       const query = `mutation {
-        createCyclicalRelationship(action: publish, locale: all, data: {}) {
+        updateCyclicalRelationship(id: ${documentID}, action: publish, locale: all, data: {}) {
           id
+          title
         }
       }`
       const response = await restClient
@@ -60,9 +68,10 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
         .then((res) => res.json())
 
       expect(response.errors).toBeUndefined()
+      expect(response.data.updateCyclicalRelationship.title).toBe('Default locale title')
 
       const created = await payload.findByID({
-        id: response.data.createCyclicalRelationship.id,
+        id: response.data.updateCyclicalRelationship.id,
         collection: 'cyclical-relationship',
         locale: 'all',
         version: 'published',

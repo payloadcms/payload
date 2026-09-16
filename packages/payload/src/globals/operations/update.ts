@@ -25,8 +25,8 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { getRequestWithLocale } from '../../utilities/getRequestWithLocale.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -51,6 +51,7 @@ type Args<TSlug extends GlobalSlug> = {
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
+  returningLocale?: string
   showHiddenFields?: boolean
   slug: string
 } & Pick<FindOptions<string, SelectType>, 'select'>
@@ -72,6 +73,7 @@ export const updateOperation = async <
     populate,
     req: { fallbackLocale, locale, payload, payload: { config } = {} },
     req,
+    returningLocale,
     select: incomingSelect,
     showHiddenFields,
   } = args
@@ -431,7 +433,7 @@ export const updateOperation = async <
       doc: resultWithLocales,
       fallbackLocale: null,
       global: globalConfig,
-      locale: locale!,
+      locale: returningLocale || locale!,
       overrideAccess: overrideAccess!,
       populate,
       req,

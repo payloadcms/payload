@@ -33,6 +33,7 @@ import {
   draftUnlimitedGlobalSlug,
   draftWithUploadCloudStorageCollectionSlug,
   draftWithUploadCollectionSlug,
+  errorOnUnpublishSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
@@ -71,6 +72,26 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
   })
 
   test.describe('Version and action API surfaces', () => {
+    test('preserves the custom validation error when REST unpublishes all locales', async ({
+      payload,
+      restClient,
+    }) => {
+      const doc = await payload.create({
+        action: 'publish',
+        collection: errorOnUnpublishSlug,
+        data: { title: 'Published' },
+      })
+
+      const response = await restClient.PATCH(
+        `/${errorOnUnpublishSlug}/${doc.id}?action=unpublish&locale=all`,
+        { body: JSON.stringify({}) },
+      )
+      const json = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(json.errors?.[0]?.message).toBe('Custom error on unpublish')
+    })
+
     test('allows an unsaved versioned global to be initialized through a latest read', async ({
       payload,
     }) => {

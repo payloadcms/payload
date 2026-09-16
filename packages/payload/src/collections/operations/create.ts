@@ -58,6 +58,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   req: PayloadRequest
+  returningLocale?: string
   selectedLocales?: string[]
   showHiddenFields?: boolean
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
@@ -110,6 +111,7 @@ export const createOperation = async <
         payload: { config },
       },
       req,
+      returningLocale,
       select: incomingSelect,
       selectedLocales,
       showHiddenFields,
@@ -414,7 +416,7 @@ export const createOperation = async <
       doc: resultWithLocales,
       fallbackLocale: fallbackLocale!,
       global: null,
-      locale: locale!,
+      locale: returningLocale || locale!,
       overrideAccess: overrideAccess!,
       populate,
       req,

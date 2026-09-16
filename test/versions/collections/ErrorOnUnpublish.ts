@@ -14,21 +14,21 @@ const ErrorOnUnpublish: CollectionConfig = {
       required: true,
     },
   ],
-  versions: {
-    drafts: true,
-  },
   hooks: {
     beforeValidate: [
       ({ data, originalDoc, req }) => {
         if (
           data?._status === 'draft' &&
           originalDoc?._status === 'published' &&
-          req.locale === 'all'
+          req.query.locale === 'all'
         ) {
           throw new APIError('Custom error on unpublish', 400, {}, true)
         }
       },
     ],
+  },
+  versions: {
+    drafts: true,
   },
 }
 
