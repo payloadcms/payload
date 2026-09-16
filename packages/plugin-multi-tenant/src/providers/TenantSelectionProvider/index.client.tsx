@@ -184,7 +184,15 @@ export const TenantSelectionProviderClient = ({
       const result = await req.json()
 
       if (result.tenantOptions && userID) {
-        setTenantOptions(result.tenantOptions)
+        setTenantOptions((prev) => {
+          if (
+            prev.length === result.tenantOptions.length &&
+            prev.every((opt, i) => opt.value === result.tenantOptions[i]?.value)
+          ) {
+            return prev
+          }
+          return result.tenantOptions
+        })
 
         if (result.tenantOptions.length === 1) {
           setSelectedTenantID(result.tenantOptions[0].value)
