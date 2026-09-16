@@ -992,6 +992,51 @@ test.describe('Bulk Edit', () => {
     await expect(modal.locator('[data-testid="custom-field"]')).toBeVisible()
   })
 
+  test('should bulk edit values from custom Field components', async () => {
+    await deleteAllPosts()
+    await Promise.all([createPost({ title: 'Post 1' }), createPost({ title: 'Post 2' })])
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await selectAllAndEditMany(page)
+
+    const { modal } = await selectFieldToEdit(page, {
+      fieldID: 'fieldWithCustomField',
+      fieldLabel: 'Field With Custom Field',
+    })
+
+    const field = modal.locator('[data-testid="custom-field"] input')
+
+    await expect(field).toHaveAttribute('id', 'field-fieldWithCustomField')
+    await field.fill('Bulk edited custom field')
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      'Updated 2 Posts successfully.',
+    )
+
+    await expect
+      .poll(
+        async () => {
+          const updatedPosts = await payload.find({
+            collection: postsSlug,
+            limit: 2,
+          })
+
+          return (
+            updatedPosts.docs.length === 2 &&
+            updatedPosts.docs.every(
+              (post) => post.fieldWithCustomField === 'Bulk edited custom field',
+            )
+          )
+        },
+        { timeout: POLL_TOPASS_TIMEOUT },
+      )
+      .toBe(true)
+  })
+
   test('should preserve values of previously selected fields when selecting another field', async () => {
     await deleteAllPosts()
     await createPost({ title: 'Post 1' })
