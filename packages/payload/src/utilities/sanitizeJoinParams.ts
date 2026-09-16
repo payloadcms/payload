@@ -3,8 +3,10 @@ import type { JoinQuery } from '../types/index.js'
 import { isNumber } from './isNumber.js'
 
 export type JoinParams =
+  | 'false'
   | {
       [schemaPath: string]:
+        | 'false'
         | {
             limit?: unknown
             sort?: string
@@ -19,6 +21,16 @@ export type JoinParams =
  * @param joins
  */
 export const sanitizeJoinParams = (_joins: JoinParams = {}): JoinQuery => {
+  // `?joins=false` disables every join field. Over REST the query string makes that the
+  // string 'false' rather than a boolean, and neither form survives the loop below:
+  // `Object.keys('false')` is ['0','1','2','3','4'], so the string was walked character
+  // by character into a join query keyed by index that matched no field and disabled
+  // nothing, while `Object.keys(false)` is [] and produced an empty query with the same
+  // effect. Both are the whole-query form, which `JoinQuery` expresses as `false`.
+  if (_joins === false || _joins === 'false') {
+    return false
+  }
+
   const joinQuery: Record<string, any> = {}
   const joins = _joins as Record<string, any>
 
