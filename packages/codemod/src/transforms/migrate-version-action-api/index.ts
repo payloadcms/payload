@@ -249,6 +249,13 @@ function rewriteAllLocaleOptionsObject({
     return mutated
   }
 
+  if (localeAssignment && locale !== 'all' && hasPotentialWriteData(options)) {
+    notes.push(
+      `${filePath}: non-empty \`data\` with explicit \`locale: '${locale}'\` and \`${activeFlag.name}\` cannot be rewritten safely — keep the localized data write and perform the all-locale publication as a separate operation manually.`,
+    )
+    return mutated
+  }
+
   if (localeAssignment) {
     localeAssignment.setInitializer("'all'")
     activeFlag.property.remove()
@@ -260,6 +267,16 @@ function rewriteAllLocaleOptionsObject({
   }
 
   return true
+}
+
+function hasPotentialWriteData(options: ObjectLiteralExpression): boolean {
+  const dataProperty = getNamedPropertyAssignment(options, 'data')
+  if (!dataProperty) {
+    return options.getProperty('data') !== undefined
+  }
+
+  const data = unwrap(dataProperty.getInitializer())
+  return !Node.isObjectLiteralExpression(data) || data.getProperties().length > 0
 }
 
 function hasUnresolvedObjectOverride(options: ObjectLiteralExpression): boolean {

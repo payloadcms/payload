@@ -19,7 +19,7 @@ export async function updateAllLocales(payload: Payload, sdk: PayloadSDK) {
   await sdk.create({
     action: 'publish',
     collection: 'posts',
-    data: { title: 'Created' },
+    data: {},
     locale: 'all'
   })
 

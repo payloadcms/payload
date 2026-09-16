@@ -107,6 +107,23 @@ describe('migrate-version-action-api', () => {
     expect(await apply('all-locales.input.ts')).toBe(output)
   })
 
+  it('should not replace an explicit locale when non-empty data could be redirected', async () => {
+    const input = await fixture('all-locales-localized-data.input.ts')
+    const output = await fixture('all-locales-localized-data.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    project.createSourceFile('/all-locales-localized-data.ts', input)
+
+    const result = await migrateVersionActionApi.apply({ packageJsons: [], project })
+
+    expect(project.getSourceFileOrThrow('/all-locales-localized-data.ts').getFullText()).toBe(
+      output,
+    )
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([
+      expect.stringContaining("non-empty `data` with explicit `locale: 'es'`"),
+    ])
+  })
+
   it('should rewrite static REST all-locale publication flags', async () => {
     const output = await fixture('all-locales-rest.output.ts')
 
@@ -230,6 +247,7 @@ describe('migrate-version-action-api', () => {
       'alias.output.ts',
       'strict-draft-types-false.output.ts',
       'all-locales.output.ts',
+      'all-locales-localized-data.output.ts',
       'all-locales-rest.output.ts',
       'all-locales-graphql.output.ts',
       'all-locales-graphql-nested.output.ts',

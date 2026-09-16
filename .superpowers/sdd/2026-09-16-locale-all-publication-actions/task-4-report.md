@@ -244,3 +244,67 @@ $ tsc
 ### Concerns
 
 - None.
+
+## Final review fix: localized data safety
+
+### Root cause
+
+The object-call migration treated every statically known concrete `locale` as replaceable
+publication metadata. That is safe for publication-only calls, but not for a call with
+non-empty `data`: changing `locale: 'es'` to `locale: 'all'` can redirect the localized
+write to the default locale even though the legacy flag only broadened publication status.
+
+### Implementation
+
+- Added a conservative guard for Local API and SDK object calls with a static concrete locale.
+- When such a call also has non-empty or non-statically-provable `data`, the transform leaves
+  the call unchanged, does not count the file as changed, and emits a manual-review note that
+  explains the localized write and all-locale publication must be separated manually.
+- Calls whose locale is already `all`, or whose data is absent or a statically empty object,
+  retain the established automatic migration.
+
+### RED evidence
+
+The localized-data fixture and idempotency assertion were added before the production guard:
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 failed (1)
+Tests       2 failed | 35 passed (37)
+```
+
+The direct regression assertion and the idempotency loop both showed the unsafe rewrite from
+`locale: 'es', publishAllLocales: true` to `locale: 'all'` while retaining the Spanish data.
+
+### GREEN evidence
+
+```text
+node_modules/.bin/vitest run packages/codemod/src/transforms/migrate-version-action-api/index.spec.ts
+Test Files  1 passed (1)
+Tests       37 passed (37)
+
+pnpm --pm-on-fail=ignore --filter @payloadcms/codemod typecheck
+$ tsc
+```
+
+### Tests and fixtures
+
+- `all-locales-localized-data.*` proves an explicit non-default locale plus non-empty data is
+  unchanged, reports no changed file, emits a clear note, and remains idempotent.
+- The existing static Local API and SDK fixture remains green with empty data, including the
+  concrete-locale publish case and concrete-locale unpublish case.
+- Existing REST, GraphQL, draft migration, notes, and exact `filesChanged` coverage remains green.
+
+### Self-review
+
+- The guard runs before changing the active all-locales flag or locale, so the unsafe call is
+  preserved byte-for-byte.
+- Dynamic, shorthand, and otherwise non-provable data values are treated conservatively as
+  potential writes.
+- The change is limited to object-call migration; no core, GraphQL runtime, or documentation
+  files were modified.
+
+### Concerns
+
+- None. The transform intentionally asks for manual review rather than synthesizing a second
+  write or guessing whether localized data can be redirected.
