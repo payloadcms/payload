@@ -16,9 +16,10 @@ export function detectSvgFromXml(buffer: Buffer): boolean {
       return false
     }
 
-    // Remove XML declarations, comments, and processing instructions
+    // Remove XML declarations, DOCTYPE declarations, comments, and processing instructions
     const cleanContent = content
       .replace(/<\?xml[^>]*\?>/gi, '')
+      .replace(/<!DOCTYPE[^>[]*(?:\[[^\]]*\]\s*)?>/gi, '')
       .replace(/<!--[\s\S]*?-->/g, '')
       .replace(/<\?[^>]*\?>/g, '')
       .trim()
