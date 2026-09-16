@@ -22,6 +22,7 @@ import { createImageSizes } from './image-resizing/createImageSizes.js'
 import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
+import { stripUploadFilenamePath } from './sanitizeUploadFilename.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
@@ -267,7 +268,12 @@ export const generateFileData = async <T>({
     }
     fileData.mimeType = mime
 
-    const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
+    // Keep in sync with `sanitizeUploadFilename` (payload/internal), which
+    // mirrors this path strip + base-name + ext rejoin for the cloud-storage
+    // client-upload path. `ext` here may come from `file-type` for images, so
+    // the shared helper cannot be used directly.
+    const nameOnly = stripUploadFilenamePath(file.name)
+    const baseFilename = sanitize(nameOnly.substring(0, nameOnly.lastIndexOf('.')) || nameOnly)
     fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
 
     if (!overwriteExistingFiles) {

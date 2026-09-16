@@ -271,6 +271,90 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
       expect(url).toContain('test-prefix')
       expect(url).toContain('safe-image.png')
     })
+
+    /**
+     * Regression for #16694: clientUploads must store the blob under the same key
+     * that ends up in `doc.filename`. Before the fix, `resolveSignedURLKey` used
+     * `payload/shared` `sanitizeFilename` while `generateFileData` used
+     * `sanitize-filename`, so names like `Baustelle4:5.png` or `My Photo...png`
+     * landed on S3 under the raw name but were recorded differently in the DB.
+     */
+    test('should keep the S3 key in sync with the DB filename for sanitized client-upload names', async ({
+      payload,
+      restClient,
+    }) => {
+      const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+      const cases = [
+        { input: 'Baustelle4:5.png', expected: 'Baustelle45.png' },
+        { input: 'My Photo...png', expected: 'My Photo.png' },
+      ] as const
+
+      const createdIds: (number | string)[] = []
+
+      try {
+        for (const { input, expected } of cases) {
+          const instructions = await restClient
+            .POST(signedURLEndpoint, {
+              body: signedURLBody(mediaHeaderOnlySlug, input, file.length, 'image/png'),
+            })
+            .then((res) => res.json<UploadInstructions>())
+
+          expect(instructions.file.filename).toBe(expected)
+
+          if (instructions.type !== 'http') {
+            throw new Error('Expected HTTP upload instructions')
+          }
+
+          expect(instructions.request.url).toContain(encodeURIComponent(expected))
+          expect(instructions.request.url).not.toContain(encodeURIComponent(input))
+
+          const uploadResponse = await fetch(instructions.request.url, {
+            body: file,
+            headers: { 'Content-Type': 'image/png' },
+            method: 'PUT',
+          })
+          expect(uploadResponse.ok).toBe(true)
+
+          const s3Object = await getAWSClient()
+            .headObject({
+              Bucket: getTestBucketName(),
+              Key: expected,
+            })
+            .catch(() => null)
+
+          expect(s3Object).not.toBeNull()
+          assert(s3Object)
+          expect(s3Object.ContentLength).toBe(file.length)
+
+          const divergentKeyExists = await getAWSClient()
+            .headObject({
+              Bucket: getTestBucketName(),
+              Key: input,
+            })
+            .then(() => true)
+            .catch(() => false)
+
+          expect(divergentKeyExists).toBe(false)
+
+          const createFormData = new FormData()
+          createFormData.append('file', JSON.stringify(instructions.file))
+
+          const createRes = await restClient.POST(`/${mediaHeaderOnlySlug}`, {
+            body: createFormData,
+          })
+
+          expect(createRes.status).toBe(201)
+          const { doc } = await createRes.json()
+          createdIds.push(doc.id)
+
+          expect(doc.filename).toBe(expected)
+        }
+      } finally {
+        for (const id of createdIds) {
+          await payload.delete({ id, collection: mediaHeaderOnlySlug })
+        }
+      }
+    })
   })
 
   /**
