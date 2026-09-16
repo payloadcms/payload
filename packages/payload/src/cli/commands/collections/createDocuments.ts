@@ -63,7 +63,6 @@ export const createCreateDocumentsCommand = defineCLICommand({
           overrideAccess: args.overrideAccess,
           overwriteExistingFiles: args.overwriteExistingFiles,
           populate: args.populate,
-          publishAllLocales: args.publishAllLocales,
           select: args.returning ? args.select : { id: true },
           showHiddenFields: args.showHiddenFields,
         })

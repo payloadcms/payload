@@ -39,10 +39,8 @@ export const createUpdateGlobalCommand = defineCLICommand({
         overrideAccess: args.overrideAccess,
         overrideLock: args.overrideLock,
         populate: args.populate,
-        publishAllLocales: args.publishAllLocales,
         select: args.select,
         showHiddenFields: args.showHiddenFields,
-        unpublishAllLocales: args.unpublishAllLocales,
       })
     } catch (error) {
       const validation = getGlobalValidationResult({ slug, error, req })

@@ -20,7 +20,6 @@ export const createHandler: PayloadHandler = async (req) => {
     autosave,
     depth,
     populate,
-    publishAllLocales,
     select,
   } = parseParams(req.query)
   const action = parseEnumParam({
@@ -36,7 +35,6 @@ export const createHandler: PayloadHandler = async (req) => {
     data: req.data!,
     depth,
     populate,
-    publishAllLocales,
     req,
     select,
   })

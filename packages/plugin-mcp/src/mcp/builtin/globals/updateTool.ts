@@ -36,9 +36,7 @@ export const updateGlobalTool = defineGlobalTool({
     locale,
     overrideLock,
     populate,
-    publishAllLocales,
     select,
-    unpublishAllLocales,
   } = input
 
   logger.info(
@@ -60,9 +58,7 @@ export const updateGlobalTool = defineGlobalTool({
       overrideAccess: authorizedMCP.overrideAccess,
       overrideLock,
       populate,
-      publishAllLocales,
       req,
-      unpublishAllLocales,
     }
 
     if (locale) {

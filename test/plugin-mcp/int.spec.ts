@@ -516,6 +516,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       expect(createDocuments.inputSchema.properties.draft).toBeUndefined()
       expect(createDocuments.inputSchema.properties.fallbackLocale).toBeDefined()
       expect(createDocuments.inputSchema.properties.locale).toBeDefined()
+      expect(createDocuments.inputSchema.properties.publishAllLocales).toBeUndefined()
+      expect(createDocuments.inputSchema.properties.unpublishAllLocales).toBeUndefined()
       expect(createDocuments.inputSchema.properties.returning).toMatchObject({
         default: false,
         description: 'Return complete documents instead of only their IDs.',
@@ -680,6 +682,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       expect(updateGlobalTool.inputSchema.properties.select.description).toContain(
         "Optional: define exactly which fields you'd like to return in the response",
       )
+      expect(updateGlobalTool.inputSchema.properties.locale).toBeDefined()
+      expect(updateGlobalTool.inputSchema.properties.publishAllLocales).toBeUndefined()
+      expect(updateGlobalTool.inputSchema.properties.unpublishAllLocales).toBeUndefined()
       expect(updateGlobalTool.inputSchema.properties.showHiddenFields).toBeUndefined()
 
       const findGlobalVersionsTool = toolsResponse.tools.find(
@@ -719,8 +724,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       expect(updateToolSchema.inputSchema.properties.select.description).toContain(
         "Optional: define exactly which fields you'd like to return in the response",
       )
-      expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeDefined()
-      expect(updateToolSchema.inputSchema.properties.publishAllLocales.type).toBe('boolean')
+      expect(updateToolSchema.inputSchema.properties.locale).toBeDefined()
+      expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeUndefined()
+      expect(updateToolSchema.inputSchema.properties.unpublishAllLocales).toBeUndefined()
       expect(updateToolSchema.inputSchema.properties.file).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.filePath).toBeUndefined()
       expect(updateToolSchema.inputSchema.properties.overwriteExistingFiles).toBeUndefined()
@@ -1786,7 +1792,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
         await payload.delete({ id: page.id, collection: 'pages' })
       }
     })
-    it('should forward publishAllLocales when updating a document', async ({
+    it('should publish all locales when updating a document with locale all', async ({
       mcp,
       getApiKey,
       payload,
@@ -1815,11 +1821,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
             id: post.id,
             data: {
               _status: 'published',
-              title: 'Published English title',
             },
             action: 'publish',
-            locale: 'en',
-            publishAllLocales: false,
+            locale: 'all',
           },
           name: 'updateDocument',
         })
@@ -1829,7 +1833,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
           version: 'published',
           locale: 'all',
         })
-        const spanishDraft = await payload.findByID({
+        const latestSpanish = await payload.findByID({
           id: post.id,
           collection: 'posts',
           version: 'latest',
@@ -1837,10 +1841,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
         })
         expect(callResponse).toBeDefined()
         expect(publishedPost._status).toMatchObject({ en: 'published' })
-        expect(publishedPost._status).not.toMatchObject({ es: 'published' })
-        expect(publishedPost._status).not.toMatchObject({ fr: 'published' })
-        expect(spanishDraft.title).toBe('Spanish draft title')
-        expect(spanishDraft._status).toBe('draft')
+        expect(publishedPost._status).toMatchObject({ es: 'published' })
+        expect(publishedPost._status).toMatchObject({ fr: 'published' })
+        expect(latestSpanish.title).toBe('Spanish draft title')
+        expect(latestSpanish._status).toBe('published')
       } finally {
         await payload.delete({ collection: 'posts', id: post.id })
       }

@@ -17,11 +17,9 @@ export const updateHandler: PayloadHandler = async (req) => {
     limit,
     overrideLock,
     populate,
-    publishAllLocales,
     select,
     sort,
     trash,
-    unpublishAllLocales,
     where,
   } = parseParams(req.query)
 
@@ -33,12 +31,10 @@ export const updateHandler: PayloadHandler = async (req) => {
     limit,
     overrideLock: overrideLock ?? false,
     populate,
-    publishAllLocales,
     req,
     select,
     sort,
     trash,
-    unpublishAllLocales,
     where: where!,
   })
 

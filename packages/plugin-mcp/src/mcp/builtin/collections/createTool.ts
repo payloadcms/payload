@@ -37,7 +37,6 @@ export const createDocumentsTool = defineCollectionTool({
     fallbackLocale,
     locale,
     populate,
-    publishAllLocales,
     returning,
     select,
   } = input
@@ -70,7 +69,6 @@ export const createDocumentsTool = defineCollectionTool({
           depth,
           overrideAccess: authorizedMCP.overrideAccess,
           populate,
-          publishAllLocales,
           req,
           ...(file ? { file } : {}),
           ...(locale ? { locale } : {}),

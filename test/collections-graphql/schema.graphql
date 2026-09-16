@@ -137,6 +137,7 @@ enum FallbackLocaleInputType {
 enum LocaleInputType {
   en
   es
+  all
 }
 
 type Users {

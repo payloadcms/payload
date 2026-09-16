@@ -312,6 +312,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
 
   test('createDocuments --help --json', async ({ cli }) => {
     const output = await cli('createDocuments --help --json')
+    const inputSchema = JSON.parse(output.stdout).result.command.inputSchema
 
     expect(JSON.parse(output.stdout)).toMatchObject({
       command: 'help',
@@ -336,6 +337,9 @@ test.suite({ config: './config.ts' })('CLI', () => {
       },
       success: true,
     })
+    expect(inputSchema.properties.locale).toBeDefined()
+    expect(inputSchema.properties.publishAllLocales).toBeUndefined()
+    expect(inputSchema.properties.unpublishAllLocales).toBeUndefined()
   })
 
   test(`createDocuments --slug pages --documents '[{"data":{"title":"not created"}}]' --select '{"title":true}' --json`, async ({
@@ -382,6 +386,7 @@ test.suite({ config: './config.ts' })('CLI', () => {
 
   test('updateDocument --help --json', async ({ cli }) => {
     const output = await cli('updateDocument --help --json')
+    const inputSchema = JSON.parse(output.stdout).result.command.inputSchema
 
     expect(JSON.parse(output.stdout)).toMatchObject({
       result: {
@@ -397,6 +402,18 @@ test.suite({ config: './config.ts' })('CLI', () => {
         },
       },
     })
+    expect(inputSchema.properties.locale).toBeDefined()
+    expect(inputSchema.properties.publishAllLocales).toBeUndefined()
+    expect(inputSchema.properties.unpublishAllLocales).toBeUndefined()
+  })
+
+  test('updateGlobal --help --json', async ({ cli }) => {
+    const output = await cli('updateGlobal --help --json')
+    const inputSchema = JSON.parse(output.stdout).result.command.inputSchema
+
+    expect(inputSchema.properties.locale).toBeDefined()
+    expect(inputSchema.properties.publishAllLocales).toBeUndefined()
+    expect(inputSchema.properties.unpublishAllLocales).toBeUndefined()
   })
 
   test(`updateDocument --slug pages --where '{"title":{"equals":"Seeded page"}}' --data '{"title":"not updated"}' --select '{"title":true}' --json`, async ({

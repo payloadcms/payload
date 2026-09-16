@@ -46,6 +46,31 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
       expect(doc.id).toBeDefined()
     })
 
+    test('should publish all locales with an explicit GraphQL action', async ({
+      payload,
+      restClient,
+    }) => {
+      const query = `mutation {
+        createCyclicalRelationship(action: publish, locale: all, data: {}) {
+          id
+        }
+      }`
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(response.errors).toBeUndefined()
+
+      const created = await payload.findByID({
+        id: response.data.createCyclicalRelationship.id,
+        collection: 'cyclical-relationship',
+        locale: 'all',
+        version: 'published',
+      })
+
+      expect(created._status).toMatchObject({ en: 'published', es: 'published' })
+    })
+
     test('should create using graphql variables', async ({ restClient }) => {
       const query = `mutation Create($title: String!) {
           createPost(data: {title: $title}) {
@@ -1130,8 +1155,7 @@ test.suite({ config: './config.ts' })('collections-graphql', () => {
               es: 'Spanish title',
             },
           },
-          locale: '*',
-          publishAllLocales: true,
+          locale: 'all',
         })
 
         await payload.update({

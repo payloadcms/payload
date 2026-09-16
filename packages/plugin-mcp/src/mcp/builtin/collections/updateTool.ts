@@ -46,12 +46,10 @@ export const updateDocumentTool = defineCollectionTool({
     locale,
     overrideLock,
     populate,
-    publishAllLocales,
     returning,
     select,
     sort,
     trash,
-    unpublishAllLocales,
     where,
   } = input
 
@@ -86,11 +84,9 @@ export const updateDocumentTool = defineCollectionTool({
         overrideAccess: authorizedMCP.overrideAccess,
         overrideLock,
         populate,
-        publishAllLocales,
         req,
         select: returning ? select : { id: true },
         trash,
-        unpublishAllLocales,
         ...(file ? { file } : {}),
       })
 
@@ -118,12 +114,10 @@ export const updateDocumentTool = defineCollectionTool({
       overrideAccess: authorizedMCP.overrideAccess,
       overrideLock,
       populate,
-      publishAllLocales,
       req,
       select: returning ? select : { id: true },
       sort,
       trash,
-      unpublishAllLocales,
       where: whereClause,
       ...(file ? { file } : {}),
     })

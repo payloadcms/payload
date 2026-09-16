@@ -15,8 +15,6 @@ export const updateHandler: PayloadHandler = async (req) => {
   const { searchParams } = req
   const { action, autosave } = parseParams(req.query)
   const depth = searchParams.get('depth')
-  const publishAllLocales = searchParams.get('publishAllLocales') === 'true'
-  const unpublishAllLocales = searchParams.get('unpublishAllLocales') === 'true'
 
   const result = await updateOperation({
     slug: globalConfig.slug,
@@ -26,10 +24,8 @@ export const updateHandler: PayloadHandler = async (req) => {
     depth: isNumber(depth) ? Number(depth) : undefined,
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),
-    publishAllLocales,
     req,
     select: sanitizeSelectParam(req.query.select),
-    unpublishAllLocales,
   })
 
   let message = req.t('general:updatedSuccessfully')

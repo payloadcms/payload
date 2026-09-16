@@ -149,8 +149,7 @@ export function PublishButton({
       {
         action: 'publish',
         depth: 0,
-        locale: localeCode,
-        ...(localizeStatusEnabled && { publishAllLocales: true }),
+        locale: localizeStatusEnabled ? 'all' : localeCode,
       },
       { addQueryPrefix: true },
     )

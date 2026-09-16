@@ -643,7 +643,6 @@ export const mcpDataset: EvalCase[] = [
         data: { _status: 'published', title: 'MCP Spanish Published Title' },
         action: 'publish',
         locale: 'es',
-        publishAllLocales: false,
       })
       await payload.update({
         id: article.id,

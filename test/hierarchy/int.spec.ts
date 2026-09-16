@@ -995,7 +995,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hierarchy', () 
         collection: 'products',
         data: { _status: 'published' },
         action: 'publish',
-        publishAllLocales: true,
+        locale: 'all',
       })
 
       // Create draft with different title for each locale

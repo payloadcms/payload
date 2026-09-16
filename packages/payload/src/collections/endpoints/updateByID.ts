@@ -16,10 +16,8 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
     depth,
     overrideLock,
     populate,
-    publishAllLocales,
     select,
     trash,
-    unpublishAllLocales,
   } = parseParams(req.query)
 
   const doc = await updateByIDOperation({
@@ -31,11 +29,9 @@ export const updateByIDHandler: PayloadHandler = async (req) => {
     depth,
     overrideLock: overrideLock ?? false,
     populate,
-    publishAllLocales,
     req,
     select,
     trash,
-    unpublishAllLocales,
   })
 
   let message = req.t('general:updatedSuccessfully')
