@@ -11,17 +11,9 @@ import { updateOperation } from '../operations/update.js'
 export const updateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const {
-    action,
-    depth,
-    limit,
-    overrideLock,
-    populate,
-    select,
-    sort,
-    trash,
-    where,
-  } = parseParams(req.query)
+  const { action, depth, limit, overrideLock, populate, select, sort, trash, where } = parseParams(
+    req.query,
+  )
 
   const result = await updateOperation({
     action,

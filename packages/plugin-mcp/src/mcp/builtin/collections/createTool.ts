@@ -30,16 +30,7 @@ export const createDocumentsTool = defineCollectionTool({
 }).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const {
-    action,
-    depth,
-    documents,
-    fallbackLocale,
-    locale,
-    populate,
-    returning,
-    select,
-  } = input
+  const { action, depth, documents, fallbackLocale, locale, populate, returning, select } = input
   logger.info(`Creating ${documents.length} documents in collection: ${slug}`)
 
   try {

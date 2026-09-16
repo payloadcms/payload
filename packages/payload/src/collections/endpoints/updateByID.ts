@@ -10,15 +10,7 @@ import { updateByIDOperation } from '../operations/updateByID.js'
 export const updateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const {
-    action,
-    autosave,
-    depth,
-    overrideLock,
-    populate,
-    select,
-    trash,
-  } = parseParams(req.query)
+  const { action, autosave, depth, overrideLock, populate, select, trash } = parseParams(req.query)
 
   const doc = await updateByIDOperation({
     id,

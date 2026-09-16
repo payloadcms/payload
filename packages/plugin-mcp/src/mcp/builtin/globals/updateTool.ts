@@ -28,16 +28,7 @@ export const updateGlobalTool = defineGlobalTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const {
-    action,
-    data,
-    depth,
-    fallbackLocale,
-    locale,
-    overrideLock,
-    populate,
-    select,
-  } = input
+  const { action, data, depth, fallbackLocale, locale, overrideLock, populate, select } = input
 
   logger.info(
     `Updating global: ${slug}, action: ${action ?? 'default'}${locale ? `, locale: ${locale}` : ''}`,

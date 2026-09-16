@@ -15,13 +15,7 @@ import { createOperation } from '../operations/create.js'
 export const createHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const {
-    action: requestedAction,
-    autosave,
-    depth,
-    populate,
-    select,
-  } = parseParams(req.query)
+  const { action: requestedAction, autosave, depth, populate, select } = parseParams(req.query)
   const action = parseEnumParam({
     allowed: createActionValues,
     param: 'action',
