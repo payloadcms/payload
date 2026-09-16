@@ -42,6 +42,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
   } = args
 
   const requestHandler = args.requestHandler || defaultRequestHandler
+  const documentID = initialData.id ?? incomingData.id
 
   const result = await requestHandler({
     apiPath: apiRoute || '/api',
@@ -53,7 +54,7 @@ export const mergeData = async <T extends Record<string, any>>(args: {
       locale,
     },
     endpoint: encodeURI(
-      `${globalSlug ? 'globals/' : ''}${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}`,
+      `${globalSlug ? 'globals/' : ''}${collectionSlug ?? globalSlug}${collectionSlug ? `/${documentID}` : ''}`,
     ),
     serverURL,
   }).then((res) => res.json())
