@@ -58,6 +58,14 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     return null!
   }
 
+  // Guard: versions must be enabled on this global
+  if (!globalConfig.versions) {
+    if (!disableErrors) {
+      throw new NotFound(req.t)
+    }
+    return null!
+  }
+
   const hasWhereAccess = typeof accessResults === 'object'
 
   const select = sanitizeSelect({
