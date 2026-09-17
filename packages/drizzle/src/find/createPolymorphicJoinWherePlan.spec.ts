@@ -412,6 +412,19 @@ describe('createPolymorphicJoinWherePlan', () => {
     })
   })
 
+  it('resolves a json sub-path whose key matches another field name', () => {
+    const settingsPlan = createPlan({ 'settings.variantTags': { equals: 'available' } }).get(
+      'settings.variantTags',
+    )
+
+    expect(settingsPlan.type).toBe('jsonPath')
+    expect(settingsPlan.fieldsByCollection.get('articles')).toMatchObject({
+      jsonColumnPath: 'settings',
+      jsonPathSegments: ['variantTags'],
+      type: 'jsonPath',
+    })
+  })
+
   it('keeps a jsonPath plan valid when the json field is absent from one target collection', () => {
     const extrasPlan = createPlan({ 'extras.flag': { equals: 1 } }).get('extras.flag')
 
@@ -433,6 +446,11 @@ describe('createPolymorphicJoinWherePlan', () => {
 
   it.each([
     ['a field that is absent from every collection', { unknown: { equals: 'value' } }, 'unknown'],
+    [
+      'a sub-path of a field that cannot be descended into',
+      { 'title.variantTags': { equals: 'value' } },
+      'title.variantTags',
+    ],
     [
       'a json sub-path that is a real column in another collection',
       { 'config.mode': { equals: 'value' } },

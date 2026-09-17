@@ -1843,7 +1843,7 @@ describe('Joins Field', () => {
           owner: user,
           parent,
           score: 5,
-          settings: { approved: true },
+          settings: { approved: true, title: 'json-only' },
           tags: ['available', 'allowed-marker'],
           title: 'available child',
           variantSelect: 'available',
@@ -2819,6 +2819,47 @@ describe('Joins Field', () => {
       expect(resultIDs).toContain(missingAvailabilityChild.id.toString())
       expect(resultIDs).not.toContain(restrictedChild.id.toString())
       expect(result.children.totalDocs).toBe(2)
+    })
+
+    it('should resolve a JSON sub-path whose key matches another field name', async () => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments()
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+            where: { 'settings.title': { equals: 'json-only' } },
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    it('should reject a sub-path of a field that cannot be descended into', async () => {
+      const { parent } = await createConstrainedJoinDocuments()
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          depth: 1,
+          joins: {
+            children: {
+              where: { 'title.tags': { equals: 'available' } },
+            },
+          },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: title.tags')
     })
 
     it('should apply an exists constraint on a JSON sub-path', async () => {

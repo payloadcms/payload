@@ -101,10 +101,19 @@ export const createPolymorphicJoinWherePlan = ({
     const optionSignatures = new Set<string>()
 
     for (const { collection, collectionConfig, table } of collectionContexts) {
-      const fieldAtPath = getFieldByPath({
+      // `getFieldByPath` does not narrow its field list when a segment's field has no subfields,
+      // so it resolves `title.tags` to an unrelated top-level `tags`. Confirm every ancestor is
+      // actually traversable before trusting the result, otherwise the path is treated as absent
+      // and handled by the `json` sub-path and unsupported-shape checks below.
+      const fieldAtPath = isPathTraversable({
         fields: collectionConfig.flattenedFields,
         path: schemaPath,
       })
+        ? getFieldByPath({
+            fields: collectionConfig.flattenedFields,
+            path: schemaPath,
+          })
+        : null
 
       if (schemaPath === 'id') {
         const idColumn = table['id'] as Column | undefined
@@ -346,6 +355,37 @@ const getJSONFieldBoundary = ({
   }
 
   return undefined
+}
+
+/**
+ * Reports whether every segment before the leaf is a container that can actually be descended into.
+ * A path whose ancestor is a leaf field, e.g. `title.tags` or a `json` sub-path, is not traversable.
+ */
+const isPathTraversable = ({
+  fields,
+  path,
+}: {
+  fields: FlattenedField[]
+  path: string
+}): boolean => {
+  const pathSegments = path.split('.')
+
+  for (let segmentIndex = 1; segmentIndex < pathSegments.length; segmentIndex++) {
+    const fieldAtAncestorPath = getFieldByPath({
+      fields,
+      path: pathSegments.slice(0, segmentIndex).join('.'),
+    })
+
+    if (
+      fieldAtAncestorPath &&
+      !('flattenedFields' in fieldAtAncestorPath.field) &&
+      !('blocks' in fieldAtAncestorPath.field)
+    ) {
+      return false
+    }
+  }
+
+  return true
 }
 
 const pathHasSeparateRows = ({ fields, path }: { fields: FlattenedField[]; path: string }) => {
