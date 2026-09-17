@@ -9,7 +9,6 @@ import { toast } from 'sonner'
 import type { UnpublishManyProps } from './index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -42,8 +41,6 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
       routes: { api },
     },
   } = useConfig()
-  const currentLocale = useLocale()
-  const locale = currentLocale?.code
   const { i18n, t } = useTranslation()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -85,13 +82,14 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
 
     return qs.stringify(
       {
-        locale,
+        action: 'unpublish',
+        locale: 'all',
         select: {},
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale, where])
+  }, [collection, searchParams, selectAll, ids, where])
 
   const handleUnpublish = useCallback(async () => {
     const url = formatAdminURL({

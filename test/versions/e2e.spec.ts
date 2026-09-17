@@ -157,6 +157,7 @@ describe('Versions', () => {
     test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
       // Create a published document
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
@@ -332,6 +333,7 @@ describe('Versions', () => {
 
     test('should show currently published version status in versions view', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
@@ -345,8 +347,9 @@ describe('Versions', () => {
       await expect(page.locator('main.versions')).toContainText('Currently Published')
     })
 
-    test('should show unpublished version status in versions view', async () => {
+    test('should show the current draft status after unpublishing', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
@@ -359,15 +362,15 @@ describe('Versions', () => {
       // Unpublish the document
       await payload.update({
         id: publishedDoc.id,
+        action: 'unpublish',
         collection: draftCollectionSlug,
         data: {
           _status: 'draft',
         },
-        draft: false,
       })
 
       await page.goto(`${url.edit(publishedDoc.id)}/versions`)
-      await expect(page.locator('main.versions')).toContainText('Previously Published')
+      await expect(page.locator('main.versions')).toContainText('Current Draft')
     })
 
     test('should show global versions view level action in globals versions view', async () => {
@@ -510,6 +513,7 @@ describe('Versions', () => {
       })
 
       const { id: docID } = await payload.create({
+        action: 'publish',
         collection: autosaveCollectionSlug,
         data: {
           description: 'autosave description',
@@ -529,7 +533,7 @@ describe('Versions', () => {
         // Important: assert that depth is 0 in this request
         formatAdminURL({
           apiRoute: '/api',
-          path: `/autosave-posts/${docID}?autosave=true&depth=0&draft=true&fallback-locale=null&locale=en`,
+          path: `/autosave-posts/${docID}?action=saveDraft&autosave=true&depth=0&fallback-locale=null&locale=en`,
           serverURL,
         }),
         async () => {
@@ -560,7 +564,7 @@ describe('Versions', () => {
       // This test checks that when we click "Create new" in the list view, it only creates 1 extra document and not more
       const { totalDocs: initialDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       await page.goto(autosaveURL.create)
@@ -570,7 +574,7 @@ describe('Versions', () => {
 
       const { totalDocs: updatedDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       await expect(() => {
@@ -588,7 +592,7 @@ describe('Versions', () => {
 
       const { totalDocs: latestDocsCount } = await payload.find({
         collection: autosaveCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       await expect(() => {
@@ -759,6 +763,7 @@ describe('Versions', () => {
 
     test('collections — should hide publish button when access control prevents update', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: disablePublishSlug,
         data: {
           _status: 'published',
@@ -794,6 +799,7 @@ describe('Versions', () => {
 
     test('collections — should hide unpublish button when access control prevents update', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: disablePublishSlug,
         data: {
           _status: 'published',
@@ -811,6 +817,7 @@ describe('Versions', () => {
 
     test('collections — should show custom error message when unpublishing fails', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: errorOnUnpublishSlug,
         data: {
           _status: 'published',
@@ -828,6 +835,7 @@ describe('Versions', () => {
 
     test('collections — should render custom unpublish button', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: draftWithCustomUnpublishSlug,
         data: {
           _status: 'published',
@@ -869,6 +877,7 @@ describe('Versions', () => {
 
     test('collections — should not increment version count when unpublishing', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
@@ -898,12 +907,12 @@ describe('Versions', () => {
 
     test('should show documents title in relationship even if draft document', async () => {
       await payload.create({
+        action: 'saveDraft',
         collection: autosaveCollectionSlug,
         data: {
           description: 'some description',
           title: 'some title',
         },
-        draft: true,
       })
 
       await page.goto(postURL.create)
@@ -923,12 +932,12 @@ describe('Versions', () => {
 
     test('correctly increments version count', async () => {
       const createdDoc = await payload.create({
+        action: 'saveDraft',
         collection: draftCollectionSlug,
         data: {
           description: 'some description',
           title: 'some title',
         },
-        draft: true,
       })
 
       await page.goto(url.edit(createdDoc.id))
@@ -969,12 +978,12 @@ describe('Versions', () => {
 
     test('collection — respects max number of versions', async () => {
       const maxOneCollection = await payload.create({
+        action: 'saveDraft',
         collection: draftWithMaxCollectionSlug,
         data: {
           description: 'some description',
           title: 'initial title',
         },
-        draft: true,
       })
 
       const collection = new AdminUrlUtil(serverURL, draftWithMaxCollectionSlug)
@@ -1148,6 +1157,7 @@ describe('Versions', () => {
 
     test('should keep published status after reuploading a file and saving as draft', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: draftWithUploadCollectionSlug,
         data: {
           _status: 'published',
@@ -1185,6 +1195,7 @@ describe('Versions', () => {
 
     test('should create a draft version with the new file without altering the published doc', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: draftWithUploadCollectionSlug,
         data: {
           _status: 'published',
@@ -1209,7 +1220,7 @@ describe('Versions', () => {
       await expect(async () => {
         const { docs: draftDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
-          draft: true,
+          version: 'latest',
           where: { id: { equals: publishedDoc.id } },
         })
         expect(draftDocs[0]!._status).toStrictEqual('draft')
@@ -1225,6 +1236,7 @@ describe('Versions', () => {
 
     test('should create a draft when duplicating a published upload document', async () => {
       const publishedDoc = await payload.create({
+        action: 'publish',
         collection: draftWithUploadCollectionSlug,
         data: {
           _status: 'published',
@@ -1251,7 +1263,7 @@ describe('Versions', () => {
       await expect(async () => {
         const { docs: draftDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
-          draft: true,
+          version: 'latest',
           where: { id: { equals: duplicatedDocID } },
         })
         expect(draftDocs[0]!._status).toStrictEqual('draft')
@@ -1260,7 +1272,7 @@ describe('Versions', () => {
           collection: draftWithUploadCollectionSlug,
           where: { id: { equals: duplicatedDocID } },
         })
-        expect(mainDocs[0]!._status).toStrictEqual('draft')
+        expect(mainDocs).toHaveLength(0)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
@@ -1796,6 +1808,7 @@ describe('Versions', () => {
       // Step 2: Add a block via API (simpler and more reliable than UI interaction)
       await payload.update({
         id,
+        action: 'saveDraft',
         collection: localizedCollectionSlug,
         data: {
           blocks: [
@@ -1805,13 +1818,13 @@ describe('Versions', () => {
             },
           ],
         },
-        draft: true,
         locale: 'en',
       })
 
       // Step 3: Publish specific locale (English) via API
       const published = await payload.update({
         id,
+        action: 'publish',
         collection: localizedCollectionSlug,
         data: {
           _status: 'published',
@@ -1823,7 +1836,6 @@ describe('Versions', () => {
           ],
           text: 'english text',
         },
-        draft: false,
         locale: 'en',
       })
 
@@ -2261,6 +2273,7 @@ describe('Versions', () => {
 
     beforeEach(async () => {
       const newPost = await payload.create({
+        action: 'publish',
         collection: draftCollectionSlug,
         data: {
           description: 'new description',
@@ -2273,6 +2286,7 @@ describe('Versions', () => {
 
       await payload.update({
         id: postID,
+        action: 'saveDraft',
         collection: draftCollectionSlug,
         data: {
           blocksField: [
@@ -2286,7 +2300,6 @@ describe('Versions', () => {
           title: 'current draft post title',
         },
         depth: 0,
-        draft: true,
       })
 
       const versions = await payload.findVersions({
@@ -2728,6 +2741,7 @@ describe('Versions', () => {
         depth: 0,
         limit: 3,
         sort: 'createdAt',
+        version: 'latest',
       })
 
       await expect(
@@ -3131,6 +3145,7 @@ describe('Versions', () => {
     test('correctly renders text fields containing HTML special characters', async () => {
       // Create a document with HTML special characters in a text field
       const doc = await payload.create({
+        action: 'publish',
         collection: diffCollectionSlug,
         data: {
           _status: 'published',
@@ -3181,6 +3196,7 @@ describe('Versions', () => {
     test('correctly renders JSON fields containing HTML special characters', async () => {
       // Create a document with HTML special characters in a JSON field
       const doc = await payload.create({
+        action: 'publish',
         collection: diffCollectionSlug,
         data: {
           _status: 'published',

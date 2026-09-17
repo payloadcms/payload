@@ -16,7 +16,7 @@ export async function generateStaticParams() {
 
   const pages = await payload.find({
     collection: 'pages',
-    draft: false,
+    version: 'published',
     limit: 1000,
     overrideAccess: false,
   })
@@ -76,7 +76,7 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
 
   const result = await payload.find({
     collection: 'pages',
-    draft,
+    version: draft ? 'latest' : 'published',
     limit: 1,
     overrideAccess: draft,
     where: {
@@ -86,5 +86,5 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
     },
   })
 
-  return result.docs?.[0] || null
+  return (result.docs?.[0] || null) as PageType | null
 })

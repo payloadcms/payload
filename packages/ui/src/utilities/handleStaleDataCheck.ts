@@ -34,12 +34,12 @@ export const handleStaleDataCheck = async ({
         id,
         collection: collectionSlug,
         depth: 0,
-        draft: collectionHasDrafts,
         overrideAccess: false,
         select: {
           updatedAt: true,
         },
         user: req.user,
+        version: collectionHasDrafts ? 'latest' : undefined,
       })
 
       currentUpdatedAt = currentDoc?.updatedAt as string
@@ -51,12 +51,12 @@ export const handleStaleDataCheck = async ({
       const currentGlobal = await req.payload.findGlobal({
         slug: globalSlug,
         depth: 0,
-        draft: globalHasDrafts,
         overrideAccess: false,
         select: {
           updatedAt: true,
         },
         user: req.user,
+        version: globalHasDrafts ? 'latest' : undefined,
       })
 
       currentUpdatedAt = currentGlobal?.updatedAt as string

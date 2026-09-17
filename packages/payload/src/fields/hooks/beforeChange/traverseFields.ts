@@ -8,6 +8,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
+  allLocales: boolean
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
@@ -66,6 +67,7 @@ type Args = {
  */
 export const traverseFields = async ({
   id,
+  allLocales,
   blockData,
   collection,
   context,
@@ -95,6 +97,7 @@ export const traverseFields = async ({
     promises.push(
       promise({
         id,
+        allLocales,
         blockData,
         collection,
         context,

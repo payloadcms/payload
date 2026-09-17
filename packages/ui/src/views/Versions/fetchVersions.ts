@@ -63,7 +63,6 @@ export const fetchVersion = async <TVersionData extends object = object>({
 export const fetchVersions = async <TVersionData extends object = object>({
   collectionSlug,
   depth,
-  draft,
   globalSlug,
   limit,
   locale,
@@ -78,7 +77,6 @@ export const fetchVersions = async <TVersionData extends object = object>({
 }: {
   collectionSlug?: string
   depth?: number
-  draft?: boolean
   globalSlug?: string
   limit?: number
   locale?: 'all' | ({} & string)
@@ -105,7 +103,6 @@ export const fetchVersions = async <TVersionData extends object = object>({
       return (await req.payload.findVersions({
         collection: collectionSlug,
         depth,
-        draft,
         limit,
         locale,
         overrideAccess,
@@ -189,7 +186,6 @@ export const fetchLatestVersion = async <TVersionData extends object = object>({
   const latest = await fetchVersions({
     collectionSlug,
     depth,
-    draft: true,
     globalSlug,
     limit: 1,
     locale,

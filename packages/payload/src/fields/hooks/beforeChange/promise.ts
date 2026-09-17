@@ -25,6 +25,7 @@ function buildFieldLabel(parentLabel: string, label: string | undefined): string
 }
 
 type Args = {
+  allLocales: boolean
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
@@ -70,6 +71,7 @@ type Args = {
 
 export const promise = async ({
   id,
+  allLocales,
   blockData,
   collection,
   context,
@@ -269,6 +271,26 @@ export const promise = async ({
     if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
       mergeLocaleActions.push(() => {
         const localeData: Record<string, unknown> = {}
+        const fieldValue = siblingData[field.name!]
+
+        if (
+          allLocales &&
+          fieldValue &&
+          typeof fieldValue === 'object' &&
+          !Array.isArray(fieldValue) &&
+          localization.localeCodes.some((locale) =>
+            Object.prototype.hasOwnProperty.call(fieldValue, locale),
+          )
+        ) {
+          for (const locale of localization.localeCodes) {
+            if (Object.prototype.hasOwnProperty.call(fieldValue, locale)) {
+              localeData[locale] = fieldValue[locale]
+            }
+          }
+
+          siblingData[field.name!] = localeData
+          return
+        }
 
         for (const locale of localization.localeCodes) {
           const fieldValue =
@@ -301,6 +323,7 @@ export const promise = async ({
           promises.push(
             traverseFields({
               id,
+              allLocales,
               blockData,
               collection,
               context,
@@ -375,6 +398,7 @@ export const promise = async ({
             promises.push(
               traverseFields({
                 id,
+                allLocales,
                 blockData: row,
                 collection,
                 context,
@@ -413,6 +437,7 @@ export const promise = async ({
     case 'row': {
       await traverseFields({
         id,
+        allLocales,
         blockData,
         collection,
         context,
@@ -486,6 +511,7 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        allLocales,
         blockData,
         collection,
         context,
@@ -616,6 +642,7 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        allLocales,
         blockData,
         collection,
         context,
@@ -652,6 +679,7 @@ export const promise = async ({
     case 'tabs': {
       await traverseFields({
         id,
+        allLocales,
         blockData,
         collection,
         context,

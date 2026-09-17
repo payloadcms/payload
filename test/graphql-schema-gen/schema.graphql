@@ -1,25 +1,47 @@
+enum ReadVersion {
+  published
+  latest
+  draft
+}
+
+enum CreateAction {
+  publish
+  saveDraft
+}
+
+enum UpdateAction {
+  publish
+  saveDraft
+  unpublish
+}
+
+enum RestoreAction {
+  publish
+  saveDraft
+}
+
 type Query {
-  Collection1(id: String!, draft: Boolean, trash: Boolean): Collection1
-  Collection1s(draft: Boolean, where: Collection1_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Collection1s
-  countCollection1s(draft: Boolean, trash: Boolean, where: Collection1_where): countCollection1s
+  Collection1(id: String!, version: ReadVersion, trash: Boolean): Collection1
+  Collection1s(version: ReadVersion, where: Collection1_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Collection1s
+  countCollection1s(trash: Boolean, where: Collection1_where): countCollection1s
   docAccessCollection1(id: String!): collection1DocAccess
-  Collection2(id: String!, draft: Boolean, trash: Boolean): Collection2
-  Collection2s(draft: Boolean, where: Collection2_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Collection2s
-  countCollection2s(draft: Boolean, trash: Boolean, where: Collection2_where): countCollection2s
+  Collection2(id: String!, version: ReadVersion, trash: Boolean): Collection2
+  Collection2s(version: ReadVersion, where: Collection2_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Collection2s
+  countCollection2s(trash: Boolean, where: Collection2_where): countCollection2s
   docAccessCollection2(id: String!): collection2DocAccess
-  User(id: String!, draft: Boolean, trash: Boolean): User
-  Users(draft: Boolean, where: User_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Users
-  countUsers(draft: Boolean, trash: Boolean, where: User_where): countUsers
+  User(id: String!, version: ReadVersion, trash: Boolean): User
+  Users(version: ReadVersion, where: User_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Users
+  countUsers(trash: Boolean, where: User_where): countUsers
   docAccessUser(id: String!): usersDocAccess
-  meUser: usersMe
+  meUser(version: ReadVersion): usersMe
   initializedUser: Boolean
-  PayloadLockedDocument(id: String!, draft: Boolean, trash: Boolean): PayloadLockedDocument
-  PayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
-  countPayloadLockedDocuments(draft: Boolean, trash: Boolean, where: PayloadLockedDocument_where): countPayloadLockedDocuments
+  PayloadLockedDocument(id: String!, version: ReadVersion, trash: Boolean): PayloadLockedDocument
+  PayloadLockedDocuments(version: ReadVersion, where: PayloadLockedDocument_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
+  countPayloadLockedDocuments(trash: Boolean, where: PayloadLockedDocument_where): countPayloadLockedDocuments
   docAccessPayloadLockedDocument(id: String!): payload_locked_documentsDocAccess
-  PayloadPreference(id: String!, draft: Boolean, trash: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadPreferences
-  countPayloadPreferences(draft: Boolean, trash: Boolean, where: PayloadPreference_where): countPayloadPreferences
+  PayloadPreference(id: String!, version: ReadVersion, trash: Boolean): PayloadPreference
+  PayloadPreferences(version: ReadVersion, where: PayloadPreference_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadPreferences
+  countPayloadPreferences(trash: Boolean, where: PayloadPreference_where): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
 }
@@ -3243,16 +3265,16 @@ type PayloadPreferencesDeleteAccess {
 }
 
 type Mutation {
-  createCollection1(data: mutationCollection1Input!, draft: Boolean): Collection1
-  updateCollection1(id: String!, autosave: Boolean, data: mutationCollection1UpdateInput!, draft: Boolean, trash: Boolean): Collection1
+  createCollection1(data: mutationCollection1Input!, action: CreateAction): Collection1
+  updateCollection1(id: String!, autosave: Boolean, data: mutationCollection1UpdateInput!, action: UpdateAction, trash: Boolean): Collection1
   deleteCollection1(id: String!, trash: Boolean): Collection1
-  duplicateCollection1(id: String!, data: mutationCollection1Input!): Collection1
-  createCollection2(data: mutationCollection2Input!, draft: Boolean): Collection2
-  updateCollection2(id: String!, autosave: Boolean, data: mutationCollection2UpdateInput!, draft: Boolean, trash: Boolean): Collection2
+  duplicateCollection1(id: String!, action: CreateAction, data: mutationCollection1Input!): Collection1
+  createCollection2(data: mutationCollection2Input!, action: CreateAction): Collection2
+  updateCollection2(id: String!, autosave: Boolean, data: mutationCollection2UpdateInput!, action: UpdateAction, trash: Boolean): Collection2
   deleteCollection2(id: String!, trash: Boolean): Collection2
-  duplicateCollection2(id: String!, data: mutationCollection2Input!): Collection2
-  createUser(data: mutationUserInput!, draft: Boolean): User
-  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean, trash: Boolean): User
+  duplicateCollection2(id: String!, action: CreateAction, data: mutationCollection2Input!): Collection2
+  createUser(data: mutationUserInput!, action: CreateAction): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, action: UpdateAction, trash: Boolean): User
   deleteUser(id: String!, trash: Boolean): User
   refreshTokenUser: usersRefreshedUser
   logoutUser(allSessions: Boolean): String
@@ -3261,14 +3283,14 @@ type Mutation {
   forgotPasswordUser(disableEmail: Boolean, expiration: Int, email: String!): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
-  createPayloadLockedDocument(data: mutationPayloadLockedDocumentInput!, draft: Boolean): PayloadLockedDocument
-  updatePayloadLockedDocument(id: String!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, draft: Boolean, trash: Boolean): PayloadLockedDocument
+  createPayloadLockedDocument(data: mutationPayloadLockedDocumentInput!, action: CreateAction): PayloadLockedDocument
+  updatePayloadLockedDocument(id: String!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, action: UpdateAction, trash: Boolean): PayloadLockedDocument
   deletePayloadLockedDocument(id: String!, trash: Boolean): PayloadLockedDocument
-  duplicatePayloadLockedDocument(id: String!, data: mutationPayloadLockedDocumentInput!): PayloadLockedDocument
-  createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean, trash: Boolean): PayloadPreference
+  duplicatePayloadLockedDocument(id: String!, action: CreateAction, data: mutationPayloadLockedDocumentInput!): PayloadLockedDocument
+  createPayloadPreference(data: mutationPayloadPreferenceInput!, action: CreateAction): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, action: UpdateAction, trash: Boolean): PayloadPreference
   deletePayloadPreference(id: String!, trash: Boolean): PayloadPreference
-  duplicatePayloadPreference(id: String!, data: mutationPayloadPreferenceInput!): PayloadPreference
+  duplicatePayloadPreference(id: String!, action: CreateAction, data: mutationPayloadPreferenceInput!): PayloadPreference
 }
 
 input mutationCollection1Input {

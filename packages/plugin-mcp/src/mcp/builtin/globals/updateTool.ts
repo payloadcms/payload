@@ -28,20 +28,11 @@ export const updateGlobalTool = defineGlobalTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const {
-    data,
-    depth,
-    draft,
-    fallbackLocale,
-    locale,
-    overrideLock,
-    populate,
-    publishAllLocales,
-    select,
-    unpublishAllLocales,
-  } = input
+  const { action, data, depth, fallbackLocale, locale, overrideLock, populate, select } = input
 
-  logger.info(`Updating global: ${slug}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`)
+  logger.info(
+    `Updating global: ${slug}, action: ${action ?? 'default'}${locale ? `, locale: ${locale}` : ''}`,
+  )
 
   try {
     const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, slug)
@@ -52,15 +43,13 @@ export const updateGlobalTool = defineGlobalTool({
 
     const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
       slug,
+      action,
       data: parsedData,
       depth,
-      draft,
       overrideAccess: authorizedMCP.overrideAccess,
       overrideLock,
       populate,
-      publishAllLocales,
       req,
-      unpublishAllLocales,
     }
 
     if (locale) {

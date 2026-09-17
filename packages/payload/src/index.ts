@@ -48,12 +48,14 @@ import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './global
 import type {
   ApplyDisableErrors,
   DraftTransformCollectionWithSelect,
+  DraftTransformGlobalWithSelect,
   JsonObject,
   SelectType,
   TransformCollectionWithSelect,
   TransformGlobalWithSelect,
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
+import type { ReadVersion, TypeWithVersion } from './versions/types.js'
 
 import { countLocal, type CountOptions } from './collections/operations/local/count.js'
 import {
@@ -134,7 +136,6 @@ import type { EncryptionKeyring } from './auth/crypto.js'
 import type { ClientConfig } from './config/client.js'
 import type { KVAdapter } from './kv/index.js'
 import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
-import type { TypeWithVersion } from './versions/types.js'
 
 import { buildEncryptionKeyring, decrypt, encrypt, reencrypt } from './auth/crypto.js'
 import { authLocal } from './auth/operations/local/auth.js'
@@ -591,19 +592,17 @@ export class BasePayload {
   find = async <
     TSlug extends CollectionSlug,
     TSelect extends SelectFromCollectionSlug<TSlug>,
-    TDraft extends boolean = false,
+    TVersion extends ReadVersion | undefined = undefined,
   >(
-    options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+    options: { version?: TVersion } & FindOptions<TSlug, TSelect>,
   ): Promise<
     PaginatedDocs<
-      TDraft extends true
-        ? PayloadTypes extends { strictDraftTypes: true }
-          ? DraftTransformCollectionWithSelect<TSlug, TSelect>
-          : TransformCollectionWithSelect<TSlug, TSelect>
+      TVersion extends 'draft' | 'latest'
+        ? DraftTransformCollectionWithSelect<TSlug, TSelect>
         : TransformCollectionWithSelect<TSlug, TSelect>
     >
   > => {
-    return findLocal<TSlug, TSelect, TDraft>(this, options)
+    return findLocal<TSlug, TSelect, TVersion>(this, options)
   }
 
   /**
@@ -615,10 +614,18 @@ export class BasePayload {
     TSlug extends CollectionSlug,
     TDisableErrors extends boolean,
     TSelect extends SelectFromCollectionSlug<TSlug>,
+    TVersion extends ReadVersion | undefined = undefined,
   >(
-    options: FindByIDOptions<TSlug, TDisableErrors, TSelect>,
-  ): Promise<ApplyDisableErrors<TransformCollectionWithSelect<TSlug, TSelect>, TDisableErrors>> => {
-    return findByIDLocal<TSlug, TDisableErrors, TSelect>(this, options)
+    options: { version?: TVersion } & FindByIDOptions<TSlug, TDisableErrors, TSelect>,
+  ): Promise<
+    ApplyDisableErrors<
+      TVersion extends 'draft' | 'latest'
+        ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+        : TransformCollectionWithSelect<TSlug, TSelect>,
+      TDisableErrors
+    >
+  > => {
+    return findByIDLocal<TSlug, TDisableErrors, TSelect, TVersion>(this, options)
   }
 
   /**
@@ -635,10 +642,18 @@ export class BasePayload {
     return findDistinctLocal(this, options)
   }
 
-  findGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
-    options: FindGlobalOptions<TSlug, TSelect>,
-  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-    return findOneGlobalLocal<TSlug, TSelect>(this, options)
+  findGlobal = async <
+    TSlug extends GlobalSlug,
+    TSelect extends SelectFromGlobalSlug<TSlug>,
+    TVersion extends ReadVersion | undefined = undefined,
+  >(
+    options: { version?: TVersion } & FindGlobalOptions<TSlug, TSelect>,
+  ): Promise<
+    TVersion extends 'draft' | 'latest'
+      ? DraftTransformGlobalWithSelect<TSlug, TSelect>
+      : TransformGlobalWithSelect<TSlug, TSelect>
+  > => {
+    return findOneGlobalLocal<TSlug, TSelect, TVersion>(this, options)
   }
 
   /**
@@ -1485,17 +1500,26 @@ export type {
   CollectionAccess,
   CollectionAdminOptions,
   CollectionConfig,
+  CollectionsWithoutDrafts,
+  CreateActionFromCollectionSlug,
+  CreateDataFromCollectionSlug,
   DataFromCollectionSlug,
+  DraftDataFromCollectionSlug,
   HookOperationType,
   IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
+  QueryDraftDataFromCollection,
+  QueryDraftDataFromCollectionSlug,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,
+  RestoreActionFromCollectionSlug,
   SanitizedCollectionConfig,
   SanitizedJoins,
   TypeWithID,
   TypeWithTimestamps,
+  UpdateActionFromCollectionSlug,
+  VersionFromCollectionSlug,
 } from './collections/config/types.js'
 
 export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
@@ -1892,7 +1916,12 @@ export type {
   GlobalAccess,
   GlobalAdminOptions,
   GlobalConfig,
+  GlobalsWithoutDrafts,
+  QueryDraftDataFromGlobalSlug,
+  RestoreActionFromGlobalSlug,
   SanitizedGlobalConfig,
+  UpdateActionFromGlobalSlug,
+  VersionFromGlobalSlug,
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
@@ -2095,6 +2124,13 @@ export { transformPointDataToPayload } from './utilities/transformPointDataToPay
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { strictObject } from './utilities/zod.js'
+export type {
+  CreateAction,
+  RestoreAction,
+  UpdateAction,
+  WriteAction,
+  WriteOperation,
+} from './versions/actions/types.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
@@ -2110,6 +2146,6 @@ export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
-export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
+export type { ReadVersion, SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
 export { z } from 'zod/mini'

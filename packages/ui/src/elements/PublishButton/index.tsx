@@ -6,6 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, hasAutosaveEnabled, hasLocalizeStatusEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -16,6 +17,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { requests } from '../../utilities/api.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import './index.css'
@@ -45,6 +47,7 @@ export function PublishButton({
   const {
     localization,
     routes: { api },
+    serverURL,
   } = config
 
   const { i18n, t } = useTranslation()
@@ -91,8 +94,8 @@ export function PublishButton({
 
     const params = qs.stringify(
       {
+        action: 'saveDraft',
         depth: 0,
-        draft: true,
         'fallback-locale': 'null',
         locale: localeCode,
       },
@@ -145,46 +148,108 @@ export function PublishButton({
       return
     }
 
-    const params = qs.stringify(
+    const activeLocaleParams = qs.stringify(
       {
+        action: 'publish',
         depth: 0,
         locale: localeCode,
-        ...(localizeStatusEnabled && { publishAllLocales: true }),
       },
       { addQueryPrefix: true },
     )
 
-    const action = formatAdminURL({
+    const activeLocaleAction = formatAdminURL({
       apiRoute: api,
       path: `${
         globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
-      }${params}` as `/${string}`,
+      }${activeLocaleParams}` as `/${string}`,
     })
 
     const result = await submit({
-      action,
+      action: activeLocaleAction,
+      disableSuccessStatus: localizeStatusEnabled,
       overrides: {
         _status: 'published',
       },
     })
 
-    if (result) {
-      setUnpublishedVersionCount(0)
-      setMostRecentVersionIsAutosaved(false)
-      setHasPublishedDoc(true)
+    if (!result || !result.res.ok || !localizeStatusEnabled) {
+      if (result && result.res.ok) {
+        setUnpublishedVersionCount(0)
+        setMostRecentVersionIsAutosaved(false)
+        setHasPublishedDoc(true)
+      }
+      return
     }
+
+    const responseDocument = result.json.doc || result.json.result
+    const responseDocumentID = (() => {
+      if (
+        !responseDocument ||
+        typeof responseDocument !== 'object' ||
+        !('id' in responseDocument)
+      ) {
+        return undefined
+      }
+
+      return typeof responseDocument.id === 'string' || typeof responseDocument.id === 'number'
+        ? responseDocument.id
+        : undefined
+    })()
+    const documentID = id || responseDocumentID
+
+    if (collectionSlug && !documentID) {
+      return
+    }
+
+    const allLocalesParams = qs.stringify(
+      {
+        action: 'publish',
+        depth: 0,
+        locale: 'all',
+      },
+      { addQueryPrefix: true },
+    )
+    const allLocalesURL = formatAdminURL({
+      apiRoute: api,
+      path: `${
+        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}/${documentID}`
+      }${allLocalesParams}` as `/${string}`,
+      serverURL,
+    })
+    const method = globalSlug ? 'post' : 'patch'
+    const allLocalesResponse = await requests[method](allLocalesURL, {
+      body: JSON.stringify({ _status: 'published' }),
+      headers: {
+        'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
+      },
+    })
+    const allLocalesJSON = await allLocalesResponse.json()
+
+    if (!allLocalesResponse.ok) {
+      toast.error(allLocalesJSON.errors?.[0]?.message || t('error:unknown'))
+      return
+    }
+
+    toast.success(allLocalesJSON.message || t('general:submissionSuccessful'))
+    setUnpublishedVersionCount(0)
+    setMostRecentVersionIsAutosaved(false)
+    setHasPublishedDoc(true)
   }, [
     localeCode,
     localizeStatusEnabled,
     api,
+    serverURL,
     collectionSlug,
     globalSlug,
     id,
+    i18n.language,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,
     uploadStatus,
     setMostRecentVersionIsAutosaved,
+    t,
   ])
 
   const publishLocale = useCallback(
@@ -195,6 +260,7 @@ export function PublishButton({
 
       const params = qs.stringify(
         {
+          action: 'publish',
           depth: 0,
           locale,
         },

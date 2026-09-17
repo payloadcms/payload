@@ -1,0 +1,17 @@
+import type { Payload } from 'payload'
+
+export async function updateAllLocales(payload: Payload) {
+  return fetch(`${payload.config.serverURL}${payload.config.routes.api}/graphql`, {
+    method: 'POST',
+    body: JSON.stringify({
+      query: `
+        mutation UpdateAllLocales {
+          updatePost(id: "1", action: publish, publishAllLocales: true, data: {}) { id }
+          updatePage(id: "2", locale: es, unpublishAllLocales: true, action: unpublish, data: {}) { id }
+          updateArticle(id: "3", action: publish, publishAllLocales: false, data: {}) { id }
+          updateProduct(id: "4", locale: de, action: publish, publishAllLocales: true) { id }
+        }
+      `,
+    }),
+  })
+}

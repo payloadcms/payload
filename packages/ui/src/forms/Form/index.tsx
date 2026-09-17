@@ -529,7 +529,7 @@ export const Form: React.FC<FormProps> = (props) => {
           errorToast(message)
         }
 
-        return { formState: contextRef.current.fields, res }
+        return { formState: contextRef.current.fields, json, res }
       } catch (err) {
         console.error('Error submitting form', err) // eslint-disable-line no-console
         setProcessing(false)

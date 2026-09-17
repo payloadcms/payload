@@ -42,6 +42,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
     test('should update more than 10 (default limit) breadcrumbs', async ({ payload }) => {
       // create a parent doc
       const parentDoc = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: '11 children',
@@ -97,6 +98,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
 
     test('should return breadcrumbs as an array of objects', async ({ payload }) => {
       const parentDoc = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'parent doc',
@@ -129,6 +131,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       payload,
     }) => {
       const parentDoc = await payload.create({
+        action: 'publish',
         collection: 'pages',
         data: {
           title: 'parent doc',
@@ -220,7 +223,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       const initialPublished = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
       })
       expect(initialPublished._status).toBe('published')
       expect(initialPublished.breadcrumbs).toHaveLength(2)
@@ -232,7 +235,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         data: {
           title: 'Version Child Draft Edit',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // Step 4: Re-publish the parent (triggers resaveChildren)
@@ -250,7 +253,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       const publishedChild = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
       })
 
       expect(publishedChild).toBeDefined()
@@ -262,7 +265,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       const draftChild = await payload.findByID({
         id: childDoc.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
       })
 
       expect(draftChild).toBeDefined()
@@ -311,7 +314,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       const updatedDraftChild = await payload.findByID({
         id: draftChild.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
       })
 
       expect(updatedDraftChild.breadcrumbs).toHaveLength(2)
@@ -349,7 +352,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
         data: {
           title: 'Breadcrumb Child Draft',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // Update parent slug
@@ -366,7 +369,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       const published = await payload.findByID({
         id: child.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
       })
 
       expect(published._status).toBe('published')
@@ -376,7 +379,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       const draft = await payload.findByID({
         id: child.id,
         collection: 'pages',
-        draft: true,
+        version: 'latest',
       })
 
       expect(draft._status).toBe('draft')
@@ -395,7 +398,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
           title: 'Scheduled Page',
           slug: 'scheduled-page',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toBe('draft')
@@ -425,7 +428,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: 'pages',
-        draft: false,
+        version: 'published',
       })
 
       expect(retrieved._status).toBe('published')

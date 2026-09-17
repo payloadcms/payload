@@ -34,12 +34,12 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - #### Pages
 
-  The `pages` collection is draft-enabled and has access control that restricts public users from viewing pages with a `_status` of `draft`. To fetch draft documents on your front-end, simply include the `draft=true` query param along with the `Authorization` header once you have entered [Preview Mode](#preview-mode).
+  The `pages` collection is draft-enabled and has access control that restricts public users from viewing pages with a `_status` of `draft`. To fetch draft documents on your front-end, include `version=latest` along with the `Authorization` header once you have entered [Preview Mode](#preview-mode).
 
   ```ts
   const preview = true // set this based on your own front-end environment (see `Preview Mode` below)
   const pageSlug = 'example-page' // same here
-  const searchParams = `?where[slug][equals]=${pageSlug}&depth=1${preview ? `&draft=true` : ''}`
+  const searchParams = `?where[slug][equals]=${pageSlug}&depth=1${preview ? `&version=latest` : ''}`
 
   // when previewing, send the payload token to bypass draft access control
   const pageReq = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages${searchParams}`, {

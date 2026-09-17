@@ -473,6 +473,11 @@ export default buildConfigWithDefaults({
         slug: globalWithDraftsSlug,
         fields: [
           {
+            name: 'email',
+            type: 'email',
+            localized: true,
+          },
+          {
             name: 'text',
             type: 'text',
             localized: true,

@@ -48,12 +48,12 @@ export const createDuplicateDocumentCommand = defineCLICommand({
 
       result = await payload.duplicate({
         id: parseDocumentID({ id: args.id, collectionSlug: collection, payload }),
+        action: args.action,
         collection,
         data: inputData
           ? prepareCollectionData({ collection, data: inputData, payload })
           : undefined,
         depth: args.depth,
-        draft: args.draft,
         fallbackLocale: args.fallbackLocale,
         locale: args.locale,
         overrideAccess: args.overrideAccess,

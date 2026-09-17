@@ -43,6 +43,7 @@ export const getSchedulePublishTask = ({
 
         await req.payload.update({
           id,
+          action: _status === 'published' ? 'publish' : 'unpublish',
           collection: input.doc.relationTo,
           data: {
             _status,
@@ -57,6 +58,7 @@ export const getSchedulePublishTask = ({
       if (input.global) {
         await req.payload.updateGlobal({
           slug: input.global,
+          action: _status === 'published' ? 'publish' : 'unpublish',
           data: {
             _status,
           },

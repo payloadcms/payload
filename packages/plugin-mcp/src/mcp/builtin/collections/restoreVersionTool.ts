@@ -22,16 +22,16 @@ export const restoreVersionTool = defineCollectionTool({
 }).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { id, depth, draft, fallbackLocale, locale, populate, select } = input
+  const { id, action, depth, fallbackLocale, locale, populate, select } = input
 
   logger.info(`Restoring version in collection: ${slug} with ID: ${id}`)
 
   try {
     const result = await payload.restoreVersion({
       id: String(id),
+      action,
       collection: slug,
       depth,
-      draft,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
       ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),

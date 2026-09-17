@@ -4,6 +4,7 @@ import type { DeepPartial } from 'ts-essentials'
 import type { PayloadSDK } from '../index.js'
 import type {
   DataFromGlobalSlug,
+  GlobalUpdateActionOptions,
   PopulateType,
   SelectFromGlobalSlug,
   TransformGlobalWithSelect,
@@ -22,10 +23,6 @@ export type UpdateGlobalOptions<
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Update documents to a draft.
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -46,7 +43,7 @@ export type UpdateGlobalOptions<
    * the Global slug to operate against.
    */
   slug: TSlug
-}
+} & GlobalUpdateActionOptions<TSlug>
 
 export async function updateGlobal<
   T extends PayloadTypesShape,

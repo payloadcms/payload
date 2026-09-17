@@ -9,6 +9,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
+import type { UpdateAction } from '../../versions/actions/types.js'
 import type {
   Collection,
   RequiredDataFromCollectionSlug,
@@ -25,33 +26,34 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled, hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
+  action?: UpdateAction
   autosave?: boolean
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
-  draft?: boolean
   id: number | string
   overrideAccess?: boolean
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
+  returningLocale?: string
   showHiddenFields?: boolean
   trash?: boolean
-  unpublishAllLocales?: boolean
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateByIDOperation = async <
@@ -78,16 +80,15 @@ export const updateByIDOperation = async <
 
     const {
       id,
+      action,
       autosave = false,
       collection: { config: collectionConfig },
       collection,
       depth,
-      draft: draftArg = false,
       overrideAccess,
       overrideLock,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales,
       req: {
         fallbackLocale,
         locale,
@@ -95,17 +96,37 @@ export const updateByIDOperation = async <
         payload,
       },
       req,
+      returningLocale,
       select: incomingSelect,
       showHiddenFields,
       trash = false,
-      unpublishAllLocales,
     } = args
 
     if (!id) {
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }
 
-    const { data } = args
+    let { data } = args
+
+    const resolvedAction = resolveAction({
+      action,
+      autosave,
+      draftsEnabled: hasDraftsEnabled(collectionConfig),
+      locale,
+      localizedStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
+      operation: 'update',
+      status:
+        data && typeof data === 'object' && data !== null && '_status' in data
+          ? data._status
+          : undefined,
+    })
+    const isSavingDraft = resolvedAction === 'saveDraft'
+
+    data = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data,
+      locale,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -185,6 +206,7 @@ export const updateByIDOperation = async <
       collection,
       config,
       data,
+      draft: isSavingDraft,
       operation: 'update',
       overwriteExistingFiles,
       req,
@@ -207,13 +229,18 @@ export const updateByIDOperation = async <
 
     let result = await updateDocument<TSlug, TSelect>({
       id,
+      action:
+        resolvedAction === 'unpublish' ||
+        resolvedAction === 'saveDraft' ||
+        resolvedAction === 'publish'
+          ? resolvedAction
+          : undefined,
       autosave,
       collectionConfig,
       config,
       data: deepCopyObjectSimple(newFileData),
       depth: depth!,
       docWithLocales,
-      draftArg,
       fallbackLocale: fallbackLocale!,
       filesToUpload,
       locale: locale!,
@@ -221,11 +248,10 @@ export const updateByIDOperation = async <
       overrideLock: overrideLock!,
       payload,
       populate,
-      publishAllLocales,
       req,
+      returningLocale,
       select: select!,
       showHiddenFields: showHiddenFields!,
-      unpublishAllLocales,
     })
 
     // /////////////////////////////////////

@@ -76,6 +76,7 @@ export const syncDocAsSearchIndex = async ({
         req,
         // Include trashed documents when the document being synced is trashed
         trash: isTrashDocument,
+        version: 'latest',
       })
     }
     dataToSave = await beforeSync({
@@ -213,11 +214,11 @@ export const syncDocAsSearchIndex = async ({
               } = await payload.find({
                 collection,
                 depth: 0,
-                draft: false,
                 limit: 1,
                 locale: syncLocale,
                 pagination: false,
                 req,
+                version: 'published',
                 where: {
                   and: [
                     {

@@ -136,6 +136,7 @@ export const generateReindexHandler =
           limit: batchSize,
           locale: defaultLocale,
           page: i + 1,
+          version: syncDrafts && draftsEnabled ? 'latest' : 'published',
           where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
           ...defaultLocalApiProps,
         })

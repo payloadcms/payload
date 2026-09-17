@@ -10,37 +10,25 @@ import { updateByIDOperation } from '../operations/updateByID.js'
 export const updateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const {
-    autosave,
-    depth,
-    draft,
-    overrideLock,
-    populate,
-    publishAllLocales,
-    select,
-    trash,
-    unpublishAllLocales,
-  } = parseParams(req.query)
+  const { action, autosave, depth, overrideLock, populate, select, trash } = parseParams(req.query)
 
   const doc = await updateByIDOperation({
     id,
+    action,
     autosave,
     collection,
     data: req.data!,
     depth,
-    draft,
     overrideLock: overrideLock ?? false,
     populate,
-    publishAllLocales,
     req,
     select,
     trash,
-    unpublishAllLocales,
   })
 
   let message = req.t('general:updatedSuccessfully')
 
-  if (draft) {
+  if (action === 'saveDraft') {
     message = req.t('version:draftSavedSuccessfully')
   }
   if (autosave) {

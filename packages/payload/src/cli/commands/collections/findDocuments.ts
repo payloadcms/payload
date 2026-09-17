@@ -26,20 +26,20 @@ export const createFindDocumentsCommand = defineCLICommand({
             id: parseDocumentID({ id: args.id, collectionSlug: collection, payload }),
             collection,
             ...commonOptions,
-            draft: args.draft,
             joins: args.joins,
             trash: args.trash,
+            version: args.version,
           })
         : await payload.find({
             collection,
             ...commonOptions,
-            draft: args.draft,
             joins: args.joins,
             limit: args.limit,
             page: args.page,
             pagination: args.pagination,
             sort: args.sort,
             trash: args.trash,
+            version: args.version,
             where: args.where,
           })
 

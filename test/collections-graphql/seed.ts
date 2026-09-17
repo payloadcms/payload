@@ -6,6 +6,7 @@ import { pointSlug, relationSlug, slug } from './shared.js'
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({
+    action: 'publish',
     collection: 'users',
     data: {
       email: devUser.email,
@@ -14,6 +15,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: 'custom-ids',
     data: {
       id: 1,
@@ -22,6 +24,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       relationToCustomID: 1,
@@ -30,6 +33,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       title: 'post1',
@@ -37,6 +41,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       title: 'post2',
@@ -44,6 +49,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       description: 'description',
@@ -52,6 +58,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       number: 1,
@@ -60,6 +67,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       number: 2,
@@ -68,6 +76,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const rel1 = await _payload.create({
+    action: 'publish',
     collection: relationSlug,
     data: {
       name: 'name',
@@ -75,6 +84,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   const rel2 = await _payload.create({
+    action: 'publish',
     collection: relationSlug,
     data: {
       name: 'name2',
@@ -82,6 +92,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       relationHasManyField: rel1.id,
@@ -90,6 +101,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       relationHasManyField: rel2.id,
@@ -98,6 +110,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       relationMultiRelationTo: {
@@ -109,6 +122,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: slug,
     data: {
       relationMultiRelationToHasMany: [
@@ -126,11 +140,13 @@ export const seed = async (_payload: Payload) => {
   })
 
   const payloadAPITest1 = await _payload.create({
+    action: 'publish',
     collection: 'payload-api-test-ones',
     data: {},
   })
 
   await _payload.create({
+    action: 'publish',
     collection: 'payload-api-test-twos',
     data: {
       relation: payloadAPITest1.id,
@@ -138,6 +154,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: pointSlug,
     data: {
       point: [10, 20],
@@ -145,6 +162,7 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    action: 'publish',
     collection: 'content-type',
     data: {},
   })

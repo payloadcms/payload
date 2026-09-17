@@ -68,10 +68,10 @@ export function UnpublishButton({
 
         const queryString = qs.stringify(
           {
+            action: 'unpublish',
             depth: 0,
             'fallback-locale': 'null',
-            locale: unpublishAll ? undefined : localeCode,
-            unpublishAllLocales: unpublishAll,
+            locale: unpublishAll ? 'all' : localeCode,
           },
           { addQueryPrefix: true },
         )

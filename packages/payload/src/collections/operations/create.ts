@@ -8,6 +8,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
+import type { CreateAction } from '../../versions/actions/types.js'
 import type {
   Collection,
   DataFromCollectionSlug,
@@ -30,6 +31,7 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { getRequestWithLocale } from '../../utilities/getRequestWithLocale.js'
 import {
   hasDraftsEnabled,
   hasDraftValidationEnabled,
@@ -40,23 +42,24 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { canonicalizeWriteStatus, resolveAction } from '../../versions/actions/resolveAction.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
+  action?: CreateAction
   autosave?: boolean
   collection: Collection
   data: RequiredDataFromCollectionSlug<TSlug>
   depth?: number
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
-  draft?: boolean
   duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  publishAllLocales?: boolean
   req: PayloadRequest
+  returningLocale?: string
   selectedLocales?: string[]
   showHiddenFields?: boolean
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
@@ -92,17 +95,16 @@ export const createOperation = async <
     })
 
     const {
+      action,
       autosave = false,
       collection: { config: collectionConfig },
       collection,
       depth,
       disableVerificationEmail,
-      draft = false,
       duplicateFromID,
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales: publishAllLocalesArg,
       req: {
         fallbackLocale,
         locale,
@@ -110,6 +112,7 @@ export const createOperation = async <
         payload: { config },
       },
       req,
+      returningLocale,
       select: incomingSelect,
       selectedLocales,
       showHiddenFields,
@@ -117,14 +120,39 @@ export const createOperation = async <
 
     let { data } = args
 
-    // For creates there is no existing doc — always publish all locales when not a draft.
-    const publishAllLocales =
-      !draft &&
-      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
-    const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
+    const draftsEnabled = hasDraftsEnabled(collectionConfig)
+    const resolvedAction = resolveAction({
+      action,
+      autosave,
+      draftsEnabled,
+      locale,
+      localizedStatusEnabled: hasLocalizeStatusEnabled(collectionConfig),
+      operation: duplicateFromID ? 'duplicate' : 'create',
+      status: data && typeof data === 'object' && '_status' in data ? data._status : undefined,
+    })
 
-    if (isSavingDraft) {
-      data._status = 'draft'
+    data = canonicalizeWriteStatus({
+      action: resolvedAction,
+      data,
+      locale,
+    })
+
+    const isSavingDraft = resolvedAction === 'saveDraft'
+    const isPublishingAllLocales = locale === 'all' && resolvedAction === 'publish'
+
+    const localization = config.localization
+    const operationLocale = locale === 'all' && localization ? localization.defaultLocale : locale!
+    const operationReq = getRequestWithLocale({ locale: operationLocale, req })
+    let publicationLocaleCodes = localization ? localization.localeCodes : []
+
+    if (isPublishingAllLocales && localization && localization.filterAvailableLocales) {
+      const filteredLocales = await localization.filterAvailableLocales({
+        locales: localization.locales,
+        req,
+      })
+      publicationLocaleCodes = filteredLocales.map((locale) =>
+        typeof locale === 'string' ? locale : locale.code,
+      )
     }
 
     let duplicatedFromDocWithLocales: JsonObject = {}
@@ -133,8 +161,11 @@ export const createOperation = async <
     if (duplicateFromID) {
       const duplicateResult = await getDuplicateDocumentData({
         id: duplicateFromID,
+        action:
+          resolvedAction === 'saveDraft' || resolvedAction === 'publish'
+            ? resolvedAction
+            : undefined,
         collectionConfig,
-        draftArg: isSavingDraft,
         overrideAccess,
         req,
         selectedLocales,
@@ -181,13 +212,13 @@ export const createOperation = async <
 
     data = await beforeValidate({
       collection: collectionConfig,
-      context: req.context,
+      context: operationReq.context,
       data,
       doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
       overrideAccess: overrideAccess!,
-      req,
+      req: operationReq,
     })
 
     // /////////////////////////////////////
@@ -199,11 +230,11 @@ export const createOperation = async <
         data =
           (await hook({
             collection: collectionConfig,
-            context: req.context,
+            context: operationReq.context,
             data,
             operation: 'create',
             originalDoc: duplicatedFromDoc,
-            req,
+            req: operationReq,
           })) || data
       }
     }
@@ -217,11 +248,11 @@ export const createOperation = async <
         data =
           (await hook({
             collection: collectionConfig,
-            context: req.context,
+            context: operationReq.context,
             data,
             operation: 'create',
             originalDoc: duplicatedFromDoc,
-            req,
+            req: operationReq,
           })) || data
       }
     }
@@ -231,15 +262,16 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     const dataWithLocales = await beforeChange<JsonObject>({
+      allLocales: locale === 'all',
       collection: collectionConfig,
-      context: req.context,
+      context: operationReq.context,
       data,
       doc: duplicatedFromDoc,
       docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
       overrideAccess,
-      req,
+      req: operationReq,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
@@ -253,30 +285,24 @@ export const createOperation = async <
     ) {
       const statusStr = dataWithLocales._status
       dataWithLocales._status = {}
-      for (const localeCode of config.localization.localeCodes) {
+      const statusLocaleCodes = isPublishingAllLocales
+        ? publicationLocaleCodes
+        : config.localization.localeCodes
+
+      for (const localeCode of statusLocaleCodes) {
         ;(dataWithLocales._status as Record<string, unknown>)[localeCode] = statusStr
       }
     }
 
-    if (config.localization && hasLocalizeStatusEnabled(collectionConfig) && publishAllLocales) {
-      let accessibleLocaleCodes = config.localization.localeCodes
+    if (config.localization && hasLocalizeStatusEnabled(collectionConfig) && locale === 'all') {
+      dataWithLocales._status = {}
 
-      if (config.localization.filterAvailableLocales) {
-        const filteredLocales = await config.localization.filterAvailableLocales({
-          locales: config.localization.locales,
-          req,
-        })
-        accessibleLocaleCodes = filteredLocales.map((locale) =>
-          typeof locale === 'string' ? locale : locale.code,
-        )
-      }
+      const statusLocaleCodes = isPublishingAllLocales
+        ? publicationLocaleCodes
+        : config.localization.localeCodes
 
-      if (typeof dataWithLocales._status !== 'object' || dataWithLocales._status === null) {
-        dataWithLocales._status = {}
-      }
-
-      for (const localeCode of accessibleLocaleCodes) {
-        dataWithLocales._status[localeCode] = 'published'
+      for (const localeCode of statusLocaleCodes) {
+        dataWithLocales._status[localeCode] = isPublishingAllLocales ? 'published' : 'draft'
       }
     }
 
@@ -357,6 +383,7 @@ export const createOperation = async <
         autosave,
         collection: collectionConfig,
         docWithLocales: resultWithLocales,
+        draft: isSavingDraft,
         operation: 'create',
         payload,
         req,
@@ -389,15 +416,15 @@ export const createOperation = async <
       context: req.context,
       depth: depth!,
       doc: resultWithLocales,
-      draft,
       fallbackLocale: fallbackLocale!,
       global: null,
-      locale: locale!,
+      locale: returningLocale || locale!,
       overrideAccess: overrideAccess!,
       populate,
       req,
       select,
       showHiddenFields: showHiddenFields!,
+      version: isSavingDraft ? 'latest' : 'published',
     })
 
     // /////////////////////////////////////
@@ -422,6 +449,7 @@ export const createOperation = async <
     // /////////////////////////////////////
 
     result = await afterChange({
+      action: resolvedAction,
       collection: collectionConfig,
       context: req.context,
       data,
@@ -440,6 +468,7 @@ export const createOperation = async <
       for (const hook of collectionConfig.hooks.afterChange) {
         result =
           (await hook({
+            action: resolvedAction as CreateAction | undefined,
             collection: collectionConfig,
             context: req.context,
             data,

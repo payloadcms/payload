@@ -1866,6 +1866,7 @@ export interface GlobalText {
  */
 export interface GlobalDraft {
   id: string;
+  email?: string | null;
   text?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -1901,6 +1902,7 @@ export interface GlobalTextSelect<T extends boolean = true> {
  * via the `definition` "global-drafts_select".
  */
 export interface GlobalDraftsSelect<T extends boolean = true> {
+  email?: T;
   text?: T;
   _status?: T;
   updatedAt?: T;

@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
+    action: 'publish',
     collection: 'pages',
     data: { title: 'Seeded page' },
   } as never)
@@ -9,6 +10,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   const fileData = Buffer.from('Seeded media')
 
   await payload.create({
+    action: 'publish',
     collection: 'media',
     data: { title: 'Seeded media' },
     file: {
@@ -20,6 +22,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   } as never)
 
   await payload.updateGlobal({
+    action: 'publish',
     slug: 'settings',
     data: { title: 'Seeded settings' },
   } as never)

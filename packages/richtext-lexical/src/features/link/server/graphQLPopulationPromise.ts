@@ -11,7 +11,6 @@ export const linkPopulationPromiseHOC = (
     context,
     currentDepth,
     depth,
-    draft,
     editorPopulationPromises,
     field,
     fieldPromises,
@@ -23,6 +22,7 @@ export const linkPopulationPromiseHOC = (
     populationPromises,
     req,
     showHiddenFields,
+    version,
   }) => {
     if (!props.fields?.length) {
       return
@@ -37,7 +37,6 @@ export const linkPopulationPromiseHOC = (
         currentDepth,
         data: node.fields,
         depth,
-        draft,
         editorPopulationPromises,
         fieldPromises,
         fields: props.fields,
@@ -49,6 +48,7 @@ export const linkPopulationPromiseHOC = (
         req,
         showHiddenFields,
         siblingDoc: node.fields,
+        version,
       })
     }
   }

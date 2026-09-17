@@ -16,14 +16,14 @@ import {
   overrideLockSchema,
   paginationSchema,
   populateSchema,
-  publishAllLocalesSchema,
+  restoreActionSchema,
   selectSchema,
   showHiddenFieldsSchema,
   slugSchema,
   sortSchema,
-  unpublishAllLocalesSchema,
+  updateActionSchema,
+  versionSchema,
   whereSchema,
-  writeDraftSchema,
 } from '../../utilities/sharedInputSchemas.js'
 import { strictObject } from '../../utilities/zod.js'
 
@@ -48,6 +48,7 @@ const findGlobalInputShape = {
   locale: localeSchema,
   populate: populateSchema,
   select: selectSchema,
+  version: versionSchema,
 }
 
 export const findGlobalInputSchema = strictObject(findGlobalInputShape)
@@ -108,6 +109,7 @@ export const getGlobalSchemaInputSchema = strictObject({
 const restoreGlobalVersionInputShape = {
   id: idSchema,
   slug: slugSchema,
+  action: restoreActionSchema,
   depth: depthSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
@@ -126,16 +128,14 @@ export const restoreGlobalVersionLocalInputSchema = strictObject({
 
 const updateGlobalInputShape = {
   slug: slugSchema,
+  action: updateActionSchema,
   data: dataSchema,
   depth: depthSchema,
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   overrideLock: overrideLockSchema,
   populate: populateSchema,
-  publishAllLocales: publishAllLocalesSchema,
   select: selectSchema,
-  unpublishAllLocales: unpublishAllLocalesSchema,
 }
 
 export const updateGlobalInputSchema = strictObject(updateGlobalInputShape)

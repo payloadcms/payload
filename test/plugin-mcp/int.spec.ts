@@ -14,9 +14,9 @@ import { it, itModern, test } from './helpers/mcpFixtures.js'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 type CreateOneDocumentInput = {
   slug: string
+  action?: 'publish' | 'saveDraft'
   data: Record<string, unknown>
   depth?: number
-  draft?: boolean
   fallbackLocale?: string
   file?: Record<string, unknown>
   locale?: string
@@ -33,6 +33,7 @@ const callCreateDocumentsWithOne = async (
 ) =>
   client.callTool({
     arguments: {
+      action: 'publish',
       returning: true,
       ...options,
       documents: [{ data, ...(file ? { file } : {}) }],
@@ -511,9 +512,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       expect(createDocuments.inputSchema.properties.documents.items.required).toContain('data')
       expect(createDocuments.inputSchema.properties.documents.items.properties.file).toBeDefined()
       expect(createDocuments.inputSchema.properties.depth).toBeDefined()
-      expect(createDocuments.inputSchema.properties.draft).toBeDefined()
+      expect(createDocuments.inputSchema.properties.action.enum).toEqual(['saveDraft', 'publish'])
+      expect(createDocuments.inputSchema.properties.draft).toBeUndefined()
       expect(createDocuments.inputSchema.properties.fallbackLocale).toBeDefined()
       expect(createDocuments.inputSchema.properties.locale).toBeDefined()
+      expect(createDocuments.inputSchema.properties.publishAllLocales).toBeUndefined()
+      expect(createDocuments.inputSchema.properties.unpublishAllLocales).toBeUndefined()
       expect(createDocuments.inputSchema.properties.returning).toMatchObject({
         default: false,
         description: 'Return complete documents instead of only their IDs.',
@@ -526,6 +530,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       expect(findDocuments.inputSchema.properties.id).toBeDefined()
       expect(findDocuments.inputSchema.properties.limit).toBeDefined()
       expect(findDocuments.inputSchema.properties.page).toBeDefined()
+      expect(findDocuments.inputSchema.properties.version.enum).toEqual([
+        'published',
+        'latest',
+        'draft',
+      ])
+      expect(findDocuments.inputSchema.properties.draft).toBeUndefined()
       expect(findDocuments.inputSchema.properties.select).toBeDefined()
       expect(findDocuments.inputSchema.properties.select.type).toBe('object')
       expect(findDocuments.inputSchema.properties.where).toBeDefined()
@@ -672,6 +682,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       expect(updateGlobalTool.inputSchema.properties.select.description).toContain(
         "Optional: define exactly which fields you'd like to return in the response",
       )
+      expect(updateGlobalTool.inputSchema.properties.locale).toBeDefined()
+      expect(updateGlobalTool.inputSchema.properties.publishAllLocales).toBeUndefined()
+      expect(updateGlobalTool.inputSchema.properties.unpublishAllLocales).toBeUndefined()
       expect(updateGlobalTool.inputSchema.properties.showHiddenFields).toBeUndefined()
 
       const findGlobalVersionsTool = toolsResponse.tools.find(
@@ -711,8 +724,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       expect(updateToolSchema.inputSchema.properties.select.description).toContain(
         "Optional: define exactly which fields you'd like to return in the response",
       )
-      expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeDefined()
-      expect(updateToolSchema.inputSchema.properties.publishAllLocales.type).toBe('boolean')
+      expect(updateToolSchema.inputSchema.properties.locale).toBeDefined()
+      expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeUndefined()
+      expect(updateToolSchema.inputSchema.properties.unpublishAllLocales).toBeUndefined()
       expect(updateToolSchema.inputSchema.properties.file).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.filePath).toBeUndefined()
       expect(updateToolSchema.inputSchema.properties.overwriteExistingFiles).toBeUndefined()
@@ -907,6 +921,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({
         arguments: {
+          action: 'publish',
           slug: 'posts',
           documents: [
             {
@@ -944,7 +959,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
         arguments: {
           slug: 'posts',
           documents: [{ data: { content: 'Incomplete draft' } }],
-          draft: true,
+          action: 'saveDraft',
           returning: true,
         },
         name: 'createDocuments',
@@ -975,6 +990,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       const callResponse = await client.callTool({
         arguments: {
           slug: 'posts',
+          action: 'publish',
           documents: [
             { data: { content: 'First bulk content', title: 'First bulk post' } },
             { data: { content: 'Missing the required title' } },
@@ -1251,7 +1267,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
             _status: 'published',
             title: 'Published through MCP',
           },
-          draft: false,
+          action: undefined,
           locale: 'en',
         },
       })
@@ -1263,7 +1279,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       const storedPost = await payload.findByID({
         id: createdPost.id,
         collection: 'posts',
-        draft: false,
+        version: 'published',
         locale: 'all',
       })
       expect(storedPost._status).toMatchObject({ en: 'published' })
@@ -1353,6 +1369,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
     it('should call findDocuments', async ({ mcp, getApiKey, payload }) => {
       const post = await payload.create({
         collection: 'posts',
+        action: 'publish',
         data: {
           content: 'Content for test post.',
           title: 'Test Post for Finding',
@@ -1388,6 +1405,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Content that should be omitted',
@@ -1531,6 +1549,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
     })
     it('should call collection version tools', async ({ mcp, getApiKey, payload }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Initial version content',
@@ -1625,6 +1644,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       userId,
     }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           author: userId,
@@ -1671,6 +1691,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       userId,
     }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           author: userId,
@@ -1709,6 +1730,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
     })
     it('should call updateDocument', async ({ mcp, getApiKey, payload }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Content for test post to update.',
@@ -1770,7 +1792,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
         await payload.delete({ id: page.id, collection: 'pages' })
       }
     })
-    it('should forward publishAllLocales when updating a document', async ({
+    it('should publish all locales when updating a document with locale all', async ({
       mcp,
       getApiKey,
       payload,
@@ -1780,7 +1802,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
         data: {
           title: 'English draft title',
         },
-        draft: true,
+        action: 'saveDraft',
         locale: 'en',
       })
       try {
@@ -1788,7 +1810,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
           id: post.id,
           collection: 'posts',
           data: { title: 'Spanish draft title' },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
         const apiKey = await getApiKey()
@@ -1799,32 +1821,30 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
             id: post.id,
             data: {
               _status: 'published',
-              title: 'Published English title',
             },
-            draft: false,
-            locale: 'en',
-            publishAllLocales: false,
+            action: 'publish',
+            locale: 'all',
           },
           name: 'updateDocument',
         })
         const publishedPost = await payload.findByID({
           id: post.id,
           collection: 'posts',
-          draft: false,
+          version: 'published',
           locale: 'all',
         })
-        const spanishDraft = await payload.findByID({
+        const latestSpanish = await payload.findByID({
           id: post.id,
           collection: 'posts',
-          draft: true,
+          version: 'latest',
           locale: 'es',
         })
         expect(callResponse).toBeDefined()
         expect(publishedPost._status).toMatchObject({ en: 'published' })
-        expect(publishedPost._status).not.toMatchObject({ es: 'published' })
-        expect(publishedPost._status).not.toMatchObject({ fr: 'published' })
-        expect(spanishDraft.title).toBe('Spanish draft title')
-        expect(spanishDraft._status).toBe('draft')
+        expect(publishedPost._status).toMatchObject({ es: 'published' })
+        expect(publishedPost._status).toMatchObject({ fr: 'published' })
+        expect(latestSpanish.title).toBe('Spanish draft title')
+        expect(latestSpanish._status).toBe('published')
       } finally {
         await payload.delete({ collection: 'posts', id: post.id })
       }
@@ -1835,6 +1855,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Content to be cleared',
@@ -1869,6 +1890,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       userId,
     }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           title: 'Union Type Relationship Test',
@@ -1902,6 +1924,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Original content',
@@ -1945,6 +1968,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
     })
     it('should call deleteDocuments', async ({ mcp, getApiKey, payload }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Content for test post to delete.',
@@ -1976,6 +2000,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       const matching = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Original content',
@@ -1983,6 +2008,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
         },
       })
       const excluded = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Original content',
@@ -2024,6 +2050,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Content for object where delete.',
@@ -2031,6 +2058,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
         },
       })
       await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Content for object where delete.',
@@ -2109,6 +2137,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const createdPost = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           location: [-118.2437, 34.0522],
@@ -2338,6 +2367,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: { title: 'Virtual Field Update Test' },
       })
@@ -2366,6 +2396,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'Content for test post.',
@@ -2910,6 +2941,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       const doc = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           title: 'Minified JSON Test',
@@ -2962,6 +2994,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
       payload,
     }) => {
       const doc = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           title: 'Minified JSON FindByID Test',
@@ -3039,6 +3072,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
     it('should update post to add translation', async ({ mcp, getApiKey, payload }) => {
       // First create a post in English
       const englishPost = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'English Content',
@@ -3069,6 +3103,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
     it('should find post in specific locale', async ({ mcp, getApiKey, payload }) => {
       // Create a post with English and Spanish translations
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'English Content',
@@ -3104,6 +3139,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
     it('should find post with locale "all"', async ({ mcp, getApiKey, payload }) => {
       // Create a post with multiple translations
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           content: 'English Content',
@@ -3156,6 +3192,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
     }) => {
       // Create a post only in English with explicit content
       const post = await payload.create({
+        action: 'publish',
         collection: 'posts',
         data: {
           title: 'English Only Title',
@@ -3170,6 +3207,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plu
           slug: 'posts',
           id: post.id,
           locale: 'fr',
+          version: 'latest',
         },
         name: 'findDocuments',
       })

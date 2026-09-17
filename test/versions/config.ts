@@ -92,6 +92,13 @@ export default buildConfigWithDefaults({
     indexSortableFields: true,
     localization: {
       defaultLocale: 'en',
+      filterAvailableLocales: ({ locales, req }) => {
+        if (req.context.filterAvailableLocalesToSpanish) {
+          return locales.filter((locale) => locale.code === 'es')
+        }
+
+        return locales
+      },
       locales: [
         {
           code: 'en',

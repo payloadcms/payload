@@ -24,7 +24,6 @@ export type FindGlobalVersionByIDOptions<
    * `null` will be returned instead, if the document on this ID was not found.
    */
   disableErrors?: TDisableErrors
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */

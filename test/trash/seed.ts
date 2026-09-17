@@ -28,6 +28,7 @@ export const seed = async (payload: Payload) => {
   })
 
   await payload.create({
+    action: 'publish',
     collection: 'pages',
     depth: 0,
     select: {},

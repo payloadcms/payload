@@ -913,6 +913,39 @@ describe('Localization', () => {
   })
 
   describe('localize status', () => {
+    test('should preserve non-default locale edits when publishing all locales', async () => {
+      const document = await payload.create({
+        action: 'publish',
+        collection: allFieldsLocalizedSlug,
+        data: {
+          text: 'English published value',
+        },
+        locale: defaultLocale,
+      })
+
+      await page.goto(urlAllFieldsLocalized.edit(String(document.id)))
+      await changeLocale(page, spanishLocale)
+      await page.locator('#field-text').fill('Spanish published value')
+      await saveDocAndAssert(page, '#action-save')
+
+      const published = await payload.find({
+        collection: allFieldsLocalizedSlug,
+        locale: 'all',
+        version: 'published',
+        where: { id: { equals: document.id } },
+      })
+      const publishedDocument = published.docs[0]
+
+      expect(publishedDocument.text).toMatchObject({
+        en: 'English published value',
+        es: 'Spanish published value',
+      })
+      expect(publishedDocument._status).toMatchObject({
+        en: 'published',
+        es: 'published',
+      })
+    })
+
     describe('versions list', () => {
       test('should show currently published doc in version list', async () => {
         await changeLocale(page, defaultLocale)

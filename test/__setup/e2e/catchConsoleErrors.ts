@@ -66,7 +66,10 @@ export function catchConsoleErrors(page: Page, options?: { ignoreCORS?: boolean 
         msg.text().includes("No 'Access-Control-Allow-Origin' header is present")
       ) &&
       // Conditionally ignore network-related errors
-      !msg.text().includes('Failed to load resource: net::ERR_FAILED')
+      !msg.text().includes('Failed to load resource: net::ERR_FAILED') &&
+      // Next.js forwards Node process warnings to the browser as console.error.
+      // Mongoose's findOneAndUpdate `new` deprecation is not an application error.
+      !msg.text().includes('[MONGOOSE] Warning:')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.

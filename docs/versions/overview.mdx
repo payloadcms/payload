@@ -197,6 +197,7 @@ const result = await payload.findVersionByID({
 const result = await payload.restoreVersion({
   collection: 'posts', // required
   id: '507f1f77bcf86cd799439013', // required
+  action: 'publish', // default; use 'saveDraft' to restore without publishing
   depth: 2,
   user: dummyUser,
   overrideAccess: false,

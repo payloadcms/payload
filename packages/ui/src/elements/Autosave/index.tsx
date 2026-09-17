@@ -110,9 +110,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           let entitySlug: string
           const params = qs.stringify(
             {
+              action: 'saveDraft',
               autosave: true,
               depth: 0,
-              draft: true,
               'fallback-locale': 'null',
               locale,
             },

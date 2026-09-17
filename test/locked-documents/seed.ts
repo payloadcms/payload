@@ -29,6 +29,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          action: 'publish',
           collection: pagesSlug,
           data: {
             text: 'example page',
@@ -36,6 +37,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          action: 'publish',
           collection: postsSlug,
           data: {
             text: 'example post',
@@ -51,6 +53,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
+          action: 'publish',
           collection: simpleWithVersionsSlug,
           data: {
             fieldA: 'Initial value A',

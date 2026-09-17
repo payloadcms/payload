@@ -815,7 +815,7 @@ const published = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
   context: { computeHierarchyPaths: true },
-  // draft: false (default)
+  // version: 'published' (default)
 })
 // published._h_slugPath: 'products/clothing' (uses published parent title)
 
@@ -823,7 +823,7 @@ const published = await payload.findByID({
 const draft = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
-  draft: true,
+  version: 'latest',
   context: { computeHierarchyPaths: true },
 })
 // draft._h_slugPath: 'products/apparel' (uses draft title if changed)
@@ -831,7 +831,7 @@ const draft = await payload.findByID({
 
 **How it works:**
 
-1. When computing paths, hierarchy fetches ancestors using the same `draft` context
+1. When computing paths, hierarchy fetches ancestors using the same `version` context
 2. If reading a draft, ancestor titles come from draft versions (if they exist)
 3. If reading published, ancestor titles come from published versions
 4. This ensures paths always reflect the correct version's hierarchy state
@@ -840,65 +840,21 @@ const draft = await payload.findByID({
 
 Unlike stored paths, computed paths don't require updating draft versions when a parent changes. Paths are always accurate because they're computed from the current version's tree structure.
 
-## Limitations
+## Publishing Parent Changes Across Locales
 
-### Locale 'all' Not Supported
-
-Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually.
-
-### Parent Changes When Publishing a Single Locale
-
-**Use with caution:** When publishing a single locale (`locale: '<code>'` with `_status: 'published'`), be aware that the `parent` field is **not localized**—tree structure must be consistent across locales.
-
-When you publish a draft with a changed parent for one locale:
-
-- The parent change applies to **all locales** (parent field is not localized)
-- Paths are computed per locale on next read
-- Each locale's paths will reflect the new parent combined with that locale's titles
-
-**Example:**
+Hierarchy supports `locale: 'all'`. The `parent` field is not localized, so the hierarchy `beforeChange` hook still validates parent changes, including circular references, regardless of the locale. To publish a parent change across all locales, use an explicit all-locale publication action:
 
 ```ts
-// Published document with localized titles
-{
-  parent: 'parent-1',
-  title: { en: 'Page', fr: 'Page' },
-  _h_slugPath: { en: 'products/page', fr: 'produits/page' }
-}
-
-// Draft changes parent
 await payload.update({
   collection: 'pages',
   id: 'doc-id',
-  data: { parent: 'parent-2' },
-  draft: true,
-})
-
-// Publish only French
-await payload.update({
-  collection: 'pages',
-  id: 'doc-id',
-  locale: 'fr',
-  data: { _status: 'published' },
-  draft: false,
-})
-// Result: parent changed to 'parent-2' for ALL locales
-// Paths computed on next read will reflect new parent for all locales
-```
-
-**Recommendation:** When moving documents in the hierarchy (changing parent), prefer `publishAllLocales` (default) to make the intent clear:
-
-```ts
-// ✅ Clear: publishes parent change for all locales
-await payload.update({
-  collection: 'pages',
-  id: 'doc-id',
+  locale: 'all',
+  action: 'publish',
   data: { parent: 'new-parent' },
-  // publishAllLocales is default
 })
 ```
 
-**Note:** Title changes work as expected when publishing a single locale, since paths are computed per locale.
+Hierarchy paths are virtual fields computed on read when requested, using the same `version` context as the document. When `locale: 'all'` is requested for a collection whose `useAsTitle` field is localized, both path fields are returned as per-locale maps. Publishing a single locale is appropriate only when intentionally publishing a subset; the non-localized parent change still applies to the document as a whole.
 
 ## Best Practices
 

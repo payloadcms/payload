@@ -7,11 +7,11 @@
 import * as z from 'zod/mini'
 
 import {
+  createActionSchema,
   dataSchema,
   defaultLimitSchema,
   defaultPageSchema,
   depthSchema,
-  draftSchema,
   fallbackLocaleSchema,
   fieldSchema,
   idSchema,
@@ -24,9 +24,9 @@ import {
   pageSchema,
   paginationSchema,
   populateSchema,
-  publishAllLocalesSchema,
   requireIDOrWhere,
   requireReturningForSelect,
+  restoreActionSchema,
   returningSchema,
   selectedLocalesSchema,
   selectSchema,
@@ -34,9 +34,9 @@ import {
   slugSchema,
   sortSchema,
   trashSchema,
-  unpublishAllLocalesSchema,
+  updateActionSchema,
+  versionSchema,
   whereSchema,
-  writeDraftSchema,
 } from '../../utilities/sharedInputSchemas.js'
 import { strictObject } from '../../utilities/zod.js'
 
@@ -75,6 +75,7 @@ const getCreateDocumentsInputShape = <TFile extends z.core.$ZodType>({
   file: TFile
 }) => ({
   slug: slugSchema,
+  action: createActionSchema,
   depth: depthSchema,
   documents: z
     .array(
@@ -84,11 +85,9 @@ const getCreateDocumentsInputShape = <TFile extends z.core.$ZodType>({
       }),
     )
     .check(z.minLength(1), z.describe('A JSON array of {"data": {...}, "file"?: ...} objects.')),
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
-  publishAllLocales: publishAllLocalesSchema,
   returning: returningSchema,
   select: selectSchema,
 })
@@ -142,9 +141,9 @@ export const deleteDocumentsLocalInputSchema = strictObject(
 const duplicateDocumentInputShape = {
   id: idSchema,
   slug: slugSchema,
+  action: createActionSchema,
   data: z.optional(dataSchema),
   depth: depthSchema,
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
@@ -187,7 +186,6 @@ const findDocumentsInputShape = {
   id: z.optional(idSchema),
   slug: slugSchema,
   depth: depthSchema,
-  draft: draftSchema,
   fallbackLocale: fallbackLocaleSchema,
   joins: joinsSchema,
   limit: defaultLimitSchema,
@@ -198,6 +196,7 @@ const findDocumentsInputShape = {
   select: selectSchema,
   sort: sortSchema,
   trash: trashSchema,
+  version: versionSchema,
   where: whereSchema,
 }
 
@@ -214,7 +213,6 @@ const findVersionByIDInputShape = {
   id: idSchema,
   slug: slugSchema,
   depth: depthSchema,
-  draft: draftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
@@ -234,7 +232,6 @@ export const findVersionByIDLocalInputSchema = strictObject({
 const findVersionsInputShape = {
   slug: slugSchema,
   depth: depthSchema,
-  draft: draftSchema,
   fallbackLocale: fallbackLocaleSchema,
   limit: defaultLimitSchema,
   locale: localeSchema,
@@ -263,8 +260,8 @@ export const getCollectionSchemaInputSchema = strictObject({
 const restoreVersionInputShape = {
   id: idSchema,
   slug: slugSchema,
+  action: restoreActionSchema,
   depth: depthSchema,
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   locale: localeSchema,
   populate: populateSchema,
@@ -283,21 +280,19 @@ export const restoreVersionLocalInputSchema = strictObject({
 const getUpdateDocumentInputShape = <TFile extends z.core.$ZodType>({ file }: { file: TFile }) => ({
   id: z.optional(idSchema),
   slug: slugSchema,
+  action: updateActionSchema,
   data: dataSchema,
   depth: depthSchema,
-  draft: writeDraftSchema,
   fallbackLocale: fallbackLocaleSchema,
   file: z.optional(file),
   limit: limitSchema,
   locale: localeSchema,
   overrideLock: overrideLockSchema,
   populate: populateSchema,
-  publishAllLocales: publishAllLocalesSchema,
   returning: returningSchema,
   select: selectSchema,
   sort: sortSchema,
   trash: trashSchema,
-  unpublishAllLocales: unpublishAllLocalesSchema,
   where: whereSchema,
 })
 

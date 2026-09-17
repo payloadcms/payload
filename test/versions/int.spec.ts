@@ -33,6 +33,7 @@ import {
   draftUnlimitedGlobalSlug,
   draftWithUploadCloudStorageCollectionSlug,
   draftWithUploadCollectionSlug,
+  errorOnUnpublishSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   nestedArraySelectCollectionSlug,
@@ -70,6 +71,216 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
     })
   })
 
+  test.describe('Version and action API surfaces', () => {
+    test('preserves the custom validation error when REST unpublishes all locales', async ({
+      payload,
+      restClient,
+    }) => {
+      const doc = await payload.create({
+        action: 'publish',
+        collection: errorOnUnpublishSlug,
+        data: { title: 'Published' },
+      })
+
+      const response = await restClient.PATCH(
+        `/${errorOnUnpublishSlug}/${doc.id}?action=unpublish&locale=all`,
+        { body: JSON.stringify({}) },
+      )
+      const json = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(json.errors?.[0]?.message).toBe('Custom error on unpublish')
+    })
+
+    test('allows an unsaved versioned global to be initialized through a latest read', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.findGlobal({
+          slug: draftGlobalSlug,
+        }),
+      ).rejects.toThrow('Not Found')
+
+      const global = await payload.findGlobal({
+        slug: draftGlobalSlug,
+        version: 'latest',
+      })
+
+      expect(global).toBeDefined()
+      expect(global._status).toBe('draft')
+    })
+
+    test('resolves local actions, _status, and read versions consistently', async ({ payload }) => {
+      const doc = await payload.create({
+        collection: draftCollectionSlug,
+        data: { title: 'Local action API' },
+      })
+
+      expect(doc._status).toBe('draft')
+      await expect(
+        payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+        }),
+      ).rejects.toThrow('Not Found')
+
+      const latestDraft = await payload.findByID({
+        id: doc.id,
+        collection: draftCollectionSlug,
+        version: 'latest',
+      })
+      expect(latestDraft.title).toBe('Local action API')
+
+      const published = await payload.update({
+        id: doc.id,
+        collection: draftCollectionSlug,
+        data: { description: 'Published', title: 'Local published' },
+      })
+      expect(published._status).toBe('published')
+
+      await payload.update({
+        id: doc.id,
+        collection: draftCollectionSlug,
+        data: { _status: 'draft', title: 'Status-selected draft' },
+      })
+
+      const actionWins = await payload.update({
+        id: doc.id,
+        action: 'publish',
+        collection: draftCollectionSlug,
+        data: { _status: 'draft', title: 'Action-selected publish' },
+      })
+      expect(actionWins._status).toBe('published')
+
+      await expect(
+        payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          version: 'draft',
+        }),
+      ).rejects.toThrow('Not Found')
+
+      await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+    })
+
+    test('accepts version and action through REST', async ({ payload, restClient }) => {
+      const doc = await payload.create({
+        action: 'publish',
+        collection: draftCollectionSlug,
+        data: { description: 'Published', title: 'REST published' },
+      })
+
+      await payload.update({
+        id: doc.id,
+        action: 'saveDraft',
+        collection: draftCollectionSlug,
+        data: { title: 'REST draft' },
+      })
+
+      const published = await restClient.GET(`/${draftCollectionSlug}/${doc.id}`)
+      expect((await published.json()).title).toBe('REST published')
+
+      const latest = await restClient.GET(`/${draftCollectionSlug}/${doc.id}?version=latest`)
+      expect((await latest.json()).title).toBe('REST draft')
+
+      const draft = await restClient.GET(`/${draftCollectionSlug}/${doc.id}?version=draft`)
+      expect((await draft.json()).title).toBe('REST draft')
+
+      const republished = await restClient.PATCH(
+        `/${draftCollectionSlug}/${doc.id}?action=publish`,
+        { body: JSON.stringify({ description: 'Published again' }) },
+      )
+      expect((await republished.json()).doc._status).toBe('published')
+
+      await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+    })
+
+    test('accepts version and action through GraphQL', async ({ payload, restClient }) => {
+      const create = `mutation {
+        createDraftPost(
+          action: saveDraft
+          data: { description: "Draft description", title: "GraphQL draft" }
+        ) {
+          id
+          title
+          _status
+        }
+      }`
+      const createResult = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: create }) })
+        .then((response) => response.json())
+      expect(createResult.errors).toBeUndefined()
+      const doc = createResult.data.createDraftPost
+
+      expect(doc._status).toBe('draft')
+
+      const read = `query {
+        published: DraftPost(id: ${formatGraphQLID({ payload }, doc.id)}) { title }
+        latest: DraftPost(id: ${formatGraphQLID({ payload }, doc.id)}, version: latest) { title }
+      }`
+      const readResult = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: read }) })
+        .then((response) => response.json())
+
+      expect(readResult.data.published).toBeNull()
+      expect(readResult.data.latest.title).toBe('GraphQL draft')
+
+      const publish = `mutation {
+        updateDraftPost(
+          id: ${formatGraphQLID({ payload }, doc.id)}
+          action: publish
+          data: { description: "Published", title: "GraphQL published" }
+        ) { _status }
+      }`
+      const publishResult = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: publish }) })
+        .then((response) => response.json())
+      expect(publishResult.data.updateDraftPost._status).toBe('published')
+
+      await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+    })
+
+    test('accepts version and action through the SDK', async ({ payload, sdk }) => {
+      const { token } = await sdk.login({
+        collection: 'users',
+        data: devUser,
+      })
+      const sdkAuth = { headers: { Authorization: `JWT ${token}` } }
+
+      const doc = await sdk.create(
+        {
+          action: 'saveDraft',
+          collection: draftCollectionSlug,
+          data: { title: 'SDK draft' },
+        },
+        sdkAuth,
+      )
+
+      await expect(
+        sdk.findByID({ id: doc.id, collection: draftCollectionSlug }, sdkAuth),
+      ).rejects.toMatchObject({ status: 404 })
+
+      const latest = await sdk.findByID(
+        { id: doc.id, collection: draftCollectionSlug, version: 'latest' },
+        sdkAuth,
+      )
+      expect(latest.title).toBe('SDK draft')
+
+      const published = await sdk.update(
+        {
+          id: doc.id,
+          action: 'publish',
+          collection: draftCollectionSlug,
+          data: { description: 'Published', title: 'SDK published' },
+        },
+        sdkAuth,
+      )
+      expect(published._status).toBe('published')
+
+      await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+    })
+  })
+
   test.describe('Collections - Local', () => {
     test.describe('Create', () => {
       test('should allow creating a draft with missing required field data', async ({
@@ -81,7 +292,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: undefined,
             title: 'i have a title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft.id).toBeDefined()
@@ -101,6 +312,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         // Update to create a version
         await payload.update({
+          action: 'saveDraft',
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
           data: {
@@ -121,6 +333,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const updatedPost = await payload.findByID({
           id: autosavePost.id,
           collection: autosaveCollectionSlug,
+          version: 'latest',
         })
         expect(updatedPost.title).toBe(updatedTitle)
         expect(updatedPost._status).toStrictEqual('draft')
@@ -255,7 +468,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       })
 
       // https://github.com/payloadcms/payload/issues/4827
-      test('should query drafts with relation', async ({ payload }) => {
+      test('should only query drafts with relation when requesting the latest version', async ({
+        payload,
+      }) => {
         const draftPost = await payload.create({
           collection: draftCollectionSlug,
           data: {
@@ -282,9 +497,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           },
         }
         const all = await payload.find(query)
-        const drafts = await payload.find({ ...query, draft: true })
+        const drafts = await payload.find({ ...query, version: 'latest' })
 
-        expect(all.docs).toHaveLength(1)
+        expect(all.docs).toHaveLength(0)
         expect(drafts.docs).toHaveLength(1)
       })
 
@@ -332,7 +547,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const fromNonVersionsTable = await payload.findByID({
           id: doc.id,
           collection: autosaveCollectionSlug,
-          draft: false,
+          version: 'published',
         })
 
         // createdAt from non-versions should be the same as version_createdAt in versions
@@ -360,7 +575,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             ],
           },
           depth: 0,
-          draft: true,
+          action: 'saveDraft',
         })
         expect(res.blocks[0]?.array[0]?.relationship).toEqual(post.id)
         const {
@@ -377,7 +592,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const post = await payload.create({
           collection: 'autosave-posts',
           data: { _status: 'draft', description: 'description', title: 'post' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -385,7 +600,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const getVersionsCount = async () => {
@@ -407,7 +622,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'post-updated-1' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(await getVersionsCount()).toBe(2)
@@ -417,7 +632,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: 'autosave-posts',
           data: { title: 'post-updated-2' },
-          draft: true,
+          action: 'saveDraft',
           where: { id: { equals: post.id } },
         })
         expect(await getVersionsCount()).toBe(2)
@@ -440,7 +655,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Autosaved Title' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Simulate page reload: read the latest draft version (what getLatestCollectionVersion does)
@@ -474,7 +689,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 1' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterFirst = await payload.countVersions({
@@ -488,7 +703,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 2' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterSecond = await payload.countVersions({
@@ -504,7 +719,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'Change 3' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const countAfterThird = await payload.countVersions({
@@ -532,13 +747,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const post = await payload.create({
           collection,
           data: { description: 'description' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const docWithLocales = await payload.findByID({
           collection,
           id: post.id,
           locale: 'all',
+          version: 'latest',
         })
 
         const result = await saveVersion({
@@ -563,7 +779,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             title: 'Original Title',
             _status: 'published',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const duplicatedDoc = await payload.create({
@@ -572,7 +788,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(duplicatedDoc._status).toBe('draft')
@@ -590,14 +806,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             title: 'Draft with partial data',
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // description is required but missing — duplicate should still succeed as a draft
         const duplicatedDoc = await payload.duplicate({
           id: originalDoc.id,
           collection: draftCollectionSlug,
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(duplicatedDoc._status).toBe('draft')
@@ -618,7 +834,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             title: 'REST draft partial',
             _status: 'draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Mimics the admin UI: POST to /:collection/:id/duplicate
@@ -664,13 +880,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       test('should query drafts with sort', async ({ payload }) => {
         const draftsAscending = await payload.find({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           sort: 'title',
         })
 
         const draftsDescending = await payload.find({
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
           sort: '-title',
         })
 
@@ -684,14 +900,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       test('should `findVersions` with sort', async ({ payload }) => {
         const draftsAscending = await payload.findVersions({
           collection: draftCollectionSlug,
-          draft: true,
           limit: 100,
           sort: 'createdAt',
         })
 
         const draftsDescending = await payload.findVersions({
           collection: draftCollectionSlug,
-          draft: true,
           limit: 100,
           sort: '-createdAt',
         })
@@ -765,7 +979,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'version description',
             title: 'version title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         let updatedPost = await payload.update({
@@ -781,7 +995,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             ],
             title: title2,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         updatedPost = await payload.update({
@@ -799,7 +1013,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             ],
             title: title2,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(updatedPost.title).toBe(title2)
@@ -810,7 +1024,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const draftFromUpdatedPost = await payload.findByID({
           id: versionedPost.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
         expect(draftFromUpdatedPost.title).toBe(title2)
         expect(draftFromUpdatedPost.blocksField).toHaveLength(1)
@@ -828,6 +1042,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const versionToRestore = versions.docs[versions.docs.length - 1]
         // restore to previous version
         const restoredVersion = await payload.restoreVersion({
+          action: 'saveDraft',
           id: versionToRestore!.id,
           collection: draftCollectionSlug,
         })
@@ -840,7 +1055,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const latestDraft = await payload.findByID({
           id: versionedPost.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(latestDraft).toMatchObject({
@@ -859,7 +1074,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const target = await payload.create({
           collection: draftCollectionSlug,
           data: { description: 'target', title: 'filter-options target' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const doc = await payload.create({
@@ -869,7 +1084,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             relationWithFilterOptions: [target.id],
             title: 'filter-options doc',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -879,7 +1094,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             relationWithFilterOptions: [target.id],
             title: 'filter-options doc updated',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versions = await payload.findVersions({
@@ -892,7 +1107,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         // Mimics the admin UI restore button: POST /:collection/versions/:id
         const response = await restClient.POST(
-          `/${draftCollectionSlug}/versions/${versionToRestore!.id}`,
+          `/${draftCollectionSlug}/versions/${versionToRestore!.id}?action=saveDraft`,
         )
         const body = await response.json()
 
@@ -903,7 +1118,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           id: doc.id,
           collection: draftCollectionSlug,
           depth: 0,
-          draft: true,
+          version: 'latest',
         })
         expect(restored.relationWithFilterOptions).toStrictEqual([target.id])
 
@@ -925,7 +1140,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'initial description',
             title: 'leak test',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const blockId = doc.blocksField?.[0]!.id
@@ -948,7 +1163,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             select: ['test1'],
             title: 'leak test',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Find versions and restore the original (oldest) version
@@ -967,7 +1182,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const restored = await payload.findByID({
           id: doc.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         // Top-level fields should NOT have leaked from the updated version
@@ -999,7 +1214,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'published',
           title: 'v2',
         },
-        draft: true,
       })
 
       // get the version id of the original draft
@@ -1023,7 +1237,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const latestDraft = await payload.findByID({
         id: originalPost.id,
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       // assert it has the original post content
@@ -1051,7 +1265,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           description: 'description v2',
           title: 'title v2 en',
         },
-        draft: true,
       })
 
       const versions = await payload.findVersions({
@@ -1137,7 +1350,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'draft',
             title: patchedTitle,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -1151,7 +1364,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'draft',
             title: spanishTitle,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -1163,7 +1376,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const draftPost = await payload.findByID({
           id: originalPublishedPost.id,
           collection: autosaveCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -1179,7 +1392,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'desc',
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -1190,7 +1403,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -1208,7 +1421,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'desc',
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -1220,7 +1433,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -1240,7 +1453,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             tag: firstDocTag,
             title: 'title 1',
           },
-          draft: false,
+          action: 'publish',
         })
         await payload.update({
           id: doc.id,
@@ -1250,7 +1463,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             tag: firstDocTag,
             title: 'title 2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const doc2 = await payload.create({
@@ -1260,7 +1473,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             tag: ['blog'],
             title: 'title 1-2',
           },
-          draft: false,
+          action: 'publish',
         })
 
         await payload.update({
@@ -1271,7 +1484,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             tag: ['blog'],
             title: 'title 2-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
         await payload.update({
           id: doc2.id,
@@ -1281,7 +1494,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             tag: ['blog'],
             title: 'title 3-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const lastDocVersion = await payload.findVersions({
@@ -1315,7 +1528,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             outer: [{ inner: [{ days: ['monday'] }] }],
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(updated.outer?.[0]?.inner?.[0]?.days).toEqual(['monday'])
@@ -1326,14 +1539,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
       })
 
-      test('should validate when publishing with the draft arg', async ({ payload }) => {
+      test('should validate when publishing from _status without an action', async ({
+        payload,
+      }) => {
         // no title (not valid for publishing)
         const doc = await payload.create({
           collection: draftCollectionSlug,
           data: {
             description: 'desc',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await expect(
@@ -1341,7 +1556,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             id: doc.id,
             collection: draftCollectionSlug,
             data: { _status: 'published' },
-            draft: true,
           }),
         ).rejects.toThrow(ValidationError)
 
@@ -1349,7 +1563,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const updateManyResult = await payload.update({
           collection: draftCollectionSlug,
           data: { _status: 'published' },
-          draft: true,
           where: {
             id: { equals: doc.id },
           },
@@ -1366,7 +1579,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const { id } = await payload.create({
           collection: autosaveCollectionSlug,
           data: { _status: 'draft', description: 'some-description', title: 'my-title' },
-          draft: true,
         })
 
         // Autosave the same draft, calls db.updateVersion
@@ -1377,7 +1589,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'new-title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versionsCount = await payload.countVersions({
@@ -1397,7 +1609,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'new-title-2',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versionsCountAfter = await payload.countVersions({
@@ -1447,7 +1659,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // bulk publish
@@ -1457,7 +1669,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             description: 'updated description',
           },
-          draft: true,
           where: {
             id: {
               in: [doc.id],
@@ -1546,7 +1757,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'A',
             title: 'A',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -1557,7 +1768,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'B',
             title: 'B',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await payload.update({
@@ -1568,13 +1779,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'C',
             title: 'C',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const mostRecentDraft = await payload.findByID({
           id: originalDraft.id,
           collection: draftCollectionSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(mostRecentDraft.title).toStrictEqual('C')
@@ -1621,13 +1832,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(initialVersions.docs[0].version._status).toBe('published')
 
         const unpublished = await payload.update({
+          action: 'unpublish',
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
-        expect(unpublished._status).toBe('draft')
+        expect(unpublished._status).toEqual({ de: 'draft', en: 'draft', es: 'draft' })
 
         const afterVersions = await payload.findVersions({
           collection: draftCollectionSlug,
@@ -1651,9 +1863,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const initialCount = initialVersions.docs.length
 
         await payload.updateGlobal({
+          action: 'unpublish',
           slug: draftGlobalSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
         const afterVersions = await payload.findGlobalVersions({
@@ -1677,22 +1890,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         await payload.update({
+          action: 'unpublish',
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
         const found = await payload.findByID({
           id: doc.id,
           collection: draftCollectionSlug,
-          draft: false,
+          version: 'latest',
         })
 
         expect(found._status).toBe('draft')
       })
 
-      test('should unpublish a collection document with localized required fields from a non-default locale', async ({
+      test('should unpublish all locales of a collection document with localized required fields', async ({
         payload,
       }) => {
         const doc = await payload.create({
@@ -1706,19 +1920,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         const unpublished = await payload.update({
+          action: 'unpublish',
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
-          locale: 'es',
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
-        expect(unpublished._status).toBe('draft')
+        expect(unpublished._status).toEqual({ de: 'draft', en: 'draft', es: 'draft' })
 
         await payload.delete({ collection: draftCollectionSlug, id: doc.id })
       })
 
-      test('should unpublish a global with localized required fields from a non-default locale', async ({
+      test('should unpublish all locales of a global with localized required fields', async ({
         payload,
       }) => {
         await payload.updateGlobal({
@@ -1728,14 +1942,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         const unpublished = await payload.updateGlobal({
+          action: 'unpublish',
           slug: draftGlobalSlug,
           data: { _status: 'draft' },
           fallbackLocale: false,
-          locale: 'es',
-          unpublishAllLocales: true,
+          locale: 'all',
         })
 
-        expect(unpublished._status).toBe('draft')
+        expect(unpublished._status).toEqual({ de: 'draft', en: 'draft', es: 'draft' })
 
         await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
       })
@@ -1750,15 +1964,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       })
 
       test('should allow creating drafts without required fields', async ({ payload }) => {
-        // This test validates that when draft: true is set, required fields become optional
+        // This test validates that when action: 'saveDraft' is set, required fields become optional
         // TypeScript should not complain about missing 'description' field even though it's required
         const draft = await payload.create({
           collection: draftCollectionSlug,
           data: {
             title: 'Draft without description',
-            // description is required but omitted - should work with draft: true
+            // description is required but omitted - should work with action: 'saveDraft'
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft.title).toBe('Draft without description')
@@ -1767,43 +1981,44 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(draft._status).toBe('draft')
       })
 
-      test('should require all required fields when draft is false', async ({ payload }) => {
-        // This validates that required fields are still enforced when draft is false
+      test("should require all required fields when action is 'publish'", async ({ payload }) => {
+        // Publishing still enforces required fields.
         await expect(
-          // @ts-expect-error - description is required when not creating a draft
+          // @ts-expect-error - description is required when publishing
           payload.create({
             collection: draftCollectionSlug,
             data: {
               title: 'Published without description',
             },
-            draft: false,
+            action: 'publish',
           }),
         ).rejects.toThrow(ValidationError)
       })
 
-      test('should require all required fields when draft is not specified', async ({
+      test('should default to saving a draft when action and _status are omitted', async ({
         payload,
       }) => {
-        // This validates that required fields are still enforced when draft option is omitted
-        await expect(
-          // @ts-expect-error - description is required when draft option is not specified
-          payload.create({
-            collection: draftCollectionSlug,
-            data: {
-              title: 'Post without description',
-            },
-          }),
-        ).rejects.toThrow(ValidationError)
+        const draft = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Post without description',
+          },
+        })
+
+        expect(draft._status).toBe('draft')
+        expect(draft.description).toBeFalsy()
       })
 
-      test('should allow all fields to be optional with draft: true', async ({ payload }) => {
+      test("should allow all fields to be optional with action: 'saveDraft'", async ({
+        payload,
+      }) => {
         // Test that even fields nested in groups can be omitted
         const draft = await payload.create({
           collection: draftCollectionSlug,
           data: {
             // Both title and description are required but omitted
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(draft._status).toBe('draft')
@@ -1936,7 +2151,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
                   id: doc.id,
                   collection: draftCollectionSlug,
                   data: {},
-                  draft: true,
+                  action: 'saveDraft',
                 })
                 .then(resolve)
                 .catch(resolve)
@@ -1978,7 +2193,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
           data: { title: 'original', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // Establish an existing autosave version so updateLatestVersion has something to update
@@ -1987,7 +2202,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'first autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const spy = vi
@@ -2000,7 +2215,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           autosave: true,
           collection: autosaveCollectionSlug,
           data: { title: 'second autosave' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         spy.mockRestore()
@@ -2027,7 +2242,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
           data: { title: 'original', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const updateVersionSpy = vi
@@ -2043,7 +2258,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             autosave: true,
             collection: autosaveCollectionSlug,
             data: { title: 'will fail' },
-            draft: true,
+            action: 'saveDraft',
           }),
         ).rejects.toThrow('database connection lost')
 
@@ -2107,7 +2322,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
         file: draftImageFile,
       })
 
@@ -2119,7 +2333,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2166,14 +2380,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'draft',
           alt: 'Draft with new file',
         },
-        draft: true,
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2210,14 +2423,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'draft',
           alt: 'Draft version',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       uploadedFilenames.push(draftDoc.filename)
@@ -2227,7 +2440,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         data: {
           _status: 'published',
         },
-        draft: true,
         where: {
           id: { equals: publishedDoc.id },
         },
@@ -2243,7 +2455,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       expect(republishedDoc.alt).toBe('Draft version')
     })
 
-    test('should create a draft when duplicating a published upload document with draft: true', async ({
+    test("should create a draft when duplicating a published upload document with action: 'saveDraft'", async ({
       payload,
     }) => {
       const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
@@ -2267,7 +2479,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         data: {
           alt: 'Duplicated draft',
         },
-        draft: true,
+        action: 'saveDraft',
         duplicateFromID: publishedDoc.id,
       })
 
@@ -2315,7 +2527,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
@@ -2327,7 +2539,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       expect(mainDoc._status).toBe('published')
@@ -2366,7 +2578,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'draft',
           alt: 'Updated in draft',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
@@ -2398,14 +2610,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'draft',
           alt: 'Draft version',
         },
-        draft: true,
+        action: 'saveDraft',
         file: draftImageFile,
       })
 
       const draftDoc = await payload.findByID({
         id: publishedDoc.id,
         collection: draftWithUploadCloudStorageCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       const republishedDoc = await payload.update({
@@ -2414,7 +2626,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         data: {
           _status: 'published',
         },
-        draft: true,
       })
 
       expect(republishedDoc._status).toBe('published')
@@ -2489,7 +2700,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         data: {
           title: updatedTitle1,
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       // This will be created in the `_draft-posts_versions` collection
@@ -2500,7 +2711,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         data: {
           title: updatedTitle2,
         },
-        draft: true,
+        action: 'saveDraft',
       })
     }
 
@@ -2515,17 +2726,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       })
     })
 
-    test('should allow querying a draft doc from main collection', async ({ payload }) => {
+    test('should query the newest draft when requesting the latest version', async ({
+      payload,
+    }) => {
       const findResults = await payload.find({
         collection: draftCollectionSlug,
+        version: 'latest',
         where: {
           title: {
-            equals: originalTitle,
+            equals: updatedTitle2,
           },
         },
       })
 
-      expect(findResults.docs[0].title).toStrictEqual(originalTitle)
+      expect(findResults.docs[0].title).toStrictEqual(updatedTitle2)
     })
 
     test('should return more than 10 `totalDocs`', async ({ payload }) => {
@@ -2573,7 +2787,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
     }) => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: updatedTitle1,
@@ -2589,7 +2803,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
     }) => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: updatedTitle2,
@@ -2634,12 +2848,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         where: query,
       })
 
-      expect(publishedFindResults.docs).toHaveLength(1)
-      expect(publishedFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeDefined()
+      expect(publishedFindResults.docs).toHaveLength(0)
+      expect(publishedFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeUndefined()
 
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: query,
       })
 
@@ -2652,7 +2866,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
     }) => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             equals: originalTitle,
@@ -2667,14 +2881,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       await createPostWithVersions({ payload }, { title: 'different document' })
       const allDocs = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
       })
 
       expect(allDocs.docs).toHaveLength(2)
 
       const byID = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           id: {
             equals: firstDraft.id,
@@ -2691,7 +2905,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       await createPostWithVersions({ payload }, { title: 'title document 2' })
       const allDocs = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           title: {
             like: 'title',
@@ -2703,7 +2917,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       const results = await payload.find({
         collection: draftCollectionSlug,
-        draft: true,
+        version: 'latest',
         where: {
           and: [
             {
@@ -3177,6 +3391,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
     test.beforeEach(async ({ payload }) => {
       const title2 = 'Here is an updated global title in EN'
       await payload.updateGlobal({
+        action: 'saveDraft',
         slug: autoSaveGlobalSlug,
         data: {
           title: 'Test Global',
@@ -3184,6 +3399,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       })
 
       await payload.updateGlobal({
+        action: 'saveDraft',
         slug: autoSaveGlobalSlug,
         data: {
           title: title2,
@@ -3201,6 +3417,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const title2 = 'Here is an updated global title in EN'
         const updatedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
+          version: 'latest',
         })
         expect(updatedGlobal.title).toBe(title2)
         expect(updatedGlobal._status).toStrictEqual('draft')
@@ -3214,7 +3431,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'draft',
             title: 'Draft',
           },
-          draft: true,
+          action: 'saveDraft',
         })
         expect(draftVersion.title).toStrictEqual('Draft')
         expect(draftVersion._status).toStrictEqual('draft')
@@ -3225,7 +3442,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             title: 'Published',
           },
-          draft: false,
+          action: 'publish',
         })
         expect(publishedVersion.title).toStrictEqual('Published')
         expect(publishedVersion._status).toStrictEqual('published')
@@ -3235,17 +3452,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         payload,
       }) => {
         const doc = await payload.updateGlobal({
+          action: 'publish',
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
-          publishAllLocales: true,
         })
 
         await wait(10)
 
         const upd = await payload.updateGlobal({
+          action: 'publish',
           slug: autoSaveGlobalSlug,
           data: { title: 'asd2' },
-          publishAllLocales: true,
         })
 
         expect(upd.createdAt).toBe(doc.createdAt)
@@ -3268,7 +3485,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const fromNonVersionsTable = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: false,
+          version: 'published',
         })
 
         // createdAt from non-versions should be the same as version_createdAt in versions
@@ -3398,7 +3615,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -3408,7 +3625,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -3425,7 +3642,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'title',
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await wait(10)
@@ -3435,7 +3652,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'updated title',
           },
-          draft: true,
+          action: 'saveDraft',
           autosave: true,
         })
 
@@ -3451,11 +3668,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const title2 = 'Another updated title in EN'
 
         const updatedGlobal = await payload.updateGlobal({
+          action: 'publish',
           slug: autoSaveGlobalSlug,
           data: {
             title: title2,
           },
-          publishAllLocales: true,
         })
 
         expect(updatedGlobal.title).toBe(title2)
@@ -3463,7 +3680,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         // Make sure it was updated correctly
         const foundUpdatedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
         expect(foundUpdatedGlobal.title).toBe(title2)
 
@@ -3480,7 +3697,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const restoredGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
 
         expect(restoredGlobal.title).toBe(restore.version.title.en)
@@ -3492,18 +3709,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const originalTitle = 'Here is a published global'
 
         await payload.updateGlobal({
+          action: 'publish',
           slug: autoSaveGlobalSlug,
           data: {
             _status: 'published',
             description: 'kjnjyhbbdsfseankuhsjsfghb',
             title: originalTitle,
           },
-          publishAllLocales: true,
         })
 
         const publishedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
         })
 
         const updatedTitle2 = 'Here is a draft global with a patched title'
@@ -3514,7 +3731,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'draft',
             title: updatedTitle2,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -3524,13 +3741,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'draft',
             title: updatedTitle2,
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
         const updatedGlobal = await payload.findGlobal({
           slug: autoSaveGlobalSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -3548,7 +3765,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'draft',
             title: originalTitle,
           },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const updatedTitle2 = 'Now try to publish'
@@ -3571,7 +3788,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
     async function createAndSetVersionID({ restClient }: { restClient: NextRESTClient }) {
       const update = `mutation {
-        updateAutosaveGlobal(draft: true, data: {
+        updateAutosaveGlobal(action: saveDraft, data: {
           title: "${globalGraphQLOriginalTitle}"
         }) {
           _status
@@ -3660,7 +3877,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         // Update it
         const update = `mutation {
-          updateAutosaveGlobal(draft: true, data: {
+          updateAutosaveGlobal(action: saveDraft, data: {
             title: "${updatedTitle}"
           }) {
             title
@@ -3704,7 +3921,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3729,7 +3946,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: draftCollectionSlug,
-        draft: false,
+        version: 'published',
       })
 
       expect(retrieved._status).toStrictEqual('published')
@@ -3748,7 +3965,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           restrictedToUpdate: true,
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3776,6 +3993,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: draftCollectionSlug,
+        version: 'latest',
       })
 
       expect(retrieved._status).toStrictEqual('draft')
@@ -3819,6 +4037,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const retrieved = await payload.findByID({
         id: published.id,
         collection: draftCollectionSlug,
+        version: 'latest',
       })
 
       expect(retrieved._status).toStrictEqual('draft')
@@ -3836,7 +4055,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3886,7 +4105,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3934,7 +4153,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'draft',
           title: 'i will publish',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -3955,6 +4174,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       const retrieved = await payload.findGlobal({
         slug: draftGlobalSlug,
+        version: 'latest',
       })
 
       expect(retrieved._status).toStrictEqual('published')
@@ -3989,6 +4209,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       const retrieved = await payload.findGlobal({
         slug: draftGlobalSlug,
+        version: 'latest',
       })
 
       expect(retrieved._status).toStrictEqual('draft')
@@ -4003,7 +4224,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'draft',
           title: 'draft only',
         },
-        draft: true,
+        action: 'saveDraft',
       })
 
       expect(draft._status).toStrictEqual('draft')
@@ -4017,6 +4238,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         slug: draftGlobalSlug,
         overrideAccess: false,
         req,
+        version: 'latest',
       })
 
       // Should return empty object, not {_status: 'draft'}
@@ -4229,6 +4451,233 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
       })
 
+      test('should preserve scalar localized data in the default locale when creating and publishing all locales', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          data: {
+            text: 'English published',
+          },
+          locale: 'all',
+        })
+
+        expect(created.text.en).toBe('English published')
+        expect(created._status).toEqual({ de: 'published', en: 'published', es: 'published' })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text.en).toBe('English published')
+        expect(persisted._status).toEqual({
+          de: 'published',
+          en: 'published',
+          es: 'published',
+        })
+      })
+
+      test('should preserve explicit localized data maps when creating and publishing all locales', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          data: {
+            // @ts-expect-error locale all accepts an explicit map of localized values at runtime
+            text: { en: 'English published', es: 'Spanish published' },
+          },
+          locale: 'all',
+        })
+
+        expect(created.text).toMatchObject({
+          en: 'English published',
+          es: 'Spanish published',
+        })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text).toMatchObject({
+          en: 'English published',
+          es: 'Spanish published',
+        })
+      })
+
+      test('should leave omitted locales empty when creating from a partial localized data map', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          data: {
+            // @ts-expect-error locale all accepts an explicit map of localized values at runtime
+            text: { es: 'Spanish only' },
+          },
+          locale: 'all',
+        })
+
+        expect(created.text).toMatchObject({
+          en: null,
+          es: 'Spanish only',
+        })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text).toMatchObject({
+          en: null,
+          es: 'Spanish only',
+        })
+      })
+
+      test('should preserve localized field hook transformations when creating from a locale map', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          context: { uppercaseLocalizedText: true },
+          data: {
+            // @ts-expect-error locale all accepts an explicit map of localized values at runtime
+            text: { en: 'English transformed', es: 'Spanish transformed' },
+          },
+          locale: 'all',
+        })
+
+        expect(created.text).toMatchObject({
+          en: 'ENGLISH TRANSFORMED',
+          es: 'SPANISH TRANSFORMED',
+        })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text).toMatchObject({
+          en: 'ENGLISH TRANSFORMED',
+          es: 'SPANISH TRANSFORMED',
+        })
+      })
+
+      test('should preserve scalar field hook behavior for a single-locale create', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          context: { uppercaseLocalizedText: true },
+          data: { text: 'Spanish transformed' },
+          locale: 'es',
+        })
+
+        expect(created.text).toBe('SPANISH TRANSFORMED')
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+        })
+
+        expect(persisted.text).toMatchObject({ es: 'SPANISH TRANSFORMED' })
+      })
+
+      test('should only publish filtered collection locales on create', async ({ payload }) => {
+        const created = await payload.create({
+          action: 'publish',
+          collection,
+          context: { filterAvailableLocalesToSpanish: true },
+          data: { text: 'English content' },
+          locale: 'all',
+          overrideAccess: false,
+          user,
+        })
+
+        expect(created._status).toMatchObject({ en: 'draft', es: 'published' })
+
+        const persisted = await payload.findByID({
+          id: created.id,
+          collection,
+          locale: 'all',
+          version: 'latest',
+        })
+
+        expect(persisted._status).toMatchObject({ en: 'draft', es: 'published' })
+      })
+
+      test('should only publish collection locales allowed by filterAvailableLocales', async ({
+        payload,
+      }) => {
+        const draft = await payload.create({
+          action: 'saveDraft',
+          collection,
+          data: {},
+          locale: 'all',
+        })
+
+        await payload.update({
+          id: draft.id,
+          action: 'publish',
+          collection,
+          context: { filterAvailableLocalesToSpanish: true },
+          data: {},
+          locale: 'all',
+          overrideAccess: false,
+          user,
+        })
+
+        const latest = await payload.findByID({
+          id: draft.id,
+          collection,
+          locale: 'all',
+          version: 'latest',
+        })
+
+        expect(latest._status).toMatchObject({ en: 'draft', es: 'published' })
+      })
+
+      test('should only unpublish collection locales allowed by filterAvailableLocales', async ({
+        payload,
+      }) => {
+        const published = await payload.create({
+          action: 'publish',
+          collection,
+          data: {},
+          locale: 'all',
+        })
+
+        await payload.update({
+          id: published.id,
+          action: 'unpublish',
+          collection,
+          context: { filterAvailableLocalesToSpanish: true },
+          data: {},
+          locale: 'all',
+          overrideAccess: false,
+          user,
+        })
+
+        const latest = await payload.findByID({
+          id: published.id,
+          collection,
+          locale: 'all',
+          version: 'latest',
+        })
+
+        expect(latest._status).toMatchObject({ en: 'published', es: 'draft' })
+      })
+
       test('should save correct doc data when publishing individual locale', async ({
         payload,
       }) => {
@@ -4238,7 +4687,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4250,7 +4699,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'My English description',
             text: 'English draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4261,7 +4710,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             text: 'German draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'de',
         })
 
@@ -4273,7 +4722,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             text: 'English published 1',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4294,7 +4743,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const docWithSpanishDraft1 = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4311,7 +4760,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             text: 'English published 2',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4336,14 +4785,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'draft',
             text: 'German draft 1',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'de',
         })
 
         const docWithGermanDraft = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4362,7 +4811,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             text: 'German published 1',
           },
-          draft: false,
+          action: 'publish',
           locale: 'de',
         })
 
@@ -4373,7 +4822,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             text: 'English published 3',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4391,7 +4840,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const finalDraft = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4410,7 +4859,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const finalPublished = await payload.findByID({
           id: draft1.id,
           collection: localizedCollectionSlug,
-          draft: true,
+          version: 'latest',
           locale: 'all',
         })
 
@@ -4425,7 +4874,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4436,7 +4885,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4457,7 +4906,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4468,7 +4917,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4486,8 +4935,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             _status: 'published',
           },
-          draft: false,
-          publishAllLocales: true,
+          action: 'publish',
+          locale: 'all',
         })
 
         const publishedAll = await payload.findByID({
@@ -4506,7 +4955,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4517,7 +4966,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             text: 'German publish',
           },
-          draft: false,
+          action: 'publish',
           locale: 'de',
         })
 
@@ -4538,7 +4987,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             text: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4549,7 +4998,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             text: 'English publish',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4582,7 +5031,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             text: 'English draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4599,7 +5048,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             ],
             text: 'English with blocks',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'en',
         })
 
@@ -4617,7 +5066,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             ],
             text: 'English published with blocks',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4646,6 +5095,89 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           payload,
         })
       })
+
+      test('should only publish global locales allowed by filterAvailableLocales', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: global,
+          action: 'saveDraft',
+          data: {},
+          locale: 'all',
+        })
+
+        await payload.updateGlobal({
+          slug: global,
+          action: 'publish',
+          context: { filterAvailableLocalesToSpanish: true },
+          data: {},
+          locale: 'all',
+          overrideAccess: false,
+          user,
+        })
+
+        const latest = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+          version: 'latest',
+        })
+
+        expect(latest._status).toMatchObject({ en: 'draft', es: 'published' })
+      })
+
+      test('should only publish filtered global locales on the first write', async ({
+        payload,
+      }) => {
+        const published = await payload.updateGlobal({
+          slug: global,
+          action: 'publish',
+          context: { filterAvailableLocalesToSpanish: true },
+          data: { title: 'English content' },
+          locale: 'all',
+          overrideAccess: false,
+          user,
+        })
+
+        expect(published._status).toMatchObject({ en: 'draft', es: 'published' })
+
+        const persisted = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+          version: 'latest',
+        })
+
+        expect(persisted._status).toMatchObject({ en: 'draft', es: 'published' })
+      })
+
+      test('should only unpublish global locales allowed by filterAvailableLocales', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: global,
+          action: 'publish',
+          data: {},
+          locale: 'all',
+        })
+
+        await payload.updateGlobal({
+          slug: global,
+          action: 'unpublish',
+          context: { filterAvailableLocalesToSpanish: true },
+          data: {},
+          locale: 'all',
+          overrideAccess: false,
+          user,
+        })
+
+        const latest = await payload.findGlobal({
+          slug: global,
+          locale: 'all',
+          version: 'latest',
+        })
+
+        expect(latest._status).toMatchObject({ en: 'published', es: 'draft' })
+      })
+
       test('should save correct global data when publishing individual locale', async ({
         payload,
       }) => {
@@ -4666,7 +5198,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             content: 'Spanish draft content',
             title: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4698,7 +5230,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: 'Another spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4709,7 +5241,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             title: 'Eng published',
           },
-          draft: false,
+          action: 'publish',
           locale: 'en',
         })
 
@@ -4733,7 +5265,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             content: 'Spanish draft content',
             title: 'Spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4756,11 +5288,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(publishedOnlyEN.title.en).toStrictEqual('Eng published')
 
         await payload.updateGlobal({
+          action: 'publish',
           slug: global,
           data: {
             _status: 'published',
           },
-          publishAllLocales: true,
+          locale: 'all',
         })
 
         const publishedAll = await payload.findGlobal({
@@ -4780,7 +5313,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             content: 'Test span draft content',
             title: 'Test span draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4812,7 +5345,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             content: 'New spanish draft content',
             title: 'New spanish draft',
           },
-          draft: true,
+          action: 'saveDraft',
           locale: 'es',
         })
 
@@ -4823,7 +5356,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             title: 'New eng',
           },
-          draft: false,
+          action: 'publish',
         })
 
         const allVersions = await payload.findGlobalVersions({

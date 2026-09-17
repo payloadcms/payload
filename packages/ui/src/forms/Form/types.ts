@@ -122,7 +122,7 @@ export type Submit = <T extends Response, C extends Record<string, unknown>>(
  *
  * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own risk.
  */
-{ formState?: FormState; res: T } | void>
+{ formState?: FormState; json: Record<string, unknown>; res: T } | void>
 
 export type ValidateForm = () => Promise<boolean>
 

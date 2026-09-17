@@ -72,7 +72,7 @@ export const Restore: React.FC<Props> = ({
     let redirectURL: string
 
     if (collectionConfig) {
-      fetchURL = `${fetchURL}/${collectionConfig.slug}/versions/${versionID}?draft=${draft}`
+      fetchURL = `${fetchURL}/${collectionConfig.slug}/versions/${versionID}?action=${draft ? 'saveDraft' : 'publish'}`
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionConfig.slug}/${originalDocID}`,
@@ -80,7 +80,7 @@ export const Restore: React.FC<Props> = ({
     }
 
     if (globalConfig) {
-      fetchURL = `${fetchURL}/globals/${globalConfig.slug}/versions/${versionID}?draft=${draft}`
+      fetchURL = `${fetchURL}/globals/${globalConfig.slug}/versions/${versionID}?action=${draft ? 'saveDraft' : 'publish'}`
       redirectURL = formatAdminURL({
         adminRoute,
         path: `/globals/${globalConfig.slug}`,

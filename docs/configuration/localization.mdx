@@ -197,32 +197,34 @@ await payload.update({
 })
 ```
 
-To publish or unpublish every locale at once, use `publishAllLocales` or `unpublishAllLocales`. These set the status for all locales the user has access to, regardless of the active locale:
+To publish or unpublish every locale at once, use `locale: 'all'` with an explicit publication `action`. These set the status for all locales the user has access to, regardless of the active locale. An omitted action (or `_status: 'published'` in `data`) cannot be used for an all-locale publication transition:
 
 ```ts
 // Publishes every locale
 await payload.update({
   collection: 'posts',
   id,
-  publishAllLocales: true,
-  data: { _status: 'published' },
+  locale: 'all',
+  action: 'publish',
+  data: {},
 })
 
 // Unpublishes every locale
 await payload.update({
   collection: 'posts',
   id,
-  unpublishAllLocales: true,
-  data: { _status: 'draft' },
+  locale: 'all',
+  action: 'unpublish',
 })
 ```
 
-Passing `locale: 'all'` together with `_status: 'published'` also publishes every locale, and is equivalent to `publishAllLocales: true`.
+`_status` remains a valid property on returned documents and in write data. If `action` is omitted, a recognized `_status` is used as the write intent; an explicit `action` always wins. This means `_status: 'draft'` can still infer `saveDraft`, while `_status: 'published'` with `locale: 'all'` is rejected because publishing all locales must be explicit.
 
 <Banner type="info">
   When the `_status` field is **not** localized (localization disabled, or no
   localized fields), publishing and unpublishing always apply to the whole
-  document, and `publishAllLocales` / `unpublishAllLocales` have no effect.
+  document. `locale: 'all'` is still accepted for an explicit publication
+  action.
 </Banner>
 
 The same parameters are available on `payload.updateGlobal()` for globals, as well as on the REST and Local APIs.

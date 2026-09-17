@@ -9,8 +9,8 @@ import type {
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DataFromGlobalSlug,
-  DraftFlagFromGlobalSlug,
   SelectFromGlobalSlug,
+  UpdateActionFromGlobalSlug,
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -27,6 +27,11 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+  /**
+   * Whether the current update should be marked as from autosave.
+   * `versions.drafts.autosave` should be specified.
+   */
+  autosave?: boolean
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -67,13 +72,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
-   * Publish the document / documents in all locales. Only applies when localization is enabled
-   * and the global has localized fields.
-   *
-   * @default undefined
-   */
-  publishAllLocales?: boolean
-  /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
@@ -88,11 +86,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   slug: TSlug
   /**
-   * Unpublish the document / documents in all locales. Only applies when localization is enabled
-   * and the global has localized fields.
-   */
-  unpublishAllLocales?: boolean
-  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
@@ -102,7 +95,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = Base
   TSlug,
   TSelect
 > &
-  DraftFlagFromGlobalSlug<TSlug>
+  UpdateActionFromGlobalSlug<TSlug>
 
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
@@ -113,16 +106,15 @@ export async function updateGlobalLocal<
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
   const {
     slug: globalSlug,
+    action,
+    autosave,
     data,
     depth,
-    draft,
     overrideAccess = true,
     overrideLock,
     populate,
-    publishAllLocales,
     select,
     showHiddenFields,
-    unpublishAllLocales,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -133,17 +125,16 @@ export async function updateGlobalLocal<
 
   return updateOperation<TSlug, TSelect>({
     slug: globalSlug as string,
+    action,
+    autosave,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
-    draft,
     globalConfig,
     overrideAccess,
     overrideLock,
     populate,
-    publishAllLocales,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
-    unpublishAllLocales,
   })
 }

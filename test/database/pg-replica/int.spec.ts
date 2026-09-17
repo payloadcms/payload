@@ -213,7 +213,7 @@ test.suite({ db: (adapter) => adapter === 'postgres-read-replicas' })(
         const doc = await (payload as any).create({
           collection: 'posts',
           data: { title: 'versioned-doc', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(doc).toBeDefined()
@@ -231,7 +231,7 @@ test.suite({ db: (adapter) => adapter === 'postgres-read-replicas' })(
         const doc = await (payload as any).create({
           collection: 'posts',
           data: { title: 'draft-original', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         // This triggers updateOne (has getPrimaryDb) + createVersion (now fixed)
@@ -239,7 +239,7 @@ test.suite({ db: (adapter) => adapter === 'postgres-read-replicas' })(
           collection: 'posts',
           id: doc.id,
           data: { title: 'draft-updated' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         expect(updated.title).toBe('draft-updated')
@@ -256,14 +256,14 @@ test.suite({ db: (adapter) => adapter === 'postgres-read-replicas' })(
         const doc = await (payload as any).create({
           collection: 'posts',
           data: { title: 'restore-v1', _status: 'draft' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         await (payload as any).update({
           collection: 'posts',
           id: doc.id,
           data: { title: 'restore-v2' },
-          draft: true,
+          action: 'saveDraft',
         })
 
         const versions = await (payload as any).findVersions({

@@ -4,6 +4,7 @@ import type {
   PayloadRequest,
   SanitizedGlobalConfig,
   SelectType,
+  UpdateAction,
 } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
@@ -14,8 +15,8 @@ import type { Context } from '../types.js'
 type Resolver<TSlug extends GlobalSlug> = (
   _: unknown,
   args: {
+    action?: UpdateAction
     data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-    draft?: boolean
     fallbackLocale?: string
     locale?: string
   },
@@ -28,22 +29,42 @@ export function update<TSlug extends GlobalSlug>(
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
+    const localization = context.req.payload.config.localization
+    const returningLocale =
+      args.locale === 'all'
+        ? context.req.locale !== 'all' && context.req.locale
+          ? context.req.locale
+          : localization
+            ? localization.defaultLocale
+            : undefined
+        : undefined
+    const req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale'])
+
     if (args.locale) {
-      context.req.locale = args.locale
+      req.locale = args.locale
     }
     if (args.fallbackLocale) {
-      context.req.fallbackLocale = args.fallbackLocale
+      req.fallbackLocale = args.fallbackLocale
+    }
+
+    if (args.locale === 'all') {
+      context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale'])
+      context.req.locale = returningLocale
+      context.req.fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
+    } else {
+      context.req = req
     }
 
     const { slug } = globalConfig
 
     const options = {
       slug,
+      action: args.action,
       data: args.data,
       depth: 0,
-      draft: args.draft,
       globalConfig,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      req: isolateObjectProperty(req, 'transactionID'),
+      returningLocale,
     }
 
     const result = await updateOperationGlobal<TSlug, SelectType>(options)

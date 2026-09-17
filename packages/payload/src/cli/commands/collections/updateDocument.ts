@@ -52,10 +52,10 @@ export const createUpdateDocumentCommand = defineCLICommand({
       if (args.id !== undefined) {
         const doc = await payload.update({
           id: parseDocumentID({ id: args.id, collectionSlug: collection, payload }),
+          action: args.action,
           collection,
           data,
           depth: args.depth,
-          draft: args.draft,
           fallbackLocale: args.fallbackLocale,
           ...resolvedFile,
           locale: args.locale,
@@ -63,11 +63,9 @@ export const createUpdateDocumentCommand = defineCLICommand({
           overrideLock: args.overrideLock,
           overwriteExistingFiles: args.overwriteExistingFiles,
           populate: args.populate,
-          publishAllLocales: args.publishAllLocales,
           select: args.returning ? args.select : { id: true },
           showHiddenFields: args.showHiddenFields,
           trash: args.trash,
-          unpublishAllLocales: args.unpublishAllLocales,
         })
 
         const result = args.returning ? doc : { id: doc.id }
@@ -81,10 +79,10 @@ export const createUpdateDocumentCommand = defineCLICommand({
 
       if (args.where !== undefined) {
         const updateResult = await payload.update({
+          action: args.action,
           collection,
           data,
           depth: args.depth,
-          draft: args.draft,
           fallbackLocale: args.fallbackLocale,
           ...resolvedFile,
           limit: args.limit,
@@ -93,12 +91,10 @@ export const createUpdateDocumentCommand = defineCLICommand({
           overrideLock: args.overrideLock,
           overwriteExistingFiles: args.overwriteExistingFiles,
           populate: args.populate,
-          publishAllLocales: args.publishAllLocales,
           select: args.returning ? args.select : { id: true },
           showHiddenFields: args.showHiddenFields,
           sort: args.sort,
           trash: args.trash,
-          unpublishAllLocales: args.unpublishAllLocales,
           where: args.where,
         })
 

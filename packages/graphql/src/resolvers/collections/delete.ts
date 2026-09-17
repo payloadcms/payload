@@ -7,7 +7,6 @@ import type { Context } from '../types.js'
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
-    draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
@@ -31,16 +30,6 @@ export function getDeleteResolver<TSlug extends CollectionSlug>(
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     if (!req.query) {
       req.query = {}
-    }
-
-    const draft: boolean =
-      (args.draft ?? req.query?.draft === 'false')
-        ? false
-        : req.query?.draft === 'true'
-          ? true
-          : undefined
-    if (typeof draft === 'boolean') {
-      req.query.draft = String(draft)
     }
 
     context.req = req

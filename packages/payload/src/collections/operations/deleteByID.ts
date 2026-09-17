@@ -226,7 +226,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       context: req.context,
       depth: depth!,
       doc: result,
-      draft: undefined!,
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,

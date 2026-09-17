@@ -37,26 +37,24 @@ export const updateDocumentTool = defineCollectionTool({
 
   const {
     id,
+    action,
     data,
     depth,
-    draft,
     fallbackLocale,
     file: fileInput,
     limit,
     locale,
     overrideLock,
     populate,
-    publishAllLocales,
     returning,
     select,
     sort,
     trash,
-    unpublishAllLocales,
     where,
   } = input
 
   logger.info(
-    `Updating document in collection: ${slug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+    `Updating document in collection: ${slug}${id ? ` with ID: ${id}` : ' with where clause'}, action: ${action ?? 'default'}${locale ? `, locale: ${locale}` : ''}`,
   )
 
   try {
@@ -77,20 +75,18 @@ export const updateDocumentTool = defineCollectionTool({
     if (id !== undefined) {
       const result = await payload.update({
         id: parseDocumentID({ id, collectionSlug: slug, payload }),
+        action,
         collection: slug,
         data: parsedData,
         depth,
-        draft,
         fallbackLocale,
         locale,
         overrideAccess: authorizedMCP.overrideAccess,
         overrideLock,
         populate,
-        publishAllLocales,
         req,
         select: returning ? select : { id: true },
         trash,
-        unpublishAllLocales,
         ...(file ? { file } : {}),
       })
 
@@ -108,22 +104,20 @@ export const updateDocumentTool = defineCollectionTool({
     }
 
     const result = await payload.update({
+      action,
       collection: slug,
       data: parsedData,
       depth,
-      draft,
       fallbackLocale,
       limit,
       locale,
       overrideAccess: authorizedMCP.overrideAccess,
       overrideLock,
       populate,
-      publishAllLocales,
       req,
       select: returning ? select : { id: true },
       sort,
       trash,
-      unpublishAllLocales,
       where: whereClause,
       ...(file ? { file } : {}),
     })

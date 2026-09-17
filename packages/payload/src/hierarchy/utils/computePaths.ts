@@ -1,5 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
+import type { ReadVersion } from '../../versions/types.js'
 
 import { slugify as payloadSlugify } from '../../utilities/slugify.js'
 import { HIERARCHY_SLUG_PATH_FIELD, HIERARCHY_TITLE_PATH_FIELD } from '../constants.js'
@@ -16,6 +17,7 @@ type ComputePathsArgs = {
   req: PayloadRequest
   slugPathFieldName?: string
   titlePathFieldName?: string
+  version?: ReadVersion
 }
 
 type ComputePathsResult = {
@@ -123,7 +125,10 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
     req,
     slugPathFieldName = HIERARCHY_SLUG_PATH_FIELD,
     titlePathFieldName = HIERARCHY_TITLE_PATH_FIELD,
+    version,
   } = args
+
+  const readVersion = version ?? (draft ? 'latest' : 'published')
 
   const slugify =
     (collection.hierarchy !== false && collection.hierarchy.slugify) ||
@@ -218,7 +223,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
     }
 
     const cache = context.hierarchyAncestorCache[collection.slug]
-    const cacheKey = `${parentID}_${locale || 'default'}`
+    const cacheKey = `${parentID}_${locale || 'default'}_${readVersion}`
 
     // Check cache first
     let parent = cache[cacheKey]
@@ -249,117 +254,117 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
         },
       }
 
-      // Fetch parent
-      // When locale === 'all', we need special handling because Payload doesn't support
-      // fetching all locales of a draft document (drafts are stored per-locale).
-      // Strategy: Try published first, fallback to fetching each locale separately for drafts.
+      // When locale === 'all', published docs can be fetched in one query. Latest/draft
+      // versions are stored per-locale, so those reads fetch each locale separately.
       const fetchParent = async () => {
         if (locale === 'all') {
-          try {
-            // First try to fetch published version with all locales
-            return await req.payload.findByID({
-              id: validParentID,
-              collection: collection.slug,
-              depth: 0,
-              locale,
-              overrideAccess: true,
-              req: parentReq,
-              select: {
-                [parentHierarchyConfig.parentFieldName]: true,
-                [parentHierarchyConfig.slugPathFieldName]: true,
-                [parentHierarchyConfig.titlePathFieldName]: true,
-                [parentTitleField]: true,
-                ...(slugFieldName ? { [slugFieldName]: true } : {}),
-              },
-              user: req.user,
-            })
-          } catch (_error) {
-            // Published version not found, must be a draft
-            // Payload doesn't support fetching all locales of a draft with a single query
-            // So we need to fetch each locale separately and combine the path data
-            const locales = req.payload.config.localization
-              ? req.payload.config.localization.localeCodes
-              : []
-            const parentPathsByLocale: Record<
-              string,
-              { slugPath?: string; title?: string; titlePath?: string }
-            > = {}
-
-            // Get parent collection's slugify function (may differ from child's)
-            const parentSlugify =
-              (parentCollectionConfig.hierarchy !== false &&
-                parentCollectionConfig.hierarchy.slugify) ||
-              ((text: string) => payloadSlugify(text) || '')
-
-            // Fetch parent for each locale to get paths
-            for (const loc of locales) {
-              // Create a new request with this specific locale but keep computeHierarchyPaths flag
-              const localeReq = {
-                ...req,
-                context: {
-                  ...req.context,
-                  computeHierarchyPaths: true,
+          if (readVersion === 'published') {
+            try {
+              return await req.payload.findByID({
+                id: validParentID,
+                collection: collection.slug,
+                depth: 0,
+                locale,
+                overrideAccess: true,
+                req: parentReq,
+                select: {
+                  [parentHierarchyConfig.parentFieldName]: true,
+                  [parentHierarchyConfig.slugPathFieldName]: true,
+                  [parentHierarchyConfig.titlePathFieldName]: true,
+                  [parentTitleField]: true,
+                  ...(slugFieldName ? { [slugFieldName]: true } : {}),
                 },
+                user: req.user,
+                version: readVersion,
+              })
+            } catch {
+              // Published version not found, must be a draft-only ancestor.
+            }
+          }
+
+          // Latest/draft versions are stored per locale, so fetch each locale separately.
+          const locales = req.payload.config.localization
+            ? req.payload.config.localization.localeCodes
+            : []
+          const parentPathsByLocale: Record<
+            string,
+            { slugPath?: string; title?: string; titlePath?: string }
+          > = {}
+
+          // Get parent collection's slugify function (may differ from child's)
+          const parentSlugify =
+            (parentCollectionConfig.hierarchy !== false &&
+              parentCollectionConfig.hierarchy.slugify) ||
+            ((text: string) => payloadSlugify(text) || '')
+
+          // Fetch parent for each locale to get paths
+          for (const loc of locales) {
+            // Create a new request with this specific locale but keep computeHierarchyPaths flag
+            const localeReq = {
+              ...req,
+              context: {
+                ...req.context,
+                computeHierarchyPaths: true,
+              },
+              locale: loc,
+            }
+
+            try {
+              const parentForLocale = await req.payload.findByID({
+                id: validParentID,
+                collection: collection.slug,
+                depth: 0,
                 locale: loc,
+                overrideAccess: true,
+                req: localeReq,
+                user: req.user,
+                version: readVersion,
+              })
+
+              // Extract the path fields and title from the parent
+              // If paths weren't computed (undefined), compute them manually for root documents
+              let parentSlugPath = parentForLocale[parentHierarchyConfig.slugPathFieldName]
+              let parentTitlePath = parentForLocale[parentHierarchyConfig.titlePathFieldName]
+              const parentTitle = parentForLocale[parentTitleField]
+
+              // If paths are undefined, this might be a root document - compute paths from title
+              if (!parentSlugPath && parentTitle) {
+                parentSlugPath = parentSlugify(parentTitle)
+              }
+              if (!parentTitlePath && parentTitle) {
+                parentTitlePath = parentTitle
               }
 
-              try {
-                const parentForLocale = await req.payload.findByID({
-                  id: validParentID,
-                  collection: collection.slug,
-                  depth: 0,
-                  draft: true,
-                  locale: loc,
-                  overrideAccess: true,
-                  req: localeReq,
-                  user: req.user,
-                })
-
-                // Extract the path fields and title from the parent
-                // If paths weren't computed (undefined), compute them manually for root documents
-                let parentSlugPath = parentForLocale[parentHierarchyConfig.slugPathFieldName]
-                let parentTitlePath = parentForLocale[parentHierarchyConfig.titlePathFieldName]
-                const parentTitle = parentForLocale[parentTitleField]
-
-                // If paths are undefined, this might be a root document - compute paths from title
-                if (!parentSlugPath && parentTitle) {
-                  parentSlugPath = parentSlugify(parentTitle)
-                }
-                if (!parentTitlePath && parentTitle) {
-                  parentTitlePath = parentTitle
-                }
-
-                parentPathsByLocale[loc] = {
-                  slugPath: parentSlugPath,
-                  title: parentTitle,
-                  titlePath: parentTitlePath,
-                }
-              } catch (_localeError) {
-                // This locale doesn't exist, skip it
+              parentPathsByLocale[loc] = {
+                slugPath: parentSlugPath,
+                title: parentTitle,
+                titlePath: parentTitlePath,
               }
+            } catch (_localeError) {
+              // This locale doesn't exist, skip it
             }
+          }
 
-            // Combine the path data from all locales into a single parent object
-            const combinedSlugPaths: Record<string, string | undefined> = {}
-            const combinedTitlePaths: Record<string, string | undefined> = {}
-            const combinedTitles: Record<string, string | undefined> = {}
+          // Combine the path data from all locales into a single parent object
+          const combinedSlugPaths: Record<string, string | undefined> = {}
+          const combinedTitlePaths: Record<string, string | undefined> = {}
+          const combinedTitles: Record<string, string | undefined> = {}
 
-            for (const loc of locales) {
-              if (parentPathsByLocale[loc]) {
-                combinedSlugPaths[loc] = parentPathsByLocale[loc].slugPath
-                combinedTitlePaths[loc] = parentPathsByLocale[loc].titlePath
-                combinedTitles[loc] = parentPathsByLocale[loc].title
-              }
+          for (const loc of locales) {
+            if (parentPathsByLocale[loc]) {
+              combinedSlugPaths[loc] = parentPathsByLocale[loc].slugPath
+              combinedTitlePaths[loc] = parentPathsByLocale[loc].titlePath
+              combinedTitles[loc] = parentPathsByLocale[loc].title
             }
+          }
 
-            // Return a parent object with only the hierarchy fields we need
-            // (all properly formatted as multi-locale objects)
-            return {
-              id: validParentID,
-              [parentHierarchyConfig.slugPathFieldName]: combinedSlugPaths,
-              [parentHierarchyConfig.titlePathFieldName]: combinedTitlePaths,
-              [parentTitleField]: combinedTitles,
-            }
+          // Return a parent object with only the hierarchy fields we need
+          // (all properly formatted as multi-locale objects)
+          return {
+            id: validParentID,
+            [parentHierarchyConfig.slugPathFieldName]: combinedSlugPaths,
+            [parentHierarchyConfig.titlePathFieldName]: combinedTitlePaths,
+            [parentTitleField]: combinedTitles,
           }
         } else {
           // Normal case: single locale, can pass draft parameter
@@ -367,7 +372,6 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
             id: validParentID,
             collection: collection.slug,
             depth: 0,
-            draft,
             locale,
             overrideAccess: true,
             req: parentReq,
@@ -379,6 +383,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
               ...(slugFieldName ? { [slugFieldName]: true } : {}),
             },
             user: req.user,
+            version: readVersion,
           })
         }
       }

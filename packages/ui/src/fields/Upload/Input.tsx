@@ -267,9 +267,9 @@ export function UploadInput(props: UploadInputProps) {
       const fetches = Object.entries(grouped).map(async ([collection, ids]) => {
         const query = {
           depth: 0,
-          draft: true,
           limit: ids.length,
           locale: code,
+          version: 'latest',
           where: {
             and: [
               {

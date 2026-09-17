@@ -9,6 +9,7 @@ import type {
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
+import type { ReadVersion } from '../../../versions/types.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
 import type { AfterReadArgs } from './index.js'
 
@@ -69,6 +70,7 @@ type Args = {
   siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
   triggerHooks?: boolean
+  version: ReadVersion
 } & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
 
 // This function is responsible for the following actions, in order:
@@ -111,6 +113,7 @@ export const promise = async ({
   siblingFields,
   triggerAccessControl = true,
   triggerHooks = true,
+  version,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -309,6 +312,7 @@ export const promise = async ({
                 siblingData: siblingDoc,
                 siblingFields: siblingFields!,
                 value,
+                version,
               })
 
               if (hookedValue !== undefined) {
@@ -339,6 +343,7 @@ export const promise = async ({
             siblingData: siblingDoc,
             siblingFields: siblingFields!,
             value: siblingDoc[field.name],
+            version,
           })
 
           if (hookedValue !== undefined) {
@@ -366,6 +371,7 @@ export const promise = async ({
           segments: field.virtual.split('.'),
           showHiddenFields,
           siblingDoc,
+          version,
         }),
       )
     }
@@ -435,6 +441,7 @@ export const promise = async ({
           req,
           showHiddenFields,
           siblingDoc,
+          version,
         }),
       )
     }
@@ -485,6 +492,7 @@ export const promise = async ({
             siblingDoc: row || {},
             triggerAccessControl,
             triggerHooks,
+            version,
           })
         })
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
@@ -519,6 +527,7 @@ export const promise = async ({
                 siblingDoc: (row as JsonObject) || {},
                 triggerAccessControl,
                 triggerHooks,
+                version,
               })
             })
           }
@@ -583,6 +592,7 @@ export const promise = async ({
               siblingDoc: (row as JsonObject) || {},
               triggerAccessControl,
               triggerHooks,
+              version,
             })
           }
         })
@@ -627,6 +637,7 @@ export const promise = async ({
                   siblingDoc: (row as JsonObject) || {},
                   triggerAccessControl,
                   triggerHooks,
+                  version,
                 })
               }
             })
@@ -673,6 +684,7 @@ export const promise = async ({
         siblingDoc,
         triggerAccessControl,
         triggerHooks,
+        version,
       })
 
       break
@@ -717,6 +729,7 @@ export const promise = async ({
               siblingDoc: localizedData || {},
               triggerAccessControl,
               triggerHooks,
+              version,
             })
           })
         } else {
@@ -750,6 +763,7 @@ export const promise = async ({
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
             triggerAccessControl,
             triggerHooks,
+            version,
           })
         }
       } else {
@@ -783,6 +797,7 @@ export const promise = async ({
           siblingDoc,
           triggerAccessControl,
           triggerHooks,
+          version,
         })
       }
 
@@ -813,7 +828,6 @@ export const promise = async ({
                   currentDepth,
                   data: doc,
                   depth,
-                  draft,
                   fallbackLocale: fallbackLocale!,
                   field,
                   fieldPromises,
@@ -836,6 +850,7 @@ export const promise = async ({
                   triggerAccessControl,
                   triggerHooks,
                   value,
+                  version,
                 })
 
                 if (hookedValue !== undefined) {
@@ -850,7 +865,6 @@ export const promise = async ({
               currentDepth,
               data: doc,
               depth,
-              draft,
               fallbackLocale: fallbackLocale!,
               field,
               fieldPromises,
@@ -873,6 +887,7 @@ export const promise = async ({
               triggerAccessControl,
               triggerHooks,
               value: siblingDoc[field.name],
+              version,
             })
 
             if (hookedValue !== undefined) {
@@ -926,6 +941,7 @@ export const promise = async ({
               siblingDoc: localizedData || {},
               triggerAccessControl,
               triggerHooks,
+              version,
             })
           })
         } else {
@@ -959,6 +975,7 @@ export const promise = async ({
             siblingDoc: typeof siblingDoc[field.name] !== 'object' ? {} : siblingDoc[field.name],
             triggerAccessControl,
             triggerHooks,
+            version,
           })
         }
       } else {
@@ -992,6 +1009,7 @@ export const promise = async ({
           siblingDoc: tabDoc,
           triggerAccessControl,
           triggerHooks,
+          version,
         })
       }
 
@@ -1029,6 +1047,7 @@ export const promise = async ({
         siblingDoc,
         triggerAccessControl,
         triggerHooks,
+        version,
       })
 
       break

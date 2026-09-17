@@ -11,34 +11,22 @@ import { updateOperation } from '../operations/update.js'
 export const updateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const {
-    depth,
-    draft,
-    limit,
-    overrideLock,
-    populate,
-    publishAllLocales,
-    select,
-    sort,
-    trash,
-    unpublishAllLocales,
-    where,
-  } = parseParams(req.query)
+  const { action, depth, limit, overrideLock, populate, select, sort, trash, where } = parseParams(
+    req.query,
+  )
 
   const result = await updateOperation({
+    action,
     collection,
     data: req.data!,
     depth,
-    draft,
     limit,
     overrideLock: overrideLock ?? false,
     populate,
-    publishAllLocales,
     req,
     select,
     sort,
     trash,
-    unpublishAllLocales,
     where: where!,
   })
 

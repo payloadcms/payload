@@ -1,4 +1,10 @@
-import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
+import type {
+  Collection,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  PayloadRequest,
+  UpdateAction,
+} from 'payload'
 
 import { isolateObjectProperty, updateByIDOperation } from 'payload'
 
@@ -7,9 +13,9 @@ import type { Context } from '../types.js'
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
   args: {
+    action?: UpdateAction
     autosave: boolean
     data: DataFromCollectionSlug<TSlug>
-    draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
@@ -24,37 +30,41 @@ export function updateResolver<TSlug extends CollectionSlug>(
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context: Context) {
-    let { req } = context
-    const locale = req.locale
-    const fallbackLocale = req.fallbackLocale
-    req = isolateObjectProperty(req, 'locale')
-    req = isolateObjectProperty(req, 'fallbackLocale')
+    const originalReq = context.req
+    const locale = originalReq.locale
+    const fallbackLocale = originalReq.fallbackLocale
+    const returningLocale =
+      args.locale === 'all'
+        ? locale !== 'all' && locale
+          ? locale
+          : originalReq.payload.config.localization
+            ? originalReq.payload.config.localization.defaultLocale
+            : undefined
+        : undefined
+    const req = isolateObjectProperty(originalReq, ['locale', 'fallbackLocale'])
     req.locale = args.locale || locale
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     if (!req.query) {
       req.query = {}
     }
 
-    const draft: boolean =
-      (args.draft ?? req.query?.draft === 'false')
-        ? false
-        : req.query?.draft === 'true'
-          ? true
-          : undefined
-    if (typeof draft === 'boolean') {
-      req.query.draft = String(draft)
+    if (args.locale === 'all') {
+      context.req = isolateObjectProperty(originalReq, ['locale', 'fallbackLocale'])
+      context.req.locale = returningLocale
+      context.req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    } else {
+      context.req = req
     }
-
-    context.req = req
 
     const options = {
       id: args.id,
+      action: args.action,
       autosave: args.autosave,
       collection,
       data: args.data as any,
       depth: 0,
-      draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
+      returningLocale,
       trash: args.trash,
     }
 
