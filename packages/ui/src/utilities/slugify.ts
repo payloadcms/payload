@@ -97,6 +97,7 @@ export const slugifyHandler: ServerFunction<
       draftsEnabled: hasDraftsEnabled(collectionConfig),
       field: field.name,
       locale: localeToScope,
+      overrideAccess: true,
       req,
       value: result,
     })
@@ -107,6 +108,7 @@ export const slugifyHandler: ServerFunction<
     collection: collectionConfig,
     field: field.name,
     locale: localeToScope,
+    overrideAccess: true,
     req,
     slugify,
   })

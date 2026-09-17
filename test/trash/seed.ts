@@ -35,24 +35,4 @@ export const seed = async (payload: Payload) => {
       title: 'Page',
     },
   })
-
-  await payload.create({
-    collection: 'posts',
-    depth: 0,
-    select: {},
-    data: {
-      title: 'Post 1',
-      _status: 'published',
-    },
-  })
-
-  await payload.create({
-    collection: 'posts',
-    depth: 0,
-    select: {},
-    data: {
-      title: 'Post 2',
-      _status: 'published',
-    },
-  })
 }

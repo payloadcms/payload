@@ -29,6 +29,7 @@ import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import SelectVersionsFields from './collections/SelectVersions/index.js'
 import SlugField from './collections/SlugField/index.js'
+import { SlugFieldAccess } from './collections/SlugFieldAccess/index.js'
 import { SlugFieldAutosave } from './collections/SlugFieldAutosave/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
@@ -82,6 +83,7 @@ export const collections: CollectionConfig[] = [
   RelationshipFields,
   SelectFields,
   SlugField,
+  SlugFieldAccess,
   SlugFieldAutosave,
   TabsFields2,
   TabsFields,
@@ -98,7 +100,27 @@ export const collections: CollectionConfig[] = [
 ]
 
 export const baseConfig: Partial<Config> = {
-  collections,
+  admin: {
+    components: {
+      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
+    },
+    custom: {
+      client: {
+        'new-value': 'client available',
+      },
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    timezones: {
+      defaultTimezone: 'America/Monterrey',
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones,
+        { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
+        { label: 'Custom UTC', value: 'UTC' },
+      ],
+    },
+  },
   blocks: [
     {
       slug: 'ConfigBlockTest',
@@ -130,6 +152,7 @@ export const baseConfig: Partial<Config> = {
       ],
     },
   ],
+  collections,
   custom: {
     client: {
       'new-value': 'client available',
@@ -138,38 +161,14 @@ export const baseConfig: Partial<Config> = {
       'new-server-value': 'only available on server',
     },
   },
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    components: {
-      afterNavLinks: ['/components/AfterNavLinks.js#AfterNavLinks'],
-    },
-    custom: {
-      client: {
-        'new-value': 'client available',
-      },
-    },
-    timezones: {
-      supportedTimezones: ({ defaultTimezones }) => [
-        ...defaultTimezones,
-        { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
-        { label: 'Custom UTC', value: 'UTC' },
-      ],
-      defaultTimezone: 'America/Monterrey',
-    },
-  },
   localization: {
     defaultLocale: 'en',
     fallback: true,
     locales: ['en', 'es'],
   },
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 }
+
+export { seed }

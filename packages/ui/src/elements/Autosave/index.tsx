@@ -53,7 +53,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const [formState] = useAllFormFields()
   const modified = useFormModified()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { t } = useTranslation()
 
   const interval = getAutosaveInterval(docConfig)

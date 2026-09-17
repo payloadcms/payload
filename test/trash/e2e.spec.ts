@@ -47,7 +47,6 @@ describe('Trash', () => {
   beforeEach(async ({ context, page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'trash',
     })
     pagesDocOneID = (
       await payload.find({
@@ -58,31 +57,23 @@ describe('Trash', () => {
       })
     ).docs[0]!.id
     postsDocOneID = (
-      await payload.find({
+      await payload.create({
         collection: 'posts',
-        depth: 0,
-        limit: 1,
-        pagination: false,
-        where: {
-          title: {
-            equals: 'Post 1',
-          },
+        data: {
+          _status: 'published',
+          title: 'Post 1',
         },
       })
-    ).docs[0]!.id
+    ).id
     postsDocTwoID = (
-      await payload.find({
+      await payload.create({
         collection: 'posts',
-        depth: 0,
-        limit: 1,
-        pagination: false,
-        where: {
-          title: {
-            equals: 'Post 2',
-          },
+        data: {
+          _status: 'published',
+          title: 'Post 2',
         },
       })
-    ).docs[0]!.id
+    ).id
     await initPage({ page, serverURL })
     //await throttleTest({ page, context, delay: 'Slow 4G' })
   })
@@ -1196,10 +1187,10 @@ describe('Trash', () => {
       const linkURL = await nameLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURL}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
     })
 
     test('Should properly disable auth fields in the trashed user edit view', async ({ page }) => {
@@ -1212,10 +1203,10 @@ describe('Trash', () => {
       const linkURL = await cellLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURL}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
 
       await expect(page.locator('input[name="email"]')).toBeDisabled()
       await expect(page.locator('#change-password')).toBeDisabled()
@@ -1235,10 +1226,10 @@ describe('Trash', () => {
       const linkURLRestore = await nameLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURLRestore}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
 
       await page.locator('.doc-controls__controls #action-restore').click()
 

@@ -21,13 +21,35 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-azure',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
+    collections: [Media, MediaWithPrefix, Users],
+    storage: [
+      azureStorage({
+        allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
+        baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
+        clientUploads: true,
+        collections: {
+          [mediaSlug]: true,
+          [mediaWithPrefixSlug]: {
+            prefix,
+          },
+        },
+        connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING!,
+        containerName: process.env.AZURE_STORAGE_CONTAINER_NAME!,
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: uploadOptions,
   },
-  collections: [Media, MediaWithPrefix, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -35,24 +57,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  storage: [
-    azureStorage({
-      collections: {
-        [mediaSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
-      },
-      allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
-      baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
-      clientUploads: true,
-      connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING!,
-      containerName: process.env.AZURE_STORAGE_CONTAINER_NAME!,
-    }),
-  ],
-  upload: uploadOptions,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

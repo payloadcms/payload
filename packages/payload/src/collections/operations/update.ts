@@ -364,6 +364,13 @@ export const updateOperation = async <
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
+    await unlinkTempFiles({
+      collectionConfig: args.collection.config,
+      config: args.req.payload.config,
+      req: args.req,
+    }).catch((unlinkError) => {
+      args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
+    })
     await killTransaction(args.req)
     throw error
   }

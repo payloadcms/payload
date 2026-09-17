@@ -18,13 +18,47 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-s3-search-before-s3',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [Media, Users],
+    plugins: [
+      searchPlugin({
+        beforeSync: ({ originalDoc, searchDoc }) => {
+          return {
+            ...searchDoc,
+            title: originalDoc?.filename || 'Untitled',
+          }
+        },
+        collections: [mediaSlug],
+      }),
+    ],
+    storage: [
+      s3Storage({
+        bucket: process.env.S3_BUCKET!,
+        collections: {
+          [mediaSlug]: true,
+        },
+        config: {
+          credentials: {
+            accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+          },
+          endpoint: process.env.S3_ENDPOINT,
+          forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+          region: process.env.S3_REGION,
+        },
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [Media, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -32,36 +66,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  plugins: [
-    searchPlugin({
-      collections: [mediaSlug],
-      beforeSync: ({ originalDoc, searchDoc }) => {
-        return {
-          ...searchDoc,
-          title: originalDoc?.filename || 'Untitled',
-        }
-      },
-    }),
-  ],
-  storage: [
-    s3Storage({
-      collections: {
-        [mediaSlug]: true,
-      },
-      bucket: process.env.S3_BUCKET!,
-      config: {
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-        },
-        endpoint: process.env.S3_ENDPOINT,
-        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-        region: process.env.S3_REGION,
-      },
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

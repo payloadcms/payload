@@ -19,8 +19,14 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   config,
   req,
 }) => {
-  if (config.upload?.useTempFiles && collectionConfig.upload) {
-    const { file } = req
+  const { file } = req
+
+  // A file fetched from a client-upload reference always gets its own temp file for
+  // post-processing (see getFileFromUploadInstructions.ts), regardless of the global
+  // useTempFiles setting, so it must always be cleaned up here too.
+  const isClientUploadTempFile = Boolean(file?.uploadReference)
+
+  if (collectionConfig.upload && (config.upload?.useTempFiles || isClientUploadTempFile)) {
     const fileArray = [{ file }]
     await mapAsync(fileArray, async ({ file }) => {
       // Still need this check because this will not be populated if using local API

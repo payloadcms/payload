@@ -8,6 +8,7 @@ export const mediaSlug = 'media'
 export const categoriesSlug = 'categories'
 export const collectionLevelConfigSlug = 'collection-level-config'
 export const openByDefaultSlug = 'open-by-default'
+export const forbiddenURLSlug = 'forbidden-url'
 export const usersSlug = 'users'
 
 export const mobileBreakpoint = {
