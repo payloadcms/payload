@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
 
@@ -70,7 +71,7 @@ const stripeMock = vi.hoisted(() => {
   }
 })
 
-vi.mock('../../packages/plugin-ecommerce/node_modules/stripe', () => ({
+const stripeMockModule = () => ({
   default: class Stripe {
     customers = {
       create: ({ email }: { email: string }) => Promise.resolve(stripeMock.createCustomer(email)),
@@ -101,7 +102,19 @@ vi.mock('../../packages/plugin-ecommerce/node_modules/stripe', () => ({
       },
     }
   },
-}))
+})
+
+// The plugin imports the `stripe` package by bare specifier from its own source,
+// so the test file cannot resolve it directly. Resolve it from the plugin package
+// instead, then target stripe's ESM build (the entry Vitest loads for the plugin's
+// `import Stripe from 'stripe'`) so the mock intercepts the real request.
+const stripeEntry = createRequire(
+  fileURLToPath(new URL('../../packages/plugin-ecommerce/package.json', import.meta.url)),
+)
+  .resolve('stripe')
+  .replace(/\/cjs\/stripe\.cjs\.node\.js$/, '/esm/stripe.esm.node.js')
+
+vi.doMock(stripeEntry, stripeMockModule)
 
 const originalStripeSecretKey = process.env.STRIPE_SECRET_KEY
 process.env.STRIPE_SECRET_KEY = 'sk_test_offline'
