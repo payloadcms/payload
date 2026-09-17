@@ -96,6 +96,13 @@ let context: BrowserContext
 
 const londonTimezone = 'Europe/London'
 
+async function waitForVersionViewToLoad(page: Page): Promise<void> {
+  const versionView = page.locator('.view-version')
+
+  await expect(versionView).not.toContainText('Loading...')
+  await expect(versionView.locator('.render-field-diffs').first()).toBeVisible()
+}
+
 describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -297,7 +304,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
       await page.locator('.restore-version__restore-as-draft-button').click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
@@ -320,7 +327,7 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
       await page.locator('.restore-version .popup__trigger-wrap button').click()
       await page.getByRole('button', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
@@ -1230,7 +1237,9 @@ describe('Versions', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(publishedDoc.id)
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toContain(publishedDoc.id)
 
       await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
       await waitForFormReady(page)
@@ -2210,7 +2219,7 @@ describe('Versions', () => {
         serverURL,
       })
       await page.goto(versionURL)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+      await waitForVersionViewToLoad(page)
     }
 
     async function navigateToDiffVersionView(versionID?: string) {

@@ -10,7 +10,7 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFieldPaths, toKebabCase } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -24,6 +24,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { TabsProvider } from './provider.js'
+import { resolveRestoredTabIndex } from './resolveRestoredTabIndex.js'
 import { TabComponent } from './Tab/index.js'
 import './index.scss'
 
@@ -64,6 +65,8 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const [activeTabIndex, setActiveTabIndex] = useState<number>(
     () => tabStates.filter(({ passesCondition }) => passesCondition)?.[0]?.index ?? 0,
   )
+
+  const hasUserSelectedTab = useRef(false)
 
   const tabsPrefKey = `tabs-${indexPath}`
 
@@ -114,18 +117,40 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   useEffect(() => {
     if (preferencesKey) {
-      const getInitialPref = async () => {
+      const restoreTabFromPreferences = async () => {
         const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
-        const initialIndex = path
+
+        // A tab selected while this read was in flight wins. Restoring afterwards
+        // would move the user off the tab they just opened
+        if (hasUserSelectedTab.current) {
+          return
+        }
+
+        const storedTabIndex = path
           ? existingPreferences?.fields?.[path]?.tabIndex
           : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
 
-        const newIndex = typeof initialIndex === 'number' && initialIndex < tabStates.length ? initialIndex : 0
-        setActiveTabIndex(newIndex)
+        const restoredTabIndex = resolveRestoredTabIndex({
+          storedTabIndex,
+          tabCount: tabStates.length,
+        })
+
+        if (typeof restoredTabIndex === 'number') {
+          setActiveTabIndex(restoredTabIndex)
+        }
       }
-      void getInitialPref()
+      void restoreTabFromPreferences()
     }
-  }, [path, getPreference, preferencesKey, tabsPrefKey, tabs, parentPath, parentSchemaPath])
+  }, [
+    path,
+    getPreference,
+    preferencesKey,
+    tabsPrefKey,
+    tabs,
+    tabStates.length,
+    parentPath,
+    parentSchemaPath,
+  ])
 
   useEffect(() => {
     if (activeTabInfo?.passesCondition === false) {
@@ -158,6 +183,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
                 key={index}
                 parentPath={path}
                 setIsActive={() => {
+                  hasUserSelectedTab.current = true
                   void handleTabChange(index)
                 }}
                 tab={tab}
