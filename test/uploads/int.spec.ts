@@ -1537,7 +1537,7 @@ describe('Collections - Uploads', () => {
               },
             },
           })
-          const metadata = await payload.config.sharp!(sourcePath).metadata()
+          const metadata = await payload.config.sharp(sourcePath).metadata()
 
           expect(response.status).toBe(200)
           expect(metadata).toMatchObject({ height: 40, width: 40 })
@@ -3440,13 +3440,16 @@ describe('Collections - Uploads', () => {
     it.each([
       { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
       { dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp'), description: 'relative path' },
-    ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
-      const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
-      const filePath = handler.getFilePath()
+    ])(
+      'creates temp files in correct location for $description',
+      async ({ dir, expectedPrefix }) => {
+        const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
+        const filePath = handler.getFilePath()
 
-      expect(filePath.startsWith(expectedPrefix)).toBe(true)
-      handler.cleanup()
-    })
+        expect(filePath.startsWith(expectedPrefix)).toBe(true)
+        await handler.cleanup()
+      },
+    )
   })
 
   describe('prefix query parameter', () => {
