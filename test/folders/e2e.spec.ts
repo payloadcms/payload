@@ -564,6 +564,31 @@ test.describe('Folders', () => {
       )
     })
 
+    test('should not title the folder drawer "[Untitled]" when bulk editing', async () => {
+      await page.goto(postURL.list)
+
+      await page.locator('tbody .row-1 input[type="checkbox"]').check()
+      await page.locator('.edit-many__toggle').click()
+
+      const bulkEditForm = page.locator('form.edit-many__form')
+      await expect(bulkEditForm).toBeVisible()
+
+      await selectInput({
+        multiSelect: true,
+        options: ['Folder'],
+        page,
+        selectLocator: bulkEditForm.locator('.react-select'),
+      })
+
+      await bulkEditForm.locator('.move-doc-to-folder').click()
+
+      // There is no document in bulk edit, so the heading must fall back to the
+      // collection's singular label rather than the `[Untitled]` placeholder.
+      const drawerHeading = page.locator('dialog .drawer-action-header__title')
+      await expect(drawerHeading).toBeVisible()
+      await expect(drawerHeading).toHaveText('Select folder for Post')
+    })
+
     test('should resolve folder pills and not get stuck as Loading...', async () => {
       await selectFolderAndConfirmMoveFromList({ folderName: 'Move Into This Folder', page })
       const folderPill = page.locator('tbody .row-1 .move-doc-to-folder')
