@@ -302,8 +302,12 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       })
       expect(signedResponse.status).toBe(200)
 
-      const signed: { docPrefix: string; filename?: string; url: string } =
-        await signedResponse.json()
+      const signed: {
+        clientUploadContext: Record<string, unknown>
+        docPrefix: string
+        filename?: string
+        url: string
+      } = await signedResponse.json()
       const storedFilename = signed.filename || filename
 
       await new BlockBlobClient(signed.url).uploadData(file, {
@@ -314,7 +318,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       form.append(
         'file',
         JSON.stringify({
-          clientUploadContext: { prefix: signed.docPrefix },
+          clientUploadContext: signed.clientUploadContext,
           collectionSlug,
           filename: storedFilename,
           mimeType,
