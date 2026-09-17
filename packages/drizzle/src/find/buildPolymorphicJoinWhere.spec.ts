@@ -203,6 +203,18 @@ const blockChain = {
   leafColumnKey: 'label',
 }
 
+const arrayBlockChain = {
+  hops: [
+    {
+      isLocalesTable: false,
+      parentColumnKey: '_parentID',
+      pathValue: 'entries.%.content',
+      tableName: 'join_articles_blocks_hero',
+    },
+  ],
+  leafColumnKey: 'label',
+}
+
 const separateRowsPlan = ({
   chain,
   collections = ['articles'],
@@ -675,6 +687,38 @@ describe('buildPolymorphicJoinWhere', () => {
       expect(query.sql).not.toContain('join_articles_locales')
     },
   )
+
+  it('rejects a negated operator with a null member in its list', () => {
+    expect(() =>
+      renderWhere({
+        where: { localizedTitle: { not_in: ['blocked', null] } } as unknown as Where,
+        wherePlan: separateRowsPlan({ chain: localizedScalarChain, schemaPath: 'localizedTitle' }),
+      }),
+    ).toThrow('localizedTitle.not_in')
+  })
+
+  it('keeps not_equals null as an existence check', () => {
+    const query = renderWhere({
+      where: { localizedTitle: { not_equals: null } },
+      wherePlan: separateRowsPlan({ chain: localizedScalarChain, schemaPath: 'localizedTitle' }),
+    })
+
+    expect(query.sql).toContain('exists (select 1 from "join_articles_locales"')
+    expect(query.sql).not.toContain('not exists')
+    expect(query.sql).toContain('"localized_title" is not null')
+  })
+
+  it('rejects a block path that stands in for an array index', () => {
+    expect(() =>
+      renderWhere({
+        where: { 'entries.content.hero.label': { equals: 'available' } },
+        wherePlan: separateRowsPlan({
+          chain: arrayBlockChain,
+          schemaPath: 'entries.content.hero.label',
+        }),
+      }),
+    ).toThrow('entries.content.hero.label.equals')
+  })
 
   it('builds a false condition for an empty json sub-path in comparison', () => {
     const query = renderWhere({

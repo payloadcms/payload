@@ -50,7 +50,7 @@ export const buildPolymorphicJoinSeparateRowsConstraint = ({
   // cannot be compiled without changing what the constraint means.
   const isSingleRowChain = locale !== 'all' && chain.hops.every((hop) => hop.isLocalesTable)
 
-  if (leaf.requiresSingleRowChain && !isSingleRowChain) {
+  if (leaf.isUnsupported || (leaf.requiresSingleRowChain && !isSingleRowChain)) {
     throw new QueryError([{ path: errorPath }])
   }
 
@@ -104,6 +104,12 @@ export const buildPolymorphicJoinSeparateRowsConstraint = ({
     }
 
     if (hop.pathValue) {
+      // `%` stands in for an array index, which the write side stores literally (`items.0.content`),
+      // so an equality predicate could never match. Fail closed rather than silently match nothing.
+      if (hop.pathValue.includes('%')) {
+        throw new QueryError([{ path: errorPath }])
+      }
+
       hopConditions.push(eq(table['_path'] as Column, hop.pathValue))
     }
 
@@ -165,6 +171,8 @@ const resolveLeafOperator = ({
   value: unknown
 }): {
   isNegated: boolean
+  /** Set when the operator and value combination cannot be compiled soundly for any chain. */
+  isUnsupported?: boolean
   operator: string
   requiresSingleRowChain: boolean
   value: unknown
@@ -196,6 +204,19 @@ const resolveLeafOperator = ({
   }
 
   if (operator in negatedOperators) {
+    // The positive predicate matches a null leaf, so `NOT EXISTS` around it would also exclude
+    // that case — leaving a row with no matching child row passing a constraint meant to reject
+    // it. There is no sound rewrite, so reject rather than widen the constraint.
+    if (Array.isArray(value) ? value.includes(null) : value === null) {
+      return {
+        isNegated: true,
+        isUnsupported: true,
+        operator: negatedOperators[operator],
+        requiresSingleRowChain: true,
+        value,
+      }
+    }
+
     return {
       isNegated: true,
       operator: negatedOperators[operator],
