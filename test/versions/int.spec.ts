@@ -14,7 +14,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
-
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { fetchLatestVersion } from '../../packages/next/src/views/Version/fetchVersions.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { cloudStorageDeletedFilenames } from './collections/DraftsWithUploadCloudStorage.js'
@@ -35,6 +36,7 @@ import {
   draftWithUploadCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
+  simpleDraftGlobalSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -564,34 +566,34 @@ describe('Versions', () => {
         const originalDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
+            _status: 'published',
             description: 'Original description',
             title: 'Original Title',
-            _status: 'published',
           },
           draft: false,
         })
 
         const duplicatedDoc = await payload.create({
-          duplicateFromID: originalDoc.id,
           collection: draftCollectionSlug,
           data: {
             _status: 'draft',
           },
           draft: true,
+          duplicateFromID: originalDoc.id,
         })
 
         expect(duplicatedDoc._status).toBe('draft')
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
-        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+        await payload.delete({ id: originalDoc.id, collection: draftCollectionSlug })
+        await payload.delete({ id: duplicatedDoc.id, collection: draftCollectionSlug })
       })
 
       it('should duplicate a draft document with empty required fields via local API', async () => {
         const originalDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
-            title: 'Draft with partial data',
             _status: 'draft',
+            title: 'Draft with partial data',
           },
           draft: true,
         })
@@ -607,16 +609,16 @@ describe('Versions', () => {
         expect(duplicatedDoc.id).not.toEqual(originalDoc.id)
         expect(duplicatedDoc.title).toContain('Draft with partial data')
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
-        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+        await payload.delete({ id: originalDoc.id, collection: draftCollectionSlug })
+        await payload.delete({ id: duplicatedDoc.id, collection: draftCollectionSlug })
       })
 
       it('should duplicate a draft document with empty required fields via REST API without explicit draft param', async () => {
         const originalDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
-            title: 'REST draft partial',
             _status: 'draft',
+            title: 'REST draft partial',
           },
           draft: true,
         })
@@ -636,8 +638,8 @@ describe('Versions', () => {
         expect(doc._status).toBe('draft')
         expect(doc.id).not.toEqual(originalDoc.id)
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
-        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+        await payload.delete({ id: originalDoc.id, collection: draftCollectionSlug })
+        await payload.delete({ id: doc.id, collection: draftCollectionSlug })
       })
     })
 
@@ -748,7 +750,7 @@ describe('Versions', () => {
         })
 
         for (let i = 0; i < 100; i++) {
-          await payload.update({ collection: draftCollectionSlug, id: doc.id, data: {} })
+          await payload.update({ id: doc.id, collection: draftCollectionSlug, data: {} })
         }
         const res = await payload.findVersions({
           collection: draftCollectionSlug,
@@ -1305,7 +1307,7 @@ describe('Versions', () => {
 
         expect(updateManyResult.docs).toHaveLength(0)
         expect(updateManyResult.errors).toStrictEqual([
-          { id: doc.id, message: 'The following field is invalid: Group > Title', isPublic: true },
+          { id: doc.id, isPublic: true, message: 'The following field is invalid: Group > Title' },
         ])
       })
 
@@ -1609,7 +1611,7 @@ describe('Versions', () => {
         expect(afterVersions.docs).toHaveLength(initialCount)
         expect(afterVersions.docs[0].version._status).toBe('draft')
 
-        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+        await cleanupGlobal({ globalSlug: draftGlobalSlug, payload })
       })
 
       it('should update main table _status to draft when unpublishing', async () => {
@@ -1659,7 +1661,7 @@ describe('Versions', () => {
 
         expect(unpublished._status).toBe('draft')
 
-        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+        await payload.delete({ id: doc.id, collection: draftCollectionSlug })
       })
 
       it('should unpublish a global with localized required fields from a non-default locale', async () => {
@@ -1679,7 +1681,7 @@ describe('Versions', () => {
 
         expect(unpublished._status).toBe('draft')
 
-        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+        await cleanupGlobal({ globalSlug: draftGlobalSlug, payload })
       })
     })
 
@@ -1915,7 +1917,7 @@ describe('Versions', () => {
       it('should fall back to creating a new version when updateVersion fails due to a concurrent write', async () => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
-          data: { title: 'original', _status: 'draft' },
+          data: { _status: 'draft', title: 'original' },
           draft: true,
         })
 
@@ -1964,7 +1966,7 @@ describe('Versions', () => {
       it('should propagate the error when createVersion also fails', async () => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
-          data: { title: 'original', _status: 'draft' },
+          data: { _status: 'draft', title: 'original' },
           draft: true,
         })
 
@@ -3295,11 +3297,11 @@ describe('Versions', () => {
 
         const updated = await payload.updateGlobal({
           slug: draftGlobalSlug,
+          autosave: true,
           data: {
             title: 'updated title',
           },
           draft: true,
-          autosave: true,
         })
 
         const createdUpdatedAt = new Date(created.updatedAt)
@@ -4449,8 +4451,8 @@ describe('Versions', () => {
           data: {
             blocks: [
               {
-                blockType: 'block',
                 array: [],
+                blockType: 'block',
               },
             ],
             text: 'English with blocks',
@@ -4467,8 +4469,8 @@ describe('Versions', () => {
             _status: 'published',
             blocks: [
               {
-                blockType: 'block',
                 array: [],
+                blockType: 'block',
               },
             ],
             text: 'English published with blocks',
@@ -4697,6 +4699,44 @@ describe('Versions', () => {
         const latestVersion = versions[0].version
         expect(latestVersion.title.es).toBeFalsy()
         expect(latestVersion.title.en).toStrictEqual('New eng')
+      })
+    })
+
+    describe('fetchLatestVersion', () => {
+      it('should retrieve the latest published version of a global', async () => {
+        // 1. Create a published version of a global
+        await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: {
+            _status: 'published',
+            title: 'Published Global Title',
+          },
+          draft: false,
+        })
+
+        // 2. Create a draft version of the global (newer than published)
+        await payload.updateGlobal({
+          slug: simpleDraftGlobalSlug,
+          data: {
+            _status: 'draft',
+            title: 'Draft Global Title',
+          },
+          draft: true,
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        // 3. Call fetchLatestVersion requesting 'published' version
+        const latestPublished = await fetchLatestVersion({
+          globalSlug: simpleDraftGlobalSlug,
+          req,
+          status: 'published',
+          user,
+        })
+
+        // 4. Assert that the returned version is the published one, NOT the newer draft one!
+        expect(latestPublished).toBeDefined()
+        expect(latestPublished.version.title).toBe('Published Global Title')
       })
     })
   })
