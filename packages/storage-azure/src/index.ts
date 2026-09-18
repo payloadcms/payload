@@ -1,3 +1,4 @@
+import type { TokenCredential } from '@azure/core-auth'
 import type {
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
@@ -8,7 +9,44 @@ import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { createAzureAdapter } from './adapter.js'
-import { getStorageClient as getStorageClientFunc } from './utils/getStorageClient.js'
+import {
+  getBlobServiceClient as getBlobServiceClientFunc,
+  getStorageClient as getStorageClientFunc,
+} from './utils/getStorageClient.js'
+
+/**
+ * Authentication for the Azure Blob storage account. Exactly one of the
+ * following must be provided:
+ *
+ * - `connectionString` — account-key or SAS-based connection string
+ * - `credential` — an Entra ID `TokenCredential` (e.g. `DefaultAzureCredential`
+ *   from `@azure/identity`) for managed identity / workload identity auth
+ */
+type AzureStorageAuth =
+  | {
+      /**
+       * Azure Blob storage connection string
+       */
+      connectionString: string
+      credential?: never
+    }
+  | {
+      connectionString?: never
+      /**
+       * Entra ID credential used to authenticate against the storage account,
+       * e.g. `DefaultAzureCredential` or `ManagedIdentityCredential` from
+       * `@azure/identity`.
+       *
+       * When set, `baseURL` must be the storage account's blob endpoint
+       * (`https://<account>.blob.core.windows.net`), not a CDN URL.
+       *
+       * The identity requires the `Storage Blob Data Contributor` role on the
+       * account or container. Client uploads (`clientUploads`) additionally rely
+       * on user delegation SAS, whose `generateUserDelegationKey` action is
+       * included in that role.
+       */
+      credential: TokenCredential
+    }
 
 export type AzureStorageOptions = {
   /**
@@ -59,11 +97,6 @@ export type AzureStorageOptions = {
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
 
   /**
-   * Azure Blob storage connection string
-   */
-  connectionString: string
-
-  /**
    * Azure Blob storage container name
    */
   containerName: string
@@ -88,7 +121,7 @@ export type AzureStorageOptions = {
    * @default false
    */
   useCompositePrefixes?: boolean
-}
+} & AzureStorageAuth
 
 type AzureStorageFactory = (azureStorageArgs: AzureStorageOptions) => StorageAdapter
 
@@ -98,11 +131,16 @@ export const azureStorage: AzureStorageFactory = (
   name: 'azure',
   collections: Object.keys(azureStorageOptions.collections),
   init: (incomingConfig: Config): Config => {
-    const getStorageClient = () =>
-      getStorageClientFunc({
-        connectionString: azureStorageOptions.connectionString,
-        containerName: azureStorageOptions.containerName,
-      })
+    const storageClientArgs = {
+      baseURL: azureStorageOptions.baseURL,
+      clientCacheKey: azureStorageOptions.clientCacheKey,
+      connectionString: azureStorageOptions.connectionString,
+      containerName: azureStorageOptions.containerName,
+      credential: azureStorageOptions.credential,
+    }
+
+    const getStorageClient = () => getStorageClientFunc(storageClientArgs)
+    const getBlobServiceClient = () => getBlobServiceClientFunc(storageClientArgs)
 
     const isPluginDisabled = azureStorageOptions.enabled === false
 
@@ -111,10 +149,7 @@ export const azureStorage: AzureStorageFactory = (
     }
 
     const createContainerIfNotExists = () => {
-      void getStorageClientFunc({
-        connectionString: azureStorageOptions.connectionString,
-        containerName: azureStorageOptions.containerName,
-      }).createIfNotExists({
+      void getStorageClient().createIfNotExists({
         access: 'blob',
       })
     }
@@ -125,6 +160,7 @@ export const azureStorage: AzureStorageFactory = (
       clientUploads: azureStorageOptions.clientUploads,
       containerName: azureStorageOptions.containerName,
       createContainerIfNotExists,
+      getBlobServiceClient,
       getStorageClient,
       useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
     })
