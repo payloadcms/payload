@@ -217,9 +217,10 @@ export async function createLocal<
 
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
 
+  const __originalReqFile = req.file
   req.file = file ?? (await getFileByPath(filePath!))
 
-  return createOperation<TSlug, TSelect>({
+  const operationResult = await createOperation<TSlug, TSelect>({
     collection,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
@@ -235,4 +236,9 @@ export async function createLocal<
     select,
     showHiddenFields,
   })
+  // Restore original request file if it existed before this operation
+  if (typeof __originalReqFile !== 'undefined') {
+    req.file = __originalReqFile
+  }
+  return operationResult
 }
