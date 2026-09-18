@@ -220,9 +220,14 @@ export async function changeLocale(page: Page, newLocale: string) {
 
 export async function waitForFormReady(page: Page) {
   await expect
-    .poll(async () => (await page.locator('[data-form-ready="false"]').count()) === 0, {
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
+    .poll(
+      async () =>
+        (await page.locator('[data-form-ready="false"]').count()) === 0 &&
+        (await page.locator('[data-form-ready="true"]').count()) > 0,
+      {
+        timeout: POLL_TOPASS_TIMEOUT,
+      },
+    )
     .toBe(true)
 }
 

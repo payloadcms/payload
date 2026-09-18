@@ -877,6 +877,7 @@ test.describe('Multi Tenant', () => {
         textToMatch: 'Blue Dog',
         urlUtil: tenantsURL,
       })
+      await waitForFormReady(page)
       await wait(500)
 
       await expect(page.locator('#field-name')).toBeVisible()
@@ -904,6 +905,7 @@ test.describe('Multi Tenant', () => {
         textToMatch: 'Red Dog',
         urlUtil: tenantsURL,
       })
+      await waitForFormReady(page)
       await wait(500)
 
       // Change the tenant back to the original name
