@@ -158,7 +158,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       locale: code || undefined,
     }
 
-    const docAccessPath = `/${collectionSlug}/access?${qs.stringify(params)}`
+    const docAccessPath: `/${string}/access?${string}` = `/${collectionSlug}/access?${qs.stringify(params)}`
     const res = await fetch(formatAdminURL({ apiRoute: api, path: docAccessPath }), {
       credentials: 'include',
       headers: {
