@@ -10,6 +10,43 @@ In addition to its REST and Local APIs, Payload ships with a fully featured and 
 
 By default, the GraphQL API is exposed via `/api/graphql`, but you can customize this URL via specifying your `routes` within the main Payload Config.
 
+## Installation
+
+GraphQL is opt-in. Its packages are optional peer dependencies of `@payloadcms/next`, so projects
+that only use the REST and Local APIs do not install or bundle them.
+
+The templates and `create-payload-app` include GraphQL by default. If you are adding it to an
+existing project, install:
+
+```bash
+pnpm add @payloadcms/graphql graphql graphql-http graphql-playground-html
+```
+
+and make sure the GraphQL routes exist in your app:
+
+```ts
+// app/(payload)/api/graphql/route.ts
+import config from '@payload-config'
+import { GRAPHQL_POST, REST_OPTIONS } from '@payloadcms/next/routes'
+
+export const POST = GRAPHQL_POST(config)
+export const OPTIONS = REST_OPTIONS(config)
+```
+
+```ts
+// app/(payload)/api/graphql-playground/route.ts
+import config from '@payload-config'
+import { GRAPHQL_PLAYGROUND_GET } from '@payloadcms/next/routes'
+
+export const GET = GRAPHQL_PLAYGROUND_GET(config)
+```
+
+<Banner type="info">
+  To remove GraphQL from a project, delete those two route files and uninstall
+  the packages above. Setting `graphQL.disable` to `true` also turns the
+  endpoints off, but keeps the packages installed.
+</Banner>
+
 The labels you provide for your Collections and Globals are used to name the GraphQL types that are created to correspond to your config. Special characters and spaces are removed.
 
 ## GraphQL Clients

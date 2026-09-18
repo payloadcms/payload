@@ -173,6 +173,11 @@
   "peerDependencies": {
     "graphql": "^16.8.1"
   },
+  "peerDependenciesMeta": {
+    "graphql": {
+      "optional": true
+    }
+  },
   "engines": {
     "node": ">=24.15.0"
   },

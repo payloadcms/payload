@@ -121,24 +121,16 @@ export const handleGraphQL = async ({
   const headers: Record<string, string> = {}
   const apiResponse = await createHandler({
     context: { headers, req },
-    onOperation: async (_request: any, args: any, result: any) => {
-      const response =
-        typeof payload.extensions === 'function'
-          ? await payload.extensions({
-              args,
-              req: _request,
-              result,
-            })
-          : result
-      if (response.errors) {
+    onOperation: async (_request: any, _args: any, result: any) => {
+      if (result.errors) {
         const errors = await Promise.all(
-          response.errors.map((error: any) => {
+          result.errors.map((error: any) => {
             return handleError({ err: error, payload, req })
           }),
         )
-        return { ...response, errors }
+        return { ...result, errors }
       }
-      return response
+      return result
     },
     schema,
     validationRules: (_: any, args: any, defaultRules: any) =>
