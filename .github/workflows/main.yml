@@ -19,7 +19,6 @@ env:
   NODE_HEAP_HIGH: --max-old-space-size=8192
 
 permissions:
-  actions: read
   contents: read
 
 jobs:
@@ -513,8 +512,6 @@ jobs:
     needs: [changes, build]
     if: needs.changes.outputs.needs_visual == 'true'
     timeout-minutes: 30
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v5
 
@@ -739,7 +736,6 @@ jobs:
     # with --shard); `test:int:summary` cannot shard.
     continue-on-error: true
     permissions:
-      actions: read
       id-token: write
       contents: read
     services:
