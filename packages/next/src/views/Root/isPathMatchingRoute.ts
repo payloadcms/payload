@@ -18,6 +18,15 @@ export const isPathMatchingRoute = ({
     return false
   }
 
+  const normalizeTrailingSlash = (path: string) => {
+    if (strict || path === '/') {
+      return path
+    }
+
+    return path.replace(/\/$/, '')
+  }
+
+  const normalizedCurrentRoute = normalizeTrailingSlash(currentRoute)
   const keys = []
 
   // run the view path through `pathToRegexp` to resolve any dynamic segments
@@ -27,19 +36,19 @@ export const isPathMatchingRoute = ({
     strict,
   })
 
-  const match = regex.exec(currentRoute)
-  const viewRoute = match?.[0] || viewPath
+  const match = regex.exec(normalizedCurrentRoute)
+  const viewRoute = normalizeTrailingSlash(match?.[0] || viewPath)
 
   if (exact) {
-    return currentRoute === viewRoute
+    return normalizedCurrentRoute === viewRoute
   }
 
   if (!exact) {
-    if (!currentRoute.startsWith(viewRoute)) {
+    if (!normalizedCurrentRoute.startsWith(viewRoute)) {
       return false
     }
 
-    const remainingPath = currentRoute.slice(viewRoute.length)
+    const remainingPath = normalizedCurrentRoute.slice(viewRoute.length)
 
     return remainingPath === '' || remainingPath.startsWith('/')
   }

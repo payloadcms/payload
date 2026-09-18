@@ -71,6 +71,13 @@ test.describe('Trailing Slash', () => {
     apiResponses.length = 0
   })
 
+  test('should render the login page when accessing the admin while logged out', async () => {
+    await page.goto(url.admin)
+
+    await expect(page.locator('.login')).toBeVisible()
+    expect(page.url()).toBe(url.login)
+  })
+
   test('should render forgot-password form action with trailing slash', async () => {
     await page.goto(`${url.admin}/forgot`)
 

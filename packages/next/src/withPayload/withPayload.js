@@ -270,10 +270,9 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
 
-  if (nextConfig.trailingSlash === true) {
-    process.env.NEXT_TRAILING_SLASH = 'true'
-    baseConfig.env.NEXT_TRAILING_SLASH = 'true'
-  }
+  const trailingSlash = nextConfig.trailingSlash === true ? 'true' : 'false'
+  process.env.NEXT_TRAILING_SLASH = trailingSlash
+  baseConfig.env.NEXT_TRAILING_SLASH = trailingSlash
 
   if (!supportsTurbopackBuild) {
     return withPayloadLegacy(baseConfig)
