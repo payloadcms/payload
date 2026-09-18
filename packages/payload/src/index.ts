@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
-import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
 import type { NonNever } from 'ts-essentials'
 
@@ -577,12 +575,6 @@ export class BasePayload {
 
   encryptionKeyring!: EncryptionKeyring
 
-  extensions!: (args: {
-    args: OperationArgs<any>
-    req: graphQLRequest<unknown, unknown>
-    result: ExecutionResult
-  }) => Promise<any>
-
   /**
    * @description Find documents with criteria
    * @param options
@@ -754,8 +746,6 @@ export class BasePayload {
     return restoreVersionLocal<TSlug>(this, options)
   }
 
-  schema!: GraphQLSchema
-
   secret!: string
 
   sendEmail!: InitializedEmailAdapter['sendEmail']
@@ -781,8 +771,6 @@ export class BasePayload {
   ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
     return updateGlobalLocal<TSlug, TSelect>(this, options)
   }
-
-  validationRules!: (args: OperationArgs<any>) => ValidationRule[]
 
   verifyEmail = async <TSlug extends CollectionSlug>(
     options: VerifyEmailOptions<TSlug>,
