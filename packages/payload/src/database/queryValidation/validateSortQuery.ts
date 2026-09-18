@@ -51,6 +51,7 @@ export const validateSortQuery = async ({
       incomingPath: path,
       locale: req.locale!,
       overrideAccess: true,
+      parentIsLocalized: false,
       payload: req.payload,
     })
 

@@ -43,10 +43,7 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   parentIndexPath: string
-  /**
-   * @todo make required in v4.0
-   */
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   populate?: PopulateType
