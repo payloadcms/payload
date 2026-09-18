@@ -32,6 +32,7 @@
       }
 
       /* Stay in a row on mobile, where Row otherwise stacks into a column. */
+      /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
       @media (max-width: 1024px) {
         flex-direction: row;
       }

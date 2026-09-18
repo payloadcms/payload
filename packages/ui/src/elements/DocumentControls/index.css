@@ -144,6 +144,7 @@
     background: transparent;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .doc-controls__controls-wrapper {
       margin-left: auto;
