@@ -70,7 +70,7 @@ export const RootPage = async ({
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
   // route without possible trailing slash
-  const currentRoutePath =
+  const currentRouteToCompare =
     currentRouteURL.length > 1 && currentRouteURL.endsWith('/')
       ? currentRouteURL.slice(0, -1)
       : currentRouteURL
@@ -152,13 +152,13 @@ export const RootPage = async ({
 
   if (
     !permissions.canAccessAdmin &&
-    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRoutePath }) &&
-    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRoutePath })
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRouteToCompare }) &&
+    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRouteToCompare })
   ) {
     redirect(
       handleAuthRedirect({
         config: payload.config,
-        route: currentRoutePath,
+        route: currentRouteToCompare,
         searchParams,
         user: req.user,
       }),
@@ -195,7 +195,7 @@ export const RootPage = async ({
     adminRoute,
     collectionConfig,
     collectionPreferences,
-    currentRoute: currentRoutePath,
+    currentRoute: currentRouteToCompare,
     globalConfig,
     payload,
     searchParams,
@@ -239,15 +239,15 @@ export const RootPage = async ({
       ? rawCreateFirstUserRoute.slice(0, -1)
       : rawCreateFirstUserRoute
 
-  if (disableLocalStrategy && currentRoutePath === createFirstUserRoute) {
+  if (disableLocalStrategy && currentRouteToCompare === createFirstUserRoute) {
     redirect(adminRouteURL)
   }
 
-  if (!dbHasUser && currentRoutePath !== createFirstUserRoute && !disableLocalStrategy) {
+  if (!dbHasUser && currentRouteToCompare !== createFirstUserRoute && !disableLocalStrategy) {
     redirect(rawCreateFirstUserRoute)
   }
 
-  if (dbHasUser && currentRoutePath === createFirstUserRoute) {
+  if (dbHasUser && currentRouteToCompare === createFirstUserRoute) {
     redirect(adminRouteURL)
   }
 
