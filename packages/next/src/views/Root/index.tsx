@@ -144,7 +144,7 @@ export const RootPage = async ({
         }),
       },
       // intentionally omit `serverURL` to keep URL relative
-      urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
+      urlSuffix: `${rawCurrentRoute}${searchParams ? queryString : ''}`,
     },
   })
 
