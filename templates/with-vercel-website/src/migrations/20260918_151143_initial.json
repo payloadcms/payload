@@ -3914,6 +3914,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "_objectkey": {
+          "name": "_objectkey",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "folder_id": {
           "name": "folder_id",
           "type": "integer",
@@ -4809,6 +4815,12 @@
         "hash": {
           "name": "hash",
           "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reset_password_requested_at": {
+          "name": "reset_password_requested_at",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -9181,6 +9193,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "b3556809-69cb-45b6-ab30-8c8607fa2abb",
+  "id": "8b52c6f2-3de2-40bd-a078-5bb4efed209c",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
