@@ -60,6 +60,7 @@ export const RootPage = async ({
     },
     routes: { admin: adminRoute },
   } = config
+  const adminRouteURL = formatAdminURL({ adminRoute })
 
   const params = await paramsPromise
 
@@ -90,7 +91,7 @@ export const RootPage = async ({
 
       // Only redirect if there's NO custom view configured for /collections
       if (!viewKey) {
-        redirect(adminRoute)
+        redirect(adminRouteURL)
       }
     }
 
@@ -109,7 +110,7 @@ export const RootPage = async ({
 
       // Only redirect if there's NO custom view configured for /globals
       if (!viewKey) {
-        redirect(adminRoute)
+        redirect(adminRouteURL)
       }
     }
 
@@ -220,7 +221,7 @@ export const RootPage = async ({
     }
 
     if (dbHasUser) {
-      redirect(adminRoute)
+      redirect(adminRouteURL)
     }
   }
 
@@ -237,19 +238,19 @@ export const RootPage = async ({
       : rawCreateFirstUserRoute
 
   if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
-    redirect(adminRoute)
+    redirect(adminRouteURL)
   }
 
   if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
-    redirect(createFirstUserRoute)
+    redirect(rawCreateFirstUserRoute)
   }
 
   if (dbHasUser && currentRoute === createFirstUserRoute) {
-    redirect(adminRoute)
+    redirect(adminRouteURL)
   }
 
   if (!DefaultView?.Component && !DefaultView?.payloadComponent && !dbHasUser) {
-    redirect(adminRoute)
+    redirect(adminRouteURL)
   }
 
   const clientConfig = getClientConfig({
