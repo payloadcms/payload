@@ -73,6 +73,7 @@ test.suite({ config: './config.ts' })('globals', () => {
           },
         },
         slug,
+        overrideAccess: true,
       })
 
       expect(createdJSON.json.state).toEqual({})
@@ -85,6 +86,7 @@ test.suite({ config: './config.ts' })('globals', () => {
       const doc = await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
       expect(doc).toMatchObject(data)
     })
@@ -97,9 +99,11 @@ test.suite({ config: './config.ts' })('globals', () => {
       await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
       const doc = await payload.findGlobal({
         slug,
+        overrideAccess: true,
       })
 
       expect(doc.globalType).toEqual(slug)
@@ -130,6 +134,7 @@ test.suite({ config: './config.ts' })('globals', () => {
         },
         locale: englishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       await payload.updateGlobal({
@@ -138,16 +143,19 @@ test.suite({ config: './config.ts' })('globals', () => {
         },
         locale: spanishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       const en = await payload.findGlobal({
         locale: englishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       const es = await payload.findGlobal({
         locale: spanishLocale,
         slug: arraySlug,
+        overrideAccess: true,
       })
 
       expect(en).toMatchObject(localized.en)
@@ -179,6 +187,7 @@ test.suite({ config: './config.ts' })('globals', () => {
           enabled: true,
         },
         slug: accessControlSlug,
+        overrideAccess: true,
       })
 
       const hasAccess = await payload.findGlobal({
@@ -194,6 +203,7 @@ test.suite({ config: './config.ts' })('globals', () => {
     }) => {
       const defaultValueGlobal = await payload.findGlobal({
         slug: defaultValueSlug,
+        overrideAccess: true,
       })
 
       expect(defaultValueGlobal.text).toStrictEqual('test')
@@ -227,6 +237,7 @@ test.suite({ config: './config.ts' })('globals', () => {
       await payload.updateGlobal({
         data,
         slug,
+        overrideAccess: true,
       })
 
       const query = `query {

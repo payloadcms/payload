@@ -16,6 +16,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
         email: 'bulk-delete-owner@payloadcms.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     const otherUser = await payload.create({
@@ -24,6 +25,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
         email: 'bulk-delete-other@payloadcms.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     const lockedPost = await payload.create({
@@ -31,6 +33,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
       data: {
         text: 'bulk delete locked post',
       },
+      overrideAccess: true,
     })
 
     const unlockedPost = await payload.create({
@@ -38,6 +41,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
       data: {
         text: 'bulk delete unlocked post',
       },
+      overrideAccess: true,
     })
 
     // Give locking ownership of one of the two documents to another user
@@ -54,6 +58,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
           value: otherUser.id,
         },
       },
+      overrideAccess: true,
     })
 
     // The other document is locked by the user performing the delete, so it is not blocked. It
@@ -71,6 +76,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
           value: deletingUser.id,
         },
       },
+      overrideAccess: true,
     })
 
     const { docs, errors } = await payload.delete({
@@ -80,6 +86,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
       where: {
         id: { in: [lockedPost.id, unlockedPost.id] },
       },
+      overrideAccess: true,
     })
 
     expect(docs).toHaveLength(1)
@@ -95,6 +102,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
       where: {
         id: { in: [lockedPost.id, unlockedPost.id] },
       },
+      overrideAccess: true,
     })
 
     expect(remainingPosts.docs).toHaveLength(1)
@@ -105,6 +113,7 @@ test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
       payload.findByID({
         id: ownLock.id,
         collection: lockedDocumentCollection,
+        overrideAccess: true,
       }),
     ).rejects.toBeInstanceOf(NotFound)
   })

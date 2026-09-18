@@ -42,7 +42,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('First user regi
       expect(registered.user).not.toHaveProperty('restrictedField')
     } finally {
       if (createdUserID) {
-        await payload.delete({ id: createdUserID, collection: firstUsersSlug as any })
+        await payload.delete({
+          id: createdUserID,
+          collection: firstUsersSlug as any,
+          overrideAccess: true,
+        })
       }
     }
   })

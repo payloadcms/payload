@@ -231,6 +231,7 @@ export function buildPluginCloudStorageIntConfig({
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       payload.logger.info(

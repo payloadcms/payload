@@ -185,6 +185,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     const updated = await payload.findByID({
       id: doc.id,
       collection: mediaWithDocPrefixSlug,
+      overrideAccess: true,
     })
 
     expect(updated.prefix).toBe(doc.prefix)
@@ -215,7 +216,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
   test('should delete an existing upload at its pre-upgrade object key', async ({ payload }) => {
     const { doc, key } = await seedLegacyUpload({ payload })
 
-    await payload.delete({ collection: mediaWithDocPrefixSlug, id: doc.id })
+    await payload.delete({ id: doc.id, collection: mediaWithDocPrefixSlug, overrideAccess: true })
 
     expect(await containerClient.getBlockBlobClient(key).exists()).toBe(false)
   })
@@ -225,10 +226,11 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
   }) => {
     const { doc, key } = await seedLegacyUpload({ payload })
     const updated = await payload.update({
-      collection: mediaWithDocPrefixSlug,
       id: doc.id,
+      collection: mediaWithDocPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(updated.prefix).toBe('docprefix-collection/legacy-invoices')
@@ -275,14 +277,14 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
     expect(instructions.type).toBe('dispatch')
 
     expect(instructions.file).toEqual({
+      filename: 'duplicate-target-1.png',
+      mimeType: 'image/png',
+      size: fileBuffer.length,
       uploadReference: {
         _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
         prefix: '',
         signedReceipt: expect.any(String),
       },
-      filename: 'duplicate-target-1.png',
-      mimeType: 'image/png',
-      size: fileBuffer.length,
     })
 
     if (instructions.type !== 'dispatch') {
@@ -298,7 +300,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
     expect(blobKey).toMatch(/^[0-9a-f-]+\/duplicate-target-1\.png$/)
 
-    await payload.delete({ id: seedDoc.id, collection: mediaSlug })
+    await payload.delete({ id: seedDoc.id, collection: mediaSlug, overrideAccess: true })
   })
 
   test('should preserve prefix.defaultValue while storing the file beneath the collection prefix', async ({
@@ -308,6 +310,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
       collection: mediaWithDocPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.prefix).toMatch(/^docprefix-collection\/doc-[a-z0-9]{1,8}$/)
@@ -336,7 +339,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlySlug })
+        await payload.delete({ id, collection: mediaHeaderOnlySlug, overrideAccess: true })
       }
       createdIds.length = 0
     })
@@ -429,7 +432,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads',
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
+        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug, overrideAccess: true })
       }
       createdIds.length = 0
     })

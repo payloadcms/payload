@@ -36,6 +36,7 @@ test.suite({ config: './config.ts', cron: false })('Queues - CLI', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)

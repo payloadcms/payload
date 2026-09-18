@@ -55,6 +55,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   })
 
@@ -63,7 +64,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
     test.afterEach(async ({ payload }) => {
       for (const id of created) {
-        await payload.delete({ collection: 'slug-fields', id })
+        await payload.delete({ id, collection: 'slug-fields', overrideAccess: true })
       }
       created.length = 0
     })
@@ -72,6 +73,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: 'slug-fields',
         data: { title: 'My First Post' },
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.slug).toBe('my-first-post')
@@ -80,7 +82,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should keep a user-provided slug on create', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'My First Post', slug: 'custom-slug' },
+        data: { slug: 'custom-slug', title: 'My First Post' },
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.slug).toBe('custom-slug')
@@ -89,7 +92,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should slugify an unnormalized explicit value', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'My First Post', slug: 'Hello World' },
+        data: { slug: 'Hello World', title: 'My First Post' },
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.slug).toBe('hello-world')
@@ -99,20 +103,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: 'slug-fields',
         data: { title: 'Original Title' },
+        overrideAccess: true,
       })
       created.push(doc.id)
 
       const updated = await payload.update({
-        collection: 'slug-fields',
         id: doc.id,
-        data: { title: 'Changed Title', slug: 'manual-value' },
+        collection: 'slug-fields',
+        data: { slug: 'manual-value', title: 'Changed Title' },
+        overrideAccess: true,
       })
       expect(updated.slug).toBe('manual-value')
 
       const again = await payload.update({
-        collection: 'slug-fields',
         id: doc.id,
+        collection: 'slug-fields',
         data: { title: 'Changed Title Again' },
+        overrideAccess: true,
       })
       expect(again.slug).toBe('manual-value')
     })
@@ -120,8 +127,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should fill every locale of a localized slug on create', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Title', localizedTitle: 'English Title' },
+        data: { localizedTitle: 'English Title', title: 'Title' },
         locale: 'en',
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.localizedSlug).toBe('english-title')
@@ -129,9 +137,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       // The other locale is seeded on create so switching locales never lands on an empty slug —
       // with no source of its own it takes a `<singular>-N` fallback.
       const allLocales = await payload.findByID({
-        collection: 'slug-fields',
         id: doc.id,
+        collection: 'slug-fields',
         locale: 'all',
+        overrideAccess: true,
       })
       const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
       expect(localizedSlug.en).toBe('english-title')
@@ -145,15 +154,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         collection: 'slug-fields',
         data: { title: 'Hello World' },
         locale: 'en',
+        overrideAccess: true,
       })
       created.push(doc.id)
 
       // `title` is not localized, so its value applies to every locale — each derives `hello-world`
       // rather than falling back to the counter.
       const allLocales = await payload.findByID({
-        collection: 'slug-fields',
         id: doc.id,
+        collection: 'slug-fields',
         locale: 'all',
+        overrideAccess: true,
       })
       const shared = allLocales.localizedSharedSlug as unknown as Record<string, string>
       expect(shared.en).toBe('hello-world')
@@ -165,23 +176,26 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     }) => {
       const doc = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Title', localizedTitle: 'English Title' },
+        data: { localizedTitle: 'English Title', title: 'Title' },
         locale: 'en',
+        overrideAccess: true,
       })
       created.push(doc.id)
 
       // Changing one locale's slug leaves the others untouched (a slug is static once set).
       await payload.update({
-        collection: 'slug-fields',
         id: doc.id,
+        collection: 'slug-fields',
         data: { localizedSlug: 'titulo-espanol' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       const allLocales = await payload.findByID({
-        collection: 'slug-fields',
         id: doc.id,
+        collection: 'slug-fields',
         locale: 'all',
+        overrideAccess: true,
       })
       const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
       expect(localizedSlug.en).toBe('english-title')
@@ -194,6 +208,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: 'slug-fields',
         data: { title: 'No Source' },
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.sourcelessSlug).toMatch(/^slug-field-\d+$/)
@@ -204,7 +219,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     }) => {
       const doc = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'No Source', sourcelessSlug: 'Manual Value' },
+        data: { sourcelessSlug: 'Manual Value', title: 'No Source' },
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.sourcelessSlug).toBe('manual-value')
@@ -213,16 +229,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should allow the same localized slug value in different locales', async ({ payload }) => {
       const en = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Title', localizedSlug: 'shared' },
+        data: { localizedSlug: 'shared', title: 'Title' },
         locale: 'en',
+        overrideAccess: true,
       })
       created.push(en.id)
       expect(en.localizedSlug).toBe('shared')
 
       const es = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Titulo', localizedSlug: 'shared' },
+        data: { localizedSlug: 'shared', title: 'Titulo' },
         locale: 'es',
+        overrideAccess: true,
       })
       created.push(es.id)
       expect(es.localizedSlug).toBe('shared')
@@ -233,24 +251,27 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     }) => {
       const doc = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Title', localizedSlug: 'shared-across-self' },
+        data: { localizedSlug: 'shared-across-self', title: 'Title' },
         locale: 'en',
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.localizedSlug).toBe('shared-across-self')
 
       const es = await payload.update({
-        collection: 'slug-fields',
         id: doc.id,
+        collection: 'slug-fields',
         data: { localizedSlug: 'shared-across-self' },
         locale: 'es',
+        overrideAccess: true,
       })
       expect(es.localizedSlug).toBe('shared-across-self')
 
       const allLocales = await payload.findByID({
-        collection: 'slug-fields',
         id: doc.id,
+        collection: 'slug-fields',
         locale: 'all',
+        overrideAccess: true,
       })
       const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
       expect(localizedSlug.en).toBe('shared-across-self')
@@ -262,8 +283,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     }) => {
       const first = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'First', localizedSlug: 'shared-localized' },
+        data: { localizedSlug: 'shared-localized', title: 'First' },
         locale: 'es',
+        overrideAccess: true,
       })
       created.push(first.id)
       expect(first.localizedSlug).toBe('shared-localized')
@@ -271,8 +293,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       await expect(
         payload.create({
           collection: 'slug-fields',
-          data: { title: 'Second', localizedSlug: 'shared-localized' },
+          data: { localizedSlug: 'shared-localized', title: 'Second' },
           locale: 'es',
+          overrideAccess: true,
         }),
       ).rejects.toThrow()
     })
@@ -281,30 +304,43 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       // Doc A: en `my-slug`, es `my-slugo`.
       const a = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'A', localizedSlug: 'my-slug' },
+        data: { localizedSlug: 'my-slug', title: 'A' },
         locale: 'en',
+        overrideAccess: true,
       })
       created.push(a.id)
       await payload.update({
-        collection: 'slug-fields',
         id: a.id,
+        collection: 'slug-fields',
         data: { localizedSlug: 'my-slugo' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       // Doc B may take `my-slug` in es — it matches A's en value, but the es namespace is free.
       const b = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'B', localizedSlug: 'my-slug' },
+        data: { localizedSlug: 'my-slug', title: 'B' },
         locale: 'es',
+        overrideAccess: true,
       })
       created.push(b.id)
 
       const aLocales = (
-        await payload.findByID({ collection: 'slug-fields', id: a.id, locale: 'all' })
+        await payload.findByID({
+          id: a.id,
+          collection: 'slug-fields',
+          locale: 'all',
+          overrideAccess: true,
+        })
       ).localizedSlug as unknown as Record<string, string>
       const bLocales = (
-        await payload.findByID({ collection: 'slug-fields', id: b.id, locale: 'all' })
+        await payload.findByID({
+          id: b.id,
+          collection: 'slug-fields',
+          locale: 'all',
+          overrideAccess: true,
+        })
       ).localizedSlug as unknown as Record<string, string>
       expect(aLocales.en).toBe('my-slug')
       expect(aLocales.es).toBe('my-slugo')
@@ -314,8 +350,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       await expect(
         payload.create({
           collection: 'slug-fields',
-          data: { title: 'C', localizedSlug: 'my-slugo' },
+          data: { localizedSlug: 'my-slugo', title: 'C' },
           locale: 'es',
+          overrideAccess: true,
         }),
       ).rejects.toThrow()
     })
@@ -325,16 +362,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     }) => {
       const first = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'First', localizedTitle: 'Shared Derived' },
+        data: { localizedTitle: 'Shared Derived', title: 'First' },
         locale: 'es',
+        overrideAccess: true,
       })
       created.push(first.id)
       expect(first.localizedSlug).toBe('shared-derived')
 
       const second = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Second', localizedTitle: 'Shared Derived' },
+        data: { localizedTitle: 'Shared Derived', title: 'Second' },
         locale: 'es',
+        overrideAccess: true,
       })
       created.push(second.id)
       expect(second.localizedSlug).toBe('shared-derived-1')
@@ -345,16 +384,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     }) => {
       const en = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'English', localizedTitle: 'Cross Locale' },
+        data: { localizedTitle: 'Cross Locale', title: 'English' },
         locale: 'en',
+        overrideAccess: true,
       })
       created.push(en.id)
       expect(en.localizedSlug).toBe('cross-locale')
 
       const es = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Spanish', localizedTitle: 'Cross Locale' },
+        data: { localizedTitle: 'Cross Locale', title: 'Spanish' },
         locale: 'es',
+        overrideAccess: true,
       })
       created.push(es.id)
       expect(es.localizedSlug).toBe('cross-locale')
@@ -366,13 +407,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const original = await payload.create({
         collection: 'slug-fields',
         data: { title: 'My First Post' },
+        overrideAccess: true,
       })
       created.push(original.id)
       expect(original.slug).toBe('my-first-post')
 
       const duplicate = await payload.duplicate({
-        collection: 'slug-fields',
         id: original.id,
+        collection: 'slug-fields',
+        overrideAccess: true,
       })
       created.push(duplicate.id)
 
@@ -380,8 +423,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       expect(duplicate.slug).toBe('slug-field-1')
 
       const secondDuplicate = await payload.duplicate({
-        collection: 'slug-fields',
         id: original.id,
+        collection: 'slug-fields',
+        overrideAccess: true,
       })
       created.push(secondDuplicate.id)
       expect(secondDuplicate.slug).toBe('slug-field-2')
@@ -392,7 +436,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     }) => {
       const doc = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Fallthrough Title', slug: '!!!' },
+        data: { slug: '!!!', title: 'Fallthrough Title' },
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.slug).toBe('fallthrough-title')
@@ -401,7 +446,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should reject a slug that collides with another document', async ({ payload }) => {
       const first = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'First', slug: 'shared-slug' },
+        data: { slug: 'shared-slug', title: 'First' },
+        overrideAccess: true,
       })
       created.push(first.id)
       expect(first.slug).toBe('shared-slug')
@@ -409,7 +455,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       await expect(
         payload.create({
           collection: 'slug-fields',
-          data: { title: 'Second', slug: 'shared-slug' },
+          data: { slug: 'shared-slug', title: 'Second' },
+          overrideAccess: true,
         }),
       ).rejects.toThrow()
     })
@@ -417,33 +464,42 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should reject updating a slug to collide with another document', async ({ payload }) => {
       const a = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Doc A', slug: 'doc-a' },
+        data: { slug: 'doc-a', title: 'Doc A' },
+        overrideAccess: true,
       })
       created.push(a.id)
       const b = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Doc B', slug: 'doc-b' },
+        data: { slug: 'doc-b', title: 'Doc B' },
+        overrideAccess: true,
       })
       created.push(b.id)
 
       await expect(
-        payload.update({ collection: 'slug-fields', id: b.id, data: { slug: 'doc-a' } }),
+        payload.update({
+          id: b.id,
+          collection: 'slug-fields',
+          data: { slug: 'doc-a' },
+          overrideAccess: true,
+        }),
       ).rejects.toThrow()
     })
 
     test('should allow re-saving a document with its own unchanged slug', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'slug-fields',
-        data: { title: 'Stable', slug: 'stable-slug' },
+        data: { slug: 'stable-slug', title: 'Stable' },
+        overrideAccess: true,
       })
       created.push(doc.id)
 
       // Autosave resends the current slug on every tick — re-saving the same value must not trip the
       // collision check against the document itself.
       const updated = await payload.update({
-        collection: 'slug-fields',
         id: doc.id,
+        collection: 'slug-fields',
         data: { slug: 'stable-slug' },
+        overrideAccess: true,
       })
       expect(updated.slug).toBe('stable-slug')
     })
@@ -458,6 +514,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         collection: 'slug-fields',
         data: { title: 'Taken' },
         locale: 'es',
+        overrideAccess: true,
       })
       created.push(taken.id)
       const takenSlug = taken.localizedSlug as string
@@ -484,6 +541,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const first = await payload.create({
         collection: 'slug-fields',
         data: { title: 'Shared Regen' },
+        overrideAccess: true,
       })
       created.push(first.id)
       expect(first.slug).toBe('shared-regen')
@@ -509,6 +567,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: 'slug-fields',
         data: { title: 'Own Slug' },
+        overrideAccess: true,
       })
       created.push(doc.id)
       expect(doc.slug).toBe('own-slug')
@@ -534,7 +593,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       test.afterEach(async ({ payload }) => {
         for (const id of created) {
-          await payload.delete({ collection: 'slug-autosave', id })
+          await payload.delete({ id, collection: 'slug-autosave', overrideAccess: true })
         }
         created.length = 0
       })
@@ -542,8 +601,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should generate the slug from the source on a draft create', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: { title: 'Draft One' },
+          draft: true,
+          overrideAccess: true,
         })
         created.push(draft.id)
         expect(draft.slug).toBe('draft-one')
@@ -554,8 +614,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: {},
+          draft: true,
+          overrideAccess: true,
         })
         created.push(draft.id)
         expect(draft.slug).toBe('slug-autosave-1')
@@ -563,9 +624,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // The admin reads the latest draft version, not the create response, so the fallback must
         // be persisted there too.
         const latestDraft = await payload.findByID({
-          collection: 'slug-autosave',
           id: draft.id,
+          collection: 'slug-autosave',
           draft: true,
+          overrideAccess: true,
         })
         expect(latestDraft.slug).toBe('slug-autosave-1')
       })
@@ -575,8 +637,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: { slug: '!!!' },
+          draft: true,
+          overrideAccess: true,
         })
         created.push(draft.id)
         expect(draft.slug).toBe('slug-autosave-1')
@@ -587,15 +650,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const first = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: {},
+          draft: true,
+          overrideAccess: true,
         })
         created.push(first.id)
 
         const second = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: {},
+          draft: true,
+          overrideAccess: true,
         })
         created.push(second.id)
 
@@ -606,8 +671,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should reject a draft slug that collides with another draft', async ({ payload }) => {
         const first = await payload.create({
           collection: 'slug-autosave',
+          data: { slug: 'shared-draft-slug', title: 'First' },
           draft: true,
-          data: { title: 'First', slug: 'shared-draft-slug' },
+          overrideAccess: true,
         })
         created.push(first.id)
         expect(first.slug).toBe('shared-draft-slug')
@@ -615,8 +681,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await expect(
           payload.create({
             collection: 'slug-autosave',
+            data: { slug: 'shared-draft-slug', title: 'Second' },
             draft: true,
-            data: { title: 'Second', slug: 'shared-draft-slug' },
+            overrideAccess: true,
           }),
         ).rejects.toThrow()
       })
@@ -626,23 +693,26 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const a = await payload.create({
           collection: 'slug-autosave',
+          data: { slug: 'draft-a', title: 'A' },
           draft: true,
-          data: { title: 'A', slug: 'draft-a' },
+          overrideAccess: true,
         })
         created.push(a.id)
         const b = await payload.create({
           collection: 'slug-autosave',
+          data: { slug: 'draft-b', title: 'B' },
           draft: true,
-          data: { title: 'B', slug: 'draft-b' },
+          overrideAccess: true,
         })
         created.push(b.id)
 
         await expect(
           payload.update({
-            collection: 'slug-autosave',
             id: b.id,
-            draft: true,
+            collection: 'slug-autosave',
             data: { slug: 'draft-a' },
+            draft: true,
+            overrideAccess: true,
           }),
         ).rejects.toThrow()
       })
@@ -652,9 +722,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const en = await payload.create({
           collection: 'slug-autosave',
+          data: { localizedSlug: 'shared-draft-localized', localizedTitle: 'One' },
           draft: true,
-          data: { localizedTitle: 'One', localizedSlug: 'shared-draft-localized' },
           locale: 'en',
+          overrideAccess: true,
         })
         created.push(en.id)
         expect(en.localizedSlug).toBe('shared-draft-localized')
@@ -662,9 +733,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // Same value in a different locale is fine — uniqueness is per-locale.
         const es = await payload.create({
           collection: 'slug-autosave',
+          data: { localizedSlug: 'shared-draft-localized', localizedTitle: 'Uno' },
           draft: true,
-          data: { localizedTitle: 'Uno', localizedSlug: 'shared-draft-localized' },
           locale: 'es',
+          overrideAccess: true,
         })
         created.push(es.id)
         expect(es.localizedSlug).toBe('shared-draft-localized')
@@ -673,9 +745,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await expect(
           payload.create({
             collection: 'slug-autosave',
+            data: { localizedSlug: 'shared-draft-localized', localizedTitle: 'Two' },
             draft: true,
-            data: { localizedTitle: 'Two', localizedSlug: 'shared-draft-localized' },
             locale: 'en',
+            overrideAccess: true,
           }),
         ).rejects.toThrow()
       })
@@ -685,27 +758,30 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: {},
+          draft: true,
           locale: 'en',
+          overrideAccess: true,
         })
         created.push(draft.id)
         expect(draft.localizedSlug).toBe('slug-autosave-1')
 
         // The fallback must persist to the draft version the admin reads back, and survive publish.
         const latestDraft = await payload.findByID({
-          collection: 'slug-autosave',
           id: draft.id,
+          collection: 'slug-autosave',
           draft: true,
           locale: 'en',
+          overrideAccess: true,
         })
         expect(latestDraft.localizedSlug).toBe('slug-autosave-1')
 
         const published = await payload.update({
-          collection: 'slug-autosave',
           id: draft.id,
+          collection: 'slug-autosave',
           data: { _status: 'published' },
           locale: 'en',
+          overrideAccess: true,
         })
         expect(published.localizedSlug).toBe('slug-autosave-1')
       })
@@ -715,17 +791,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: {},
+          draft: true,
           locale: 'en',
+          overrideAccess: true,
         })
         created.push(draft.id)
 
         const allLocales = await payload.findByID({
-          collection: 'slug-autosave',
           id: draft.id,
+          collection: 'slug-autosave',
           draft: true,
           locale: 'all',
+          overrideAccess: true,
         })
         const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
         expect(localizedSlug.en).toMatch(/^slug-autosave-\d+$/)
@@ -737,20 +815,22 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const en = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: {},
+          draft: true,
           locale: 'en',
+          overrideAccess: true,
         })
         created.push(en.id)
         expect(en.localizedSlug).toBe('slug-autosave-1')
 
         // A different locale falls back independently — the counter is scoped per-locale.
         const es = await payload.update({
-          collection: 'slug-autosave',
           id: en.id,
-          draft: true,
+          collection: 'slug-autosave',
           data: {},
+          draft: true,
           locale: 'es',
+          overrideAccess: true,
         })
         expect(es.localizedSlug).toBe('slug-autosave-1')
       })
@@ -758,13 +838,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should give a duplicated draft its own unique slug', async ({ payload }) => {
         const original = await payload.create({
           collection: 'slug-autosave',
+          data: { slug: 'dup-me', title: 'Dup Me' },
           draft: true,
-          data: { title: 'Dup Me', slug: 'dup-me' },
+          overrideAccess: true,
         })
         created.push(original.id)
         expect(original.slug).toBe('dup-me')
 
-        const duplicate = await payload.duplicate({ collection: 'slug-autosave', id: original.id })
+        const duplicate = await payload.duplicate({
+          id: original.id,
+          collection: 'slug-autosave',
+          overrideAccess: true,
+        })
         created.push(duplicate.id)
 
         expect(duplicate.slug).not.toBe('dup-me')
@@ -776,8 +861,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
+          data: { slug: 'user-typed', title: 'Draft One' },
           draft: true,
-          data: { title: 'Draft One', slug: 'user-typed' },
+          overrideAccess: true,
         })
         created.push(draft.id)
         expect(draft.slug).toBe('user-typed')
@@ -786,17 +872,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should freeze the slug across subsequent autosaves once set', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: { title: 'Draft One' },
+          draft: true,
+          overrideAccess: true,
         })
         created.push(draft.id)
         expect(draft.slug).toBe('draft-one')
 
         const updated = await payload.update({
-          collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          collection: 'slug-autosave',
           data: { title: 'Draft One Updated' },
+          draft: true,
+          overrideAccess: true,
         })
         expect(updated.slug).toBe('draft-one')
       })
@@ -804,31 +892,35 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should keep an admin overwrite across subsequent autosaves', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: { title: 'Draft One' },
+          draft: true,
+          overrideAccess: true,
         })
         created.push(draft.id)
 
         await payload.update({
-          collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          collection: 'slug-autosave',
           data: { title: 'Draft Two' },
+          draft: true,
+          overrideAccess: true,
         })
 
         const overwritten = await payload.update({
-          collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          collection: 'slug-autosave',
           data: { slug: 'human-chosen-slug' },
+          draft: true,
+          overrideAccess: true,
         })
         expect(overwritten.slug).toBe('human-chosen-slug')
 
         const afterMoreEdits = await payload.update({
-          collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          collection: 'slug-autosave',
           data: { title: 'Draft Three' },
+          draft: true,
+          overrideAccess: true,
         })
         expect(afterMoreEdits.slug).toBe('human-chosen-slug')
       })
@@ -836,30 +928,34 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should not change an already-set slug on publish or after', async ({ payload }) => {
         const draft = await payload.create({
           collection: 'slug-autosave',
-          draft: true,
           data: { title: 'Draft One' },
+          draft: true,
+          overrideAccess: true,
         })
         created.push(draft.id)
         expect(draft.slug).toBe('draft-one')
 
         await payload.update({
-          collection: 'slug-autosave',
           id: draft.id,
-          draft: true,
+          collection: 'slug-autosave',
           data: { title: 'Publishable Title' },
+          draft: true,
+          overrideAccess: true,
         })
 
         const published = await payload.update({
-          collection: 'slug-autosave',
           id: draft.id,
+          collection: 'slug-autosave',
           data: { _status: 'published', title: 'Publishable Title' },
+          overrideAccess: true,
         })
         expect(published.slug).toBe('draft-one')
 
         const afterPublish = await payload.update({
-          collection: 'slug-autosave',
           id: draft.id,
+          collection: 'slug-autosave',
           data: { _status: 'published', title: 'Title Changed After Publish' },
+          overrideAccess: true,
         })
         expect(afterPublish.slug).toBe('draft-one')
       })
@@ -872,7 +968,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
     test.afterEach(async ({ payload }) => {
       for (const id of created) {
-        await payload.delete({ collection, id })
+        await payload.delete({ id, collection, overrideAccess: true })
       }
       created.length = 0
     })
@@ -884,6 +980,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const hidden = await payload.create({
         collection,
         data: { title: 'REST shared title' },
+        overrideAccess: true,
       })
       created.push(hidden.id)
 
@@ -903,6 +1000,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const hidden = await payload.create({
         collection,
         data: { title: 'Shared title' },
+        overrideAccess: true,
       })
       created.push(hidden.id)
 
@@ -924,17 +1022,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const hidden = await payload.create({
         collection,
         data: { slug: 'shared-slug', title: 'Hidden' },
+        overrideAccess: true,
       })
       const editable = await payload.create({
         collection,
         data: { slug: 'editable-slug', title: 'Editable' },
+        overrideAccess: true,
       })
       created.push(hidden.id, editable.id)
 
       const req = await createLocalReq({ user: user.user }, payload)
       const updated = await payload.update({
-        collection,
         id: editable.id,
+        collection,
         data: { slug: 'shared-slug' },
         overrideAccess: false,
         req,
@@ -948,6 +1048,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         collection,
         data: { localizedTitle: 'Localized title', title: 'Hidden' },
         locale: 'en',
+        overrideAccess: true,
       })
       created.push(hidden.id)
 
@@ -962,14 +1063,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       created.push(createdWithAccess.id)
 
       const allLocales = await payload.findByID({
-        collection,
         id: createdWithAccess.id,
+        collection,
         locale: 'all',
+        overrideAccess: true,
       })
       const hiddenLocales = await payload.findByID({
-        collection,
         id: hidden.id,
+        collection,
         locale: 'all',
+        overrideAccess: true,
       })
       const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
       const hiddenLocalizedSlug = hiddenLocales.localizedSlug as unknown as Record<string, string>
@@ -982,6 +1085,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const hidden = await payload.create({
         collection,
         data: { title: 'Hidden' },
+        overrideAccess: true,
       })
       created.push(hidden.id)
 
@@ -1003,6 +1107,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const hidden = await payload.create({
         collection,
         data: { title: 'Shared title' },
+        overrideAccess: true,
       })
       created.push(hidden.id)
 
@@ -1026,12 +1131,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       doc = await payload.create({
         collection: 'text-fields',
         data: { text },
+        overrideAccess: true,
       })
     })
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdDuplicateIDs) {
-        await payload.delete({ id, collection: duplicateFieldsSlug })
+        await payload.delete({ id, collection: duplicateFieldsSlug, overrideAccess: true })
       }
       createdDuplicateIDs.length = 0
     })
@@ -1043,12 +1149,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           disabledText: 'source-value',
           text,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(source.id)
 
       const duplicate = await payload.duplicate({
         id: source.id,
         collection: duplicateFieldsSlug,
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(duplicate.id)
 
@@ -1066,6 +1174,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           },
           text,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(source.id)
 
@@ -1075,6 +1184,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         context: {
           shouldThrowDisabledDuplicateDescendantHook: true,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(duplicate.id)
 
@@ -1096,12 +1206,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           ],
           text,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(source.id)
 
       const duplicate = await payload.duplicate({
         id: source.id,
         collection: duplicateFieldsSlug,
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(duplicate.id)
 
@@ -1123,12 +1235,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           ],
           text,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(source.id)
 
       const duplicate = await payload.duplicate({
         id: source.id,
         collection: duplicateFieldsSlug,
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(duplicate.id)
 
@@ -1150,12 +1264,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           ],
           text,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(source.id)
 
       const duplicate = await payload.duplicate({
         id: source.id,
         collection: duplicateFieldsSlug,
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(duplicate.id)
 
@@ -1175,6 +1291,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           disabledText: 'source-value',
           text,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(source.id)
 
@@ -1184,6 +1301,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           disabledText: 'request-value',
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(duplicate.id)
 
@@ -1199,6 +1317,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           disabledHookText: 'source-value',
           text,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(source.id)
 
@@ -1208,6 +1327,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         context: {
           shouldThrowDisabledDuplicateHook: true,
         },
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(duplicate.id)
 
@@ -1224,6 +1344,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           text,
         },
         locale: 'en',
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(source.id)
 
@@ -1231,6 +1352,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         id: source.id,
         collection: duplicateFieldsSlug,
         locale: 'en',
+        overrideAccess: true,
       })
       createdDuplicateIDs.push(duplicate.id)
 
@@ -1249,6 +1371,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const { dependentOnFieldWithDefaultValue, fieldWithDefaultValue } = await payload.create({
         collection: 'text-fields',
         data: { text },
+        overrideAccess: true,
       })
 
       expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
@@ -1256,13 +1379,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
     test('should populate function default values from req', async ({ payload }) => {
       const text = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'required' },
+        overrideAccess: true,
         req: {
           context: {
             defaultValue: 'from-context',
           },
         },
-        collection: 'text-fields',
-        data: { text: 'required' },
       })
 
       expect(text.defaultValueFromReq).toBe('from-context')
@@ -1277,11 +1401,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           text,
         },
         locale: 'en',
+        overrideAccess: true,
       })
       const localizedDoc = await payload.findByID({
         id,
         collection: 'text-fields',
         locale: 'all',
+        overrideAccess: true,
       })
 
       // @ts-expect-error
@@ -1300,12 +1426,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           },
         },
         locale: 'all',
+        overrideAccess: true,
       })
 
       const allLocales = await payload.findByID({
         id: doc.id,
         collection: 'text-fields',
         locale: 'all',
+        overrideAccess: true,
       })
 
       // @ts-expect-error
@@ -1313,7 +1441,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       // @ts-expect-error
       expect(allLocales.localizedRequiredText.es).toEqual('Spanish text')
 
-      await payload.delete({ collection: 'text-fields', id: doc.id })
+      await payload.delete({ id: doc.id, collection: 'text-fields', overrideAccess: true })
     })
 
     test('should query hasMany in', async ({ payload }) => {
@@ -1323,6 +1451,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasMany: ['one', 'five'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const miss = await payload.create({
@@ -1331,10 +1460,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasMany: ['two'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
         where: {
           hasMany: {
             in: ['one'],
@@ -1350,7 +1481,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     })
 
     test('should query multiple hasMany fields', async ({ payload }) => {
-      await payload.delete({ collection: 'text-fields', where: {} })
+      await payload.delete({ collection: 'text-fields', overrideAccess: true, where: {} })
       const hit = await payload.create({
         collection: 'text-fields',
         data: {
@@ -1358,6 +1489,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasManySecond: ['4'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const miss = await payload.create({
@@ -1367,10 +1499,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasManySecond: ['4'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
         where: {
           hasMany: { equals: '3' },
           hasManySecond: {
@@ -1393,6 +1527,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasMany: ['apple pie', 'banana bread', 'cherry tart'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const miss = await payload.create({
@@ -1401,10 +1536,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasMany: ['orange juice', 'grape soda'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
         where: {
           hasMany: {
             contains: 'banana',
@@ -1418,8 +1555,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       expect(hitResult).toBeDefined()
       expect(missResult).toBeFalsy()
 
-      await payload.delete({ collection: 'text-fields', id: hit.id })
-      await payload.delete({ collection: 'text-fields', id: miss.id })
+      await payload.delete({ id: hit.id, collection: 'text-fields', overrideAccess: true })
+      await payload.delete({ id: miss.id, collection: 'text-fields', overrideAccess: true })
     })
 
     test('should query hasMany with contains operator - array value', async ({ payload }) => {
@@ -1429,6 +1566,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasMany: ['apple pie', 'banana bread'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const hit2 = await payload.create({
@@ -1437,6 +1575,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasMany: ['cherry tart', 'grape soda'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const miss = await payload.create({
@@ -1445,10 +1584,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           hasMany: ['orange juice', 'lemon water'],
           text: 'required',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
         where: {
           hasMany: {
             contains: ['banana', 'cherry'],
@@ -1464,9 +1605,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       expect(hit2Result).toBeDefined()
       expect(missResult).toBeFalsy()
 
-      await payload.delete({ collection: 'text-fields', id: hit1.id })
-      await payload.delete({ collection: 'text-fields', id: hit2.id })
-      await payload.delete({ collection: 'text-fields', id: miss.id })
+      await payload.delete({ id: hit1.id, collection: 'text-fields', overrideAccess: true })
+      await payload.delete({ id: hit2.id, collection: 'text-fields', overrideAccess: true })
+      await payload.delete({ id: miss.id, collection: 'text-fields', overrideAccess: true })
     })
 
     test('should query like on value', async ({ payload }) => {
@@ -1475,6 +1616,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           text: 'dog',
         },
+        overrideAccess: true,
       })
 
       const hit = await payload.create({
@@ -1482,10 +1624,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           text: 'cat',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
         where: {
           text: {
             like: 'cat',
@@ -1506,6 +1650,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           text: 'dog-unique-test',
         },
+        overrideAccess: true,
       })
 
       const miss = await payload.create({
@@ -1513,10 +1658,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           text: 'cat-unique-test',
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
         where: {
           text: {
             not_like: 'cat-unique-test',
@@ -1535,35 +1682,38 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const docFirst = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'required',
           array: [
             {
               texts: ['text_1', 'text_2'],
             },
           ],
+          text: 'required',
         },
+        overrideAccess: true,
       })
 
       const docSecond = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'required',
           array: [
             {
               texts: ['text_other', 'text_2'],
             },
           ],
+          text: 'required',
         },
+        overrideAccess: true,
       })
 
       const resEqualsFull = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
+        sort: '-createdAt',
         where: {
           'array.texts': {
             equals: 'text_2',
           },
         },
-        sort: '-createdAt',
       })
 
       expect(resEqualsFull.docs.find((res) => res.id === docFirst.id)).toBeDefined()
@@ -1573,12 +1723,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const resEqualsFirst = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
+        sort: '-createdAt',
         where: {
           'array.texts': {
             equals: 'text_1',
           },
         },
-        sort: '-createdAt',
       })
 
       expect(resEqualsFirst.docs.find((res) => res.id === docFirst.id)).toBeDefined()
@@ -1588,12 +1739,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const resContainsSecond = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
+        sort: '-createdAt',
         where: {
           'array.texts': {
             contains: 'text_other',
           },
         },
-        sort: '-createdAt',
       })
 
       expect(resContainsSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
@@ -1603,12 +1755,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const resInSecond = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
+        sort: '-createdAt',
         where: {
           'array.texts': {
             in: ['text_other'],
           },
         },
-        sort: '-createdAt',
       })
 
       expect(resInSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
@@ -1621,37 +1774,40 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const docFirst = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'required',
           blocks: [
             {
               blockType: 'blockWithText',
               texts: ['text_1', 'text_2'],
             },
           ],
+          text: 'required',
         },
+        overrideAccess: true,
       })
 
       const docSecond = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'required',
           blocks: [
             {
               blockType: 'blockWithText',
               texts: ['text_other', 'text_2'],
             },
           ],
+          text: 'required',
         },
+        overrideAccess: true,
       })
 
       const resEqualsFull = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
+        sort: '-createdAt',
         where: {
           'blocks.texts': {
             equals: 'text_2',
           },
         },
-        sort: '-createdAt',
       })
 
       expect(resEqualsFull.docs.find((res) => res.id === docFirst.id)).toBeDefined()
@@ -1661,12 +1817,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const resEqualsFirst = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
+        sort: '-createdAt',
         where: {
           'blocks.texts': {
             equals: 'text_1',
           },
         },
-        sort: '-createdAt',
       })
 
       expect(resEqualsFirst.docs.find((res) => res.id === docFirst.id)).toBeDefined()
@@ -1676,12 +1833,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const resContainsSecond = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
+        sort: '-createdAt',
         where: {
           'blocks.texts': {
             contains: 'text_other',
           },
         },
-        sort: '-createdAt',
       })
 
       expect(resContainsSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
@@ -1691,12 +1849,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const resInSecond = await payload.find({
         collection: 'text-fields',
+        overrideAccess: true,
+        sort: '-createdAt',
         where: {
           'blocks.texts': {
             in: ['text_other'],
           },
         },
-        sort: '-createdAt',
       })
 
       expect(resInSecond.docs.find((res) => res.id === docFirst.id)).toBeUndefined()
@@ -1709,22 +1868,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const { id: createdDocId } = await payload.create({
         collection: textFieldsSlug,
         data: {
-          text: 'hasMany deletion test',
           hasMany: ['one', 'two', 'three'],
+          text: 'hasMany deletion test',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
-        collection: textFieldsSlug,
         id: createdDocId,
+        collection: textFieldsSlug,
         data: {
           hasMany: [],
         },
+        overrideAccess: true,
       })
 
       const resultingDoc = await payload.findByID({
-        collection: textFieldsSlug,
         id: createdDocId,
+        collection: textFieldsSlug,
+        overrideAccess: true,
       })
 
       expect(resultingDoc.hasMany).toHaveLength(0)
@@ -1749,12 +1911,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           text: textDocText,
         },
+        overrideAccess: true,
       })
       otherTextDoc = await payload.create({
         collection: 'text-fields',
         data: {
           text: otherTextDocText,
         },
+        overrideAccess: true,
       })
       const relationship = { relationTo: 'text-fields', value: textDoc.id }
       parent = await payload.create({
@@ -1763,24 +1927,27 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           relationship,
           text: relationshipText,
         },
+        overrideAccess: true,
       })
 
       child = await payload.create({
         collection: relationshipFieldsSlug,
         data: {
-          relationToSelf: parent.id,
           relationship,
+          relationToSelf: parent.id,
           text: relationshipText,
         },
+        overrideAccess: true,
       })
 
       grandChild = await payload.create({
         collection: relationshipFieldsSlug,
         data: {
-          relationToSelf: child.id,
           relationship,
+          relationToSelf: child.id,
           text: relationshipText,
         },
+        overrideAccess: true,
       })
 
       selfReferencing = await payload.create({
@@ -1789,6 +1956,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           relationship,
           text: relationshipText,
         },
+        overrideAccess: true,
       })
 
       relationshipInArray = await payload.create({
@@ -1801,12 +1969,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           ],
           relationship,
         },
+        overrideAccess: true,
       })
     })
 
     test('should query parent self-reference', async ({ payload }) => {
       const childResult = await payload.find({
         collection: relationshipFieldsSlug,
+        overrideAccess: true,
         where: {
           relationToSelf: { equals: parent.id },
         },
@@ -1814,6 +1984,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const grandChildResult = await payload.find({
         collection: relationshipFieldsSlug,
+        overrideAccess: true,
         where: {
           relationToSelf: { equals: child.id },
         },
@@ -1821,9 +1992,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const anyChildren = await payload.find({
         collection: relationshipFieldsSlug,
+        overrideAccess: true,
       })
       const allChildren = await payload.find({
         collection: relationshipFieldsSlug,
+        overrideAccess: true,
         where: {
           'relationToSelf.text': { equals: relationshipText },
         },
@@ -1837,6 +2010,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should query relationship inside array', async ({ payload }) => {
       const result = await payload.find({
         collection: relationshipFieldsSlug,
+        overrideAccess: true,
         where: {
           and: [
             {
@@ -1856,11 +2030,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should query text in row after relationship', async ({ payload }) => {
       const row = await payload.create({
         collection: 'row-fields',
-        data: { title: 'some-title', id: 'custom-row-id' },
+        data: { id: 'custom-row-id', title: 'some-title' },
+        overrideAccess: true,
       })
       const textDoc = await payload.create({
         collection: 'text-fields',
         data: { text: 'asd' },
+        overrideAccess: true,
       })
 
       const rel = await payload.create({
@@ -1870,10 +2046,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           relationToRow: row.id,
           relationToRowMany: [row.id],
         },
+        overrideAccess: true,
       })
 
       const result = await payload.find({
         collection: 'relationship-fields',
+        overrideAccess: true,
         where: {
           'relationToRow.title': { equals: 'some-title' },
           'relationToRowMany.title': { equals: 'some-title' },
@@ -1896,6 +2074,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             id: 'some-id',
             title: '',
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Title within a row')
     })
@@ -1909,6 +2088,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       doc = await payload.create({
         collection: 'date-fields',
         data: dateDoc,
+        overrideAccess: true,
       })
     })
 
@@ -1916,6 +2096,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const { docs } = await payload.find({
         collection: 'date-fields',
         depth: 0,
+        overrideAccess: true,
         where: {
           updatedAt: {
             greater_than_equal: tenMinutesAgo,
@@ -1930,6 +2111,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
+        overrideAccess: true,
         where: {
           createdAt: {
             greater_than_equal: tenMinutesAgo,
@@ -1944,6 +2126,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
+        overrideAccess: true,
         where: {
           createdAt: {
             greater_than_equal: tenMinutesLater,
@@ -1958,6 +2141,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
+        overrideAccess: true,
         where: {
           createdAt: {
             less_than: tenMinutesLater,
@@ -1972,6 +2156,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
+        overrideAccess: true,
         where: {
           createdAt: {
             less_than: tenMinutesAgo,
@@ -1986,6 +2171,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
+        overrideAccess: true,
         where: {
           createdAt: {
             in: [new Date(doc.createdAt)],
@@ -2000,6 +2186,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
+        overrideAccess: true,
         where: {
           createdAt: {
             in: [tenMinutesAgo],
@@ -2032,16 +2219,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     })
 
     test('should query a date field inside an array field', async ({ payload }) => {
-      await payload.delete({ collection: 'date-fields', where: {} })
+      await payload.delete({ collection: 'date-fields', overrideAccess: true, where: {} })
       for (const doc of dataSample) {
         await payload.create({
           collection: 'date-fields',
           data: doc,
+          overrideAccess: true,
         })
       }
 
       const res = await payload.find({
         collection: 'date-fields',
+        overrideAccess: true,
         where: { 'array.date': { greater_than: new Date('2025-06-01').toISOString() } },
       })
 
@@ -2070,11 +2259,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           selectHasManyLocalized: ['one', 'two'],
         },
         locale: 'en',
+        overrideAccess: true,
       })
       doc = await payload.findByID({
         id,
         collection: 'select-fields',
         locale: 'all',
+        overrideAccess: true,
       })
     })
 
@@ -2088,6 +2279,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           selectHasMany: ['one', 'two'],
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
@@ -2096,6 +2288,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           select: 'one',
         },
+        overrideAccess: true,
       })
 
       expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true)
@@ -2108,6 +2301,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           selectHasMany: ['one', 'two'],
         },
+        overrideAccess: true,
       })
 
       const updatedDoc = await payload.update({
@@ -2116,6 +2310,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           selectHasMany: [],
         },
+        overrideAccess: true,
       })
 
       expect(updatedDoc.selectHasMany).toHaveLength(0)
@@ -2127,6 +2322,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           selectHasMany: ['one', 'four'],
         },
+        overrideAccess: true,
       })
 
       const miss = await payload.create({
@@ -2134,10 +2330,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           selectHasMany: ['three'],
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'select-fields',
+        overrideAccess: true,
         where: {
           selectHasMany: {
             in: ['one'],
@@ -2156,13 +2354,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: 'select-fields',
         data: { array: [{ selectHasMany: ['one', 'two'] }] },
+        overrideAccess: true,
       })
 
       expect(doc.array[0].selectHasMany).toStrictEqual(['one', 'two'])
 
       const upd = await payload.update({
-        collection: 'select-fields',
         id: doc.id,
+        collection: 'select-fields',
         data: {
           array: [
             {
@@ -2171,6 +2370,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       expect(upd.array[0].selectHasMany).toStrictEqual(['six'])
@@ -2180,13 +2380,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: 'select-fields',
         data: { array: [{ group: { selectHasMany: ['one', 'two'] } }] },
+        overrideAccess: true,
       })
 
       expect(doc.array[0].group.selectHasMany).toStrictEqual(['one', 'two'])
 
       const upd = await payload.update({
-        collection: 'select-fields',
         id: doc.id,
+        collection: 'select-fields',
         data: {
           array: [
             {
@@ -2195,6 +2396,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       expect(upd.array[0].group.selectHasMany).toStrictEqual(['six'])
@@ -2204,6 +2406,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const base = await payload.create({
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b'] },
+        overrideAccess: true,
       })
 
       expect(base.hasMany).toStrictEqual(['a', 'b'])
@@ -2212,6 +2415,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         collection: 'select-versions-fields',
         data: { array: [{ hasManyArr: ['a', 'b'] }] },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(array.array[0]?.hasManyArr).toStrictEqual(['a', 'b'])
@@ -2219,6 +2423,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const block = await payload.create({
         collection: 'select-versions-fields',
         data: { blocks: [{ blockType: 'block', hasManyBlocks: ['a', 'b'] }] },
+        overrideAccess: true,
       })
 
       expect(block.blocks[0]?.hasManyBlocks).toStrictEqual(['a', 'b'])
@@ -2228,6 +2433,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       let data = await payload.create({
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b', 'c'] },
+        overrideAccess: true,
       })
       expect(data.hasMany).toStrictEqual(['a', 'b', 'c'])
 
@@ -2236,24 +2442,27 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         collection: 'select-versions-fields',
         data: { hasMany: ['a'] },
         draft: true,
+        overrideAccess: true,
       })
       expect(data.hasMany).toStrictEqual(['a'])
 
       data = await payload.update({
         id: data.id,
+        autosave: true,
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b', 'c', 'd'] },
         draft: true,
-        autosave: true,
+        overrideAccess: true,
       })
       expect(data.hasMany).toStrictEqual(['a', 'b', 'c', 'd'])
 
       data = await payload.update({
         id: data.id,
+        autosave: true,
         collection: 'select-versions-fields',
         data: { hasMany: ['a'] },
         draft: true,
-        autosave: true,
+        overrideAccess: true,
       })
       expect(data.hasMany).toStrictEqual(['a'])
     })
@@ -2268,6 +2477,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             disallowOption1: true,
             selectWithFilteredOptions: 'one',
           },
+          overrideAccess: true,
         })
 
         expect(result).toBeFalsy()
@@ -2283,6 +2493,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           disallowOption1: true,
           selectWithFilteredOptions: 'two',
         },
+        overrideAccess: true,
       })
 
       expect(result).toBeTruthy()
@@ -2298,6 +2509,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             disallowOption2: true,
             selectAsyncFilterOptions: 'one',
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Select with async filtered options')
 
@@ -2307,6 +2519,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           disallowOption2: true,
           selectAsyncFilterOptions: 'two',
         },
+        overrideAccess: true,
       })
 
       expect(result).toBeTruthy()
@@ -2323,6 +2536,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             selectHasMany: ['one', 'two', 'one', 'two', 'one'],
           },
+          overrideAccess: true,
         })
       } catch (e) {
         error = e as ValidationError
@@ -2340,6 +2554,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       doc = await payload.create({
         collection: 'number-fields',
         data: numberDoc,
+        overrideAccess: true,
       })
     })
 
@@ -2361,6 +2576,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             min: 5,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Min')
     })
@@ -2371,6 +2587,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             max: 15,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Max')
     })
@@ -2382,6 +2599,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             positiveNumber: -5,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Positive Number')
     })
@@ -2393,6 +2611,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             negativeNumber: 5,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Negative Number')
     })
@@ -2403,6 +2622,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             decimalMin: -0.25,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Decimal Min')
     })
@@ -2414,6 +2634,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             decimalMax: 1.5,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Decimal Max')
     })
@@ -2425,11 +2646,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           localizedHasMany,
         },
         locale: 'en',
+        overrideAccess: true,
       })
       const localizedDoc = await payload.findByID({
         id,
         collection: 'number-fields',
         locale: 'all',
+        overrideAccess: true,
       })
 
       // @ts-expect-error
@@ -2442,6 +2665,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           hasMany: [5, 10],
         },
+        overrideAccess: true,
       })
 
       const miss = await payload.create({
@@ -2449,10 +2673,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           hasMany: [13],
         },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'number-fields',
+        overrideAccess: true,
         where: {
           hasMany: {
             in: [5],
@@ -2473,10 +2699,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           number: null,
         },
+        overrideAccess: true,
       })
 
       const numbersExist = await payload.find({
         collection: 'number-fields',
+        overrideAccess: true,
         where: {
           number: {
             exists: true,
@@ -2489,6 +2717,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const numbersNotExists = await payload.find({
         collection: 'number-fields',
+        overrideAccess: true,
         where: {
           number: {
             exists: false,
@@ -2507,19 +2736,22 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           localizedHasMany: [1, 2, 3],
         },
+        overrideAccess: true,
       })
 
       await payload.update({
-        collection: numberFieldsSlug,
         id: createdDocId,
+        collection: numberFieldsSlug,
         data: {
           localizedHasMany: [],
         },
+        overrideAccess: true,
       })
 
       const resultingDoc = await payload.findByID({
-        collection: numberFieldsSlug,
         id: createdDocId,
+        collection: numberFieldsSlug,
+        overrideAccess: true,
       })
 
       expect(resultingDoc.localizedHasMany).toHaveLength(0)
@@ -2536,6 +2768,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const docSecond = await payload.create({
@@ -2547,10 +2780,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const resEqualsFull = await payload.find({
       collection: 'number-fields',
+      overrideAccess: true,
       where: {
         'array.numbers': {
           equals: 10,
@@ -2565,6 +2800,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
     const resEqualsFirst = await payload.find({
       collection: 'number-fields',
+      overrideAccess: true,
       where: {
         'array.numbers': {
           equals: 30,
@@ -2579,6 +2815,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
     const resInSecond = await payload.find({
       collection: 'number-fields',
+      overrideAccess: true,
       where: {
         'array.numbers': {
           in: [40],
@@ -2603,6 +2840,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const docSecond = await payload.create({
@@ -2615,10 +2853,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           },
         ],
       },
+      overrideAccess: true,
     })
 
     const resEqualsFull = await payload.find({
       collection: 'number-fields',
+      overrideAccess: true,
       where: {
         'blocks.numbers': {
           equals: 10,
@@ -2633,6 +2873,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
     const resEqualsFirst = await payload.find({
       collection: 'number-fields',
+      overrideAccess: true,
       where: {
         'blocks.numbers': {
           equals: 30,
@@ -2647,6 +2888,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
     const resInSecond = await payload.find({
       collection: 'number-fields',
+      overrideAccess: true,
       where: {
         'blocks.numbers': {
           in: [40],
@@ -2751,6 +2993,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test.beforeEach(async ({ payload }) => {
       const findDoc = await payload.find({
         collection: 'point-fields',
+        overrideAccess: true,
         pagination: false,
       })
       ;[doc] = findDoc.docs
@@ -2762,6 +3005,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }
       const find = await payload.find({
         collection: 'point-fields',
+        overrideAccess: true,
         pagination: false,
       })
 
@@ -2783,6 +3027,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           localized,
           point,
         },
+        overrideAccess: true,
       })
 
       expect(doc.point).toEqual(point)
@@ -2807,6 +3052,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           localized: uniqueLocalized,
           point: uniquePoint,
         },
+        overrideAccess: true,
       })
 
       // Now make sure we can't create a duplicate (since 'localized' is a unique field)
@@ -2818,6 +3064,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             localized: uniqueLocalized,
             point: uniquePoint,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow(Error)
 
@@ -2827,6 +3074,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             min: 5,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Min')
 
@@ -2852,16 +3100,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           localized: uniqueLocalized,
           point: uniquePoint,
         },
+        overrideAccess: true,
       })
 
       // try to update the required field to null
       await expect(() =>
         payload.update({
+          id: doc.id,
           collection: 'point-fields',
           data: {
             point: null,
           },
-          id: doc.id,
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Location')
     })
@@ -2883,17 +3133,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           localized: uniqueLocalized,
           point: uniquePoint,
         },
+        overrideAccess: true,
       })
 
       expect(doc.localized).toEqual(uniqueLocalized)
 
       // try to update the non-required field to null
       const updatedDoc = await payload.update({
+        id: doc.id,
         collection: 'point-fields',
         data: {
           localized: null,
         },
-        id: doc.id,
+        overrideAccess: true,
       })
 
       expect(updatedDoc.localized).toEqual(undefined)
@@ -2906,7 +3158,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const res = await payload.create({
         collection: 'point-fields',
-        data: { point, camelCasePoint: [7, -7] },
+        data: { camelCasePoint: [7, -7], point },
+        overrideAccess: true,
       })
       expect(res.camelCasePoint).toEqual([7, -7])
     })
@@ -2916,6 +3169,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test.beforeEach(async ({ payload }) => {
       await payload.delete({
         collection: checkboxFieldsSlug,
+        overrideAccess: true,
         where: {
           id: {
             exists: true,
@@ -2931,6 +3185,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           checkbox: true,
           checkboxNotRequired: false,
         },
+        overrideAccess: true,
       })
 
       const existsFalseDoc = await payload.create({
@@ -2938,10 +3193,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           checkbox: true,
         },
+        overrideAccess: true,
       })
 
       const existsFalse = await payload.find({
         collection: checkboxFieldsSlug,
+        overrideAccess: true,
         where: {
           checkboxNotRequired: {
             exists: false,
@@ -2953,6 +3210,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const existsTrue = await payload.find({
         collection: checkboxFieldsSlug,
+        overrideAccess: true,
         where: {
           checkboxNotRequired: {
             exists: true,
@@ -2970,6 +3228,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       // This ensures each test starts with a clean slate
       await payload.delete({
         collection: 'indexed-fields',
+        overrideAccess: true,
         where: {
           id: {
             exists: true,
@@ -2987,11 +3246,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       await payload.create({
         collection: 'indexed-fields',
         data,
+        overrideAccess: true,
       })
       expect(async () => {
         const result = await payload.create({
           collection: 'indexed-fields',
           data,
+          overrideAccess: true,
         })
         return result.error
       }).toBeDefined()
@@ -3003,6 +3264,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const textDoc = await payload.create({
         collection: 'text-fields',
         data: { text: 'unique-test-hasMany-false-' + Date.now() },
+        overrideAccess: true,
       })
 
       const firstDoc = await payload
@@ -3011,17 +3273,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-1-' + Date.now(),
             text: 'unique-2-' + Date.now(),
-            uniqueRequiredText: 'unique-3-' + Date.now(),
             uniqueRelationship: textDoc.id,
+            uniqueRequiredText: 'unique-3-' + Date.now(),
           },
+          overrideAccess: true,
         })
         // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
-            locale: 'es',
+            id: doc.id,
             collection: 'indexed-fields',
             data: { localizedUniqueRequiredText: 'unique-20-' + Date.now() },
-            id: doc.id,
+            locale: 'es',
+            overrideAccess: true,
           }),
         )
 
@@ -3031,9 +3295,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-4-' + Date.now(),
             text: 'unique-5-' + Date.now(),
-            uniqueRequiredText: 'unique-10-' + Date.now(),
             uniqueRelationship: textDoc.id,
+            uniqueRequiredText: 'unique-10-' + Date.now(),
           },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
     })
@@ -3044,6 +3309,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const textDoc = await payload.create({
         collection: 'text-fields',
         data: { text: 'unique-test-hasMany-true-' + Date.now() },
+        overrideAccess: true,
       })
 
       const firstDoc = await payload
@@ -3052,17 +3318,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-hasMany1-' + Date.now(),
             text: 'unique-hasMany2-' + Date.now(),
-            uniqueRequiredText: 'unique-hasMany3-' + Date.now(),
             uniqueHasManyRelationship: [textDoc.id],
+            uniqueRequiredText: 'unique-hasMany3-' + Date.now(),
           },
+          overrideAccess: true,
         })
         // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
-            locale: 'es',
+            id: doc.id,
             collection: 'indexed-fields',
             data: { localizedUniqueRequiredText: 'unique-hasMany40-' + Date.now() },
-            id: doc.id,
+            locale: 'es',
+            overrideAccess: true,
           }),
         )
 
@@ -3073,17 +3341,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-hasMany31-' + Date.now(),
             text: 'unique-hasMany24-' + Date.now(),
-            uniqueRequiredText: 'unique-hasMany55-' + Date.now(),
             uniqueHasManyRelationship_2: [textDoc.id],
+            uniqueRequiredText: 'unique-hasMany55-' + Date.now(),
           },
+          overrideAccess: true,
         })
         // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
-            locale: 'es',
+            id: doc.id,
             collection: 'indexed-fields',
             data: { localizedUniqueRequiredText: 'unique-hasMany30-' + Date.now() },
-            id: doc.id,
+            locale: 'es',
+            overrideAccess: true,
           }),
         )
 
@@ -3093,9 +3363,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-hasMany4-' + Date.now(),
             text: 'unique-hasMany5-' + Date.now(),
-            uniqueRequiredText: 'unique-hasMany10-' + Date.now(),
             uniqueHasManyRelationship: [textDoc.id],
+            uniqueRequiredText: 'unique-hasMany10-' + Date.now(),
           },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
     })
@@ -3106,6 +3377,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const textDoc = await payload.create({
         collection: 'text-fields',
         data: { text: 'unique-test-poly-' + Date.now() },
+        overrideAccess: true,
       })
 
       const firstDoc = await payload
@@ -3114,17 +3386,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-poly1-' + Date.now(),
             text: 'unique-poly2-' + Date.now(),
-            uniqueRequiredText: 'unique-poly3-' + Date.now(),
             uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
+            uniqueRequiredText: 'unique-poly3-' + Date.now(),
           },
+          overrideAccess: true,
         })
         // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
-            locale: 'es',
+            id: doc.id,
             collection: 'indexed-fields',
             data: { localizedUniqueRequiredText: 'unique-poly20-' + Date.now() },
-            id: doc.id,
+            locale: 'es',
+            overrideAccess: true,
           }),
         )
 
@@ -3135,17 +3409,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-poly31-' + Date.now(),
             text: 'unique-poly24-' + Date.now(),
-            uniqueRequiredText: 'unique-poly55-' + Date.now(),
             uniquePolymorphicRelationship_2: { relationTo: 'text-fields', value: textDoc.id },
+            uniqueRequiredText: 'unique-poly55-' + Date.now(),
           },
+          overrideAccess: true,
         })
         // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
-            locale: 'es',
+            id: doc.id,
             collection: 'indexed-fields',
             data: { localizedUniqueRequiredText: 'unique-poly100-' + Date.now() },
-            id: doc.id,
+            locale: 'es',
+            overrideAccess: true,
           }),
         )
 
@@ -3155,9 +3431,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-poly4-' + Date.now(),
             text: 'unique-poly5-' + Date.now(),
-            uniqueRequiredText: 'unique-poly10-' + Date.now(),
             uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
+            uniqueRequiredText: 'unique-poly10-' + Date.now(),
           },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
     })
@@ -3168,6 +3445,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const textDoc = await payload.create({
         collection: 'text-fields',
         data: { text: 'unique-test-poly-hasMany-' + Date.now() },
+        overrideAccess: true,
       })
 
       const firstDoc = await payload
@@ -3176,18 +3454,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-polyMany1-' + Date.now(),
             text: 'unique-polyMany2-' + Date.now(),
-            uniqueRequiredText: 'unique-polyMany3-' + Date.now(),
             uniqueHasManyPolymorphicRelationship: [
               { relationTo: 'text-fields', value: textDoc.id },
             ],
+            uniqueRequiredText: 'unique-polyMany3-' + Date.now(),
           },
+          overrideAccess: true,
         })
         .then((doc) =>
           payload.update({
-            locale: 'es',
+            id: doc.id,
             collection: 'indexed-fields',
             data: { localizedUniqueRequiredText: 'unique-polyMany100-' + Date.now() },
-            id: doc.id,
+            locale: 'es',
+            overrideAccess: true,
           }),
         )
 
@@ -3198,19 +3478,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-polyMany31-' + Date.now(),
             text: 'unique-polyMany24-' + Date.now(),
-            uniqueRequiredText: 'unique-polyMany55-' + Date.now(),
             uniqueHasManyPolymorphicRelationship_2: [
               { relationTo: 'text-fields', value: textDoc.id },
             ],
+            uniqueRequiredText: 'unique-polyMany55-' + Date.now(),
           },
+          overrideAccess: true,
         })
         // Skip mongodb unique error because it threats localizedUniqueRequriedText.es as undefined
         .then((doc) =>
           payload.update({
-            locale: 'es',
+            id: doc.id,
             collection: 'indexed-fields',
             data: { localizedUniqueRequiredText: 'unique-polyMany300-' + Date.now() },
-            id: doc.id,
+            locale: 'es',
+            overrideAccess: true,
           }),
         )
 
@@ -3220,11 +3502,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             localizedUniqueRequiredText: 'unique-polyMany4-' + Date.now(),
             text: 'unique-polyMany5-' + Date.now(),
-            uniqueRequiredText: 'unique-polyMany10-' + Date.now(),
             uniqueHasManyPolymorphicRelationship: [
               { relationTo: 'text-fields', value: textDoc.id },
             ],
+            uniqueRequiredText: 'unique-polyMany10-' + Date.now(),
           },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
     })
@@ -3242,6 +3525,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: 'indexed-fields',
         data,
+        overrideAccess: true,
       })
       // Update spanish so we do not run into the unique constraint for other locales
       await payload.update({
@@ -3251,11 +3535,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           localizedUniqueRequiredText: 'es1-' + timestamp,
         },
         locale: 'es',
+        overrideAccess: true,
       })
       data.uniqueRequiredText = 'b-' + timestamp
       const result = await payload.create({
         collection: 'indexed-fields',
         data: { ...data, localizedUniqueRequiredText: 'en2-' + timestamp },
+        overrideAccess: true,
       })
 
       expect(result.id).toBeDefined()
@@ -3270,10 +3556,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: 'indexed-fields',
         data,
+        overrideAccess: true,
       })
       const result = await payload.duplicate({
         id: doc.id,
         collection: 'indexed-fields',
+        overrideAccess: true,
       })
 
       expect(result.id).not.toEqual(doc.id)
@@ -3289,6 +3577,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       doc = await payload.create({
         collection,
         data: {},
+        overrideAccess: true,
       })
     })
 
@@ -3296,6 +3585,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const docWithIDs = (await payload.create({
         collection: groupFieldsSlug,
         data: namedGroupDoc,
+        overrideAccess: true,
       })) as Partial<GroupField>
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })
@@ -3321,6 +3611,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const spanish = await payload.update({
@@ -3336,12 +3627,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           ],
         },
         locale: 'es',
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
         id: doc.id,
         collection,
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(doc.items[0].localizedText).toStrictEqual('test')
@@ -3368,6 +3661,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const res = await payload.update({
@@ -3395,6 +3689,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       expect(res.nestedArrayLocalized).toHaveLength(3)
@@ -3423,11 +3718,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
         id: doc.id,
         collection,
+        overrideAccess: true,
       })
 
       expect(result.items[0]).toMatchObject({
@@ -3452,6 +3749,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           localized,
         },
+        overrideAccess: true,
       })
 
       const enDoc = await payload.update({
@@ -3461,6 +3759,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           localized: [{ text: enText }],
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const esDoc = await payload.update({
@@ -3470,12 +3769,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           localized: [{ text: esText }],
         },
         locale: 'es',
+        overrideAccess: true,
       })
 
       const allLocales = (await payload.findByID({
         id,
         collection,
         locale: 'all',
+        overrideAccess: true,
       })) as unknown as {
         localized: {
           en: unknown
@@ -3495,13 +3796,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           items: [
             {
+              anotherText: 'another',
               localizedText: 'test',
               text: 'required',
-              anotherText: 'another',
             },
           ],
           localized: [{ text: 'a' }],
         },
+        overrideAccess: true,
       })
 
       // left join collection_items + left join collection_items_locales
@@ -3509,6 +3811,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         docs: [res],
       } = await payload.find({
         collection,
+        overrideAccess: true,
         where: {
           and: [
             {
@@ -3542,15 +3845,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             items: [
               {
-                text: 'required',
                 subArray: [
                   {
                     textTwo: '',
                   },
                 ],
+                text: 'required',
               },
             ],
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Second text field')
     })
@@ -3564,15 +3868,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             items: [
               {
-                text: 'required',
                 subArray: [
                   {
                     textInRow: '',
                   },
                 ],
+                text: 'required',
               },
             ],
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Text In Row')
     })
@@ -3595,42 +3900,45 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     })
 
     test.options({ db: 'mongo' })('should query exists true', async ({ payload }) => {
-      await payload.delete({ collection: 'array-fields', where: {} })
+      await payload.delete({ collection: 'array-fields', overrideAccess: true, where: {} })
 
       const withoutCollapsed = await payload.create({
         collection: 'array-fields',
         data: {
-          localized: [
-            {
-              text: 'without-collapsed',
-            },
-          ],
           items: [
             {
               text: 'without-collapsed',
             },
           ],
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
         },
+        overrideAccess: true,
       })
       const withCollapsed = await payload.create({
         collection: 'array-fields',
         data: {
-          localized: [
-            {
-              text: 'with-collapsed',
-            },
-          ],
           collapsedArray: [
             {
               text: 'with-collapsed',
             },
           ],
           items: [{ text: 'with-collapsed' }],
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
         },
+        overrideAccess: true,
       })
 
       const res = await payload.find({
         collection: 'array-fields',
+        overrideAccess: true,
         where: {
           collapsedArray: {
             exists: true,
@@ -3643,42 +3951,45 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     })
 
     test.options({ db: 'mongo' })('should query exists false', async ({ payload }) => {
-      await payload.delete({ collection: 'array-fields', where: {} })
+      await payload.delete({ collection: 'array-fields', overrideAccess: true, where: {} })
 
       const withoutCollapsed = await payload.create({
         collection: 'array-fields',
         data: {
-          localized: [
-            {
-              text: 'without-collapsed',
-            },
-          ],
           items: [
             {
               text: 'without-collapsed',
             },
           ],
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
         },
+        overrideAccess: true,
       })
       const withCollapsed = await payload.create({
         collection: 'array-fields',
         data: {
-          localized: [
-            {
-              text: 'with-collapsed',
-            },
-          ],
           collapsedArray: [
             {
               text: 'with-collapsed',
             },
           ],
           items: [{ text: 'with-collapsed' }],
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
         },
+        overrideAccess: true,
       })
 
       const res = await payload.find({
         collection: 'array-fields',
+        overrideAccess: true,
         where: {
           collapsedArray: {
             exists: false,
@@ -3697,7 +4008,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           children: [
             {
               type: 'paragraph',
-              children: [{ type: 'text', text: 'Hello from array', format: 1 }],
+              children: [{ type: 'text', format: 1, text: 'Hello from array' }],
             },
           ],
         },
@@ -3708,12 +4019,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           items: [
             {
-              text: 'required',
               richTextField: richTextValue,
+              text: 'required',
             },
           ],
           localized: [{ text: 'req' }],
         },
+        overrideAccess: true,
       })
 
       // Verify richText is returned as an object, not a string
@@ -3723,8 +4035,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       // Also verify on read
       const found = await payload.findByID({
-        collection,
         id: doc.id,
+        collection,
+        overrideAccess: true,
       })
 
       expect(found.items[0].richTextField).toBeDefined()
@@ -3737,8 +4050,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         collection,
         data: {
           // @ts-expect-error testing null in array
-          items: [null, { text: 'required', localizedText: 'valid' }],
+          items: [null, { localizedText: 'valid', text: 'required' }],
         },
+        overrideAccess: true,
       })
 
       // The null should be stripped; the valid row should survive intact.
@@ -3754,6 +4068,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       document = await payload.create({
         collection: groupFieldsSlug,
         data: {},
+        overrideAccess: true,
       })
     })
 
@@ -3775,16 +4090,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const groupDoc = await payload.create({
         collection: groupFieldsSlug,
         data: {
-          insideUnnamedGroup: 'Hello world',
           deeplyNestedGroup: { insideNestedUnnamedGroup: 'Secondfield' },
+          insideUnnamedGroup: 'Hello world',
         },
+        overrideAccess: true,
       })
       expect(groupDoc).toMatchObject({
         id: expect.anything(),
-        insideUnnamedGroup: 'Hello world',
         deeplyNestedGroup: {
           insideNestedUnnamedGroup: 'Secondfield',
         },
+        insideUnnamedGroup: 'Hello world',
       })
     })
 
@@ -3811,10 +4127,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const data = (await groupDoc.json()).data.createGroupField
 
       expect(data).toMatchObject({
-        insideUnnamedGroup: 'Hello world',
         deeplyNestedGroup: {
           insideNestedUnnamedGroup: 'Secondfield',
         },
+        insideUnnamedGroup: 'Hello world',
       })
     })
 
@@ -3827,6 +4143,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             text,
           },
         },
+        overrideAccess: true,
       })
       const miss = await payload.create({
         collection: groupFieldsSlug,
@@ -3835,9 +4152,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             text: 'do not find this',
           },
         },
+        overrideAccess: true,
       })
       const result = await payload.find({
         collection: groupFieldsSlug,
+        overrideAccess: true,
         where: {
           'localizedGroup.text': { equals: text },
         },
@@ -3855,20 +4174,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const res = await payload.create({
         collection: 'group-fields',
         data: {
-          group: { text: 'required' },
           camelCaseGroup: {
             array: [
               {
-                text: 'text',
                 array: [
                   {
                     text: 'nested',
                   },
                 ],
+                text: 'text',
               },
             ],
           },
+          group: { text: 'required' },
         },
+        overrideAccess: true,
       })
 
       expect(res.camelCaseGroup.array[0].text).toBe('text')
@@ -3878,34 +4198,37 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should insert/update/read localized group with array inside', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'group-fields',
-        locale: 'en',
         data: {
           group: { text: 'req' },
           localizedGroupArr: {
             array: [{ text: 'text-en' }],
           },
         },
+        locale: 'en',
+        overrideAccess: true,
       })
 
       expect(doc.localizedGroupArr.array[0].text).toBe('text-en')
 
       const esDoc = await payload.update({
-        collection: 'group-fields',
-        locale: 'es',
         id: doc.id,
+        collection: 'group-fields',
         data: {
           localizedGroupArr: {
             array: [{ text: 'text-es' }],
           },
         },
+        locale: 'es',
+        overrideAccess: true,
       })
 
       expect(esDoc.localizedGroupArr.array[0].text).toBe('text-es')
 
       const allDoc = await payload.findByID({
-        collection: 'group-fields',
         id: doc.id,
+        collection: 'group-fields',
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(allDoc.localizedGroupArr.en.array[0].text).toBe('text-en')
@@ -3917,34 +4240,37 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     }) => {
       const doc = await payload.create({
         collection: 'group-fields',
-        locale: 'en',
         data: {
           group: { text: 'req' },
           localizedGroupSelect: {
             select: ['one', 'two'],
           },
         },
+        locale: 'en',
+        overrideAccess: true,
       })
 
       expect(doc.localizedGroupSelect.select).toStrictEqual(['one', 'two'])
 
       const esDoc = await payload.update({
-        collection: 'group-fields',
-        locale: 'es',
         id: doc.id,
+        collection: 'group-fields',
         data: {
           localizedGroupSelect: {
             select: ['one'],
           },
         },
+        locale: 'es',
+        overrideAccess: true,
       })
 
       expect(esDoc.localizedGroupSelect.select).toStrictEqual(['one'])
 
       const allDoc = await payload.findByID({
-        collection: 'group-fields',
         id: doc.id,
+        collection: 'group-fields',
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(allDoc.localizedGroupSelect.en.select).toStrictEqual(['one', 'two'])
@@ -3957,45 +4283,50 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const rel_1 = await payload.create({
         collection: 'email-fields',
         data: { email: 'pro123@gmail.com' },
+        overrideAccess: true,
       })
 
       const rel_2 = await payload.create({
         collection: 'email-fields',
         data: { email: 'frank@gmail.com' },
+        overrideAccess: true,
       })
 
       const doc = await payload.create({
         collection: 'group-fields',
-        depth: 0,
         data: {
           group: { text: 'requireddd' },
           localizedGroupRel: {
             email: rel_1.id,
           },
         },
+        depth: 0,
+        overrideAccess: true,
       })
 
       expect(doc.localizedGroupRel.email).toBe(rel_1.id)
 
       const upd = await payload.update({
-        collection: 'group-fields',
-        depth: 0,
         id: doc.id,
-        locale: 'es',
+        collection: 'group-fields',
         data: {
           localizedGroupRel: {
             email: rel_2.id,
           },
         },
+        depth: 0,
+        locale: 'es',
+        overrideAccess: true,
       })
 
       expect(upd.localizedGroupRel.email).toBe(rel_2.id)
 
       const docAll = await payload.findByID({
-        collection: 'group-fields',
         id: doc.id,
-        locale: 'all',
+        collection: 'group-fields',
         depth: 0,
+        locale: 'all',
+        overrideAccess: true,
       })
 
       expect(docAll.localizedGroupRel.en.email).toBe(rel_1.id)
@@ -4008,45 +4339,50 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const rel_1 = await payload.create({
         collection: 'email-fields',
         data: { email: 'pro123@gmail.com' },
+        overrideAccess: true,
       })
 
       const rel_2 = await payload.create({
         collection: 'email-fields',
         data: { email: 'frank@gmail.com' },
+        overrideAccess: true,
       })
 
       const doc = await payload.create({
         collection: 'group-fields',
-        depth: 0,
         data: {
           group: { text: 'requireddd' },
           localizedGroupManyRel: {
             email: [rel_1.id],
           },
         },
+        depth: 0,
+        overrideAccess: true,
       })
 
       expect(doc.localizedGroupManyRel.email).toStrictEqual([rel_1.id])
 
       const upd = await payload.update({
-        collection: 'group-fields',
-        depth: 0,
         id: doc.id,
-        locale: 'es',
+        collection: 'group-fields',
         data: {
           localizedGroupManyRel: {
             email: [rel_2.id],
           },
         },
+        depth: 0,
+        locale: 'es',
+        overrideAccess: true,
       })
 
       expect(upd.localizedGroupManyRel.email).toStrictEqual([rel_2.id])
 
       const docAll = await payload.findByID({
-        collection: 'group-fields',
         id: doc.id,
-        locale: 'all',
+        collection: 'group-fields',
         depth: 0,
+        locale: 'all',
+        overrideAccess: true,
       })
 
       expect(docAll.localizedGroupManyRel.en.email).toStrictEqual([rel_1.id])
@@ -4059,16 +4395,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const rel_1 = await payload.create({
         collection: 'email-fields',
         data: { email: 'pro123@gmail.com' },
+        overrideAccess: true,
       })
 
       const rel_2 = await payload.create({
         collection: 'email-fields',
         data: { email: 'frank@gmail.com' },
+        overrideAccess: true,
       })
 
       const doc = await payload.create({
         collection: 'group-fields',
-        depth: 0,
         data: {
           group: { text: 'requireddd' },
           localizedGroupPolyRel: {
@@ -4078,6 +4415,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           },
         },
+        depth: 0,
+        overrideAccess: true,
       })
 
       expect(doc.localizedGroupPolyRel.email).toStrictEqual({
@@ -4086,39 +4425,41 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       })
 
       const upd = await payload.update({
-        collection: 'group-fields',
-        depth: 0,
         id: doc.id,
-        locale: 'es',
+        collection: 'group-fields',
         data: {
           localizedGroupPolyRel: {
             email: {
-              value: rel_2.id,
               relationTo: 'email-fields',
+              value: rel_2.id,
             },
           },
         },
+        depth: 0,
+        locale: 'es',
+        overrideAccess: true,
       })
 
       expect(upd.localizedGroupPolyRel.email).toStrictEqual({
-        value: rel_2.id,
         relationTo: 'email-fields',
+        value: rel_2.id,
       })
 
       const docAll = await payload.findByID({
-        collection: 'group-fields',
         id: doc.id,
-        locale: 'all',
+        collection: 'group-fields',
         depth: 0,
+        locale: 'all',
+        overrideAccess: true,
       })
 
       expect(docAll.localizedGroupPolyRel.en.email).toStrictEqual({
-        value: rel_1.id,
         relationTo: 'email-fields',
+        value: rel_1.id,
       })
       expect(docAll.localizedGroupPolyRel.es.email).toStrictEqual({
-        value: rel_2.id,
         relationTo: 'email-fields',
+        value: rel_2.id,
       })
     })
 
@@ -4128,16 +4469,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const rel_1 = await payload.create({
         collection: 'email-fields',
         data: { email: 'pro123@gmail.com' },
+        overrideAccess: true,
       })
 
       const rel_2 = await payload.create({
         collection: 'email-fields',
         data: { email: 'frank@gmail.com' },
+        overrideAccess: true,
       })
 
       const doc = await payload.create({
         collection: 'group-fields',
-        depth: 0,
         data: {
           group: { text: 'requireddd' },
           localizedGroupPolyHasManyRel: {
@@ -4149,6 +4491,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             ],
           },
         },
+        depth: 0,
+        overrideAccess: true,
       })
 
       expect(doc.localizedGroupPolyHasManyRel.email).toStrictEqual([
@@ -4159,46 +4503,48 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       ])
 
       const upd = await payload.update({
-        collection: 'group-fields',
-        depth: 0,
         id: doc.id,
-        locale: 'es',
+        collection: 'group-fields',
         data: {
           localizedGroupPolyHasManyRel: {
             email: [
               {
-                value: rel_2.id,
                 relationTo: 'email-fields',
+                value: rel_2.id,
               },
             ],
           },
         },
+        depth: 0,
+        locale: 'es',
+        overrideAccess: true,
       })
 
       expect(upd.localizedGroupPolyHasManyRel.email).toStrictEqual([
         {
-          value: rel_2.id,
           relationTo: 'email-fields',
+          value: rel_2.id,
         },
       ])
 
       const docAll = await payload.findByID({
-        collection: 'group-fields',
         id: doc.id,
-        locale: 'all',
+        collection: 'group-fields',
         depth: 0,
+        locale: 'all',
+        overrideAccess: true,
       })
 
       expect(docAll.localizedGroupPolyHasManyRel.en.email).toStrictEqual([
         {
-          value: rel_1.id,
           relationTo: 'email-fields',
+          value: rel_1.id,
         },
       ])
       expect(docAll.localizedGroupPolyHasManyRel.es.email).toStrictEqual([
         {
-          value: rel_2.id,
           relationTo: 'email-fields',
+          value: rel_2.id,
         },
       ])
     })
@@ -4211,6 +4557,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       document = await payload.create({
         collection: tabsFieldsSlug,
         data: tabsDoc,
+        overrideAccess: true,
       })
     })
 
@@ -4218,6 +4565,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const testDoc1 = await payload.findByID({
         id: document.id,
         collection: tabsFieldsSlug,
+        overrideAccess: true,
       })
 
       await reload(payload.config, payload, true)
@@ -4225,6 +4573,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const testDoc2 = await payload.findByID({
         id: document.id,
         collection: tabsFieldsSlug,
+        overrideAccess: true,
       })
 
       expect(testDoc1.id).toStrictEqual(testDoc2.id)
@@ -4247,6 +4596,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         id: document.id,
         collection: tabsFieldsSlug,
         locale: 'all',
+        overrideAccess: true,
       })
       expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue)
     })
@@ -4264,6 +4614,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const newDocument = await payload.create({
         collection: tabsFieldsSlug,
         data: tabsDoc,
+        overrideAccess: true,
       })
       expect(newDocument.hooksTab.beforeValidate).toBe(true)
       expect(newDocument.hooksTab.beforeChange).toBe(true)
@@ -4275,6 +4626,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const doc = await payload.create({
         collection: groupFieldsSlug,
         data: namedGroupDoc,
+        overrideAccess: true,
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()
@@ -4289,22 +4641,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           blocks: [{ blockType: 'content', text: 'req' }],
           group: { number: 1 },
           numberInRow: 1,
-          textInRow: 'req',
           tab: { array: [{ text: 'req' }] },
+          textInRow: 'req',
 
           camelCaseTab: {
             array: [
               {
-                text: 'text',
                 array: [
                   {
                     text: 'nested',
                   },
                 ],
+                text: 'text',
               },
             ],
           },
         },
+        overrideAccess: true,
       })
 
       expect(res.camelCaseTab.array[0].text).toBe('text')
@@ -4331,6 +4684,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
               },
             ],
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Tab with Array > Array 3 > Text')
     })
@@ -4340,6 +4694,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should retrieve doc with blocks', async ({ payload }) => {
       const blockFields = await payload.find({
         collection: 'block-fields',
+        overrideAccess: true,
       })
 
       expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksDoc.blocks[0].blockType)
@@ -4362,6 +4717,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
+          overrideAccess: true,
           where: {
             'blocks.richText.root.children.children.text': {
               like: 'fun',
@@ -4373,6 +4729,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
         const blockFieldsFail = await payload.find({
           collection: 'block-fields',
+          overrideAccess: true,
           where: {
             'blocks.richText.root.children.children.text': {
               like: 'funny',
@@ -4390,6 +4747,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
+          overrideAccess: true,
           where: {
             'localizedBlocks.en.richText.root.children.children.text': {
               like: 'fun',
@@ -4401,6 +4759,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
         const blockFieldsFail = await payload.find({
           collection: 'block-fields',
+          overrideAccess: true,
           where: {
             'localizedBlocks.en.richText.root.children.children.text': {
               like: 'funny',
@@ -4418,6 +4777,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
+          overrideAccess: true,
           where: {
             'localizedBlocks.richText.root.children.children.text': {
               like: 'fun',
@@ -4429,6 +4789,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
         const blockFieldsFail = await payload.find({
           collection: 'block-fields',
+          overrideAccess: true,
           where: {
             'localizedBlocks.richText.root.children.children.text': {
               like: 'funny',
@@ -4451,6 +4812,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'block-fields',
@@ -4462,6 +4824,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'block-fields',
@@ -4473,6 +4836,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const blockFields = await payload.find({
@@ -4500,6 +4864,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           text: 'test',
         },
+        overrideAccess: true,
       })
       const blockDoc = await payload.create({
         collection: blockFieldsSlug,
@@ -4511,9 +4876,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
       const result = await payload.find({
         collection: blockFieldsSlug,
+        overrideAccess: true,
         where: {
           'relationshipBlocks.relationship': { equals: textDoc.id },
         },
@@ -4536,6 +4903,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
       const miss = await payload.create({
         collection: blockFieldsSlug,
@@ -4553,10 +4921,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       const { docs: equalsDocs } = await payload.find({
         collection: blockFieldsSlug,
+        overrideAccess: true,
         where: {
           and: [
             {
@@ -4571,6 +4941,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const { docs: inDocs } = await payload.find({
         collection: blockFieldsSlug,
+        overrideAccess: true,
         where: {
           'blocks.blockType': { in: ['content'] },
         },
@@ -4593,15 +4964,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           blocksWithLocalizedArray: [
             {
-              blockType: 'localizedArray',
               array: [
                 {
                   text: 'localized',
                 },
               ],
+              blockType: 'localizedArray',
             },
           ],
         },
+        overrideAccess: true,
       })
 
       expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
@@ -4613,6 +4985,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const blockFields = await payload.find({
         collection: 'block-fields',
         locale: 'all',
+        overrideAccess: true,
       })
 
       // Find the document that has the localizedReferences field from the seed
@@ -4632,6 +5005,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       const blockFields = await payload.find({
         collection: 'block-fields',
         locale: 'all',
+        overrideAccess: true,
       })
 
       // Find the document that has the localizedReferencesLocalizedBlock field from the seed
@@ -4660,6 +5034,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             },
           ],
         },
+        overrideAccess: true,
       })
 
       // The null should be stripped; the valid block should survive intact.
@@ -4677,13 +5052,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         payload.create({
           collection: collapsibleFieldsSlug,
           data: {
-            text: 'required',
             group: {
               subGroup: {
                 requiredTextWithinSubGroup: '',
               },
             },
+            text: 'required',
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow(
         'The following field is invalid: Collapsible Field > Group > Sub Group > Required Text Within Sub Group',
@@ -4699,6 +5075,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           json,
         },
+        overrideAccess: true,
       })
 
       expect(doc.json).toStrictEqual({ foo: 'bar' })
@@ -4711,6 +5088,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             json: '{ bad input: true }',
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Json')
     })
@@ -4722,6 +5100,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             json: { foo: 'bad' },
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('The following field is invalid: Json')
     })
@@ -4734,6 +5113,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             state: {},
           },
         },
+        overrideAccess: true,
       })
 
       expect(jsonFieldsDoc.json.state).toEqual({})
@@ -4746,6 +5126,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             state: {},
           },
         },
+        overrideAccess: true,
       })
 
       expect(updatedJsonFieldsDoc.json.state).toEqual({})
@@ -4760,6 +5141,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // This ensures each test has predictable data and query results
         await payload.delete({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             id: {
               exists: true,
@@ -4772,6 +5154,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             json: { foo: 'foobar', number: 5 },
           },
+          overrideAccess: true,
         })
 
         bazBar = await payload.create({
@@ -4779,6 +5162,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             json: { baz: 'bar', number: 10 },
           },
+          overrideAccess: true,
         })
 
         // Create content for array 'in' and 'not_in' queries
@@ -4787,10 +5171,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             collection: 'json-fields',
             data: {
               json: {
-                value: i,
                 isEven: i % 2 === 0,
+                value: i,
               },
             },
+            overrideAccess: true,
           })
         }
       })
@@ -4798,6 +5183,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should query nested properties - like', async ({ payload }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.foo': { like: 'bar' },
           },
@@ -4812,6 +5198,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should query nested properties - not_like', async ({ payload }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.baz': { not_like: 'bar' },
           },
@@ -4826,6 +5213,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should query nested properties - equals', async ({ payload }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.foo': { equals: 'foobar' },
           },
@@ -4833,6 +5221,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
         const notEquals = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.foo': { equals: 'bar' },
           },
@@ -4848,6 +5237,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should query nested numbers - equals', async ({ payload }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.number': { equals: 5 },
           },
@@ -4862,6 +5252,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should query nested properties - exists', async ({ payload }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.foo': { exists: true },
           },
@@ -4877,22 +5268,26 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const nullJSON = await payload.create({
           collection: 'json-fields',
           data: {},
+          overrideAccess: true,
         })
         const hasJSON = await payload.create({
           collection: 'json-fields',
           data: {
             json: [],
           },
+          overrideAccess: true,
         })
 
         const docsExistsFalse = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             json: { exists: false },
           },
         })
         const docsExistsTrue = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             json: { exists: true },
           },
@@ -4914,10 +5309,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             select: 'one',
           },
+          overrideAccess: true,
         })
 
         const existsResult = await payload.find({
           collection: 'select-fields',
+          overrideAccess: true,
           where: {
             id: { equals: id },
             select: { exists: true },
@@ -4928,6 +5325,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
         const existsFalseResult = await payload.find({
           collection: 'select-fields',
+          overrideAccess: true,
           where: {
             id: { equals: id },
             select: { exists: false },
@@ -4942,10 +5340,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             select: null,
           },
+          overrideAccess: true,
         })
 
         const existsTrueResult = await payload.find({
           collection: 'select-fields',
+          overrideAccess: true,
           where: {
             id: { equals: id },
             select: { exists: true },
@@ -4956,6 +5356,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
         const result = await payload.find({
           collection: 'select-fields',
+          overrideAccess: true,
           where: {
             id: { equals: id },
             select: { exists: false },
@@ -4968,6 +5369,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should query nested numbers - in', async ({ payload }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.value': { in: [1, 3] },
           },
@@ -4983,6 +5385,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should query nested numbers - not_in', async ({ payload }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.value': { not_in: [1, 3] },
           },
@@ -4998,6 +5401,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should query nested strings as literals - in', async ({ payload }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.foo': { in: ['foobar'] },
           },
@@ -5015,10 +5419,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             json: { foo: 'bar', number: 10 },
           },
+          overrideAccess: true,
         })
 
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.foo': { not_in: ['foobar'] },
           },
@@ -5036,10 +5442,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             json: { value: 'literal-value' },
           },
+          overrideAccess: true,
         })
 
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.value': { in: [null, 1, 'literal-value'] },
           },
@@ -5058,6 +5466,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       }) => {
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             and: [
               {
@@ -5090,19 +5499,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             json: {
               array: [
                 {
-                  text: 'some-text',
                   object: {
-                    text: 'deep-text',
                     array: [10],
+                    text: 'deep-text',
                   },
+                  text: 'some-text',
                 },
               ],
             },
           },
+          overrideAccess: true,
         })
 
         const { docs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             and: [
               {
@@ -5145,28 +5556,32 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const matchingDoc = await payload.create({
           collection: 'json-fields',
           data: {
-            json: { doc: { value: docId, relationTo: collectionSlug } },
+            json: { doc: { relationTo: collectionSlug, value: docId } },
           },
+          overrideAccess: true,
         })
 
         // different ID, same relationTo — should NOT match the and query
         await payload.create({
           collection: 'json-fields',
           data: {
-            json: { doc: { value: '99', relationTo: collectionSlug } },
+            json: { doc: { relationTo: collectionSlug, value: '99' } },
           },
+          overrideAccess: true,
         })
 
         // same ID, different relationTo — should NOT match the and query
         await payload.create({
           collection: 'json-fields',
           data: {
-            json: { doc: { value: docId, relationTo: 'other' } },
+            json: { doc: { relationTo: 'other', value: docId } },
           },
+          overrideAccess: true,
         })
 
         const { docs: equalsDocs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.doc.value': { equals: docId },
           },
@@ -5176,6 +5591,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
         const { docs: existsDocs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.doc.value': { exists: true },
           },
@@ -5188,6 +5604,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // where[and][3][input.doc.relationTo][equals] = collectionSlug
         const { docs: andDocs } = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             and: [
               { 'json.doc.value': { equals: docId } },
@@ -5204,6 +5621,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await expect(
           payload.find({
             collection: 'json-fields',
+            overrideAccess: true,
             where: {
               'json.select from': { equals: 5 },
             },
@@ -5213,6 +5631,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await expect(
           payload.find({
             collection: 'json-fields',
+            overrideAccess: true,
             where: {
               'json."unsafe"': { equals: 5 },
             },
@@ -5222,6 +5641,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await expect(
           payload.find({
             collection: 'json-fields',
+            overrideAccess: true,
             where: {
               'json.(unsafe"': { equals: 5 },
             },
@@ -5231,6 +5651,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         await expect(
           payload.find({
             collection: 'json-fields',
+            overrideAccess: true,
             where: {
               'json.unsafe="': { equals: 5 },
             },
@@ -5244,6 +5665,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           await expect(
             payload.find({
               collection: 'json-fields',
+              overrideAccess: true,
               where: {
                 'json.value': { equals: 'select(' },
               },
@@ -5253,6 +5675,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           await expect(
             payload.find({
               collection: 'json-fields',
+              overrideAccess: true,
               where: {
                 'json.value': { equals: '"unsafe' },
               },
@@ -5262,6 +5685,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           await expect(
             payload.find({
               collection: 'json-fields',
+              overrideAccess: true,
               where: {
                 'json.value': { equals: `'unsafe` },
               },
@@ -5271,6 +5695,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           await expect(
             payload.find({
               collection: 'json-fields',
+              overrideAccess: true,
               where: {
                 'json.value': { equals: `unsafe\\` },
               },
@@ -5280,6 +5705,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           await expect(
             payload.find({
               collection: 'json-fields',
+              overrideAccess: true,
               where: {
                 'json.value': { equals: `unsafe=` },
               },
@@ -5304,6 +5730,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           await expect(
             payload.find({
               collection: 'json-fields',
+              overrideAccess: true,
               where: {
                 [path]: { equals: 'test' },
               },
@@ -5315,6 +5742,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
       test('should accept valid path segments in JSON field queries', async ({ payload }) => {
         const result = await payload.find({
           collection: 'json-fields',
+          overrideAccess: true,
           where: {
             'json.valid_key': { equals: 'test' },
           },
@@ -5329,6 +5757,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test('should not crash if querying with empty in operator', async ({ payload }) => {
       const query = await payload.find({
         collection: 'relationship-fields',
+        overrideAccess: true,
         where: {
           'relationship.value': {
             in: [],
@@ -5344,7 +5773,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
-          await payload.delete({ collection: 'relationship-fields', id })
+          await payload.delete({ id, collection: 'relationship-fields', overrideAccess: true })
         }
         createdIDs.length = 0
       })
@@ -5359,25 +5788,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
+          overrideAccess: true,
         })
 
         const text2 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 2' },
+          overrideAccess: true,
         })
 
         const relDoc = await payload.create({
           collection: 'relationship-fields',
           data: {
-            relationshipHasMany: [text1.id, text2.id],
             relationship: { relationTo: 'text-fields', value: text1.id },
+            relationshipHasMany: [text1.id, text2.id],
           },
+          overrideAccess: true,
         })
         createdIDs.push(relDoc.id)
 
         // Query with exact array match [text1.id, text2.id]
         const result = await payload.find({
           collection: 'relationship-fields',
+          overrideAccess: true,
           where: {
             relationshipHasMany: {
               equals: [text1.id, text2.id],
@@ -5391,6 +5824,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // Verify that querying with subset [text1.id] returns no results (not exact match)
         const noMatchResult = await payload.find({
           collection: 'relationship-fields',
+          overrideAccess: true,
           where: {
             relationshipHasMany: {
               equals: [text1.id],
@@ -5411,12 +5845,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
+          overrideAccess: true,
         })
 
         // @ts-expect-error - items field typing issue
         const array1 = await payload.create({
           collection: 'array-fields',
           data: { items: [{ text: 'Array 1' }] },
+          overrideAccess: true,
         })
 
         const relDoc = await payload.create({
@@ -5428,12 +5864,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             ],
             relationship: { relationTo: 'text-fields', value: text1.id },
           },
+          overrideAccess: true,
         })
         createdIDs.push(relDoc.id)
 
         // Query with exact array match [text-fields:text1, array-fields:array1]
         const result = await payload.find({
           collection: 'relationship-fields',
+          overrideAccess: true,
           where: {
             relationHasManyPolymorphic: {
               equals: [
@@ -5450,6 +5888,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // Verify that querying with subset [text-fields:text1] returns no results (not exact match)
         const noMatchResult = await payload.find({
           collection: 'relationship-fields',
+          overrideAccess: true,
           where: {
             relationHasManyPolymorphic: {
               equals: [{ relationTo: 'text-fields', value: text1.id }],
@@ -5470,39 +5909,45 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
+          overrideAccess: true,
         })
 
         const text2 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 2' },
+          overrideAccess: true,
         })
 
         const text3 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 3' },
+          overrideAccess: true,
         })
 
         const relDoc1 = await payload.create({
           collection: 'relationship-fields',
           data: {
-            relationshipHasMany: [text1.id, text2.id],
             relationship: { relationTo: 'text-fields', value: text1.id },
+            relationshipHasMany: [text1.id, text2.id],
           },
+          overrideAccess: true,
         })
         createdIDs.push(relDoc1.id)
 
         const relDoc2 = await payload.create({
           collection: 'relationship-fields',
           data: {
-            relationshipHasMany: [text3.id],
             relationship: { relationTo: 'text-fields', value: text3.id },
+            relationshipHasMany: [text3.id],
           },
+          overrideAccess: true,
         })
         createdIDs.push(relDoc2.id)
 
         // Query with not_equals [text1.id, text2.id] should exclude relDoc1 and include relDoc2
         const result = await payload.find({
           collection: 'relationship-fields',
+          overrideAccess: true,
           where: {
             relationshipHasMany: {
               not_equals: [text1.id, text2.id],
@@ -5518,6 +5963,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // Query with not_equals [text3.id] should exclude relDoc2 and include relDoc1
         const noMatchResult = await payload.find({
           collection: 'relationship-fields',
+          overrideAccess: true,
           where: {
             relationshipHasMany: {
               not_equals: [text3.id],
@@ -5541,17 +5987,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
+          overrideAccess: true,
         })
 
         // @ts-expect-error - items field typing issue
         const array1 = await payload.create({
           collection: 'array-fields',
           data: { items: [{ text: 'Array 1' }] },
+          overrideAccess: true,
         })
 
         const text2 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 2' },
+          overrideAccess: true,
         })
 
         const relDoc1 = await payload.create({
@@ -5563,6 +6012,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             ],
             relationship: { relationTo: 'text-fields', value: text1.id },
           },
+          overrideAccess: true,
         })
         createdIDs.push(relDoc1.id)
 
@@ -5572,12 +6022,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             relationHasManyPolymorphic: [{ relationTo: 'text-fields', value: text2.id }],
             relationship: { relationTo: 'text-fields', value: text2.id },
           },
+          overrideAccess: true,
         })
         createdIDs.push(relDoc2.id)
 
         // Query with not_equals [text-fields:text1, array-fields:array1] should exclude relDoc1 and include relDoc2
         const result = await payload.find({
           collection: 'relationship-fields',
+          overrideAccess: true,
           where: {
             relationHasManyPolymorphic: {
               not_equals: [
@@ -5596,6 +6048,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         // Query with not_equals [text-fields:text2] should exclude relDoc2 and include relDoc1
         const noMatchResult = await payload.find({
           collection: 'relationship-fields',
+          overrideAccess: true,
           where: {
             relationHasManyPolymorphic: {
               not_equals: [{ relationTo: 'text-fields', value: text2.id }],
@@ -5615,20 +6068,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
+          overrideAccess: true,
         })
 
         const relDoc = await payload.create({
           collection: 'relationship-fields',
           data: {
-            relationshipHasMany: [text1.id],
             relationship: { relationTo: 'text-fields', value: text1.id },
+            relationshipHasMany: [text1.id],
           },
+          overrideAccess: true,
         })
         createdIDs.push(relDoc.id)
 
         try {
           const equalsResult = await payload.find({
             collection: 'relationship-fields',
+            overrideAccess: true,
             where: {
               relationshipHasMany: {
                 equals: [text1.id],
@@ -5640,6 +6096,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
           const notEqualsResult = await payload.find({
             collection: 'relationship-fields',
+            overrideAccess: true,
             where: {
               relationshipHasMany: {
                 not_equals: [text1.id],
@@ -5649,7 +6106,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
           expect(notEqualsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(false)
         } finally {
-          await payload.delete({ collection: 'text-fields', id: text1.id })
+          await payload.delete({ id: text1.id, collection: 'text-fields', overrideAccess: true })
         }
       })
 
@@ -5664,11 +6121,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
+          overrideAccess: true,
         })
 
         const text2 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 2' },
+          overrideAccess: true,
         })
 
         // relDocWithNull has no relationshipDrawer set (null)
@@ -5677,6 +6136,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           data: {
             relationship: { relationTo: 'text-fields', value: text1.id },
           },
+          overrideAccess: true,
         })
         createdIDs.push(relDocWithNull.id)
 
@@ -5687,6 +6147,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           // (not TRUE), so the document is incorrectly excluded.
           const result = await payload.find({
             collection: 'relationship-fields',
+            overrideAccess: true,
             where: {
               relationshipDrawer: {
                 not_equals: [text2.id],
@@ -5696,8 +6157,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
           expect(result.docs.some((doc) => doc.id === relDocWithNull.id)).toBe(true)
         } finally {
-          await payload.delete({ collection: 'text-fields', id: text1.id })
-          await payload.delete({ collection: 'text-fields', id: text2.id })
+          await payload.delete({ id: text1.id, collection: 'text-fields', overrideAccess: true })
+          await payload.delete({ id: text2.id, collection: 'text-fields', overrideAccess: true })
         }
       })
     })
@@ -5710,10 +6171,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           select: 'one',
         },
+        overrideAccess: true,
       })
 
       const existsResult = await payload.find({
         collection: 'select-fields',
+        overrideAccess: true,
         where: {
           id: { equals: id },
           select: { exists: true },
@@ -5724,6 +6187,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const existsFalseResult = await payload.find({
         collection: 'select-fields',
+        overrideAccess: true,
         where: {
           id: { equals: id },
           select: { exists: false },
@@ -5738,10 +6202,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           select: null,
         },
+        overrideAccess: true,
       })
 
       const existsTrueResult = await payload.find({
         collection: 'select-fields',
+        overrideAccess: true,
         where: {
           id: { equals: id },
           select: { exists: true },
@@ -5752,6 +6218,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
 
       const result = await payload.find({
         collection: 'select-fields',
+        overrideAccess: true,
         where: {
           id: { equals: id },
           select: { exists: false },
@@ -5768,8 +6235,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
         await payload.delete({
-          collection: customIDNestedSlug,
           id,
+          collection: customIDNestedSlug,
+          overrideAccess: true,
         })
       }
       createdIDs.length = 0
@@ -5783,9 +6251,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         collection: customIDNestedSlug,
         data: {
           id: customID,
-          title: 'Test Document',
           description: 'Testing nested custom ID field',
+          title: 'Test Document',
         },
+        overrideAccess: true,
       })
 
       expect(doc.id).toBe(customID)
@@ -5802,11 +6271,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           id: customID,
           title: 'Another Test',
         },
+        overrideAccess: true,
       })
 
       const retrieved = await payload.findByID({
-        collection: customIDNestedSlug,
         id: customID,
+        collection: customIDNestedSlug,
+        overrideAccess: true,
       })
 
       expect(retrieved.id).toBe(customID)
@@ -5823,14 +6294,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           id: customID,
           title: 'Original Title',
         },
+        overrideAccess: true,
       })
 
       const updated = await payload.update({
-        collection: customIDNestedSlug,
         id: customID,
+        collection: customIDNestedSlug,
         data: {
           title: 'Updated Title',
         },
+        overrideAccess: true,
       })
 
       expect(updated.id).toBe(customID)
@@ -5848,6 +6321,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone_tz: '+05:30',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
@@ -5863,6 +6337,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithMixedTimezones_tz: 'America/New_York',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
@@ -5873,6 +6348,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
         data: {
           dateWithMixedTimezones_tz: '+05:30',
         },
+        overrideAccess: true,
       })
 
       expect(updated.dateWithMixedTimezones_tz).toEqual('+05:30')
@@ -5887,6 +6363,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone_tz: '+05:30',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -5897,10 +6374,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone_tz: '-08:00',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       const indiaTimezoneResults = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
         where: {
           dateWithOffsetTimezone_tz: {
             equals: '+05:30',
@@ -5923,6 +6402,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithMixedTimezones_tz: 'America/New_York',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
@@ -5936,6 +6416,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithMixedTimezones_tz: '+05:30',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc2.dateWithMixedTimezones_tz).toEqual('+05:30')
@@ -5951,6 +6432,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone_tz: '+05:30',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc1.dateWithOffsetTimezone_tz).toEqual('+05:30')
@@ -5964,6 +6446,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone_tz: '-08:00',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc2.dateWithOffsetTimezone_tz).toEqual('-08:00')
@@ -5977,6 +6460,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithOffsetTimezone_tz: '+00:00',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc3.dateWithOffsetTimezone_tz).toEqual('+00:00')
@@ -5996,6 +6480,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone_tz: '+05:30',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const query = `
@@ -6031,6 +6516,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone_tz: '-08:00',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const query = `
@@ -6060,6 +6546,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithMixedTimezones_tz: 'America/New_York',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const query = `
@@ -6162,6 +6649,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone_tz: '+05:30',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const mutation = `
@@ -6199,6 +6687,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
             dateWithMixedTimezones_tz: 'America/New_York',
           },
+          overrideAccess: true,
         })
 
         const mutation = `
@@ -6237,6 +6726,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithMixedTimezones_tz: '+05:30',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const mutation = `
@@ -6274,6 +6764,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone_tz: '+05:30',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -6284,6 +6775,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
             dateWithOffsetTimezone_tz: '-08:00',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const query = `
@@ -6366,6 +6858,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc.dateWithTimezoneWithDisabledColumns_tz).toEqual('America/New_York')
@@ -6398,6 +6891,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000Z',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc.dateWithTimezoneNoDefault_tz).toBeFalsy()
@@ -6413,6 +6907,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => 
           dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')

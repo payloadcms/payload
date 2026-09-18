@@ -24,6 +24,7 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
     const result = await payload.create({
       collection: apiKeysSlug,
       data: { apiKey },
+      overrideAccess: true,
     })
     const originalUpdateOne = payload.db.updateOne
     let backfillCount = 0
@@ -54,12 +55,17 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
 
   test('should revoke API keys for submitted invalid or empty values', async ({ payload }) => {
     for (const apiKeyValue of [null, '', 0, true, {}, []]) {
-      const user = await payload.create({ collection: apiKeysSlug, data: { apiKey: uuid() } })
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: { apiKey: uuid() },
+        overrideAccess: true,
+      })
 
       await payload.update({
         id: user.id,
         collection: apiKeysSlug,
         data: { apiKey: apiKeyValue } as never,
+        overrideAccess: true,
       })
 
       const storedUser = await payload.db.findOne({
@@ -76,12 +82,17 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
 
   test('should preserve API key fields for explicitly undefined values', async ({ payload }) => {
     const apiKey = uuid()
-    const user = await payload.create({ collection: apiKeysSlug, data: { apiKey } })
+    const user = await payload.create({
+      collection: apiKeysSlug,
+      data: { apiKey },
+      overrideAccess: true,
+    })
 
     await payload.update({
       id: user.id,
       collection: apiKeysSlug,
       data: { apiKey: undefined } as never,
+      overrideAccess: true,
     })
 
     const storedUser = await payload.db.findOne({
@@ -97,7 +108,11 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
 
   test('should not inject the reveal endpoint by default', async ({ payload, restClient }) => {
     await loginAdmin({ payload, restClient })
-    const apiKeyUser = await payload.create({ collection: apiKeysSlug, data: { apiKey: uuid() } })
+    const apiKeyUser = await payload.create({
+      collection: apiKeysSlug,
+      data: { apiKey: uuid() },
+      overrideAccess: true,
+    })
     const response = await restClient.POST(`/${apiKeysSlug}/${apiKeyUser.id}/api-key/reveal`)
 
     expect(response.status).toBe(404)
@@ -116,10 +131,11 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
     restClient,
   }) => {
     const apiKey = uuid()
-    await payload.create({ collection: apiKeysSlug, data: { apiKey } })
+    await payload.create({ collection: apiKeysSlug, data: { apiKey }, overrideAccess: true })
     const revealableKey = await payload.create({
       collection: revealableKeysSlug,
       data: { apiKey: uuid() },
+      overrideAccess: true,
     })
 
     const response = await restClient.POST(
@@ -141,6 +157,7 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
     const revealableKey = await payload.create({
       collection: restrictedRevealableKeysSlug,
       data: { apiKey: uuid(), denyCollectionReadAccess: true },
+      overrideAccess: true,
     })
     const response = await restClient.POST(
       `/${restrictedRevealableKeysSlug}/${revealableKey.id}/api-key/reveal`,
@@ -157,6 +174,7 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
     const revealableKey = await payload.create({
       collection: restrictedRevealableKeysSlug,
       data: { apiKey: uuid(), denyAPIKeyUpdateAccess: true },
+      overrideAccess: true,
     })
     const response = await restClient.POST(
       `/${restrictedRevealableKeysSlug}/${revealableKey.id}/api-key/reveal`,
@@ -174,6 +192,7 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
     const revealableKey = await payload.create({
       collection: restrictedRevealableKeysSlug,
       data: { apiKey },
+      overrideAccess: true,
     })
     const response = await restClient.POST(
       `/${restrictedRevealableKeysSlug}/${revealableKey.id}/api-key/reveal`,
@@ -193,10 +212,12 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
     const matching = await payload.create({
       collection: tenantRevealableKeysSlug,
       data: { apiKey, tenant: 'match' } as never,
+      overrideAccess: true,
     })
     const mismatched = await payload.create({
       collection: tenantRevealableKeysSlug,
       data: { apiKey: uuid(), tenant: 'other' } as never,
+      overrideAccess: true,
     })
 
     const allowed = await restClient.POST(
@@ -219,6 +240,7 @@ test.suite({ config: './config.ts' })('API key reveal access', () => {
     const revealableKey = await payload.create({
       collection: restrictedRevealableKeysSlug,
       data: { apiKey: uuid(), denyCollectionUpdateAccess: true },
+      overrideAccess: true,
     })
     const response = await restClient.POST(
       `/${restrictedRevealableKeysSlug}/${revealableKey.id}/api-key/reveal`,

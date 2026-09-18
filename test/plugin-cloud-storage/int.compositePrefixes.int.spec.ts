@@ -71,6 +71,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite 
             prefix: docPrefix,
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         expect(upload.id).toBeTruthy()
@@ -93,6 +94,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite 
           collection: mediaWithCompositePrefixesSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         expect(upload.id).toBeTruthy()

@@ -65,6 +65,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -88,6 +89,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -111,6 +113,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)
@@ -138,6 +141,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -164,6 +168,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -190,6 +195,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)
@@ -213,6 +219,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -246,6 +253,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(3)
@@ -280,6 +288,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(2) // Would be 4 by default, if only scheduled jobs were respected in handleSchedules condition
@@ -305,6 +314,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(2)
@@ -332,6 +342,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(3)
@@ -366,6 +377,7 @@ test.suite({ config: './config.schedules.ts' })(
             equals: 'This task runs every second - max 2 per second',
           },
         },
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(6)
@@ -381,6 +393,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)

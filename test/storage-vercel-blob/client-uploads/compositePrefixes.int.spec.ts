@@ -24,6 +24,7 @@ test.suite({ config: './config.compositePrefixes.ts' })(
         await payload.delete({
           id,
           collection: mediaWithCompositePrefixesSlug,
+          overrideAccess: true,
         })
       }
 

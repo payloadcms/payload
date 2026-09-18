@@ -42,6 +42,7 @@ test.suite({ config: './config.ts' })('baseAccess', () => {
       await payload.create({
         collection: postsSlug,
         data,
+        overrideAccess: true,
       })
     }
     const req = await createRequest({
@@ -86,6 +87,7 @@ test.suite({ config: './config.ts' })('baseAccess', () => {
       collection: postsSlug,
       data,
       req,
+      overrideAccess: true,
     })
 
     expect(doc.title).toBe(data.title)

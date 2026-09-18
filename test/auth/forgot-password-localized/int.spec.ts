@@ -29,6 +29,7 @@ test.suite({ config: './config.ts' })('Forgot password operation with localized 
       data: {
         localizedField: 'Polish content',
       },
+      overrideAccess: true,
     })
   })
 
@@ -40,6 +41,7 @@ test.suite({ config: './config.ts' })('Forgot password operation with localized 
       collection: collectionSlug,
       data: { email: devUser.email },
       disableEmail: true,
+      overrideAccess: true,
     })
 
     // Verify token was generated successfully
@@ -55,6 +57,7 @@ test.suite({ config: './config.ts' })('Forgot password operation with localized 
         collection: collectionSlug,
         data: { email: devUser.email },
         disableEmail: true,
+        overrideAccess: true,
       }),
     ).resolves.not.toThrow()
   })
