@@ -1,4 +1,5 @@
 import { pathToRegexp } from 'path-to-regexp'
+import { stripTrailingSlash } from 'payload/shared'
 
 export const isPathMatchingRoute = ({
   currentRoute,
@@ -18,15 +19,7 @@ export const isPathMatchingRoute = ({
     return false
   }
 
-  const normalizeTrailingSlash = (path: string) => {
-    if (strict || path === '/') {
-      return path
-    }
-
-    return path.replace(/\/$/, '')
-  }
-
-  const normalizedCurrentRoute = normalizeTrailingSlash(currentRoute)
+  const normalizedCurrentRoute = strict ? currentRoute : stripTrailingSlash(currentRoute)
   const keys = []
 
   // run the view path through `pathToRegexp` to resolve any dynamic segments
@@ -37,7 +30,7 @@ export const isPathMatchingRoute = ({
   })
 
   const match = regex.exec(normalizedCurrentRoute)
-  const viewRoute = normalizeTrailingSlash(match?.[0] || viewPath)
+  const viewRoute = strict ? match?.[0] || viewPath : stripTrailingSlash(match?.[0] || viewPath)
 
   if (exact) {
     return normalizedCurrentRoute === viewRoute

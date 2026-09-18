@@ -15,7 +15,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
+import { applyLocaleFiltering, formatAdminURL, stripTrailingSlash } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -70,10 +70,7 @@ export const RootPage = async ({
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
   // route without possible trailing slash
-  const currentRouteToCompare =
-    currentRouteURL.length > 1 && currentRouteURL.endsWith('/')
-      ? currentRouteURL.slice(0, -1)
-      : currentRouteURL
+  const currentRouteToCompare = stripTrailingSlash(currentRouteURL)
 
   const segments = Array.isArray(params.segments) ? params.segments : []
   const isCollectionRoute = segments[0] === 'collections'
@@ -234,10 +231,7 @@ export const RootPage = async ({
     adminRoute,
     path: _createFirstUserRoute,
   })
-  const createFirstUserRoute =
-    rawCreateFirstUserRoute.length > 1 && rawCreateFirstUserRoute.endsWith('/')
-      ? rawCreateFirstUserRoute.slice(0, -1)
-      : rawCreateFirstUserRoute
+  const createFirstUserRoute = stripTrailingSlash(rawCreateFirstUserRoute)
 
   if (disableLocalStrategy && currentRouteToCompare === createFirstUserRoute) {
     redirect(adminRouteURL)

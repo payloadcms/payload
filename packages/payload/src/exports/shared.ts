@@ -89,7 +89,7 @@ export { extractID } from '../utilities/extractID.js'
 
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
-export { formatAdminURL } from '../utilities/formatAdminURL.js'
+export { formatAdminURL, stripTrailingSlash } from '../utilities/formatAdminURL.js'
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'

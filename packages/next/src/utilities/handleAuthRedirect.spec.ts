@@ -48,4 +48,16 @@ describe('handleAuthRedirect', () => {
 
     expect(result).toBe('/admin/login/')
   })
+
+  it('should preserve non-trailing-slash URLs when trailing slashes are disabled', () => {
+    process.env.NEXT_TRAILING_SLASH = 'false'
+
+    const result = handleAuthRedirect({
+      config,
+      route: '/admin/collections/posts',
+      searchParams: {},
+    })
+
+    expect(result).toBe('/admin/login?redirect=%2Fadmin%2Fcollections%2Fposts')
+  })
 })
