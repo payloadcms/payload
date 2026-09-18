@@ -32,6 +32,7 @@ export const appendUploadSelectFields = ({
       select.sizes = {
         [collectionConfig.upload.adminThumbnail]: {
           filename: true,
+          url: true,
         },
       }
     } else {
