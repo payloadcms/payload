@@ -15,10 +15,6 @@ export const hoistQueryParamsToAnd = (currentWhere: Where, incomingWhere: Where)
 
   if ('and' in currentWhere && currentWhere.and) {
     currentWhere.and.push(incomingWhere)
-  } else if ('or' in currentWhere) {
-    currentWhere = {
-      and: [currentWhere, incomingWhere],
-    }
   } else {
     currentWhere = {
       and: [currentWhere, incomingWhere],

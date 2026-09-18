@@ -237,16 +237,14 @@ describe('parseParams', () => {
       expect(result).toEqual({})
     })
 
-    it('should throw error for null params (current implementation bug)', () => {
-      expect(() => {
-        parseParams(null as any)
-      }).toThrow(TypeError)
+    it('should return empty object for null params', () => {
+      const result = parseParams(null as any)
+      expect(result).toEqual({})
     })
 
-    it('should throw error for undefined params (current implementation bug)', () => {
-      expect(() => {
-        parseParams(undefined as any)
-      }).toThrow(TypeError)
+    it('should return empty object for undefined params', () => {
+      const result = parseParams(undefined as any)
+      expect(result).toEqual({})
     })
 
     it('should preserve unknown parameters', () => {
