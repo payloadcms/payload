@@ -477,6 +477,7 @@ export const daTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Vælg alle rækker',
     selectedCount: '{{count}} {{label}} valgt',
     selectLabel: 'Vælg {{label}}',
+    selectRow: undefined,
     selectValue: 'Vælg en værdi',
     settings: 'Indstillinger',
     showAllLabel: 'Vis alle {{label}}',
