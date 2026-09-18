@@ -42,6 +42,23 @@ export type PayloadAdminBarProps = {
     style?: CSSProperties
   }
   id?: string
+  /**
+   * Override the default English labels on each link. Each entry is
+   * optional; omitted entries fall back to the built-in English string.
+   *
+   * For `edit` and `create`, you can pass either a plain string or a
+   * function that receives the resolved collection singular label (when
+   * `collectionLabels.singular` is set). Use the function form when you
+   * want to interpolate the collection name into the label, e.g.
+   * `edit: ({ singular }) => `Edytuj ${singular ?? 'stronę'}`.
+   */
+  labels?: {
+    create?: ((args: { singular?: string }) => string) | string
+    edit?: ((args: { singular?: string }) => string) | string
+    exitPreview?: string
+    logout?: string
+    profile?: string
+  }
   logo?: ReactElement
   logoProps?: {
     [key: string]: unknown
