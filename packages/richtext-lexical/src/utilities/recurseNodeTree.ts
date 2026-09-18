@@ -4,7 +4,7 @@ import type { SerializedLexicalNode } from 'lexical'
 export const recurseNodeTree = ({
   flattenedNodes,
   nodeIDMap,
-  nodes,
+  nodes: nodes_,
 }: {
   flattenedNodes?: SerializedLexicalNode[]
   nodeIDMap?: {
@@ -12,6 +12,8 @@ export const recurseNodeTree = ({
   }
   nodes: SerializedLexicalNode[]
 }): void => {
+  const nodes = nodes_.filter((node) => Boolean(node))
+
   if (!nodes?.length) {
     return
   }
