@@ -12,6 +12,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   depth?: number
@@ -27,9 +28,7 @@ export type Arguments = {
 export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
   args: Arguments,
 ): Promise<T> => {
-  const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
-  const req = args.req!
-  const { fallbackLocale, locale, payload } = req
+  let req = args.req!
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -38,19 +37,16 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     // beforeOperation - Global
     // /////////////////////////////////////
 
-    if (globalConfig.hooks?.beforeOperation?.length) {
-      for (const hook of globalConfig.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            context: req.context,
-            global: globalConfig,
-            operation: 'restoreVersion',
-            overrideAccess,
-            req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      global: args.globalConfig,
+      operation: 'restoreVersion',
+      overrideAccess: args.overrideAccess,
+    })
+
+    req = args.req!
+    const { id, depth, draft, globalConfig, overrideAccess, populate, showHiddenFields } = args
+    const { fallbackLocale, locale, payload } = req
 
     // /////////////////////////////////////
     // Retrieve original raw version
