@@ -41,6 +41,16 @@
       "import": "./src/exports/client.ts",
       "types": "./src/exports/client.ts",
       "default": "./src/exports/client.ts"
+    },
+    "./translations/languages/all": {
+      "import": "./src/translations/index.ts",
+      "types": "./src/translations/index.ts",
+      "default": "./src/translations/index.ts"
+    },
+    "./translations/languages/*": {
+      "import": "./src/translations/languages/*.ts",
+      "types": "./src/translations/languages/*.ts",
+      "default": "./src/translations/languages/*.ts"
     }
   },
   "main": "./src/index.ts",
@@ -60,6 +70,7 @@
     "test": "echo \"Error: no tests specified\""
   },
   "dependencies": {
+    "@payloadcms/translations": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/ui": "workspace:*"
   },
