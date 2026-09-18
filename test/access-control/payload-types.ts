@@ -104,6 +104,9 @@ export interface Config {
     'where-cache-same': WhereCacheSame;
     'where-cache-unique': WhereCacheUnique;
     'async-parent': AsyncParent;
+    'access-relation-parent': AccessRelationParent;
+    'access-relation-child': AccessRelationChild;
+    'self-referential': SelfReferential;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -118,6 +121,9 @@ export interface Config {
       joinedPostsMany: 'posts';
       joinedPostsPolymorphicOn: 'posts';
       polymorphicJoinedPosts: 'posts' | 'unrestricted';
+    };
+    unrestricted: {
+      restrictedRelatedItems: 'fully-restricted';
     };
   };
   collectionsSelect: {
@@ -154,6 +160,9 @@ export interface Config {
     'where-cache-same': WhereCacheSameSelect<false> | WhereCacheSameSelect<true>;
     'where-cache-unique': WhereCacheUniqueSelect<false> | WhereCacheUniqueSelect<true>;
     'async-parent': AsyncParentSelect<false> | AsyncParentSelect<true>;
+    'access-relation-parent': AccessRelationParentSelect<false> | AccessRelationParentSelect<true>;
+    'access-relation-child': AccessRelationChildSelect<false> | AccessRelationChildSelect<true>;
+    'self-referential': SelfReferentialSelect<false> | SelfReferentialSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -397,12 +406,22 @@ export interface PostReference {
 export interface Unrestricted {
   id: string;
   name?: string | null;
+  hiddenName?: string | null;
+  restrictedName?: string | null;
   reference?: (string | null) | PostReference;
   info?: {
     title?: string | null;
     description?: string | null;
   };
   userRestrictedDocs?: (string | UserRestrictedCollection)[] | null;
+  userRestrictedDoc?: (string | null) | UserRestrictedCollection;
+  fullyRestrictedDocs?: (string | FullyRestricted)[] | null;
+  restrictedUserDocs?: (string | CanCreateNotUpdateCollection)[] | null;
+  restrictedRelatedItems?: {
+    docs?: (string | FullyRestricted)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   createNotUpdateDocs?: (string | CanCreateNotUpdateCollection)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -419,21 +438,25 @@ export interface UserRestrictedCollection {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "can-create-not-update-collection".
- */
-export interface CanCreateNotUpdateCollection {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "fully-restricted".
  */
 export interface FullyRestricted {
   id: string;
   name?: string | null;
+  hiddenName?: string | null;
+  restrictedName?: string | null;
+  unrestrictedDoc?: (string | null) | Unrestricted;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "can-create-not-update-collection".
+ */
+export interface CanCreateNotUpdateCollection {
+  id: string;
+  name?: string | null;
+  hiddenName?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1049,6 +1072,43 @@ export interface AsyncParent {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-relation-parent".
+ */
+export interface AccessRelationParent {
+  id: string;
+  title?: string | null;
+  status?: string | null;
+  child?: (string | null) | AccessRelationChild;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-relation-child".
+ */
+export interface AccessRelationChild {
+  id: string;
+  name?: string | null;
+  nested?: {
+    isActive?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "self-referential".
+ */
+export interface SelfReferential {
+  id: string;
+  label?: string | null;
+  isPublic?: boolean | null;
+  parent?: (string | null) | SelfReferential;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1202,6 +1262,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'async-parent';
         value: string | AsyncParent;
+      } | null)
+    | ({
+        relationTo: 'access-relation-parent';
+        value: string | AccessRelationParent;
+      } | null)
+    | ({
+        relationTo: 'access-relation-child';
+        value: string | AccessRelationChild;
+      } | null)
+    | ({
+        relationTo: 'self-referential';
+        value: string | SelfReferential;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1352,6 +1424,8 @@ export interface PostReferencesSelect<T extends boolean = true> {
  */
 export interface UnrestrictedSelect<T extends boolean = true> {
   name?: T;
+  hiddenName?: T;
+  restrictedName?: T;
   reference?: T;
   info?:
     | T
@@ -1360,6 +1434,10 @@ export interface UnrestrictedSelect<T extends boolean = true> {
         description?: T;
       };
   userRestrictedDocs?: T;
+  userRestrictedDoc?: T;
+  fullyRestrictedDocs?: T;
+  restrictedUserDocs?: T;
+  restrictedRelatedItems?: T;
   createNotUpdateDocs?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1382,6 +1460,9 @@ export interface RelationRestrictedSelect<T extends boolean = true> {
  */
 export interface FullyRestrictedSelect<T extends boolean = true> {
   name?: T;
+  hiddenName?: T;
+  restrictedName?: T;
+  unrestrictedDoc?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1409,6 +1490,7 @@ export interface UserRestrictedCollectionSelect<T extends boolean = true> {
  */
 export interface CanCreateNotUpdateCollectionSelect<T extends boolean = true> {
   name?: T;
+  hiddenName?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1884,6 +1966,42 @@ export interface AsyncParentSelect<T extends boolean = true> {
               deepChild2?: T;
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-relation-parent_select".
+ */
+export interface AccessRelationParentSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  child?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "access-relation-child_select".
+ */
+export interface AccessRelationChildSelect<T extends boolean = true> {
+  name?: T;
+  nested?:
+    | T
+    | {
+        isActive?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "self-referential_select".
+ */
+export interface SelfReferentialSelect<T extends boolean = true> {
+  label?: T;
+  isPublic?: T;
+  parent?: T;
   updatedAt?: T;
   createdAt?: T;
 }

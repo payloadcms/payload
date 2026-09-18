@@ -34,6 +34,10 @@ export const whereCacheSameSlug = 'where-cache-same'
 export const whereCacheUniqueSlug = 'where-cache-unique'
 export const asyncParentSlug = 'async-parent'
 
+export const accessRelationParentSlug = 'access-relation-parent'
+export const accessRelationChildSlug = 'access-relation-child'
+export const selfReferentialSlug = 'self-referential'
+
 // Trash access control slugs
 export const differentiatedTrashSlug = 'differentiated-trash'
 export const restrictedTrashSlug = 'restricted-trash'
