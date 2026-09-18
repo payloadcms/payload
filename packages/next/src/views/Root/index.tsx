@@ -64,14 +64,16 @@ export const RootPage = async ({
 
   const params = await paramsPromise
 
-  const rawCurrentRoute = formatAdminURL({
+  // route with possible trailing slash
+  const currentRouteURL = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
-  const currentRoute =
-    rawCurrentRoute.length > 1 && rawCurrentRoute.endsWith('/')
-      ? rawCurrentRoute.slice(0, -1)
-      : rawCurrentRoute
+  // route without possible trailing slash
+  const currentRoutePath =
+    currentRouteURL.length > 1 && currentRouteURL.endsWith('/')
+      ? currentRouteURL.slice(0, -1)
+      : currentRouteURL
 
   const segments = Array.isArray(params.segments) ? params.segments : []
   const isCollectionRoute = segments[0] === 'collections'
@@ -144,19 +146,19 @@ export const RootPage = async ({
         }),
       },
       // intentionally omit `serverURL` to keep URL relative
-      urlSuffix: `${rawCurrentRoute}${searchParams ? queryString : ''}`,
+      urlSuffix: `${currentRouteURL}${searchParams ? queryString : ''}`,
     },
   })
 
   if (
     !permissions.canAccessAdmin &&
-    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRoute }) &&
-    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRoute })
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRoutePath }) &&
+    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRoutePath })
   ) {
     redirect(
       handleAuthRedirect({
         config: payload.config,
-        route: currentRoute,
+        route: currentRoutePath,
         searchParams,
         user: req.user,
       }),
@@ -193,7 +195,7 @@ export const RootPage = async ({
     adminRoute,
     collectionConfig,
     collectionPreferences,
-    currentRoute,
+    currentRoute: currentRoutePath,
     globalConfig,
     payload,
     searchParams,
@@ -237,15 +239,15 @@ export const RootPage = async ({
       ? rawCreateFirstUserRoute.slice(0, -1)
       : rawCreateFirstUserRoute
 
-  if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
+  if (disableLocalStrategy && currentRoutePath === createFirstUserRoute) {
     redirect(adminRouteURL)
   }
 
-  if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
+  if (!dbHasUser && currentRoutePath !== createFirstUserRoute && !disableLocalStrategy) {
     redirect(rawCreateFirstUserRoute)
   }
 
-  if (dbHasUser && currentRoute === createFirstUserRoute) {
+  if (dbHasUser && currentRoutePath === createFirstUserRoute) {
     redirect(adminRouteURL)
   }
 
@@ -269,7 +271,7 @@ export const RootPage = async ({
     !clientConfig.localization.localeCodes.includes(req.locale)
   ) {
     redirect(
-      `${rawCurrentRoute}${qs.stringify(
+      `${currentRouteURL}${qs.stringify(
         {
           ...searchParams,
           locale: clientConfig.localization.localeCodes.includes(
