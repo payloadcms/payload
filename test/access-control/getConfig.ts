@@ -21,6 +21,8 @@ import { Regression2 } from './collections/Regression-2/index.js'
 import { RestrictedTrash } from './collections/RestrictedTrash/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
+  accessRelationChildSlug,
+  accessRelationParentSlug,
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   differentiatedTrashSlug,
@@ -43,6 +45,7 @@ import {
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
+  selfReferentialSlug,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
@@ -1014,6 +1017,81 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
       versions: false,
+    },
+    // Parent collection whose read access returns a where constraint, with a
+    // relationship to a child collection that ALSO returns a where constraint.
+    {
+      slug: accessRelationParentSlug,
+      access: {
+        ...openAccess,
+        // Unauthenticated callers only see "published" parents.
+        read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'status',
+          type: 'text',
+        },
+        {
+          name: 'child',
+          type: 'relationship',
+          relationTo: accessRelationChildSlug,
+        },
+      ],
+    },
+    {
+      slug: accessRelationChildSlug,
+      access: {
+        ...openAccess,
+        // Child also constrains read access with a where query.
+        read: ({ req: { user } }) => (user ? true : { createdAt: { exists: true } }),
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'nested',
+          type: 'group',
+          fields: [
+            {
+              name: 'isActive',
+              type: 'checkbox',
+              defaultValue: true,
+            },
+          ],
+        },
+      ],
+    },
+    // Self-referential relationship on a collection whose read access returns a where
+    // constraint. Querying through `parent` must apply that constraint to the related doc.
+    {
+      slug: selfReferentialSlug,
+      access: {
+        ...openAccess,
+        read: ({ req: { user } }) => (user ? true : { isPublic: { equals: true } }),
+      },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+        {
+          name: 'isPublic',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: selfReferentialSlug,
+        },
+      ],
     },
   ],
   globals: [

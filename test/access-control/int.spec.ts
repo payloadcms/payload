@@ -16,6 +16,8 @@ import type { FullyRestricted, Post } from './payload-types.js'
 import { test } from '../__helpers/int/vitest.js'
 import { requestHeaders } from './getConfig.js'
 import {
+  accessRelationChildSlug,
+  accessRelationParentSlug,
   asyncParentSlug,
   authSlug,
   createNotUpdateCollectionSlug,
@@ -32,6 +34,7 @@ import {
   relyOnRequestHeadersSlug,
   restrictedVersionsSlug,
   secondArrayText,
+  selfReferentialSlug,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
@@ -974,6 +977,73 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         await expect(
           payload.find({ collection: postReferencesSlug, overrideAccess: true, where }),
         ).rejects.toThrow('Not supported')
+      })
+
+      test('should not apply parent query constraints to a related collections nested query', async ({
+        payload,
+      }) => {
+        const child = await payload.create({
+          collection: accessRelationChildSlug,
+          data: { name: 'child', nested: { isActive: true } },
+        })
+
+        const parent = await payload.create({
+          collection: accessRelationParentSlug,
+          data: { title: 'parent', status: 'published', child: child.id },
+        })
+
+        const result = await payload.find({
+          collection: accessRelationParentSlug,
+          overrideAccess: false,
+          where: {
+            'child.nested.isActive': { equals: true },
+          },
+        })
+
+        await payload.delete({ collection: accessRelationParentSlug, id: parent.id })
+        await payload.delete({ collection: accessRelationChildSlug, id: child.id })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]!.id).toBe(parent.id)
+      })
+
+      test('should apply the related collection constraint through a self-referential relationship', async ({
+        payload,
+      }) => {
+        const parentA = await payload.create({
+          collection: selfReferentialSlug,
+          data: { label: 'target', isPublic: false },
+        })
+        const parentB = await payload.create({
+          collection: selfReferentialSlug,
+          data: { label: 'target', isPublic: true },
+        })
+        const childA = await payload.create({
+          collection: selfReferentialSlug,
+          data: { label: 'child-a', isPublic: true, parent: parentA.id },
+        })
+        const childB = await payload.create({
+          collection: selfReferentialSlug,
+          data: { label: 'child-b', isPublic: true, parent: parentB.id },
+        })
+
+        // `parent` points back to the same collection, whose access control returns a where
+        // constraint that must also apply to the related document.
+        const result = await payload.find({
+          collection: selfReferentialSlug,
+          overrideAccess: false,
+          where: {
+            'parent.label': { equals: 'target' },
+          },
+        })
+
+        const ids = [parentA.id, parentB.id, childA.id, childB.id]
+        for (const id of ids) {
+          await payload.delete({ collection: selfReferentialSlug, id })
+        }
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]!.id).toBe(childB.id)
       })
     })
 
