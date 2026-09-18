@@ -269,7 +269,7 @@ export const RootPage = async ({
     !clientConfig.localization.localeCodes.includes(req.locale)
   ) {
     redirect(
-      `${currentRoute}${qs.stringify(
+      `${rawCurrentRoute}${qs.stringify(
         {
           ...searchParams,
           locale: clientConfig.localization.localeCodes.includes(
