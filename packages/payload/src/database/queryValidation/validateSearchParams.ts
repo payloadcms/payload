@@ -255,8 +255,8 @@ export async function validateSearchParam({
                   },
                 ]
 
-                // The scoped `contains` above fully replaces the user's original filter; leaving the
-                // unscoped key would let a different, readable related document satisfy it.
+                // The scoped `contains` above fully replaces the user's original filter;
+                // so we can remove it from the top-level where clause
                 delete mutableWhere[incomingPath]
               }
             } else {
