@@ -85,6 +85,39 @@ const fields = flattenAllFields({
         },
       ],
     },
+    {
+      type: 'group',
+      name: 'localizedGroup',
+      localized: true,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'textLocalized',
+          type: 'text',
+          localized: true,
+        },
+      ],
+    },
+    {
+      type: 'blocks',
+      name: 'localizedBlocks',
+      localized: true,
+      blocks: [
+        {
+          slug: 'block1',
+          fields: [
+            {
+              name: 'textLocalized',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
   ],
 })
 
@@ -138,5 +171,27 @@ describe('getFieldByPath', () => {
     const sourceField = (fields[4] as any).blocks?.[1].flattenedFields?.[0]
     expect(sourceField).toBeDefined()
     expect(fieldInBlock?.field).toBe(sourceField)
+  })
+
+  it('adds a <locale> segment only for the outermost localized field', () => {
+    // Fields nested under a localized parent are not localized in storage
+    // (see fieldShouldBeLocalized), so the localized path must contain a
+    // single <locale> segment at the outermost localized field.
+    const nestedPlain = getFieldByPath({ fields, path: 'localizedGroup.text' })
+    assert(nestedPlain)
+    expect(nestedPlain.pathHasLocalized).toBe(true)
+    expect(nestedPlain.localizedPath).toBe('localizedGroup.<locale>.text')
+
+    const nestedLocalized = getFieldByPath({ fields, path: 'localizedGroup.textLocalized' })
+    assert(nestedLocalized)
+    expect(nestedLocalized.pathHasLocalized).toBe(true)
+    expect(nestedLocalized.localizedPath).toBe('localizedGroup.<locale>.textLocalized')
+  })
+
+  it('adds a single <locale> segment for localized fields within localized blocks', () => {
+    const result = getFieldByPath({ fields, path: 'localizedBlocks.block1.textLocalized' })
+    assert(result)
+    expect(result.pathHasLocalized).toBe(true)
+    expect(result.localizedPath).toBe('localizedBlocks.<locale>.block1.textLocalized')
   })
 })
