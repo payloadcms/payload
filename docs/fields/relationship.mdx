@@ -208,6 +208,15 @@ Given the variety of options possible within the `relationship` field type, the 
 and updating these fields can vary. The following sections will describe the variety of data shapes that can arise from
 this field.
 
+<Banner type="warning">
+  **Renaming relationship fields:** If you rename a `hasMany` or polymorphic
+  relationship field, Payload does not automatically migrate existing
+  relationship data stored in `{collection}_rels` tables. See [Renaming
+  relationship and upload
+  fields](/docs/database/migrations#renaming-relationship-and-upload-fields) for
+  manual migration steps.
+</Banner>
+
 ### Has One
 
 The most simple pattern of a relationship is to use `hasMany: false` with a `relationTo` that allows for only one type
