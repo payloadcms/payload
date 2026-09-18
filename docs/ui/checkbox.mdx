@@ -1,0 +1,86 @@
+---
+title: Checkbox
+label: Checkbox
+order: 40
+desc: The Checkbox component is a simple checkbox that can be used in Forms or custom UIs.
+keywords: checkbox, ui, component, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+## Usage
+
+To use the Checkbox Input, import it from `@payloadcms/ui`:
+
+```tsx
+import { CheckboxInput } from '@payloadcms/ui'
+
+export function MyCheckboxExample() {
+  const [checked, setChecked] = React.useState(false)
+
+  return (
+    <CheckboxInput
+      checked={checked}
+      label="I agree to the Terms"
+      onToggle={(e) => setChecked(e.currentTarget.checked)}
+    />
+  )
+}
+```
+
+## Props
+
+| Prop            | Type                                                      | Description                                                                                           |
+| --------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **`checked`**   | `boolean`                                                | Manually control checked state.                                                                        |
+| **`label`**     | `StaticLabel \| React.ReactNode`                         | Label text or custom label component.                                                                  |
+| **`onToggle`**  | `(event: React.ChangeEvent<HTMLInputElement>) => void`    | Fires when checkbox state changes.                                                                     |
+| **`partialChecked`** | `boolean`                                           | Renders a partial (indeterminate) check.                                                               |
+| **`readOnly`**  | `boolean`                                                | Disables interaction if true.                                                                          |
+| **`required`**  | `boolean`                                                | Marks the checkbox as required.                                                                        |
+| **`BeforeInput`**,<br/>**`AfterInput`** | `React.ReactNode`                    | Optional elements to render before or after the checkbox input.                                        |
+| **`Label`**     | `React.ReactNode`                                        | Provide a custom label component.                                                                      |
+
+## Example
+
+```tsx
+'use client'
+import React, { useState } from 'react'
+import { CheckboxInput } from '@payloadcms/ui'
+
+export function CheckboxDemo() {
+  const [checked, setChecked] = useState(false)
+
+  return (
+    <CheckboxInput
+      checked={checked}
+      label="Select me"
+      onToggle={(e) => {
+        setChecked(e.currentTarget.checked)
+      }}
+    />
+  )
+}
+```
+
+## Using as a Field
+
+If you'd like to use a fully integrated field within a form, you can use the `CheckboxField`:
+
+```tsx
+import React from 'react'
+import { CheckboxField } from '@payloadcms/ui'
+
+export function MyCheckboxFieldExample() {
+  return (
+    <form>
+      <CheckboxField
+        field={{
+          name: 'acceptTerms',
+          label: 'I agree to the Terms',
+          required: true,
+        }}
+        onChange={(isChecked) => console.log('checked:', isChecked)}
+      />
+    </form>
+  )
+}
+```
