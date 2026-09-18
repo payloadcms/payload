@@ -26,10 +26,6 @@
     overflow: hidden;
   }
 
-  .bulk-upload--file-manager > .dialog__footer {
-    border-block-start: var(--stroke-width-small) solid var(--color-border);
-  }
-
   .bulk-upload--file-manager__editView {
     display: flex;
     flex-direction: column;
