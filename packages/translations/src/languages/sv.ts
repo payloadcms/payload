@@ -59,6 +59,7 @@ export const svTranslations: DefaultTranslationsObject = {
     notRedirected: 'Inte omdirigerad? <0>Logga in här</0>',
     passed: 'Autentisering godkänd',
     passwordResetSuccessfully: 'Lösenordet har återställts',
+    resend: 'Skicka igen',
     resetPassword: 'Återställ lösenord',
     resetPasswordExpiration: 'Utgångstid för återställning av lösenord',
     resetPasswordToken: 'Återställningstoken för lösenord',
