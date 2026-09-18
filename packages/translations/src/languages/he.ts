@@ -462,6 +462,7 @@ export const heTranslations: DefaultTranslationsObject = {
     selectAllRows: 'בחר את כל השורות',
     selectedCount: '{{count}} {{label}} נבחרו',
     selectLabel: '{{label}} בחר',
+    selectRow: undefined,
     selectValue: 'בחר ערך',
     settings: 'הגדרות',
     showAllLabel: 'הצג את כל ה{{label}}',
