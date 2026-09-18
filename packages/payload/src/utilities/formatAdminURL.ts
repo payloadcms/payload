@@ -57,7 +57,7 @@ export const formatAdminURL = (args: FormatURLArgs): string => {
   const routePath = adminRoute || apiRoute
   const segments = [routePath && routePath !== '/' && routePath, path && path].filter(Boolean)
   const pathname = segments.join('') || '/'
-  const pathnameWithBase = (basePath + pathname).replace(/\/$/, '') || '/'
+  const pathnameWithBase = stripTrailingSlash(basePath + pathname) || '/'
   const includeBasePath = includeBasePathArg ?? (adminRoute ? false : true)
 
   if (relative || !serverURL) {
@@ -69,6 +69,14 @@ export const formatAdminURL = (args: FormatURLArgs): string => {
 
   const serverURLObj = new URL(serverURL)
   return applyTrailingSlash(new URL(pathnameWithBase, serverURLObj.origin).toString())
+}
+
+export const stripTrailingSlash = (path: string): string => {
+  if (path.length > 1 && path.endsWith('/')) {
+    return path.slice(0, -1)
+  }
+
+  return path
 }
 
 const applyTrailingSlash = (url: string): string => {

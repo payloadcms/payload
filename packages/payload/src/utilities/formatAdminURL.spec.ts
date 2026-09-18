@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, it, expect } from 'vitest'
-import { formatAdminURL } from './formatAdminURL.js'
+import { formatAdminURL, stripTrailingSlash } from './formatAdminURL.js'
 
 describe('formatAdminURL', () => {
   const serverURL = 'https://example.com'
@@ -8,6 +8,14 @@ describe('formatAdminURL', () => {
   const rootAdminRoute = '/'
 
   const dummyPath = '/collections/posts'
+
+  describe('stripTrailingSlash', () => {
+    it('removes a trailing slash while preserving the root path', () => {
+      expect(stripTrailingSlash('/admin/')).toBe('/admin')
+      expect(stripTrailingSlash('/')).toBe('/')
+      expect(stripTrailingSlash('/admin')).toBe('/admin')
+    })
+  })
 
   describe('relative URLs', () => {
     it('should ignore `serverURL` when relative=true', () => {

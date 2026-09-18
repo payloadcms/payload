@@ -13,7 +13,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
+import { applyLocaleFiltering, formatAdminURL, stripTrailingSlash } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
@@ -93,10 +93,7 @@ export const renderRoot = async ({
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
   // route without possible trailing slash
-  const currentRouteToCompare =
-    currentRouteURL.length > 1 && currentRouteURL.endsWith('/')
-      ? currentRouteURL.slice(0, -1)
-      : currentRouteURL
+  const currentRouteToCompare = stripTrailingSlash(currentRouteURL)
 
   const segments = Array.isArray(params.segments) ? params.segments : []
   const isCollectionRoute = segments[0] === 'collections'
@@ -256,10 +253,7 @@ export const renderRoot = async ({
     adminRoute,
     path: _createFirstUserRoute,
   })
-  const createFirstUserRouteToCompare =
-    createFirstUserURL.length > 1 && createFirstUserURL.endsWith('/')
-      ? createFirstUserURL.slice(0, -1)
-      : createFirstUserURL
+  const createFirstUserRouteToCompare = stripTrailingSlash(createFirstUserURL)
 
   if (disableLocalStrategy && currentRouteToCompare === createFirstUserRouteToCompare) {
     req.server.redirect(adminRouteURL)
