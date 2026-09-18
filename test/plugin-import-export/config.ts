@@ -1,3 +1,5 @@
+import type { CollectionConfig } from 'payload'
+
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { en } from '@payloadcms/translations/languages/en'
@@ -24,6 +26,7 @@ import {
 } from './collections/PostsWithColumnMap.js'
 import { PostsWithFieldHooks } from './collections/PostsWithFieldHooks.js'
 import { PostsWithHooks } from './collections/PostsWithHooks.js'
+import { PostsWithHooksJobs } from './collections/PostsWithHooksJobs.js'
 import { PostsWithLimits } from './collections/PostsWithLimits.js'
 import { PostsWithS3 } from './collections/PostsWithS3.js'
 import { Users } from './collections/Users.js'
@@ -35,9 +38,15 @@ import {
 } from './hookSpies.js'
 import { seed } from './seed/index.js'
 import {
+  batchRefFieldName,
   customIdPagesSlug,
   postsWithColumnMapSlug,
   postsWithFieldHooksSlug,
+  postsWithHooksExportSlug,
+  postsWithHooksImportSlug,
+  postsWithHooksJobsExportSlug,
+  postsWithHooksJobsImportSlug,
+  postsWithHooksJobsSlug,
   postsWithHooksSlug,
   postsWithS3Slug,
 } from './shared.js'
@@ -45,13 +54,34 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+/**
+ * Applies the three overrides every hook-test import/export collection needs: a distinct slug,
+ * uploads pointed at this suite's directory, and a `batchRef` field standing in for a field a
+ * project adds via `overrideCollection` and an editor fills in on the form.
+ */
+const withTestCollectionOverrides = ({
+  slug,
+  collection,
+}: {
+  collection: CollectionConfig
+  slug: string
+}): CollectionConfig => {
+  collection.slug = slug
+  collection.upload = {
+    ...(typeof collection.upload === 'object' ? collection.upload : {}),
+    staticDir: path.resolve(dirname, 'uploads'),
+  }
+  collection.fields = [...collection.fields, { name: batchRefFieldName, type: 'text' }]
+
+  return collection
+}
+
 // Load config to work with emulated services
 dotenv.config({
   path: path.resolve(dirname, './.env.emulated'),
 })
 
 export default buildConfigWithDefaults({
-  suite: 'plugin-import-export',
   config: {
     admin: {
       importMap: {
@@ -71,6 +101,7 @@ export default buildConfigWithDefaults({
       PostsWithLimits,
       PostsWithS3,
       PostsWithHooks,
+      PostsWithHooksJobs,
       PostsWithFieldHooks,
       PostsWithColumnMap,
       Media,
@@ -263,11 +294,8 @@ export default buildConfigWithDefaults({
                 after: exportAfterHook,
                 before: exportBeforeHook,
               },
-              overrideCollection: ({ collection }) => {
-                collection.slug = 'posts-with-hooks-export'
-                collection.upload.staticDir = path.resolve(dirname, 'uploads')
-                return collection
-              },
+              overrideCollection: ({ collection }) =>
+                withTestCollectionOverrides({ slug: postsWithHooksExportSlug, collection }),
             },
             import: {
               batchSize: 2,
@@ -276,13 +304,33 @@ export default buildConfigWithDefaults({
                 after: importAfterHook,
                 before: importBeforeHook,
               },
-              overrideCollection: ({ collection }) => {
-                collection.slug = 'posts-with-hooks-import'
-                collection.upload.staticDir = path.resolve(dirname, 'uploads')
-                return collection
-              },
+              overrideCollection: ({ collection }) =>
+                withTestCollectionOverrides({ slug: postsWithHooksImportSlug, collection }),
             },
             versions: false,
+          },
+          {
+            // Same hooks as postsWithHooksSlug, but the jobs queue stays enabled so the
+            // import/export run through their task handlers.
+            slug: postsWithHooksJobsSlug,
+            export: {
+              batchSize: 2,
+              hooks: {
+                after: exportAfterHook,
+                before: exportBeforeHook,
+              },
+              overrideCollection: ({ collection }) =>
+                withTestCollectionOverrides({ slug: postsWithHooksJobsExportSlug, collection }),
+            },
+            import: {
+              batchSize: 2,
+              hooks: {
+                after: importAfterHook,
+                before: importBeforeHook,
+              },
+              overrideCollection: ({ collection }) =>
+                withTestCollectionOverrides({ slug: postsWithHooksJobsImportSlug, collection }),
+            },
           },
           {
             slug: postsWithFieldHooksSlug,
@@ -379,4 +427,5 @@ export default buildConfigWithDefaults({
     await createTestBucket()
     await seed(payload)
   },
+  suite: 'plugin-import-export',
 })
