@@ -26,6 +26,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const {
     field,
     field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
+    forceRender = false,
     indexPath,
     parentPath,
     parentSchemaPath,
@@ -141,6 +142,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         >
           <RenderFields
             fields={fields}
+            forceRender={forceRender}
             parentIndexPath={indexPath}
             parentPath={parentPath}
             parentSchemaPath={parentSchemaPath}
