@@ -118,7 +118,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
 
       result = await payload.db.createGlobalVersion({
         autosave: false,
-        createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
+        createdAt: now,
         globalSlug: globalConfig.slug,
         req,
         updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
