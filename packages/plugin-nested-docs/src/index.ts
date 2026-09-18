@@ -2,6 +2,8 @@ import type { SingleRelationshipField } from 'payload'
 
 import { definePlugin } from 'payload'
 
+import { deepMergeSimple } from 'payload/shared'
+
 import type { NestedDocsPluginConfig } from './types.js'
 
 import { createBreadcrumbsField } from './fields/breadcrumbs.js'
@@ -10,7 +12,9 @@ import { parentFilterOptions } from './fields/parentFilterOptions.js'
 import { populateBreadcrumbsBeforeChange } from './hooks/populateBreadcrumbsBeforeChange.js'
 import { resaveChildren } from './hooks/resaveChildren.js'
 import { resaveSelfAfterCreate } from './hooks/resaveSelfAfterCreate.js'
+import { translations } from './translations/index.js'
 import { getParents } from './utilities/getParents.js'
+export { translations as nestedDocsTranslations } from './translations/index.js'
 
 export { createBreadcrumbsField, createParentField, getParents }
 
@@ -69,5 +73,9 @@ export const nestedDocsPlugin = definePlugin<NestedDocsPluginConfig>({
 
       return collection
     }),
+    i18n: {
+      ...config.i18n,
+      translations: deepMergeSimple(translations, config.i18n?.translations ?? {}),
+    },
   }),
 })

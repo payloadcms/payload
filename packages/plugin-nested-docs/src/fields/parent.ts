@@ -13,6 +13,8 @@ export const createParentField = (
     position: 'sidebar',
     ...(overrides?.admin || {}),
   },
+  // @ts-expect-error - translations are not typed in plugins yet
+  label: ({ t }) => t('plugin-nested-docs:parent'),
   // filterOptions are assigned dynamically based on the pluginConfig
   // filterOptions: parentFilterOptions(),
   type: 'relationship',
