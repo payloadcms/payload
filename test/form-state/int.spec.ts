@@ -1,15 +1,18 @@
 import type { FieldState, FormState, User } from 'payload'
-import type React from 'react'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { createLocalReq } from 'payload'
+import { createLocalReq, getAccessResults } from 'payload'
+import React from 'react'
 import { fileURLToPath } from 'url'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import { devUser } from '../credentials.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 import { test } from '../__helpers/int/vitest.js'
@@ -20,14 +23,14 @@ const { email, password } = devUser
 
 const DummyReactComponent: React.ReactNode = {
   // @ts-expect-error - can ignore, needs to satisfy `typeof value.$$typeof === 'symbol'`
-  $$typeof: Symbol.for('react.element'),
   type: 'div',
-  props: {},
+  $$typeof: Symbol.for('react.element'),
   key: null,
+  props: {},
 }
 
-test.suite({ config: './config.ts' })('Form State', () => {
-  test.beforeEach(async ({ restClient }) => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Form State', () => {
+  test.beforeAll(async ({ restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -38,6 +41,60 @@ test.suite({ config: './config.ts' })('Form State', () => {
       .then((res) => res.json())
 
     user = data.user
+  })
+
+  test.afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  test('should respect field create access when initializing an autosave draft', async ({
+    payload,
+  }) => {
+    const editor = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'editor@example.com',
+        password: 'test-password',
+      },
+      overrideAccess: true,
+    })
+
+    const req = await createLocalReq({ user: editor }, payload)
+    const permissions = await getAccessResults({ req })
+    const restrictedValue = 'client supplied'
+    const title = 'Access filtered autosave'
+    vi.stubGlobal('React', React)
+
+    await renderDocumentHandler({
+      collectionSlug: autosavePostsSlug,
+      cookies: new Map(),
+      docID: undefined as never,
+      importMap: payload.importMap,
+      initialData: {
+        restrictedValue,
+        title,
+      },
+      locale: undefined,
+      permissions,
+      redirectAfterCreate: false,
+      redirectAfterDelete: false,
+      redirectAfterDuplicate: false,
+      req,
+    })
+
+    const { docs } = await payload.find({
+      collection: autosavePostsSlug,
+      draft: true,
+      overrideAccess: true,
+      where: {
+        title: {
+          equals: title,
+        },
+      },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]).not.toHaveProperty('restrictedValue', restrictedValue)
   })
 
   test('should build entire form state', async ({ payload }) => {
@@ -52,7 +109,6 @@ test.suite({ config: './config.ts' })('Form State', () => {
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -68,6 +124,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -75,25 +132,25 @@ test.suite({ config: './config.ts' })('Form State', () => {
     })
 
     expect(state).toMatchObject({
-      title: {
-        value: postData.title,
-        initialValue: postData.title,
-      },
-      updatedAt: {
-        value: postData.updatedAt,
-        initialValue: postData.updatedAt,
-      },
-      createdAt: {
-        value: postData.createdAt,
-        initialValue: postData.createdAt,
-      },
-      renderTracker: {},
-      validateUsingEvent: {},
       blocks: {
         initialValue: 0,
         rows: [],
         value: 0,
       },
+      createdAt: {
+        initialValue: postData.createdAt,
+        value: postData.createdAt,
+      },
+      renderTracker: {},
+      title: {
+        initialValue: postData.title,
+        value: postData.title,
+      },
+      updatedAt: {
+        initialValue: postData.updatedAt,
+        value: postData.updatedAt,
+      },
+      validateUsingEvent: {},
     })
   })
 
@@ -111,7 +168,6 @@ test.suite({ config: './config.ts' })('Form State', () => {
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -120,6 +176,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -137,10 +194,10 @@ test.suite({ config: './config.ts' })('Form State', () => {
         disableFormData: true,
       },
       title: {
-        value: postData.title,
+        addedByServer: true,
         initialValue: postData.title,
         lastRenderedPath: 'title',
-        addedByServer: true,
+        value: postData.title,
       },
     })
   })
@@ -151,8 +208,12 @@ test.suite({ config: './config.ts' })('Form State', () => {
     const req = await createLocalReq({ user }, payload)
 
     const { state: stateWithRow } = await buildFormState({
-      mockRSCs: true,
       collectionSlug: postsSlug,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
       formState: {
         array: {
           rows: [
@@ -162,15 +223,11 @@ test.suite({ config: './config.ts' })('Form State', () => {
           ],
         },
         'array.0.id': {
-          value: '123',
           initialValue: '123',
+          value: '123',
         },
       },
-      docPermissions: undefined,
-      docPreferences: {
-        fields: {},
-      },
-      documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -184,8 +241,12 @@ test.suite({ config: './config.ts' })('Form State', () => {
     expect(stateWithRow?.['array.0.customTextField']?.customComponents?.Field).toBeDefined()
 
     const { state: stateWithTitle } = await buildFormState({
-      mockRSCs: true,
       collectionSlug: postsSlug,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
       formState: {
         array: {
           rows: [
@@ -197,27 +258,23 @@ test.suite({ config: './config.ts' })('Form State', () => {
             },
           ],
         },
-        'array.0.id': {
-          value: '123',
-          initialValue: '123',
-        },
         'array.0.customTextField': {
           lastRenderedPath: 'array.0.customTextField',
         },
+        'array.0.id': {
+          initialValue: '123',
+          value: '123',
+        },
         'array.1.id': {
-          value: '456',
           initialValue: '456',
+          value: '456',
         },
       },
-      docPermissions: undefined,
-      docPreferences: {
-        fields: {},
-      },
-      documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
-      schemaPath: postsSlug,
       req,
+      schemaPath: postsSlug,
     })
 
     // Ensure that row 1 _DOES NOT_ return with rendered components
@@ -244,7 +301,6 @@ test.suite({ config: './config.ts' })('Form State', () => {
     })
 
     const { state: stateHidden } = await buildFormState({
-      mockRSCs: true,
       id: hiddenDoc.id,
       collectionSlug: conditionsSlug,
       data: hiddenDoc,
@@ -253,6 +309,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -273,7 +330,6 @@ test.suite({ config: './config.ts' })('Form State', () => {
     })
 
     const { state: stateVisible } = await buildFormState({
-      mockRSCs: true,
       id: visibleDoc.id,
       collectionSlug: conditionsSlug,
       data: visibleDoc,
@@ -282,6 +338,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -292,8 +349,8 @@ test.suite({ config: './config.ts' })('Form State', () => {
     expect(stateVisible?.conditionalCustomField).toHaveProperty('customComponents')
     expect(stateVisible?.conditionalCustomField?.customComponents?.Field).toBeDefined()
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id, overrideAccess: true })
-    await payload.delete({ collection: conditionsSlug, id: visibleDoc.id, overrideAccess: true })
+    await payload.delete({ id: hiddenDoc.id, collection: conditionsSlug, overrideAccess: true })
+    await payload.delete({ id: visibleDoc.id, collection: conditionsSlug, overrideAccess: true })
   })
 
   test('should preserve values of fields nested inside a row hidden by admin.condition', async ({
@@ -304,14 +361,13 @@ test.suite({ config: './config.ts' })('Form State', () => {
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
       data: {
-        showField: false,
         conditionalRowField: 'value in db',
+        showField: false,
       },
       overrideAccess: true,
     })
 
     const { state: stateHidden } = await buildFormState({
-      mockRSCs: true,
       id: hiddenDoc.id,
       collectionSlug: conditionsSlug,
       data: hiddenDoc,
@@ -320,6 +376,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -333,7 +390,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
     // `withCondition` (rather than rendering an empty, visible row).
     expect(stateHidden?.['_index-2']?.passesCondition).toBe(false)
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id, overrideAccess: true })
+    await payload.delete({ id: hiddenDoc.id, collection: conditionsSlug, overrideAccess: true })
   })
 
   test('should preserve values of fields nested inside a collapsible hidden by admin.condition', async ({
@@ -344,14 +401,13 @@ test.suite({ config: './config.ts' })('Form State', () => {
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
       data: {
-        showField: false,
         conditionalCollapsibleField: 'collapsible db value',
+        showField: false,
       },
       overrideAccess: true,
     })
 
     const { state: stateHidden } = await buildFormState({
-      mockRSCs: true,
       id: hiddenDoc.id,
       collectionSlug: conditionsSlug,
       data: hiddenDoc,
@@ -360,6 +416,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -370,7 +427,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
     // nested field's value must survive even though the collapsible is hidden.
     expect(stateHidden?.conditionalCollapsibleField?.value).toBe('collapsible db value')
 
-    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id, overrideAccess: true })
+    await payload.delete({ id: hiddenDoc.id, collection: conditionsSlug, overrideAccess: true })
   })
 
   test('should render custom Field component when admin.condition flips from false to true via onChange', async ({
@@ -387,7 +444,6 @@ test.suite({ config: './config.ts' })('Form State', () => {
     })
 
     const { state: initialState } = await buildFormState({
-      mockRSCs: true,
       id: doc.id,
       collectionSlug: conditionsSlug,
       data: doc,
@@ -396,6 +452,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: true,
       req,
@@ -409,15 +466,15 @@ test.suite({ config: './config.ts' })('Form State', () => {
     initialState.showField!.value = true
 
     const { state: flippedState } = await buildFormState({
-      mockRSCs: true,
       id: doc.id,
       collectionSlug: conditionsSlug,
-      formState: initialState,
       docPermissions: undefined,
       docPreferences: {
         fields: {},
       },
       documentFormState: undefined,
+      formState: initialState,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -428,7 +485,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
     expect(flippedState?.conditionalCustomField).toHaveProperty('customComponents')
     expect(flippedState?.conditionalCustomField?.customComponents?.Field).toBeDefined()
 
-    await payload.delete({ collection: conditionsSlug, id: doc.id, overrideAccess: true })
+    await payload.delete({ id: doc.id, collection: conditionsSlug, overrideAccess: true })
   })
 
   test('should add `addedByServer` flag to fields that originate on the server', async ({
@@ -439,19 +496,18 @@ test.suite({ config: './config.ts' })('Form State', () => {
     const postData = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'Test Post',
         blocks: [
           {
             blockType: 'text',
             text: 'Test block',
           },
         ],
+        title: 'Test Post',
       },
       overrideAccess: true,
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -460,6 +516,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -497,14 +554,14 @@ test.suite({ config: './config.ts' })('Form State', () => {
           },
         ],
       },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-      },
       'array.0.customTextField': {
-        value: 'Test',
-        initialValue: 'Test',
         addedByServer: true,
+        initialValue: 'Test',
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        value: '1',
       },
     }
 
@@ -514,10 +571,10 @@ test.suite({ config: './config.ts' })('Form State', () => {
     })
 
     expect(newState['array.0.customTextField']).toStrictEqual({
+      initialValue: 'Test',
       passesCondition: true,
       valid: true,
       value: 'Test',
-      initialValue: 'Test',
     })
   })
 
@@ -537,12 +594,12 @@ test.suite({ config: './config.ts' })('Form State', () => {
         ],
       },
       'array.0.id': {
-        value: '1',
         initialValue: '1',
+        value: '1',
       },
       'array.1.id': {
-        value: '2',
         initialValue: '2',
+        value: '2',
       },
     }
 
@@ -555,14 +612,14 @@ test.suite({ config: './config.ts' })('Form State', () => {
           },
         ],
       },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-      },
       'array.0.customTextField': {
-        value: 'Test',
-        initialValue: 'Test',
         addedByServer: true,
+        initialValue: 'Test',
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        value: '1',
       },
     }
 
@@ -576,7 +633,6 @@ test.suite({ config: './config.ts' })('Form State', () => {
       array: {
         errorPaths: [],
         passesCondition: true,
-        valid: true,
         rows: [
           {
             id: '1',
@@ -587,22 +643,23 @@ test.suite({ config: './config.ts' })('Form State', () => {
             isLoading: true,
           },
         ],
-      },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-        passesCondition: true,
         valid: true,
       },
       'array.0.customTextField': {
-        value: 'Test',
         initialValue: 'Test',
         passesCondition: true,
         valid: true,
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
       },
       'array.1.id': {
-        value: '2',
         initialValue: '2',
+        value: '2',
       },
     })
   })
@@ -618,8 +675,8 @@ test.suite({ config: './config.ts' })('Form State', () => {
         ],
       },
       'array.0.id': {
-        value: '1',
         initialValue: '1',
+        value: '1',
       },
     }
 
@@ -636,22 +693,22 @@ test.suite({ config: './config.ts' })('Form State', () => {
           },
         ],
       },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-      },
       'array.0.customTextField': {
-        value: 'Test',
-        initialValue: 'Test',
         addedByServer: true,
+        initialValue: 'Test',
+        value: 'Test',
       },
-      'array.1.id': {
-        value: '2',
-        initialValue: '2',
+      'array.0.id': {
+        initialValue: '1',
+        value: '1',
       },
       'array.1.customTextField': {
-        value: 'Test',
         initialValue: 'Test',
+        value: 'Test',
+      },
+      'array.1.id': {
+        initialValue: '2',
+        value: '2',
       },
     }
 
@@ -664,25 +721,25 @@ test.suite({ config: './config.ts' })('Form State', () => {
     expect(newState).toStrictEqual({
       array: {
         passesCondition: true,
-        valid: true,
         rows: [
           {
             id: '1',
             lastRenderedPath: 'array.0.customTextField',
           },
         ],
-      },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-        passesCondition: true,
         valid: true,
       },
       'array.0.customTextField': {
-        value: 'Test',
         initialValue: 'Test',
         passesCondition: true,
         valid: true,
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
       },
     })
   })
@@ -698,8 +755,8 @@ test.suite({ config: './config.ts' })('Form State', () => {
         ],
       },
       'array.0.id': {
-        value: '1',
         initialValue: '1',
+        value: '1',
       },
     }
 
@@ -708,19 +765,19 @@ test.suite({ config: './config.ts' })('Form State', () => {
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.customTextField',
             isLoading: false,
+            lastRenderedPath: 'array.0.customTextField',
           },
         ],
       },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-      },
       'array.0.customTextField': {
-        value: 'Test',
-        initialValue: 'Test',
         addedByServer: true,
+        initialValue: 'Test',
+        value: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        value: '1',
       },
     }
 
@@ -732,26 +789,26 @@ test.suite({ config: './config.ts' })('Form State', () => {
     expect(newState).toStrictEqual({
       array: {
         passesCondition: true,
-        valid: true,
         rows: [
           {
             id: '1',
-            lastRenderedPath: 'array.0.customTextField',
             isLoading: false,
+            lastRenderedPath: 'array.0.customTextField',
           },
         ],
-      },
-      'array.0.id': {
-        passesCondition: true,
         valid: true,
-        value: '1',
-        initialValue: '1',
       },
       'array.0.customTextField': {
+        initialValue: 'Test',
         passesCondition: true,
         valid: true,
         value: 'Test',
-        initialValue: 'Test',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
       },
     })
   })
@@ -759,10 +816,10 @@ test.suite({ config: './config.ts' })('Form State', () => {
   test('should return the same object reference when only modifying a value', () => {
     const currentState = {
       title: {
-        value: 'Test Post',
         initialValue: 'Test Post',
-        valid: true,
         passesCondition: true,
+        valid: true,
+        value: 'Test Post',
       },
     }
 
@@ -770,10 +827,10 @@ test.suite({ config: './config.ts' })('Form State', () => {
       currentState,
       incomingState: {
         title: {
-          value: 'Test Post (modified)',
           initialValue: 'Test Post',
-          valid: true,
           passesCondition: true,
+          valid: true,
+          value: 'Test Post (modified)',
         },
       },
     })
@@ -783,24 +840,15 @@ test.suite({ config: './config.ts' })('Form State', () => {
 
   test('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
     const title: FieldState = {
-      value: 'Test Post (modified on the client)',
       initialValue: 'Test Post',
-      valid: true,
       passesCondition: true,
+      valid: true,
+      value: 'Test Post (modified on the client)',
     }
 
     const currentState: Record<string, FieldState> = {
-      title: {
-        ...title,
-        isModified: true, // This is critical, this is what we're testing
-      },
-      computedTitle: {
-        value: 'Test Post (computed on the client)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
       array: {
+        passesCondition: true,
         rows: [
           {
             id: '1',
@@ -811,36 +859,34 @@ test.suite({ config: './config.ts' })('Form State', () => {
           },
         ],
         valid: true,
-        passesCondition: true,
-      },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-        valid: true,
-        passesCondition: true,
       },
       'array.0.customTextField': {
-        value: 'Test Post (modified on the client)',
         initialValue: 'Test Post',
-        valid: true,
         passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the client)',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
+      },
+      computedTitle: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (computed on the client)',
+      },
+      title: {
+        ...title,
+        isModified: true, // This is critical, this is what we're testing
       },
     }
 
     const incomingStateFromServer: Record<string, FieldState> = {
-      title: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
-      computedTitle: {
-        value: 'Test Post (computed on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
       array: {
+        passesCondition: true,
         rows: [
           {
             id: '1',
@@ -848,20 +894,31 @@ test.suite({ config: './config.ts' })('Form State', () => {
             // Omit `customComponents` because the server did not re-render this row
           },
         ],
-        passesCondition: true,
         valid: true,
-      },
-      'array.0.id': {
-        value: '1',
-        initialValue: '1',
-        valid: true,
-        passesCondition: true,
       },
       'array.0.customTextField': {
-        value: 'Test Post (modified on the client)',
         initialValue: 'Test Post',
-        valid: true,
         passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the client)',
+      },
+      'array.0.id': {
+        initialValue: '1',
+        passesCondition: true,
+        valid: true,
+        value: '1',
+      },
+      computedTitle: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (computed on the server)',
+      },
+      title: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the server)',
       },
     }
 
@@ -873,50 +930,50 @@ test.suite({ config: './config.ts' })('Form State', () => {
 
     expect(newState).toStrictEqual({
       ...incomingStateFromServer,
-      title: {
-        ...incomingStateFromServer.title,
-        isModified: true,
-      },
       array: {
         ...incomingStateFromServer.array,
         rows: currentState?.array?.rows,
+      },
+      title: {
+        ...incomingStateFromServer.title,
+        isModified: true,
       },
     })
   })
 
   test('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
     const title: FieldState = {
-      value: 'Test Post (modified on the client 1)',
       initialValue: 'Test Post',
-      valid: true,
       passesCondition: true,
+      valid: true,
+      value: 'Test Post (modified on the client 1)',
     }
 
     const currentState: Record<string, FieldState> = {
+      computedTitle: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post',
+      },
       title: {
         ...title,
         isModified: true,
       },
-      computedTitle: {
-        value: 'Test Post',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
     }
 
     const incomingStateFromServer: Record<string, FieldState> = {
-      title: {
-        value: 'Test Post (modified on the server)',
-        initialValue: 'Test Post',
-        valid: true,
-        passesCondition: true,
-      },
       computedTitle: {
-        value: 'Test Post (modified on the server)',
         initialValue: 'Test Post',
-        valid: true,
         passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the server)',
+      },
+      title: {
+        initialValue: 'Test Post',
+        passesCondition: true,
+        valid: true,
+        value: 'Test Post (modified on the server)',
       },
     }
 
@@ -928,11 +985,11 @@ test.suite({ config: './config.ts' })('Form State', () => {
 
     expect(newState).toStrictEqual({
       ...currentState,
+      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
       title: {
         ...currentState.title,
         isModified: true,
       },
-      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
     })
   })
 
@@ -945,21 +1002,21 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'C' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'C text', initialValue: 'C text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'C text', value: 'C text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 3,
         rows: [{ id: 'C' }, { id: 'A' }, { id: 'B' }],
+        value: 3,
       },
-      'array.0.text': { value: 'C text', initialValue: 'C text' },
-      'array.1.text': { value: 'A text', initialValue: 'A text' },
-      'array.2.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'C text', value: 'C text' },
+      'array.1.text': { initialValue: 'A text', value: 'A text' },
+      'array.2.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -983,20 +1040,20 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'B' }, { id: 'A' }],
+        value: 2,
       },
-      'array.0.text': { value: 'B text', initialValue: 'B text' },
-      'array.1.text': { value: 'A text', initialValue: 'A text' },
+      'array.0.text': { initialValue: 'B text', value: 'B text' },
+      'array.1.text': { initialValue: 'A text', value: 'A text' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -1020,28 +1077,28 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'B' }, { id: 'A' }],
+        value: 2,
       },
-      'blocks.0.items.0.text': { value: 'B text', initialValue: 'B text' },
-      'blocks.0.items.1.text': { value: 'A text', initialValue: 'A text' },
+      'blocks.0.items.0.text': { initialValue: 'B text', value: 'B text' },
+      'blocks.0.items.1.text': { initialValue: 'A text', value: 'A text' },
     }
 
     const serverState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'blocks.0.items.0.text': { value: 'A text', initialValue: 'A text' },
-      'blocks.0.items.1.text': { value: 'B text', initialValue: 'B text' },
+      'blocks.0.items.0.text': { initialValue: 'A text', value: 'A text' },
+      'blocks.0.items.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -1067,29 +1124,29 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'C' }, { id: 'B' }],
+        value: 2,
       },
-      'blocks.0.items.0.text': { value: 'C text', initialValue: 'C text' },
-      'blocks.0.items.1.text': { value: 'B text', initialValue: 'B text' },
+      'blocks.0.items.0.text': { initialValue: 'C text', value: 'C text' },
+      'blocks.0.items.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const serverState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 3,
         rows: [{ id: 'C' }, { id: 'A' }, { id: 'B' }],
+        value: 3,
       },
-      'blocks.0.items.0.text': { value: 'C text', initialValue: 'C text' },
-      'blocks.0.items.1.text': { value: 'A text', initialValue: 'A text' },
-      'blocks.0.items.2.text': { value: 'B text', initialValue: 'B text' },
+      'blocks.0.items.0.text': { initialValue: 'C text', value: 'C text' },
+      'blocks.0.items.1.text': { initialValue: 'A text', value: 'A text' },
+      'blocks.0.items.2.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -1121,20 +1178,20 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'B' }, { id: 'A' }],
+        value: 2,
       },
-      'array.0.text': { value: 'B text modified locally', initialValue: 'B text' },
-      'array.1.text': { value: 'A text modified locally', initialValue: 'A text' },
+      'array.0.text': { initialValue: 'B text', value: 'B text modified locally' },
+      'array.1.text': { initialValue: 'A text', value: 'A text modified locally' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'A text from server', initialValue: 'A text' },
-      'array.1.text': { value: 'B text from server', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text from server' },
+      'array.1.text': { initialValue: 'B text', value: 'B text from server' },
     }
 
     const newState = mergeServerFormState({
@@ -1158,23 +1215,23 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       array: {
-        value: 4,
         rows: [{ id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }],
+        value: 4,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
-      'array.2.text': { value: 'C text', initialValue: 'C text' },
-      'array.3.text': { value: 'D text', initialValue: 'D text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
+      'array.2.text': { initialValue: 'C text', value: 'C text' },
+      'array.3.text': { initialValue: 'D text', value: 'D text' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 3,
         rows: [{ id: 'A' }, { id: 'B' }, { id: 'C' }],
+        value: 3,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
-      'array.2.text': { value: 'C text', initialValue: 'C text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
+      'array.2.text': { initialValue: 'C text', value: 'C text' },
     }
 
     const newState = mergeServerFormState({
@@ -1196,21 +1253,21 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const serverState: FormState = {
       array: {
-        value: 3,
         rows: [{ id: 'A' }, { id: 'B' }, { id: 'C', addedByServer: true }],
+        value: 3,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
-      'array.2.text': { value: 'C text', initialValue: 'C text', addedByServer: true },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
+      'array.2.text': { addedByServer: true, initialValue: 'C text', value: 'C text' },
     }
 
     const newState = mergeServerFormState({
@@ -1234,18 +1291,18 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       array: {
-        value: 0,
         rows: [],
+        value: 0,
       },
     }
 
     const serverState: FormState = {
       array: {
-        value: 2,
         rows: [{ id: 'A' }, { id: 'B' }],
+        value: 2,
       },
-      'array.0.text': { value: 'A text', initialValue: 'A text' },
-      'array.1.text': { value: 'B text', initialValue: 'B text' },
+      'array.0.text': { initialValue: 'A text', value: 'A text' },
+      'array.1.text': { initialValue: 'B text', value: 'B text' },
     }
 
     const newState = mergeServerFormState({
@@ -1267,36 +1324,36 @@ test.suite({ config: './config.ts' })('Form State', () => {
      */
     const currentState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'item-1' }, { id: 'item-2' }],
+        value: 2,
       },
       'blocks.0.items.1.subItems': {
-        value: 2,
         rows: [{ id: 'Y' }, { id: 'X' }],
+        value: 2,
       },
-      'blocks.0.items.1.subItems.0.text': { value: 'Y text', initialValue: 'Y text' },
-      'blocks.0.items.1.subItems.1.text': { value: 'X text', initialValue: 'X text' },
+      'blocks.0.items.1.subItems.0.text': { initialValue: 'Y text', value: 'Y text' },
+      'blocks.0.items.1.subItems.1.text': { initialValue: 'X text', value: 'X text' },
     }
 
     const serverState: FormState = {
       blocks: {
-        value: 1,
         rows: [{ id: 'block-1' }],
+        value: 1,
       },
       'blocks.0.items': {
-        value: 2,
         rows: [{ id: 'item-1' }, { id: 'item-2' }],
+        value: 2,
       },
       'blocks.0.items.1.subItems': {
-        value: 2,
         rows: [{ id: 'X' }, { id: 'Y' }],
+        value: 2,
       },
-      'blocks.0.items.1.subItems.0.text': { value: 'X text', initialValue: 'X text' },
-      'blocks.0.items.1.subItems.1.text': { value: 'Y text', initialValue: 'Y text' },
+      'blocks.0.items.1.subItems.0.text': { initialValue: 'X text', value: 'X text' },
+      'blocks.0.items.1.subItems.1.text': { initialValue: 'Y text', value: 'Y text' },
     }
 
     const newState = mergeServerFormState({
@@ -1319,14 +1376,13 @@ test.suite({ config: './config.ts' })('Form State', () => {
     const postData = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'Test Post',
         array: [], // Empty array - this should result in rows: [] in form state
+        title: 'Test Post',
       },
       overrideAccess: true,
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -1342,6 +1398,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -1366,7 +1423,6 @@ test.suite({ config: './config.ts' })('Form State', () => {
     })
 
     const { state } = await buildFormState({
-      mockRSCs: true,
       id: postData.id,
       collectionSlug: postsSlug,
       data: postData,
@@ -1375,6 +1431,7 @@ test.suite({ config: './config.ts' })('Form State', () => {
         fields: {},
       },
       documentFormState: undefined,
+      mockRSCs: true,
       operation: 'update',
       renderAllFields: false,
       req,
@@ -1383,6 +1440,6 @@ test.suite({ config: './config.ts' })('Form State', () => {
 
     expect(state.selectWithAsyncFilterOptions?.selectFilterOptions).toStrictEqual(['allowed'])
 
-    await payload.delete({ collection: postsSlug, id: postData.id, overrideAccess: true })
+    await payload.delete({ id: postData.id, collection: postsSlug, overrideAccess: true })
   })
 })

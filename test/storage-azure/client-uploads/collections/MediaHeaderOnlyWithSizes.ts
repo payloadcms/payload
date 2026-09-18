@@ -14,7 +14,7 @@ export const mediaHeaderOnlyWithSizesSlug = 'media-header-only-with-sizes'
  */
 export const MediaHeaderOnlyWithSizes: CollectionConfig = {
   slug: mediaHeaderOnlyWithSizesSlug,
-  fields: [],
+  fields: [{ name: 'prefix', type: 'text' }],
   hooks: {
     beforeValidate: [
       ({ data, req }) => {

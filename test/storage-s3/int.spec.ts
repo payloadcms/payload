@@ -287,7 +287,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
   })
 
   test.describe('R2', () => {
-    test.todo('can upload')
+    test.todo('can upload via R2 multipart')
   })
 
   test.describe('prefix collision detection', () => {
@@ -386,7 +386,14 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image.png') // Should NOT increment
       expect(upload1.prefix).toBe(prefix) // 'test-prefix'
-      expect(upload2.prefix).toBe('different-prefix')
+      // New uploads store the document prefix beneath the collection prefix.
+      expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
+      await verifyUploads({
+        collectionSlug: mediaWithPrefixSlug,
+        payload,
+        prefix: `${prefix}/different-prefix`,
+        uploadId: upload2.id,
+      })
     })
 
     test('supports multi-tenant scenario with dynamic prefix from hook', async ({ payload }) => {
