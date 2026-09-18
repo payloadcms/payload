@@ -29,7 +29,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Pealkiri {{headingLevel}}',
   },
   fa: {
-    label: '[SKIPPED]',
+    label: 'عنوان {{headingLevel}}',
   },
   fr: {
     label: 'En-tête {{headingLevel}}',
