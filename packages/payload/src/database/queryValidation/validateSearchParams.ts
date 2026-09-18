@@ -196,34 +196,36 @@ export async function validateSearchParam({
           }
 
           const relatedCollectionReadPermission = policies.collections![collectionSlug].read
+          const previousSegment = paths[i - 1]
+          const traversedField = previousSegment?.field
+          const isRelationshipHop =
+            Boolean(traversedField) &&
+            (traversedField!.type === 'relationship' ||
+              traversedField!.type === 'upload' ||
+              traversedField!.type === 'join')
+
           if (
-            paths.length > 1 &&
+            isRelationshipHop &&
             relatedCollectionReadPermission &&
             typeof relatedCollectionReadPermission === 'object' &&
             relatedCollectionReadPermission.where
           ) {
             const relationshipPath = paths
-              .slice(0, -1)
+              .slice(0, i)
               .map(({ path: pathToRelationship }) => pathToRelationship)
               .join('.')
 
-            const accessWhere = prefixWherePaths({
-              prefix: relationshipPath,
-              where: relatedCollectionReadPermission.where,
-            })
             const mutableWhere = constraint as Record<string, unknown>
             const existingAnd = Array.isArray(mutableWhere.and) ? mutableWhere.and : []
-            const relationshipField = paths.at(-2)?.field
 
             // Has-many relationships and joins can point to many related documents, so the user's
             // filter and the access constraint must be satisfied by the SAME related document.
             // Scoping both into a single `contains` prevents a different, readable document from
             // masking one the user cannot read (a related-document oracle).
             const isHasManyRelationship =
-              relationshipField &&
-              (relationshipField.type === 'relationship' || relationshipField.type === 'upload') &&
-              relationshipField.hasMany
-            const isJoin = relationshipField?.type === 'join'
+              (traversedField!.type === 'relationship' || traversedField!.type === 'upload') &&
+              traversedField!.hasMany
+            const isJoin = traversedField!.type === 'join'
 
             if (isHasManyRelationship || isJoin) {
               const relatedFieldPath = paths.at(-1)?.path
@@ -246,8 +248,17 @@ export async function validateSearchParam({
                     },
                   },
                 ]
+
+                // The scoped `contains` above fully replaces the user's original filter;
+                // so we can remove it from the top-level where clause
+                delete mutableWhere[incomingPath]
               }
             } else {
+              const accessWhere = prefixWherePaths({
+                prefix: relationshipPath,
+                where: relatedCollectionReadPermission.where,
+              })
+
               mutableWhere.and = [...existingAnd, accessWhere]
             }
           }
