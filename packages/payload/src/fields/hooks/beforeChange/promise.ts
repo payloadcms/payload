@@ -270,11 +270,27 @@ export const promise = async ({
       mergeLocaleActions.push(() => {
         const localeData: Record<string, unknown> = {}
 
+        const incomingAllLocales =
+          req.locale === 'all' &&
+          siblingData[field.name!] &&
+          typeof siblingData[field.name!] === 'object' &&
+          !Array.isArray(siblingData[field.name!])
+            ? (siblingData[field.name!] as Record<string, unknown>)
+            : undefined
+
         for (const locale of localization.localeCodes) {
-          const fieldValue =
-            locale === req.locale
-              ? siblingData[field.name!]
-              : siblingDocWithLocales?.[field.name!]?.[locale]
+          let fieldValue: unknown
+          if (incomingAllLocales) {
+            fieldValue =
+              locale in incomingAllLocales
+                ? incomingAllLocales[locale]
+                : siblingDocWithLocales?.[field.name!]?.[locale]
+          } else {
+            fieldValue =
+              locale === req.locale
+                ? siblingData[field.name!]
+                : siblingDocWithLocales?.[field.name!]?.[locale]
+          }
 
           // update locale value if it's not undefined
           if (typeof fieldValue !== 'undefined') {
