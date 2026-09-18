@@ -222,7 +222,6 @@ export function DefaultListView(props: ListViewClientProps) {
               hasTrashPermission={hasTrashPermission}
               i18n={i18n}
               isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
-              isTrashEnabled={isTrashEnabled}
               newDocumentURL={newDocumentURL}
               openBulkUpload={openBulkUpload}
               smallBreak={smallBreak}
@@ -242,6 +241,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 collectionConfig?.enableQueryPresets !== true || disableQueryPresets
               }
               hasCreatePermission={hasCreatePermission && viewType !== 'trash' && !isInDrawer}
+              hasDeletePermission={hasDeletePermission}
               isWhereOpen={isWhereOpen}
               listMenuItems={listMenuItems}
               newDocumentURL={newDocumentURL}
@@ -250,6 +250,7 @@ export function DefaultListView(props: ListViewClientProps) {
               queryPresetPermissions={queryPresetPermissions}
               renderedFilters={renderedFilters}
               resolvedFilterOptions={resolvedFilterOptions}
+              viewType={viewType}
             />
             {isWhereOpen && (
               <ListWhereBuilder
