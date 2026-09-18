@@ -252,8 +252,12 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: (data?.docs || []).map((_, i) => (
-        <SelectRow key={i} rowData={data?.docs[i]} />
+      renderedCells: (data?.docs || []).map((row, i) => (
+        <SelectRow
+          key={i}
+          rowData={row}
+          selectRowLabel={getSelectRowLabel({ i18n, rowData: row, useAsTitle })}
+        />
       )),
     } as Column)
   }
@@ -338,4 +342,22 @@ export const renderTable = ({
       </TableSectionRoot>
     ),
   }
+}
+
+const getSelectRowLabel = ({
+  i18n,
+  rowData,
+  useAsTitle,
+}: {
+  i18n: I18nClient
+  rowData: { id: number | string } & Record<string, unknown>
+  useAsTitle: CollectionConfig['admin']['useAsTitle']
+}) => {
+  const title = useAsTitle ? rowData[useAsTitle] : undefined
+  const label =
+    typeof title === 'number' || (typeof title === 'string' && title)
+      ? String(title)
+      : String(rowData.id)
+
+  return i18n.t('general:selectLabel', { label })
 }

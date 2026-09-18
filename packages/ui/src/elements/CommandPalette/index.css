@@ -191,11 +191,4 @@
     border: 0;
     border-radius: var(--radius-small);
   }
-
-  @media (prefers-reduced-motion: reduce) {
-    .cmd-palette,
-    .cmd-palette__inner {
-      transition: none;
-    }
-  }
 }

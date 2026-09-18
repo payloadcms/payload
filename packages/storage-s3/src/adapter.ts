@@ -7,6 +7,7 @@ import type {
 
 import type { SignedDownloadsConfig } from './getFile.js'
 
+import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 
 interface CreateS3AdapterArgs {
@@ -30,7 +31,6 @@ export function createS3Adapter({
 }: CreateS3AdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
-    clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -41,6 +41,19 @@ export function createS3Adapter({
         prefix: urlPrefix,
         useCompositePrefixes,
       }),
+
+    uploadInstructions: {
+      enabled: Boolean(clientUploads),
+      generate: generateUploadInstructions({
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        acl,
+        bucket,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
+      useInAdmin: true,
+    },
 
     // Helpers below dynamic-import their @aws-sdk dependencies so the SDK only
     // loads on the first request that actually needs it.
@@ -76,13 +89,12 @@ export function createS3Adapter({
 
     staticHandler: async (
       req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) => {
       const { getFile } = await import('./getFile.js')
       return getFile({
         bucket,
         client: getStorageClient(),
-        clientUploadContext,
         collection,
         collectionPrefix: prefix,
         filename,
@@ -90,6 +102,7 @@ export function createS3Adapter({
         prefixQueryParam,
         req,
         signedDownloads,
+        uploadReference,
         useCompositePrefixes,
       })
     },

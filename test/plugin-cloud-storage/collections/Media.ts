@@ -5,6 +5,10 @@ export const Media: CollectionConfig = {
   upload: {
     disableLocalStorage: true,
     focalPoint: true,
+    // Cropping an existing upload refetches the stored file through its served
+    // URL, which resolves to `localhost` under prod-server e2e and gets rejected
+    // by `safeFetch`'s SSRF guard.
+    skipSafeFetch: true,
     resizeOptions: {
       position: 'center',
       width: 200,

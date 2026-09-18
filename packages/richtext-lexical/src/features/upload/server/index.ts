@@ -63,7 +63,7 @@ export const UploadFeature = createServerFeature<
   UploadFeatureProps,
   UploadFeaturePropsClient
 >({
-  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
+  feature: ({ config: _config, isRoot, parentIsLocalized, props }) => {
     if (!props) {
       props = { collections: {} }
     }
@@ -91,7 +91,7 @@ export const UploadFeature = createServerFeature<
     for (const collectionKey in props.collections) {
       const collection = props.collections[collectionKey]!
       if (collection.fields?.length) {
-        collection.fields = await sanitizeFields({
+        collection.fields = sanitizeFields({
           config: _config as unknown as Config,
           fields: collection.fields,
           parentIsLocalized,

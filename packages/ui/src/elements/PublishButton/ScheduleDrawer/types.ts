@@ -7,5 +7,5 @@ export type UpcomingEvent = {
     timezone?: string
     type: PublishType
   }
-  waitUntil: Date
+  waitUntil: Date | string
 }

@@ -25,7 +25,6 @@ export type SignedDownloadsConfig =
 interface GetFileArgs {
   bucket: string
   client: AWS.S3
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
   filename: string
@@ -33,6 +32,7 @@ interface GetFileArgs {
   prefixQueryParam?: string
   req: PayloadRequest
   signedDownloads: SignedDownloadsConfig
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
@@ -67,7 +67,6 @@ const abortRequestAndDestroyStream = ({
 export async function getFile({
   bucket,
   client,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
   filename,
@@ -75,6 +74,7 @@ export async function getFile({
   prefixQueryParam,
   req,
   signedDownloads,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   let object: AWS.GetObjectOutput | undefined = undefined
@@ -89,11 +89,11 @@ export async function getFile({
 
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
       filename,
       prefixQueryParam,
       req,
+      uploadReference,
     })
 
     const { fileKey: key } = getFileKey({
@@ -103,7 +103,7 @@ export async function getFile({
       useCompositePrefixes,
     })
 
-    if (signedDownloads && !clientUploadContext) {
+    if (signedDownloads && !uploadReference) {
       let useSignedURL = true
       if (
         typeof signedDownloads === 'object' &&

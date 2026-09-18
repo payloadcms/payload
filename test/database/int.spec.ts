@@ -1,4 +1,3 @@
-/* eslint-disable vitest/no-conditional-expect */
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
@@ -29,19 +28,17 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, expect } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
-import { describe, it } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
-import { seed } from './seed.js'
 import {
   customIDsSlug,
+  customSchemaSlug,
   defaultValuesSlug,
   errorOnUnnamedFieldsSlug,
   fieldsPersistanceSlug,
@@ -52,22 +49,15 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-let payload: Payload
 let user: Record<string, unknown> & TypeWithID
 let token: string
-let restClient: NextRESTClient
 const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-describe('database', () => {
-  beforeAll(async () => {
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+test.suite({ config: './config.ts', resetBetweenTests: false })('database', () => {
+  test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     payload.db.migrationDir = path.join(dirname, './migrations')
-
-    await seed(payload)
 
     await restClient.login({
       slug: 'users',
@@ -86,12 +76,29 @@ describe('database', () => {
     token = loginResult.token
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
+  test
+    .options({
+      db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
+    })
+    .describe('connection pool', () => {
+      test('should not leave a client checked out after connecting', async ({ payload }) => {
+        const { pool } = payload.db as unknown as PostgresAdapter
 
-  describe('id type', () => {
-    it('should sanitize incoming IDs if ID type is number', async () => {
+        // Awaiting a query guarantees the pool has been used and that nothing is
+        // in flight while the counts below are read.
+        await payload.count({ collection: 'simple' })
+
+        expect(pool.totalCount).toBeGreaterThan(0)
+
+        // `connect` acquires a client to verify connectivity and to listen for
+        // ECONNRESET. Failing to release it pins that client for the lifetime of
+        // the process, so `pool.end()` never drains after `payload.destroy()`.
+        expect(pool.totalCount - pool.idleCount).toBe(0)
+      })
+    })
+
+  test.describe('id type', () => {
+    test('should sanitize incoming IDs if ID type is number', async ({ restClient }) => {
       const created = await restClient
         .POST(`/posts`, {
           body: JSON.stringify({
@@ -117,7 +124,7 @@ describe('database', () => {
       expect(updated.id).toStrictEqual(created.doc.id)
     })
 
-    it('should create with generated ID text from hook', async () => {
+    test('should create with generated ID text from hook', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'custom-ids',
         data: {},
@@ -126,7 +133,7 @@ describe('database', () => {
       expect(doc.id).toBeDefined()
     })
 
-    it('should not create duplicate versions with custom id type', async () => {
+    test('should not create duplicate versions with custom id type', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'custom-ids',
         data: {
@@ -162,11 +169,11 @@ describe('database', () => {
       expect(versionsQuery.totalDocs).toStrictEqual(1)
     })
 
-    it('should not accidentally treat nested id fields as custom id', () => {
+    test('should not accidentally treat nested id fields as custom id', ({ payload }) => {
       expect(payload.collections['fake-custom-ids'].customIDType).toBeUndefined()
     })
 
-    it('should not overwrite supplied block and array row IDs on create', async () => {
+    test('should not overwrite supplied block and array row IDs on create', async ({ payload }) => {
       const arrayRowID = '67648ed5c72f13be6eacf24e'
       const blockID = '6764de9af79a863575c5f58c'
 
@@ -192,7 +199,7 @@ describe('database', () => {
       expect(doc.blocksWithIDs[0].id).toStrictEqual(blockID)
     })
 
-    it('should overwrite supplied block and array row IDs on duplicate', async () => {
+    test('should overwrite supplied block and array row IDs on duplicate', async ({ payload }) => {
       const arrayRowID = '6764deb5201e9e36aeba3b6c'
       const blockID = '6764dec58c68f337a758180c'
 
@@ -223,7 +230,9 @@ describe('database', () => {
       expect(duplicate.blocksWithIDs[0].id).not.toStrictEqual(blockID)
     })
 
-    it('should properly give the result with hasMany relationships with custom numeric IDs', async () => {
+    test('should properly give the result with hasMany relationships with custom numeric IDs', async ({
+      payload,
+    }) => {
       await payload.create({ collection: 'categories-custom-id', data: { id: 9999 } })
       const res = await payload.create({
         collection: 'posts',
@@ -235,158 +244,156 @@ describe('database', () => {
       expect(resFind.categoriesCustomID[0]).toBe(9999)
     })
 
-    const describeUuidV7Adapter =
-      process.env.PAYLOAD_DATABASE === 'postgres-uuidv7' ||
-      process.env.PAYLOAD_DATABASE === 'sqlite-uuidv7'
-        ? describe
-        : describe.skip
+    test
+      .options({ db: (adapter) => adapter === 'postgres-uuidv7' || adapter === 'sqlite-uuidv7' })
+      .describe('uuidv7', () => {
+        const createdRows: { collection: string; id: number | string }[] = []
 
-    describeUuidV7Adapter('uuidv7', () => {
-      const createdRows: { collection: string; id: number | string }[] = []
-
-      const track = (collection: string, id: number | string) => {
-        createdRows.push({ collection, id })
-      }
-
-      afterEach(async () => {
-        for (const { collection, id } of [...createdRows].reverse()) {
-          try {
-            await payload.delete({
-              collection: collection as
-                | typeof customIDsSlug
-                | typeof postsSlug
-                | typeof relationASlug
-                | typeof relationBSlug,
-              id,
-            })
-          } catch {
-            // ignore: concurrent cleanup or FK already removed
-          }
+        const track = (collection: string, id: number | string) => {
+          createdRows.push({ collection, id })
         }
 
-        createdRows.length = 0
+        test.afterEach(async ({ payload }) => {
+          for (const { collection, id } of [...createdRows].reverse()) {
+            try {
+              await payload.delete({
+                collection: collection as
+                  | typeof customIDsSlug
+                  | typeof postsSlug
+                  | typeof relationASlug
+                  | typeof relationBSlug,
+                id,
+              })
+            } catch {
+              // ignore: concurrent cleanup or FK already removed
+            }
+          }
+
+          createdRows.length = 0
+        })
+
+        test('should generate valid UUID with version 7', async ({ payload }) => {
+          const doc = await payload.create({
+            collection: postsSlug,
+            data: { title: 'uuidv7 test' },
+          })
+
+          track(postsSlug, doc.id)
+
+          expect(doc.id).toMatch(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+          )
+
+          expect(String(doc.id).charAt(14)).toBe('7')
+        })
+
+        test('should generate chronologically ordered IDs', async ({ payload }) => {
+          const doc1 = await payload.create({
+            collection: postsSlug,
+            data: { title: 'uuidv7 first' },
+          })
+          const doc2 = await payload.create({
+            collection: postsSlug,
+            data: { title: 'uuidv7 second' },
+          })
+
+          track(postsSlug, doc1.id)
+          track(postsSlug, doc2.id)
+
+          expect(doc2.id > doc1.id).toBe(true)
+        })
+
+        test('should findByID with uuidv7', async ({ payload }) => {
+          const created = await payload.create({
+            collection: postsSlug,
+            data: { title: 'uuidv7 findable' },
+          })
+
+          track(postsSlug, created.id)
+
+          const found = await payload.findByID({
+            collection: postsSlug,
+            id: created.id,
+          })
+
+          expect(found.id).toBe(created.id)
+          expect(found.title).toBe('uuidv7 findable')
+        })
+
+        test('should query with where clause on uuidv7 id', async ({ payload }) => {
+          const created = await payload.create({
+            collection: postsSlug,
+            data: { title: 'uuidv7 queryable' },
+          })
+
+          track(postsSlug, created.id)
+
+          const result = await payload.find({
+            collection: postsSlug,
+            where: { id: { equals: created.id } },
+          })
+
+          expect(result.docs).toHaveLength(1)
+          expect(result.docs[0]!.id).toBe(created.id)
+        })
+
+        test('should handle relationships with uuidv7 IDs', async ({ payload }) => {
+          const relA = await payload.create({
+            collection: relationASlug,
+            data: { title: 'uuidv7 rel A' },
+          })
+          const relB = await payload.create({
+            collection: relationBSlug,
+            data: {
+              title: 'uuidv7 rel B',
+              relationship: relA.id,
+            },
+          })
+
+          track(relationBSlug, relB.id)
+          track(relationASlug, relA.id)
+
+          const found = await payload.findByID({
+            collection: relationBSlug,
+            id: relB.id,
+            depth: 1,
+          })
+
+          expect(found.relationship).toBeDefined()
+        })
+
+        test('should work with versions and uuidv7 adapter', async ({ payload }) => {
+          const doc = await payload.create({
+            collection: customIDsSlug,
+            data: { title: 'v7 versioned' },
+          })
+
+          track(customIDsSlug, doc.id)
+
+          await payload.update({
+            collection: customIDsSlug,
+            id: doc.id,
+            data: { title: 'v7 versioned updated' },
+          })
+
+          const versions = await payload.findVersions({
+            collection: customIDsSlug,
+            where: { parent: { equals: doc.id } },
+          })
+
+          expect(versions.totalDocs).toBeGreaterThanOrEqual(1)
+        })
+
+        test('defaultIDType should be text for uuidv7', ({ payload }) => {
+          expect(payload.db.defaultIDType).toBe('text')
+        })
       })
-
-      it('should generate valid UUID with version 7', async () => {
-        const doc = await payload.create({
-          collection: postsSlug,
-          data: { title: 'uuidv7 test' },
-        })
-
-        track(postsSlug, doc.id)
-
-        expect(doc.id).toMatch(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-        )
-
-        expect(String(doc.id).charAt(14)).toBe('7')
-      })
-
-      it('should generate chronologically ordered IDs', async () => {
-        const doc1 = await payload.create({
-          collection: postsSlug,
-          data: { title: 'uuidv7 first' },
-        })
-        const doc2 = await payload.create({
-          collection: postsSlug,
-          data: { title: 'uuidv7 second' },
-        })
-
-        track(postsSlug, doc1.id)
-        track(postsSlug, doc2.id)
-
-        expect(doc2.id > doc1.id).toBe(true)
-      })
-
-      it('should findByID with uuidv7', async () => {
-        const created = await payload.create({
-          collection: postsSlug,
-          data: { title: 'uuidv7 findable' },
-        })
-
-        track(postsSlug, created.id)
-
-        const found = await payload.findByID({
-          collection: postsSlug,
-          id: created.id,
-        })
-
-        expect(found.id).toBe(created.id)
-        expect(found.title).toBe('uuidv7 findable')
-      })
-
-      it('should query with where clause on uuidv7 id', async () => {
-        const created = await payload.create({
-          collection: postsSlug,
-          data: { title: 'uuidv7 queryable' },
-        })
-
-        track(postsSlug, created.id)
-
-        const result = await payload.find({
-          collection: postsSlug,
-          where: { id: { equals: created.id } },
-        })
-
-        expect(result.docs).toHaveLength(1)
-        expect(result.docs[0]!.id).toBe(created.id)
-      })
-
-      it('should handle relationships with uuidv7 IDs', async () => {
-        const relA = await payload.create({
-          collection: relationASlug,
-          data: { title: 'uuidv7 rel A' },
-        })
-        const relB = await payload.create({
-          collection: relationBSlug,
-          data: {
-            title: 'uuidv7 rel B',
-            relationship: relA.id,
-          },
-        })
-
-        track(relationBSlug, relB.id)
-        track(relationASlug, relA.id)
-
-        const found = await payload.findByID({
-          collection: relationBSlug,
-          id: relB.id,
-          depth: 1,
-        })
-
-        expect(found.relationship).toBeDefined()
-      })
-
-      it('should work with versions and uuidv7 adapter', async () => {
-        const doc = await payload.create({
-          collection: customIDsSlug,
-          data: { title: 'v7 versioned' },
-        })
-
-        track(customIDsSlug, doc.id)
-
-        await payload.update({
-          collection: customIDsSlug,
-          id: doc.id,
-          data: { title: 'v7 versioned updated' },
-        })
-
-        const versions = await payload.findVersions({
-          collection: customIDsSlug,
-          where: { parent: { equals: doc.id } },
-        })
-
-        expect(versions.totalDocs).toBeGreaterThanOrEqual(1)
-      })
-
-      it('defaultIDType should be text for uuidv7', () => {
-        expect(payload.db.defaultIDType).toBe('text')
-      })
-    })
   })
 
-  describe('timestamps', () => {
-    it('should have createdAt and updatedAt timestamps to the millisecond', async () => {
+  test.describe('timestamps', () => {
+    test('should have createdAt and updatedAt timestamps to the millisecond', async ({
+      payload,
+    }) => {
       const result = await payload.create({
         collection: postsSlug,
         data: {
@@ -398,14 +405,13 @@ describe('database', () => {
 
       expect(createdAtDate.getMilliseconds()).toBeDefined()
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
       })
     })
 
-    it('should allow createdAt to be set in create', async () => {
+    test('should allow createdAt to be set in create', async ({ payload }) => {
       const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: postsSlug,
@@ -423,14 +429,13 @@ describe('database', () => {
       expect(result.createdAt).toStrictEqual(createdAt)
       expect(doc.createdAt).toStrictEqual(createdAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
       })
     })
 
-    it('should allow updatedAt to be set in create', async () => {
+    test('should allow updatedAt to be set in create', async ({ payload }) => {
       const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
         collection: postsSlug,
@@ -442,13 +447,12 @@ describe('database', () => {
 
       expect(result.updatedAt).toStrictEqual(updatedAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
       })
     })
-    it('should allow createdAt to be set in update', async () => {
+    test('should allow createdAt to be set in update', async ({ payload }) => {
       const post = await payload.create({
         collection: postsSlug,
         data: {
@@ -472,14 +476,13 @@ describe('database', () => {
 
       expect(doc.createdAt).toStrictEqual(createdAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
       })
     })
 
-    it('should allow updatedAt to be set in update', async () => {
+    test('should allow updatedAt to be set in update', async ({ payload }) => {
       const post = await payload.create({
         collection: postsSlug,
         data: {
@@ -503,14 +506,13 @@ describe('database', () => {
 
       expect(doc.updatedAt).toStrictEqual(updatedAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
       })
     })
 
-    it('ensure updatedAt is automatically set when using db.updateOne', async () => {
+    test('ensure updatedAt is automatically set when using db.updateOne', async ({ payload }) => {
       const post = await payload.create({
         collection: postsSlug,
         data: {
@@ -528,14 +530,15 @@ describe('database', () => {
 
       expect(result.updatedAt).not.toStrictEqual(post.updatedAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
       })
     })
 
-    it('ensure updatedAt is not automatically set when using db.updateOne if it is explicitly set to `null`', async () => {
+    test('ensure updatedAt is not automatically set when using db.updateOne if it is explicitly set to `null`', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: postsSlug,
         data: {
@@ -554,14 +557,13 @@ describe('database', () => {
 
       expect(result.updatedAt).toStrictEqual(post.updatedAt)
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {},
       })
     })
 
-    it('should allow createdAt to be set in updateVersion', async () => {
+    test('should allow createdAt to be set in updateVersion', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',
         data: {
@@ -603,7 +605,6 @@ describe('database', () => {
         expect(version.createdAt).toStrictEqual(createdAt)
       }
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: 'categories',
         where: {},
@@ -614,7 +615,7 @@ describe('database', () => {
       })
     })
 
-    it('should allow updatedAt to be set in updateVersion', async () => {
+    test('should allow updatedAt to be set in updateVersion', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',
         data: {
@@ -656,7 +657,6 @@ describe('database', () => {
         expect(version.updatedAt).toStrictEqual(updatedAt)
       }
 
-      // Cleanup, as this test suite does not use clearAndSeedEverything
       await payload.db.deleteMany({
         collection: 'categories',
         where: {},
@@ -667,7 +667,7 @@ describe('database', () => {
       })
     })
 
-    async function noTimestampsTestLocalAPI() {
+    async function noTimestampsTestLocalAPI(payload: Payload) {
       const createdDoc: any = await payload.create({
         collection: 'noTimeStamps',
         data: {
@@ -712,7 +712,7 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
-    async function noTimestampsTestDB(aa) {
+    async function noTimestampsTestDB(payload: Payload) {
       const createdDoc: any = await payload.db.create({
         collection: 'noTimeStamps',
         data: {
@@ -757,44 +757,44 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
-    // eslint-disable-next-line vitest/expect-expect
-    it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
-      await noTimestampsTestLocalAPI()
+    test('ensure timestamps are not created in update or create when timestamps are disabled', async ({
+      payload,
+    }) => {
+      await noTimestampsTestLocalAPI(payload)
     })
 
-    // eslint-disable-next-line vitest/expect-expect
-    it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
-      await noTimestampsTestDB(true)
+    test('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async ({
+      payload,
+    }) => {
+      await noTimestampsTestDB(payload)
     })
 
-    // eslint-disable-next-line vitest/expect-expect
-    it(
+    test.options({ db: 'mongo' })(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
-      { db: 'mongo' },
-      async () => {
+      async ({ payload }) => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
-        await noTimestampsTestLocalAPI()
+        await noTimestampsTestLocalAPI(payload)
         payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
       },
     )
 
-    // eslint-disable-next-line vitest/expect-expect
-    it(
+    test.options({ db: 'mongo' })(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
-      { db: 'mongo' },
-      async () => {
+      async ({ payload }) => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
-        await noTimestampsTestDB()
+        await noTimestampsTestDB(payload)
 
         payload.db.allowAdditionalKeys = originalAllowAdditionalKeys
       },
     )
   })
 
-  describe('Data strictness', () => {
-    it('should not save and leak password, confirm-password from Local API', async () => {
+  test.describe('Data strictness', () => {
+    test('should not save and leak password, confirm-password from Local API', async ({
+      payload,
+    }) => {
       const createdUser = await payload.create({
         collection: 'users',
         data: {
@@ -818,7 +818,9 @@ describe('database', () => {
       expect(keys).not.toContain('confirm-password')
     })
 
-    it('should not save and leak password, confirm-password from payload.db', async () => {
+    test('should not save and leak password, confirm-password from payload.db', async ({
+      payload,
+    }) => {
       const createdUser = await payload.db.create({
         collection: 'users',
         data: {
@@ -844,7 +846,7 @@ describe('database', () => {
     })
   })
 
-  it('should query hasMany select field with contains operator', async () => {
+  test('should query hasMany select field with contains operator', async ({ payload }) => {
     const { id } = await payload.create({
       collection: 'select-has-many',
       data: {
@@ -867,7 +869,9 @@ describe('database', () => {
     await payload.delete({ collection: 'select-has-many', id })
   })
 
-  it('ensure querying hasMany select field with contains operator does not do partial matching', async () => {
+  test('ensure querying hasMany select field with contains operator does not do partial matching', async ({
+    payload,
+  }) => {
     const { id } = await payload.create({
       collection: 'select-has-many',
       data: {
@@ -888,18 +892,18 @@ describe('database', () => {
     await payload.delete({ collection: 'select-has-many', id })
   })
 
-  describe('allow ID on create', () => {
-    beforeAll(() => {
+  test.describe('allow ID on create', () => {
+    test.beforeAll(({ payloadInstance: payload }) => {
       payload.db.allowIDOnCreate = true
       payload.config.db.allowIDOnCreate = true
     })
 
-    afterAll(() => {
-      payload.db.allowIDOnCreate = false
-      payload.config.db.allowIDOnCreate = false
+    test.afterAll(({ payloadInstance }) => {
+      payloadInstance.db.allowIDOnCreate = false
+      payloadInstance.config.db.allowIDOnCreate = false
     })
 
-    it('local API - accepts ID on create', async () => {
+    test('local API - accepts ID on create', async ({ payload }) => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -914,7 +918,7 @@ describe('database', () => {
       expect(post.id).toBe(id)
     })
 
-    it('rEST API - accepts ID on create', async () => {
+    test('rEST API - accepts ID on create', async ({ payload, restClient }) => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -936,7 +940,7 @@ describe('database', () => {
       expect(post.doc.id).toBe(id)
     })
 
-    it('graphQL - accepts ID on create', async () => {
+    test('graphQL - accepts ID on create', async ({ payload, restClient }) => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -963,7 +967,7 @@ describe('database', () => {
     })
   })
 
-  it('should find distinct field values of the collection', async () => {
+  test('should find distinct field values of the collection', async ({ payload }) => {
     await payload.delete({ collection: 'posts', where: {} })
     const titles = [
       'title-1',
@@ -1019,7 +1023,7 @@ describe('database', () => {
     expect(resAscDefault.values).toStrictEqual(titles)
   })
 
-  it('should sort find on a different field with findDistinct', async () => {
+  test('should sort find on a different field with findDistinct', async ({ payload }) => {
     await payload.delete({ collection: 'posts', where: {} })
     const titles: {
       title: string
@@ -1072,7 +1076,7 @@ describe('database', () => {
     expect(resDesc.values).toStrictEqual(reversed)
   })
 
-  it('should populate distinct relationships when depth>0', async () => {
+  test('should populate distinct relationships when depth>0', async ({ payload }) => {
     await payload.delete({ collection: 'posts', where: {} })
 
     const categories = ['category-1', 'category-2', 'category-3', 'category-4'].map((title) => ({
@@ -1115,7 +1119,9 @@ describe('database', () => {
     }
   })
 
-  it('should populate distinct relationships of hasMany: true when depth>0', async () => {
+  test('should populate distinct relationships of hasMany: true when depth>0', async ({
+    payload,
+  }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
 
@@ -1203,7 +1209,9 @@ describe('database', () => {
     }
   })
 
-  it('should populate distinct relationships of polymorphic when depth>0', async () => {
+  test('should populate distinct relationships of polymorphic when depth>0', async ({
+    payload,
+  }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
 
@@ -1268,7 +1276,9 @@ describe('database', () => {
     ).toBe(true)
   })
 
-  it('should populate distinct relationships of hasMany polymorphic when depth>0', async () => {
+  test('should populate distinct relationships of hasMany polymorphic when depth>0', async ({
+    payload,
+  }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
 
@@ -1360,7 +1370,7 @@ describe('database', () => {
     expect(result.values.some((v) => v.categoryPolyMany === null)).toBe(true)
   })
 
-  it('should find distinct values with field nested to a relationship', async () => {
+  test('should find distinct values with field nested to a relationship', async ({ payload }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
 
@@ -1404,7 +1414,9 @@ describe('database', () => {
     ])
   })
 
-  it('should find distinct values with virtual field linked to a relationship', async () => {
+  test('should find distinct values with virtual field linked to a relationship', async ({
+    payload,
+  }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
 
@@ -1448,7 +1460,9 @@ describe('database', () => {
     ])
   })
 
-  it('should find distinct values with field nested to a 2x relationship', async () => {
+  test('should find distinct values with field nested to a 2x relationship', async ({
+    payload,
+  }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
     await payload.delete({ collection: 'simple', where: {} })
@@ -1502,7 +1516,9 @@ describe('database', () => {
     ])
   })
 
-  it('should find distinct values with virtual field linked to a 2x relationship', async () => {
+  test('should find distinct values with virtual field linked to a 2x relationship', async ({
+    payload,
+  }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
     await payload.delete({ collection: 'simple', where: {} })
@@ -1556,7 +1572,9 @@ describe('database', () => {
     ])
   })
 
-  it('should find distinct values when the virtual field is linked to ID', async () => {
+  test('should find distinct values when the virtual field is linked to ID', async ({
+    payload,
+  }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
     const category = await payload.create({
@@ -1568,7 +1586,7 @@ describe('database', () => {
     expect(distinct.values).toStrictEqual([{ categoryID: category.id }])
   })
 
-  it('should find distinct values by the explicit ID field path', async () => {
+  test('should find distinct values by the explicit ID field path', async ({ payload }) => {
     await payload.delete({ collection: 'posts', where: {} })
     await payload.delete({ collection: 'categories', where: {} })
     const category = await payload.create({
@@ -1580,11 +1598,11 @@ describe('database', () => {
     expect(distinct.values).toStrictEqual([{ 'category.id': category.id }])
   })
 
-  describe('relationship field pagination', () => {
+  test.describe('relationship field pagination', () => {
     let createdCategoryIds: string[] = []
     let createdPostIds: string[] = []
 
-    beforeEach(async () => {
+    test.beforeEach(async ({ payload }) => {
       // Create 15 unique categories
       const categoryPromises = Array.from({ length: 15 }).map(async (_, i) => {
         const cat = await payload.create({
@@ -1609,19 +1627,21 @@ describe('database', () => {
       createdPostIds = await Promise.all(postPromises)
     })
 
-    afterAll(async () => {
+    test.afterAll(async ({ payloadInstance }) => {
       // Clean up in order: posts first, then categories
       await Promise.all(
-        createdPostIds.map((id) => payload.delete({ id, collection: 'posts' }).catch(() => {})),
+        createdPostIds.map((id) =>
+          payloadInstance.delete({ id, collection: 'posts' }).catch(() => {}),
+        ),
       )
       await Promise.all(
         createdCategoryIds.map((id) =>
-          payload.delete({ id, collection: 'categories' }).catch(() => {}),
+          payloadInstance.delete({ id, collection: 'categories' }).catch(() => {}),
         ),
       )
     })
 
-    it('should paginate distinct results for relationship field paths', async () => {
+    test('should paginate distinct results for relationship field paths', async ({ payload }) => {
       // Test findDistinct with pagination on category.title path
       const page1 = await payload.findDistinct({
         collection: 'posts',
@@ -1670,7 +1690,9 @@ describe('database', () => {
     })
   })
 
-  it('should return the correct number of docs per page when sorting on an array sub-field', async () => {
+  test('should return the correct number of docs per page when sorting on an array sub-field', async ({
+    payload,
+  }) => {
     const createdIds: string[] = []
     const TOTAL = 10
     const ITEMS_PER_DOC = 3
@@ -1744,12 +1766,12 @@ describe('database', () => {
     })
   })
 
-  describe('Compound Indexes', () => {
-    beforeEach(async () => {
+  test.describe('Compound Indexes', () => {
+    test.beforeEach(async ({ payload }) => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
     })
 
-    it('top level: should throw a unique error', async () => {
+    test('top level: should throw a unique error', async ({ payload }) => {
       await payload.create({
         collection: 'compound-indexes',
         data: { one: '1', three: randomUUID(), two: '2' },
@@ -1775,7 +1797,7 @@ describe('database', () => {
       ).rejects.toBeTruthy()
     })
 
-    it('combine group and top level: should throw a unique error', async () => {
+    test('combine group and top level: should throw a unique error', async ({ payload }) => {
       await payload.create({
         collection: 'compound-indexes',
         data: {
@@ -1806,10 +1828,10 @@ describe('database', () => {
     })
   })
 
-  describe('migrations', () => {
+  test.describe('migrations', () => {
     let ranFreshTest = false
 
-    beforeEach(async () => {
+    test.beforeEach(async ({ payload }) => {
       if (
         process.env.PAYLOAD_DROP_DATABASE === 'true' &&
         'drizzle' in payload.db &&
@@ -1827,19 +1849,21 @@ describe('database', () => {
       })
     })
 
-    it('should run migrate:create', () => {
+    test('should run migrate:create', ({ payload }) => {
       // read files names in migrationsDir
       const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
       expect(migrationFile).toContain('_test')
     })
 
-    it('should create index.ts file in the migrations directory with file imports', () => {
+    test('should create index.ts file in the migrations directory with file imports', ({
+      payload,
+    }) => {
       const indexFile = path.join(payload.db.migrationDir, 'index.ts')
       const indexFileContent = fs.readFileSync(indexFile, 'utf8')
       expect(indexFileContent).toContain("_test from './")
     })
 
-    it('should run migrate', async () => {
+    test('should run migrate', async ({ payload }) => {
       await payload.db.migrate()
       const { docs } = await payload.find({
         collection: 'payload-migrations',
@@ -1849,7 +1873,7 @@ describe('database', () => {
       expect(migration?.batch).toStrictEqual(1)
     })
 
-    it('should run migrate:status', async () => {
+    test('should run migrate:status', async ({ payload }) => {
       let error
       try {
         await payload.db.migrateStatus()
@@ -1859,7 +1883,7 @@ describe('database', () => {
       expect(error).toBeUndefined()
     })
 
-    it('should run migrate:fresh', async () => {
+    test('should run migrate:fresh', async ({ payload }) => {
       await payload.db.migrateFresh({ forceAcceptWarning: true })
       const { docs } = await payload.find({
         collection: 'payload-migrations',
@@ -1871,7 +1895,7 @@ describe('database', () => {
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    it('should run migrate:down', { db: 'mongo' }, async () => {
+    test.options({ db: 'mongo' })('should run migrate:down', async ({ payload }) => {
       // migrate existing if there any
       await payload.db.migrate()
 
@@ -1905,7 +1929,7 @@ describe('database', () => {
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    it('should run migrate:refresh', { db: 'mongo' }, async () => {
+    test.options({ db: 'mongo' })('should run migrate:refresh', async ({ payload }) => {
       let error
       try {
         await payload.db.migrateRefresh()
@@ -1923,7 +1947,7 @@ describe('database', () => {
   })
 
   // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-  it('should run migrate:reset', { db: 'mongo' }, async () => {
+  test.options({ db: 'mongo' })('should run migrate:reset', async ({ payload }) => {
     let error
     try {
       await payload.db.migrateReset()
@@ -1939,8 +1963,8 @@ describe('database', () => {
     expect(migrations.docs).toHaveLength(0)
   })
 
-  describe('predefined migrations', () => {
-    it('mongoose - should execute migrateVersionsV1_V2', async () => {
+  test.describe('predefined migrations', () => {
+    test('mongoose - should execute migrateVersionsV1_V2', async ({ payload }) => {
       if (payload.db.name !== 'mongoose') {
         return
       }
@@ -1960,7 +1984,7 @@ describe('database', () => {
       expect(hasErr).toBeFalsy()
     })
 
-    it('mongoose - should execute migrateRelationshipsV2_V3', async () => {
+    test('mongoose - should execute migrateRelationshipsV2_V3', async ({ payload }) => {
       if (payload.db.name !== 'mongoose') {
         return
       }
@@ -2044,8 +2068,8 @@ describe('database', () => {
     })
   })
 
-  describe('schema', () => {
-    it('should use custom dbNames', () => {
+  test.describe('schema', () => {
+    test('should use custom dbNames', ({ payload }) => {
       expect(payload.db).toBeDefined()
 
       if (payload.db.name === 'mongoose') {
@@ -2098,7 +2122,7 @@ describe('database', () => {
       }
     })
 
-    it('should create and read doc with custom db names', async () => {
+    test('should create and read doc with custom db names', async ({ payload }) => {
       const relationA = await payload.create({
         collection: 'relation-a',
         data: {
@@ -2146,7 +2170,71 @@ describe('database', () => {
       expect(doc.blocks[0].localizedText).toStrictEqual('goodbye')
     })
 
-    it('arrays should work with both long field names and dbName', async () => {
+    test('should preserve omitted hasMany selects when updating an array with db.updateOne', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          array: [{ text: 'array row' }],
+          select: ['a', 'b'],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          array: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.array).toHaveLength(0)
+      expect(updated.select).toStrictEqual(['a', 'b'])
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+    })
+
+    test('should clear hasMany selects when provided as an empty array to db.updateOne', async ({
+      payload,
+    }) => {
+      const doc = await payload.create({
+        collection: customSchemaSlug,
+        data: {
+          select: ['a', 'b'],
+        },
+      })
+
+      await payload.db.updateOne({
+        collection: customSchemaSlug,
+        id: doc.id,
+        data: {
+          select: [],
+        },
+      })
+
+      const updated = await payload.findByID({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+
+      expect(updated.select).toHaveLength(0)
+
+      await payload.delete({
+        collection: customSchemaSlug,
+        id: doc.id,
+      })
+    })
+
+    test('arrays should work with both long field names and dbName', async ({ payload }) => {
       const { id } = await payload.create({
         collection: 'aliases',
         data: {
@@ -2169,15 +2257,15 @@ describe('database', () => {
     })
   })
 
-  describe('transactions', () => {
-    describe('local api', () => {
+  test.describe('transactions', () => {
+    test.describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
         !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
           process.env.PAYLOAD_DATABASE || '',
         )
       ) {
-        it('should commit multiple operations in isolation', async () => {
+        test('should commit multiple operations in isolation', async ({ payload }) => {
           const req = {
             payload,
             user,
@@ -2227,7 +2315,7 @@ describe('database', () => {
           expect(secondResult.id).toStrictEqual(second.id)
         })
 
-        it('should commit multiple operations async', async () => {
+        test('should commit multiple operations async', async ({ payload }) => {
           const req = {
             payload,
             user,
@@ -2277,7 +2365,7 @@ describe('database', () => {
           expect(secondResult.id).toStrictEqual(second.id)
         })
 
-        it('should rollback operations on failure', async () => {
+        test('should rollback operations on failure', async ({ payload }) => {
           const req = {
             payload,
             user,
@@ -2319,12 +2407,71 @@ describe('database', () => {
             }),
           ).rejects.toThrow('Not Found')
         })
+
+        test('should not roll back the caller transaction when a nested read throws', async ({
+          payload,
+        }) => {
+          const missing = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+          })
+
+          await payload.delete({
+            id: missing.id,
+            collection,
+          })
+
+          const req = {
+            payload,
+            user,
+          } as unknown as PayloadRequest
+
+          await initTransaction(req)
+
+          const created = await payload.create({
+            collection,
+            data: {
+              title,
+            },
+            req,
+          })
+
+          // Hooks commonly look up a related doc and tolerate it being gone. A read
+          // operation does not own the transaction, so its failure must not discard the
+          // writes already made on this req.
+          await expect(() =>
+            payload.findByID({
+              id: missing.id,
+              collection,
+              req,
+            }),
+          ).rejects.toThrow('Not Found')
+
+          expect(req.transactionID).toBeTruthy()
+
+          await commitTransaction(req)
+
+          const result = await payload.findByID({
+            id: created.id,
+            collection,
+          })
+
+          expect(result.id).toStrictEqual(created.id)
+
+          await payload.delete({
+            id: created.id,
+            collection,
+          })
+        })
       }
 
-      it(
+      test.options({
+        db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
+      })(
         'should throw error when beginTransaction fails to connect (drizzle)',
-        { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
-        async () => {
+        async ({ payload }) => {
           const db = payload.db as unknown as Record<string, unknown>
           const originalDrizzle = db.drizzle
           try {
@@ -2339,13 +2486,12 @@ describe('database', () => {
         },
       )
 
-      it(
+      test.options({
+        db: (adapter) =>
+          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+      })(
         'should throw error when beginTransaction fails to connect (mongo)',
-        {
-          db: (adapter) =>
-            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
-        },
-        async () => {
+        async ({ payload }) => {
           const db = payload.db as unknown as Record<string, unknown>
           const originalConnection = db.connection
           try {
@@ -2364,9 +2510,9 @@ describe('database', () => {
         },
       )
 
-      describe('disableTransaction', () => {
+      test.describe('disableTransaction', () => {
         let disabledTransactionPost
-        beforeAll(async () => {
+        test.beforeAll(async ({ payloadInstance: payload }) => {
           disabledTransactionPost = await payload.create({
             collection,
             data: {
@@ -2376,10 +2522,12 @@ describe('database', () => {
             disableTransaction: true,
           })
         })
-        it('should not use transaction calling create() with disableTransaction', () => {
+        test('should not use transaction calling create() with disableTransaction', () => {
           expect(disabledTransactionPost.hasTransaction).toBeFalsy()
         })
-        it('should not use transaction calling update() with disableTransaction', async () => {
+        test('should not use transaction calling update() with disableTransaction', async ({
+          payload,
+        }) => {
           const result = await payload.update({
             id: disabledTransactionPost.id,
             collection,
@@ -2391,7 +2539,9 @@ describe('database', () => {
 
           expect(result.hasTransaction).toBeFalsy()
         })
-        it('should not use transaction calling delete() with disableTransaction', async () => {
+        test('should not use transaction calling delete() with disableTransaction', async ({
+          payload,
+        }) => {
           const result = await payload.delete({
             id: disabledTransactionPost.id,
             collection,
@@ -2407,8 +2557,8 @@ describe('database', () => {
     })
   })
 
-  describe('local API', () => {
-    it('should support `limit` arg in bulk updates', async () => {
+  test.describe('local API', () => {
+    test('should support `limit` arg in bulk updates', async ({ payload }) => {
       for (let i = 0; i < 10; i++) {
         await payload.create({
           collection,
@@ -2445,7 +2595,7 @@ describe('database', () => {
       expect(worldDocs).toHaveLength(5)
     })
 
-    it('should bulk update with bulkOperationsSingleTransaction: true', async () => {
+    test('should bulk update with bulkOperationsSingleTransaction: true', async ({ payload }) => {
       const originalValue = payload.db.bulkOperationsSingleTransaction
       payload.db.bulkOperationsSingleTransaction = true
 
@@ -2469,7 +2619,7 @@ describe('database', () => {
       }
     })
 
-    it('should bulk delete with bulkOperationsSingleTransaction: true', async () => {
+    test('should bulk delete with bulkOperationsSingleTransaction: true', async ({ payload }) => {
       const originalValue = payload.db.bulkOperationsSingleTransaction
       payload.db.bulkOperationsSingleTransaction = true
 
@@ -2491,7 +2641,7 @@ describe('database', () => {
       }
     })
 
-    it('should CRUD point field', async () => {
+    test('should CRUD point field', async ({ payload }) => {
       const result = await payload.create({
         collection: 'default-values',
         data: {
@@ -2502,7 +2652,7 @@ describe('database', () => {
       expect(result.point).toEqual([5, 10])
     })
 
-    it('ensure updateMany updates all docs and respects where query', async () => {
+    test('ensure updateMany updates all docs and respects where query', async ({ payload }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -2576,7 +2726,7 @@ describe('database', () => {
       expect(notUpdatedDocs?.[0]?.title).toBe('notupdated')
     })
 
-    it('ensure updateMany respects limit', async () => {
+    test('ensure updateMany respects limit', async ({ payload }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -2645,7 +2795,7 @@ describe('database', () => {
       expect(notUpdatedDocs?.[5]?.title).toBe('not updated')
     })
 
-    it('ensure updateMany respects limit and sort', async () => {
+    test('ensure updateMany respects limit and sort', async ({ payload }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -2712,7 +2862,7 @@ describe('database', () => {
       }
     })
 
-    it('ensure payload.update operation respects limit and sort', async () => {
+    test('ensure payload.update operation respects limit and sort', async ({ payload }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -2779,7 +2929,7 @@ describe('database', () => {
       }
     })
 
-    it('ensure updateMany respects limit and negative sort', async () => {
+    test('ensure updateMany respects limit and negative sort', async ({ payload }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -2846,7 +2996,9 @@ describe('database', () => {
       }
     })
 
-    it('ensure payload.update operation respects limit and negative sort', async () => {
+    test('ensure payload.update operation respects limit and negative sort', async ({
+      payload,
+    }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -2913,7 +3065,7 @@ describe('database', () => {
       }
     })
 
-    it('ensure updateMany correctly handles 0 limit', async () => {
+    test('ensure updateMany correctly handles 0 limit', async ({ payload }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -2967,7 +3119,7 @@ describe('database', () => {
       expect(docs?.[4]?.title).toBe('updated')
     })
 
-    it('ensure updateMany correctly handles -1 limit', async () => {
+    test('ensure updateMany correctly handles -1 limit', async ({ payload }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -3021,7 +3173,9 @@ describe('database', () => {
       expect(docs?.[4]?.title).toBe('updated')
     })
 
-    it('ensure updateOne does not create new document if `where` query has no results', async () => {
+    test('ensure updateOne does not create new document if `where` query has no results', async ({
+      payload,
+    }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -3051,7 +3205,9 @@ describe('database', () => {
       expect(allPosts.docs).toHaveLength(0)
     })
 
-    it('ensure updateMany does not create new document if `where` query has no results', async () => {
+    test('ensure updateMany does not create new document if `where` query has no results', async ({
+      payload,
+    }) => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
@@ -3082,8 +3238,8 @@ describe('database', () => {
     })
   })
 
-  describe('Error Handler', () => {
-    it('should return proper top-level field validation errors', async () => {
+  test.describe('Error Handler', () => {
+    test('should return proper top-level field validation errors', async ({ payload }) => {
       let errorMessage: string = ''
 
       try {
@@ -3101,7 +3257,7 @@ describe('database', () => {
       expect(errorMessage).toBe('The following field is invalid: Title')
     })
 
-    it('should return validation errors in response', async () => {
+    test('should return validation errors in response', async ({ payload }) => {
       try {
         await payload.create({
           collection: postsSlug,
@@ -3128,7 +3284,9 @@ describe('database', () => {
       }
     })
 
-    it('should return validation errors with proper field paths for unnamed fields', async () => {
+    test('should return validation errors with proper field paths for unnamed fields', async ({
+      payload,
+    }) => {
       try {
         await payload.create({
           collection: errorOnUnnamedFieldsSlug,
@@ -3145,8 +3303,8 @@ describe('database', () => {
     })
   })
 
-  describe('defaultValue', () => {
-    it('should set default value from db.create', async () => {
+  test.describe('defaultValue', () => {
+    test('should set default value from db.create', async ({ payload }) => {
       // call the db adapter create directly to bypass Payload's default value assignment
       const result = await payload.db.create({
         collection: 'default-values',
@@ -3167,8 +3325,10 @@ describe('database', () => {
     })
   })
 
-  describe('reserved field names', () => {
-    it('should query a collection with an array field named `numbers`, `texts`, or `rels`', async () => {
+  test.describe('reserved field names', () => {
+    test('should query a collection with an array field named `numbers`, `texts`, or `rels`', async ({
+      payload,
+    }) => {
       const created = await payload.create({
         collection: 'reserved-field-names',
         data: {
@@ -3191,8 +3351,8 @@ describe('database', () => {
     })
   })
 
-  describe('Schema generation', { db: 'drizzle' }, () => {
-    it('should generate Drizzle Postgres schema', async () => {
+  test.options({ db: 'drizzle' }).describe('Schema generation', () => {
+    test('should generate Drizzle Postgres schema', async ({ payload }) => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE
       if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
         return
@@ -3222,7 +3382,7 @@ describe('database', () => {
       }
     })
 
-    it('should generate Drizzle SQLite schema', async () => {
+    test('should generate Drizzle SQLite schema', async ({ payload }) => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE
       if (!generatedAdapterName?.includes('sqlite')) {
         return
@@ -3248,13 +3408,13 @@ describe('database', () => {
     })
   })
 
-  describe('drizzle: schema hooks', () => {
-    beforeAll(() => {
+  test.describe('drizzle: schema hooks', () => {
+    test.beforeAll(() => {
       process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
     })
 
     // TODO: this test is currently not working, come back to fix in a separate PR, issue: 12907
-    it.skip('should add tables with hooks', async () => {
+    test.skip('should add tables with hooks', async ({ payload }) => {
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -3340,7 +3500,9 @@ describe('database', () => {
       expect(res_after.rows[0].text).toBe('some-text')
     })
 
-    it('should extend the existing table with extra column and modify the existing column with enforcing DB level length', async () => {
+    test('should extend the existing table with extra column and modify the existing column with enforcing DB level length', async ({
+      payload,
+    }) => {
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -3405,7 +3567,9 @@ describe('database', () => {
       }
     })
 
-    it('should extend the existing table with composite unique and throw ValidationError on it', async () => {
+    test('should extend the existing table with composite unique and throw ValidationError on it', async ({
+      payload,
+    }) => {
       if (payload.db.name === 'mongoose') {
         return
       }
@@ -3471,8 +3635,8 @@ describe('database', () => {
     })
   })
 
-  describe('virtual fields', () => {
-    it('should not save a field with `virtual: true` to the db', async () => {
+  test.describe('virtual fields', () => {
+    test('should not save a field with `virtual: true` to the db', async ({ payload }) => {
       const createRes = await payload.create({
         collection: 'fields-persistance',
         data: { array: [], text: 'asd', textHooked: 'asd' },
@@ -3496,7 +3660,9 @@ describe('database', () => {
       expect(resLocal.textHooked).toBe('hooked')
     })
 
-    it('should not save a nested field to tabs/row/collapsible with virtual: true to the db', async () => {
+    test('should not save a nested field to tabs/row/collapsible with virtual: true to the db', async ({
+      payload,
+    }) => {
       const res = await payload.create({
         collection: 'fields-persistance',
         data: {
@@ -3511,7 +3677,7 @@ describe('database', () => {
       expect(res.textWithinTabs).toBeUndefined()
     })
 
-    it('should not save a virtual field inside a block to the db', async () => {
+    test('should not save a virtual field inside a block to the db', async ({ payload }) => {
       const created = await payload.create({
         collection: fieldsPersistanceSlug,
         data: {
@@ -3537,7 +3703,7 @@ describe('database', () => {
       expect(block?.text).toBe('some text')
     })
 
-    it('should allow virtual field with reference', async () => {
+    test('should allow virtual field with reference', async ({ payload }) => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({
         collection: 'virtual-relations',
@@ -3555,7 +3721,7 @@ describe('database', () => {
       expect(draft.docs[0]?.postTitle).toBe('my-title')
     })
 
-    it('should not break when using select', async () => {
+    test('should not break when using select', async ({ payload }) => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title-10' } })
       const { id } = await payload.create({
         collection: 'virtual-relations',
@@ -3572,7 +3738,7 @@ describe('database', () => {
       expect(doc.postTitle).toBe('my-title-10')
     })
 
-    it('should respect hidden: true for virtual fields with reference', async () => {
+    test('should respect hidden: true for virtual fields with reference', async ({ payload }) => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title-3' } })
       const { id } = await payload.create({
         collection: 'virtual-relations',
@@ -3592,7 +3758,7 @@ describe('database', () => {
       expect(doc_show.postTitleHidden).toBe('my-title-3')
     })
 
-    it('should allow virtual field as reference to ID', async () => {
+    test('should allow virtual field as reference to ID', async ({ payload }) => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({
         collection: 'virtual-relations',
@@ -3606,7 +3772,7 @@ describe('database', () => {
       expect(docDepth0.postID).toBe(post.id)
     })
 
-    it('should allow virtual field as reference to custom ID', async () => {
+    test('should allow virtual field as reference to custom ID', async ({ payload }) => {
       const customID = await payload.create({ collection: 'custom-ids', data: {} })
       const { id } = await payload.create({
         collection: 'virtual-relations',
@@ -3624,7 +3790,7 @@ describe('database', () => {
       expect(docDepth0.customIDValue).toBe(customID.id)
     })
 
-    it('should allow deep virtual field as reference to ID', async () => {
+    test('should allow deep virtual field as reference to ID', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',
         data: { title: 'category-3' },
@@ -3645,7 +3811,7 @@ describe('database', () => {
       expect(docDepth0.postCategoryID).toBe(category.id)
     })
 
-    it('should allow virtual field with reference localized', async () => {
+    test('should allow virtual field with reference localized', async ({ payload }) => {
       const post = await payload.create({
         collection: 'posts',
         data: { localized: 'localized en', title: 'my-title' },
@@ -3671,7 +3837,7 @@ describe('database', () => {
       expect(doc.postLocalized).toBe('localized es')
     })
 
-    it('should allow to query by a virtual field with reference', async () => {
+    test('should allow to query by a virtual field with reference', async ({ payload }) => {
       await payload.delete({ collection: 'posts', where: {} })
       await payload.delete({ collection: 'virtual-relations', where: {} })
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'Dan' } })
@@ -3709,7 +3875,7 @@ describe('database', () => {
       expect(descDocs[0]?.id).toBe(doc_2.id)
     })
 
-    it('should allow virtual field 2x deep', async () => {
+    test('should allow virtual field 2x deep', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',
         data: { title: '1-category' },
@@ -3722,7 +3888,7 @@ describe('database', () => {
       expect(doc.postCategoryTitle).toBe('1-category')
     })
 
-    it('should not break when using select 2x deep', async () => {
+    test('should not break when using select 2x deep', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',
         data: { title: '3-category' },
@@ -3742,7 +3908,7 @@ describe('database', () => {
       expect(docWithSelect.postCategoryTitle).toBe('3-category')
     })
 
-    it('should allow to query by virtual field 2x deep', async () => {
+    test('should allow to query by virtual field 2x deep', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',
         data: { title: '2-category' },
@@ -3760,7 +3926,7 @@ describe('database', () => {
       expect(found.docs[0].id).toBe(doc.id)
     })
 
-    it('should allow to query by virtual field 2x deep with draft:true', async () => {
+    test('should allow to query by virtual field 2x deep with draft:true', async ({ payload }) => {
       await payload.delete({ collection: 'virtual-relations', where: {} })
       const category = await payload.create({
         collection: 'categories',
@@ -3780,7 +3946,7 @@ describe('database', () => {
       expect(found.docs[0].id).toBe(doc.id)
     })
 
-    it('should allow referenced virtual field in globals', async () => {
+    test('should allow referenced virtual field in globals', async ({ payload }) => {
       const post = await payload.create({ collection: 'posts', data: { title: 'post' } })
       const globalData = await payload.updateGlobal({
         slug: 'virtual-relation-global',
@@ -3790,7 +3956,9 @@ describe('database', () => {
       expect(globalData.postTitle).toBe('post')
     })
 
-    it('should allow referenced virtual field in collection update response', async () => {
+    test('should allow referenced virtual field in collection update response', async ({
+      payload,
+    }) => {
       const post = await payload.create({ collection: 'posts', data: { title: 'post-updated' } })
       const doc = await payload.create({
         collection: 'virtual-relations',
@@ -3808,7 +3976,9 @@ describe('database', () => {
       expect(updated.postTitle).toBe('post-updated')
     })
 
-    it('should allow to sort by a virtual field with a reference to an ID', async () => {
+    test('should allow to sort by a virtual field with a reference to an ID', async ({
+      payload,
+    }) => {
       await payload.delete({ collection: 'virtual-relations', where: {} })
       const category_1 = await payload.create({
         collection: 'categories-custom-id',
@@ -3854,7 +4024,23 @@ describe('database', () => {
       expect(res2[0].id).toBe(virtual_2.id)
     })
 
-    it('should allow to sort by a virtual field with a refence, Local / GraphQL', async () => {
+    test('should allow to sort by a virtual field with a refence, Local / GraphQL', async ({
+      payload,
+      restClient,
+    }) => {
+      // The `migrate:fresh` test earlier in this file drops the entire database, which removes
+      // the admin user backing the REST client's session. Re-authenticate so the GraphQL request
+      // below has a logged-in user for the field-level access checks the sort validation performs.
+      const { docs: existingUsers } = await payload.find({
+        collection: 'users',
+        limit: 1,
+        where: { email: { equals: devUser.email } },
+      })
+      if (existingUsers.length === 0) {
+        await payload.create({ collection: 'users', data: devUser })
+      }
+      await restClient.login({ slug: 'users', credentials: devUser })
+
       const post_1 = await payload.create({ collection: 'posts', data: { title: 'A' } })
       const post_2 = await payload.create({ collection: 'posts', data: { title: 'B' } })
       const doc_1 = await payload.create({
@@ -3925,7 +4111,7 @@ describe('database', () => {
       expect(localAsc[0].id).toBe(doc_1.id)
     })
 
-    it('should allow to sort by a virtual field without error', async () => {
+    test('should allow to sort by a virtual field without error', async ({ payload }) => {
       await payload.delete({ collection: fieldsPersistanceSlug, where: {} })
       await payload.create({
         collection: fieldsPersistanceSlug,
@@ -3938,7 +4124,9 @@ describe('database', () => {
       expect(docs).toHaveLength(1)
     })
 
-    it('should automatically add hasMany: true to a virtual field that references a hasMany relationship', () => {
+    test('should automatically add hasMany: true to a virtual field that references a hasMany relationship', ({
+      payload,
+    }) => {
       const field = payload.collections['virtual-relations'].config.fields.find(
         (each) => 'name' in each && each.name === 'postsTitles',
       )!
@@ -3946,7 +4134,7 @@ describe('database', () => {
       expect('hasMany' in field && field.hasMany).toBe(true)
     })
 
-    it('should the value populate with hasMany: true relationship field', async () => {
+    test('should the value populate with hasMany: true relationship field', async ({ payload }) => {
       await payload.delete({ collection: 'categories', where: {} })
       await payload.delete({ collection: 'posts', where: {} })
       await payload.delete({ collection: 'virtual-relations', where: {} })
@@ -3962,7 +4150,9 @@ describe('database', () => {
       expect(res.postsTitles).toEqual(['post 1', 'post 2'])
     })
 
-    it('should the value populate with nested hasMany: true relationship field', async () => {
+    test('should the value populate with nested hasMany: true relationship field', async ({
+      payload,
+    }) => {
       await payload.delete({ collection: 'categories', where: {} })
       await payload.delete({ collection: 'posts', where: {} })
       await payload.delete({ collection: 'virtual-relations', where: {} })
@@ -3988,7 +4178,9 @@ describe('database', () => {
       expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
 
-    it('should not error when using a virtual linked field in access control of a join target collection', async () => {
+    test('should not error when using a virtual linked field in access control of a join target collection', async ({
+      payload,
+    }) => {
       const tenant = await payload.create({
         collection: 'virtual-linked-tenants',
         data: { slug: 'my-tenant' },
@@ -4014,7 +4206,7 @@ describe('database', () => {
     })
   })
 
-  it('should convert numbers to text', async () => {
+  test('should convert numbers to text', async ({ payload }) => {
     const result = await payload.create({
       collection: postsSlug,
       data: {
@@ -4027,7 +4219,7 @@ describe('database', () => {
     expect(result.text).toStrictEqual('1')
   })
 
-  it('should convert strings to numbers in hasMany number fields', async () => {
+  test('should convert strings to numbers in hasMany number fields', async ({ payload }) => {
     const result = await payload.create({
       collection: postsSlug,
       data: {
@@ -4040,7 +4232,7 @@ describe('database', () => {
     expect(result.numbersHasMany).toEqual([10, 20, 30])
   })
 
-  it('should store and retrieve date fields as ISO strings', async () => {
+  test('should store and retrieve date fields as ISO strings', async ({ payload }) => {
     const testDate = new Date('2024-01-15T10:30:00.000Z')
 
     const result = await payload.create({
@@ -4065,7 +4257,7 @@ describe('database', () => {
     expect(retrieved.publishDate).toBe('2024-01-15T10:30:00.000Z')
   })
 
-  it('should convert Unix timestamps to ISO strings for date fields', async () => {
+  test('should convert Unix timestamps to ISO strings for date fields', async ({ payload }) => {
     // Unix timestamp for 2024-01-15T10:30:00.000Z
     const unixTimestamp = 1705314600000
 
@@ -4084,7 +4276,7 @@ describe('database', () => {
     expect(result.publishDate).toBe('2024-01-15T10:30:00.000Z')
   })
 
-  it('should not allow to query by a field with `virtual: true`', async () => {
+  test('should not allow to query by a field with `virtual: true`', async ({ payload }) => {
     await expect(
       payload.find({
         collection: 'fields-persistance',
@@ -4093,7 +4285,9 @@ describe('database', () => {
     ).rejects.toThrow(QueryError)
   })
 
-  it('should not allow document creation with relationship data to an invalid document ID', async () => {
+  test('should not allow document creation with relationship data to an invalid document ID', async ({
+    payload,
+  }) => {
     let invalidDoc
 
     // mongo requires ObjectId, postgres UUID and content-api number (wrong type for text ID)
@@ -4118,7 +4312,7 @@ describe('database', () => {
     expect(relationBDocs.docs).toHaveLength(0)
   })
 
-  it('should upsert', async () => {
+  test('should upsert', async ({ payload }) => {
     const postShouldCreated = await payload.db.upsert({
       collection: postsSlug,
       data: {
@@ -4151,7 +4345,7 @@ describe('database', () => {
     expect(postShouldCreated.id).toBe(postShouldUpdated.id)
   })
 
-  it('should apply default values on upsert insert but not on update', async () => {
+  test('should apply default values on upsert insert but not on update', async ({ payload }) => {
     // TODO: remove this as soon as It's fixed in the other database adapters
     if (payload.db.name !== 'mongoose') {
       return
@@ -4224,14 +4418,16 @@ describe('database', () => {
     expect(partialUpdate.title).toBe('upsert-test-updated')
   })
 
-  it('should enforce unique ids on db level even after delete', async () => {
+  test('should enforce unique ids on db level even after delete', async ({ payload }) => {
     const { id } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
     await payload.delete({ id, collection: postsSlug })
     const { id: id_2 } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
     expect(id_2).not.toBe(id)
   })
 
-  it('payload.db.createGlobal should have globalType, updatedAt, createdAt fields', async () => {
+  test('payload.db.createGlobal should have globalType, updatedAt, createdAt fields', async ({
+    payload,
+  }) => {
     const timestamp = Date.now()
     let result = (await payload.db.createGlobal({
       slug: 'global-2',
@@ -4245,6 +4441,8 @@ describe('database', () => {
 
     const createdAt = new Date(result.createdAt as string).getTime()
 
+    await new Promise((resolve) => setTimeout(resolve, 2))
+
     result = (await payload.db.updateGlobal({
       slug: 'global-2',
       data: { text: 'this is global-2 but updated' },
@@ -4256,7 +4454,9 @@ describe('database', () => {
     expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
   })
 
-  it('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async () => {
+  test('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async ({
+    payload,
+  }) => {
     const timestamp = Date.now()
     let result = (await payload.updateGlobal({
       slug: 'global-3',
@@ -4270,6 +4470,8 @@ describe('database', () => {
 
     const createdAt = new Date(result.createdAt as string).getTime()
 
+    await new Promise((resolve) => setTimeout(resolve, 2))
+
     result = (await payload.updateGlobal({
       slug: 'global-3',
       data: { text: 'this is global-3 but updated' },
@@ -4281,7 +4483,7 @@ describe('database', () => {
     expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
   })
 
-  it('should group where conditions with AND', async () => {
+  test('should group where conditions with AND', async ({ payload }) => {
     // create 2 docs
     await payload.create({
       collection: postsSlug,
@@ -4338,7 +4540,9 @@ describe('database', () => {
     expect(query3.totalDocs).toEqual(1)
   })
 
-  it('db.deleteOne should not fail if query does not resolve to any document', async () => {
+  test('db.deleteOne should not fail if query does not resolve to any document', async ({
+    payload,
+  }) => {
     await expect(
       payload.db.deleteOne({
         collection: 'posts',
@@ -4348,7 +4552,7 @@ describe('database', () => {
     ).resolves.toBeNull()
   })
 
-  it('mongodb additional keys stripping', async () => {
+  test('mongodb additional keys stripping', async ({ payload }) => {
     if (payload.db.name !== 'mongoose') {
       return
     }
@@ -4392,7 +4596,7 @@ describe('database', () => {
     payload.db.allowAdditionalKeys = false
   })
 
-  it('should not crash when the version field is not selected', async () => {
+  test('should not crash when the version field is not selected', async ({ payload }) => {
     const customID = await payload.create({ collection: 'custom-ids', data: {} })
     const res = await payload.db.queryDrafts({
       collection: 'custom-ids',
@@ -4403,7 +4607,7 @@ describe('database', () => {
     expect(res.docs[0].id).toBe(customID.id)
   })
 
-  it('deep nested arrays', async () => {
+  test('deep nested arrays', async ({ payload }) => {
     await payload.updateGlobal({
       slug: 'header',
       data: { itemsLvl1: [{ itemsLvl2: [{ itemsLvl3: [{ itemsLvl4: [{ label: 'label' }] }] }] }] },
@@ -4414,7 +4618,7 @@ describe('database', () => {
     expect(header.itemsLvl1[0]?.itemsLvl2[0]?.itemsLvl3[0]?.itemsLvl4[0]?.label).toBe('label')
   })
 
-  it('should count with a query that contains subqueries', async () => {
+  test('should count with a query that contains subqueries', async ({ payload }) => {
     const category = await payload.create({
       collection: 'categories',
       data: { title: 'new-category' },
@@ -4447,7 +4651,7 @@ describe('database', () => {
     expect(result_2.totalDocs).toBe(0)
   })
 
-  it('can have localized and non localized blocks', async () => {
+  test('can have localized and non localized blocks', async ({ payload }) => {
     const res = await payload.create({
       collection: 'blocks-docs',
       data: {
@@ -4460,7 +4664,7 @@ describe('database', () => {
     expect(res.testBlocksLocalized[0]?.text).toBe('text-localized')
   })
 
-  it('should support in with null', async () => {
+  test('should support in with null', async ({ payload }) => {
     await payload.delete({ collection: 'posts', where: {} })
     const post_1 = await payload.create({
       collection: 'posts',
@@ -4489,7 +4693,7 @@ describe('database', () => {
     expect(docs[2].id).toBe(post_1.id)
   })
 
-  it('should throw specific unique contraint errors', async () => {
+  test('should throw specific unique contraint errors', async ({ payload }) => {
     await payload.create({
       collection: 'unique-fields',
       data: {
@@ -4511,7 +4715,7 @@ describe('database', () => {
     }
   })
 
-  it('should throw unique constraint errors in optimized update path', async () => {
+  test('should throw unique constraint errors in optimized update path', async ({ payload }) => {
     await payload.create({
       collection: 'unique-fields',
       data: {
@@ -4543,7 +4747,7 @@ describe('database', () => {
     }
   })
 
-  it('should use optimized updateOne', async () => {
+  test('should use optimized updateOne', async ({ payload }) => {
     const post = await payload.create({
       collection: 'posts',
       data: {
@@ -4572,7 +4776,7 @@ describe('database', () => {
     expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
   })
 
-  it('should use optimized updateMany', async () => {
+  test('should use optimized updateMany', async ({ payload }) => {
     const post1 = await payload.create({
       collection: 'posts',
       data: {
@@ -4619,7 +4823,7 @@ describe('database', () => {
     }
   })
 
-  it('should allow creating docs with payload.db.create with custom ID', async () => {
+  test('should allow creating docs with payload.db.create with custom ID', async ({ payload }) => {
     if (payload.db.name === 'mongoose') {
       const customId = new mongoose.Types.ObjectId().toHexString()
       const res = await payload.db.create({
@@ -4645,7 +4849,7 @@ describe('database', () => {
     }
   })
 
-  it('should allow to query like by ID with draft: true', async () => {
+  test('should allow to query like by ID with draft: true', async ({ payload }) => {
     const category = await payload.create({
       collection: 'categories',
       data: { title: 'category123' },
@@ -4659,7 +4863,7 @@ describe('database', () => {
     expect(res.docs[0].id).toBe(category.id)
   })
 
-  it('should allow incremental number update', async () => {
+  test('should allow incremental number update', async ({ payload }) => {
     const post = await payload.create({ collection: 'posts', data: { number: 1, title: 'post' } })
 
     const res = (await payload.db.updateOne({
@@ -4687,8 +4891,8 @@ describe('database', () => {
     expect(res2.number).toBe(8)
   })
 
-  describe('array $push', () => {
-    it('should allow atomic array updates and $inc', async () => {
+  test.describe('array $push', () => {
+    test('should allow atomic array updates and $inc', async ({ payload }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -4724,7 +4928,9 @@ describe('database', () => {
       expect(res.number).toBe(15)
     })
 
-    it('should allow atomic array updates using $push with single value, unlocalized', async () => {
+    test('should allow atomic array updates using $push with single value, unlocalized', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -4754,7 +4960,9 @@ describe('database', () => {
       expect(res.arrayWithIDs?.[0]?.text).toBe('some text')
       expect(res.arrayWithIDs?.[1]?.text).toBe('some text 2')
     })
-    it('should allow atomic array updates using $push with single value, localized field within array', async () => {
+    test('should allow atomic array updates using $push with single value, localized field within array', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -4799,7 +5007,9 @@ describe('database', () => {
       })
     })
 
-    it('should allow atomic array updates using $push with single value, localized array', async () => {
+    test('should allow atomic array updates using $push with single value, localized array', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -4843,7 +5053,9 @@ describe('database', () => {
       expect(res.arrayWithIDsLocalized?.es?.[0]?.text).toBe('some text 2 es')
     })
 
-    it('should allow atomic array updates using $push with multiple values, unlocalized', async () => {
+    test('should allow atomic array updates using $push with multiple values, unlocalized', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -4881,7 +5093,9 @@ describe('database', () => {
       expect(res.arrayWithIDs?.[2]?.text).toBe('some text 3')
     })
 
-    it('should allow atomic array updates using $push with multiple values, localized field within array', async () => {
+    test('should allow atomic array updates using $push with multiple values, localized field within array', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -4942,7 +5156,9 @@ describe('database', () => {
       })
     })
 
-    it('should allow atomic array updates using $push with multiple values, localized array', async () => {
+    test('should allow atomic array updates using $push with multiple values, localized array', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -4994,8 +5210,10 @@ describe('database', () => {
     })
   })
 
-  describe('relationship $push', () => {
-    it('should allow appending relationships using $push with single value', async () => {
+  test.describe('relationship $push', () => {
+    test('should allow appending relationships using $push with single value', async ({
+      payload,
+    }) => {
       // First create some category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -5037,7 +5255,7 @@ describe('database', () => {
       expect(resultIds).toContain(cat2.id)
     })
 
-    it('should allow appending relationships using $push with array', async () => {
+    test('should allow appending relationships using $push with array', async ({ payload }) => {
       // Create category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -5080,7 +5298,7 @@ describe('database', () => {
       expect(resultIds).toContain(cat3.id)
     })
 
-    it('should prevent duplicates when using $push', async () => {
+    test('should prevent duplicates when using $push', async ({ payload }) => {
       // Create category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -5118,7 +5336,7 @@ describe('database', () => {
       expect(resultIds).toContain(cat2.id)
     })
 
-    it('should work with updateMany for bulk append operations', async () => {
+    test('should work with updateMany for bulk append operations', async ({ payload }) => {
       // Create category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -5167,7 +5385,7 @@ describe('database', () => {
       })
     })
 
-    it('should append polymorphic relationships using $push', async () => {
+    test('should append polymorphic relationships using $push', async ({ payload }) => {
       // Create a category and simple document for the polymorphic relationship
       const category = await payload.create({
         collection: 'categories',
@@ -5226,7 +5444,9 @@ describe('database', () => {
       })
     })
 
-    it('should prevent duplicates in polymorphic relationships with $push', async () => {
+    test('should prevent duplicates in polymorphic relationships with $push', async ({
+      payload,
+    }) => {
       // Create a category
       const category = await payload.create({
         collection: 'categories',
@@ -5271,7 +5491,7 @@ describe('database', () => {
       })
     })
 
-    it('should handle localized polymorphic relationships with $push', async () => {
+    test('should handle localized polymorphic relationships with $push', async ({ payload }) => {
       // Create documents for testing
       const category1 = await payload.create({
         collection: 'categories',
@@ -5327,7 +5547,9 @@ describe('database', () => {
       })
     })
 
-    it('should handle nested localized polymorphic relationships with $push', async () => {
+    test('should handle nested localized polymorphic relationships with $push', async ({
+      payload,
+    }) => {
       // Create documents for the polymorphic relationship
       const category1 = await payload.create({
         collection: 'categories',
@@ -5394,8 +5616,10 @@ describe('database', () => {
     })
   })
 
-  describe('relationship $remove', () => {
-    it('should allow removing relationships using $remove with single value', async () => {
+  test.describe('relationship $remove', () => {
+    test('should allow removing relationships using $remove with single value', async ({
+      payload,
+    }) => {
       // Create category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -5432,7 +5656,7 @@ describe('database', () => {
       expect(result.categories?.[0]).toBe(cat2.id)
     })
 
-    it('should allow removing relationships using $remove with array', async () => {
+    test('should allow removing relationships using $remove with array', async ({ payload }) => {
       // Create category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -5473,7 +5697,7 @@ describe('database', () => {
       expect(result.categories?.[0]).toBe(cat2.id)
     })
 
-    it('should work with updateMany for bulk remove operations', async () => {
+    test('should work with updateMany for bulk remove operations', async ({ payload }) => {
       // Create category documents
       const cat1 = await payload.create({
         collection: 'categories',
@@ -5527,7 +5751,7 @@ describe('database', () => {
       })
     })
 
-    it('should remove polymorphic relationships using $remove', async () => {
+    test('should remove polymorphic relationships using $remove', async ({ payload }) => {
       // Create documents
       const category1 = await payload.create({
         collection: 'categories',
@@ -5582,7 +5806,7 @@ describe('database', () => {
       })
     })
 
-    it('should remove multiple polymorphic relationships using $remove', async () => {
+    test('should remove multiple polymorphic relationships using $remove', async ({ payload }) => {
       // Create documents
       const category1 = await payload.create({
         collection: 'categories',
@@ -5634,7 +5858,7 @@ describe('database', () => {
       })
     })
 
-    it('should handle localized polymorphic relationships with $remove', async () => {
+    test('should handle localized polymorphic relationships with $remove', async ({ payload }) => {
       // Create documents for testing
       const category1 = await payload.create({
         collection: 'categories',
@@ -5695,7 +5919,9 @@ describe('database', () => {
       })
     })
 
-    it('should handle nested localized polymorphic relationships with $remove', async () => {
+    test('should handle nested localized polymorphic relationships with $remove', async ({
+      payload,
+    }) => {
       // Create documents for the polymorphic relationship
       const category1 = await payload.create({
         collection: 'categories',
@@ -5769,7 +5995,7 @@ describe('database', () => {
     })
   })
 
-  it('should support x3 nesting blocks', async () => {
+  test('should support x3 nesting blocks', async ({ payload }) => {
     const res = await payload.create({
       collection: 'posts',
       data: {
@@ -5793,7 +6019,7 @@ describe('database', () => {
     expect(res.blocks[0]?.nested[0]?.nested).toHaveLength(0)
   })
 
-  it('should ignore blocks that exist in the db but not in the config', async () => {
+  test('should ignore blocks that exist in the db but not in the config', async ({ payload }) => {
     // not possible w/ SQL anyway
     if (payload.db.name !== 'mongoose') {
       return
@@ -5839,7 +6065,7 @@ describe('database', () => {
     expect(doc.testBlocksLocalized[0].id).toBe('1')
   })
 
-  it('should CRUD with blocks as JSON in SQL adapters', async () => {
+  test('should CRUD with blocks as JSON in SQL adapters', async ({ payload }) => {
     if (!('drizzle' in payload.db)) {
       return
     }
@@ -5886,29 +6112,31 @@ describe('database', () => {
     await payload.db.connect()
   })
 
-  it('ensure mongodb query sanitization does not duplicate IDs', { db: 'mongo' }, () => {
-    const res: any = sanitizeQueryValue({
-      field: {
-        name: '_id',
-        type: 'text',
-      },
-      hasCustomID: false,
-      operator: 'in',
-      parentIsLocalized: false,
-      path: '_id',
-      payload,
-      val: ['68378b649ca45274fb10126f'],
-    })
+  test.options({ db: 'mongo' })(
+    'ensure mongodb query sanitization does not duplicate IDs',
+    ({ payload }) => {
+      const res: any = sanitizeQueryValue({
+        field: {
+          name: '_id',
+          type: 'text',
+        },
+        hasCustomID: false,
+        operator: 'in',
+        parentIsLocalized: false,
+        path: '_id',
+        payload,
+        val: ['68378b649ca45274fb10126f'],
+      })
 
-    expect(res?.val).toHaveLength(1)
-    expect(typeof res?.val?.[0]).toBe('object')
-    expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
-  })
+      expect(res?.val).toHaveLength(1)
+      expect(typeof res?.val?.[0]).toBe('object')
+      expect(JSON.parse(JSON.stringify(res)).val[0]).toEqual('68378b649ca45274fb10126f')
+    },
+  )
 
-  it(
+  test.options({ db: 'mongo' })(
     'ensure mongodb respects collation when using collection in the config',
-    { db: 'mongo' },
-    async () => {
+    async ({ payload }) => {
       // Clear any existing documents
       await payload.delete({ collection: 'simple', where: {} })
 
@@ -5957,10 +6185,9 @@ describe('database', () => {
     },
   )
 
-  it(
+  test.options({ db: 'mongo' })(
     'ensure mongodb collation works with draft pagination without sort',
-    { db: 'mongo' },
-    async () => {
+    async ({ payload }) => {
       // Clear any existing documents
       await payload.delete({ collection: 'categories', where: {} })
 

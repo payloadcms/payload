@@ -1,7 +1,6 @@
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
-  ClientUser,
   Data,
   DocumentPreferences,
   FormState,
@@ -59,14 +58,14 @@ export type DocumentInfoProps = {
 }
 
 export type DocumentInfoContext = {
-  currentEditor?: ClientUser | null | number | string
+  currentEditor?: null | number | string | User
   data?: Data
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
   documentLockState: React.RefObject<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser | number | string
+    user: number | string | User
   } | null>
   getDocPermissions: GetDocPermissions
   getDocPreferences: () => Promise<DocumentPreferences>
@@ -79,7 +78,7 @@ export type DocumentInfoContext = {
    * Use `data` instead.
    */
   savedDocumentData?: Data
-  setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
+  setCurrentEditor?: React.Dispatch<React.SetStateAction<User>>
   setData: (data: Data) => void
   setDocFieldPreferences: (
     field: string,
@@ -94,7 +93,7 @@ export type DocumentInfoContext = {
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
-  updateDocumentEditor: (docID: number | string, slug: string, user: ClientUser) => Promise<void>
+  updateDocumentEditor: (docID: number | string, slug: string, user: User) => Promise<void>
   /**
    * @deprecated This property is deprecated and will be removed in v4.
    * Use `setData` instead.

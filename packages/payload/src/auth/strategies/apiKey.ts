@@ -13,10 +13,11 @@ export const APIKeyAuthentication =
     if (authHeader?.startsWith(`${collectionConfig.slug} API-Key `)) {
       const apiKey = authHeader.replace(`${collectionConfig.slug} API-Key `, '')
 
-      const sha256APIKeyIndex = crypto
-        .createHmac('sha256', payload.secret)
-        .update(apiKey)
-        .digest('hex')
+      // The stored index was written under whichever secret was active at the
+      // time, so match against the index computed under every keyring secret.
+      const apiKeyIndexes = payload.encryptionKeyring.all.map((key) =>
+        crypto.createHmac('sha256', key.legacyKey).update(apiKey).digest('hex'),
+      )
 
       try {
         const where: Where = {}
@@ -24,7 +25,7 @@ export const APIKeyAuthentication =
           where.and = [
             {
               apiKeyIndex: {
-                equals: sha256APIKeyIndex,
+                in: apiKeyIndexes,
               },
             },
             {
@@ -34,7 +35,7 @@ export const APIKeyAuthentication =
             },
           ]
         } else {
-          where.apiKeyIndex = { equals: sha256APIKeyIndex }
+          where.apiKeyIndex = { in: apiKeyIndexes }
         }
 
         const userQuery = await payload.find({

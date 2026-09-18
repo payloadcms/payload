@@ -14,16 +14,14 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../../../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -41,23 +39,16 @@ let serverURL: string
 describe('Array', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -179,8 +170,8 @@ describe('Array', () => {
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
-      page,
       errors: ['Array With Min Rows'],
+      page,
     })
   })
 
@@ -335,7 +326,6 @@ describe('Array', () => {
     await payload.create({
       collection: 'array-fields',
       data: {
-        title: 'for test 1',
         items: [
           {
             text: 'test 1',
@@ -344,25 +334,25 @@ describe('Array', () => {
             text: 'test 2',
           },
         ],
+        title: 'for test 1',
       },
     })
 
     await payload.create({
       collection: 'array-fields',
       data: {
-        title: 'for test 2',
         items: [
           {
             text: 'test 3',
           },
         ],
+        title: 'for test 2',
       },
     })
 
     await payload.create({
       collection: 'array-fields',
       data: {
-        title: 'for test 3',
         items: [
           {
             text: 'test 4',
@@ -374,6 +364,7 @@ describe('Array', () => {
             text: 'test 6',
           },
         ],
+        title: 'for test 3',
       },
     })
 
@@ -455,9 +446,9 @@ describe('Array', () => {
     await expect(page.locator(`#field-collapsedArray__0__text`)).toBeHidden()
 
     await toggleBlockOrArrayRow({
+      fieldName: 'collapsedArray',
       page,
       rowIndex: 0,
-      fieldName: 'collapsedArray',
       targetState: 'open',
     })
 
@@ -522,15 +513,64 @@ describe('Array', () => {
         fieldName: 'readOnly',
         page,
       })
+      const popupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await expect(popupBtn).toBeVisible()
+      await popupBtn.click()
+      const disabledPasteBtn = page.locator(
+        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+      )
+      await expect(disabledPasteBtn).toBeVisible()
+    })
+
+    test('should disable paste when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.localStorage.removeItem('_payloadClipboard')
+
+      const fieldPopupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
+      const rowPopupBtn = page
+        .locator('#items-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+      ).toBeVisible()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Below")'),
+      ).toBeVisible()
+    })
+
+    test('should enable paste after copying a compatible field', async () => {
+      await page.goto(url.create)
+      await page.localStorage.removeItem('_payloadClipboard')
+
+      const fieldPopupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
       await copyPasteField({
         fieldName: 'items',
         page,
-        action: 'paste',
       })
-      const pasteErrorToast = page
-        .locator('.payload-toast-item.toast-error')
-        .filter({ hasText: 'Invalid clipboard data.' })
-      await expect(pasteErrorToast).toBeVisible()
+
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content .popup-button-list button:has-text("Paste Field")'),
+      ).toBeVisible()
     })
 
     test('should copy and paste array fields', async () => {
@@ -543,8 +583,8 @@ describe('Array', () => {
       await rowTextInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
       })
 
       await page.reload()
@@ -552,9 +592,9 @@ describe('Array', () => {
       await expect(rowTextInput).toHaveValue('row one')
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'items',
+        page,
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
@@ -570,8 +610,8 @@ describe('Array', () => {
       await rowTextInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
         rowIndex: 0,
       })
 
@@ -580,28 +620,53 @@ describe('Array', () => {
       await expect(rowTextInput).toHaveValue('row one')
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'items',
+        page,
         rowIndex: 0,
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
     })
 
-    test('should copy an array row and paste into a field with the same schema', async () => {
+    test('should paste a copied row below the target row without replacing it', async () => {
       await page.goto(url.create)
+      const arrayField = page.locator('#field-items')
 
       await copyPasteField({
         page,
-        fieldName: 'localized',
-        rowIndex: 0,
+        fieldName: 'items',
+        rowIndex: 1,
       })
 
       await copyPasteField({
         page,
-        fieldName: 'disableSort',
+        action: 'paste-below',
+        fieldName: 'items',
+        rowIndex: 0,
+      })
+
+      const rows = arrayField.locator('> div.array-field__draggable-rows > div')
+      await expect(rows).toHaveCount(3)
+
+      await expect(arrayField.locator('#field-items__0__text')).toHaveValue('row one')
+      await expect(arrayField.locator('#field-items__1__text')).toHaveValue('row two')
+      await expect(arrayField.locator('#field-items__2__text')).toHaveValue('row two')
+    })
+
+    test('should copy an array row and paste into a field with the same schema', async () => {
+      await page.goto(url.create)
+
+      await copyPasteField({
+        fieldName: 'localized',
+        page,
+        rowIndex: 0,
+      })
+
+      await copyPasteField({
         action: 'paste',
+        fieldName: 'disableSort',
+        page,
       })
 
       const rowsContainer = page
@@ -616,8 +681,8 @@ describe('Array', () => {
       await page.goto(url.create)
 
       await copyPasteField({
-        page,
         fieldName: 'localized',
+        page,
       })
 
       const field = page.locator('#field-disableSort')
@@ -630,7 +695,7 @@ describe('Array', () => {
       const row = field.locator('#disableSort-row-0')
       await expect(row).toBeVisible()
 
-      await copyPasteField({ page, action: 'paste', fieldName: 'disableSort' })
+      await copyPasteField({ action: 'paste', fieldName: 'disableSort', page })
 
       const rowsContainer = page
         .locator('#field-disableSort > div.array-field__draggable-rows')
@@ -654,16 +719,16 @@ describe('Array', () => {
       await textInputRowOne.fill(textInputRowOneValue)
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
         rowIndex: 0,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'items',
-        rowIndex: 1,
         action: 'paste',
+        fieldName: 'items',
+        page,
+        rowIndex: 1,
       })
 
       const textInputRowTwo = field.locator('#field-items__1__subArray__0__text')
@@ -691,20 +756,98 @@ describe('Array', () => {
       await expect(subArrayContainer2).toHaveCount(1)
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
         rowIndex: 1,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'items',
-        rowIndex: 0,
         action: 'paste',
+        fieldName: 'items',
+        page,
+        rowIndex: 0,
       })
 
       await expect(subArrayContainer).toHaveCount(1)
       await expect(subArrayContainer2).toHaveCount(1)
+    })
+
+    test('should copy a nested array row and paste into a sibling nested array row', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-items')
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+
+      const rowOneText = field.locator('#field-items__0__subArray__0__text')
+      await expect(rowOneText).toBeVisible()
+
+      const textVal = 'nested row copy'
+      await rowOneText.fill(textVal)
+
+      await copyPasteField({
+        fieldName: 'items__0__subArray',
+        page,
+        rowIndex: 0,
+      })
+
+      await copyPasteField({
+        action: 'paste',
+        fieldName: 'items__0__subArray',
+        page,
+        rowIndex: 1,
+      })
+
+      const rowTwoText = field.locator('#field-items__0__subArray__1__text')
+      await expect(rowTwoText).toHaveValue(textVal)
+    })
+
+    test('should copy a nested array field and paste into a sibling nested array field', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-items')
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__1__subArray' })
+
+      const sourceRows = field.locator(
+        '#field-items__0__subArray > div.array-field__draggable-rows > div',
+      )
+      const targetRows = field.locator(
+        '#field-items__1__subArray > div.array-field__draggable-rows > div',
+      )
+      await expect(sourceRows).toHaveCount(2)
+      await expect(targetRows).toHaveCount(1)
+
+      await copyPasteField({
+        fieldName: 'items__0__subArray',
+        page,
+      })
+
+      await copyPasteField({
+        action: 'paste',
+        fieldName: 'items__1__subArray',
+        page,
+      })
+
+      await expect(targetRows).toHaveCount(2)
+    })
+
+    test('should disable paste on a nested array row when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.localStorage.removeItem('_payloadClipboard')
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+
+      const rowPopupBtn = page
+        .locator('#items-0-subArray-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Replace Row")'),
+      ).toBeVisible()
     })
 
     test('should generate unique array IDs when pasting arrays across documents', async () => {
@@ -718,17 +861,17 @@ describe('Array', () => {
       const firstDocURL = page.url()
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
       })
 
       // Create second document
       await page.goto(url.create)
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'items',
+        page,
       })
 
       const pastedTextInput = page.locator('#field-items__0__text')

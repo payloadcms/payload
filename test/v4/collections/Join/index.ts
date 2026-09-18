@@ -25,7 +25,8 @@ const JoinFields: CollectionConfig = {
       on: 'category',
       label: 'Related Posts',
       admin: {
-        description: 'Posts related to this category',
+        description:
+          'This is a join field description. It’s pretty long so I can see how the spacing looks when the text reaches all the way across and is below the other controls.',
       },
     },
     // Join field with custom columns

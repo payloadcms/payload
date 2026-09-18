@@ -78,7 +78,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
       data: values,
       externallyUpdatedRelationship: mostRecentUpdate,
       globalSlug,
-      locale: locale.code,
+      locale: locale?.code,
     })
   }, [
     formState,

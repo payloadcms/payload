@@ -164,6 +164,11 @@ import type {
   UploadFieldSingleValidation,
 } from '../validations.js'
 
+export type BrowserAutoComplete = Extract<
+  React.InputHTMLAttributes<HTMLInputElement>['autoComplete'],
+  string
+>
+
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
@@ -558,7 +563,7 @@ export interface FieldBaseClient
 export type NumberField = {
   admin?: {
     /** Set this property to a string that will be used for browser autocomplete. */
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -605,7 +610,7 @@ export type NumberFieldClient = {
 
 export type TextField = {
   admin?: {
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -648,7 +653,7 @@ export type TextFieldClient = {
 
 export type EmailField = {
   admin?: {
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -682,9 +687,10 @@ export type SlugField = {
   type: 'slug'
   /**
    * Name of the sibling field whose value the slug is generated from, e.g. `'title'`.
-   * Required — there is no default, since a collection may not have a `title` field.
+   * Optional — when omitted, the slug is taken from an explicit value or falls back to a
+   * unique `<singular>-<N>`, so there is no source to derive from.
    */
-  useAsSlug: string
+  useAsSlug?: string
   validate?: TextFieldSingleValidation
 } & Omit<FieldBase, 'validate'>
 
@@ -1165,7 +1171,7 @@ export type SelectField = {
     options: Option[]
     req: PayloadRequest
     siblingData: Data
-  }) => Option[]
+  }) => Option[] | Promise<Option[]>
   hasMany?: boolean
   /**
    * Customize generated GraphQL and Typescript schema names.
@@ -2115,7 +2121,7 @@ export function fieldShouldBeLocalized({
   field: ClientField | ClientTab | Field | Tab
   parentIsLocalized: boolean
 }): boolean {
-  return 'localized' in field && field.localized! && !parentIsLocalized
+  return Boolean('localized' in field && field.localized && !parentIsLocalized)
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {

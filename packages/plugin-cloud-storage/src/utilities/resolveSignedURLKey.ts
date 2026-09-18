@@ -14,7 +14,7 @@ type Args = {
 }
 
 /**
- * Resolves the storage key for a clientUploads signed-URL request, deduping
+ * Resolves the storage key for an upload-instructions request, deduping
  * the filename via {@link getSafeFileName} so a duplicate upload does not
  * overwrite an existing blob.
  *

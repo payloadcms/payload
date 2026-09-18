@@ -7,13 +7,10 @@ import { fileURLToPath } from 'url'
 
 import { login } from '../__helpers/e2e/auth/login.js'
 import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { BASE_PATH } from './shared.js'
 
@@ -37,14 +34,7 @@ test.describe('Base Path', () => {
     url = new AdminUrlUtil(serverURL, 'posts')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({
-      noAutoLogin: true,
-      page,
-      serverURL,
-    })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
   })
 
   test('should submit forgot-password form with correct basePath in action', async () => {

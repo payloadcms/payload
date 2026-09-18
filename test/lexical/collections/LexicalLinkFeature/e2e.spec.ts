@@ -1,12 +1,13 @@
 import { expect, test } from '@playwright/test'
-import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, waitForFormReady } from '../../../__helpers/e2e/helpers.js'
+import { waitForFormReady } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -27,7 +28,6 @@ const { serverURL } = await initPayloadE2ENoConfig({
 describe('Lexical Link Feature', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     await ensureCompilationIsDone({ browser, serverURL })
   })
@@ -111,9 +111,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -179,9 +179,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -244,9 +244,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -313,9 +313,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }

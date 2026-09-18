@@ -13,6 +13,9 @@ import {
 } from 'payload'
 import * as qs from 'qs-esm'
 
+// Registers the dev reload strategy before the `getPayload` call below can
+// build an instance. Side-effect only, and a no-op outside of dev serve.
+import './devConfigReload.server.js'
 import { getRequestLocale } from './getRequestLocale.js'
 import { tanstackServerAdapter } from './serverAdapter.server.js'
 

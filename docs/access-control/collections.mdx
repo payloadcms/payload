@@ -100,6 +100,7 @@ The following arguments are provided to the `create` function:
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 | **`data`** | The data passed to create the document with.                                                                                  |
+| **`slug`** | The slug of the Collection being accessed.                                                                                    |
 
 ### Read
 
@@ -152,10 +153,11 @@ export const canReadPage: Access<Page> = ({ req: { user } }) => {
 
 The following arguments are provided to the `read` function:
 
-| Option    | Description                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
-| **`id`**  | `id` of document requested, if within `findByID`.                                                                             |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`id`**   | `id` of document requested, if within `findByID`.                                                                             |
+| **`slug`** | The slug of the Collection being accessed.                                                                                    |
 
 ### Update
 
@@ -208,6 +210,7 @@ The following arguments are provided to the `update` function:
 | **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 | **`id`**   | `id` of document requested to update.                                                                                         |
 | **`data`** | The data passed to update the document with.                                                                                  |
+| **`slug`** | The slug of the Collection being accessed.                                                                                    |
 
 <Banner type="success">
   **Tip:** For Collections with [Drafts](../versions/drafts) enabled, you can
@@ -270,6 +273,7 @@ The following arguments are provided to the `delete` function:
 | **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user.                               |
 | **`id`**   | `id` of document requested to delete.                                                                                                                                                |
 | **`data`** | The data being set on the document. For [Trash-enabled](../trash/overview) collections, check `data.deletedAt` to differentiate between soft delete and permanent delete operations. |
+| **`slug`** | The slug of the Collection being accessed.                                                                                                                                           |
 
 <Banner type="success">
   **Tip:** For Collections with [Trash](../trash/overview) enabled, you can use
@@ -301,9 +305,10 @@ export const CollectionWithAdminAccess: CollectionConfig = {
 
 The following arguments are provided to the `admin` function:
 
-| Option    | Description                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`slug`** | The slug of the Collection being accessed.                                                                                    |
 
 ### Unlock
 
@@ -328,9 +333,10 @@ export const CollectionWithUnlockAccess: CollectionConfig = {
 
 The following arguments are provided to the `unlock` function:
 
-| Option    | Description                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`slug`** | The slug of the Collection being accessed.                                                                                    |
 
 ### Read Versions
 
@@ -361,6 +367,7 @@ export const CollectionWithVersionsAccess: CollectionConfig = {
 
 The following arguments are provided to the `readVersions` function:
 
-| Option    | Description                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`slug`** | The slug of the Collection being accessed.                                                                                    |

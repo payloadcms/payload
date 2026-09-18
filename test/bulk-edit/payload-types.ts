@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     posts: Post;
     tabs: Tab;
+    'restricted-tabs': RestrictedTab;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
+    'restricted-tabs': RestrictedTabsSelect<false> | RestrictedTabsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -94,6 +96,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -130,6 +134,8 @@ export interface Post {
   fieldWithBeforeInputA1?: string | null;
   fieldWithBeforeInputA2?: string | null;
   fieldWithBeforeInputB?: string | null;
+  fieldWithCustomField?: string | null;
+  fieldWithCustomLabel?: string | null;
   defaultValueField?: string | null;
   group?: {
     defaultValueField?: string | null;
@@ -173,6 +179,7 @@ export interface TextBlock {
 export interface Tab {
   id: string;
   title?: string | null;
+  noLabelText?: string | null;
   tabTab?: {
     tabText?: string | null;
     tabTabArray?:
@@ -184,6 +191,21 @@ export interface Tab {
   };
   noLabelGroup?: {
     rowText?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs".
+ */
+export interface RestrictedTab {
+  id: string;
+  title?: string | null;
+  noUpdate?: string | null;
+  namedTab?: {
+    namedTabText?: string | null;
+    namedTabNoUpdate?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -246,6 +268,10 @@ export interface PayloadLockedDocument {
         value: string | Tab;
       } | null)
     | ({
+        relationTo: 'restricted-tabs';
+        value: string | RestrictedTab;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -301,6 +327,8 @@ export interface PostsSelect<T extends boolean = true> {
   fieldWithBeforeInputA1?: T;
   fieldWithBeforeInputA2?: T;
   fieldWithBeforeInputB?: T;
+  fieldWithCustomField?: T;
+  fieldWithCustomLabel?: T;
   defaultValueField?: T;
   group?:
     | T
@@ -345,6 +373,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface TabsSelect<T extends boolean = true> {
   title?: T;
+  noLabelText?: T;
   tabTab?:
     | T
     | {
@@ -360,6 +389,22 @@ export interface TabsSelect<T extends boolean = true> {
     | T
     | {
         rowText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs_select".
+ */
+export interface RestrictedTabsSelect<T extends boolean = true> {
+  title?: T;
+  noUpdate?: T;
+  namedTab?:
+    | T
+    | {
+        namedTabText?: T;
+        namedTabNoUpdate?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -435,6 +480,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'posts' | 'tabs' | 'restricted-tabs' | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('posts' | 'tabs' | 'restricted-tabs' | 'users')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

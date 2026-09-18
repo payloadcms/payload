@@ -13,7 +13,7 @@ export type McpClient = {
   /** Returns the HTTP responses observed by the real MCP transport. */
   getHTTPResponses: () => McpHTTPResponse[]
   /** Sends a raw POST to `/mcp` — for the auth/malformed-request tests a real client can't make. */
-  rawPost: (args: { apiKey?: string; body: unknown }) => Promise<Response>
+  rawPost: (args: { apiKey?: string; body: unknown; contentType?: string }) => Promise<Response>
 }
 
 export function createMcpClient({
@@ -57,13 +57,13 @@ export function createMcpClient({
       return client
     },
     getHTTPResponses: () => [...httpResponses],
-    rawPost: async ({ apiKey, body }) =>
+    rawPost: async ({ apiKey, body, contentType = 'application/json' }) =>
       restClient.POST('/mcp', {
         body: JSON.stringify(body),
         headers: {
           Accept: 'application/json, text/event-stream',
           ...(apiKey ? { Authorization: `users API-Key ${apiKey}` } : {}),
-          'Content-Type': 'application/json',
+          'Content-Type': contentType,
         },
       }),
   }

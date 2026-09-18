@@ -1,29 +1,16 @@
-import type { Payload } from 'payload'
-import { describe, beforeAll, afterAll, it, expect } from 'vitest'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Collection1 } from './payload-types.js'
 
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { collection1Slug, versionedRelationshipFieldSlug } from './slugs.js'
-
-let payload: Payload
-let restClient: NextRESTClient
 
 const { email, password } = devUser
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Relationship Fields', () => {
-  beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
-    ;({ payload, restClient } = initialized)
-
+test.suite({ config: './config.ts' })('Relationship Fields', () => {
+  test.beforeEach(async ({ restClient }) => {
     await restClient.login({
       slug: 'users',
       credentials: {
@@ -33,14 +20,10 @@ describe('Relationship Fields', () => {
     })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('Versioned Relationship Field', () => {
+  test.describe('Versioned Relationship Field', () => {
     let version2ID: string
     const relatedDocName = 'Related Doc'
-    beforeAll(async () => {
+    test.beforeEach(async ({ payload }) => {
       const relatedDoc = await payload.create({
         collection: collection1Slug,
         data: {
@@ -80,7 +63,9 @@ describe('Relationship Fields', () => {
 
       version2ID = versions.docs[0].id
     })
-    it('should return the correct versioned relationship field via REST', async () => {
+    test('should return the correct versioned relationship field via REST', async ({
+      restClient,
+    }) => {
       const version2Data = await restClient
         .GET(`/${versionedRelationshipFieldSlug}/versions/${version2ID}?locale=all`)
         .then((res) => res.json())
@@ -89,7 +74,9 @@ describe('Relationship Fields', () => {
       expect(version2Data.version.relationshipField[0].value.name).toEqual(relatedDocName)
     })
 
-    it('should return the correct versioned relationship field via LocalAPI', async () => {
+    test('should return the correct versioned relationship field via LocalAPI', async ({
+      payload,
+    }) => {
       const version2Data = await payload.findVersionByID({
         collection: versionedRelationshipFieldSlug,
         id: version2ID,

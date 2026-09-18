@@ -72,7 +72,9 @@ export class LinkNode extends ElementNode {
     }
   }
 
-  static override importJSON(serializedNode: SerializedLinkNode): LinkNode {
+  static override importJSON(
+    serializedNode: Record<string, unknown> & SerializedLinkNode,
+  ): LinkNode {
     const node = $createLinkNode({}).updateFromJSON(serializedNode)
 
     /**

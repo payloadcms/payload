@@ -8,6 +8,11 @@ on:
         required: false
         default: false
         type: boolean
+      dry_run:
+        description: 'Dry run: build and run pnpm publish --dry-run (nothing published to npm)'
+        required: false
+        default: false
+        type: boolean
 
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
@@ -44,8 +49,14 @@ jobs:
             echo "debug_flag=" >> $GITHUB_OUTPUT
           fi
 
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "dry_run_flag=--dry-run" >> $GITHUB_OUTPUT
+          else
+            echo "dry_run_flag=" >> $GITHUB_OUTPUT
+          fi
+
       - name: Release
-        run: pnpm publish-prerelease --tag ${{ steps.determine_release_type.outputs.release_type }} ${{ steps.determine_release_type.outputs.debug_flag }}
+        run: pnpm publish-prerelease --tag ${{ steps.determine_release_type.outputs.release_type }} ${{ steps.determine_release_type.outputs.debug_flag }} ${{ steps.determine_release_type.outputs.dry_run_flag }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true

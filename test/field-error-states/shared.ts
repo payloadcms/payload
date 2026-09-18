@@ -9,6 +9,7 @@ export const collectionSlugs: {
   prevValue: 'prev-value',
   prevValueRelation: 'prev-value-relation',
   errorFields: 'error-fields',
+  tabErrorReset: 'tab-error-reset',
 }
 
 export const globalSlugs: {

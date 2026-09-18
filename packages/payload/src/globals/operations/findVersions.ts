@@ -7,8 +7,8 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
-import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -49,134 +49,137 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
   const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
 
-  try {
-    // /////////////////////////////////////
-    // Access
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // Access
+  // /////////////////////////////////////
 
-    const accessResults = !overrideAccess
-      ? await executeAccess({ req }, globalConfig.access.readVersions)
-      : true
+  const accessResults = !overrideAccess
+    ? await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
+    : true
 
-    await validateQueryPaths({
-      globalConfig,
-      overrideAccess: overrideAccess!,
+  await validateQueryPaths({
+    globalConfig,
+    overrideAccess: overrideAccess!,
+    req,
+    versionFields,
+    where: where!,
+  })
+
+  await validateSortQuery({
+    globalConfig,
+    overrideAccess: overrideAccess!,
+    req,
+    sort,
+    versionFields,
+  })
+
+  const fullWhere = combineQueries(where!, accessResults)
+
+  const select = sanitizeSelect({
+    fields: buildVersionGlobalFields(payload.config, globalConfig, true),
+    select: resolveSelect({
+      config: globalConfig.select,
+      operation: 'read',
       req,
-      versionFields,
-      where: where!,
-    })
+      select: incomingSelect,
+    }),
+    versions: true,
+  })
 
-    const fullWhere = combineQueries(where!, accessResults)
+  // /////////////////////////////////////
+  // Find
+  // /////////////////////////////////////
 
-    const select = sanitizeSelect({
-      fields: buildVersionGlobalFields(payload.config, globalConfig, true),
-      select: resolveSelect({
-        config: globalConfig.select,
-        operation: 'read',
-        req,
-        select: incomingSelect,
+  const usePagination = pagination && limit !== 0
+  const sanitizedLimit = limit ?? (usePagination ? 10 : 0)
+  const sanitizedPage = page || 1
+
+  const paginatedDocs = await payload.db.findGlobalVersions<T>({
+    global: globalConfig.slug,
+    limit: sanitizedLimit,
+    locale: locale!,
+    page: sanitizedPage,
+    pagination,
+    req,
+    select,
+    sort,
+    where: fullWhere,
+  })
+
+  // /////////////////////////////////////
+  // afterRead - Fields
+  // /////////////////////////////////////
+
+  let result = {
+    ...paginatedDocs,
+    docs: await Promise.all(
+      paginatedDocs.docs.map(async (data) => {
+        if (!data.version) {
+          // Fallback if not selected
+          ;(data as any).version = {}
+        }
+        return {
+          ...data,
+          version: await afterRead<T>({
+            collection: null,
+            context: req.context,
+            depth: depth!,
+            doc: {
+              ...data.version,
+              // Patch globalType onto version doc
+              globalType: globalConfig.slug,
+            },
+            draft: undefined!,
+            fallbackLocale: fallbackLocale!,
+            findMany: true,
+            global: globalConfig,
+            locale: locale!,
+            overrideAccess: overrideAccess!,
+            populate,
+            req,
+            select,
+            showHiddenFields: showHiddenFields!,
+          }),
+        }
       }),
-      versions: true,
-    })
+    ),
+  } as PaginatedDocs<T>
 
-    // /////////////////////////////////////
-    // Find
-    // /////////////////////////////////////
+  // /////////////////////////////////////
+  // afterRead - Global
+  // /////////////////////////////////////
 
-    const usePagination = pagination && limit !== 0
-    const sanitizedLimit = limit ?? (usePagination ? 10 : 0)
-    const sanitizedPage = page || 1
+  if (globalConfig.hooks?.afterRead?.length) {
+    result.docs = await Promise.all(
+      result.docs.map(async (doc) => {
+        const docRef = doc
 
-    const paginatedDocs = await payload.db.findGlobalVersions<T>({
-      global: globalConfig.slug,
-      limit: sanitizedLimit,
-      locale: locale!,
-      page: sanitizedPage,
-      pagination,
-      req,
-      select,
-      sort,
-      where: fullWhere,
-    })
-
-    // /////////////////////////////////////
-    // afterRead - Fields
-    // /////////////////////////////////////
-
-    let result = {
-      ...paginatedDocs,
-      docs: await Promise.all(
-        paginatedDocs.docs.map(async (data) => {
-          if (!data.version) {
-            // Fallback if not selected
-            ;(data as any).version = {}
-          }
-          return {
-            ...data,
-            version: await afterRead<T>({
-              collection: null,
+        for (const hook of globalConfig.hooks.afterRead) {
+          docRef.version =
+            (await hook({
               context: req.context,
-              depth: depth!,
-              doc: {
-                ...data.version,
-                // Patch globalType onto version doc
-                globalType: globalConfig.slug,
-              },
-              draft: undefined!,
-              fallbackLocale: fallbackLocale!,
+              doc: doc.version,
               findMany: true,
               global: globalConfig,
-              locale: locale!,
-              overrideAccess: overrideAccess!,
-              populate,
+              overrideAccess,
+              query: fullWhere,
               req,
-              select,
-              showHiddenFields: showHiddenFields!,
-            }),
-          }
-        }),
-      ),
-    } as PaginatedDocs<T>
+            })) || doc.version
+        }
 
-    // /////////////////////////////////////
-    // afterRead - Global
-    // /////////////////////////////////////
-
-    if (globalConfig.hooks?.afterRead?.length) {
-      result.docs = await Promise.all(
-        result.docs.map(async (doc) => {
-          const docRef = doc
-
-          for (const hook of globalConfig.hooks.afterRead) {
-            docRef.version =
-              (await hook({
-                context: req.context,
-                doc: doc.version,
-                findMany: true,
-                global: globalConfig,
-                overrideAccess,
-                query: fullWhere,
-                req,
-              })) || doc.version
-          }
-
-          return docRef
-        }),
-      )
-    }
-
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    result = {
-      ...result,
-      docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
-    }
-
-    return result
-  } catch (error: unknown) {
-    await killTransaction(req)
-    throw error
+        return docRef
+      }),
+    )
   }
+
+  // /////////////////////////////////////
+  // Return results
+  // /////////////////////////////////////
+
+  result = {
+    ...result,
+    docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
+  }
+
+  return result
 }

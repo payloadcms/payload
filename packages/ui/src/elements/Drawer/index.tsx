@@ -117,6 +117,8 @@ const DrawerInner: React.FC<Props> = ({
           .join(' ')}
         // Fixes https://github.com/payloadcms/payload/issues/13778
         closeOnBlur={false}
+        // Prevents body-scroll-lock from blocking iOS touch scroll inside the drawer; background scroll is handled by CSS (`body:has(.drawer--is-open)`).
+        lockBodyScroll={false}
         slug={slug}
         style={
           {

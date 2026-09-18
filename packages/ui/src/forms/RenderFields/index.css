@@ -11,6 +11,10 @@
   }
 
   .render-fields {
+    /* Reset per nesting level so an ancestor's zeroed value (e.g. a row) does
+       not leak into nested fields. */
+    --spacing-field: var(--spacer-3);
+
     & > .field-type {
       margin-bottom: var(--spacing-field);
       position: relative;
@@ -44,8 +48,8 @@
       }
 
       &.group-field {
-        margin-top: calc(var(--gutter-h) * 2);
-        margin-bottom: calc(var(--gutter-h) * 3);
+        margin-top: calc(var(--spacing-field) * 4);
+        margin-bottom: calc(var(--spacing-field) * 3);
 
         &:first-child {
           margin-top: 0;
@@ -55,6 +59,16 @@
           margin-bottom: 0;
         }
       }
+
+      &.group-field--within-group {
+        margin-top: var(--spacing-field);
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .render-fields {
+      --spacing-field: var(--spacer-2-5);
     }
   }
 }

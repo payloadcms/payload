@@ -4,11 +4,12 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { GenerateDescription, GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import type { Field } from 'payload'
-import type { Page } from './payload-types.js'
 
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
+
+import type { Page } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -31,31 +32,75 @@ const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
 }
 
 export default buildConfigWithDefaults({
-  collections: [Users, Pages, Media, PagesWithImportedFields],
-  i18n: {
-    supportedLanguages: {
-      en,
-      es,
+  suite: 'plugin-seo',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
-    translations: {
-      es: {
-        'plugin-seo': {
-          autoGenerate: 'Auto-génerar',
+    collections: [Users, Pages, Media, PagesWithImportedFields],
+    i18n: {
+      supportedLanguages: {
+        en,
+        es,
+      },
+      translations: {
+        es: {
+          'plugin-seo': {
+            autoGenerate: 'Auto-génerar',
+          },
         },
       },
     },
-  },
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: ['en', 'es', 'de'],
+    },
+    plugins: [
+      seoPlugin({
+        collections: ['pages'],
+        fields: ({ defaultFields }) => {
+          const modifiedFields = defaultFields.map((field) => {
+            if ('name' in field && field.name === 'title') {
+              return {
+                ...field,
+                admin: {
+                  ...field.admin,
+                  components: {
+                    ...field.admin.components,
+                    afterInput: '/components/AfterInput.js#AfterInput',
+                    beforeInput: '/components/BeforeInput.js#BeforeInput',
+                  },
+                },
+                required: true,
+              } as Field
+            }
+            return field
+          })
+
+          return [
+            ...modifiedFields,
+            {
+              name: 'ogTitle',
+              type: 'text',
+              label: 'og:title',
+            },
+          ]
+        },
+        generateDescription,
+        generateTitle,
+        generateURL,
+        tabbedUI: true,
+        uploadsCollection: 'media',
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: ['en', 'es', 'de'],
-  },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -65,46 +110,5 @@ export default buildConfigWithDefaults({
     })
 
     await seed(payload)
-  },
-  plugins: [
-    seoPlugin({
-      collections: ['pages'],
-      fields: ({ defaultFields }) => {
-        const modifiedFields = defaultFields.map((field) => {
-          if ('name' in field && field.name === 'title') {
-            return {
-              ...field,
-              required: true,
-              admin: {
-                ...field.admin,
-                components: {
-                  ...field.admin.components,
-                  afterInput: '/components/AfterInput.js#AfterInput',
-                  beforeInput: '/components/BeforeInput.js#BeforeInput',
-                },
-              },
-            } as Field
-          }
-          return field
-        })
-
-        return [
-          ...modifiedFields,
-          {
-            name: 'ogTitle',
-            type: 'text',
-            label: 'og:title',
-          },
-        ]
-      },
-      generateDescription,
-      generateTitle,
-      generateURL,
-      tabbedUI: true,
-      uploadsCollection: 'media',
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -24,7 +24,7 @@ import type {
   TypedLocale,
 } from '../index.js'
 import type { File } from '../uploads/types.js'
-import type { Operator } from './constants.js'
+import type { HasManyRelationshipOperator, Operator } from './constants.js'
 export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
@@ -120,10 +120,7 @@ type PayloadRequestData = {
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
-    /**
-     * Context of the file when it was uploaded via client side.
-     */
-    clientUploadContext?: unknown
+    uploadReference?: unknown
   } & File
   /** All files from multipart form data, keyed by field name */
   files?: Record<string, File | File[]>
@@ -135,7 +132,7 @@ export interface PayloadRequest
   headers: Request['headers']
 }
 
-export type { Operator }
+export type { HasManyRelationshipOperator, Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
@@ -147,7 +144,7 @@ export interface JsonObject {
 }
 
 export type WhereField = {
-  // any json-serializable value
+  // any json-serializable value, including a nested query for supported relationship operators
   [key in Operator]?: JsonValue
 }
 
@@ -167,7 +164,7 @@ export type DefaultValue =
       locale?: TypedLocale
       req: PayloadRequest
       user: PayloadRequest['user']
-    }) => SerializableValue)
+    }) => Promise<SerializableValue> | SerializableValue)
   | SerializableValue
 
 /**

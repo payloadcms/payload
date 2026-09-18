@@ -1,5 +1,3 @@
-import type { DeepRequired } from 'ts-essentials'
-
 import type { CollectionSlug, GlobalSlug, Payload, User } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
@@ -125,7 +123,8 @@ export type SanitizedPermissions = {
  */
 export type AuthRuntimeFields = {
   /**
-   * The session ID of the current request. Present only when sessions are enabled.
+   * The session ID of the current request. May be present on request-authenticated users when
+   * sessions are enabled.
    */
   _sid?: string
   /**
@@ -141,15 +140,10 @@ export type AuthRuntimeFields = {
  */
 /**
  * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`). This is
- * what `req.user`, `payload.auth()`, the `me` operation, and auth strategies return.
+ * what `req.user`, `payload.auth()`, the `me` operation, auth strategies, and `useAuth().user`
+ * return.
  */
 export type AuthenticatedUser = AuthRuntimeFields & User
-
-/**
- * The user as available on the client (`useAuth().user`). It is the authenticated user as
- * serialized to the browser: `collection` and `_strategy` are present, `_sid` is not sent.
- */
-export type ClientUser = AuthenticatedUser
 
 export type UserSession = {
   createdAt?: Date | null | string
@@ -220,15 +214,17 @@ export type LoginWithUsernameOptions =
       requireUsername?: boolean
     }
 
+type AuthCookies = {
+  domain?: string
+  sameSite?: 'Lax' | 'None' | 'Strict' | boolean
+  secure?: boolean
+}
+
 export interface IncomingAuthType {
   /**
    * Set cookie options, including secure, sameSite, and domain. For advanced users.
    */
-  cookies?: {
-    domain?: string
-    sameSite?: 'Lax' | 'None' | 'Strict' | boolean
-    secure?: boolean
-  }
+  cookies?: AuthCookies
   /**
    * How many levels deep a user document should be populated when creating the JWT and binding the user to the req. Defaults to 0 and should only be modified if absolutely necessary, as this will affect performance.
    * @default 0
@@ -320,14 +316,32 @@ export type VerifyConfig = {
 }
 
 export interface Auth
-  extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
-  forgotPassword?: {
-    expiration?: number
-    generateEmailHTML?: GenerateForgotPasswordEmailHTML
-    generateEmailSubject?: GenerateForgotPasswordEmailSubject
-  }
-  loginWithUsername: false | LoginWithUsernameOptions
-  verify?: boolean | VerifyConfig
+  extends Omit<
+      IncomingAuthType,
+      | 'cookies'
+      | 'forgotPassword'
+      | 'lockTime'
+      | 'loginWithUsername'
+      | 'maxLoginAttempts'
+      | 'strategies'
+      | 'tokenExpiration'
+      | 'useSessions'
+      | 'verify'
+    >,
+    Required<
+      Pick<
+        IncomingAuthType,
+        | 'forgotPassword'
+        | 'lockTime'
+        | 'maxLoginAttempts'
+        | 'strategies'
+        | 'tokenExpiration'
+        | 'useSessions'
+        | 'verify'
+      >
+    > {
+  cookies: Pick<AuthCookies, 'domain'> & Required<Pick<AuthCookies, 'sameSite' | 'secure'>>
+  loginWithUsername: false | Required<LoginWithUsernameOptions>
 }
 
 export function hasWhereAccessResult(result: boolean | Where): result is Where {

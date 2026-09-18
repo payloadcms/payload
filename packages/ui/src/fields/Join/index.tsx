@@ -207,6 +207,16 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         AfterInput={AfterInput}
         allowCreate={typeof docID !== 'undefined' && allowCreate}
         BeforeInput={BeforeInput}
+        Description={
+          Description || description ? (
+            <div className="join__description">
+              <RenderCustomComponent
+                CustomComponent={Description}
+                Fallback={<FieldDescription description={description} path={path} />}
+              />
+            </div>
+          ) : undefined
+        }
         disableTable={filterOptions === null}
         field={field as JoinFieldClient}
         fieldPath={path}
@@ -233,10 +243,6 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
             : undefined
         }
         relationTo={collection}
-      />
-      <RenderCustomComponent
-        CustomComponent={Description}
-        Fallback={<FieldDescription description={description} path={path} />}
       />
     </div>
   )

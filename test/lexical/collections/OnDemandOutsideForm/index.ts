@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { EXPERIMENTAL_TableFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { lexicalEditor, TableFeature } from '@payloadcms/richtext-lexical'
 
 export const OnDemandOutsideForm: CollectionConfig = {
   slug: 'OnDemandOutsideForm',
@@ -18,7 +18,7 @@ export const OnDemandOutsideForm: CollectionConfig = {
       name: 'hiddenAnchor',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ rootFeatures }) => [...rootFeatures, EXPERIMENTAL_TableFeature()],
+        features: ({ rootFeatures }) => [...rootFeatures, TableFeature()],
       }),
       admin: {
         hidden: true,

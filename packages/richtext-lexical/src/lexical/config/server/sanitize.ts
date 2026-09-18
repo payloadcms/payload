@@ -134,12 +134,12 @@ export const sanitizeServerFeatures = (
   return sanitized
 }
 
-export async function sanitizeServerEditorConfig(
+export function sanitizeServerEditorConfig(
   editorConfig: ServerEditorConfig,
   config: SanitizedConfig,
   parentIsLocalized?: boolean,
-): Promise<SanitizedServerEditorConfig> {
-  const resolvedFeatureMap = await loadFeatures({
+): SanitizedServerEditorConfig {
+  const resolvedFeatureMap = loadFeatures({
     config,
     parentIsLocalized: parentIsLocalized!,
     unSanitizedEditorConfig: editorConfig,

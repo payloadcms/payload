@@ -5,24 +5,25 @@ import { formatAdminURL } from 'payload/shared'
 
 import type {
   R2MultipartUpload,
-  R2StorageClientUploadContext,
   R2StorageClientUploadHandlerParams,
   R2StorageMultipartUploadHandlerParams,
+  R2StorageUploadReference,
   R2UploadedPart,
 } from '../types.js'
 
 export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUploadHandlerParams>({
+  name: 'uploadToR2',
   handler: async ({
     apiRoute,
     collectionSlug,
     docPrefix,
-    extra: { chunkSize = 5 * 1024 * 1024 },
+    endpointPath,
     file,
     prefix,
-    serverHandlerPath,
+    props: { chunkSize = 5 * 1024 * 1024 },
     serverURL,
     updateFilename,
-  }): Promise<R2StorageClientUploadContext | undefined> => {
+  }): Promise<R2StorageUploadReference | undefined> => {
     const { sanitizedDocPrefix } = getFileKey({
       collectionPrefix: prefix,
       docPrefix,
@@ -37,14 +38,14 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     }
     const baseURL = formatAdminURL({
       apiRoute,
-      path: serverHandlerPath,
+      path: endpointPath,
       serverURL,
     })
 
-    const endpoint = `${baseURL}?${String(new URLSearchParams(params))}`
+    const getEndpoint = () => `${baseURL}?${String(new URLSearchParams(params))}`
 
-    // upload the file directly to R2 using the signed URL
-    const multipart = await fetch(endpoint, { method: 'POST' })
+    // Initialize the multipart upload.
+    const multipart = await fetch(getEndpoint(), { method: 'POST' })
     if (!multipart.ok) {
       throw new Error('Failed to initialize multipart upload')
     }
@@ -75,7 +76,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
         'Content-Length': String(body.size),
         'Content-Type': 'application/octet-stream',
       }
-      const uploaded = await fetch(endpoint, { body, headers, method: 'POST' })
+      const uploaded = await fetch(getEndpoint(), { body, headers, method: 'POST' })
       if (!uploaded.ok) {
         throw new Error(`Failed to upload part ${part} / ${partTotal}`)
       }
@@ -87,7 +88,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
 
         const body = JSON.stringify(multipartUploadedParts)
         const headers = { 'Content-Type': 'application/json' }
-        const complete = await fetch(endpoint, { body, headers, method: 'POST' })
+        const complete = await fetch(getEndpoint(), { body, headers, method: 'POST' })
         if (!complete.ok) {
           throw new Error(`Failed to complete multipart upload`)
         }

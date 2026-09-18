@@ -106,7 +106,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     routes: { api },
   } = config
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { i18n, t } = useTranslation()
 
   const { getDocumentSlots, getFormState } = useServerFunctions()
@@ -400,7 +401,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             body: await createFormData(
               form.formState,
               overrides,
-              collectionSlug,
               getUploadHandler({ collectionSlug }),
             ),
             credentials: 'include',

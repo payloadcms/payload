@@ -7,13 +7,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -45,18 +43,16 @@ test.describe('Ecommerce Plugin', () => {
     variantsUrl = new AdminUrlUtil(serverURL, 'variants')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     // Create a product with USD and EUR prices
     const productWithPrice = await payload.create({
       collection: 'products',
       data: {
-        priceInUSDEnabled: true,
-        priceInUSD: 1999,
-        priceInEUREnabled: true,
         priceInEUR: 2599,
+        priceInEUREnabled: true,
+        priceInUSD: 1999,
+        priceInUSDEnabled: true,
       },
     })
     productWithPriceId = productWithPrice.id
@@ -66,8 +62,8 @@ test.describe('Ecommerce Plugin', () => {
     const zeroPriceProduct = await payload.create({
       collection: 'products',
       data: {
-        priceInUSDEnabled: true,
         priceInUSD: 0,
+        priceInUSDEnabled: true,
       },
     })
     zeroPriceProductId = zeroPriceProduct.id
@@ -84,8 +80,8 @@ test.describe('Ecommerce Plugin', () => {
     // Find a seeded variant (created by seed with priceInUSD: 1999)
     const seededVariants = await payload.find({
       collection: 'variants',
-      where: { priceInUSD: { equals: 1999 } },
       limit: 1,
+      where: { priceInUSD: { equals: 1999 } },
     })
 
     if (seededVariants.docs.length > 0) {
@@ -95,7 +91,7 @@ test.describe('Ecommerce Plugin', () => {
 
   test.afterAll(async () => {
     for (const id of createdProductIDs) {
-      await payload.delete({ collection: 'products', id }).catch(() => {})
+      await payload.delete({ id, collection: 'products' }).catch(() => {})
     }
   })
 
@@ -171,8 +167,8 @@ test.describe('Ecommerce Plugin', () => {
       const editableProduct = await payload.create({
         collection: 'products',
         data: {
-          priceInUSDEnabled: true,
           priceInUSD: 999,
+          priceInUSDEnabled: true,
         },
       })
       createdProductIDs.push(editableProduct.id)

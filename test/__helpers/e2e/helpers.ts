@@ -1,5 +1,4 @@
 import type {
-  Browser,
   BrowserContext,
   CDPSession,
   ChromiumBrowserContext,
@@ -9,11 +8,10 @@ import type {
 
 import { expect } from '@playwright/test'
 import { addDefaultsToConfig, type Config, type SanitizedConfig } from 'payload'
-import { formatAdminURL, wait } from 'payload/shared'
+import { wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
-import { hideNextDevTools } from './hideNextDevTools.js'
 
 export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
@@ -25,16 +23,6 @@ const networkConditions = {
     latency: 1000,
     upload: ((750 * 1000) / 8) * 0.9,
   },
-  'Slow 3G': {
-    download: ((500 * 1000) / 8) * 0.8,
-    latency: 2500,
-    upload: ((500 * 1000) / 8) * 0.8,
-  },
-  'Slow 4G': {
-    download: ((4 * 1000 * 1000) / 8) * 0.8,
-    latency: 1000,
-    upload: ((3 * 1000 * 1000) / 8) * 0.8,
-  },
   'Fast 4G': {
     download: ((20 * 1000 * 1000) / 8) * 0.8,
     latency: 1000,
@@ -45,128 +33,16 @@ const networkConditions = {
     latency: -1,
     upload: -1,
   },
-}
-
-/**
- * Ensure admin panel is loaded before running tests
- * @param page
- * @param serverURL
- */
-export async function ensureCompilationIsDone({
-  customAdminRoutes,
-  customRoutes,
-  page: pageFromArgs,
-  serverURL,
-  noAutoLogin,
-  browser,
-  readyURL,
-}: {
-  /**
-   * Provide a browser if you need this utility to create and close a temporary page for you.
-   */
-  browser?: Browser
-  customAdminRoutes?: AdminRoutes
-  customRoutes?: Config['routes']
-  noAutoLogin?: boolean
-  page?: Page
-  readyURL?: string
-  serverURL: string
-}): Promise<void> {
-  if (!pageFromArgs && !browser) {
-    throw new Error('Either page or browser must be provided')
-  }
-  if (pageFromArgs && browser) {
-    throw new Error('Either page or browser must be provided, not both')
-  }
-
-  const page = pageFromArgs ?? (await browser!.newPage())
-
-  // Hide Next.js dev tools to prevent them from blocking interactions
-  await hideNextDevTools(page)
-
-  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
-
-  const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
-
-  // Disable the hydration wait during compilation polling — the page won't
-  // have the React tree mounted yet, so waiting 15s per attempt for the
-  // hydration marker would exhaust the beforeAll hook timeout.
-  const patchedPage = page as unknown as { __payloadSkipHydrationWait?: boolean }
-  patchedPage.__payloadSkipHydrationWait = true
-
-  const maxAttempts = 15
-  let attempt = 1
-
-  while (attempt <= maxAttempts) {
-    try {
-      console.log(
-        `Checking if compilation is done (attempt ${attempt}/${maxAttempts})...`,
-        readyURL ??
-          (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
-      )
-
-      // Commit is faster than waiting for the default waitUntil: load
-      await page.goto(adminURL, { waitUntil: 'commit' })
-
-      if (readyURL) {
-        await page.waitForURL(readyURL, { waitUntil: 'commit' })
-      } else {
-        await expect
-          .poll(
-            () => {
-              if (noAutoLogin) {
-                const baseAdminURL = adminURL + (adminURL.endsWith('/') ? '' : '/')
-                return (
-                  page.url() === `${baseAdminURL}create-first-user` ||
-                  page.url() === `${baseAdminURL}login`
-                )
-              } else {
-                return page.url() === adminURL
-              }
-            },
-            { timeout: POLL_TOPASS_TIMEOUT },
-          )
-          .toBe(true)
-      }
-
-      console.log('Successfully compiled')
-      patchedPage.__payloadSkipHydrationWait = false
-      if (browser) {
-        await page.close()
-      }
-      return
-    } catch (error) {
-      if (attempt === maxAttempts) {
-        patchedPage.__payloadSkipHydrationWait = false
-        console.error(
-          'Compilation not done yet. Giving up. The dev server is probably not running or crashed.',
-        )
-        throw error
-      }
-
-      console.log('Compilation not done yet. Retrying in 2 seconds...')
-      await wait(2000)
-      attempt++
-    }
-  }
-
-  patchedPage.__payloadSkipHydrationWait = false
-
-  if (noAutoLogin) {
-    if (browser) {
-      await page.close()
-    }
-    return
-  }
-  await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(page.locator('.dashboard__label').first()).toBeVisible()
-
-  if (browser) {
-    await page.close()
-  }
+  'Slow 3G': {
+    download: ((500 * 1000) / 8) * 0.8,
+    latency: 2500,
+    upload: ((500 * 1000) / 8) * 0.8,
+  },
+  'Slow 4G': {
+    download: ((4 * 1000 * 1000) / 8) * 0.8,
+    latency: 1000,
+    upload: ((3 * 1000 * 1000) / 8) * 0.8,
+  },
 }
 
 /**
@@ -434,182 +310,6 @@ export const openColumnControls = async (page: Page) => {
   }).toPass({ timeout: 18000 })
 }
 
-/**
- * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
- * in the e2e test failing.
- *
- * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
- * @param page
- * @param options
- */
-/**
- * Each `page.goto()` triggers a fresh SSR + hydration cycle, and on the
- * TanStack Start adapter (which serves a Vite dev server) hydration can lag
- * a click by 0.5-2s in CI. When that happens the click reaches the SSR'd
- * button and focuses it, but React's `onClick` handler is not attached yet
- * so the underlying state never updates and any follow-up `toBeVisible`
- * assertion times out. We patch `goto` here to wait for the hydration
- * marker that the TanStack root component installs (see
- * `app-tanstack/app/__root.tsx`). The patch is a no-op for the Next.js
- * adapter, where the marker is never set, so individual tests don't need to
- * branch on the framework.
- *
- * Idempotent: calling this more than once on the same page is safe.
- */
-export function installTanStackHydrationGotoWait(page: Page) {
-  if (process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start') {
-    return
-  }
-  const patchedPage = page as unknown as {
-    __payloadGotoPatched?: boolean
-    __payloadSkipHydrationWait?: boolean
-  }
-  if (patchedPage.__payloadGotoPatched) {
-    return
-  }
-  patchedPage.__payloadGotoPatched = true
-
-  const waitForHydration = async () => {
-    if (patchedPage.__payloadSkipHydrationWait) {
-      return
-    }
-    try {
-      await page.waitForFunction(
-        () => (window as unknown as { __TANSTACK_HYDRATED__?: boolean }).__TANSTACK_HYDRATED__,
-        undefined,
-        { timeout: 15000 },
-      )
-    } catch {
-      // Best-effort. Don't fail navigation if the marker never shows up;
-      // the underlying assertion in the test will still surface the real
-      // failure.
-    }
-  }
-
-  // Non-admin URLs (e.g. `/api/<collection>` JSON endpoints used by tests that
-  // assert on the raw REST response) never mount the TanStack admin app, so
-  // `__TANSTACK_HYDRATED__` will never be set. Skip the hydration wait for
-  // those, otherwise each such navigation pays the full 15s timeout.
-  const requiresHydrationWait = (url: string | undefined): boolean => {
-    if (!url) {
-      return true
-    }
-    try {
-      const path = new URL(url, 'http://localhost').pathname
-      return !path.startsWith('/api/') && path !== '/api'
-    } catch {
-      return true
-    }
-  }
-
-  const originalGoto = page.goto.bind(page)
-  page.goto = (async (...args: Parameters<Page['goto']>) => {
-    const response = await originalGoto(...args)
-    if (requiresHydrationWait(args[0])) {
-      await waitForHydration()
-    }
-    return response
-  }) as Page['goto']
-
-  const originalReload = page.reload.bind(page)
-  page.reload = (async (...args: Parameters<Page['reload']>) => {
-    const response = await originalReload(...args)
-    if (requiresHydrationWait(page.url())) {
-      await waitForHydration()
-    }
-    return response
-  }) as Page['reload']
-}
-
-export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
-  const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
-  const consoleErrors: string[] = []
-
-  let shouldCollectErrors = false
-
-  installTanStackHydrationGotoWait(page)
-
-  page.on('console', (msg) => {
-    if (
-      msg.type() === 'error' &&
-      // Playwright is seemingly loading CJS files from React Select, but Next loads ESM.
-      // This leads to classnames not matching. Ignore these God-awful errors
-      // https://github.com/JedWatson/react-select/issues/3590
-      !msg.text().includes('did not match. Server:') &&
-      !msg.text().includes('Hydration failed because the server rendered HTML') &&
-      !msg.text().includes('the server responded with a status of') &&
-      !msg.text().includes('Failed to fetch RSC payload for') &&
-      !msg.text().includes('Error loading language') &&
-      !msg.text().includes('Error: NEXT_NOT_FOUND') &&
-      !msg.text().includes('Error: NEXT_REDIRECT') &&
-      // TanStack Start adapter nav control-flow contract (analogous to the
-      // NEXT_NOT_FOUND / NEXT_REDIRECT signals above). `req.server.notFound()` /
-      // `redirect()` thrown deep inside a streamed RSC view surface as these.
-      !msg.text().includes('Error: not-found') &&
-      !msg.text().includes('Error: redirect:') &&
-      !msg.text().includes('Error getting document data') &&
-      !msg.text().includes('Failed trying to load default language strings') &&
-      !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
-      !msg.text().includes('TypeError: network error') && // Transient network errors during chunk loading
-      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
-      // Expected lexical-converter warning for blocks/inline-blocks intentionally
-      // configured without an HTML converter (e.g. the `diff` test collection's
-      // `myBlock`). Logged server-side via `console.error`; harmless in Next, but
-      // the TanStack/vite-rsc adapter forwards server `console.error` to the
-      // browser console, so it would otherwise fail every diff-view test.
-      !msg.text().includes('no converter is provided') &&
-      // Conditionally ignore CORS errors based on the `ignoreCORS` option
-      !(
-        ignoreCORS &&
-        msg.text().includes('Access to fetch at') &&
-        msg.text().includes("No 'Access-Control-Allow-Origin' header is present")
-      ) &&
-      // Conditionally ignore network-related errors
-      !msg.text().includes('Failed to load resource: net::ERR_FAILED')
-    ) {
-      // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
-      // the the server responded with a status of error happens frequently. Will ignore it for now.
-      // Most importantly, this should catch react errors.
-      const { url, lineNumber, columnNumber } = msg.location() || {}
-      const locationSuffix = url ? `\n at ${url}:${lineNumber ?? 0}:${columnNumber ?? 0}` : ''
-      throw new Error(`Browser console error: ${msg.text()}${locationSuffix}`)
-    }
-
-    // Log ignored CORS-related errors for visibility
-    if (msg.type() === 'error' && msg.text().includes('Access to fetch at') && ignoreCORS) {
-      console.log(`Ignoring expected CORS-related error: ${msg.text()}`)
-    }
-
-    // Log ignored network-related errors for visibility
-    if (msg.type() === 'error' && msg.text().includes('Failed to load resource: net::ERR_FAILED')) {
-      console.log(`Ignoring expected network error: ${msg.text()}`)
-    }
-  })
-
-  // Capture uncaught errors that do not appear in the console
-  page.on('pageerror', (error) => {
-    const message = error?.message ?? String(error)
-
-    if (message.includes('Hydration failed because the server rendered HTML')) {
-      return
-    }
-
-    if (shouldCollectErrors) {
-      const stack = error?.stack
-      consoleErrors.push(`Page error: ${message}${stack ? `\n${stack}` : ''}`)
-    } else {
-      // Rethrow the original error to preserve stack, name, and other metadata
-      throw error
-    }
-  })
-
-  return {
-    consoleErrors,
-    collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
-    stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
-  }
-}
-
 export function getRoutes({
   customAdminRoutes,
   customRoutes,
@@ -661,7 +361,7 @@ export async function runJobsQueue(args: RunJobsQueueArgs) {
   const queue = args?.queue ?? 'default'
 
   return await fetch(`${serverURL}/api/payload-jobs/run?queue=${queue}`, {
-    method: 'get',
     credentials: 'include',
+    method: 'get',
   })
 }

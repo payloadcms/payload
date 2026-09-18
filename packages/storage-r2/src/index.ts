@@ -6,12 +6,10 @@ import type {
 import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
-import type { R2Bucket, R2StorageClientUploadHandlerParams } from './types.js'
+import type { R2Bucket } from './types.js'
 
 import { createR2Adapter } from './adapter.js'
-import { getHandleMultiPartUpload } from './handleMultiPartUpload.js'
 
 export interface R2StorageOptions {
   /**
@@ -27,7 +25,7 @@ export interface R2StorageOptions {
 
   bucket: R2Bucket
   /**
-   * Do uploads directly on the client, to bypass limits on Cloudflare/Vercel.
+   * Upload files in chunks through Payload before document creation.
    */
   clientUploads?: ClientUploadsConfig
   /**
@@ -62,30 +60,11 @@ export const r2Storage: R2StorageFactory = (
     const adapter = createR2Adapter({
       bucket: r2StorageOptions.bucket,
       clientUploads: r2StorageOptions.clientUploads,
+      collections: r2StorageOptions.collections,
       useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })
 
     const isPluginDisabled = r2StorageOptions.enabled === false
-
-    initClientUploads<
-      R2StorageClientUploadHandlerParams,
-      R2StorageOptions['collections'][keyof R2StorageOptions['collections']]
-    >({
-      clientHandler: '@payloadcms/storage-r2/client#R2ClientUploadHandler',
-      collections: r2StorageOptions.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(r2StorageOptions.clientUploads),
-      serverHandler: getHandleMultiPartUpload({
-        access:
-          typeof r2StorageOptions.clientUploads === 'object'
-            ? r2StorageOptions.clientUploads.access
-            : undefined,
-        bucket: r2StorageOptions.bucket,
-        collections: r2StorageOptions.collections,
-        useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
-      }),
-      serverHandlerPath: '/storage-r2-multi-part-upload',
-    })
 
     if (isPluginDisabled) {
       return incomingConfig

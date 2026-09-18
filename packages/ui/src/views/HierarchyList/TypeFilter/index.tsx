@@ -28,6 +28,10 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
     [onChange, options],
   )
 
+  if (options.length === 0) {
+    return null
+  }
+
   return (
     <Popup
       className={baseClass}

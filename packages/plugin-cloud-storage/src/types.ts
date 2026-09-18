@@ -3,33 +3,26 @@ import type {
   Field,
   FileData,
   ImageSize,
+  PayloadHandler,
   PayloadRequest,
   TypeWithID,
   UploadCollectionSlug,
+  UploadInstructionsAccess,
+  UploadInstructionsCapability,
 } from 'payload'
 
 export interface File {
   buffer: Buffer
-  clientUploadContext?: unknown
   filename: string
   filesize: number
   mimeType: string
   tempFilePath?: string
+  uploadReference?: unknown
 }
 
-export type ClientUploadsAccess = (args: {
-  collectionSlug: UploadCollectionSlug
-  req: PayloadRequest
-}) => boolean | Promise<boolean>
-
-export type ClientUploadsConfig =
-  | {
-      access?: ClientUploadsAccess
-    }
-  | boolean
+export type ClientUploadsConfig = { access?: UploadInstructionsAccess } | boolean
 
 export type HandleUpload = (args: {
-  clientUploadContext: unknown
   collection: CollectionConfig
   data: any
   file: File
@@ -63,12 +56,11 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { clientUploadContext?: unknown; collection: string; filename: string; prefix?: string }
+    params: { collection: string; filename: string; prefix?: string; uploadReference?: unknown }
   },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
-  clientUploads?: ClientUploadsConfig
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
@@ -82,6 +74,18 @@ export interface GeneratedAdapter {
   name: string
   onInit?: () => void
   staticHandler: StaticHandler
+  /** Generates upload instructions when supported. */
+  uploadInstructions?: {
+    adminHandler?: {
+      path: string
+      props?: Record<string, unknown>
+    }
+    enabled: boolean
+    endpoint?: {
+      handler: PayloadHandler
+      path: `/${string}`
+    }
+  } & UploadInstructionsCapability
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter

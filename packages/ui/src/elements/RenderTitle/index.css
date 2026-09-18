@@ -22,6 +22,10 @@
     letter-spacing: inherit;
   }
 
+  .render-title--placeholder {
+    color: var(--color-text-secondary);
+  }
+
   .render-title__id {
     vertical-align: middle;
     position: relative;

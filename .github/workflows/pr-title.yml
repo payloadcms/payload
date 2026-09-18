@@ -79,9 +79,9 @@ jobs:
             storage-azure
             storage-gcs
             storage-r2
-            storage-uploadthing
             storage-vercel-blob
             storage-s3
+            tanstack-start
             translations
             ui
             templates

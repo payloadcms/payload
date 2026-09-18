@@ -125,6 +125,7 @@ export const updateOperation = async <
     const accessResults = !overrideAccess
       ? await executeAccess(
           {
+            slug: globalConfig.slug,
             data,
             req,
           },

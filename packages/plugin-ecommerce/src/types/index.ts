@@ -1,7 +1,6 @@
 import type {
   Access,
   AuthenticatedUser,
-  ClientUser,
   CollectionConfig,
   CollectionSlug,
   DefaultDocumentIDType,
@@ -54,9 +53,6 @@ type CartJoin = {
 
 /** Adds the optional reverse `cart` join that a project may define on its user collection. */
 export type UserWithCart = AuthenticatedUser & CartJoin
-
-/** The browser-safe user with the optional cart join. */
-export type ClientUserWithCart = CartJoin & ClientUser
 
 type InitiatePaymentReturnType = {
   /**
@@ -1067,5 +1063,5 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
   /**
    * The current authenticated user, or null if not logged in.
    */
-  user: ClientUserWithCart | null
+  user: null | UserWithCart
 }

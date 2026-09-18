@@ -258,6 +258,10 @@
       padding-inline: var(--file-gutter-h);
     }
 
+    .file-selections__collectionSelect {
+      border-bottom: none;
+    }
+
     .file-selections__header__error {
       padding-inline: 0;
     }

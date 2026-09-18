@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import type { DraftPost } from './payload-types.js'
 
 import { executePromises } from '../__helpers/shared/executePromises.js'
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
 import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
 import {
@@ -18,6 +19,7 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const seedDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'versions' })
 
 export async function seed(_payload: Payload, parallel: boolean = false) {
   const blocksField: DraftPost['blocksField'] = [
@@ -28,7 +30,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
   ]
 
-  const imageFilePath = path.resolve(dirname, './image.jpg')
+  const imageFilePath = path.resolve(seedDir, './image.jpg')
   const imageFile = await getFileByPath(imageFilePath)
 
   const { id: uploadedImage } = await _payload.create({
@@ -43,7 +45,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     file: imageFile,
   })
 
-  const imageFilePath2 = path.resolve(dirname, './image.png')
+  const imageFilePath2 = path.resolve(seedDir, './image.png')
   const imageFile2 = await getFileByPath(imageFilePath2)
 
   const { id: uploadedImage2 } = await _payload.create({

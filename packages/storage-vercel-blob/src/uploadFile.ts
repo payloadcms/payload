@@ -41,6 +41,7 @@ export async function uploadFile({
   const result = await put(fileKey, buffer, {
     access,
     addRandomSuffix,
+    allowOverwrite: true,
     cacheControlMaxAge,
     contentType: mimeType,
     token,

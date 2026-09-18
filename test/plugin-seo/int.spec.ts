@@ -1,28 +1,23 @@
-import type { Payload } from 'payload'
-
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let payload: Payload
-
-describe('@payloadcms/plugin-seo', () => {
+test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
   let page = null
   let mediaDoc = null
   let mediaDoc2 = null
 
-  beforeAll(async () => {
+  test.beforeEach(async ({ payload }) => {
     const uploadsDir = path.resolve(dirname, './media')
     removeFiles(path.normalize(uploadsDir))
-    ;({ payload } = await initPayloadInt(dirname))
 
     // Create image
     const filePath = path.resolve(dirname, './image-1.jpg')
@@ -54,11 +49,9 @@ describe('@payloadcms/plugin-seo', () => {
     })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should return different previousValue and value in afterChange hooks when relationship changes', async () => {
+  test('should return different previousValue and value in afterChange hooks when relationship changes', async ({
+    payload,
+  }) => {
     // The existing page has mediaDoc as featuredMedia
     // Update it to mediaDoc2 and we expect to see different previousValue and value in the hook
     const context: { identicalCount?: number } = {}
@@ -79,7 +72,7 @@ describe('@payloadcms/plugin-seo', () => {
     expect(context.identicalCount).toBeUndefined()
   })
 
-  it('should add meta title', async () => {
+  test('should add meta title', async ({ payload }) => {
     const pageWithTitle = await payload.update({
       collection: 'pages',
       id: page.id,
@@ -96,7 +89,7 @@ describe('@payloadcms/plugin-seo', () => {
     expect(pageWithTitle.meta.title).toBe('Hello, world!')
   })
 
-  it('should add meta description', async () => {
+  test('should add meta description', async ({ payload }) => {
     const pageWithDescription = await payload.update({
       collection: 'pages',
       id: page.id,
@@ -113,7 +106,7 @@ describe('@payloadcms/plugin-seo', () => {
     expect(pageWithDescription.meta.description).toBe('This is a test page')
   })
 
-  it('should add meta image', async () => {
+  test('should add meta image', async ({ payload }) => {
     const pageWithImage = await payload.update({
       collection: 'pages',
       id: page.id,
@@ -130,7 +123,7 @@ describe('@payloadcms/plugin-seo', () => {
     expect(pageWithImage.meta.image).toBe(mediaDoc.id)
   })
 
-  it('should add custom meta field', async () => {
+  test('should add custom meta field', async ({ payload }) => {
     const pageWithCustomField = await payload.update({
       collection: 'pages',
       id: page.id,
@@ -147,7 +140,20 @@ describe('@payloadcms/plugin-seo', () => {
     expect(pageWithCustomField.meta.ogTitle).toBe('Hello, world!')
   })
 
-  it('should localize meta fields', async () => {
+  test('should localize meta fields', async ({ payload }) => {
+    await payload.update({
+      collection: 'pages',
+      id: page.id,
+      data: {
+        meta: {
+          title: 'Hello, world!',
+          description: 'This is a test page',
+        },
+      },
+      locale: 'en',
+      depth: 0,
+    })
+
     const pageWithLocalizedMeta = await payload.update({
       collection: 'pages',
       id: page.id,
