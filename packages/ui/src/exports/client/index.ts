@@ -317,8 +317,9 @@ export {
   useServerFunctions,
 } from '../../providers/ServerFunctions/index.js'
 export { ActionsProvider, useActions } from '../../providers/Actions/index.js'
+export { AuthSessionDebug } from '../../providers/Auth/AuthSessionDebug/index.js'
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
-export type { UserWithToken } from '../../providers/Auth/index.js'
+export type { AuthSession, UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 
