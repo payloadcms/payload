@@ -3325,6 +3325,32 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
   })
 
+  test.describe('reserved field names', () => {
+    test('should query a collection with an array field named `numbers`, `texts`, or `rels`', async ({
+      payload,
+    }) => {
+      const created = await payload.create({
+        collection: 'reserved-field-names',
+        data: {
+          numbers: [{ drawPosition: 1 }],
+          texts: [{ value: 'hello' }],
+          rels: [{ value: 'world' }],
+        },
+      })
+
+      const found = await payload.findByID({
+        collection: 'reserved-field-names',
+        id: created.id,
+      })
+
+      expect(found.numbers?.[0]?.drawPosition).toStrictEqual(1)
+      expect(found.texts?.[0]?.value).toStrictEqual('hello')
+      expect(found.rels?.[0]?.value).toStrictEqual('world')
+
+      await payload.delete({ collection: 'reserved-field-names', id: created.id })
+    })
+  })
+
   test.options({ db: 'drizzle' }).describe('Schema generation', () => {
     test('should generate Drizzle Postgres schema', async ({ payload }) => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE

@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_9B9C404E".
+ * via the `definition` "LexicalNodes_6C31F5D8".
  */
-export type LexicalNodes_9B9C404E =
+export type LexicalNodes_6C31F5D8 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_9B9C404E>
+  | SerializedParagraphNode<LexicalNodes_6C31F5D8>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_9B9C404E>
+  | SerializedHeadingNode<LexicalNodes_6C31F5D8>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_9B9C404E =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_9B9C404E>
-  | SerializedListNode<LexicalNodes_9B9C404E>
-  | SerializedListItemNode<LexicalNodes_9B9C404E>
-  | SerializedAutoLinkNode<LexicalNodes_9B9C404E, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_9B9C404E, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_6C31F5D8>
+  | SerializedListNode<LexicalNodes_6C31F5D8>
+  | SerializedListItemNode<LexicalNodes_6C31F5D8>
+  | SerializedAutoLinkNode<LexicalNodes_6C31F5D8, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_6C31F5D8, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'noTimeStamps'
       | 'categories'
@@ -108,6 +108,7 @@ export type LexicalNodes_9B9C404E =
       | 'blocks-docs'
       | 'unique-fields'
       | 'select-has-many'
+      | 'reserved-field-names'
       | 'virtual-linked-tenants'
       | 'virtual-linked-roles'
       | 'virtual-linked-projects'
@@ -147,6 +148,7 @@ export interface Config {
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
     'select-has-many': SelectHasMany;
+    'reserved-field-names': ReservedFieldName;
     'virtual-linked-tenants': VirtualLinkedTenant;
     'virtual-linked-roles': VirtualLinkedRole;
     'virtual-linked-projects': VirtualLinkedProject;
@@ -185,6 +187,7 @@ export interface Config {
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
     'select-has-many': SelectHasManySelect<false> | SelectHasManySelect<true>;
+    'reserved-field-names': ReservedFieldNamesSelect<false> | ReservedFieldNamesSelect<true>;
     'virtual-linked-tenants': VirtualLinkedTenantsSelect<false> | VirtualLinkedTenantsSelect<true>;
     'virtual-linked-roles': VirtualLinkedRolesSelect<false> | VirtualLinkedRolesSelect<true>;
     'virtual-linked-projects': VirtualLinkedProjectsSelect<false> | VirtualLinkedProjectsSelect<true>;
@@ -487,7 +490,7 @@ export interface DefaultValue {
 export interface RelationA {
   id: number;
   title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_9B9C404E> | null;
+  richText?: LexicalRichText<LexicalNodes_6C31F5D8> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -499,7 +502,7 @@ export interface RelationB {
   id: number;
   title?: string | null;
   relationship?: (number | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_9B9C404E> | null;
+  richText?: LexicalRichText<LexicalNodes_6C31F5D8> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -777,6 +780,33 @@ export interface SelectHasMany {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reserved-field-names".
+ */
+export interface ReservedFieldName {
+  id: number;
+  numbers?:
+    | {
+        drawPosition?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  texts?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  rels?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "virtual-linked-tenants".
  */
 export interface VirtualLinkedTenant {
@@ -951,6 +981,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'select-has-many';
         value: number | SelectHasMany;
+      } | null)
+    | ({
+        relationTo: 'reserved-field-names';
+        value: number | ReservedFieldName;
       } | null)
     | ({
         relationTo: 'virtual-linked-tenants';
@@ -1488,6 +1522,32 @@ export interface SelectHasManySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reserved-field-names_select".
+ */
+export interface ReservedFieldNamesSelect<T extends boolean = true> {
+  numbers?:
+    | T
+    | {
+        drawPosition?: T;
+        id?: T;
+      };
+  texts?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  rels?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "virtual-linked-tenants_select".
  */
 export interface VirtualLinkedTenantsSelect<T extends boolean = true> {
@@ -1766,6 +1826,7 @@ export interface CollectionQueryWidget {
       | 'blocks-docs'
       | 'unique-fields'
       | 'select-has-many'
+      | 'reserved-field-names'
       | 'virtual-linked-tenants'
       | 'virtual-linked-roles'
       | 'virtual-linked-projects'
@@ -1816,6 +1877,7 @@ export interface ActivityWidget {
           | 'blocks-docs'
           | 'unique-fields'
           | 'select-has-many'
+          | 'reserved-field-names'
           | 'virtual-linked-tenants'
           | 'virtual-linked-roles'
           | 'virtual-linked-projects'
