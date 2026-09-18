@@ -527,6 +527,11 @@ export type FindDistinctArgs = {
   limit?: number
   locale?: string
   page?: number
+  /**
+   * Access constraints for relationship values traversed by the distinct field path.
+   * Keys are relationship paths relative to the queried collection.
+   */
+  relatedAccess?: Record<string, Where>
   req?: Partial<PayloadRequest>
   sort?: Sort
   where?: Where

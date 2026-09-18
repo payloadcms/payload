@@ -1,3 +1,5 @@
+import type { CollectionConfig } from 'payload'
+
 import { azureStorage } from '@payloadcms/storage-azure'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
@@ -20,6 +22,14 @@ import { MediaWithDocPrefix, mediaWithDocPrefixSlug } from './collections/MediaW
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const enableAzureClientUploads = (collection: CollectionConfig): CollectionConfig => ({
+  ...collection,
+  upload: {
+    ...(typeof collection.upload === 'object' ? collection.upload : {}),
+    allowRestrictedFileTypes: true,
+  },
+})
+
 dotenv.config({
   path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emulated'),
 })
@@ -31,12 +41,12 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
-    Media,
-    MediaWithPrefix,
-    MediaWithDocPrefix,
-    MediaNoContent,
-    MediaHeaderOnly,
-    MediaHeaderOnlyWithSizes,
+    enableAzureClientUploads(Media),
+    enableAzureClientUploads(MediaWithPrefix),
+    enableAzureClientUploads(MediaWithDocPrefix),
+    enableAzureClientUploads(MediaNoContent),
+    enableAzureClientUploads(MediaHeaderOnly),
+    enableAzureClientUploads(MediaHeaderOnlyWithSizes),
     Users,
   ],
   onInit: async (payload) => {
@@ -64,7 +74,7 @@ export default buildConfigWithDefaults({
           prefix,
         },
         // Configure a collection-level prefix on this slug to test that
-        // a custom `prefix.defaultValue` does override the static prefix
+        // a custom `prefix.defaultValue` is contained beneath the static prefix
         [mediaWithDocPrefixSlug]: {
           prefix: 'docprefix-collection',
         },

@@ -21,7 +21,7 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
 
   const {
     admin: {
-      routes: { account: accountRoute, login: loginRoute },
+      routes: { account: accountRoute },
     },
     routes: { admin: adminRoute },
   } = config
@@ -61,15 +61,6 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
   return (
     <Fragment>
       <ForgotPasswordForm />
-      <Link
-        href={formatAdminURL({
-          adminRoute,
-          path: loginRoute,
-        })}
-        prefetch={false}
-      >
-        {i18n.t('authentication:backToLogin')}
-      </Link>
     </Fragment>
   )
 }

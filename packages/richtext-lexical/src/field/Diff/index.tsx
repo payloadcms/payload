@@ -87,6 +87,7 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
   const payloadPopulateFn = await getPayloadPopulateFn({
     currentDepth: 0,
     depth: 1,
+    overrideAccess: false,
     req,
   })
   const fromHTML = await convertLexicalToHTMLAsync({

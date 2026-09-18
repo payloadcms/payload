@@ -632,7 +632,17 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
+  {
+    id,
+    blockData,
+    data,
+    filterOptions,
+    overrideAccess,
+    relationTo,
+    req,
+    req: { t, user },
+    siblingData,
+  },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -695,7 +705,9 @@ const validateFilterOptions: Validate<
           const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
+            disableErrors: true,
             limit: 0,
+            overrideAccess: overrideAccess ?? false,
             pagination: false,
             req,
             where: findWhere,

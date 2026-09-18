@@ -56,6 +56,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     newPassword: 'নতুন পাসওয়ার্ড',
     passed: 'প্রমাণীকরণ সফল হয়েছে',
     passwordResetSuccessfully: 'পাসওয়ার্ড সফলভাবে রিসেট করা হয়েছে।',
+    resend: 'পুনরায় পাঠান',
     resetPassword: 'পাসওয়ার্ড রিসেট করুন',
     resetPasswordExpiration: 'পাসওয়ার্ড রিসেটের মেয়াদ শেষ',
     resetPasswordToken: 'পাসওয়ার্ড রিসেট টোকেন',

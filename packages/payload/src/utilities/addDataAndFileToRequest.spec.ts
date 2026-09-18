@@ -9,6 +9,7 @@ import { addDataAndFileToRequest } from './addDataAndFileToRequest.js'
 
 type MinimalReq = Pick<PayloadRequest, 'body' | 'headers' | 'method' | 'payload'> & {
   file?: PayloadRequest['file']
+  routeParams?: PayloadRequest['routeParams']
 }
 
 const createReqWithMultipartBody = (): MinimalReq => {
@@ -78,6 +79,9 @@ const createClientUploadReq = ({
         error: () => {},
       },
     } as unknown as PayloadRequest['payload'],
+    routeParams: {
+      collection: 'media',
+    },
   }
 }
 
@@ -92,6 +96,182 @@ describe('addDataAndFileToRequest', () => {
     expect(req.file).toBeDefined()
     expect(req.file?.name).toBe('hello.txt')
     expect(req.file?.mimetype).toBe('text/plain')
+  })
+
+  it('should reject unsigned upload instructions before the route handler', async () => {
+    const formData = new FormData()
+    formData.append(
+      'file',
+      JSON.stringify({
+        collectionSlug: 'private-media',
+        clientUploadContext: { prefix: 'private' },
+        filename: 'example.txt',
+        mimeType: 'text/plain',
+        size: 11,
+      }),
+    )
+
+    const request = new Request('http://localhost/api/public-media', {
+      body: formData,
+      method: 'POST',
+    })
+
+    const privateHandler = vi.fn()
+    const publicHandler = vi.fn((_req, args) => {
+      return new Response('hello world', {
+        headers: {
+          'content-type': 'text/plain',
+          'x-collection': args.params.collection,
+        },
+      })
+    })
+
+    const req: MinimalReq = {
+      body: request.body,
+      headers: request.headers,
+      method: request.method,
+      payload: {
+        collections: {
+          'private-media': {
+            config: {
+              upload: {
+                handlers: [privateHandler],
+              },
+            },
+          },
+          'public-media': {
+            config: {
+              upload: {
+                handlers: [publicHandler],
+                requiresClientUploadReceipt: true,
+              },
+            },
+          },
+        },
+        config: {
+          bodyParser: {},
+          upload: {},
+        },
+        logger: {
+          error: () => {},
+        },
+      } as unknown as PayloadRequest['payload'],
+      routeParams: {
+        collection: 'public-media',
+      },
+    }
+
+    await expect(addDataAndFileToRequest(req as PayloadRequest)).rejects.toThrow(
+      'A verified client upload reference is required.',
+    )
+
+    expect(privateHandler).not.toHaveBeenCalled()
+    expect(publicHandler).not.toHaveBeenCalled()
+    expect(req.file).toBeUndefined()
+  })
+
+  it('should require a route collection for upload instructions', async () => {
+    const formData = new FormData()
+    formData.append(
+      'file',
+      JSON.stringify({
+        collectionSlug: 'media',
+        filename: 'example.txt',
+        mimeType: 'text/plain',
+        size: 11,
+      }),
+    )
+
+    const request = new Request('http://localhost/api/graphql', {
+      body: formData,
+      method: 'POST',
+    })
+    const handler = vi.fn(() => new Response('hello world'))
+
+    const req: MinimalReq = {
+      body: request.body,
+      headers: request.headers,
+      method: request.method,
+      payload: {
+        collections: {
+          media: {
+            config: {
+              upload: {
+                handlers: [handler],
+              },
+            },
+          },
+        },
+        config: {
+          bodyParser: {},
+          upload: {},
+        },
+        logger: {
+          error: () => {},
+        },
+      } as unknown as PayloadRequest['payload'],
+    }
+
+    await expect(addDataAndFileToRequest(req as PayloadRequest)).rejects.toThrow(
+      'Invalid upload collection.',
+    )
+
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('should require the route collection to support uploads', async () => {
+    const formData = new FormData()
+    formData.append(
+      'file',
+      JSON.stringify({
+        collectionSlug: 'media',
+        filename: 'example.txt',
+        mimeType: 'text/plain',
+        size: 11,
+      }),
+    )
+
+    const request = new Request('http://localhost/api/posts', {
+      body: formData,
+      method: 'POST',
+    })
+    const handler = vi.fn(() => new Response('hello world'))
+
+    const req: MinimalReq = {
+      body: request.body,
+      headers: request.headers,
+      method: request.method,
+      payload: {
+        collections: {
+          media: {
+            config: {
+              upload: {
+                handlers: [handler],
+              },
+            },
+          },
+          posts: {
+            config: {},
+          },
+        },
+        config: {
+          bodyParser: {},
+          upload: {},
+        },
+        logger: {
+          error: () => {},
+        },
+      } as unknown as PayloadRequest['payload'],
+      routeParams: {
+        collection: 'posts',
+      },
+    }
+
+    await expect(addDataAndFileToRequest(req as PayloadRequest)).rejects.toThrow(
+      'Invalid upload collection.',
+    )
+
+    expect(handler).not.toHaveBeenCalled()
   })
 
   describe('client uploads', () => {

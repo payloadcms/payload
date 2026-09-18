@@ -57,6 +57,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     newPassword: '新しいパスワード',
     passed: '認証が通りました',
     passwordResetSuccessfully: 'パスワードが正常にリセットされました。',
+    resend: '再送信',
     resetPassword: 'パスワード再発行',
     resetPasswordExpiration: 'パスワードの有効期限をリセット',
     resetPasswordToken: 'パスワードのトークンをリセット',

@@ -6,7 +6,7 @@ import {
 } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import fs from 'fs'
 import path from 'path'
-import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'
+import { createLocalReq, Forbidden, getFileByPath, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -33,8 +33,14 @@ import {
   draftUnlimitedGlobalSlug,
   draftWithUploadCloudStorageCollectionSlug,
   draftWithUploadCollectionSlug,
+  errorOnUnpublishSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
+  restoreAccessCollectionSlug,
+  restoreAccessGlobalSlug,
+  restoreAccessLocalizedCollectionSlug,
+  restoreAccessNoVersionsGlobalSlug,
+  secondaryAdminUserCollectionSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -53,6 +59,7 @@ const formatGraphQLID = (id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
 describe('Versions', () => {
+  let secondaryAdminUser: JsonObject
   let user: JsonObject
 
   beforeAll(async () => {
@@ -70,6 +77,21 @@ describe('Versions', () => {
     user = {
       ...newUser,
       collection: 'users',
+    }
+
+    const newSecondaryAdminUser = await payload.create({
+      collection: secondaryAdminUserCollectionSlug as any,
+      data: {
+        email: 'secondary-admin@payloadcms.com',
+        password: devUser.password,
+      },
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    secondaryAdminUser = {
+      ...newSecondaryAdminUser,
+      collection: secondaryAdminUserCollectionSlug,
     }
 
     // sets token on rest client
@@ -1680,6 +1702,88 @@ describe('Versions', () => {
         expect(unpublished._status).toBe('draft')
 
         await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+      })
+
+      it('should validate submitted collection fields when unpublishing', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'Valid description',
+            title: 'Validate collection unpublish',
+          },
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: doc.id,
+              collection: draftCollectionSlug,
+              data: {
+                _status: 'draft',
+                description: '',
+              },
+              unpublishAllLocales: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await payload.delete({ id: doc.id, collection: draftCollectionSlug })
+        }
+      })
+
+      it('should validate submitted dotted field paths when unpublishing', async () => {
+        const doc = await payload.create({
+          collection: errorOnUnpublishSlug,
+          data: {
+            _status: 'published',
+            group: {
+              textInGroup: 'Valid nested value',
+            },
+            title: 'Validate nested collection unpublish',
+          },
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: doc.id,
+              collection: errorOnUnpublishSlug,
+              data: {
+                _status: 'draft',
+                // @ts-expect-error dotted field paths are accepted at runtime
+                'group.textInGroup': '',
+              },
+              unpublishAllLocales: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await payload.delete({ id: doc.id, collection: errorOnUnpublishSlug })
+        }
+      })
+
+      it('should validate submitted global fields when unpublishing', async () => {
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            _status: 'published',
+            title: 'Validate global unpublish',
+          },
+        })
+
+        try {
+          await expect(
+            payload.updateGlobal({
+              slug: draftGlobalSlug,
+              data: {
+                _status: 'draft',
+                title: '',
+              },
+              unpublishAllLocales: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await cleanupGlobal({ globalSlug: draftGlobalSlug, payload })
+        }
       })
     })
 
@@ -3349,6 +3453,422 @@ describe('Versions', () => {
       })
     })
 
+    describe('Restore - access control', () => {
+      // Seeds a historical version ('historical') and leaves the current
+      // global at a different state ('current'), returning the id of the
+      // historical version to restore.
+      const seedRestoreAccessGlobal = async (): Promise<number | string> => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'historical' },
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'current' },
+          overrideAccess: true,
+        })
+
+        const versions = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 100,
+        })
+
+        const target = versions.docs.find((doc) => doc.version.title === 'historical')
+
+        return target!.id
+      }
+
+      afterEach(async () => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'reset' },
+          overrideAccess: true,
+        })
+
+        await payload.db.deleteVersions({
+          globalSlug: restoreAccessGlobalSlug,
+          where: {},
+        })
+
+        await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          data: { title: 'reset' },
+          overrideAccess: true,
+        })
+      })
+
+      it('should restore when update access returns true', async () => {
+        const versionID = await seedRestoreAccessGlobal()
+
+        const restored = await payload.restoreGlobalVersion({
+          id: versionID,
+          slug: restoreAccessGlobalSlug,
+          context: { restoreAccessMode: 'allow' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(restored.version.title).toBe('historical')
+      })
+
+      it('should throw Forbidden when update access returns false', async () => {
+        const versionID = await seedRestoreAccessGlobal()
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: versionID,
+            slug: restoreAccessGlobalSlug,
+            context: { restoreAccessMode: 'deny' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      it('should restore when the current global matches the update Where constraint', async () => {
+        const versionID = await seedRestoreAccessGlobal()
+
+        // Move the current global into the 'unlocked' state so it satisfies the
+        // constrained update rule (title equals 'unlocked').
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'unlocked' },
+          overrideAccess: true,
+        })
+
+        const restored = await payload.restoreGlobalVersion({
+          id: versionID,
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: false,
+          user,
+        })
+
+        expect(restored.version.title).toBe('historical')
+      })
+
+      it('should throw Forbidden when the current global does not match the update Where constraint', async () => {
+        // Current title is 'current', constraint requires title === 'unlocked',
+        // so the current global does not match and restore must be denied.
+        const versionID = await seedRestoreAccessGlobal()
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: versionID,
+            slug: restoreAccessGlobalSlug,
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      it('should reject non-versioned global updates outside the access constraint', async () => {
+        await payload.updateGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          data: { title: 'current' },
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessNoVersionsGlobalSlug,
+            data: { title: 'updated' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessNoVersionsGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      it('should use one global lookup when access is not constrained', async () => {
+        const findGlobal = vi.spyOn(payload.db, 'findGlobal')
+
+        try {
+          await payload.updateGlobal({
+            slug: restoreAccessNoVersionsGlobalSlug,
+            data: { title: 'updated' },
+            overrideAccess: true,
+          })
+
+          expect(findGlobal).toHaveBeenCalledTimes(1)
+        } finally {
+          findGlobal.mockRestore()
+        }
+      })
+
+      it('should throw Forbidden when an update does not match the access constraint', async () => {
+        await seedRestoreAccessGlobal()
+
+        await expect(
+          payload.updateGlobal({
+            slug: restoreAccessGlobalSlug,
+            data: { title: 'updated' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+
+      it('should throw Forbidden when read-version access filters out the selected version', async () => {
+        const versionID = await seedRestoreAccessGlobal()
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: versionID,
+            slug: restoreAccessGlobalSlug,
+            // Allow the update so the read-version check is isolated.
+            context: { readVersionsMode: 'constrained', restoreAccessMode: 'allow' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        expect(current.title).toBe('current')
+      })
+    })
+
+    describe('Restore - publication access control', () => {
+      const createdCollectionDocIDs: Array<number | string> = []
+      const createdLocalizedDocIDs: Array<number | string> = []
+
+      afterEach(async () => {
+        for (const id of createdCollectionDocIDs) {
+          await payload.delete({ id, collection: restoreAccessCollectionSlug })
+        }
+        createdCollectionDocIDs.length = 0
+
+        for (const id of createdLocalizedDocIDs) {
+          await payload.delete({ id, collection: restoreAccessLocalizedCollectionSlug })
+        }
+        createdLocalizedDocIDs.length = 0
+
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { title: 'reset' },
+        })
+        await payload.db.deleteVersions({
+          globalSlug: restoreAccessGlobalSlug,
+          where: {},
+        })
+      })
+
+      const findCollectionVersionByStatus = async (
+        docID: number | string,
+        status: string,
+      ): Promise<number | string> => {
+        const versions = await payload.findVersions({
+          collection: restoreAccessCollectionSlug,
+          limit: 100,
+          where: { parent: { equals: docID } },
+        })
+        const target = versions.docs.find((doc) => doc.version._status === status)
+
+        return target!.id
+      }
+
+      it('should deny restoring a published version when update access denies publishing', async () => {
+        const doc = await payload.create({
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'published', title: 'published' },
+        })
+        createdCollectionDocIDs.push(doc.id)
+
+        // Unpublish so the live document is a draft and a historical published version exists.
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'draft', title: 'unpublished' },
+        })
+
+        const publishedVersionID = await findCollectionVersionByStatus(doc.id, 'published')
+
+        // Restoring the published version would re-publish; the publish gate must deny it now
+        // that access.update sees the effective _status the restore will write.
+        await expect(
+          payload.restoreVersion({
+            id: publishedVersionID,
+            collection: restoreAccessCollectionSlug,
+            context: { restoreAccessMode: 'publishGate' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findByID({
+          id: doc.id,
+          collection: restoreAccessCollectionSlug,
+          draft: true,
+        })
+        expect(current._status).toBe('draft')
+      })
+
+      it('should allow restoring a draft version under the publish gate', async () => {
+        const doc = await payload.create({
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'published', title: 'published' },
+        })
+        createdCollectionDocIDs.push(doc.id)
+
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'draft', title: 'draft version' },
+          draft: true,
+        })
+
+        const draftVersionID = await findCollectionVersionByStatus(doc.id, 'draft')
+
+        // The restore writes _status='draft', which the publish gate permits - confirming the fix
+        // passes the real _status rather than blanket-denying restores.
+        const restored = await payload.restoreVersion({
+          id: draftVersionID,
+          collection: restoreAccessCollectionSlug,
+          context: { restoreAccessMode: 'publishGate' },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(restored._status).toBe('draft')
+      })
+
+      it('should deny restoring a draft version when update access denies unpublishing', async () => {
+        const doc = await payload.create({
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'published', title: 'published' },
+        })
+        createdCollectionDocIDs.push(doc.id)
+
+        // Create a draft version while the live document stays published.
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessCollectionSlug,
+          data: { _status: 'draft', title: 'draft version' },
+          draft: true,
+        })
+
+        const draftVersionID = await findCollectionVersionByStatus(doc.id, 'draft')
+
+        // Restoring the draft version would unpublish the live document; the unpublish gate must
+        // deny it.
+        await expect(
+          payload.restoreVersion({
+            id: draftVersionID,
+            collection: restoreAccessCollectionSlug,
+            context: { restoreAccessMode: 'unpublishGate' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+      })
+
+      it('should deny restoring a published global version when update access denies publishing', async () => {
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'published', title: 'published' },
+        })
+
+        // Unpublish so the live global is a draft and a historical published version exists.
+        await payload.updateGlobal({
+          slug: restoreAccessGlobalSlug,
+          data: { _status: 'draft', title: 'unpublished' },
+        })
+
+        const versions = await payload.findGlobalVersions({
+          slug: restoreAccessGlobalSlug,
+          limit: 100,
+        })
+        const publishedVersionID = versions.docs.find(
+          (doc) => doc.version._status === 'published',
+        )!.id
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: publishedVersionID,
+            slug: restoreAccessGlobalSlug,
+            context: { restoreAccessMode: 'publishGate' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const current = await payload.findGlobal({ draft: true, slug: restoreAccessGlobalSlug })
+        expect(current._status).toBe('draft')
+      })
+
+      it('should deny restoring a mixed-locale version that unpublishes a locale under the unpublish gate', async () => {
+        // localizeStatus makes `_status` a per-locale object. Publish both locales so the live
+        // document is fully online.
+        const doc = await payload.create({
+          collection: restoreAccessLocalizedCollectionSlug,
+          data: { _status: 'published', title: 'en published' },
+          locale: 'en',
+        })
+        createdLocalizedDocIDs.push(doc.id)
+
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessLocalizedCollectionSlug,
+          data: { _status: 'published', title: 'de published' },
+          locale: 'de',
+        })
+
+        // Save a draft for `en` only. This leaves the live document fully published and creates a
+        // version whose stored `_status` is the mixed object { en: 'draft', de: 'published' }.
+        await payload.update({
+          id: doc.id,
+          collection: restoreAccessLocalizedCollectionSlug,
+          data: { _status: 'draft', title: 'en draft' },
+          draft: true,
+          locale: 'en',
+        })
+
+        const versions = await payload.findVersions({
+          collection: restoreAccessLocalizedCollectionSlug,
+          limit: 100,
+          locale: 'all',
+          sort: '-updatedAt',
+          where: { parent: { equals: doc.id } },
+        })
+
+        const mixedVersion = versions.docs.find((v) => {
+          const status = v.version._status as null | Record<string, unknown>
+          return status && typeof status === 'object' && status.en === 'draft'
+        })
+
+        expect(mixedVersion).toBeDefined()
+        expect((mixedVersion!.version._status as Record<string, unknown>).en).toBe('draft')
+        expect((mixedVersion!.version._status as Record<string, unknown>).de).toBe('published')
+
+        // Restoring this version writes _status = { en: 'draft', de: 'published' } to the live
+        // document, taking `en` offline. getRestoredEffectiveStatus collapses the object to
+        // 'published' (any locale published), so the unpublish gate sees 'published' !== 'draft'
+        // and allows the restore - yet a locale is unpublished. That transition must be gated:
+        // the restore should be Forbidden.
+        await expect(
+          payload.restoreVersion({
+            id: mixedVersion!.id,
+            collection: restoreAccessLocalizedCollectionSlug,
+            context: { restoreAccessMode: 'unpublishGate' },
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow(Forbidden)
+      })
+    })
+
     describe('Patch', () => {
       it('should allow a draft to be patched', async () => {
         const originalTitle = 'Here is a published global'
@@ -3622,7 +4142,10 @@ describe('Versions', () => {
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
-          user: user.id,
+          user: {
+            relationTo: 'users',
+            value: user.id,
+          },
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
@@ -3640,6 +4163,231 @@ describe('Versions', () => {
       })
 
       expect(retrieved._status).toStrictEqual('draft')
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
+    })
+
+    it('should preserve the scheduling user collection for scheduled publish jobs', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          title: 'my doc to publish from a secondary admin-capable auth collection',
+        },
+        draft: true,
+      })
+
+      const req = await createLocalReq({ user: secondaryAdminUser }, payload)
+      const currentDate = new Date()
+
+      await schedulePublishHandler({
+        type: 'publish',
+        date: new Date(currentDate.getTime() + 3000),
+        doc: {
+          relationTo: draftCollectionSlug,
+          value: draft.id,
+        },
+        req,
+        user: secondaryAdminUser,
+      })
+
+      const queuedJob = (
+        await payload.find({
+          collection: 'payload-jobs',
+          where: {
+            'input.doc.value': {
+              equals: draft.id,
+            },
+          },
+        })
+      ).docs[0] as any
+
+      expect(queuedJob?.input?.user).toMatchObject({
+        relationTo: secondaryAdminUserCollectionSlug,
+        value: secondaryAdminUser.id,
+      })
+
+      await wait(4000)
+
+      const runResponse = await payload.jobs.run()
+
+      expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('success')
+
+      const published = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        draft: false,
+      })
+
+      expect(published._status).toBe('published')
+    })
+
+    it('should run scheduled publish as the scheduling user, not the admin collection', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          restrictedToSecondaryCollection: true,
+          title: 'my doc restricted from the secondary auth collection',
+        },
+        draft: true,
+      })
+
+      const req = await createLocalReq({ user: secondaryAdminUser }, payload)
+      const currentDate = new Date()
+
+      await schedulePublishHandler({
+        type: 'publish',
+        date: new Date(currentDate.getTime() + 3000),
+        doc: {
+          relationTo: draftCollectionSlug,
+          value: draft.id,
+        },
+        req,
+        user: secondaryAdminUser,
+      })
+
+      const queuedJob = (
+        await payload.find({
+          collection: 'payload-jobs',
+          where: {
+            'input.doc.value': {
+              equals: draft.id,
+            },
+          },
+        })
+      ).docs[0] as any
+
+      await wait(4000)
+
+      const runResponse = await payload.jobs.run()
+
+      expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+      })
+
+      expect(retrieved._status).toBe('draft')
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
+    })
+
+    it('should fail scheduled publish jobs that omit the user auth collection', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          title: 'my doc scheduled with a legacy bare user id',
+        },
+        draft: true,
+      })
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        input: {
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+          user: user.id,
+        },
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
+
+      const queuedJob = (
+        await payload.find({
+          collection: 'payload-jobs',
+          where: {
+            'input.doc.value': {
+              equals: draft.id,
+            },
+          },
+        })
+      ).docs[0] as any
+
+      await wait(4000)
+
+      const runResponse = await payload.jobs.run()
+
+      expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        draft: false,
+      })
+
+      expect(retrieved._status).toBe('draft')
+
+      await cleanupDocuments({
+        collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
+        payload,
+      })
+    })
+
+    it('should not skip a user id of 0 when running scheduled publish jobs', async () => {
+      const draft = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'hello',
+          title: 'my doc scheduled with a zero user id',
+        },
+        draft: true,
+      })
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        input: {
+          doc: {
+            relationTo: draftCollectionSlug,
+            value: draft.id,
+          },
+          user: {
+            relationTo: 'users',
+            value: 0,
+          },
+        },
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
+
+      const queuedJob = (
+        await payload.find({
+          collection: 'payload-jobs',
+          where: {
+            'input.doc.value': {
+              equals: draft.id,
+            },
+          },
+        })
+      ).docs[0] as any
+
+      await wait(4000)
+
+      const runResponse = await payload.jobs.run()
+
+      // A `0` id must reach findByID (which fails here) rather than being dropped to an
+      // overrideAccess publish, so the doc stays a draft.
+      expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: draftCollectionSlug,
+        draft: false,
+      })
+
+      expect(retrieved._status).toBe('draft')
 
       await cleanupDocuments({
         collectionSlugs: [draftCollectionSlug, 'payload-jobs'],
