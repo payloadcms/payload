@@ -1,7 +1,6 @@
 import type {
   CollectionSlug,
   DataFromCollectionSlug,
-  Document,
   PaginatedDistinctDocs,
   Payload,
   PayloadRequest,
@@ -9,6 +8,7 @@ import type {
   RequestContext,
   Sort,
   TypedLocale,
+  User,
   Where,
 } from '../../../index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
@@ -92,11 +92,10 @@ export type Options<
    * @default false
    */
   trash?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */

@@ -62,4 +62,5 @@ export const LocalizedWithinLocalized: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

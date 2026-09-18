@@ -7,4 +7,5 @@ export const Media: CollectionConfig = {
     read: () => true,
   },
   fields: [],
+  versions: false,
 }

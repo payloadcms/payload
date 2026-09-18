@@ -35,4 +35,5 @@ export const MediaWithDynamicPrefix: CollectionConfig<'media-with-dynamic-prefix
     disableLocalStorage: false,
     filenameCompoundIndex: ['filename', 'prefix'],
   },
+  versions: false,
 }

@@ -16,4 +16,5 @@ export const Footer: GlobalConfig = {
       fields: [link()],
     },
   ],
+  versions: false,
 }

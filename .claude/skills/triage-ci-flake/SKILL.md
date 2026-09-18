@@ -1,6 +1,6 @@
 ---
 name: triage-ci-flake
-description: Use when CI tests fail on main branch after PR merge, or when investigating flaky test failures in CI environments
+description: Use when CI tests fail on main branch after PR merge, when investigating flaky test failures, or when user provides a PR URL/number to aggregate all failing tests
 allowed-tools: Write, Bash(date:*), Bash(mkdir -p *)
 ---
 
@@ -8,7 +8,7 @@ allowed-tools: Write, Bash(date:*), Bash(mkdir -p *)
 
 ## Overview
 
-Systematic workflow for triaging and fixing test failures in CI, especially flaky tests that pass locally but fail in CI. Tests that made it to `main` are usually flaky due to timing, bundling, or environment differences.
+Systematic workflow designed specifically for triaging and fixing end-to-end (e2e) test failures in CI, especially flaky Playwright tests that pass locally but fail in CI. E2E tests that made it to `main` are usually flaky due to timing, bundling, or environment differences.
 
 **CRITICAL RULE: You MUST run the reproduction workflow before proposing any fixes. No exceptions.**
 
@@ -17,7 +17,74 @@ Systematic workflow for triaging and fixing test failures in CI, especially flak
 - CI test fails on `main` branch after PR was merged
 - Test passes locally but fails in CI
 - Test failure labeled as "flaky" or intermittent
-- E2E or integration test timing out in CI only
+- E2E test timing out in CI only
+- User provides a PR URL/number with failing checks
+
+## PR-Based Workflow (When PR URL/Number Provided)
+
+When the user provides a PR URL (e.g., `https://github.com/payloadcms/payload/pull/16701`) or PR number:
+
+### Step 1: Fetch PR Status Checks
+
+First, use `tool_search` with query "github pull request status checks" to load the GitHub tools.
+
+Then use the `github-pull-request_pullRequestStatusChecks` tool to get all failing checks:
+
+```
+Tool: github-pull-request_pullRequestStatusChecks
+Parameters:
+  pullRequestNumber: <extracted from URL or provided>
+  repo: { owner: "payloadcms", name: "payload" }
+```
+
+### Step 2: Aggregate Failing Tests
+
+Parse the status checks response and create a summary table:
+
+| Suite                 | Check Status | Target URL |
+| --------------------- | ------------ | ---------- |
+| admin**e2e**list-view | failed       | [link]     |
+| plugin-import-export  | failed       | [link]     |
+
+For each failing check, the `context` field contains the test suite name (e.g., `admin__e2e__list-view`).
+
+### Step 3: Extract Failure Details from Each Check
+
+For each failing check:
+
+1. Visit the `targetUrl` to get detailed failure logs
+2. Extract the specific test name and error message
+3. Add to the aggregated failure list
+
+Present a consolidated summary:
+
+```markdown
+## Failing Tests Summary
+
+### 1. admin**e2e**list-view (3/4)
+
+- **Test**: "should use custom pagination limit"
+- **Error**: Locator `.per-page__button` not found
+- **File**: test/admin/e2e/list-view/e2e.spec.ts:1495
+
+### 2. plugin-import-export
+
+- **Test**: "should inherit limit from list view URL"
+- **Error**: Locator `.per-page__button` not found
+- **File**: test/plugin-import-export/e2e.spec.ts:150
+```
+
+### Step 4: Identify Common Patterns
+
+Look for patterns across failures:
+
+- Same selector errors → likely a component change needing test updates
+- Same test file → localized issue
+- Different errors in same suite → may be test pollution
+
+### Step 5: Proceed with Triage
+
+For each unique failure, follow the standard reproduction workflow below.
 
 ## MANDATORY First Steps
 
@@ -81,7 +148,7 @@ From CI logs or GitHub Actions URL, identify:
 - **Test file**: Full path (e.g., `test/i18n/e2e.spec.ts`)
 - **Test name**: Exact test description
 - **Error message**: Full stack trace
-- **Test type**: E2E (Playwright) or integration (Vitest)
+- **Test type**: E2E (Playwright)
 
 ### 2. Reproduce with Dev Code
 
@@ -118,8 +185,6 @@ until curl -s http://localhost:3000/admin > /dev/null 2>&1; do sleep 1; done && 
 # For E2E tests (DO NOT use pnpm test:e2e as it spawns its own server):
 pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts -g "exact test name"
 
-# For integration tests:
-pnpm test:int $SUITE_NAME -t "exact test name"
 ```
 
 **Did the test fail?**
@@ -162,8 +227,6 @@ until curl -s http://localhost:3000/admin > /dev/null 2>&1; do sleep 1; done && 
 # ========================================
 # Run the specific test again using Playwright directly
 pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts -g "exact test name"
-# OR for integration tests:
-pnpm test:int $SUITE_NAME -t "exact test name"
 ```
 
 **Did the test fail now?**

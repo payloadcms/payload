@@ -13,7 +13,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 
 export type SelectInputProps = {
   readonly AfterInput?: React.ReactNode
@@ -39,6 +39,10 @@ export type SelectInputProps = {
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly showError?: boolean
+  /**
+   * Controls the height of the input. Defaults to `'large'`.
+   */
+  readonly size?: 'large' | 'medium'
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
 }
@@ -67,6 +71,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     readOnly,
     required,
     showError,
+    size = 'large',
     style,
     value,
   } = props
@@ -105,6 +110,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       id={`field-${path.replace(/\./g, '__')}`}
       style={style}
     >
@@ -121,6 +127,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         />
         {BeforeInput}
         <ReactSelect
+          aria-label={getTranslation(label, i18n)}
           disabled={readOnly}
           filterOption={filterOption}
           id={id}

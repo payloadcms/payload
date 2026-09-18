@@ -26,6 +26,18 @@ describe('withPayload', () => {
     }
   })
 
+  it('should position devIndicators at the bottom left by default', () => {
+    const result = withPayload({})
+
+    expect(result.devIndicators).toEqual({ position: 'bottom-left' })
+  })
+
+  it('should use user-provided devIndicators when specified', () => {
+    const result = withPayload({ devIndicators: { appIsrStatus: true } })
+
+    expect(result.devIndicators).toEqual({ appIsrStatus: true })
+  })
+
   it('should not modify process.env.NEXT_BASE_PATH when basePath is not provided', () => {
     const originalBasePath = process.env.NEXT_BASE_PATH
 

@@ -1,5 +1,5 @@
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
-export const isClientUserObject = (user): user is ClientUser => {
+export const isClientUserObject = (user): user is User => {
   return user && typeof user === 'object'
 }

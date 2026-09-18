@@ -23,8 +23,8 @@ import type {
 import type { ExportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
-import './index.scss'
 import { useImportExport } from '../ImportExportProvider/index.js'
+import './index.css'
 
 const baseClass = 'export-preview'
 

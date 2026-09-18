@@ -3,37 +3,45 @@ import type {
   Field,
   FileData,
   ImageSize,
+  PayloadHandler,
   PayloadRequest,
   TypeWithID,
   UploadCollectionSlug,
+  UploadInstructionsAccess,
+  UploadInstructionsCapability,
 } from 'payload'
 
 export interface File {
   buffer: Buffer
-  clientUploadContext?: unknown
   filename: string
   filesize: number
   mimeType: string
   tempFilePath?: string
+  uploadReference?: unknown
 }
 
-export type ClientUploadsAccess = (args: {
-  collectionSlug: UploadCollectionSlug
-  req: PayloadRequest
-}) => boolean | Promise<boolean>
+export type ClientUploadsConfig = { access?: UploadInstructionsAccess } | boolean
 
-export type ClientUploadsConfig =
-  | {
-      access?: ClientUploadsAccess
-    }
-  | boolean
+/**
+ * Reference to a client-uploaded object, returned by an upload handler and
+ * submitted with the document. Always carries the signed receipt; `prefix`
+ * locates the stored object.
+ */
+export type UploadReference = {
+  _objectKey?: string
+  prefix: string
+  signedReceipt: `${string}.${string}`
+}
 
 export type HandleUpload = (args: {
-  clientUploadContext: unknown
   collection: CollectionConfig
   data: any
   file: File
   req: PayloadRequest
+  /**
+   * Pre-resolved storage path (`_objectKey` folded in, contained beneath the collection prefix).
+   */
+  storageFilePath: string
 }) =>
   | Partial<FileData & TypeWithID>
   | Promise<Partial<FileData & TypeWithID>>
@@ -49,6 +57,10 @@ export type HandleDelete = (args: {
   doc: FileData & TypeWithID & TypeWithPrefix
   filename: string
   req: PayloadRequest
+  /**
+   * Pre-resolved storage path of the object to delete.
+   */
+  storageFilePath: string
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
@@ -63,12 +75,11 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { clientUploadContext?: unknown; collection: string; filename: string; prefix?: string }
+    params: { collection: string; filename: string; prefix?: string; uploadReference?: unknown }
   },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
-  clientUploads?: ClientUploadsConfig
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
@@ -80,8 +91,20 @@ export interface GeneratedAdapter {
   handleDelete: HandleDelete
   handleUpload: HandleUpload
   name: string
-  onInit?: () => void
+  onInit?: () => Promise<void> | void
   staticHandler: StaticHandler
+  /** Generates upload instructions when supported. */
+  uploadInstructions?: {
+    adminHandler?: {
+      path: string
+      props?: Record<string, unknown>
+    }
+    enabled: boolean
+    endpoint?: {
+      handler: PayloadHandler
+      path: `/${string}`
+    }
+  } & UploadInstructionsCapability
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter

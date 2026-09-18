@@ -28,7 +28,7 @@ export default buildConfig({
       connectionString: process.env.POSTGRES_URL || '',
     },
   }),
-  plugins: [
+  storage: [
     vercelBlobStorage({
       collections: {
         media: true,

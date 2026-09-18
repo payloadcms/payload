@@ -27,6 +27,7 @@ const RadioFields: CollectionConfig = {
           value: 'three',
         },
       ],
+      required: true,
     },
     {
       name: 'radioWithJsxLabelOption',
@@ -49,6 +50,7 @@ const RadioFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default RadioFields

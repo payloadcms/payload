@@ -7,7 +7,6 @@ import type {
   RollbackTransaction,
 } from './types.js'
 
-import { defaultUpdateJobs } from './defaultUpdateJobs.js'
 import { createMigration } from './migrations/createMigration.js'
 import { migrate } from './migrations/migrate.js'
 import { migrateDown } from './migrations/migrateDown.js'
@@ -34,7 +33,6 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     | 'migrateReset'
     | 'migrateStatus'
     | 'migrationDir'
-    | 'updateJobs'
   >,
 ): T {
   return {
@@ -52,8 +50,6 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     migrateStatus,
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     rollbackTransaction,
-    updateJobs: defaultUpdateJobs,
-
     ...args,
     // Ensure migrationDir is set
     migrationDir: args.migrationDir || 'migrations',

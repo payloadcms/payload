@@ -19,24 +19,43 @@ export const reorderBlocks = async ({
 
   const blocksField = page.locator(`#field-${fieldName}`).first()
 
-  const fromField = blocksField.locator(`[id^="${fieldName}-row-${fromBlockIndex}"]`)
+  const fromDrag = blocksField
+    .locator(`[id^="${fieldName}-row-${fromBlockIndex}"]`)
+    .locator(`.collapsible__drag`)
 
-  const fromBoundingBox = await fromField.locator(`.collapsible__drag`).boundingBox()
+  const toDrag = blocksField
+    .locator(`[id^="${fieldName}-row-${toBlockIndex}"]`)
+    .locator(`.collapsible__drag`)
 
-  const toField = blocksField.locator(`[id^="${fieldName}-row-${toBlockIndex}"]`)
+  await expect(fromDrag).toBeVisible()
+  await expect(toDrag).toBeVisible()
+  await fromDrag.scrollIntoViewIfNeeded()
 
-  const toBoundingBox = await toField.locator(`.collapsible__drag`).boundingBox()
+  // Wait for layout to stabilize after framework hydration/re-renders
+  await page.waitForTimeout(500)
+
+  const fromBoundingBox = await fromDrag.boundingBox()
+  const toBoundingBox = await toDrag.boundingBox()
 
   if (!fromBoundingBox || !toBoundingBox) {
-    return
+    throw new Error('Could not find drag handle bounding boxes for block reordering')
   }
 
-  // drag the "from" column to the left of the "to" column
-  await page.mouse.move(fromBoundingBox.x + 2, fromBoundingBox.y + 2, { steps: 10 })
+  await page.mouse.move(
+    fromBoundingBox.x + fromBoundingBox.width / 2,
+    fromBoundingBox.y + fromBoundingBox.height / 2,
+    { steps: 10 },
+  )
   await page.mouse.down()
   await wait(300)
-  await page.mouse.move(toBoundingBox.x - 2, toBoundingBox.y - 2, { steps: 10 })
+  await page.mouse.move(
+    toBoundingBox.x + toBoundingBox.width / 2,
+    toBoundingBox.y + toBoundingBox.height / 2,
+    { steps: 10 },
+  )
   await page.mouse.up()
+
+  await page.waitForTimeout(400)
 
   // Ensure blocks are loaded
   await expect(page.locator('.shimmer-effect')).toHaveCount(0)

@@ -1,11 +1,12 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
 import { executePromises } from '../__helpers/shared/executePromises.js'
+import { devUser } from '../credentials.js'
 import {
   customDocumentControlsSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
+  fullyFeaturedCollectionSlug,
   geoCollectionSlug,
   localizedCollectionSlug,
   noApiViewCollectionSlug,
@@ -129,6 +130,129 @@ export const seed = async (_payload: Payload) => {
           collection: localizedCollectionSlug,
           data: {
             title: 'Localized Doc',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: fullyFeaturedCollectionSlug,
+          data: {
+            title: 'Welcome to Payload',
+            slug: 'welcome-to-payload',
+            content: {
+              root: {
+                type: 'root',
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'This is a fully featured document with rich text, blocks, arrays, and localized fields.',
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            },
+            excerpt:
+              'A pre-seeded document demonstrating all field types in the fully featured collection.',
+            layout: [
+              {
+                blockType: 'richTextBlock',
+                richText: {
+                  root: {
+                    type: 'root',
+                    children: [
+                      {
+                        type: 'paragraph',
+                        children: [
+                          {
+                            type: 'text',
+                            detail: 0,
+                            format: 0,
+                            mode: 'normal',
+                            style: '',
+                            text: 'This is a rich text block inside the layout builder.',
+                            version: 1,
+                          },
+                        ],
+                        direction: 'ltr',
+                        format: '',
+                        indent: 0,
+                        version: 1,
+                      },
+                    ],
+                    direction: 'ltr',
+                    format: '',
+                    indent: 0,
+                    version: 1,
+                  },
+                },
+              },
+              {
+                blockType: 'ctaBlock',
+                heading: 'Get Started',
+                description: 'Learn how to build with Payload CMS.',
+                links: [
+                  {
+                    label: 'Documentation',
+                    url: 'https://payloadcms.com/docs',
+                    style: 'primary',
+                  },
+                  {
+                    label: 'GitHub',
+                    url: 'https://github.com/payloadcms/payload',
+                    style: 'secondary',
+                  },
+                ],
+              },
+              {
+                blockType: 'cardGridBlock',
+                cards: [
+                  {
+                    title: 'Rich Text',
+                    description: 'Lexical-powered rich text editing with full block support.',
+                    link: { label: 'Learn more', url: '/docs/rich-text' },
+                  },
+                  {
+                    title: 'Blocks',
+                    description: 'Flexible layout building with typed block fields.',
+                    link: { label: 'Learn more', url: '/docs/blocks' },
+                  },
+                  {
+                    title: 'Localization',
+                    description: 'First-class i18n with per-field locale control.',
+                    link: { label: 'Learn more', url: '/docs/localization' },
+                  },
+                ],
+              },
+            ],
+            tags: [{ tag: 'payload' }, { tag: 'cms' }, { tag: 'testing' }],
+            category: 'tutorial',
+            priority: 8,
+            status: 'published',
+            isFeatured: true,
+            seo: {
+              metaTitle: 'Welcome to Payload - Fully Featured Test',
+              metaDescription:
+                'A comprehensive test document showcasing rich text, blocks, arrays, and localization.',
+              noIndex: false,
+            },
           },
           depth: 0,
           overrideAccess: true,

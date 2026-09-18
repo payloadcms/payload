@@ -13,4 +13,5 @@ export const StaticURLCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

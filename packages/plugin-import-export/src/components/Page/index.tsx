@@ -5,7 +5,7 @@ import type { NumberFieldClientComponent } from 'payload'
 import { NumberField, useField } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'page-field'
 

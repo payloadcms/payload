@@ -93,9 +93,9 @@ For example:
 'use client'
 import type { MyInlineBlock, MyNumberBlock, MyTextBlock } from '@/payload-types'
 import type {
-  DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
+  WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
@@ -105,11 +105,11 @@ import {
 } from '@payloadcms/richtext-lexical/react'
 import React from 'react'
 
-// Extend the default node types with your custom blocks for full type safety
-type NodeTypes =
-  | DefaultNodeTypes
+// The default nodes plus your custom blocks for full type safety
+type NodeTypes = WithDefaultNodes<
   | SerializedBlockNode<MyNumberBlock | MyTextBlock>
   | SerializedInlineBlockNode<MyInlineBlock>
+>
 
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({
   defaultConverters,

@@ -71,5 +71,6 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig |
     },
     fields,
     lockDocuments: false,
+    versions: false,
   }
 }

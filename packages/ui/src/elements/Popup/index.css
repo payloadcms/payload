@@ -1,0 +1,72 @@
+@layer payload-default {
+  .popup {
+    position: relative;
+  }
+
+  .popup__trigger-wrap {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .popup__on-hover-watch {
+    display: contents;
+  }
+
+  .popup__hidden-content {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .popup__content {
+    --popup-caret-size: 8px;
+
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    z-index: var(--z-popup);
+    background: var(--popup-bg, var(--color-bg-elevated));
+    color: var(--popup-text, var(--color-text));
+    border-radius: var(--popup-radius);
+    min-width: 80px;
+    max-width: 400px;
+    box-shadow: var(--elevation-400-menu-panel);
+  }
+
+  .popup__content[data-theme='dark'] {
+    background: var(--popup-bg, var(--color-bg-menu));
+    color: var(--popup-text, var(--color-text-ontooltip));
+  }
+
+  .popup__content.popup--size-small {
+    min-width: 80px;
+  }
+
+  .popup__content.popup--size-large {
+    min-width: 200px;
+  }
+
+  .popup__content.popup--size-fit-content {
+    min-width: fit-content;
+  }
+
+  .popup__scroll-container {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: calc(var(--spacer-5) * 10);
+    padding: var(--spacer-2) 0;
+  }
+
+  .popup__scroll-container:not(.popup__scroll-container--show-scrollbar) {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .popup__scroll-container:not(.popup__scroll-container--show-scrollbar)::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
+  }
+}

@@ -1,8 +1,6 @@
-import type { Config } from 'payload'
-
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { definePlugin } from 'payload'
+import { type Config, definePlugin } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -28,12 +26,12 @@ declare module 'payload' {
 const readerPlugin = definePlugin<ReaderPluginOptions>({
   slug: 'priority-reader',
   order: 10,
-  plugin: ({ config, items }): Config => ({
+  plugin: ({ config, options }): Config => ({
     ...config,
     custom: {
       ...(config.custom || {}),
+      readerItems: options.items.map((i) => i.name),
       readerSawValue: (config.custom?.writerValue as string) ?? null,
-      readerItems: items.map((i) => i.name),
     },
   }),
 })
@@ -62,39 +60,47 @@ const writerPlugin = definePlugin({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'plugins',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      {
+        slug: 'users',
+        auth: true,
+        fields: [],
+        versions: false,
+      },
+    ],
+    plugins: [
+      (config) => ({
+        ...config,
+        collections: [
+          ...(config.collections || []),
+          {
+            slug: pagesSlug,
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+              },
+            ],
+            versions: false,
+          },
+        ],
+      }),
+      // Intentionally listed BEFORE the writer to verify order sorting works
+      readerPlugin({ items: [{ name: 'user-provided' }] }),
+      writerPlugin(),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    {
-      slug: 'users',
-      auth: true,
-      fields: [],
-    },
-  ],
-  plugins: [
-    (config) => ({
-      ...config,
-      collections: [
-        ...(config.collections || []),
-        {
-          slug: pagesSlug,
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    }),
-    // Intentionally listed BEFORE the writer to verify order sorting works
-    readerPlugin({ items: [{ name: 'user-provided' }] }),
-    writerPlugin(),
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -102,8 +108,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

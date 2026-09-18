@@ -34,7 +34,7 @@ const config: SanitizedConfig = {} as SanitizedConfig
 If you require the default editor config:
 
 ```ts
-const defaultEditorConfig = await editorConfigFactory.default({ config })
+const defaultEditorConfig = editorConfigFactory.default({ config })
 ```
 
 ### Option 2: Extract from a Lexical Field
@@ -54,7 +54,7 @@ You can create a custom editor configuration by specifying additional features:
 ```ts
 import { FixedToolbarFeature } from '@payloadcms/richtext-lexical'
 
-const customEditorConfig = await editorConfigFactory.fromFeatures({
+const customEditorConfig = editorConfigFactory.fromFeatures({
   config,
   features: ({ defaultFeatures }) => [
     ...defaultFeatures,
@@ -75,7 +75,7 @@ const editor = lexicalEditor({
   ],
 })
 
-const instantiatedEditorConfig = await editorConfigFactory.fromEditor({
+const instantiatedEditorConfig = editorConfigFactory.fromEditor({
   config,
   editor,
 })

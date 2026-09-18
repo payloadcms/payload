@@ -1,4 +1,4 @@
-import type { I18nClient, TFunction } from '@payloadcms/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { ClientCollectionConfig, ViewTypes } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -12,13 +12,12 @@ import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/Drawe
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
-  ListCreateNewButton,
   ListEmptyTrashButton,
 } from '../../../elements/ListHeader/TitleActions/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { ListSelection } from '../ListSelection/index.js'
-import './index.scss'
+import './index.css'
 
 const drawerBaseClass = 'list-drawer'
 
@@ -37,16 +36,7 @@ export type ListHeaderProps = {
   isTrashEnabled?: boolean
   newDocumentURL: string
   onBulkUploadSuccess?: () => void
-  /** @deprecated This prop will be removed in the next major version.
-   *
-   * Opening of the bulk upload modal is handled internally.
-   *
-   * Prefer `onBulkUploadSuccess` usage to handle the success of the bulk upload.
-   */
-  openBulkUpload: () => void
   smallBreak: boolean
-  /** @deprecated This prop will be removed in the next major version. */
-  t?: TFunction
   TitleActions?: React.ReactNode[]
   viewType?: ViewTypes
 }
@@ -63,9 +53,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   i18n,
   isBulkUploadEnabled,
   isTrashEnabled,
-  newDocumentURL,
   onBulkUploadSuccess,
-  openBulkUpload,
   smallBreak,
   viewType,
 }) => {
@@ -77,18 +65,15 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   if (isInDrawer) {
     return (
       <ListHeader
-        Actions={[
-          <CloseModalButton
-            className={`${drawerBaseClass}__header-close`}
-            key="close-button"
-            slug={drawerSlug}
-          />,
-        ]}
+        Actions={[]}
         AfterListHeaderContent={
           <>
             {Description}
             {<DrawerRelationshipSelect />}
           </>
+        }
+        BeforeTitle={
+          <CloseModalButton className={`${drawerBaseClass}__header-close`} slug={drawerSlug} />
         }
         className={`${drawerBaseClass}__header`}
         title={getTranslation(
@@ -132,14 +117,6 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
       className={className}
       title={getTranslation(collectionConfig?.labels?.plural, i18n)}
       TitleActions={[
-        hasCreatePermission && !isTrashRoute && (
-          <ListCreateNewButton
-            collectionConfig={collectionConfig}
-            hasCreatePermission={hasCreatePermission}
-            key="list-header-create-new-doc"
-            newDocumentURL={newDocumentURL}
-          />
-        ),
         hasCreatePermission && isBulkUploadEnabled && !isTrashRoute && (
           <ListBulkUploadButton
             collectionSlug={collectionConfig.slug}
@@ -147,7 +124,6 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             isBulkUploadEnabled={isBulkUploadEnabled}
             key="list-header-bulk-upload"
             onBulkUploadSuccess={onBulkUploadSuccess}
-            openBulkUpload={openBulkUpload}
           />
         ),
         hasDeletePermission && isTrashEnabled && viewType === 'trash' && (

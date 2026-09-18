@@ -8,7 +8,7 @@ import type {
   FeatureProviderProviderClient,
 } from '../features/typesClient.js'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
-import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types.js'
+import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types/index.js'
 type Args = {
   clientFieldSchemaMap: ClientFieldSchemaMap
   fieldSchemaMap: FieldSchemaMap

@@ -10,7 +10,7 @@ import type {
   ResolvedServerFeatureMap,
   SanitizedServerFeatures,
 } from '../../features/typesServer.js'
-import type { LexicalFieldAdminClientProps } from '../../types.js'
+import type { LexicalFieldAdminClientProps } from '../../types/index.js'
 
 export type ServerEditorConfig = {
   features: FeatureProviderServer<any, any, any>[]

@@ -1,8 +1,8 @@
 import {
   countRunnableOrActiveJobsForQueue,
   type TaskConfig,
-  type TaskType,
-  type WorkflowTypes,
+  type TaskSlug,
+  type WorkflowSlug,
 } from 'payload'
 
 export const EverySecondMax2Task: TaskConfig<'EverySecondMax2'> = {
@@ -15,8 +15,8 @@ export const EverySecondMax2Task: TaskConfig<'EverySecondMax2'> = {
           const runnableOrActiveJobsForQueue = await countRunnableOrActiveJobsForQueue({
             queue: queueable.scheduleConfig.queue,
             req,
-            taskSlug: queueable.taskConfig?.slug as TaskType,
-            workflowSlug: queueable.workflowConfig?.slug as WorkflowTypes,
+            taskSlug: queueable.taskConfig?.slug as TaskSlug,
+            workflowSlug: queueable.workflowConfig?.slug as WorkflowSlug,
             onlyScheduled: false, // Set to false, used to test it
           })
 

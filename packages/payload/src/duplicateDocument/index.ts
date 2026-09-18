@@ -38,7 +38,7 @@ export const getDuplicateDocumentData = async ({
   // /////////////////////////////////////
 
   const accessResults = !overrideAccess
-    ? await executeAccess({ id, req }, collectionConfig.access.read)
+    ? await executeAccess({ id, slug: collectionConfig.slug, req }, collectionConfig.access.read)
     : true
   const hasWherePolicy = hasWhereAccessResult(accessResults)
 

@@ -6,7 +6,6 @@ import type {
   DocumentPreferences,
   DocumentSlots,
   FormState,
-  GetFolderResultsComponentAndDataArgs,
   Params,
   RenderDocumentVersionsProperties,
   ServerFunction,
@@ -24,8 +23,9 @@ import type {
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
-import type { getFolderResultsComponentAndDataHandler } from '../../utilities/getFolderResultsComponentAndData.js'
 import type {
+  getUpcomingScheduledPublishHandler,
+  GetUpcomingScheduledPublishHandlerArgs,
   schedulePublishHandler,
   SchedulePublishHandlerArgs,
 } from '../../utilities/schedulePublishHandler.js'
@@ -41,6 +41,12 @@ type SchedulePublishClient = (
     signal?: AbortSignal
   } & Omit<SchedulePublishHandlerArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof schedulePublishHandler>
+
+type GetUpcomingScheduledPublishClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<GetUpcomingScheduledPublishHandlerArgs, 'clientConfig' | 'req'>,
+) => ReturnType<typeof getUpcomingScheduledPublishHandler>
 
 type GetTableStateClient = (
   args: {
@@ -104,25 +110,22 @@ type GetDocumentSlots = (args: {
   signal?: AbortSignal
 }) => Promise<DocumentSlots>
 
-type GetFolderResultsComponentAndDataClient = (
-  args: {
-    signal?: AbortSignal
-  } & Omit<GetFolderResultsComponentAndDataArgs, 'req'>,
-) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
-
 type RenderFieldClient = (args: RenderFieldServerFnArgs) => Promise<RenderFieldServerFnReturnType>
+
+type SwitchLanguageClient = (lang: string) => Promise<void>
 
 export type ServerFunctionsContextType = {
   _internal_renderField: RenderFieldClient
   copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
-  getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
+  getUpcomingScheduledPublish: GetUpcomingScheduledPublishClient
   renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
   slugify: SlugifyClient
+  switchLanguage: SwitchLanguageClient
 }
 
 export const ServerFunctionsContext = createContext<ServerFunctionsContextType | undefined>(
@@ -180,6 +183,24 @@ export const ServerFunctionsProvider: React.FC<{
       }
 
       return { error }
+    },
+    [serverFunction],
+  )
+
+  const getUpcomingScheduledPublish = useCallback<GetUpcomingScheduledPublishClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args
+
+      if (remoteSignal?.aborted) {
+        return []
+      }
+
+      const result = (await serverFunction({
+        name: 'get-upcoming-scheduled-publish',
+        args: rest,
+      })) as Awaited<ReturnType<typeof getUpcomingScheduledPublishHandler>>
+
+      return remoteSignal?.aborted ? [] : result
     },
     [serverFunction],
   )
@@ -268,26 +289,6 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  const getFolderResultsComponentAndData = useCallback<GetFolderResultsComponentAndDataClient>(
-    async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
-
-      try {
-        const result = (await serverFunction({
-          name: 'get-folder-results-component-and-data',
-          args: rest,
-        })) as Awaited<ReturnType<typeof getFolderResultsComponentAndDataHandler>>
-
-        if (!remoteSignal?.aborted) {
-          return result
-        }
-      } catch (_err) {
-        console.error(_err) // eslint-disable-line no-console
-      }
-    },
-    [serverFunction],
-  )
-
   const _internal_renderField = useCallback<RenderFieldClient>(
     async (args) => {
       try {
@@ -322,19 +323,30 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const switchLanguage = useCallback<SwitchLanguageClient>(
+    async (lang) => {
+      await serverFunction({
+        name: 'switch-language',
+        args: { lang },
+      })
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext
       value={{
         _internal_renderField,
         copyDataFromLocale,
         getDocumentSlots,
-        getFolderResultsComponentAndData,
         getFormState,
         getTableState,
+        getUpcomingScheduledPublish,
         renderDocument,
         schedulePublish,
         serverFunction,
         slugify,
+        switchLanguage,
       }}
     >
       {children}

@@ -1,5 +1,7 @@
-import type { SerializedHeadingNode } from '../../../../../nodeTypes.js'
+import type { SerializedHeadingNode } from '../../../../../types/nodeTypes.js'
 import type { JSXConverters } from '../types.js'
+
+import { ALLOWED_HEADING_TAGS } from '../../../../heading/constants.js'
 
 export const HeadingJSXConverter: JSXConverters<SerializedHeadingNode> = {
   heading: ({ node, nodesToJSX }) => {
@@ -7,7 +9,7 @@ export const HeadingJSXConverter: JSXConverters<SerializedHeadingNode> = {
       nodes: node.children,
     })
 
-    const NodeTag = node.tag
+    const NodeTag = ALLOWED_HEADING_TAGS.has(node.tag) ? node.tag : 'h1'
 
     return <NodeTag>{children}</NodeTag>
   },

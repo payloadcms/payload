@@ -62,7 +62,7 @@ export type DetectionResult = {
       packageName: string
     }
     /** Current storage adapter import info */
-    storageAdapters?: Array<{
+    storage?: Array<{
       hasOtherImports: boolean
       importDeclaration: ImportDeclaration
       packageName: string
@@ -131,7 +131,6 @@ export const ALL_STORAGE_ADAPTERS = [
   'localDisk',
   'r2Storage',
   's3Storage',
-  'uploadthingStorage',
   'vercelBlobStorage',
 ] as const
 

@@ -3,7 +3,7 @@ import type { BaseSelection, LexicalEditor } from 'lexical'
 import type React from 'react'
 
 import type { EditorConfigContextType } from '../../lexical/config/client/EditorConfigProvider.js'
-import type { FeatureClientSchemaMap } from '../../types.js'
+import type { FeatureClientSchemaMap } from '../../types/index.js'
 
 export type ToolbarGroup = ToolbarButtonsGroup | ToolbarDropdownGroup
 
@@ -12,6 +12,10 @@ export type ToolbarDropdownGroup = {
    * The dropdown toolbar ChildComponent allows you to pass in a React Component which will be displayed within the dropdown button.
    */
   ChildComponent?: React.FC
+  /**
+   * If true, the dropdown items will only show icons (text labels are hidden via CSS) and tooltips will be displayed on hover.
+   */
+  iconOnly?: boolean
   /**
    * This is optional and controls if the toolbar group is highlighted or not.
    */

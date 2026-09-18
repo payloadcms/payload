@@ -5,8 +5,8 @@ import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
@@ -25,10 +25,7 @@ test.describe('MCP Plugin', () => {
     serverURL = serverFromInit
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     // Login as dev user to get a JWT token for API key creation
     const loginRes = await request.post(`${serverURL}/api/users/login`, {
@@ -39,23 +36,19 @@ test.describe('MCP Plugin', () => {
     const token = loginData.token
     const userId = loginData.user.id
 
-    // Create an API key with permissions to call tools/list
-    const createKeyRes = await request.post(`${serverURL}/api/payload-mcp-api-keys`, {
+    apiKey = randomUUID()
+
+    // Enable a user API key for MCP authentication
+    const updateUserRes = await request.patch(`${serverURL}/api/users/${userId}`, {
       data: {
+        apiKey,
         enableAPIKey: true,
-        label: 'E2E Test Key',
-        apiKey: randomUUID(),
-        user: userId,
-        posts: { create: true, find: true, update: true, delete: true },
-        products: { find: true },
       },
       headers: {
         Authorization: `JWT ${token}`,
       },
     })
-    expect(createKeyRes.ok()).toBeTruthy()
-    const keyData = await createKeyRes.json()
-    apiKey = keyData.doc.apiKey
+    expect(updateUserRes.ok()).toBeTruthy()
   })
 
   test('should not poison the Next.js runtime after MCP requests', async ({ request }) => {
@@ -73,7 +66,7 @@ test.describe('MCP Plugin', () => {
 
     const mcpHeaders = {
       Accept: 'application/json, text/event-stream',
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `users API-Key ${apiKey}`,
       'Content-Type': 'application/json',
     }
 

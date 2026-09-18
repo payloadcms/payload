@@ -159,8 +159,8 @@ export const getImportCollection = ({
         matchField: doc.matchField,
         maxLimit,
         req,
-        userCollection: req?.user?.collection || req?.user?.user?.collection,
-        userID: req?.user?.id || req?.user?.user?.id,
+        userCollection: req?.user?.collection,
+        userID: req?.user?.id,
       })
 
       // Determine status
@@ -348,8 +348,8 @@ export const getImportCollection = ({
         importCollection: collectionConfig.slug,
         importId: doc.id,
         maxLimit,
-        userCollection: req.user?.collection || req?.user?.user?.collection,
-        userID: req?.user?.id || req?.user?.user?.id,
+        userCollection: req.user?.collection,
+        userID: req?.user?.id,
       }
 
       await req.payload.jobs.queue({

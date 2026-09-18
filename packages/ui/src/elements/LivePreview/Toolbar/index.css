@@ -1,0 +1,47 @@
+@layer payload-default {
+  .live-preview-toolbar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    max-height: var(--spacer-6);
+    padding: var(--spacer-2);
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .live-preview-window--is-expanded .live-preview-toolbar--static {
+    padding-inline-start: var(--gutter-h);
+  }
+
+  .live-preview-toolbar--static {
+    position: relative;
+    width: 100%;
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    padding-inline-end: var(--gutter-h);
+  }
+
+  .live-preview-toolbar--draggable {
+    box-shadow: var(--elevation-400-menu-panel);
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    border-radius: var(--radius-medium);
+  }
+
+  .live-preview-toolbar__drag-handle {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: grab;
+
+    .icon--drag-handle .fill {
+      fill: var(--color-icon-tertiary);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+}

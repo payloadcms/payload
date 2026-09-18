@@ -1,0 +1,165 @@
+@layer payload-default {
+  /* Allow the ReactCrop 9999px box-shadow overlay to escape the dialog bounds. */
+  .edit-upload__dialog {
+    overflow: visible;
+  }
+
+  .edit-upload__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .edit-upload__content {
+    --edit-upload-content-min-height: 480px;
+    --edit-upload-sidebar-width: 240px;
+
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    min-height: var(--edit-upload-content-min-height);
+  }
+
+  /* Canvas area */
+  .edit-upload__crop {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacer-4);
+    background: var(--color-bg-secondary);
+  }
+
+  .edit-upload .ReactCrop__selection-addon,
+  .edit-upload__crop-window {
+    height: 100%;
+    width: 100%;
+  }
+
+  .edit-upload__focal-wrapper {
+    position: relative;
+    display: inline-flex;
+    max-height: 100%;
+    max-width: 100%;
+  }
+
+  /* Sidebar */
+  .edit-upload__sidebar {
+    flex-shrink: 0;
+    width: var(--edit-upload-sidebar-width);
+    border-inline-start: var(--stroke-width-small) solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .edit-upload__section {
+    display: flex;
+    flex-direction: column;
+    padding-block-end: var(--spacer-2);
+  }
+
+  .edit-upload__section + .edit-upload__section {
+    border-top: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .edit-upload__section:last-child {
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .edit-upload__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--spacer-6);
+    padding-inline-start: var(--spacer-3);
+    padding-inline-end: var(--spacer-2);
+  }
+
+  .edit-upload__section-title {
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    color: var(--color-text);
+  }
+
+  .edit-upload__reset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-medium);
+    background: transparent;
+    color: var(--color-icon);
+    cursor: pointer;
+  }
+
+  .edit-upload__reset:hover {
+    background: var(--color-bg-secondary);
+  }
+
+  .edit-upload__reset:focus-visible {
+    outline: var(--accessibility-outline);
+  }
+
+  .edit-upload__fieldset {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacer-2);
+    padding-inline-start: var(--spacer-3);
+    padding-inline-end: var(--spacer-2);
+    padding-block: var(--spacer-1);
+  }
+
+  /* Draggable focal point */
+  .edit-upload__draggable-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none; /* let clicks pass through to the image/crop layer */
+  }
+
+  .edit-upload__draggable {
+    position: absolute;
+    pointer-events: all; /* only the handle itself is interactive */
+  }
+
+  .edit-upload__focalPoint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-5);
+    height: var(--spacer-5);
+    border-radius: 50%;
+    background: var(--color-focal-point-backdrop);
+    color: white;
+    cursor: grab;
+    transform: translate3d(-50%, -50%, 0);
+    pointer-events: all;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .edit-upload__content {
+      flex-direction: column;
+      min-height: unset;
+    }
+
+    .edit-upload__sidebar {
+      width: 100%;
+      border-inline-start: none;
+      border-top: var(--stroke-width-small) solid var(--color-border);
+    }
+  }
+}

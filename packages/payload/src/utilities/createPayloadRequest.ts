@@ -69,6 +69,7 @@ export const createPayloadRequest = async ({
 
   const query = queryToParse
     ? qs.parse(queryToParse, {
+        allowEmptyArrays: true,
         arrayLimit: 1000,
         depth: 10,
         ignoreQueryPrefix: true,
@@ -126,6 +127,7 @@ export const createPayloadRequest = async ({
     headers: req.headers,
     isGraphQL,
     payload,
+    req,
   })
 
   req.user = user

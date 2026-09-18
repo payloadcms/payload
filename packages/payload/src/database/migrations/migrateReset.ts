@@ -1,4 +1,4 @@
-import type { BaseDatabaseAdapter } from '../types.js'
+import type { BaseDatabaseAdapter, MigrationResult } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
@@ -7,7 +7,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
 import { readMigrationFiles } from './readMigrationFiles.js'
 
-export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
+export async function migrateReset(this: BaseDatabaseAdapter): Promise<MigrationResult> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -15,12 +15,13 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
 
   if (!existingMigrations?.length) {
     payload.logger.info({ msg: 'No migrations to reset.' })
-    return
+    return { migrated: [], rolledBack: [] }
   }
 
   const req = await createLocalReq({}, payload)
 
   migrationFiles.reverse()
+  const rolledBack: string[] = []
 
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
@@ -45,6 +46,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
           },
         })
         await commitTransaction(req)
+        rolledBack.push(migration.name)
         payload.logger.info({ msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)` })
       } catch (err: unknown) {
         await killTransaction(req)
@@ -66,5 +68,8 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
     })
   } catch (err: unknown) {
     payload.logger.error({ err, msg: 'Error deleting dev migration' })
+    throw err
   }
+
+  return { migrated: [], rolledBack }
 }

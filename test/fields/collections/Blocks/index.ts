@@ -1,6 +1,6 @@
 import type { BlocksField, CollectionConfig } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
 import { getBlocksFieldSeedData } from './shared.js'
@@ -27,7 +27,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
         {
           name: 'richText',
           type: 'richText',
-          editor: slateEditor({}),
+          editor: lexicalEditor({}),
         },
       ],
     },
@@ -432,20 +432,17 @@ export const BlockFields: CollectionConfig = {
     {
       name: 'deduplicatedBlocks',
       type: 'blocks',
-      blockReferences: ['ConfigBlockTest'],
-      blocks: [],
+      blocks: ['ConfigBlockTest'],
     },
     {
       name: 'deduplicatedBlocks2',
       type: 'blocks',
-      blockReferences: ['ConfigBlockTest'],
-      blocks: [],
+      blocks: ['ConfigBlockTest'],
     },
     {
       name: 'localizedReferencesLocalizedBlock',
       type: 'blocks',
-      blockReferences: ['localizedTextReference'],
-      blocks: [],
+      blocks: ['localizedTextReference'],
       localized: true,
     },
     {
@@ -453,8 +450,7 @@ export const BlockFields: CollectionConfig = {
       type: 'blocks',
       // Needs to be a separate block - otherwise this will break in postgres. This is unrelated to block references
       // and an issue with all blocks.
-      blockReferences: ['localizedTextReference2'],
-      blocks: [],
+      blocks: ['localizedTextReference2'],
     },
     {
       name: 'groupedBlocks',
@@ -629,4 +625,5 @@ export const BlockFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

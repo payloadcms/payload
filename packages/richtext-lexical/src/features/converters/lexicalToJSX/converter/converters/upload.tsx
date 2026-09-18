@@ -1,7 +1,7 @@
-import type { FileData, FileSizeImproved, TypeWithID } from 'payload'
+import type { FileData, FileSize, TypeWithID } from 'payload'
 
-import type { SerializedUploadNode } from '../../../../../nodeTypes.js'
-import type { UploadDataImproved } from '../../../../upload/server/nodes/UploadNode.js'
+import type { SerializedUploadNode } from '../../../../../types/nodeTypes.js'
+import type { UploadDataImproved } from '../../../../upload/server/schema.js'
 import type { JSXConverters } from '../types.js'
 
 export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
@@ -43,7 +43,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
 
     // Iterate through each size in the data.sizes object
     for (const size in uploadDoc.sizes) {
-      const imageSize = uploadDoc.sizes[size] as FileSizeImproved
+      const imageSize = uploadDoc.sizes[size] as FileSize
 
       // Skip if any property of the size object is null
       if (

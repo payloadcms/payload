@@ -2,11 +2,11 @@ import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToForm
 import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../../typesServer.js'
-import type { UploadFeatureProps } from './index.js'
-import type { SerializedUploadNode } from './nodes/UploadNode.js'
+import type { UploadFeatureServerProps } from './index.js'
+import type { SerializedUploadNode } from './schema.js'
 
 export const uploadValidation = (
-  props: UploadFeatureProps,
+  props: UploadFeatureServerProps,
 ): NodeValidation<SerializedUploadNode> => {
   return async ({
     node,
@@ -21,6 +21,10 @@ export const uploadValidation = (
       },
     },
   }) => {
+    if (!props.enabledCollectionSlugs.includes(node.relationTo)) {
+      return t('validation:invalidSelection')
+    }
+
     const idType = payload.collections[node.relationTo]?.customIDType || payload.db.defaultIDType
     // @ts-expect-error - Fix in Payload v4
     const nodeID = node?.value?.id || node?.value // for backwards-compatibility

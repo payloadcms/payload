@@ -1,0 +1,55 @@
+@layer payload-default {
+  .export-preview__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: var(--spacer-2);
+  }
+
+  .export-preview__export-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: calc(var(--spacer-1) / 2);
+  }
+
+  .export-preview__export-count {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .export-preview__limit-capped {
+    color: var(--color-text-warning);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .export-preview__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-4);
+    margin-top: var(--spacer-4);
+    padding-top: var(--spacer-4);
+    border-top: var(--stroke-width-small) solid var(--color-border);
+
+    /* When only PerPage is present (no Pagination), keep it on the right */
+    .per-page:only-child {
+      margin-left: auto;
+    }
+  }
+
+  .export-preview__page-info {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    white-space: nowrap;
+  }
+}

@@ -6,7 +6,6 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import type {
-  AgentType,
   CliArgs,
   DbDetails,
   PackageManager,
@@ -16,14 +15,19 @@ import type {
 
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
+import {
+  DEFAULT_PAYLOAD_VERSION_TAG,
+  resolvePackageVersion,
+} from '../utils/resolvePackageVersion.js'
+import { buildAgentConfigFiles } from './agent-config.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
+import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { downloadExample } from './download-example.js'
-import { downloadSkill } from './download-skill.js'
 import { downloadTemplate } from './download-template.js'
 import { generateSecret } from './generate-secret.js'
+import { getInstallCommand, getRunCommand } from './get-package-manager.js'
 import { manageEnvFiles } from './manage-env-files.js'
-import { getAgentChoice } from './select-agent.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -44,15 +48,9 @@ async function installDeps(args: {
   if (cliArgs['--no-deps']) {
     return true
   }
-  let installCmd = 'npm install --legacy-peer-deps'
+  const installCmd = getInstallCommand(packageManager)
 
-  if (packageManager === 'yarn') {
-    installCmd = 'yarn'
-  } else if (packageManager === 'pnpm') {
-    installCmd = 'pnpm install'
-  } else if (packageManager === 'bun') {
-    installCmd = 'bun install'
-  }
+  await ensurePnpmBuildApprovals({ packageManager, projectDir })
 
   try {
     await execa.command(installCmd, {
@@ -65,6 +63,65 @@ async function installDeps(args: {
   }
 }
 
+type PayloadGenerateResult = { error: string; ok: false } | { ok: true }
+
+async function runPayloadCommand(args: {
+  command: string
+  packageManager: PackageManager
+  projectDir: string
+}): Promise<PayloadGenerateResult> {
+  const { command, packageManager, projectDir } = args
+
+  try {
+    await execa.command(`${getRunCommand(packageManager)} ${command}`, {
+      cwd: path.resolve(projectDir),
+    })
+    return { ok: true }
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : String(err), ok: false }
+  }
+}
+
+/** Non-fatal: on failure, warn with the command to run later. */
+async function runPayloadGenerate(args: {
+  artifact: string
+  command: string
+  packageManager: PackageManager
+  projectDir: string
+  spinner: ReturnType<typeof p.spinner>
+}): Promise<void> {
+  const { artifact, command, packageManager, projectDir, spinner } = args
+
+  spinner.start(`Generating ${artifact}...`)
+  const result = await runPayloadCommand({ command, packageManager, projectDir })
+  const capitalized = artifact.charAt(0).toUpperCase() + artifact.slice(1)
+
+  if (result.ok) {
+    spinner.stop(`${capitalized} generated`)
+    return
+  }
+
+  spinner.stop(`Could not generate ${artifact}`, 1)
+  warning(`Run '${getRunCommand(packageManager)} ${command}' later. ${result.error}`)
+}
+
+async function runProjectCodegen(args: {
+  packageManager: PackageManager
+  projectDir: string
+  spinner: ReturnType<typeof p.spinner>
+}): Promise<void> {
+  await runPayloadGenerate({
+    ...args,
+    artifact: 'import map',
+    command: 'generate:importmap',
+  })
+  await runPayloadGenerate({
+    ...args,
+    artifact: 'types',
+    command: 'generate:types',
+  })
+}
+
 type TemplateOrExample =
   | {
       example: ProjectExample
@@ -75,7 +132,6 @@ type TemplateOrExample =
 
 export async function createProject(
   args: {
-    agentType?: AgentType
     cliArgs: CliArgs
     dbDetails?: DbDetails
     packageManager: PackageManager
@@ -83,7 +139,7 @@ export async function createProject(
     projectName: string
   } & TemplateOrExample,
 ): Promise<void> {
-  const { agentType, cliArgs, dbDetails, packageManager, projectDir, projectName } = args
+  const { cliArgs, dbDetails, packageManager, projectDir, projectName } = args
 
   if (cliArgs['--dry-run']) {
     debug(`Dry run: Creating project in ${chalk.green(projectDir)}`)
@@ -130,25 +186,17 @@ export async function createProject(
     })
   }
 
+  const versionOrTag = cliArgs['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG
+
   const spinner = p.spinner()
-  spinner.start('Checking latest Payload version...')
+  spinner.start(`Resolving Payload version (${versionOrTag})...`)
 
-  // Allows overriding the installed Payload version instead of installing the latest
-  const versionFromCli = cliArgs['--version']
+  const payloadVersion = await resolvePackageVersion({
+    packageName: 'payload',
+    versionOrTag,
+  })
 
-  let payloadVersion: string
-
-  if (versionFromCli) {
-    await verifyVersionForPackage({ version: versionFromCli })
-
-    payloadVersion = versionFromCli
-
-    spinner.stop(`Using provided version of Payload ${payloadVersion}`)
-  } else {
-    payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
-
-    spinner.stop(`Found latest version of Payload ${payloadVersion}`)
-  }
+  spinner.stop(`Using Payload version ${payloadVersion}`)
 
   await updatePackageJSON({ latestVersion: payloadVersion, projectDir, projectName })
 
@@ -174,28 +222,9 @@ export async function createProject(
     template: 'template' in args ? args.template : undefined,
   })
 
-  if (agentType) {
-    spinner.message('Installing agent skill...')
-    try {
-      await downloadSkill({
-        agentType,
-        branch: cliArgs['--branch'] || undefined,
-        debug: cliArgs['--debug'],
-        projectDir,
-      })
-
-      const { configFile, skillsDir } = getAgentChoice(agentType)
-      const skillPath = `${skillsDir}/payload`
-      const configContent =
-        configFile === 'CLAUDE.md'
-          ? `# Claude Code\n\nThis project uses the Payload CMS skill at \`${skillPath}/\`.\nStart with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.\n`
-          : `# Agents\n\nThis project uses the Payload CMS skill at \`${skillPath}/\`.\nStart with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.\n`
-      await fse.writeFile(path.resolve(projectDir, configFile), configContent)
-    } catch (err) {
-      if (cliArgs['--debug'] && err instanceof Error) {
-        debug(`Failed to download skill: ${err.message}`)
-      }
-      warning('Could not download agent skill. You can install it manually later.')
+  if (!cliArgs['--no-agent']) {
+    for (const { content, fileName } of buildAgentConfigFiles()) {
+      await fse.writeFile(path.resolve(projectDir, fileName), content)
     }
   }
 
@@ -205,6 +234,8 @@ export async function createProject(
     const result = await installDeps({ cliArgs, packageManager, projectDir })
     if (result) {
       spinner.stop('Successfully installed Payload and dependencies')
+
+      await runProjectCodegen({ packageManager, projectDir, spinner })
     } else {
       spinner.stop('Error installing dependencies', 1)
     }
@@ -276,77 +307,4 @@ export function updatePackageJSONDependencies(args: {
     {} as Record<string, string>,
   )
   packageJson.dependencies = updatedDependencies
-}
-
-/**
- * Fetches the latest version of a package from the NPM registry.
- *
- * Used in determining the latest version of Payload to use in the generated templates.
- */
-async function getLatestPackageVersion({
-  packageName = 'payload',
-}: {
-  /**
-   * Package name to fetch the latest version for based on the NPM registry URL
-   *
-   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
-   *
-   * @default 'payload'
-   */
-  packageName?: string
-}): Promise<string> {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
-    const data = await response.json()
-
-    // Monster chaining for type safety just checking for data.latest
-    const latestVersion =
-      data &&
-      typeof data === 'object' &&
-      'latest' in data &&
-      data.latest &&
-      typeof data.latest === 'string'
-        ? data.latest
-        : null
-
-    if (!latestVersion) {
-      throw new Error(`No latest version found for package: ${packageName}`)
-    }
-
-    return latestVersion
-  } catch (error) {
-    console.error('Error fetching Payload version:', error)
-    throw error
-  }
-}
-
-/**
- * Verifies that the specified version of a package exists on the NPM registry.
- *
- * Throws an error if the version does not exist.
- */
-async function verifyVersionForPackage({
-  packageName = 'payload',
-  version,
-}: {
-  /**
-   * Package name to fetch the latest version for based on the NPM registry URL
-   *
-   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
-   *
-   * @default 'payload'
-   */
-  packageName?: string
-  version: string
-}): Promise<void> {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/${packageName}/${version}`)
-
-    if (response.status !== 200) {
-      throw new Error(`No ${version} version found for package: ${packageName}`)
-    }
-  } catch (error) {
-    console.error('Error verifying Payload version:', error)
-    throw error
-  }
 }

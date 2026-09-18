@@ -7,7 +7,7 @@ import { useEditDepth } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
 
-import type { LexicalRichTextFieldProps } from '../types.js'
+import type { LexicalRichTextFieldProps } from '../types/index.js'
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
 import { useRichTextView } from '../field/RichTextViewProvider.js'

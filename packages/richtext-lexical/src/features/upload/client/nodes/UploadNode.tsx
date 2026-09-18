@@ -6,11 +6,7 @@ import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
-import type {
-  Internal_UploadData,
-  SerializedUploadNode,
-  UploadData,
-} from '../../server/nodes/UploadNode.js'
+import type { Internal_UploadData, SerializedUploadNode, UploadData } from '../../server/schema.js'
 
 import { $convertUploadElement } from '../../server/nodes/conversions.js'
 import { UploadServerNode } from '../../server/nodes/UploadNode.js'

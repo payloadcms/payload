@@ -1,12 +1,12 @@
 'use client'
 
+import { STRIKETHROUGH } from '@lexical/markdown'
 import { $isTableSelection } from '@lexical/table'
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarFormatGroupWithItems } from '../shared/toolbarFormatGroup.js'
-import { STRIKETHROUGH } from './markdownTransformers.js'
 
 const toolbarGroups = [
   toolbarFormatGroupWithItems([

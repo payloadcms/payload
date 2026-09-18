@@ -1,13 +1,4 @@
-import type {
-  Config,
-  Field,
-  FieldSchemaMap,
-  FileData,
-  FileSizeImproved,
-  Payload,
-  TypeWithID,
-  UploadCollectionSlug,
-} from 'payload'
+import type { CollectionSlug, Config, Field, FieldSchemaMap, UploadCollectionSlug } from 'payload'
 
 import { sanitizeFields } from 'payload'
 
@@ -15,12 +6,21 @@ import type { UploadFeaturePropsClient } from '../client/index.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
+import { filterEnabledRelationshipCollections } from '../../relationship/shared/filterEnabledRelationshipCollections.js'
 import { createNode } from '../../typeUtilities.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
-import { UploadMarkdownTransformer } from './markdownTransformer.js'
+import { PAYLOAD_UPLOAD } from './markdownTransformer.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
+import { createUploadNodeJSONSchema } from './schema.js'
 import { uploadValidation } from './validate.js'
+
+export type {
+  Internal_UploadData,
+  SerializedUploadNode,
+  UploadData,
+  UploadDataImproved,
+} from './schema.js'
 
 export type ExclusiveUploadFeatureProps =
   | {
@@ -59,31 +59,29 @@ export type UploadFeatureProps = {
   maxDepth?: number
 } & ExclusiveUploadFeatureProps
 
-/**
- * Get the absolute URL for an upload URL by potentially prepending the serverURL
- */
-function getAbsoluteURL(url: string, payload: Payload): string {
-  return url?.startsWith('http') ? url : (payload?.config?.serverURL || '') + url
-}
+export type UploadFeatureServerProps = {
+  /** Collection policy resolved during feature initialization. */
+  enabledCollectionSlugs: CollectionSlug[]
+} & UploadFeatureProps
 
 export const UploadFeature = createServerFeature<
   UploadFeatureProps,
-  UploadFeatureProps,
+  UploadFeatureServerProps,
   UploadFeaturePropsClient
 >({
-  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
-    if (!props) {
-      props = { collections: {} }
+  feature: ({ config: _config, isRoot, parentIsLocalized, props: unsanitizedProps }) => {
+    const props: UploadFeatureServerProps = {
+      ...unsanitizedProps,
+      collections: unsanitizedProps?.collections ?? {},
+      enabledCollectionSlugs: filterEnabledRelationshipCollections(_config.collections, {
+        ...unsanitizedProps,
+        uploads: true,
+      }).map(({ slug }) => slug),
     }
 
     const clientProps: UploadFeaturePropsClient = {
       collections: {},
-    }
-    if (props.disabledCollections) {
-      clientProps.disabledCollections = props.disabledCollections
-    }
-    if (props.enabledCollections) {
-      clientProps.enabledCollections = props.enabledCollections
+      enabledCollectionSlugs: props.enabledCollectionSlugs,
     }
 
     if (props.collections) {
@@ -99,7 +97,7 @@ export const UploadFeature = createServerFeature<
     for (const collectionKey in props.collections) {
       const collection = props.collections[collectionKey]!
       if (collection.fields?.length) {
-        collection.fields = await sanitizeFields({
+        collection.fields = sanitizeFields({
           config: _config as unknown as Config,
           fields: collection.fields,
           parentIsLocalized,
@@ -131,112 +129,9 @@ export const UploadFeature = createServerFeature<
         return schemaMap
       },
       i18n,
-      markdownTransformers: [UploadMarkdownTransformer],
+      markdownTransformers: [PAYLOAD_UPLOAD],
       nodes: [
         createNode({
-          converters: {
-            html: {
-              converter: async ({
-                currentDepth,
-                depth,
-                draft,
-                node,
-                overrideAccess,
-                req,
-                showHiddenFields,
-              }) => {
-                // @ts-expect-error - for backwards-compatibility
-                const id = node?.value?.id || node?.value
-
-                if (req?.payload) {
-                  const uploadDocument: {
-                    value?: FileData & TypeWithID
-                  } = {}
-
-                  try {
-                    await populate({
-                      id,
-                      collectionSlug: node.relationTo,
-                      currentDepth,
-                      data: uploadDocument,
-                      depth,
-                      draft,
-                      key: 'value',
-                      overrideAccess,
-                      req,
-                      showHiddenFields,
-                    })
-                  } catch (ignored) {
-                    // eslint-disable-next-line no-console
-                    console.error(
-                      'Lexical upload node HTML converter: error fetching upload file',
-                      ignored,
-                      'Node:',
-                      node,
-                    )
-                    return `<img />`
-                  }
-
-                  const url = getAbsoluteURL(uploadDocument?.value?.url ?? '', req?.payload)
-
-                  const alt =
-                    (node.fields?.alt as string) ||
-                    (uploadDocument?.value as { alt?: string })?.alt ||
-                    ''
-
-                  /**
-                   * If the upload is not an image, return a link to the upload
-                   */
-                  if (!uploadDocument?.value?.mimeType?.startsWith('image')) {
-                    return `<a href="${url}" rel="noopener noreferrer">${uploadDocument.value?.filename}</a>`
-                  }
-
-                  /**
-                   * If the upload is a simple image with no different sizes, return a simple img tag
-                   */
-                  if (
-                    !uploadDocument?.value?.sizes ||
-                    !Object.keys(uploadDocument?.value?.sizes).length
-                  ) {
-                    return `<img src="${url}" alt="${alt}" width="${uploadDocument?.value?.width}"  height="${uploadDocument?.value?.height}"/>`
-                  }
-
-                  /**
-                   * If the upload is an image with different sizes, return a picture element
-                   */
-                  let pictureHTML = '<picture>'
-
-                  // Iterate through each size in the data.sizes object
-                  for (const size in uploadDocument.value?.sizes) {
-                    const imageSize = uploadDocument.value.sizes[size] as FileSizeImproved
-
-                    // Skip if any property of the size object is null
-                    if (
-                      !imageSize.width ||
-                      !imageSize.height ||
-                      !imageSize.mimeType ||
-                      !imageSize.filesize ||
-                      !imageSize.filename ||
-                      !imageSize.url
-                    ) {
-                      continue
-                    }
-                    const imageSizeURL = getAbsoluteURL(imageSize?.url, req?.payload)
-
-                    pictureHTML += `<source srcset="${imageSizeURL}" media="(max-width: ${imageSize.width}px)" type="${imageSize.mimeType}">`
-                  }
-
-                  // Add the default img tag
-                  pictureHTML += `<img src="${url}" alt="${alt}" width="${uploadDocument.value?.width}" height="${uploadDocument.value?.height}">`
-                  pictureHTML += '</picture>'
-                  return pictureHTML
-                } else {
-                  return `<img src="${id}" />`
-                }
-              },
-              nodeTypes: [UploadServerNode.getType()],
-            },
-          },
           getSubFields: ({ node, req }) => {
             if (!node) {
               let allSubFields: Field[] = []
@@ -245,6 +140,9 @@ export const UploadFeature = createServerFeature<
                 allSubFields = allSubFields.concat(collectionFields)
               }
               return allSubFields
+            }
+            if (!props.enabledCollectionSlugs.includes(node.relationTo)) {
+              return null
             }
             const collection = req ? req.payload.collections[node?.relationTo] : null
 
@@ -277,7 +175,7 @@ export const UploadFeature = createServerFeature<
                 req,
                 showHiddenFields,
               }) => {
-                if (!node?.value) {
+                if (!node?.value || !props.enabledCollectionSlugs.includes(node.relationTo)) {
                   return node
                 }
                 const collection = req.payload.collections[node?.relationTo]
@@ -285,8 +183,10 @@ export const UploadFeature = createServerFeature<
                 if (!collection) {
                   return node
                 }
-                // @ts-expect-error - Fix in Payload v4
-                const id = node?.value?.id || node?.value // for backwards-compatibility
+                const id =
+                  typeof node?.value === 'object' && node.value !== null && 'id' in node.value
+                    ? node.value.id
+                    : node?.value // for backwards-compatibility
 
                 const populateDepth =
                   props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
@@ -312,6 +212,7 @@ export const UploadFeature = createServerFeature<
               },
             ],
           },
+          jsonSchema: createUploadNodeJSONSchema(props),
           node: UploadServerNode,
           validations: [uploadValidation(props)],
         }),

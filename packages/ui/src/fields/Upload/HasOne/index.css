@@ -1,0 +1,6 @@
+@layer payload-default {
+  .upload {
+    position: relative;
+    max-width: 100%;
+  }
+}

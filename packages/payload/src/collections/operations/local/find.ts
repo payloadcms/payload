@@ -1,16 +1,15 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,
-  GeneratedTypes,
   JoinQuery,
   Payload,
   PayloadTypes,
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
+  User,
 } from '../../../index.js'
 import type {
-  Document,
   DraftTransformCollectionWithSelect,
   PayloadRequest,
   PopulateType,
@@ -20,10 +19,7 @@ import type {
   Where,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type {
-  DraftFlagFromCollectionSlug,
-  SelectFromCollectionSlug,
-} from '../../config/types.js'
+import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -169,23 +165,27 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
    * @default false
    */
   trash?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
 }
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  BaseFindOptions<TSlug, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseFindOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 // Backward compatibility export
-export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  Options<TSlug, TSelect>
+export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Options<
+  TSlug,
+  TSelect
+>
 
 export async function findLocal<
   TSlug extends CollectionSlug,

@@ -1,3 +1,5 @@
+import { buildEditorState } from '@payloadcms/richtext-lexical'
+
 import type { BlockField } from '../../payload-types.js'
 
 export const getBlocksFieldSeedData = (prefix?: string): any => [
@@ -5,11 +7,7 @@ export const getBlocksFieldSeedData = (prefix?: string): any => [
     blockName: 'First block',
     blockType: prefix ? `${prefix}Content` : 'content',
     text: 'first block',
-    richText: [
-      {
-        children: [{ text: '' }],
-      },
-    ],
+    richText: buildEditorState({}),
   },
   {
     blockName: 'Second block',

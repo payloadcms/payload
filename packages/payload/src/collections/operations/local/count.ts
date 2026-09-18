@@ -1,5 +1,5 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, Where } from '../../../types/index.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
+import type { PayloadRequest, Where } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -46,11 +46,10 @@ export type CountOptions<TSlug extends CollectionSlug> = {
    * @default false
    */
   trash?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */

@@ -1,6 +1,4 @@
 'use client'
-import type { RichTextField } from 'payload'
-
 import {
   FieldContext,
   FieldPathContext,
@@ -13,8 +11,8 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useRef } from 'react'
 
-import type { DefaultTypedEditorState } from '../../nodeTypes.js'
-import type { LexicalRichTextField } from '../../types.js'
+import type { LexicalRichTextField } from '../../types/index.js'
+import type { DefaultTypedEditorState } from '../../types/nodeTypes.js'
 
 /**
  * Utility to render a lexical editor on the client.
@@ -28,6 +26,8 @@ export const RenderLexical: React.FC<
    * If neither is passed, it will rely on the parent form to manage the value.
    */
   {
+    /** @deprecated Use `name` and `label` instead. */
+    field?: Partial<LexicalRichTextField>
     /**
      * Override the loading state while the field component is being fetched and rendered.
      */
@@ -35,30 +35,28 @@ export const RenderLexical: React.FC<
 
     setValue?: FieldType<DefaultTypedEditorState | undefined>['setValue']
     value?: FieldType<DefaultTypedEditorState | undefined>['value']
-  } & RenderFieldServerFnArgs<LexicalRichTextField>
+  } & Omit<RenderFieldServerFnArgs, 'hidden'>
 > = (args) => {
-  const { field, initialValue, Loading, path, schemaPath, setValue, value } = args
+  const { name, field, initialValue, label, Loading, path, schemaPath, setValue, value } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const serverFunctionContext = useServerFunctions()
   const { _internal_renderField } = serverFunctionContext
 
   const [entityType, entitySlug] = schemaPath.split('.', 2)
 
-  const fieldPath = path ?? (field && 'name' in field ? field?.name : '') ?? ''
+  const fieldName = name !== undefined ? name : field?.name
+  const fieldLabel = label !== undefined ? label : field?.label
+  const fieldPath = path ?? fieldName ?? ''
 
   const renderLexical = useCallback(() => {
     async function render() {
       const { Field } = await _internal_renderField({
-        field: {
-          ...((field as RichTextField) || {}),
-          type: 'richText',
-          admin: {
-            ...((field as RichTextField)?.admin || {}),
-            // When using "fake" anchor fields, hidden is often set to true. We need to override that here to ensure the field is rendered.
-            hidden: false,
-          },
-        },
+        name: fieldName,
+        // When using "fake" anchor fields, hidden is often set to true.
+        // We need to override that here to ensure the field is rendered.
+        hidden: false,
         initialValue: initialValue ?? undefined,
+        label: typeof fieldLabel === 'function' ? undefined : fieldLabel,
         path,
         schemaPath,
       })
@@ -66,7 +64,7 @@ export const RenderLexical: React.FC<
       setComponent(Field)
     }
     void render()
-  }, [_internal_renderField, schemaPath, path, field, initialValue])
+  }, [_internal_renderField, schemaPath, path, fieldName, fieldLabel, initialValue])
 
   const mounted = useRef(false)
 

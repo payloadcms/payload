@@ -8,8 +8,8 @@ import {
 } from 'lexical'
 import React, { type JSX } from 'react'
 
-import type { ViewMapBlockComponentProps } from '../../../../types.js'
-import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
+import type { ViewMapBlockComponentProps } from '../../../../types/index.js'
+import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/schema.js'
 
 import { ServerBlockNode } from '../../server/nodes/BlocksNode.js'
 import { BlockComponent } from '../component/index.js'

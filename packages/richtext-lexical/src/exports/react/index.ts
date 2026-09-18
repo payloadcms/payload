@@ -32,4 +32,4 @@ export type {
   ViewMapBlockComponentProps,
   ViewMapBlockEditorProps,
   ViewMapBlockJSXConverterProps,
-} from '../../types.js'
+} from '../../types/index.js'

@@ -1,5 +1,6 @@
+import type { File } from '@payloadcms/plugin-cloud-storage/types'
 import type { S3StorageOptions } from '@payloadcms/storage-s3'
-import type { Plugin } from 'payload'
+import type { StorageAdapter } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { azureStorage } from '@payloadcms/storage-azure'
@@ -15,35 +16,43 @@ import { Media } from './collections/Media.js'
 import { MediaWithCompositePrefixes } from './collections/MediaWithCompositePrefixes.js'
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
+import { MediaWithOverwrite } from './collections/MediaWithOverwrite.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
+import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
+import { r2UploadEndpoints } from './r2.js'
 import {
   collectionPrefix,
   mediaSlug,
   mediaWithCompositePrefixesSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
+  mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
+  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
 } from './shared.js'
-import { createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+export const uploadedTestFiles = new Map<string, { prefix?: string } & File>()
 
 export type BuildPluginCloudStorageIntConfigArgs = {
   /** When false, S3 uses non-composite prefix resolution (single stored prefix segment; pre-composite behavior). */
   useCompositePrefixes: boolean
 }
 
+export const recordedCleanupTargets: Array<{ filename: string; prefix?: string }> = []
+
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
 }: BuildPluginCloudStorageIntConfigArgs) {
-  let storagePlugin: Plugin = {} as Plugin
+  let storagePlugin: StorageAdapter | undefined
   let uploadOptions
 
   dotenv.config({
@@ -113,9 +122,11 @@ export function buildPluginCloudStorageIntConfig({
               : null,
           prefix,
         } as S3StorageOptions['collections'][keyof S3StorageOptions['collections']],
+        [mediaWithOverwriteSlug]: true,
         [mediaWithPrefixSlug]: {
           prefix,
         },
+        [mediaWithThrowingHookSlug]: true,
         [restrictedMediaSlug]: true,
       },
       config: {
@@ -157,8 +168,13 @@ export function buildPluginCloudStorageIntConfig({
       [testMetadataSlug]: {
         adapter: () => ({
           name: 'test-metadata-adapter',
-          handleDelete: () => Promise.resolve(),
+          handleDelete: ({ doc, filename }) => {
+            recordedCleanupTargets.push({ filename, prefix: doc.prefix })
+            uploadedTestFiles.delete(filename)
+          },
           handleUpload: ({ data, file }) => {
+            uploadedTestFiles.set(file.filename, { ...file, prefix: data.prefix })
+
             const metadata = {
               ...data,
               bucketName: 'test-bucket',
@@ -173,45 +189,42 @@ export function buildPluginCloudStorageIntConfig({
           },
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
+        prefix: 'test-metadata',
       },
     },
   })
 
   return buildConfigWithDefaults({
-    admin: {
-      importMap: {
-        baseDir: path.resolve(dirname),
+    suite: useCompositePrefixes
+      ? 'plugin-cloud-storage-composite-prefixes'
+      : 'plugin-cloud-storage',
+    config: {
+      admin: {
+        importMap: {
+          baseDir: path.resolve(dirname),
+        },
       },
+      collections: [
+        Media,
+        MediaWithCompositePrefixes,
+        MediaWithCustomURL,
+        MediaWithGenerateFileURL,
+        MediaWithOverwrite,
+        MediaWithPrefix,
+        MediaWithThrowingHook,
+        RestrictedMedia,
+        TestMetadata,
+        Users,
+      ],
+      endpoints: r2UploadEndpoints,
+      plugins: [testMetadataPlugin],
+      storage: storagePlugin ? [storagePlugin] : [],
+      typescript: {
+        outputFile: path.resolve(dirname, 'payload-types.ts'),
+      },
+      upload: uploadOptions,
     },
-    collections: [
-      Media,
-      MediaWithCompositePrefixes,
-      MediaWithCustomURL,
-      MediaWithGenerateFileURL,
-      MediaWithPrefix,
-      RestrictedMedia,
-      TestMetadata,
-      Users,
-    ],
-    onInit: async (payload) => {
-      /*const client = new AWS.S3({
-      endpoint: process.env.S3_ENDPOINT,
-      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-      region: process.env.S3_REGION,
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-      },
-    })
-
-    const makeBucketRes = await client.send(
-      new AWS.CreateBucketCommand({ Bucket: 'payload-bucket' }),
-    )
-
-    if (makeBucketRes.$metadata.httpStatusCode !== 200) {
-      throw new Error(`Failed to create bucket. ${makeBucketRes.$metadata.httpStatusCode}`)
-    }*/
-
+    seed: async (payload) => {
       await payload.create({
         collection: 'users',
         data: {
@@ -220,16 +233,9 @@ export function buildPluginCloudStorageIntConfig({
         },
       })
 
-      await createTestBucket()
-
       payload.logger.info(
         `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
       )
     },
-    plugins: [storagePlugin, testMetadataPlugin],
-    typescript: {
-      outputFile: path.resolve(dirname, 'payload-types.ts'),
-    },
-    upload: uploadOptions,
   })
 }

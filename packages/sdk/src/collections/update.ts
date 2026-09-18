@@ -60,10 +60,6 @@ export type UpdateBaseOptions<
    */
   populate?: PopulateType<T>
   /**
-   * Publish the document / documents with a specific locale.
-   */
-  publishSpecificLocale?: string
-  /**
    * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
    */
   select?: TSelect

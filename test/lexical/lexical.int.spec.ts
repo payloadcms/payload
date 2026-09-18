@@ -1,83 +1,86 @@
 import type {
   SerializedEditorState,
+  SerializedLexicalNode,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { PaginatedDocs, Payload } from 'payload'
+import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs } from 'payload'
 
 import {
+  BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
+  lexicalEditor,
+  type LexicalRichTextAdapter,
+  LinkFeature,
   type SerializedBlockNode,
   type SerializedLinkNode,
+  type SerializedListItemNode,
+  type SerializedListNode,
   type SerializedRelationshipNode,
   type SerializedUploadNode,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
-import path from 'path'
+import { configToJSONSchema, sanitizeConfig } from 'payload'
+import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
-import { fileURLToPath } from 'url'
-import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
+import { expect } from 'vitest'
 
-import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
+import type { LexicalField, LexicalListsFeature, RichTextField } from './payload-types.js'
 
 // Sync converters
-import { HeadingHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/heading.js'
-import { LinkHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/link.js'
-import { ListHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/list.js'
-import { TableHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/table.js'
-import { TextHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/text.js'
-import { UploadHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/upload.js'
+import {
+  HeadingHTMLConverter,
+  LinkHTMLConverter,
+  ListHTMLConverter,
+  TableHTMLConverter,
+  TextHTMLConverter,
+  UploadHTMLConverter,
+} from '@payloadcms/richtext-lexical/html'
 
 // Async converters
-import { HeadingHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/heading.js'
-import { LinkHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/link.js'
-import { ListHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/list.js'
-import { TableHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/table.js'
-import { TextHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/text.js'
-import { UploadHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/upload.js'
+import {
+  HeadingHTMLConverterAsync,
+  LinkHTMLConverterAsync,
+  ListHTMLConverterAsync,
+  TableHTMLConverterAsync,
+  TextHTMLConverterAsync,
+  UploadHTMLConverterAsync,
+} from '@payloadcms/richtext-lexical/html-async'
 
-// Diff converter
+import { convertLexicalNodesToHTMLAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/index.js'
+import { convertLexicalNodesToHTML } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/index.js'
+
+// Diff converters
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
-import { it } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import { ListItemDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/listitem/index.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
 import { textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
-import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
-  lexicalMigrateFieldsSlug,
+  lexicalHeadingFeatureSlug,
+  lexicalListsFeatureSlug,
+  lexicalRelationshipFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
+  uploads2Slug,
   uploadsSlug,
+  usersSlug,
 } from './slugs.js'
-
-let payload: Payload
-let restClient: NextRESTClient
 
 let createdArrayDocID: number | string = null
 let createdJPGDocID: number | string = null
 let createdTextDocID: number | string = null
 let createdRichTextDocID: number | string = null
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Lexical', () => {
-  beforeAll(async () => {
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  beforeEach(async () => {
-    await clearAndSeedEverything(payload)
-    restClient = new NextRESTClient(payload.config)
+test.suite({ config: './config.ts' })('Lexical', () => {
+  test.beforeEach(async ({ payload, restClient }) => {
     await restClient.login({
       slug: 'users',
       credentials: devUser,
@@ -132,8 +135,145 @@ describe('Lexical', () => {
     ).docs[0].id
   })
 
-  describe('basic', () => {
-    it('should allow querying on lexical content', async () => {
+  test.describe('basic', () => {
+    test('should reject heading tags that are not enabled', async ({ restClient }) => {
+      const response = await restClient.POST(`/${lexicalHeadingFeatureSlug}`, {
+        body: JSON.stringify({
+          richText: buildEditorState({
+            nodes: [
+              {
+                type: 'heading',
+                tag: 'h1',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+          }),
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(result.errors[0].data.errors).toEqual([
+        expect.objectContaining({
+          message: 'heading node failed to validate: Heading tag must be one of h2, h4.',
+          path: 'richText',
+        }),
+      ])
+    })
+
+    test('should reject list tags that are not supported', async ({ restClient }) => {
+      const response = await restClient.POST(`/${lexicalListsFeatureSlug}`, {
+        body: JSON.stringify({
+          onlyOrderedList: buildEditorState({
+            nodes: [
+              {
+                type: 'list',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                listType: 'number',
+                start: 1,
+                tag: 'style',
+                version: 1,
+              },
+            ],
+          }),
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(result.errors[0].data.errors).toEqual([
+        expect.objectContaining({
+          message: 'list node failed to validate: List tag must be one of ol, ul.',
+          path: 'onlyOrderedList',
+        }),
+      ])
+    })
+
+    test('should reject a REST update with a nonnumeric list item value', async ({
+      payload,
+      restClient,
+    }) => {
+      const listData: NonNullable<LexicalListsFeature['onlyOrderedList']> = {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'list',
+              children: [
+                {
+                  type: 'listitem',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'List item',
+                      version: 1,
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  value: 1,
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              listType: 'number',
+              start: 1,
+              tag: 'ol',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      }
+      const doc = await payload.create({
+        collection: lexicalListsFeatureSlug,
+        data: { onlyOrderedList: listData },
+      })
+      const invalidData = JSON.parse(JSON.stringify(listData))
+
+      invalidData.root.children[0].children[0].value = 'not-a-number'
+
+      const response = await restClient.PATCH(`/${lexicalListsFeatureSlug}/${doc.id}`, {
+        body: JSON.stringify({ onlyOrderedList: invalidData }),
+      })
+      const body = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(body.errors[0].data.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: 'listitem node failed to validate: List item value must be a finite number.',
+            path: 'onlyOrderedList',
+          }),
+        ]),
+      )
+
+      const savedDoc = await payload.findByID({
+        id: doc.id,
+        collection: lexicalListsFeatureSlug,
+      })
+
+      expect(savedDoc.onlyOrderedList).toEqual(listData)
+    })
+
+    test('should allow querying on lexical content', async ({ payload }) => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
@@ -169,7 +309,9 @@ describe('Lexical', () => {
       )
     })
 
-    it('should populate respect depth parameter and populate link node relationship', async () => {
+    test('should populate respect depth parameter and populate link node relationship', async ({
+      payload,
+    }) => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
@@ -209,7 +351,7 @@ describe('Lexical', () => {
       expect(linkNode.fields.doc.value.text).toStrictEqual(textDoc.text)
     })
 
-    it('should populate relationship node', async () => {
+    test('should populate relationship node', async ({ payload }) => {
       const richTextDoc: RichTextField = (
         await payload.find({
           collection: richTextFieldsSlug,
@@ -230,7 +372,146 @@ describe('Lexical', () => {
       expect(relationshipNode.value.text).toStrictEqual(textDoc.text)
     })
 
-    it('should respect GraphQL rich text depth parameter and populate upload node', async () => {
+    test('should not populate relationships to collections outside enabledCollections', async ({
+      payload,
+      restClient,
+    }) => {
+      const relatedUser = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'related-user@example.com',
+          password: 'test-password',
+        },
+      })
+
+      const originalReadAccess = payload.collections[usersSlug].config.access.read
+      const node = {
+        type: 'relationship',
+        format: '',
+        relationTo: usersSlug,
+        value: relatedUser.id,
+        version: 2,
+      }
+      const richText = buildEditorState<SerializedLexicalNode>({ nodes: [node] })
+
+      payload.collections[usersSlug].config.access.read = () => false
+
+      try {
+        const readResponse = await restClient.GET(`/${usersSlug}/${relatedUser.id}`)
+
+        expect(readResponse.status).toBe(403)
+
+        // The referenced collection is not enabled for this field.
+        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}?depth=2`, {
+          body: JSON.stringify({ richText }),
+        })
+
+        expect(response.status).toBe(400)
+
+        const doc = await payload.create({
+          collection: lexicalRelationshipFieldsSlug,
+          data: {},
+        })
+
+        // Simulate existing content referencing a collection outside enabledCollections.
+        await payload.db.updateOne({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          data: { richText },
+        })
+
+        // Read the stored content through the Local API.
+        const rendered = await payload.findByID({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          depth: 2,
+        })
+
+        const storedNode = rendered.richText.root.children[0] as SerializedRelationshipNode
+
+        expect(storedNode.value).toBe(relatedUser.id)
+      } finally {
+        payload.collections[usersSlug].config.access.read = originalReadAccess
+      }
+    })
+
+    for (const { fieldName, relationTo, type } of [
+      { fieldName: 'richText', relationTo: textFieldsSlug, type: 'relationship' },
+      { fieldName: 'richText', relationTo: uploads2Slug, type: 'upload' },
+      { fieldName: 'richText', relationTo: usersSlug, type: 'upload' },
+      { fieldName: 'richText3', relationTo: uploadsSlug, type: 'upload' },
+    ] as const) {
+      test(`should enforce ${fieldName} collection restrictions for ${type} nodes referencing ${relationTo}`, async ({
+        payload,
+        restClient,
+      }) => {
+        const { docs: targets } = await payload.find({ collection: relationTo, depth: 0, limit: 1 })
+        const targetID = targets[0].id
+        const node = {
+          id: 'test-upload-node',
+          type,
+          fields: {},
+          format: '',
+          relationTo,
+          value: targetID,
+          version: 2,
+        }
+        const richText = buildEditorState<SerializedLexicalNode>({ nodes: [node] })
+        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}`, {
+          body: JSON.stringify({ [fieldName]: richText }),
+        })
+
+        expect(response.status).toBe(400)
+
+        const doc = await payload.create({
+          collection: lexicalRelationshipFieldsSlug,
+          data: {},
+        })
+
+        // Simulate existing content referencing a collection not enabled for this field.
+        await payload.db.updateOne({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          data: { [fieldName]: richText },
+        })
+
+        const localDoc = await payload.findByID({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          depth: 2,
+        })
+
+        expect(localDoc[fieldName].root.children[0].value).toBe(targetID)
+
+        const restResponse = await restClient.GET(`/${lexicalRelationshipFieldsSlug}/${doc.id}`, {
+          query: { depth: 2 },
+        })
+        const restDoc = await restResponse.json()
+
+        expect(restResponse.status).toBe(200)
+        expect(restDoc[fieldName].root.children[0].value).toBe(targetID)
+
+        const graphQLResponse = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+              LexicalRelationshipFields(where: { id: { equals: ${JSON.stringify(doc.id)} } }) {
+                docs { ${fieldName}(depth: 2) }
+              }
+            }`,
+          }),
+        })
+        const graphQLResult = await graphQLResponse.json()
+
+        expect(graphQLResult.errors).toBeUndefined()
+        expect(
+          graphQLResult.data.LexicalRelationshipFields.docs[0][fieldName].root.children[0].value,
+        ).toBe(targetID)
+      })
+    }
+
+    test('should respect GraphQL rich text depth parameter and populate upload node', async ({
+      restClient,
+    }) => {
       const query = `query {
         RichTextFields {
           docs {
@@ -256,7 +537,7 @@ describe('Lexical', () => {
     })
   })
 
-  it('ensure link nodes convert to markdown', async () => {
+  test('ensure link nodes convert to markdown', async ({ payload }) => {
     const newLexicalDoc = await payload.create({
       collection: lexicalFieldsSlug,
       depth: 0,
@@ -312,8 +593,8 @@ describe('Lexical', () => {
     )
   })
 
-  describe('upload markdown: Lexical → Markdown (export)', () => {
-    it('exports upload node to markdown placeholder when unpopulated', async () => {
+  test.describe('upload markdown: Lexical → Markdown (export)', () => {
+    test('exports upload node to markdown placeholder when unpopulated', async ({ payload }) => {
       const newLexicalDoc = await payload.create({
         collection: lexicalFieldsSlug,
         depth: 0,
@@ -344,7 +625,7 @@ describe('Lexical', () => {
       expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(`![uploads:${createdJPGDocID}]()`)
     })
 
-    it('exported markdown contains upload placeholder in seeded doc', async () => {
+    test('exported markdown contains upload placeholder in seeded doc', async ({ payload }) => {
       const lexicalDoc = await payload.find({
         collection: lexicalFieldsSlug,
         depth: 0,
@@ -357,61 +638,8 @@ describe('Lexical', () => {
     })
   })
 
-  describe('converters and migrations', () => {
-    it('htmlConverter: should output correct HTML for top-level lexical field', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField = lexicalDoc?.lexicalSimple_html
-      expect(htmlField).toStrictEqual('<div class="payload-richtext"><p>simple</p></div>')
-    })
-    it('htmlConverter: should output correct HTML for lexical field nested in group', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField = lexicalDoc?.groupWithLexicalField?.lexicalInGroupField_html
-      expect(htmlField).toStrictEqual('<div class="payload-richtext"><p>group</p></div>')
-    })
-    it('htmlConverter: should output correct HTML for lexical field nested in array', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField1 = lexicalDoc?.arrayWithLexicalField?.[0]?.lexicalInArrayField_html
-      const htmlField2 = lexicalDoc?.arrayWithLexicalField?.[1]?.lexicalInArrayField_html
-
-      expect(htmlField1).toStrictEqual('<div class="payload-richtext"><p>array 1</p></div>')
-      expect(htmlField2).toStrictEqual('<div class="payload-richtext"><p>array 2</p></div>')
-    })
-  })
-  describe('advanced - blocks', () => {
-    it('should not populate relationships in blocks if depth is 0', async () => {
+  test.describe('advanced - blocks', () => {
+    test('should not populate relationships in blocks if depth is 0', async ({ payload }) => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
@@ -435,7 +663,7 @@ describe('Lexical', () => {
       expect(relationshipBlockNode.fields.rel).toStrictEqual(createdJPGDocID)
     })
 
-    it('should populate relationships in blocks with depth=1', async () => {
+    test('should populate relationships in blocks with depth=1', async ({ payload }) => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
@@ -459,7 +687,9 @@ describe('Lexical', () => {
       expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload.jpg')
     })
 
-    it('should correctly populate polymorphic hasMany relationships in blocks with depth=0', async () => {
+    test('should correctly populate polymorphic hasMany relationships in blocks with depth=0', async ({
+      payload,
+    }) => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
@@ -489,7 +719,9 @@ describe('Lexical', () => {
       expect(relationshipBlockNode.fields.rel[1].value).toStrictEqual(createdJPGDocID)
     })
 
-    it('should correctly populate polymorphic hasMany relationships in blocks with depth=1', async () => {
+    test('should correctly populate polymorphic hasMany relationships in blocks with depth=1', async ({
+      payload,
+    }) => {
       // Related issue: https://github.com/payloadcms/payload/issues/4277
       const lexicalDoc: LexicalField = (
         await payload.find({
@@ -526,7 +758,9 @@ describe('Lexical', () => {
       expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual('payload.jpg')
     })
 
-    it('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async () => {
+    test('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async ({
+      payload,
+    }) => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
@@ -558,7 +792,9 @@ describe('Lexical', () => {
       expect(typeof subEditorRelationshipNode.value).not.toStrictEqual('object')
     })
 
-    it('should populate relationship nodes inside of a sub-editor from a blocks node with 1 depth', async () => {
+    test('should populate relationship nodes inside of a sub-editor from a blocks node with 1 depth', async ({
+      payload,
+    }) => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
@@ -605,7 +841,9 @@ describe('Lexical', () => {
       expect(populatedDocEditorRelationshipNode.value).not.toStrictEqual('object')
     })
 
-    it('should populate relationship nodes inside of a sub-editor from a blocks node with depth 2', async () => {
+    test('should populate relationship nodes inside of a sub-editor from a blocks node with depth 2', async ({
+      payload,
+    }) => {
       const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
@@ -651,8 +889,8 @@ describe('Lexical', () => {
     })
   })
 
-  describe('Localization', () => {
-    it('ensure localized lexical field is different across locales', async () => {
+  test.describe('Localization', () => {
+    test('ensure localized lexical field is different across locales', async ({ payload }) => {
       const lexicalDocEN = await payload.find({
         collection: 'lexical-localized-fields',
         locale: 'en',
@@ -678,7 +916,9 @@ describe('Lexical', () => {
       )
     })
 
-    it('ensure localized text field within blocks field within unlocalized lexical field is different across locales', async () => {
+    test('ensure localized text field within blocks field within unlocalized lexical field is different across locales', async ({
+      payload,
+    }) => {
       const lexicalDocEN = await payload.find({
         collection: 'lexical-localized-fields',
         locale: 'en',
@@ -714,8 +954,8 @@ describe('Lexical', () => {
     })
   })
 
-  describe('Hooks', () => {
-    it('ensure hook within number field within lexical block runs', async () => {
+  test.describe('Hooks', () => {
+    test('ensure hook within number field within lexical block runs', async ({ payload }) => {
       const lexicalDocEN = await payload.create({
         collection: 'lexical-localized-fields',
         locale: 'en',
@@ -747,162 +987,10 @@ describe('Lexical', () => {
     })
   })
 
-  describe('richText', () => {
-    it('should allow querying on rich text content', async () => {
-      const emptyRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'doesnt exist',
-          },
-        },
-      })
-
-      expect(emptyRichTextQuery.docs).toHaveLength(0)
-
-      const workingRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(workingRichTextQuery.docs).toHaveLength(1)
-    })
-
-    it('should show center alignment', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(query.docs[0]?.richText[0]?.textAlign).toEqual('center')
-    })
-
-    it('should populate link relationship', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.linkType': {
-            equals: 'internal',
-          },
-        },
-      })
-
-      const nodes = query.docs[0]?.richText
-      expect(nodes).toBeDefined()
-      const child = nodes?.flatMap((n) => n.children).find((c) => c?.doc)
-      expect(child).toMatchObject({
-        type: 'link',
-        linkType: 'internal',
-      })
-      expect(child.doc.relationTo).toEqual('array-fields')
-
-      if (payload.db.defaultIDType === 'number') {
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(typeof child.doc.value.id).toBe('number')
-      } else {
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(typeof child.doc.value.id).toBe('string')
-      }
-
-      expect(child.doc.value.items).toHaveLength(6)
-    })
-
-    it('should disallow unsafe query paths', async () => {
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children from': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children."unsafe"': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.(unsafe"': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.unsafe="': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-    })
-
-    it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: 'select(' },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: '"unsafe' },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `'unsafe` },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `unsafe\\` },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `unsafe=` },
-          },
-        }),
-      ).rejects.toBeTruthy()
-    })
-  })
-
-  describe('Autosave', () => {
-    it('should populate previousValue in afterChange hooks for fields inside lexical', async () => {
+  test.describe('Autosave', () => {
+    test('should populate previousValue in afterChange hooks for fields inside lexical', async ({
+      payload,
+    }) => {
       const { autosaveHookLog, clearAutosaveHookLog } = await import(
         './collections/LexicalAutosave/index.js'
       )
@@ -990,8 +1078,8 @@ describe('Lexical', () => {
     })
   })
 
-  describe('sanitizeUrl', () => {
-    vitestIt.each([
+  test.describe('sanitizeUrl', () => {
+    test.each([
       ['http://example.com', 'http://example.com'],
       ['https://example.com/page', 'https://example.com/page'],
       ['mailto:user@example.com', 'mailto:user@example.com'],
@@ -1006,7 +1094,7 @@ describe('Lexical', () => {
       expect(sanitizeUrl(input)).toBe(expected)
     })
 
-    vitestIt.each([
+    test.each([
       ['javascript:alert(1)', '#'],
       ['JavaScript:alert(document.cookie)', '#'],
       ['JAVASCRIPT:void(0)', '#'],
@@ -1017,7 +1105,7 @@ describe('Lexical', () => {
       expect(sanitizeUrl(input)).toBe(expected)
     })
 
-    vitestIt('trims whitespace', () => {
+    test('trims whitespace', () => {
       expect(sanitizeUrl('  https://example.com  ')).toBe('https://example.com')
     })
   })
@@ -1057,10 +1145,10 @@ describe('Lexical', () => {
   ] as const
 
   for (const variant of converterVariants) {
-    describe(`HTML Converters (${variant.label})`, () => {
+    test.describe(`HTML Converters (${variant.label})`, () => {
       // ── Text ──
-      describe('TextHTMLConverter', () => {
-        vitestIt('escapes script tags in text content', async () => {
+      test.describe('TextHTMLConverter', () => {
+        test('escapes script tags in text content', async () => {
           const result = await variant.text.text!({
             ...converterBaseArgs,
             node: { format: 0, text: '<script>alert("xss")</script>' } as any,
@@ -1070,7 +1158,7 @@ describe('Lexical', () => {
           expect(result).toContain('&lt;script&gt;')
         })
 
-        vitestIt('escapes HTML entities in bold text', async () => {
+        test('escapes HTML entities in bold text', async () => {
           const result = await variant.text.text!({
             ...converterBaseArgs,
             node: { format: 1, text: '<img src=x onerror=alert(1)>' } as any,
@@ -1081,7 +1169,7 @@ describe('Lexical', () => {
           expect(result).toContain('&lt;img')
         })
 
-        vitestIt('preserves normal text with formatting', async () => {
+        test('preserves normal text with formatting', async () => {
           const result = await variant.text.text!({
             ...converterBaseArgs,
             node: { format: 1, text: 'Hello World' } as any,
@@ -1090,7 +1178,7 @@ describe('Lexical', () => {
           expect(result).toBe('<strong>Hello World</strong>')
         })
 
-        vitestIt('properly encodes ampersands', async () => {
+        test('properly encodes ampersands', async () => {
           const result = await variant.text.text!({
             ...converterBaseArgs,
             node: { format: 0, text: 'Tom & Jerry' } as any,
@@ -1101,8 +1189,8 @@ describe('Lexical', () => {
       })
 
       // ── Link ──
-      describe('LinkHTMLConverter', () => {
-        vitestIt('blocks javascript: protocol in autolink', async () => {
+      test.describe('LinkHTMLConverter', () => {
+        test('blocks javascript: protocol in autolink', async () => {
           const result = await variant.link.autolink!({
             ...converterBaseArgs,
             node: {
@@ -1115,7 +1203,7 @@ describe('Lexical', () => {
           expect(result).toContain('href="#"')
         })
 
-        vitestIt('blocks data: protocol in link', async () => {
+        test('blocks data: protocol in link', async () => {
           const result = await variant.link.link!({
             ...converterBaseArgs,
             node: {
@@ -1132,7 +1220,7 @@ describe('Lexical', () => {
           expect(result).toContain('href="#"')
         })
 
-        vitestIt('escapes HTML entities in href attribute', async () => {
+        test('escapes HTML entities in href attribute', async () => {
           const result = await variant.link.autolink!({
             ...converterBaseArgs,
             node: {
@@ -1148,7 +1236,7 @@ describe('Lexical', () => {
           expect(result).toContain('&amp;')
         })
 
-        vitestIt('allows safe https URLs', async () => {
+        test('allows safe https URLs', async () => {
           const result = await variant.link.autolink!({
             ...converterBaseArgs,
             node: {
@@ -1160,7 +1248,7 @@ describe('Lexical', () => {
           expect(result).toContain('href="https://example.com/safe-page"')
         })
 
-        vitestIt('preserves query params with proper encoding', async () => {
+        test('preserves query params with proper encoding', async () => {
           const result = await variant.link.autolink!({
             ...converterBaseArgs,
             node: {
@@ -1174,7 +1262,7 @@ describe('Lexical', () => {
       })
 
       // ── Upload ──
-      describe('UploadHTMLConverter', () => {
+      test.describe('UploadHTMLConverter', () => {
         const baseUploadNode = {
           fields: {},
           relationTo: 'uploads',
@@ -1189,7 +1277,7 @@ describe('Lexical', () => {
           },
         }
 
-        vitestIt('escapes HTML in non-image filename', async () => {
+        test('escapes HTML in non-image filename', async () => {
           const result = await variant.upload.upload!({
             ...converterBaseArgs,
             node: {
@@ -1206,7 +1294,7 @@ describe('Lexical', () => {
           expect(result).toContain('</a>')
         })
 
-        vitestIt('escapes HTML in alt attribute', async () => {
+        test('escapes HTML in alt attribute', async () => {
           const result = await variant.upload.upload!({
             ...converterBaseArgs,
             node: {
@@ -1220,7 +1308,7 @@ describe('Lexical', () => {
           expect(result).toContain('&quot;')
         })
 
-        vitestIt('escapes HTML in image URL', async () => {
+        test('escapes HTML in image URL', async () => {
           const result = await variant.upload.upload!({
             ...converterBaseArgs,
             node: {
@@ -1236,7 +1324,7 @@ describe('Lexical', () => {
           expect(result).not.toContain('<script>')
         })
 
-        vitestIt('renders normal image with correct attributes', async () => {
+        test('renders normal image with correct attributes', async () => {
           const result = await variant.upload.upload!({
             ...converterBaseArgs,
             node: {
@@ -1262,8 +1350,8 @@ describe('Lexical', () => {
       })
 
       // ── Heading ──
-      describe('HeadingHTMLConverter', () => {
-        vitestIt.each(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])('allows valid tag: %s', async (tag) => {
+      test.describe('HeadingHTMLConverter', () => {
+        test.each(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])('allows valid tag: %s', async (tag) => {
           const result = await variant.heading.heading!({
             ...converterBaseArgs,
             node: { children: [], tag } as any,
@@ -1273,7 +1361,7 @@ describe('Lexical', () => {
           expect(result).toContain(`</${tag}>`)
         })
 
-        vitestIt('rejects arbitrary tag names and defaults to h1', async () => {
+        test('rejects arbitrary tag names and defaults to h1', async () => {
           const result = await variant.heading.heading!({
             ...converterBaseArgs,
             node: { children: [], tag: 'script' } as any,
@@ -1285,8 +1373,8 @@ describe('Lexical', () => {
       })
 
       // ── List ──
-      describe('ListHTMLConverter', () => {
-        vitestIt.each(['ol', 'ul'])('allows valid list tag: %s', async (tag) => {
+      test.describe('ListHTMLConverter', () => {
+        test.each(['ol', 'ul'])('allows valid list tag: %s', async (tag) => {
           const result = await variant.list.list!({
             ...converterBaseArgs,
             node: { children: [], listType: 'bullet', tag } as any,
@@ -1296,7 +1384,7 @@ describe('Lexical', () => {
           expect(result).toContain(`</${tag}>`)
         })
 
-        vitestIt('rejects arbitrary tag names and defaults to ul', async () => {
+        test('rejects arbitrary tag names and defaults to ul', async () => {
           const result = await variant.list.list!({
             ...converterBaseArgs,
             node: { children: [], listType: 'bullet', tag: 'img' } as any,
@@ -1306,7 +1394,7 @@ describe('Lexical', () => {
           expect(result).toContain('<ul')
         })
 
-        vitestIt('validates listType against allowlist', async () => {
+        test('validates listType against allowlist', async () => {
           const result = await variant.list.list!({
             ...converterBaseArgs,
             node: { children: [], listType: 'evil"><script>', tag: 'ul' } as any,
@@ -1318,8 +1406,8 @@ describe('Lexical', () => {
       })
 
       // ── Table ──
-      describe('TableHTMLConverter', () => {
-        vitestIt.each([
+      test.describe('TableHTMLConverter', () => {
+        test.each([
           ['hex', '#ff0000'],
           ['named', 'steelblue'],
           ['rgb()', 'rgb(255, 0, 0)'],
@@ -1339,7 +1427,7 @@ describe('Lexical', () => {
           expect(result).toContain(`background-color: ${color};`)
         })
 
-        vitestIt('rejects invalid backgroundColor values', async () => {
+        test('rejects invalid backgroundColor values', async () => {
           const result = await variant.table.tablecell!({
             ...converterBaseArgs,
             node: {
@@ -1355,7 +1443,7 @@ describe('Lexical', () => {
           expect(result).not.toContain('background-color:')
         })
 
-        vitestIt('renders th for header cells with correct attributes', async () => {
+        test('renders th for header cells with correct attributes', async () => {
           const result = await variant.table.tablecell!({
             ...converterBaseArgs,
             node: {
@@ -1376,8 +1464,57 @@ describe('Lexical', () => {
     })
   }
 
-  describe('UploadHTMLConverter — picture/source path', () => {
-    vitestIt('escapes HTML in source srcset and type attributes', () => {
+  for (const variant of [
+    { converters: ListHTMLConverter, label: 'Sync', listTypes: ['number', 'check'] },
+    { converters: ListHTMLConverterAsync, label: 'Async', listTypes: ['number', 'check'] },
+    {
+      converters: ListItemDiffHTMLConverterAsync,
+      label: 'Admin version diff',
+      listTypes: ['number'],
+    },
+  ] as const) {
+    test.describe(`List item escaping (${variant.label})`, () => {
+      test.each(variant.listTypes)(
+        'should escape stored malformed values in %s list items',
+        async (listType) => {
+          const storedValue = 'List item " & < >'
+          const node: SerializedListItemNode = {
+            type: 'listitem',
+            children: [],
+            direction: null,
+            format: '',
+            indent: 0,
+            // Older stored content can contain strings despite the numeric type.
+            value: storedValue as unknown as number,
+            version: 1,
+          }
+          const parent: SerializedListNode = {
+            type: 'list',
+            children: [node],
+            direction: null,
+            format: '',
+            indent: 0,
+            listType,
+            start: 1,
+            tag: listType === 'number' ? 'ol' : 'ul',
+            version: 1,
+          }
+          const args = { nodes: [node], parent }
+          const result = (
+            variant.label === 'Sync'
+              ? convertLexicalNodesToHTML({ ...args, converters: variant.converters })
+              : await convertLexicalNodesToHTMLAsync({ ...args, converters: variant.converters })
+          ).join('')
+
+          expect(result).toContain('value="List item &quot; &amp; &lt; &gt;"')
+          expect(result).not.toContain(storedValue)
+        },
+      )
+    })
+  }
+
+  test.describe('UploadHTMLConverter — picture/source path', () => {
+    test('escapes HTML in source srcset and type attributes', () => {
       const result = UploadHTMLConverter.upload!({
         ...converterBaseArgs,
         node: {
@@ -1412,10 +1549,10 @@ describe('Lexical', () => {
     })
   })
 
-  describe('Diff View Link Converter', () => {
+  test.describe('Diff View Link Converter', () => {
     const diffLinkConverter = LinkDiffHTMLConverterAsync({})
 
-    vitestIt('blocks disallowed protocols in autolink', async () => {
+    test('blocks disallowed protocols in autolink', async () => {
       const result = await diffLinkConverter.autolink!({
         ...converterBaseArgs,
         node: {
@@ -1428,7 +1565,7 @@ describe('Lexical', () => {
       expect(result).toContain('href="#"')
     })
 
-    vitestIt('blocks disallowed protocols in link', async () => {
+    test('blocks disallowed protocols in link', async () => {
       const result = await diffLinkConverter.link!({
         ...converterBaseArgs,
         node: {
@@ -1445,7 +1582,7 @@ describe('Lexical', () => {
       expect(result).toContain('href="#"')
     })
 
-    vitestIt('properly encodes special characters in href', async () => {
+    test('properly encodes special characters in href', async () => {
       const result = await diffLinkConverter.autolink!({
         ...converterBaseArgs,
         node: {
@@ -1458,7 +1595,7 @@ describe('Lexical', () => {
       expect(result).toContain('&quot;')
     })
 
-    vitestIt('allows safe URLs and includes fields hash', async () => {
+    test('allows safe URLs and includes fields hash', async () => {
       const result = await diffLinkConverter.autolink!({
         ...converterBaseArgs,
         node: {
@@ -1470,5 +1607,218 @@ describe('Lexical', () => {
       expect(result).toContain('href="https://example.com/page"')
       expect(result).toContain('data-fields-hash=')
     })
+  })
+})
+
+test.describe('Lexical root editor sanitization', () => {
+  test('should resolve referenced blocks after their fields are sanitized', () => {
+    const config = {
+      blocks: [
+        {
+          slug: 'rootBlock',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      collections: [
+        {
+          slug: 'articles',
+          fields: [{ name: 'content', type: 'richText' }],
+        },
+      ],
+      editor: lexicalEditor({
+        features: [BlocksFeature({ blocks: ['rootBlock' as BlockSlug] })],
+      }),
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const editor = sanitizedConfig.editor as LexicalRichTextAdapter
+    const blocksFeature = editor.editorConfig.resolvedFeatureMap.get('blocks')!
+    const [blocksField] = blocksFeature.nodes![0]!.getSubFields!({})!
+    const [block] = (blocksField as BlocksField).blocks as Block[]
+
+    expect(block!.fields).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'title' }),
+        expect.objectContaining({ name: 'id' }),
+        expect.objectContaining({ name: 'blockName' }),
+      ]),
+    )
+  })
+})
+
+test.describe('Lexical block interface generation', () => {
+  // A lexical block's interface is named after its slug (PascalCase) or its `interfaceName`.
+  // When two differently-shaped blocks resolve to the same name, each must get its own
+  // interface — the first keeps the clean name, the second gets a content-hash suffix — so
+  // neither is silently mistyped. This mirrors payload core's `registerBlockInterface`.
+  test('content-hashes a colliding lexical block instead of silently overwriting it', () => {
+    const heroEditor = (fieldName: string, fieldType: 'number' | 'text') =>
+      lexicalEditor({
+        features: [
+          BlocksFeature({
+            blocks: [{ slug: 'hero', fields: [{ name: fieldName, type: fieldType }] }],
+          }),
+        ],
+      })
+
+    // Two richText fields each define a `hero` block with DIFFERENT fields, so both
+    // resolve to the `Hero` interface name.
+    const config = {
+      collections: [
+        {
+          slug: 'collisionTest',
+          fields: [
+            { name: 'rt1', type: 'richText', editor: heroEditor('title', 'text') },
+            { name: 'rt2', type: 'richText', editor: heroEditor('subtitle', 'number') },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+    const defs = jsonSchema.$defs!
+
+    // Each differently-shaped `hero` gets its own interface (one clean, one hashed).
+    const heroNames = Object.keys(defs).filter((k) => /^Hero(?:_[0-9A-F]{8})?$/.test(k))
+    expect(heroNames).toHaveLength(2)
+
+    // ...and they carry distinct field shapes (not a silent overwrite).
+    const shapeOf = (name: string): string =>
+      Object.keys((defs[name] as { properties: Record<string, unknown> }).properties)
+        .sort()
+        .join(',')
+    expect(shapeOf(heroNames[0]!)).not.toBe(shapeOf(heroNames[1]!))
+  })
+})
+
+test.describe('Lexical link fields interface generation', () => {
+  // The node-union name is a content hash of the editor's nodes. A link node only carries a `$ref`
+  // to its `LexicalLinkFields_<hash>` interface, whose *content* lives separately — so two editors
+  // with identical nodes but different custom LinkFeature fields must not hash the same, or one
+  // `LexicalLinkFields_<hash>` would overwrite the other and mistype a field.
+  test('gives editors with identical nodes but different custom link fields distinct interfaces', () => {
+    const linkEditor = (fieldName: string) =>
+      lexicalEditor({
+        features: [
+          LinkFeature({
+            fields: ({ defaultFields }) => [...defaultFields, { name: fieldName, type: 'text' }],
+          }),
+        ],
+      })
+
+    // Two richText fields with the same nodes, differing only in their custom link field.
+    const config = {
+      collections: [
+        {
+          slug: 'linkCollisionTest',
+          fields: [
+            { name: 'rt1', type: 'richText', editor: linkEditor('label') },
+            { name: 'rt2', type: 'richText', editor: linkEditor('trackingId') },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+    const defs = jsonSchema.$defs!
+
+    // Each editor gets its own custom-link-fields interface (not a single shared, overwritten one).
+    const linkFieldsNames = Object.keys(defs).filter((k) =>
+      /^LexicalLinkFields_[0-9A-F]{8}$/.test(k),
+    )
+    expect(linkFieldsNames).toHaveLength(2)
+
+    // ...and each carries its own custom field (`label` vs `trackingId`), not a silent overwrite.
+    const propsOf = (name: string): string[] =>
+      Object.keys((defs[name] as { properties: Record<string, unknown> }).properties).sort()
+    expect(propsOf(linkFieldsNames[0]!)).not.toEqual(propsOf(linkFieldsNames[1]!))
+  })
+})
+
+test.describe('Lexical upload node type generation', () => {
+  // The upload node's JSON Schema validates configured extra fields strictly, so the generated
+  // TypeScript must expose them too - not erase them to `{ [k: string]: unknown }`.
+  test('reflects UploadFeature extra fields in the generated upload node type', async () => {
+    const config = {
+      collections: [
+        { slug: 'media', fields: [], upload: true },
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  UploadFeature({
+                    collections: { media: { fields: [{ name: 'caption', type: 'text' }] } },
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const { types: generatedTypes } = await generateTypes(sanitizedConfig, {
+      log: false,
+      returnString: true,
+    })
+
+    // The configured `caption` upload field must survive into the generated upload node type,
+    // not be erased to `{ [k: string]: unknown }`.
+    expect(generatedTypes).toContain('caption')
+  })
+})
+
+test.describe('Lexical inline block node type generation', () => {
+  // A `BlocksFeature` with `blocks` but no `inlineBlocks` should not make the generated node union
+  // claim the field can contain inline-block nodes - the editor can never produce one.
+  test('omits the inline-block node type when no inline blocks are configured', async () => {
+    const config = {
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  BlocksFeature({
+                    blocks: [{ slug: 'myBlock', fields: [{ name: 'title', type: 'text' }] }],
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const { types: generatedTypes } = await generateTypes(sanitizedConfig, {
+      log: false,
+      returnString: true,
+    })
+
+    // The configured block is part of the node union...
+    expect(generatedTypes).toContain('SerializedBlockNode<MyBlock>')
+    // ...but the union must not include an inline-block node
+    expect(generatedTypes).not.toMatch(/SerializedInlineBlockNode<\s*\{\s*blockType:/)
   })
 })

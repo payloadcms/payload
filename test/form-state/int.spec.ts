@@ -1,28 +1,25 @@
-import type { FieldState, FormState, Payload, User } from 'payload'
-import type React from 'react'
+import type { FieldState, FormState, User } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import path from 'path'
-import { createLocalReq } from 'payload'
+import { createLocalReq, getAccessResults } from 'payload'
+import React from 'react'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect, vi } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
+import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
+import { test } from '../__helpers/int/vitest.js'
 
-let payload: Payload
-let restClient: NextRESTClient
 let user: User
 
 const { email, password } = devUser
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 const DummyReactComponent: React.ReactNode = {
   // @ts-expect-error - can ignore, needs to satisfy `typeof value.$$typeof === 'symbol'`
@@ -32,10 +29,8 @@ const DummyReactComponent: React.ReactNode = {
   key: null,
 }
 
-describe('Form State', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true))
-
+test.suite({ config: './config.ts', resetBetweenTests: false })('Form State', () => {
+  test.beforeAll(async ({ restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -48,11 +43,60 @@ describe('Form State', () => {
     user = data.user
   })
 
-  afterAll(async () => {
-    await payload.destroy()
+  test.afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
-  it('should build entire form state', async () => {
+  test('should respect field create access when initializing an autosave draft', async ({
+    payload,
+  }) => {
+    const editor = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'editor@example.com',
+        password: 'test-password',
+      },
+    })
+
+    const req = await createLocalReq({ user: editor }, payload)
+    const permissions = await getAccessResults({ req })
+    const restrictedValue = 'client supplied'
+    const title = 'Access filtered autosave'
+    vi.stubGlobal('React', React)
+
+    await renderDocumentHandler({
+      collectionSlug: autosavePostsSlug,
+      cookies: new Map(),
+      docID: undefined as never,
+      importMap: payload.importMap,
+      initialData: {
+        restrictedValue,
+        title,
+      },
+      locale: undefined,
+      permissions,
+      redirectAfterCreate: false,
+      redirectAfterDelete: false,
+      redirectAfterDuplicate: false,
+      req,
+    })
+
+    const { docs } = await payload.find({
+      collection: autosavePostsSlug,
+      draft: true,
+      overrideAccess: true,
+      where: {
+        title: {
+          equals: title,
+        },
+      },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]).not.toHaveProperty('restrictedValue', restrictedValue)
+  })
+
+  test('should build entire form state', async ({ payload }) => {
     const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
@@ -108,7 +152,9 @@ describe('Form State', () => {
     })
   })
 
-  it('should use `select` to build partial form state with only specified fields', async () => {
+  test('should use `select` to build partial form state with only specified fields', async ({
+    payload,
+  }) => {
     const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
@@ -138,6 +184,12 @@ describe('Form State', () => {
     })
 
     expect(state).toStrictEqual({
+      '_index-7': {
+        disableFormData: true,
+      },
+      '_index-7-0-0': {
+        disableFormData: true,
+      },
       title: {
         value: postData.title,
         initialValue: postData.title,
@@ -147,7 +199,9 @@ describe('Form State', () => {
     })
   })
 
-  it('should not render custom components when `lastRenderedPath` exists', async () => {
+  test('should not render custom components when `lastRenderedPath` exists', async ({
+    payload,
+  }) => {
     const req = await createLocalReq({ user }, payload)
 
     const { state: stateWithRow } = await buildFormState({
@@ -230,7 +284,205 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
   })
 
-  it('should add `addedByServer` flag to fields that originate on the server', async () => {
+  test('should not render custom Field components for fields hidden by admin.condition', async ({
+    payload,
+  }) => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(stateHidden?.conditionalCustomField).toBeDefined()
+    expect(stateHidden?.conditionalCustomField?.passesCondition).toBe(false)
+    expect(stateHidden?.conditionalCustomField).not.toHaveProperty('customComponents')
+    expect(stateHidden?.conditionalCustomField?.lastRenderedPath).toBeUndefined()
+
+    const visibleDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: true,
+      },
+    })
+
+    const { state: stateVisible } = await buildFormState({
+      mockRSCs: true,
+      id: visibleDoc.id,
+      collectionSlug: conditionsSlug,
+      data: visibleDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(stateVisible?.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(stateVisible?.conditionalCustomField).toHaveProperty('customComponents')
+    expect(stateVisible?.conditionalCustomField?.customComponents?.Field).toBeDefined()
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ collection: conditionsSlug, id: visibleDoc.id })
+  })
+
+  test('should preserve values of fields nested inside a row hidden by admin.condition', async ({
+    payload,
+  }) => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+        conditionalRowField: 'value in db',
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(stateHidden?.conditionalRowField).toBeDefined()
+    expect(stateHidden?.conditionalRowField?.value).toBe('value in db')
+
+    // The row itself must still carry `passesCondition: false` so the client hides it via
+    // `withCondition` (rather than rendering an empty, visible row).
+    expect(stateHidden?.['_index-2']?.passesCondition).toBe(false)
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+  })
+
+  test('should preserve values of fields nested inside a collapsible hidden by admin.condition', async ({
+    payload,
+  }) => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+        conditionalCollapsibleField: 'collapsible db value',
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    // Same regression class as `row`: a collapsible is a presentational container, so its
+    // nested field's value must survive even though the collapsible is hidden.
+    expect(stateHidden?.conditionalCollapsibleField?.value).toBe('collapsible db value')
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+  })
+
+  test('should render custom Field component when admin.condition flips from false to true via onChange', async ({
+    payload,
+  }) => {
+    const req = await createLocalReq({ user }, payload)
+
+    const doc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+      },
+    })
+
+    const { state: initialState } = await buildFormState({
+      mockRSCs: true,
+      id: doc.id,
+      collectionSlug: conditionsSlug,
+      data: doc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(initialState?.conditionalCustomField).not.toHaveProperty('customComponents')
+
+    // Simulate condition flipping true (user toggles checkbox) by re-requesting
+    // form state with `renderAllFields: false` and updated value — same flow as onChange.
+    initialState.showField!.value = true
+
+    const { state: flippedState } = await buildFormState({
+      mockRSCs: true,
+      id: doc.id,
+      collectionSlug: conditionsSlug,
+      formState: initialState,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(flippedState?.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(flippedState?.conditionalCustomField).toHaveProperty('customComponents')
+    expect(flippedState?.conditionalCustomField?.customComponents?.Field).toBeDefined()
+
+    await payload.delete({ collection: conditionsSlug, id: doc.id })
+  })
+
+  test('should add `addedByServer` flag to fields that originate on the server', async ({
+    payload,
+  }) => {
     const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
@@ -274,7 +526,7 @@ describe('Form State', () => {
     expect(newState.title?.addedByServer).toBeUndefined()
   })
 
-  it('should not omit value and initialValue from fields added by the server', () => {
+  test('should not omit value and initialValue from fields added by the server', () => {
     const currentState: FormState = {
       array: {
         rows: [
@@ -317,7 +569,7 @@ describe('Form State', () => {
     })
   })
 
-  it('should merge array rows without losing rows added to local state', () => {
+  test('should merge array rows without losing rows added to local state', () => {
     const currentState: FormState = {
       array: {
         errorPaths: [],
@@ -403,7 +655,7 @@ describe('Form State', () => {
     })
   })
 
-  it('should merge array rows without bringing back rows deleted from local state', () => {
+  test('should merge array rows without bringing back rows deleted from local state', () => {
     const currentState: FormState = {
       array: {
         rows: [
@@ -483,7 +735,7 @@ describe('Form State', () => {
     })
   })
 
-  it('should merge new fields returned from the server that do not yet exist in local state', () => {
+  test('should merge new fields returned from the server that do not yet exist in local state', () => {
     const currentState: FormState = {
       array: {
         rows: [
@@ -552,7 +804,7 @@ describe('Form State', () => {
     })
   })
 
-  it('should return the same object reference when only modifying a value', () => {
+  test('should return the same object reference when only modifying a value', () => {
     const currentState = {
       title: {
         value: 'Test Post',
@@ -577,7 +829,7 @@ describe('Form State', () => {
     expect(newState === currentState).toBe(true)
   })
 
-  it('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
+  test('should accept all values from the server regardless of local modifications, e.g. `acceptAllValues` on submit', () => {
     const title: FieldState = {
       value: 'Test Post (modified on the client)',
       initialValue: 'Test Post',
@@ -680,7 +932,7 @@ describe('Form State', () => {
     })
   })
 
-  it('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
+  test('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
     const title: FieldState = {
       value: 'Test Post (modified on the client 1)',
       initialValue: 'Test Post',
@@ -732,7 +984,7 @@ describe('Form State', () => {
     })
   })
 
-  it('should preserve client row data after reorder and delete during autosave', () => {
+  test('should preserve client row data after reorder and delete during autosave', () => {
     /**
      * Regression test for the "ghost item" bug.
      * User reorders [A, B, C] → [C, A, B], autosave fires, then user deletes A.
@@ -772,7 +1024,7 @@ describe('Form State', () => {
     expect(newState['array.1.text']?.value).toBe('B text')
   })
 
-  it('should preserve client row data after reorder during autosave', () => {
+  test('should preserve client row data after reorder during autosave', () => {
     /**
      * User reorders [A, B] → [B, A] during autosave.
      * Server responds with stale [A, B]. Field values should remain with correct rows.
@@ -808,7 +1060,7 @@ describe('Form State', () => {
     expect(newState['array.1.text']?.value).toBe('A text')
   })
 
-  it('should preserve nested array row data after reorder during autosave', () => {
+  test('should preserve nested array row data after reorder during autosave', () => {
     /**
      * User reorders nested array blocks[0].items from [A, B] → [B, A] during autosave.
      * Outer block unchanged. Server responds with stale inner array [A, B].
@@ -855,7 +1107,7 @@ describe('Form State', () => {
     expect(newState['blocks.0.items.1.text']?.value).toBe('A text')
   })
 
-  it('should preserve nested array row data after reorder and delete during autosave', () => {
+  test('should preserve nested array row data after reorder and delete during autosave', () => {
     /**
      * User reorders nested array blocks[0].items from [A, B, C] → [C, A, B], then deletes A.
      * Outer block unchanged. Server responds with stale inner array [C, A, B].
@@ -904,7 +1156,7 @@ describe('Form State', () => {
     expect(newState['blocks.0.items.1.text']?.value).toBe('B text')
   })
 
-  it('should accept server values on explicit save without row ID guard', () => {
+  test('should accept server values on explicit save without row ID guard', () => {
     /**
      * On explicit save (acceptValues: true), server values should be accepted
      * without the row ID guard interfering. This test ensures the guard is
@@ -947,7 +1199,7 @@ describe('Form State', () => {
     expect(newState['array.1.text']?.value).toBe('B text from server')
   })
 
-  it('should preserve client-added row during autosave', () => {
+  test('should preserve client-added row during autosave', () => {
     /**
      * Client adds row D during autosave. Server responds with stale [A, B, C].
      * Row D should be preserved with its client value.
@@ -985,7 +1237,7 @@ describe('Form State', () => {
     expect(newState['array.3.text']?.value).toBe('D text')
   })
 
-  it('should append server-added row with addedByServer flag', () => {
+  test('should append server-added row with addedByServer flag', () => {
     /**
      * Server adds a new row via hook with addedByServer: true.
      * Row should be appended and not blocked by row ID guard.
@@ -1023,7 +1275,7 @@ describe('Form State', () => {
     expect(newState['array.2.text']).not.toHaveProperty('addedByServer')
   })
 
-  it('should preserve empty client array when server has rows', () => {
+  test('should preserve empty client array when server has rows', () => {
     /**
      * Client deleted all rows during autosave. Server responds with [A, B].
      * Client should stay empty.
@@ -1056,7 +1308,7 @@ describe('Form State', () => {
     expect(newState['array.1.text']).toBeUndefined()
   })
 
-  it('should handle 3-level nested array reordering', () => {
+  test('should handle 3-level nested array reordering', () => {
     /**
      * Verify parseArrayFieldPath works at depth 3+.
      * blocks.0.items.1.subItems reordered from [X, Y] → [Y, X].
@@ -1108,7 +1360,7 @@ describe('Form State', () => {
     expect(newState['blocks.0.items.1.subItems.1.text']?.value).toBe('X text')
   })
 
-  it('should set rows to empty array for empty array fields', async () => {
+  test('should set rows to empty array for empty array fields', async ({ payload }) => {
     const req = await createLocalReq({ user }, payload)
 
     // Create a document with an empty array
@@ -1145,5 +1397,38 @@ describe('Form State', () => {
 
     expect(state.array).toBeDefined()
     expect(state?.array?.rows).toEqual([]) // should be [] not undefined
+  })
+
+  test('should resolve a promise-returning `filterOptions` on a select field into `selectFilterOptions`', async ({
+    payload,
+  }) => {
+    const req = await createLocalReq({ user }, payload)
+
+    const postData = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+      },
+    })
+
+    const { state } = await buildFormState({
+      mockRSCs: true,
+      id: postData.id,
+      collectionSlug: postsSlug,
+      data: postData,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(state.selectWithAsyncFilterOptions?.selectFilterOptions).toStrictEqual(['allowed'])
+
+    await payload.delete({ collection: postsSlug, id: postData.id })
   })
 })

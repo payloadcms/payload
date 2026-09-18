@@ -247,7 +247,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             result[field.name][locale] = localizedBlocks.map((row) => {
               const block =
                 adapter.payload.blocks[row.blockType] ??
-                ((field.blockReferences ?? field.blocks).find(
+                (field.blocks.find(
                   (block) => typeof block !== 'string' && block.slug === row.blockType,
                 ) as FlattenedBlock | undefined)
 
@@ -314,7 +314,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
             const block =
               adapter.payload.blocks[row.blockType] ??
-              ((field.blockReferences ?? field.blocks).find(
+              (field.blocks.find(
                 (block) => typeof block !== 'string' && block.slug === row.blockType,
               ) as FlattenedBlock | undefined)
 

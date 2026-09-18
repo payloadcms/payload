@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
-import './LexicalEditor.scss'
+import './LexicalEditor.css'
 import { EditorPlugin } from './EditorPlugin.js'
 import { ClipboardPlugin } from './plugins/ClipboardPlugin/index.js'
 import { DecoratorPlugin } from './plugins/DecoratorPlugin/index.js'
@@ -62,7 +62,7 @@ export const LexicalEditor: React.FC<
       editorConfigContext.blurEditor(editorConfigContext)
     }
 
-    const unregisterFocus = editor.registerCommand<MouseEvent>(
+    const unregisterFocus = editor.registerCommand(
       FOCUS_COMMAND,
       () => {
         handleFocus()
@@ -71,7 +71,7 @@ export const LexicalEditor: React.FC<
       COMMAND_PRIORITY_LOW,
     )
 
-    const unregisterBlur = editor.registerCommand<MouseEvent>(
+    const unregisterBlur = editor.registerCommand(
       BLUR_COMMAND,
       () => {
         handleBlur()

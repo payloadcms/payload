@@ -12,7 +12,9 @@ import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
-import './index.scss'
+import { WriteIcon } from '../../../icons/Write/index.js'
+import './index.css'
+import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
@@ -63,7 +65,7 @@ export function RelationshipContent(props: Props) {
   } = props
 
   const { config } = useConfig()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const collectionConfig =
     'collections' in config
       ? config.collections.find((collection) => collection.slug === collectionSlug)
@@ -133,22 +135,25 @@ export function RelationshipContent(props: Props) {
         <div className={`${baseClass}__actions`}>
           {allowEdit !== false ? (
             <Button
-              buttonStyle="icon-label"
-              className={`${baseClass}__edit`}
-              icon="edit"
-              iconStyle="none"
+              aria-label={t('general:edit')}
+              buttonStyle="ghost"
+              className={`${baseClass}__action-btn`}
+              icon={<WriteIcon />}
+              margin={false}
               onClick={openDrawer}
             />
           ) : null}
           {allowRemove !== false ? (
             <Button
-              buttonStyle="icon-label"
-              className={`${baseClass}__remove`}
-              icon="x"
-              iconStyle="none"
+              aria-label={t('general:remove')}
+              buttonStyle="ghost"
+              className={`${baseClass}__action-btn`}
+              icon={<XIcon size={24} />}
+              margin={false}
               onClick={() => onRemove()}
             />
           ) : null}
+
           <DocumentDrawer onSave={onSave} />
         </div>
       ) : null}

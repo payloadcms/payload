@@ -52,6 +52,7 @@ const Users: CollectionConfig = {
     afterLogin: [afterLoginHook],
     beforeLogin: [beforeLoginHook],
   },
+  versions: false,
 }
 
 export default Users

@@ -1,0 +1,9 @@
+@layer payload-default {
+  .collection-edit {
+    width: 100%;
+  }
+
+  .collection-edit__form {
+    height: auto;
+  }
+}

@@ -42,7 +42,7 @@ const toolbarGroups = (props: TextStateFeatureProps, stateMap: StateMap): Toolba
   return [
     {
       type: 'dropdown',
-      ChildComponent: () => <TextStateIcon css={{ color: 'var(--theme-elevation-600)' }} />,
+      ChildComponent: () => <TextStateIcon css={{ color: 'var(--color-icon-secondary)' }} />,
       items: [...clearStyle, ...items],
       key: 'textState',
       order: 30,

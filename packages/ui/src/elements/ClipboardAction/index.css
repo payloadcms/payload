@@ -1,0 +1,8 @@
+@layer payload-default {
+  .clipboard-action__button.popup-button--active,
+  .clipboard-action__button.popup-button--active:hover,
+  .clipboard-action__button.popup-button--active:active {
+    background: var(--color-bg-selected);
+    color: var(--color-icon-selected);
+  }
+}

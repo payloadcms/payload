@@ -1,4 +1,4 @@
-import type * as AWS from '@aws-sdk/client-s3'
+import type { S3, S3ClientConfig } from '@aws-sdk/client-s3'
 import type {
   Adapter,
   ClientUploadsConfig,
@@ -7,17 +7,15 @@ import type {
 
 import type { SignedDownloadsConfig } from './getFile.js'
 
-import { deleteFile } from './deleteFile.js'
+import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
-import { getFile } from './getFile.js'
-import { uploadFile } from './uploadFile.js'
 
 interface CreateS3AdapterArgs {
   acl?: 'private' | 'public-read'
   bucket: string
   clientUploads?: ClientUploadsConfig
-  config: AWS.S3ClientConfig
-  getStorageClient: () => AWS.S3
+  config: S3ClientConfig
+  getStorageClient: () => S3
   signedDownloads: SignedDownloadsConfig
   useCompositePrefixes?: boolean
 }
@@ -33,7 +31,6 @@ export function createS3Adapter({
 }: CreateS3AdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
-    clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -45,49 +42,61 @@ export function createS3Adapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({
+    uploadInstructions: {
+      enabled: Boolean(clientUploads),
+      generate: generateUploadInstructions({
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        acl,
         bucket,
-        client: getStorageClient(),
         collectionPrefix: prefix,
-        docPrefix,
-        filename,
+        getStorageClient,
         useCompositePrefixes,
       }),
+      requiresUploadReceipt: true,
+      useInAdmin: true,
+    },
 
-    handleUpload: async ({ data, file }) => {
+    // Helpers below dynamic-import their @aws-sdk dependencies so the SDK only
+    // loads on the first request that actually needs it.
+    handleDelete: async ({ storageFilePath }) => {
+      const { deleteFile } = await import('./deleteFile.js')
+      return deleteFile({
+        bucket,
+        client: getStorageClient(),
+        storageFilePath,
+      })
+    },
+
+    handleUpload: async ({ data, file, storageFilePath }) => {
+      const { uploadFile } = await import('./uploadFile.js')
       await uploadFile({
         acl,
         bucket,
         buffer: file.buffer,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
+        storageFilePath,
         tempFilePath: file.tempFilePath,
-        useCompositePrefixes,
       })
 
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
-    ) =>
-      getFile({
+    staticHandler: async (req, { doc, headers, params: { filename, uploadReference } }) => {
+      const { getFile } = await import('./getFile.js')
+      return getFile({
         bucket,
         client: getStorageClient(),
-        clientUploadContext,
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
         signedDownloads,
+        uploadReference,
         useCompositePrefixes,
-      }),
+      })
+    },
   })
 }

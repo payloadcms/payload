@@ -4,7 +4,7 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
+} from '../../../../types/nodeTypes.js'
 
 export type JSXConverterArgs<
   TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
@@ -43,31 +43,13 @@ export type JSXConverters<
   >
 } & {
   blocks?: {
-    [K in Extract<
-      Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: JSXConverter<
-      Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? SerializedBlockNode<Extract<B, { blockType: K }>>
-        : SerializedBlockNode
+    [K in Extract<TNodes, { type: 'block' }>['fields']['blockType']]?: JSXConverter<
+      Extract<TNodes, { fields: { blockType: K }; type: 'block' }>
     >
   }
   inlineBlocks?: {
-    [K in Extract<
-      Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: JSXConverter<
-      Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
-        : SerializedInlineBlockNode
+    [K in Extract<TNodes, { type: 'inlineBlock' }>['fields']['blockType']]?: JSXConverter<
+      Extract<TNodes, { fields: { blockType: K }; type: 'inlineBlock' }>
     >
   }
   unknown?: JSXConverter<SerializedLexicalNode>

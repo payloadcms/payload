@@ -1,0 +1,121 @@
+@layer payload-default, payload;
+
+@import '../styles.css';
+
+@layer payload-default {
+  :root {
+    --font-body: var(--font-family-sans), sans-serif;
+    --font-mono: var(--font-family-mono), 'SF Mono', Menlo, Consolas, Monaco, monospace;
+
+    --app-header-height: 0px;
+    --doc-controls-height: 0px;
+    --doc-header-height: 0px;
+    --nav-width: 275px;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --nav-width: 100vw;
+    }
+  }
+
+  /* GLOBAL STYLES */
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+
+    &[data-theme='dark'] {
+      color-scheme: dark;
+    }
+  }
+
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
+    color: var(--color-text);
+    margin: 0;
+    /* this is for the nav to be able to push the document over */
+    overflow-x: hidden;
+  }
+
+  /* Lock background scroll while a drawer is open. Backs up faceless-ui's JS
+     body-scroll-lock, which a sibling modal can clear prematurely. */
+  body:has(.drawer--is-open) {
+    overflow: hidden;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  ul,
+  ol {
+    padding-left: 1.53846rem;
+    margin: 0;
+  }
+
+  :focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+    border-radius: var(--radius-medium);
+  }
+
+  a {
+    color: currentColor;
+
+    &:focus {
+      &:not(:focus-visible) {
+        opacity: 0.8;
+      }
+    }
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  svg {
+    vertical-align: middle;
+  }
+
+  dialog {
+    width: 100%;
+    border: 0;
+    padding: 0;
+    color: currentColor;
+  }
+
+  .payload__modal-item {
+    min-height: 100%;
+    background: transparent;
+  }
+
+  .payload__modal-container--enterDone {
+    overflow: auto;
+  }
+
+  .payload__modal-item--enter,
+  .payload__modal-item--enterDone {
+    z-index: var(--z-modal);
+  }
+}

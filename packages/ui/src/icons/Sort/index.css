@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--sort {
+    /* Icon uses fill, no additional styles needed */
+  }
+}

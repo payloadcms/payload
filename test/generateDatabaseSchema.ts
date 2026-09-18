@@ -4,7 +4,7 @@ import { loadEnv } from 'payload/node'
 import { fileURLToPath } from 'url'
 
 import { setTestEnvPaths } from './__helpers/shared/setTestEnvPaths.js'
-import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
+import { generateDatabaseAdapter } from './dbAdapters.js'
 
 loadEnv()
 

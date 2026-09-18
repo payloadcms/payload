@@ -39,4 +39,5 @@ export const LexicalViewsFrontend: CollectionConfig = {
     plural: 'Lexical Views Frontend',
     singular: 'Lexical Views Frontend',
   },
+  versions: false,
 }

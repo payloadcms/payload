@@ -26,4 +26,5 @@ export const CustomCollectionView: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

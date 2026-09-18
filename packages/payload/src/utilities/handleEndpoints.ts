@@ -87,6 +87,12 @@ export const handleEndpoints = async ({
     (request.headers.get('X-Payload-HTTP-Method-Override') === 'GET' ||
       request.headers.get('X-HTTP-Method-Override') === 'GET')
   ) {
+    // Extract properties before consuming the body — srvx (TanStack Start) uses
+    // lazy property getters that reconstruct the underlying Request, which throws
+    // after the body has been read via .text() / .json().
+    const requestHeaders = request.headers
+    const requestSignal = request.signal
+
     let url = request.url
     let data: any = undefined
 
@@ -108,12 +114,9 @@ export const handleEndpoints = async ({
     }
 
     const req = new Request(url, {
-      // @ts-expect-error // TODO: check if this is required
-      cache: request.cache,
-      credentials: request.credentials,
-      headers: request.headers,
+      headers: requestHeaders,
       method: 'GET',
-      signal: request.signal,
+      signal: requestSignal,
     })
 
     if (data) {

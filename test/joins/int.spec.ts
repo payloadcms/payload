@@ -3,17 +3,22 @@ import type { Payload, TypeWithID } from 'payload'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
+import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
+  accessJoinArticlesSlug,
+  accessJoinNotesSlug,
+  accessJoinParentsSlug,
   categoriesJoinRestrictedSlug,
   categoriesSlug,
+  operatorHandlerJoinArticlesSlug,
+  operatorHandlerJoinNotesSlug,
+  operatorHandlerJoinParentsSlug,
   postsSlug,
   restrictedCategoriesSlug,
   restrictedPostsSlug,
@@ -22,14 +27,11 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-let payload: Payload
 let token: string
-let restClient: NextRESTClient
 
 const { email, password } = devUser
 
-describe('Joins Field', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', () => {
   let category: Category
   let otherCategory: Category
   let categoryID
@@ -37,9 +39,7 @@ describe('Joins Field', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+  test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -85,49 +85,48 @@ describe('Joins Field', () => {
       if (i % 2 === 0) {
         categories = [category.id, otherCategory.id]
       }
-      await createPost({
-        title: `test ${i}`,
-        category: category.id,
-        upload: uploadedImage,
-        categories,
-        categoriesLocalized: categories,
-        polymorphic: {
-          relationTo: 'categories',
-          value: category.id,
-        },
-        polymorphics: [
-          {
-            relationTo: 'categories',
-            value: category.id,
-          },
-        ],
-        localizedPolymorphic: {
-          relationTo: 'categories',
-          value: category.id,
-        },
-        localizedPolymorphics: [
-          {
-            relationTo: 'categories',
-            value: category.id,
-          },
-        ],
-        group: {
+      await createPost(
+        { payload },
+        {
+          title: `test ${i}`,
           category: category.id,
-          camelCaseCategory: category.id,
+          upload: uploadedImage,
+          categories,
+          categoriesLocalized: categories,
+          polymorphic: {
+            relationTo: 'categories',
+            value: category.id,
+          },
+          polymorphics: [
+            {
+              relationTo: 'categories',
+              value: category.id,
+            },
+          ],
+          localizedPolymorphic: {
+            relationTo: 'categories',
+            value: category.id,
+          },
+          localizedPolymorphics: [
+            {
+              relationTo: 'categories',
+              value: category.id,
+            },
+          ],
+          group: {
+            category: category.id,
+            camelCaseCategory: category.id,
+          },
+          array: [{ category: category.id }],
+          arrayHasMany: [{ category: [category.id] }],
+          localizedArray: [{ category: category.id }],
+          blocks: [{ blockType: 'block', category: category.id }],
         },
-        array: [{ category: category.id }],
-        arrayHasMany: [{ category: [category.id] }],
-        localizedArray: [{ category: category.id }],
-        blocks: [{ blockType: 'block', category: category.id }],
-      })
+      )
     }
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should populate joins using findByID', async () => {
+  test('should populate joins using findByID', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -144,7 +143,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
   })
 
-  it('should not populate joins if not selected', async () => {
+  test('should not populate joins if not selected', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -159,7 +158,7 @@ describe('Joins Field', () => {
     expect(Object.keys(categoryWithPosts)).toStrictEqual(['id'])
   })
 
-  it('should populate joins if selected', async () => {
+  test('should populate joins if selected', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -186,7 +185,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
   })
 
-  it('should count joins', async () => {
+  test('should count joins', async ({ payload }) => {
     let categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -216,7 +215,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
   })
 
-  it('should count hasMany relationship joins', async () => {
+  test('should count hasMany relationship joins', async ({ payload }) => {
     const res = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -228,7 +227,7 @@ describe('Joins Field', () => {
     expect(res.hasManyPosts?.totalDocs).toBe(15)
   })
 
-  it('should populate relationships in joins', async () => {
+  test('should populate relationships in joins', async ({ payload }) => {
     const { docs } = await payload.find({
       limit: 1,
       collection: postsSlug,
@@ -240,7 +239,7 @@ describe('Joins Field', () => {
     expect(docs[0].category.relatedPosts.docs).toHaveLength(5) // uses defaultLimit
   })
 
-  it('should populate relationships in joins with camelCase names', async () => {
+  test('should populate relationships in joins with camelCase names', async ({ payload }) => {
     const { docs } = await payload.find({
       limit: 1,
       collection: postsSlug,
@@ -251,7 +250,7 @@ describe('Joins Field', () => {
     expect(docs[0].group.camelCaseCategory.group.camelCasePosts.docs).toHaveLength(10)
   })
 
-  it('should populate joins with array relationships', async () => {
+  test('should populate joins with array relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -261,7 +260,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.arrayPosts.docs).toHaveLength(10)
   })
 
-  it('should populate joins with array hasMany relationships', async () => {
+  test('should populate joins with array hasMany relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -271,7 +270,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.arrayHasManyPosts.docs).toHaveLength(10)
   })
 
-  it('should populate joins with localized array relationships', async () => {
+  test('should populate joins with localized array relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -281,7 +280,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.localizedArrayPosts.docs).toHaveLength(10)
   })
 
-  it('should populate joins with blocks relationships', async () => {
+  test('should populate joins with blocks relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -290,7 +289,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.blocksPosts.docs).toBeDefined()
   })
 
-  it('should populate uploads in joins', async () => {
+  test('should populate uploads in joins', async ({ payload }) => {
     const { docs } = await payload.find({
       limit: 1,
       collection: postsSlug,
@@ -300,7 +299,7 @@ describe('Joins Field', () => {
     expect(docs[0].upload.relatedPosts.docs).toHaveLength(10)
   })
 
-  it('should join on polymorphic relationships', async () => {
+  test('should join on polymorphic relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       collection: categoriesSlug,
       id: category.id,
@@ -311,9 +310,11 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.localizedPolymorphics.docs[0]).toHaveProperty('id')
   })
 
-  it('should not throw a path validation error when querying joins with polymorphic relationships', async () => {
+  test('should not throw a path validation error when querying joins with polymorphic relationships', async ({
+    payload,
+  }) => {
     const folderDoc = await payload.create({
-      collection: 'payload-folders',
+      collection: 'folders',
       data: {
         name: 'sharedFolder',
       },
@@ -323,7 +324,7 @@ describe('Joins Field', () => {
       collection: 'folderPoly1',
       data: {
         folderPoly1Title: 'Poly 1 title',
-        folder: folderDoc.id,
+        _h_folders: folderDoc.id,
       },
       depth: 0,
     })
@@ -332,15 +333,15 @@ describe('Joins Field', () => {
       collection: 'folderPoly2',
       data: {
         folderPoly2Title: 'Poly 2 Title',
-        folder: folderDoc.id,
+        _h_folders: folderDoc.id,
       },
       depth: 0,
     })
 
     const result = await payload.find({
-      collection: 'payload-folders',
+      collection: 'folders',
       joins: {
-        documentsAndFolders: {
+        children: {
           limit: 100_000,
           sort: 'name',
           where: {
@@ -366,12 +367,12 @@ describe('Joins Field', () => {
       },
     })
 
-    expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(1)
+    expect(result.docs[0]?.children.docs).toHaveLength(1)
   })
 
-  it('should allow join where query on hasMany select fields', async () => {
+  test('should allow join where query on hasMany select fields', async ({ payload }) => {
     const folderDoc = await payload.create({
-      collection: 'payload-folders',
+      collection: 'folders',
       data: {
         name: 'scopedFolder',
         folderType: ['folderPoly1', 'folderPoly2'],
@@ -379,30 +380,30 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
-      collection: 'payload-folders',
+      collection: 'folders',
       data: {
         name: 'childFolder',
         folderType: ['folderPoly1'],
-        folder: folderDoc.id,
+        _h_folders: folderDoc.id,
       },
     })
 
     const findFolder = await payload.find({
-      collection: 'payload-folders',
+      collection: 'folders',
       where: {
         id: {
           equals: folderDoc.id,
         },
       },
       joins: {
-        documentsAndFolders: {
+        children: {
           limit: 100_000,
           sort: 'name',
           where: {
             and: [
               {
                 relationTo: {
-                  equals: 'payload-folders',
+                  equals: 'folders',
                 },
               },
               {
@@ -416,13 +417,13 @@ describe('Joins Field', () => {
       },
     })
 
-    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+    expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
   })
 
-  it('should query where with exists for hasMany select fields', async () => {
-    await payload.delete({ collection: 'payload-folders', where: {} })
+  test('should query where with exists for hasMany select fields', async ({ payload }) => {
+    await payload.delete({ collection: 'folders', where: {} })
     const folderDoc = await payload.create({
-      collection: 'payload-folders',
+      collection: 'folders',
       data: {
         name: 'scopedFolder',
         folderType: ['folderPoly1', 'folderPoly2'],
@@ -430,30 +431,30 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
-      collection: 'payload-folders',
+      collection: 'folders',
       data: {
         name: 'childFolder',
         folderType: ['folderPoly1'],
-        folder: folderDoc.id,
+        _h_folders: folderDoc.id,
       },
     })
 
     const findFolder = await payload.find({
-      collection: 'payload-folders',
+      collection: 'folders',
       where: {
         id: {
           equals: folderDoc.id,
         },
       },
       joins: {
-        documentsAndFolders: {
+        children: {
           limit: 100_000,
           sort: 'name',
           where: {
             and: [
               {
                 relationTo: {
-                  equals: 'payload-folders',
+                  equals: 'folders',
                 },
               },
               {
@@ -476,10 +477,10 @@ describe('Joins Field', () => {
       },
     })
 
-    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+    expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
   })
 
-  it('should filter joins using where query', async () => {
+  test('should filter joins using where query', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       joins: {
@@ -499,7 +500,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.relatedPosts.hasNextPage).toStrictEqual(false)
   })
 
-  it('should apply defaultSort when no sort is specified in join query', async () => {
+  test('should apply defaultSort when no sort is specified in join query', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -510,7 +511,7 @@ describe('Joins Field', () => {
     expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 9')
   })
 
-  it('should override defaultSort when sort is specified in join query', async () => {
+  test('should override defaultSort when sort is specified in join query', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
       collection: categoriesSlug,
@@ -525,7 +526,7 @@ describe('Joins Field', () => {
     expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 0')
   })
 
-  it('should populate joins using find', async () => {
+  test('should populate joins using find', async ({ payload }) => {
     const result = await payload.find({
       collection: categoriesSlug,
       where: {
@@ -540,7 +541,7 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toBe('test 14')
   })
 
-  it('should populate joins using find with hasMany relationships', async () => {
+  test('should populate joins using find with hasMany relationships', async ({ payload }) => {
     const result = await payload.find({
       collection: categoriesSlug,
       where: {
@@ -565,8 +566,11 @@ describe('Joins Field', () => {
     expect(otherCategoryWithPosts.hasManyPosts.docs[0].title).toBe('test 14')
   })
 
-  it('should populate joins using find with hasMany localized relationships', async () => {
+  test('should populate joins using find with hasMany localized relationships', async ({
+    payload,
+  }) => {
     const post_1 = await createPost(
+      { payload },
       {
         title: `test es localized 1`,
         categoriesLocalized: [category.id],
@@ -579,6 +583,7 @@ describe('Joins Field', () => {
     )
 
     const post_2 = await createPost(
+      { payload },
       {
         title: `test es localized 2`,
         categoriesLocalized: [otherCategory.id],
@@ -648,7 +653,7 @@ describe('Joins Field', () => {
     })
   })
 
-  it('should not error when deleting documents with joins', async () => {
+  test('should not error when deleting documents with joins', async ({ payload }) => {
     const category = await payload.create({
       collection: categoriesSlug,
       data: {
@@ -656,9 +661,12 @@ describe('Joins Field', () => {
       },
     })
 
-    await createPost({
-      category: category.id,
-    })
+    await createPost(
+      { payload },
+      {
+        category: category.id,
+      },
+    )
 
     const result = await payload.delete({
       collection: categoriesSlug,
@@ -671,9 +679,9 @@ describe('Joins Field', () => {
     expect(result.docs[0].id).toStrictEqual(category.id)
   })
 
-  describe('`where` filters', () => {
+  test.describe('`where` filters', () => {
     let categoryWithFilteredPost
-    beforeAll(async () => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       categoryWithFilteredPost = await payload.create({
         collection: categoriesSlug,
         data: {
@@ -681,17 +689,23 @@ describe('Joins Field', () => {
         },
       })
 
-      await createPost({
-        title: 'filtered post',
-        category: categoryWithFilteredPost.id,
-        isFiltered: true,
-      })
+      await createPost(
+        { payload },
+        {
+          title: 'filtered post',
+          category: categoryWithFilteredPost.id,
+          isFiltered: true,
+        },
+      )
 
-      await createPost({
-        title: 'unfiltered post',
-        category: categoryWithFilteredPost.id,
-        isFiltered: false,
-      })
+      await createPost(
+        { payload },
+        {
+          title: 'unfiltered post',
+          category: categoryWithFilteredPost.id,
+          isFiltered: false,
+        },
+      )
 
       categoryWithFilteredPost = await payload.findByID({
         id: categoryWithFilteredPost.id,
@@ -699,11 +713,13 @@ describe('Joins Field', () => {
       })
     })
 
-    it('should filter joins using where from field config', () => {
+    test('should filter joins using where from field config', () => {
       expect(categoryWithFilteredPost.filtered.docs).toHaveLength(1)
     })
 
-    it('should filter joins using where from field config and the requested filter', async () => {
+    test('should filter joins using where from field config and the requested filter', async ({
+      payload,
+    }) => {
       categoryWithFilteredPost = await payload.findByID({
         id: categoryWithFilteredPost.id,
         collection: categoriesSlug,
@@ -720,10 +736,10 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('Joins with localization', () => {
+  test.describe('Joins with localization', () => {
     let localizedCategory: Category
 
-    beforeAll(async () => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       localizedCategory = await payload.create({
         collection: 'localized-categories',
         locale: 'en',
@@ -758,7 +774,9 @@ describe('Joins Field', () => {
       })
     })
 
-    it('should populate joins using findByID with localization on the relationship', async () => {
+    test('should populate joins using findByID with localization on the relationship', async ({
+      payload,
+    }) => {
       const enCategory = await payload.findByID({
         id: localizedCategory.id,
         collection: 'localized-categories',
@@ -774,13 +792,13 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('Joins with versions', () => {
-    afterEach(async () => {
+  test.describe('Joins with versions', () => {
+    test.afterEach(async ({ payload }) => {
       await payload.delete({ collection: 'versions', where: {} })
       await payload.delete({ collection: 'categories-versions', where: {} })
     })
 
-    it('should populate joins when versions on both sides draft false', async () => {
+    test('should populate joins when versions on both sides draft false', async ({ payload }) => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -793,7 +811,9 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
 
-    it('should populate joins with hasMany relationships when versions on both sides draft false', async () => {
+    test('should populate joins with hasMany relationships when versions on both sides draft false', async ({
+      payload,
+    }) => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -806,7 +826,9 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
     })
 
-    it('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async () => {
+    test('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async ({
+      payload,
+    }) => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -822,7 +844,9 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
 
-    it('should populate joins with hasMany when on both sides documents are in draft', async () => {
+    test('should populate joins with hasMany when on both sides documents are in draft', async ({
+      payload,
+    }) => {
       const category = await payload.create({
         collection: 'categories-versions',
         data: { _status: 'draft' },
@@ -851,7 +875,9 @@ describe('Joins Field', () => {
       expect(res.docs[0].relatedVersions.docs[0].title).toBe('updated-title')
     })
 
-    it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
+    test('should populate joins when versions on both sides draft true payload.db.queryDrafts', async ({
+      payload,
+    }) => {
       const category = await payload.create({ collection: 'categories-versions', data: {} })
 
       const version = await payload.create({
@@ -868,8 +894,8 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('REST', () => {
-    it('should have simple paginate for joins', async () => {
+  test.describe('REST', () => {
+    test('should have simple paginate for joins through REST', async ({ restClient }) => {
       const query = {
         depth: 1,
         where: {
@@ -896,7 +922,7 @@ describe('Joins Field', () => {
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
-    it('should have simple paginate with page for joins', async () => {
+    test('should have simple paginate with page for joins through REST', async ({ restClient }) => {
       const query = {
         depth: 1,
         where: {
@@ -936,7 +962,7 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should respect access control for join collections', async () => {
+    test('should respect access control for join collections', async ({ payload }) => {
       const { docs } = await payload.find({
         collection: categoriesJoinRestrictedSlug,
         where: {
@@ -952,7 +978,7 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should respect access control for join request `where` queries', async () => {
+    test('should respect access control for join request `where` queries', async ({ payload }) => {
       await expect(
         payload.findByID({
           id: category.id,
@@ -970,20 +996,25 @@ describe('Joins Field', () => {
       ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
-    it('should respect access control of join field configured `where` queries', async () => {
+    test('should respect access control of join field configured `where` queries', async ({
+      payload,
+    }) => {
       const restrictedCategory = await payload.create({
         collection: restrictedCategoriesSlug,
         data: {
           name: 'restricted category',
         },
       })
-      await createPost({
-        collection: restrictedPostsSlug,
-        data: {
-          title: 'restricted post',
-          category: restrictedCategory.id,
+      await createPost(
+        { payload },
+        {
+          collection: restrictedPostsSlug,
+          data: {
+            title: 'restricted post',
+            category: restrictedCategory.id,
+          },
         },
-      })
+      )
       await expect(
         payload.findByID({
           id: category.id,
@@ -994,14 +1025,14 @@ describe('Joins Field', () => {
       ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
-    it('should sort joins', async () => {
+    test('should sort joins', async ({ restClient }) => {
       const response = await restClient
         .GET(`/categories/${category.id}?joins[relatedPosts][sort]=-title`)
         .then((res) => res.json())
       expect(response.relatedPosts.docs[0].title).toStrictEqual('test 9')
     })
 
-    it('should query in on collections with joins', async () => {
+    test('should query in on collections with joins', async ({ restClient }) => {
       const response = await restClient
         .GET(`/categories?where[id][in]=${category.id}`)
         .then((res) => res.json())
@@ -1009,8 +1040,8 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('GraphQL', () => {
-    it('should have simple paginate for joins', async () => {
+  test.describe('GraphQL', () => {
+    test('should have simple paginate for joins', async ({ restClient }) => {
       const queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1068,7 +1099,7 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
-    it('should return totalDocs with count: true', async () => {
+    test('should return totalDocs with count: true', async ({ restClient }) => {
       const queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1099,7 +1130,7 @@ describe('Joins Field', () => {
       expect(pageWithLimit.data.Categories.docs[0].relatedPosts.totalDocs).toStrictEqual(15)
     })
 
-    it('should have simple paginate with page for joins', async () => {
+    test('should have simple paginate with page for joins', async ({ restClient }) => {
       let queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1187,7 +1218,7 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should have simple paginate with page for joins polymorphic', async () => {
+    test('should have simple paginate with page for joins polymorphic', async ({ restClient }) => {
       let queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1275,7 +1306,10 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should populate joins with hasMany when on both sides documents are in draft', async () => {
+    test('should populate joins with hasMany when both GraphQL documents are in draft', async ({
+      payload,
+      restClient,
+    }) => {
       const category = await payload.create({
         collection: 'categories-versions',
         data: { _status: 'draft' },
@@ -1321,7 +1355,7 @@ describe('Joins Field', () => {
       )
     })
 
-    it('should have simple paginate for joins inside groups', async () => {
+    test('should have simple paginate for joins inside groups', async ({ restClient }) => {
       const queryWithLimit = `query {
     Categories(where: {
             name: { equals: "paginate example" }
@@ -1386,7 +1420,7 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].group.relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
-    it('should sort joins', async () => {
+    test('should sort joins through GraphQL', async ({ restClient }) => {
       const query = `query {
         Category(id: ${categoryID}) {
           relatedPosts(
@@ -1405,7 +1439,7 @@ describe('Joins Field', () => {
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 9')
     })
 
-    it('should query in on collections with joins', async () => {
+    test('should query in on collections with joins through GraphQL', async ({ restClient }) => {
       const query = `query {
          Category(id: ${categoryID}) {
           relatedPosts(
@@ -1428,7 +1462,9 @@ describe('Joins Field', () => {
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
     })
 
-    it('should respect access control for join collections', async () => {
+    test('should respect access control for join collections through GraphQL', async ({
+      restClient,
+    }) => {
       const query = `query {
         CategoriesJoinRestricteds {
           docs {
@@ -1454,7 +1490,10 @@ describe('Joins Field', () => {
     })
   })
 
-  it('should work id.in command delimited querying with joins', async () => {
+  test('should work id.in command delimited querying with joins', async ({
+    payload,
+    restClient,
+  }) => {
     const allCategories = await payload.find({ collection: categoriesSlug, pagination: false })
 
     const allCategoriesByIds = await restClient
@@ -1472,7 +1511,7 @@ describe('Joins Field', () => {
     expect(allCategories.totalDocs).toBe(allCategoriesByIds.totalDocs)
   })
 
-  it('should join with singular collection name', async () => {
+  test('should join with singular collection name', async ({ payload }) => {
     const {
       docs: [category],
     } = await payload.find({ collection: categoriesSlug, limit: 1, depth: 0 })
@@ -1490,7 +1529,9 @@ describe('Joins Field', () => {
     expect((categoryWithJoins.singulars.docs[0] as Singular).id).toBe(singular.id)
   })
 
-  it('local API should not populate individual join by providing schemaPath=false', async () => {
+  test('local API should not populate individual join by providing schemaPath=false', async ({
+    payload,
+  }) => {
     const {
       docs: [res],
     } = await payload.find({
@@ -1512,7 +1553,9 @@ describe('Joins Field', () => {
     expect(res.group.camelCasePosts.docs).toBeDefined()
   })
 
-  it('rEST API should not populate individual join by providing schemaPath=false', async () => {
+  test('rEST API should not populate individual join by providing schemaPath=false', async ({
+    restClient,
+  }) => {
     const {
       docs: [res],
     } = await restClient
@@ -1537,7 +1580,7 @@ describe('Joins Field', () => {
     expect(res.group.camelCasePosts.docs).toBeDefined()
   })
 
-  it('should have correct totalDocs', async () => {
+  test('should have correct totalDocs', async ({ payload }) => {
     for (let i = 0; i < 50; i++) {
       await payload.create({ collection: categoriesSlug, data: { name: 'totalDocs' } })
     }
@@ -1559,7 +1602,7 @@ describe('Joins Field', () => {
     await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
   })
 
-  it('should self join', async () => {
+  test('should self join', async ({ payload }) => {
     const doc_1 = await payload.create({ collection: 'self-joins', data: {} })
     const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0 })
 
@@ -1568,7 +1611,7 @@ describe('Joins Field', () => {
     expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
   })
 
-  it('should populate joins on depth 2', async () => {
+  test('should populate joins on depth 2', async ({ payload }) => {
     const depthJoin_2 = await payload.create({ collection: 'depth-joins-2', data: {}, depth: 0 })
     const depthJoin_1 = await payload.create({
       collection: 'depth-joins-1',
@@ -1597,8 +1640,8 @@ describe('Joins Field', () => {
     expect(joinedDoc2.id).toBe(depthJoin_3.id)
   })
 
-  describe('Array of collection', () => {
-    it('should join across multiple collections', async () => {
+  test.describe('Array of collection', () => {
+    test('should join across multiple collections', async ({ payload }) => {
       let parent = await payload.create({
         collection: 'multiple-collections-parents',
         depth: 0,
@@ -1629,10 +1672,15 @@ describe('Joins Field', () => {
         depth: 0,
       })
 
-      expect(parent.children.docs[0].value).toBe(child_2.id)
-      expect(parent.children.docs[0]?.relationTo).toBe('multiple-collections-2')
-      expect(parent.children.docs[1]?.value).toBe(child_1.id)
-      expect(parent.children.docs[1]?.relationTo).toBe('multiple-collections-1')
+      const child1Reference = parent.children.docs.find(
+        ({ relationTo }) => relationTo === 'multiple-collections-1',
+      )
+      const child2Reference = parent.children.docs.find(
+        ({ relationTo }) => relationTo === 'multiple-collections-2',
+      )
+
+      expect(child1Reference?.value).toBe(child_1.id)
+      expect(child2Reference?.value).toBe(child_2.id)
 
       parent = await payload.findByID({
         collection: 'multiple-collections-parents',
@@ -1640,10 +1688,15 @@ describe('Joins Field', () => {
         depth: 1,
       })
 
-      expect(parent.children.docs[0].value.id).toBe(child_2.id)
-      expect(parent.children.docs[0]?.relationTo).toBe('multiple-collections-2')
-      expect(parent.children.docs[1]?.value.id).toBe(child_1.id)
-      expect(parent.children.docs[1]?.relationTo).toBe('multiple-collections-1')
+      const populatedChild1Reference = parent.children.docs.find(
+        ({ relationTo }) => relationTo === 'multiple-collections-1',
+      )
+      const populatedChild2Reference = parent.children.docs.find(
+        ({ relationTo }) => relationTo === 'multiple-collections-2',
+      )
+
+      expect(populatedChild1Reference?.value.id).toBe(child_1.id)
+      expect(populatedChild2Reference?.value.id).toBe(child_2.id)
 
       // Pagination across collections
       parent = await payload.findByID({
@@ -1795,7 +1848,1314 @@ describe('Joins Field', () => {
     })
   })
 
-  it('should support where querying by a top level join field', async () => {
+  test.options({ db: 'drizzle' }).describe('Constrained joins', () => {
+    test.afterEach(async ({ payload }) => {
+      await payload.delete({ collection: accessJoinArticlesSlug, where: {} })
+      await payload.delete({ collection: accessJoinNotesSlug, where: {} })
+      await payload.delete({ collection: accessJoinParentsSlug, where: {} })
+      await payload.delete({ collection: operatorHandlerJoinArticlesSlug, where: {} })
+      await payload.delete({ collection: operatorHandlerJoinNotesSlug, where: {} })
+      await payload.delete({ collection: operatorHandlerJoinParentsSlug, where: {} })
+    })
+
+    const createConstrainedJoinDocuments = async (payload: Payload) => {
+      const parent = await payload.create({
+        collection: accessJoinParentsSlug,
+        data: {},
+        depth: 0,
+      })
+
+      const allowedChild = await payload.create({
+        collection: accessJoinArticlesSlug,
+        data: {
+          articleMeta: {
+            articleTags: ['available'],
+            status: 'reviewed',
+          },
+          articleTags: ['available'],
+          availability: 'available',
+          details: {
+            articleTags: ['available'],
+            mixedTags: ['available'],
+            status: 'available',
+            tags: ['available'],
+          },
+          owner: user,
+          parent,
+          score: 5,
+          settings: { approved: true },
+          tags: ['available', 'allowed-marker'],
+          title: 'available child',
+          variantSelect: 'available',
+        },
+        depth: 0,
+      })
+
+      const restrictedChild = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          articleMeta: { status: 'reviewed' },
+          availability: 'unavailable',
+          details: {
+            mixedTags: 'available',
+            tags: ['available'],
+          },
+          details_status: 'available',
+          owner: user,
+          parent,
+          score: 15,
+          settings: { approved: true },
+          tags: ['available', 'not-permitted'],
+          title: 'restricted child',
+          variantSelect: 'available',
+        },
+        depth: 0,
+      })
+
+      const missingAvailabilityChild = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          articleMeta: { status: 'reviewed' },
+          availability: 'missing',
+          details: {
+            mixedTags: 'available',
+            tags: ['available'],
+          },
+          details_status: 'available',
+          owner: user,
+          parent,
+          score: 20,
+          settings: { approved: true },
+          tags: ['available'],
+          title: 'Niño',
+        },
+        depth: 0,
+      })
+
+      const partialTagChild = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          articleMeta: { status: 'reviewed' },
+          availability: 'available',
+          details: {
+            mixedTags: 'available',
+            tags: ['available'],
+          },
+          details_status: 'available',
+          owner: user,
+          parent,
+          score: 25,
+          settings: { approved: true },
+          tags: ['unavailable'],
+          title: 'available child',
+        },
+        depth: 0,
+      })
+
+      return {
+        allowedChild,
+        children: [allowedChild, restrictedChild, missingAvailabilityChild, partialTagChild],
+        missingAvailabilityChild,
+        parent,
+        partialTagChild,
+        restrictedChild,
+      }
+    }
+
+    test('should apply all access constraints through the Local API', async ({ payload }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    test('should apply all access constraints through REST', async ({ payload, restClient }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await restClient
+        .GET(`/${accessJoinParentsSlug}/${parent.id}`, {
+          query: {
+            depth: 1,
+            joins: {
+              children: {
+                count: true,
+              },
+            },
+          },
+        })
+        .then((response) => response.json())
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    test('should normalize REST values for has-many select join constraints', async ({
+      payload,
+      restClient,
+    }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const noTagsResult = await restClient
+        .GET(`/${accessJoinParentsSlug}/${parent.id}`, {
+          query: {
+            depth: 1,
+            joins: {
+              children: {
+                count: true,
+                where: { tags: { exists: 'false' } },
+              },
+            },
+          },
+        })
+        .then((response) => response.json())
+      const matchingTagResult = await restClient
+        .GET(`/${accessJoinParentsSlug}/${parent.id}`, {
+          query: {
+            depth: 1,
+            joins: {
+              children: {
+                count: true,
+                where: { tags: { in: 'available' } },
+              },
+            },
+          },
+        })
+        .then((response) => response.json())
+
+      expect(noTagsResult.children.docs).toHaveLength(0)
+      expect(noTagsResult.children.totalDocs).toBe(0)
+      expect(matchingTagResult.children.docs).toHaveLength(1)
+      expect(matchingTagResult.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(matchingTagResult.children.totalDocs).toBe(1)
+    })
+
+    test('should normalize REST values for absent scalar and relationTo constraints', async ({
+      payload,
+      restClient,
+    }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+      const allowedNote = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          availability: 'available',
+          parent,
+          tags: ['available'],
+          title: 'available note',
+        },
+        depth: 0,
+      })
+
+      const absentScalarResult = await restClient
+        .GET(`/${accessJoinParentsSlug}/${parent.id}`, {
+          query: {
+            depth: 1,
+            joins: {
+              children: {
+                count: true,
+                where: { 'details.status': { exists: 'false' } },
+              },
+            },
+          },
+        })
+        .then((response) => response.json())
+      const relationToResult = await restClient
+        .GET(`/${accessJoinParentsSlug}/${parent.id}`, {
+          query: {
+            depth: 1,
+            joins: {
+              children: {
+                count: true,
+                where: {
+                  relationTo: { in: `${accessJoinArticlesSlug},${accessJoinNotesSlug}` },
+                },
+              },
+            },
+          },
+        })
+        .then((response) => response.json())
+      const relationToReferences = relationToResult.children.docs
+        .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
+        .sort()
+
+      expect(absentScalarResult.children.docs).toHaveLength(1)
+      expect(absentScalarResult.children.docs[0]?.value.id).toBe(allowedNote.id)
+      expect(absentScalarResult.children.totalDocs).toBe(1)
+      expect(relationToReferences).toEqual(
+        [
+          `${accessJoinArticlesSlug}:${allowedChild.id.toString()}`,
+          `${accessJoinNotesSlug}:${allowedNote.id.toString()}`,
+        ].sort(),
+      )
+      expect(relationToResult.children.totalDocs).toBe(2)
+    })
+
+    test('should reject an access value that cannot be normalized', async ({ payload }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useUndefinedInAccessConstraint: true },
+          depth: 1,
+          joins: { children: { count: true } },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: id.in')
+    })
+
+    test('should apply all operators in Local API join constraints', async ({ payload }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              score: {
+                greater_than: 0,
+                less_than: 10,
+              },
+            },
+          },
+        },
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+    })
+
+    test('should match null values with equals join constraints', async ({ payload }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+      const childWithoutAvailability = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          parent,
+          title: 'child without availability',
+        },
+        depth: 0,
+      })
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              availability: {
+                equals: null,
+              },
+            },
+          },
+        },
+      })
+      const resultReferences = result.children.docs
+        .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
+        .sort()
+
+      expect(resultReferences).toEqual([
+        `${accessJoinNotesSlug}:${childWithoutAvailability.id.toString()}`,
+      ])
+    })
+
+    test('should include null values with not_equals join constraints', async ({ payload }) => {
+      const { allowedChild, missingAvailabilityChild, parent, partialTagChild } =
+        await createConstrainedJoinDocuments(payload)
+      const childWithoutAvailability = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          parent,
+          title: 'child without availability',
+        },
+        depth: 0,
+      })
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              availability: {
+                not_equals: 'unavailable',
+              },
+            },
+          },
+        },
+      })
+      const resultReferences = result.children.docs
+        .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
+        .sort()
+
+      expect(resultReferences).toEqual(
+        [
+          `${accessJoinArticlesSlug}:${allowedChild.id.toString()}`,
+          `${accessJoinNotesSlug}:${childWithoutAvailability.id.toString()}`,
+          `${accessJoinNotesSlug}:${missingAvailabilityChild.id.toString()}`,
+          `${accessJoinNotesSlug}:${partialTagChild.id.toString()}`,
+        ].sort(),
+      )
+    })
+
+    test('should exclude null values with not_equals null join constraints', async ({
+      payload,
+    }) => {
+      const { allowedChild, missingAvailabilityChild, parent, partialTagChild, restrictedChild } =
+        await createConstrainedJoinDocuments(payload)
+      const childWithoutAvailability = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          parent,
+          title: 'child without availability',
+        },
+        depth: 0,
+      })
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              availability: {
+                not_equals: null,
+              },
+            },
+          },
+        },
+      })
+      const resultReferences = result.children.docs
+        .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
+        .sort()
+
+      expect(resultReferences).toEqual(
+        [
+          `${accessJoinArticlesSlug}:${allowedChild.id.toString()}`,
+          `${accessJoinNotesSlug}:${missingAvailabilityChild.id.toString()}`,
+          `${accessJoinNotesSlug}:${partialTagChild.id.toString()}`,
+          `${accessJoinNotesSlug}:${restrictedChild.id.toString()}`,
+        ].sort(),
+      )
+      expect(resultReferences).not.toContain(
+        `${accessJoinNotesSlug}:${childWithoutAvailability.id.toString()}`,
+      )
+    })
+
+    test('should match null values in in join constraints', async ({ payload }) => {
+      const { parent, restrictedChild } = await createConstrainedJoinDocuments(payload)
+      const childWithoutAvailability = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          parent,
+          title: 'child without availability',
+        },
+        depth: 0,
+      })
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              availability: {
+                in: ['unavailable', null],
+              },
+            },
+          },
+        },
+      })
+      const resultReferences = result.children.docs
+        .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
+        .sort()
+
+      expect(resultReferences).toEqual(
+        [
+          `${accessJoinNotesSlug}:${childWithoutAvailability.id.toString()}`,
+          `${accessJoinNotesSlug}:${restrictedChild.id.toString()}`,
+        ].sort(),
+      )
+    })
+
+    test.options({ db: (adapter) => adapter === 'postgres' })(
+      'should apply configured operator handlers to null-only in join constraints',
+      async ({ payload }) => {
+        const { allowedChild, parent, partialTagChild } =
+          await createConstrainedJoinDocuments(payload)
+        const childWithoutAvailability = await payload.create({
+          collection: accessJoinNotesSlug,
+          data: {
+            parent,
+            title: 'child without availability',
+          },
+          depth: 0,
+        })
+
+        const result = await payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          depth: 1,
+          joins: {
+            children: {
+              where: {
+                availability: {
+                  in: [null],
+                },
+              },
+            },
+          },
+        })
+        const resultReferences = result.children.docs
+          .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
+          .sort()
+
+        expect(resultReferences).toEqual(
+          [
+            `${accessJoinArticlesSlug}:${allowedChild.id.toString()}`,
+            `${accessJoinNotesSlug}:${childWithoutAvailability.id.toString()}`,
+            `${accessJoinNotesSlug}:${partialTagChild.id.toString()}`,
+          ].sort(),
+        )
+      },
+    )
+
+    test('should apply all operators to has-many select join constraints', async ({ payload }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              tags: {
+                equals: 'available',
+                in: ['allowed-marker'],
+              },
+            },
+          },
+        },
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+    })
+
+    test.options({ db: (adapter) => adapter === 'postgres' })(
+      'should reject polymorphic join access constraints that cannot be applied',
+      async ({ payload }) => {
+        const { parent } = await createConstrainedJoinDocuments(payload)
+
+        await expect(
+          payload.findByID({
+            id: parent.id,
+            collection: accessJoinParentsSlug,
+            context: { useNearAccessConstraint: true },
+            depth: 1,
+            overrideAccess: false,
+            user,
+          }),
+        ).rejects.toThrow('The following path cannot be queried: coordinates.near')
+      },
+    )
+
+    test('should reject polymorphic join constraints for incompatible field shapes', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useMixedFieldShapeAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: mixedTags.equals')
+    })
+
+    test('should apply nested has-many select access constraints', async ({ payload }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useNestedHasManyAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(0)
+      expect(result.children.totalDocs).toBe(0)
+    })
+
+    test('should match empty nested has-many select fields with exists false', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+      const childWithoutTags = await payload.create({
+        collection: accessJoinNotesSlug,
+        data: {
+          parent,
+          title: 'available child',
+        },
+        depth: 0,
+      })
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useNestedHasManyAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.relationTo).toBe(accessJoinNotesSlug)
+      expect(result.children.docs[0]?.value.id).toBe(childWithoutTags.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    test.options({ db: (adapter) => adapter === 'postgres' })(
+      'should preserve field-specific operator handling across polymorphic join targets',
+      async ({ payload }) => {
+        const parent = await payload.create({
+          collection: operatorHandlerJoinParentsSlug,
+          data: {},
+          depth: 0,
+        })
+
+        const matchingChild = await payload.create({
+          collection: operatorHandlerJoinArticlesSlug,
+          data: {
+            id: `matching-field-child-${parent.id}`,
+            parent,
+            title: 'allowed',
+          },
+          depth: 0,
+        })
+        await payload.create({
+          collection: operatorHandlerJoinNotesSlug,
+          data: {
+            id: `excluded-field-child-${parent.id}`,
+            parent,
+            title: 'BLOCKED',
+          },
+          depth: 0,
+        })
+
+        const result = await payload.findByID({
+          id: parent.id,
+          collection: operatorHandlerJoinParentsSlug,
+          context: { useFieldSpecificOperatorHandlerAccessConstraint: true },
+          depth: 1,
+          joins: {
+            children: {
+              count: true,
+            },
+          },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(result.children.docs).toHaveLength(1)
+        expect(result.children.docs[0]?.value.id).toBe(matchingChild.id)
+        expect(result.children.totalDocs).toBe(1)
+      },
+    )
+
+    test('should reject polymorphic join constraints for incompatible nested field shapes', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useNestedMixedFieldShapeAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: details.mixedTags.equals')
+    })
+
+    test('should use exact matching for has-many select contains access constraints', async ({
+      payload,
+    }) => {
+      const { allowedChild, parent, partialTagChild } =
+        await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useContainsAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      const resultIDs = result.children.docs.map(({ value }) =>
+        (typeof value === 'object' ? value.id : value).toString(),
+      )
+
+      expect(resultIDs).toContain(allowedChild.id.toString())
+      expect(resultIDs).not.toContain(partialTagChild.id.toString())
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    test('should reject polymorphic join constraints for incompatible scalar field shapes', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useMixedScalarFieldShapeAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: variantValue.equals')
+    })
+
+    test('should filter matching scalar select fields across polymorphic join targets', async ({
+      payload,
+    }) => {
+      const { allowedChild, parent, restrictedChild } =
+        await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useScalarSelectAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const resultReferences = result.children.docs
+        .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
+        .sort()
+
+      expect(resultReferences).toEqual(
+        [
+          `${accessJoinArticlesSlug}:${allowedChild.id.toString()}`,
+          `${accessJoinNotesSlug}:${restrictedChild.id.toString()}`,
+        ].sort(),
+      )
+      expect(result.children.totalDocs).toBe(2)
+    })
+
+    test('should reject polymorphic join constraints for localized has-many fields', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useLocalizedHasManyAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: localizedTags.equals')
+    })
+
+    test('should reject polymorphic join constraints for has-many fields in arrays', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useArrayHasManyAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: items.tags.exists')
+    })
+
+    test('should reject unsupported has-many select access operators', async ({ payload }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useNotEqualsAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: tags.not_equals')
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useNotInAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: tags.not_in')
+    })
+
+    test('should return no polymorphic join results for an empty in constraint', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useEmptyInAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(0)
+      expect(result.children.totalDocs).toBe(0)
+    })
+
+    test('should combine multi-value has-many access constraints with sibling fields', async ({
+      payload,
+    }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useMultipleInAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    test('should support has-many fields that are absent from a joined collection', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useMissingHasManyAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(3)
+      expect(
+        result.children.docs.every(({ relationTo }) => relationTo === accessJoinNotesSlug),
+      ).toBe(true)
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    test('should support has-many group fields that are absent from a joined collection', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useMissingGroupHasManyAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(3)
+      expect(
+        result.children.docs.every(({ relationTo }) => relationTo === accessJoinNotesSlug),
+      ).toBe(true)
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    test('should support has-many tab fields that are absent from a joined collection', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useMissingTabHasManyAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(3)
+      expect(
+        result.children.docs.every(({ relationTo }) => relationTo === accessJoinNotesSlug),
+      ).toBe(true)
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    test('should reject access paths that are absent from every joined collection', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+      const missingPathContexts = [
+        {
+          context: { useMissingEverywhereAccessConstraint: true },
+          path: 'missingTags.exists',
+        },
+        {
+          context: { useMissingGroupEverywhereAccessConstraint: true },
+          path: 'details.missingTags.exists',
+        },
+        {
+          context: { useMissingTabEverywhereAccessConstraint: true },
+          path: 'articleMeta.missingTags.exists',
+        },
+      ]
+
+      const results = await Promise.allSettled(
+        missingPathContexts.map(({ context }) =>
+          payload.findByID({
+            id: parent.id,
+            collection: accessJoinParentsSlug,
+            context,
+            depth: 1,
+            overrideAccess: false,
+            user,
+          }),
+        ),
+      )
+      const errorMessages = results.map((result) =>
+        result.status === 'rejected' && result.reason instanceof Error
+          ? result.reason.message
+          : undefined,
+      )
+
+      expect(errorMessages).toEqual(
+        missingPathContexts.map(({ path }) => `The following path cannot be queried: ${path}`),
+      )
+    })
+
+    test('should not match flattened field names from another joined collection', async ({
+      payload,
+    }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useFlattenedFieldCollisionAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    test('should not match nested fields to top-level paths from another joined collection', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useReverseFlattenedFieldCollisionAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(3)
+      expect(
+        result.children.docs.every(({ relationTo }) => relationTo === accessJoinNotesSlug),
+      ).toBe(true)
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    test('should reject distinct schema paths that share a flattened field name', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useCombinedFlattenedFieldCollisionAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow(
+        /The following path cannot be queried: (details\.status|details_status)\.equals/,
+      )
+    })
+
+    test('should filter polymorphic joins by document id', async ({ payload }) => {
+      const { allowedChild, children, parent } = await createConstrainedJoinDocuments(payload)
+      const matchingChildren = children.filter(({ id }) => id === allowedChild.id)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: {
+          allowedChildID: allowedChild.id,
+          useIDAccessConstraint: true,
+        },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(matchingChildren.length)
+      expect(result.children.docs.every(({ value }) => value.id === allowedChild.id)).toBe(true)
+      expect(result.children.totalDocs).toBe(matchingChildren.length)
+    })
+
+    test.options({ db: (adapter) => adapter === 'postgres' })(
+      'should apply configured operator handlers to polymorphic join constraints',
+      async ({ payload }) => {
+        const { children, parent } = await createConstrainedJoinDocuments(payload)
+
+        const result = await payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useOperatorHandlerAccessConstraint: true },
+          depth: 1,
+          joins: {
+            children: {
+              count: true,
+            },
+          },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(result.children.docs).toHaveLength(children.length - 1)
+        expect(result.children.docs.every(({ value }) => value.title !== 'Niño')).toBe(true)
+        expect(result.children.totalDocs).toBe(children.length - 1)
+      },
+    )
+
+    test.options({ db: (adapter) => adapter === 'postgres' })(
+      'should apply configured operator handlers to custom IDs in polymorphic join constraints',
+      async ({ payload }) => {
+        const parent = await payload.create({
+          collection: operatorHandlerJoinParentsSlug,
+          data: {},
+          depth: 0,
+        })
+        const matchingChild = await payload.create({
+          collection: operatorHandlerJoinArticlesSlug,
+          data: {
+            id: `matching-child-${parent.id}`,
+            parent,
+          },
+          depth: 0,
+        })
+        const excludedChild = await payload.create({
+          collection: operatorHandlerJoinNotesSlug,
+          data: {
+            id: `excluded-child-niño-${parent.id}`,
+            parent,
+          },
+          depth: 0,
+        })
+
+        const result = await payload.findByID({
+          id: parent.id,
+          collection: operatorHandlerJoinParentsSlug,
+          context: {
+            excludedChildID: excludedChild.id.replace('ñ', 'n'),
+            useOperatorHandlerIDAccessConstraint: true,
+          },
+          depth: 1,
+          joins: {
+            children: {
+              count: true,
+            },
+          },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(result.children.docs).toHaveLength(1)
+        expect(result.children.docs[0]?.value.id).toBe(matchingChild.id)
+        expect(result.children.totalDocs).toBe(1)
+      },
+    )
+
+    test.options({ db: (adapter) => adapter === 'postgres' })(
+      'should apply configured operator handlers to system IDs in polymorphic join constraints',
+      async ({ payload }) => {
+        const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+        const result = await payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: {
+            excludedChildID: allowedChild.id,
+            useSystemIDOperatorHandlerAccessConstraint: true,
+          },
+          depth: 1,
+          joins: {
+            children: {
+              count: true,
+            },
+          },
+          overrideAccess: false,
+          user,
+        })
+
+        expect(result.children.docs).toHaveLength(0)
+        expect(result.children.totalDocs).toBe(0)
+      },
+    )
+
+    test('should use exact matching for number like access constraints', async ({ payload }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useNumberLikeAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    test('should reject nested relationship paths in polymorphic join constraints', async ({
+      payload,
+    }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useNestedRelationshipAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: owner.email.exists')
+    })
+
+    test('should reject nested JSON paths in polymorphic join constraints', async ({ payload }) => {
+      const { parent } = await createConstrainedJoinDocuments(payload)
+
+      await expect(
+        payload.findByID({
+          id: parent.id,
+          collection: accessJoinParentsSlug,
+          context: { useNestedJSONAccessConstraint: true },
+          depth: 1,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: settings.approved.exists')
+    })
+
+    test('should preserve substring matching in REST join constraints', async ({
+      payload,
+      restClient,
+    }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+
+      const result = await restClient
+        .GET(`/${accessJoinParentsSlug}/${parent.id}`, {
+          query: {
+            depth: 1,
+            joins: {
+              children: {
+                where: {
+                  title: {
+                    contains: 'available',
+                  },
+                },
+              },
+            },
+          },
+        })
+        .then((response) => response.json())
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+    })
+
+    test('should apply all access constraints through GraphQL', async ({ payload, restClient }) => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
+      await payload.create({
+        collection: accessJoinArticlesSlug,
+        data: {
+          availability: 'unavailable',
+          parent,
+          tags: ['available'],
+          title: 'restricted child',
+        },
+      })
+
+      const query = `query {
+        AccessJoinParents {
+          docs {
+            articles(count: true) {
+              docs {
+                id
+              }
+              totalDocs
+            }
+          }
+        }
+      }`
+      const result = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(result.data.AccessJoinParents.docs[0].articles.docs).toHaveLength(1)
+      expect(result.data.AccessJoinParents.docs[0].articles.docs[0].id.toString()).toBe(
+        allowedChild.id.toString(),
+      )
+      expect(result.data.AccessJoinParents.docs[0].articles.totalDocs).toBe(1)
+    })
+
+    test('should reject polymorphic joins through GraphQL', async ({ payload, restClient }) => {
+      await createConstrainedJoinDocuments(payload)
+
+      const query = `query {
+        AccessJoinParents {
+          docs {
+            children {
+              docs
+            }
+          }
+        }
+      }`
+      const result = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(result.data.AccessJoinParents.docs[0].children).toBeNull()
+      expect(result.errors).toHaveLength(1)
+      expect(result.errors[0].message).toBe('Something went wrong.')
+    })
+  })
+
+  test('should support where querying by a top level join field', async ({ payload }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1810,7 +3170,7 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field as ID', async () => {
+  test('should support where querying by a join field as ID', async ({ payload }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     const post = await payload.create({
       collection: 'posts',
@@ -1835,7 +3195,9 @@ describe('Joins Field', () => {
     expect(found_2.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field with hasMany relationship', async () => {
+  test('should support where querying by a join field with hasMany relationship', async ({
+    payload,
+  }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1850,7 +3212,9 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field with relationship nested to a group', async () => {
+  test('should support where querying by a join field with relationship nested to a group', async ({
+    payload,
+  }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1865,7 +3229,9 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field with relationship nested to an array', async () => {
+  test('should support where querying by a join field with relationship nested to an array', async ({
+    payload,
+  }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     const post = await payload.create({
       collection: 'posts',
@@ -1883,7 +3249,7 @@ describe('Joins Field', () => {
     await payload.delete({ collection: 'categories', id: category.id })
   })
 
-  it('should support where querying by a join field multiple times', async () => {
+  test('should support where querying by a join field multiple times', async ({ payload }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1911,7 +3277,9 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  it('should support where querying by a join field with hasMany relationship multiple times', async () => {
+  test('should support where querying by a join field with hasMany relationship multiple times', async ({
+    payload,
+  }) => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
       collection: 'posts',
@@ -1938,31 +3306,32 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
-  describe('Polymorphic join query validation', () => {
-    const isPostgres = process.env.PAYLOAD_DATABASE === 'postgres'
+  test.describe('Polymorphic join query validation', () => {
+    test.options({ db: (adapter) => adapter === 'postgres' })(
+      'should reject unknown operators and not delay response',
+      async ({ restClient }) => {
+        const startTime = Date.now()
 
-    it.skipIf(!isPostgres)('should reject unknown operators and not delay response', async () => {
-      const startTime = Date.now()
-
-      const response = await restClient.GET('/categories', {
-        query: {
-          limit: 1,
-          joins: {
-            polymorphicJoin: {
-              limit: 1,
-              where: { x: { $raw: 'EXISTS(SELECT 1 FROM pg_sleep(3))' } },
+        const response = await restClient.GET('/categories', {
+          query: {
+            limit: 1,
+            joins: {
+              polymorphicJoin: {
+                limit: 1,
+                where: { x: { $raw: 'EXISTS(SELECT 1 FROM pg_sleep(3))' } },
+              },
             },
           },
-        },
-      })
+        })
 
-      const elapsedSeconds = (Date.now() - startTime) / 1000
+        const elapsedSeconds = (Date.now() - startTime) / 1000
 
-      expect(response.status).toBe(400)
-      expect(elapsedSeconds).toBeLessThan(1)
-    })
+        expect(response.status).toBe(400)
+        expect(elapsedSeconds).toBeLessThan(1)
+      },
+    )
 
-    it('should reject unknown operators in polymorphic join where', async () => {
+    test('should reject unknown operators in polymorphic join where', async ({ restClient }) => {
       const response = await restClient.GET('/categories', {
         query: {
           limit: 1,
@@ -1978,7 +3347,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should allow valid operators in polymorphic join where', async () => {
+    test('should allow valid operators in polymorphic join where', async ({ restClient }) => {
       const response = await restClient.GET('/categories', {
         query: {
           limit: 1,
@@ -1994,7 +3363,55 @@ describe('Joins Field', () => {
       expect(response.status).toBe(200)
     })
 
-    it('should reject unknown operators regardless of value type', async () => {
+    test('should reject hidden fields in polymorphic join where', async ({ restClient }) => {
+      const response = await restClient.GET('/categories', {
+        query: {
+          joins: {
+            polymorphicJoin: {
+              limit: 1,
+              where: { hiddenSecret: { equals: 'secret' } },
+            },
+          },
+          limit: 1,
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    test('should reject hidden fields in Local API polymorphic join where', async ({ payload }) => {
+      await expect(
+        payload.find({
+          collection: categoriesSlug,
+          joins: {
+            polymorphicJoin: {
+              where: { hiddenSecret: { equals: 'secret' } },
+            },
+          },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: hiddenSecret')
+    })
+
+    test('should reject access-controlled fields in Local API polymorphic join where', async ({
+      payload,
+    }) => {
+      await expect(
+        payload.find({
+          collection: categoriesSlug,
+          joins: {
+            polymorphicJoin: {
+              where: { restrictedField: { equals: 'restricted' } },
+            },
+          },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow('The following path cannot be queried: restrictedField')
+    })
+
+    test('should reject unknown operators regardless of value type', async ({ restClient }) => {
       const payloads = [
         { title: { bogus_operator: 'primitive' } },
         { title: { not_a_real_op: { nested: 'object' } } },
@@ -2018,7 +3435,7 @@ describe('Joins Field', () => {
       }
     })
 
-    it('should reject unknown operators when value is an array', async () => {
+    test('should reject unknown operators when value is an array', async ({ restClient }) => {
       // When qs parses [$raw][0]=value, the value becomes an array.
       // Arrays must be rejected the same as other value types.
       const response = await restClient.GET('/categories', {
@@ -2036,7 +3453,9 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject disallowed characters in polymorphic join where paths', async () => {
+    test('should reject disallowed characters in polymorphic join where paths', async ({
+      restClient,
+    }) => {
       // Polymorphic joins suppress "field not found" errors so that
       // fields unique to one collection are accepted. But paths with
       // disallowed characters must always be rejected.
@@ -2066,7 +3485,7 @@ describe('Joins Field', () => {
       }
     })
 
-    it('should reject $raw in non-polymorphic join where clause', async () => {
+    test('should reject $raw in non-polymorphic join where clause', async ({ restClient }) => {
       // Non-polymorphic joins use the full parseParams pipeline, not
       // buildSQLWhere. The $raw operator must still be rejected.
       const response = await restClient.GET('/categories', {
@@ -2085,8 +3504,10 @@ describe('Joins Field', () => {
     })
   })
 
-  describe('Top-level query validation', () => {
-    it('should reject $raw operator on top-level collection queries via REST', async () => {
+  test.describe('Top-level query validation', () => {
+    test('should reject $raw operator on top-level collection queries via REST', async ({
+      restClient,
+    }) => {
       // $raw is an internal-only operator and must be rejected
       // at the top-level collection query as well as in joins.
       const response = await restClient.GET(`/${postsSlug}`, {
@@ -2099,7 +3520,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject $raw operator via Local API', async () => {
+    test('should reject $raw operator via Local API', async ({ payload }) => {
       // The Local API goes through the same validateQueryPaths pipeline.
       await expect(
         payload.find({
@@ -2110,7 +3531,9 @@ describe('Joins Field', () => {
       ).rejects.toBeTruthy()
     })
 
-    it('should reject unknown operators on top-level collection queries', async () => {
+    test('should reject unknown operators on top-level collection queries', async ({
+      restClient,
+    }) => {
       const response = await restClient.GET(`/${postsSlug}`, {
         query: {
           limit: 1,
@@ -2121,7 +3544,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject $raw nested inside AND combinator', async () => {
+    test('should reject $raw nested inside AND combinator', async ({ restClient }) => {
       // Unrecognized operators inside boolean combinators should
       // also be caught by recursive validation.
       const response = await restClient.GET(`/${postsSlug}`, {
@@ -2136,7 +3559,7 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject $raw nested inside OR combinator', async () => {
+    test('should reject $raw nested inside OR combinator', async ({ restClient }) => {
       const response = await restClient.GET(`/${postsSlug}`, {
         query: {
           limit: 1,
@@ -2149,7 +3572,9 @@ describe('Joins Field', () => {
       expect(response.status).toBe(400)
     })
 
-    it('should reject $raw nested inside AND combinator in join where', async () => {
+    test('should reject $raw nested inside AND combinator in join where', async ({
+      restClient,
+    }) => {
       const response = await restClient.GET('/categories', {
         query: {
           limit: 1,
@@ -2169,7 +3594,11 @@ describe('Joins Field', () => {
   })
 })
 
-async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {
+async function createPost(
+  { payload }: { payload: Payload },
+  overrides?: Partial<Post>,
+  locale?: Config['locale'],
+) {
   return payload.create({
     collection: postsSlug,
     locale,

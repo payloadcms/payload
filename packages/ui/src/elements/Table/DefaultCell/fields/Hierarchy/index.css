@@ -1,0 +1,17 @@
+@layer payload-default {
+  .hierarchy-cell {
+    display: flex;
+    align-items: center;
+  }
+
+  .hierarchy-cell__pill {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-2);
+
+    &:hover {
+      background-color: var(--color-bg-hover);
+    }
+  }
+}

@@ -49,7 +49,7 @@ export async function handleSchedules({
   })
 
   if (Object.keys(queuesWithSchedules).length === 0) {
-    // No schedules defined => return early, before fetching jobsStatsGlobal, as the global may not even exist
+    // No schedules defined => return early before fetching the stats global.
     return {
       errored: [],
       queued: [],
@@ -141,10 +141,7 @@ export function checkQueueableTimeConstraints({
     ? queueScheduleStats?.tasks?.[taskConfig.slug]?.lastScheduledRun
     : queueScheduleStats?.workflows?.[workflowConfig?.slug ?? '']?.lastScheduledRun
 
-  const nextRun = new Cron(scheduleConfig.cron, {
-    // TODO: Remove this compatibility option in 4.0. This only exists to ensure backwards-compatibility between Croner v9 and Croner v10 cron syntax
-    sloppyRanges: true,
-  }).nextRun(lastScheduledRun ?? undefined)
+  const nextRun = new Cron(scheduleConfig.cron).nextRun(lastScheduledRun ?? undefined)
 
   if (!nextRun) {
     return false
@@ -166,7 +163,7 @@ export async function scheduleQueueable({
   req: PayloadRequest
   stats: JobStats
 }): Promise<{
-  job?: Job<false>
+  job?: Job
   status: 'error' | 'skipped' | 'success'
 }> {
   if (!queueable.taskConfig && !queueable.workflowConfig) {
@@ -213,7 +210,7 @@ export async function scheduleQueueable({
       task: queueable?.taskConfig?.slug,
       waitUntil: beforeScheduleResult.waitUntil,
       workflow: queueable.workflowConfig?.slug,
-    } as Parameters<typeof req.payload.jobs.queue>[0])) as unknown as Job<false>
+    } as Parameters<typeof req.payload.jobs.queue>[0])) as unknown as Job
 
     await (afterScheduleFN ?? defaultAfterSchedule)({
       // @ts-expect-error we know defaultAfterchedule will never call itself => pass null

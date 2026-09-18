@@ -8,7 +8,7 @@ let config: SanitizedConfig
 
 describe('get localized sort property', () => {
   beforeAll(async () => {
-    config = await sanitizeConfig({
+    config = sanitizeConfig({
       localization: {
         defaultLocale: 'en',
         fallback: true,

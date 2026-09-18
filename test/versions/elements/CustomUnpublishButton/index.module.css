@@ -1,0 +1,29 @@
+.customUnpublishButton {
+  :global(.btn) {
+    background-color: var(--color-bg-danger-tertiary);
+    color: var(--color-text-danger);
+
+    &:hover {
+      background-color: var(--color-bg-danger-tertiary-hover) !important;
+    }
+
+    &:disabled {
+      background-color: var(--color-bg-danger-tertiary);
+      color: var(--color-text-danger);
+    }
+  }
+
+  :global(.popup-button) {
+    background-color: var(--color-bg-danger-tertiary);
+    color: var(--color-text-danger);
+
+    &:hover {
+      background-color: var(--color-bg-danger-tertiary-hover) !important;
+    }
+
+    &:disabled {
+      background-color: var(--color-bg-danger-tertiary);
+      color: var(--color-text-danger);
+    }
+  }
+}

@@ -36,4 +36,5 @@ export const LexicalViewsNested: CollectionConfig = {
     plural: 'Lexical Views Nested',
     singular: 'Lexical Views Nested',
   },
+  versions: false,
 }

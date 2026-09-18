@@ -5,15 +5,9 @@ import type {
   Payload,
   RequestContext,
   TypedLocale,
+  User,
 } from '../../../index.js'
-import type {
-  Document,
-  PayloadRequest,
-  PopulateType,
-  SelectType,
-  Sort,
-  Where,
-} from '../../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
@@ -88,11 +82,10 @@ export type Options<TSlug extends GlobalSlug> = {
    * @example ['version.group', '-version.createdAt'] // sort by 2 fields, ASC group and DESC createdAt
    */
   sort?: Sort
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */

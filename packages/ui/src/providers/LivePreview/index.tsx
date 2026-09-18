@@ -10,6 +10,7 @@ import { usePopupWindow } from '../../hooks/usePopupWindow.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { formatAbsoluteURL } from '../../utilities/formatAbsoluteURL.js'
+import { isHttpURL } from '../../utilities/isHttpURL.js'
 import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
 import { sizeReducer } from './sizeReducer.js'
@@ -44,8 +45,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   typeofLivePreviewURL,
   url: urlFromProps,
 }) => {
-  const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
-
   const [isLivePreviewing, _setIsLivePreviewing] =
     useState<LivePreviewContextType['isLivePreviewing']>(incomingIsLivePreviewing)
 
@@ -81,7 +80,15 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   )
 
   const [url, setURL] = useState<string>('')
-  const [previewURL, setPreviewURL] = useState<string>(previewURLFromProps)
+  const [previewURL, _setPreviewURL] = useState<string>()
+
+  const setPreviewURL = useCallback<LivePreviewContextType['setPreviewURL']>((incomingURL) => {
+    _setPreviewURL(isHttpURL(incomingURL) ? incomingURL : undefined)
+  }, [])
+
+  useEffect(() => {
+    setPreviewURL(previewURLFromProps)
+  }, [previewURLFromProps, setPreviewURL])
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
@@ -89,7 +96,9 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   })
 
   const [appIsReady, setAppIsReady] = useState(false)
-  const [listeningForMessages, setListeningForMessages] = useState(false)
+  // Tracks when any preview (iframe or popup) signals it's ready
+  // Used to trigger an initial sync to newly opened previews
+  const [lastReadyAt, setLastReadyAt] = useState<number>(0)
 
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
@@ -98,6 +107,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   const { setPreference } = usePreferences()
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
+
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const [loadedURL, setLoadedURL] = useState<string>()
 
@@ -138,7 +149,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setURL(incomingURL)
       }
     },
-    [url],
+    [setIsLivePreviewing, url],
   )
 
   /**
@@ -219,39 +230,17 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
       ) {
         if (event.data.ready) {
           setAppIsReady(true)
+          setLastReadyAt(Date.now())
         }
       }
     }
 
     window.addEventListener('message', handleMessage)
 
-    setListeningForMessages(true)
-
     return () => {
       window.removeEventListener('message', handleMessage)
     }
-  }, [url, listeningForMessages])
-
-  const handleWindowChange = useCallback(
-    (type: 'iframe' | 'popup') => {
-      setAppIsReady(false)
-      setPreviewWindowType(type)
-      if (type === 'popup') {
-        openPopupWindow()
-      }
-    },
-    [openPopupWindow],
-  )
-
-  // when the user closes the popup window, switch back to the iframe
-  // the `usePopupWindow` reports the `isPopupOpen` state for us to use here
-  useEffect(() => {
-    const newPreviewWindowType = isPopupOpen ? 'popup' : 'iframe'
-
-    if (newPreviewWindowType !== previewWindowType) {
-      handleWindowChange('iframe')
-    }
-  }, [previewWindowType, isPopupOpen, handleWindowChange])
+  }, [url])
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -277,25 +266,24 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         breakpoint,
         breakpoints,
         iframeRef,
+        isExpanded,
         isLivePreviewEnabled,
         isLivePreviewing,
         isPopupOpen,
         isPreviewEnabled,
-        listeningForMessages,
+        lastReadyAt,
         loadedURL,
         measuredDeviceSize,
         openPopupWindow,
         popupRef,
         previewURL,
-        previewWindowType,
-        setAppIsReady,
         setBreakpoint,
         setHeight,
+        setIsExpanded,
         setIsLivePreviewing,
         setLoadedURL,
         setMeasuredDeviceSize,
         setPreviewURL,
-        setPreviewWindowType: handleWindowChange,
         setSize,
         setToolbarPosition: setPosition,
         setURL: setLivePreviewURL,

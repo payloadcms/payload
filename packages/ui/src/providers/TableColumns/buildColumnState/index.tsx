@@ -188,13 +188,13 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
         serverField &&
         'admin' in serverField &&
         'components' in serverField.admin &&
+        serverField.admin.components &&
         'Label' in serverField.admin.components &&
         serverField.admin.components.Label !== undefined // let it return `null`
           ? serverField.admin.components.Label
           : undefined
 
-      // TODO: customComponent will be optional in v4
-      const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      const clientProps: ClientComponentProps = {
         field: clientField,
       }
 
@@ -253,12 +253,15 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
       />
     )
 
+    const isLinkedColumn = enableLinkedCell && colIndex === activeColumnsIndices[0]
+
     const column: Column = {
       accessor,
       active: isActive,
       CustomLabel,
       field: clientField,
       Heading,
+      isLinkedColumn,
       renderedCells: isActive
         ? docs.map((doc, rowIndex) => {
             return renderCell({
@@ -269,7 +272,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               doc: dataType === 'monomorphic' ? doc : doc.value,
               enableRowSelections,
               i18n,
-              isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
+              isLinkedColumn,
               payload,
               req,
               rowIndex,

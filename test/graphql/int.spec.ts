@@ -1,31 +1,40 @@
-import type { Payload } from 'payload'
+import type { GraphQLInputObjectType } from 'graphql'
 
-import path from 'path'
+import { configToSchema } from '@payloadcms/graphql'
+import { GraphQLNonNull } from 'graphql'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
+import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
-let payload: Payload
-let restClient: NextRESTClient
+test.suite({ config: './config.ts' })('graphql', () => {
+  test.describe('graphql', () => {
+    test('should return 404 when GraphQL is disabled', async ({ payload, restClient }) => {
+      const originalDisable = payload.config.graphQL?.disable
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+      payload.config.graphQL.disable = true
 
-describe('graphql', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
+      try {
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+          Posts {
+            docs {
+              id
+            }
+          }
+        }`,
+          }),
+        })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
+        expect(response.status).toBe(404)
+      } finally {
+        payload.config.graphQL.disable = originalDisable
+      }
+    })
 
-  describe('graphql', () => {
-    it('should not be able to query introspection', async () => {
+    test('should not be able to query introspection', async ({ restClient }) => {
       const query = `query {
         __schema {
           queryType {
@@ -45,7 +54,7 @@ describe('graphql', () => {
       )
     })
 
-    it('should respect maxComplexity', async () => {
+    test('should respect maxComplexity', async ({ payload, restClient }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -80,7 +89,10 @@ describe('graphql', () => {
       )
     })
 
-    it('should sanitize hyphenated field names to snake case', async () => {
+    test('should sanitize hyphenated field names to snake case', async ({
+      payload,
+      restClient,
+    }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -104,7 +116,7 @@ describe('graphql', () => {
       expect(res.hyphenated_name).toStrictEqual('example-hyphenated-name')
     })
 
-    it('should not error because of non nullable fields', async () => {
+    test('should not error because of non nullable fields', async ({ payload, restClient }) => {
       await payload.delete({ collection: 'posts', where: {} })
 
       // this is an array if any errors
@@ -149,7 +161,7 @@ query {
       expect(res_2.errors).toBeFalsy()
     })
 
-    it('should handle blocks with select: true', async () => {
+    test('should handle blocks with select: true', async ({ payload, restClient }) => {
       const createdPost = await payload.create({
         collection: 'posts',
         data: {
@@ -218,7 +230,10 @@ query {
       })
     })
 
-    it('should not error when querying a global with a deleted relationship in an array', async () => {
+    test('should not error when querying a global with a deleted relationship in an array', async ({
+      payload,
+      restClient,
+    }) => {
       const post1 = await payload.create({
         collection: 'posts',
         data: {
@@ -267,6 +282,20 @@ query {
         .then((res) => res.json())
 
       expect(afterDelete.errors).toBeUndefined()
+    })
+
+    test.describe('nullable schema types', () => {
+      test('should not mark required virtual fields as non-null in the mutation input type', ({
+        payload,
+      }) => {
+        const { schema } = configToSchema(payload.config)
+        const inputType = schema.getType('mutationVirtualFieldInput') as GraphQLInputObjectType
+        const fields = inputType.getFields()
+
+        expect(fields.requiredTitle!.type instanceof GraphQLNonNull).toBe(true)
+        expect(fields.virtualComputed!.type instanceof GraphQLNonNull).toBe(false)
+        expect(fields.virtualFromRelation!.type instanceof GraphQLNonNull).toBe(false)
+      })
     })
   })
 })

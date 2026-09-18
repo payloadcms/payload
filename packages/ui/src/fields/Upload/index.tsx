@@ -10,7 +10,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { UploadInput } from './Input.js'
-import './index.scss'
+import './index.css'
 
 export { UploadInput } from './Input.js'
 export type { UploadInputProps } from './Input.js'
@@ -92,7 +92,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
-    <BulkUploadProvider drawerSlugPrefix={pathFromProps}>
+    <BulkUploadProvider modalSlugPrefix={pathFromProps}>
       <UploadInput
         AfterInput={AfterInput}
         allowCreate={allowCreate !== false}

@@ -1,13 +1,13 @@
 import type { Payload } from 'payload'
 
+import { buildEditorState } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
-// TODO: decouple blocks from both test suites
-import { richTextDocData } from '../lexical/collections/RichText/data.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
@@ -62,10 +62,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
-  const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
-  const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
-  const pngPath = path.resolve(dirname, './uploads/payload.png')
-  const png20x20Path = path.resolve(dirname, './collections/Upload/payload20x20.png')
+  const fieldsDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'fields' })
+  const jpgPath = path.resolve(fieldsDir, './collections/Upload/payload.jpg')
+  const jpg480x320Path = path.resolve(fieldsDir, './collections/Upload/payload480x320.jpg')
+  const pngPath = path.resolve(fieldsDir, './uploads/payload.png')
+  const png20x20Path = path.resolve(fieldsDir, './collections/Upload/payload20x20.png')
 
   const [jpgFile, jpg480x320File, pngFile, png20x20File] = await Promise.all([
     getFileByPath(jpgPath),
@@ -194,28 +195,14 @@ export const seed = async (_payload: Payload) => {
   //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
   //   },
   // })
-  const formattedID =
-    _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
-
-  const formattedJPGID =
-    _payload.db.defaultIDType === 'number' ? createdJPGDoc.id : `"${createdJPGDoc.id}"`
-
-  const formattedTextID =
-    _payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
-
-  const richTextDocWithRelId = JSON.parse(
-    JSON.stringify(richTextDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
-  )
   const blocksDocWithRichText = {
     ...(blocksDoc as any),
   }
-  const richTextDocWithRelationship = { ...richTextDocWithRelId }
 
-  blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
-  blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
+  const blockRichText = buildEditorState({ text: 'I can do all kinds of fun stuff' })
+
+  blocksDocWithRichText.blocks[0].richText = blockRichText
+  blocksDocWithRichText.localizedBlocks[0].richText = blockRichText
 
   await _payload.create({
     collection: emailFieldsSlug,
@@ -427,6 +414,9 @@ export async function clearAndSeedEverything(_payload: Payload) {
     collectionSlugs,
     seedFunction: seed,
     snapshotKey: 'fieldsTest',
-    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    uploadsDir: path.resolve(
+      getTestSuiteDir({ fallbackDir: dirname, suitePath: 'fields' }),
+      './collections/Upload/uploads',
+    ),
   })
 }

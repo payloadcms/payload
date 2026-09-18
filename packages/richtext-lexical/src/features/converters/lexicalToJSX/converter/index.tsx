@@ -3,14 +3,14 @@ import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
 import React from 'react'
 
-import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
 import type {
   LexicalEditorNodeMap,
   NodeMapBlockValue,
   NodeMapValue,
   SerializedNodeBase,
   ViewMapBlockJSXConverterProps,
-} from '../../../../types.js'
+} from '../../../../types/index.js'
+import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../types/nodeTypes.js'
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
 import { hasText } from '../../../../validate/hasText.js'

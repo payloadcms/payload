@@ -23,12 +23,13 @@ export const getUserTenantIDs = <IDType extends number | string>(
   const tenantsArrayTenantFieldName =
     options?.tenantsArrayTenantFieldName || defaults.tenantsArrayTenantFieldName
 
+  const tenantsArray = (user as Record<string, unknown>)[tenantsArrayFieldName]
+
   return (
-    (Array.isArray(user[tenantsArrayFieldName]) ? user[tenantsArrayFieldName] : [])?.reduce<
-      IDType[]
-    >((acc, row) => {
-      if (row[tenantsArrayTenantFieldName]) {
-        acc.push(extractID<IDType>(row[tenantsArrayTenantFieldName] as Tenant<IDType>))
+    (Array.isArray(tenantsArray) ? tenantsArray : [])?.reduce<IDType[]>((acc, row) => {
+      const tenantRow = row[tenantsArrayTenantFieldName] as Tenant<IDType>
+      if (tenantRow !== undefined && tenantRow !== null) {
+        acc.push(extractID(tenantRow))
       }
 
       return acc
