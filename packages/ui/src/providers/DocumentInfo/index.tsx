@@ -359,7 +359,7 @@ const DocumentInfo: React.FC<
         {
           addQueryPrefix: true,
         },
-      )}`,
+      )}` as `/${string}`,
     })
   }, [api, locale, pluralType, id, slug, uploadEdits])
 
