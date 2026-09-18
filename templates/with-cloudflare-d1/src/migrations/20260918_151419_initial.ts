@@ -23,6 +23,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	\`reset_password_expiration\` text,
   	\`salt\` text,
   	\`hash\` text,
+  	\`reset_password_requested_at\` text,
   	\`login_attempts\` numeric DEFAULT 0,
   	\`lock_until\` text
   );
@@ -33,6 +34,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.run(sql`CREATE TABLE \`media\` (
   	\`id\` integer PRIMARY KEY NOT NULL,
   	\`alt\` text NOT NULL,
+  	\`_objectkey\` text,
   	\`updated_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
   	\`created_at\` text DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL,
   	\`url\` text,
@@ -47,6 +49,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.run(sql`CREATE INDEX \`media_updated_at_idx\` ON \`media\` (\`updated_at\`);`)
   await db.run(sql`CREATE INDEX \`media_created_at_idx\` ON \`media\` (\`created_at\`);`)
   await db.run(sql`CREATE UNIQUE INDEX \`media_filename_idx\` ON \`media\` (\`filename\`);`)
+  await db.run(sql`CREATE TABLE \`payload_kv\` (
+  	\`id\` integer PRIMARY KEY NOT NULL,
+  	\`key\` text NOT NULL,
+  	\`data\` text NOT NULL
+  );
+  `)
+  await db.run(sql`CREATE UNIQUE INDEX \`payload_kv_key_idx\` ON \`payload_kv\` (\`key\`);`)
   await db.run(sql`CREATE TABLE \`payload_locked_documents\` (
   	\`id\` integer PRIMARY KEY NOT NULL,
   	\`global_slug\` text,
@@ -149,6 +158,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   await db.run(sql`DROP TABLE \`users_sessions\`;`)
   await db.run(sql`DROP TABLE \`users\`;`)
   await db.run(sql`DROP TABLE \`media\`;`)
+  await db.run(sql`DROP TABLE \`payload_kv\`;`)
   await db.run(sql`DROP TABLE \`payload_locked_documents\`;`)
   await db.run(sql`DROP TABLE \`payload_locked_documents_rels\`;`)
   await db.run(sql`DROP TABLE \`payload_preferences\`;`)

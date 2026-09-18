@@ -347,6 +347,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"id" serial PRIMARY KEY NOT NULL,
   	"alt" varchar,
   	"caption" jsonb,
+  	"_objectkey" varchar,
   	"folder_id" integer,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -440,6 +441,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"reset_password_expiration" timestamp(3) with time zone,
   	"salt" varchar,
   	"hash" varchar,
+  	"reset_password_requested_at" timestamp(3) with time zone,
   	"login_attempts" numeric DEFAULT 0,
   	"lock_until" timestamp(3) with time zone
   );

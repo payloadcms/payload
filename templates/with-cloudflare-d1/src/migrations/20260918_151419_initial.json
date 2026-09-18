@@ -129,6 +129,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "reset_password_requested_at": {
+          "name": "reset_password_requested_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "login_attempts": {
           "name": "login_attempts",
           "type": "numeric",
@@ -182,6 +189,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "_objectkey": {
+          "name": "_objectkey",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "updated_at": {
@@ -264,6 +278,43 @@
         "media_filename_idx": {
           "name": "media_filename_idx",
           "columns": ["filename"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "payload_kv": {
+      "name": "payload_kv",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "data": {
+          "name": "data",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "payload_kv_key_idx": {
+          "name": "payload_kv_key_idx",
+          "columns": ["key"],
           "isUnique": true
         }
       },
@@ -650,6 +701,6 @@
   "internal": {
     "indexes": {}
   },
-  "id": "892a870d-47bc-44f3-8237-e7d4c7022b26",
+  "id": "29d83c45-4d74-4bf5-a1c0-58e774e7f370",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

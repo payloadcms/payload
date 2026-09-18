@@ -140,6 +140,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "reset_password_requested_at": {
+          "name": "reset_password_requested_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "login_attempts": {
           "name": "login_attempts",
           "type": "numeric",
@@ -223,6 +229,12 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "_objectkey": {
+          "name": "_objectkey",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "updated_at": {
           "name": "updated_at",
@@ -934,6 +946,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "1669725a-7e4b-4055-b084-4a4a3410f026",
+  "id": "f8e6b1ec-6a9a-4d8f-83e7-faf6169d1061",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
