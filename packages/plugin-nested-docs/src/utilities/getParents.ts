@@ -8,10 +8,23 @@ export const getParents = async (
   collection: CollectionConfig,
   doc: Record<string, unknown>,
   docs: Array<Record<string, unknown>> = [],
+  visited: Set<string> = new Set(),
 ): Promise<Document[]> => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
   const parent = doc[parentSlug]
   let retrievedParent: null | Record<string, unknown> = null
+
+  // Track visited document IDs to detect circular parent chains.
+  // Without this, a document whose parent references itself (or
+  // forms a cycle A→B→A) causes infinite recursion and a stack
+  // overflow on every save.
+  if (doc?.id != null) {
+    const idKey = String(doc.id)
+    if (visited.has(idKey)) {
+      return docs
+    }
+    visited.add(idKey)
+  }
 
   if (parent) {
     // If not auto-populated, and we have an ID
@@ -35,7 +48,7 @@ export const getParents = async (
         return getParents(req, pluginConfig, collection, retrievedParent, [
           retrievedParent,
           ...docs,
-        ])
+        ], visited)
       }
 
       return [retrievedParent, ...docs]
