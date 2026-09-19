@@ -55,6 +55,7 @@ import {
   execute,
   init,
   insert,
+  makePostgresDropsIdempotent,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
@@ -105,7 +106,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
     }: {
       sqlExecute: string
       statements: string[]
-    }) => `${sqlExecute}\n ${statements.join('\n')}\`)`
+    }) => `${sqlExecute}\n ${makePostgresDropsIdempotent(statements).join('\n')}\`)`
 
     const adapter = createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
