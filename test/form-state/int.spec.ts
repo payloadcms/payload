@@ -1,15 +1,18 @@
 import type { FieldState, FormState, User } from 'payload'
-import type React from 'react'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { createLocalReq } from 'payload'
+import { createLocalReq, getAccessResults } from 'payload'
+import React from 'react'
 import { fileURLToPath } from 'url'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import { devUser } from '../credentials.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { renderDocumentHandler } from '../../packages/ui/src/views/Document/handleServerFunction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 import { test } from '../__helpers/int/vitest.js'
@@ -38,6 +41,59 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Form State', ()
       .then((res) => res.json())
 
     user = data.user
+  })
+
+  test.afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  test('should respect field create access when initializing an autosave draft', async ({
+    payload,
+  }) => {
+    const editor = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'editor@example.com',
+        password: 'test-password',
+      },
+    })
+
+    const req = await createLocalReq({ user: editor }, payload)
+    const permissions = await getAccessResults({ req })
+    const restrictedValue = 'client supplied'
+    const title = 'Access filtered autosave'
+    vi.stubGlobal('React', React)
+
+    await renderDocumentHandler({
+      collectionSlug: autosavePostsSlug,
+      cookies: new Map(),
+      docID: undefined as never,
+      importMap: payload.importMap,
+      initialData: {
+        restrictedValue,
+        title,
+      },
+      locale: undefined,
+      permissions,
+      redirectAfterCreate: false,
+      redirectAfterDelete: false,
+      redirectAfterDuplicate: false,
+      req,
+    })
+
+    const { docs } = await payload.find({
+      collection: autosavePostsSlug,
+      draft: true,
+      overrideAccess: true,
+      where: {
+        title: {
+          equals: title,
+        },
+      },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]).not.toHaveProperty('restrictedValue', restrictedValue)
   })
 
   test('should build entire form state', async ({ payload }) => {

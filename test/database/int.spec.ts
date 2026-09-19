@@ -563,6 +563,35 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       })
     })
 
+    test.options({ db: 'drizzle' }).describe('conditional updateOne', () => {
+      test('should allow exactly one concurrent compare-and-set winner', async ({ payload }) => {
+        const post = await payload.create({
+          collection: postsSlug,
+          data: { title: 'pending' },
+        })
+
+        const results = await Promise.all(
+          Array.from({ length: 20 }, () =>
+            payload.db.updateOne({
+              collection: postsSlug,
+              data: { title: 'processing' },
+              options: { atomic: true },
+              where: {
+                and: [{ id: { equals: post.id } }, { title: { equals: 'pending' } }],
+              },
+            }),
+          ),
+        )
+
+        expect(results.filter(Boolean)).toHaveLength(1)
+
+        await payload.db.deleteMany({
+          collection: postsSlug,
+          where: { id: { equals: post.id } },
+        })
+      })
+    })
+
     test('should allow createdAt to be set in updateVersion', async ({ payload }) => {
       const category = await payload.create({
         collection: 'categories',

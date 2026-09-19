@@ -31,6 +31,7 @@ import {
   constructorOptionsSlug,
   customFileNameMediaSlug,
   enlargeSlug,
+  fileAccessMediaSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
   imageSizesOnlySlug,
@@ -1153,6 +1154,56 @@ export default buildConfigWithDefaults({
           staticDir: path.resolve(dirname, './prefix-media'),
         },
         versions: false,
+      },
+      {
+        slug: fileAccessMediaSlug,
+        access: {
+          read: () => ({
+            visibility: {
+              equals: 'public',
+            },
+          }),
+        },
+        fields: [
+          {
+            name: 'prefix',
+            type: 'text',
+          },
+          {
+            name: 'requestMetadata',
+            type: 'text',
+          },
+          {
+            name: 'url',
+            localized: true,
+            type: 'text',
+          },
+          {
+            name: 'visibility',
+            type: 'select',
+            options: ['public', 'restricted'],
+            required: true,
+          },
+        ],
+        hooks: {
+          beforeChange: [
+            ({ data, req }) => ({
+              ...data,
+              requestMetadata: `${req.method}:${req.headers.get('content-type') ?? ''}:${new URL(req.url!).pathname}`,
+            }),
+          ],
+        },
+        upload: {
+          imageSizes: [
+            {
+              name: 'thumbnail',
+              height: 100,
+              width: 100,
+            },
+          ],
+          staticDir: path.resolve(dirname, `./${fileAccessMediaSlug}`),
+        },
+        versions: true,
       },
       {
         slug: mediaWithFieldsSlug,
