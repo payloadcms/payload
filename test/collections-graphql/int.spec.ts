@@ -11,7 +11,7 @@ import type { Post } from './payload-types.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
+import { errorOnHookSlug, nestedRelationsSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
 
@@ -1374,6 +1374,46 @@ describe('collections-graphql', () => {
       expect(errors[0].path[0]).toEqual('QueryWithInternalError')
       expect(errors[0].extensions.statusCode).toEqual(500)
       expect(errors[0].extensions.name).toEqual('Error')
+    })
+  })
+
+  describe('select projection', () => {
+    // A relationship's sub-selection must survive the select projection derived
+    // from the GraphQL query, including when the field is aliased or nested in
+    // an array/block. Regression test for dropped sub-selections.
+    it('keeps sub-selection for aliased and array/block-nested relationships', async () => {
+      const rel1 = await payload.create({ collection: relationSlug, data: { name: 'top-level' } })
+      const rel2 = await payload.create({ collection: relationSlug, data: { name: 'in-array' } })
+      const rel3 = await payload.create({ collection: relationSlug, data: { name: 'in-block' } })
+
+      const doc = await payload.create({
+        collection: nestedRelationsSlug,
+        data: {
+          array: [{ link: rel2.id }],
+          blocks: [{ blockType: 'content', link: rel3.id }],
+          topLevelRelation: rel1.id,
+        },
+      })
+
+      // `select: true` makes the resolver derive a projection from the query,
+      // which is the path that runs `resolveSelect` for each relationship.
+      const query = `query {
+        NestedRelation(id: ${formatID(doc.id)}, select: true) {
+          aliased: topLevelRelation { id name }
+          array { link { id name } }
+          blocks { ... on Content { link { id name } } }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      const result = data.NestedRelation
+
+      expect(result.aliased).toMatchObject({ id: rel1.id, name: 'top-level' })
+      expect(result.array[0].link).toMatchObject({ id: rel2.id, name: 'in-array' })
+      expect(result.blocks[0].link).toMatchObject({ id: rel3.id, name: 'in-block' })
     })
   })
 })

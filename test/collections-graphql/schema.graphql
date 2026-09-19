@@ -59,6 +59,10 @@ type Query {
   Sorts(draft: Boolean, where: Sort_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): Sorts
   countSorts(draft: Boolean, trash: Boolean, where: Sort_where, locale: LocaleInputType): countSorts
   docAccessSort(id: Int!): sortDocAccess
+  NestedRelation(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): NestedRelation
+  NestedRelations(draft: Boolean, where: NestedRelation_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): NestedRelations
+  countNestedRelations(draft: Boolean, trash: Boolean, where: NestedRelation_where, locale: LocaleInputType): countNestedRelations
+  docAccessNestedRelation(id: Int!): nested_relationsDocAccess
   PayloadKv(id: Int!, draft: Boolean, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, select: Boolean, trash: Boolean): PayloadKv
   PayloadKvs(draft: Boolean, where: PayloadKv_where, fallbackLocale: FallbackLocaleInputType, locale: LocaleInputType, limit: Int, page: Int, pagination: Boolean, select: Boolean, sort: String, trash: Boolean): PayloadKvs
   countPayloadKvs(draft: Boolean, trash: Boolean, where: PayloadKv_where, locale: LocaleInputType): countPayloadKvs
@@ -5161,6 +5165,344 @@ type SortDeleteDocAccess {
   where: JSONObject
 }
 
+type NestedRelation {
+  id: Int!
+  topLevelRelation(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
+  array: [NestedRelation_Array!]
+  blocks: [NestedRelation_Blocks!]
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type NestedRelation_Array {
+  link(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
+  id: String
+}
+
+union NestedRelation_Blocks = Content
+
+type Content {
+  link(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
+  id: String
+  blockName: String
+  blockType: String
+}
+
+type NestedRelations {
+  docs: [NestedRelation!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  nextPage: Int
+  offset: Int
+  page: Int!
+  pagingCounter: Int!
+  prevPage: Int
+  totalDocs: Int!
+  totalPages: Int!
+}
+
+input NestedRelation_where {
+  topLevelRelation: NestedRelation_topLevelRelation_operator
+  array__link: NestedRelation_array__link_operator
+  array__id: NestedRelation_array__id_operator
+  updatedAt: NestedRelation_updatedAt_operator
+  createdAt: NestedRelation_createdAt_operator
+  id: NestedRelation_id_operator
+  AND: [NestedRelation_where_and]
+  OR: [NestedRelation_where_or]
+}
+
+input NestedRelation_topLevelRelation_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input NestedRelation_array__link_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input NestedRelation_array__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input NestedRelation_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input NestedRelation_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input NestedRelation_id_operator {
+  equals: Int
+  not_equals: Int
+  greater_than_equal: Int
+  greater_than: Int
+  less_than_equal: Int
+  less_than: Int
+  exists: Boolean
+}
+
+input NestedRelation_where_and {
+  topLevelRelation: NestedRelation_topLevelRelation_operator
+  array__link: NestedRelation_array__link_operator
+  array__id: NestedRelation_array__id_operator
+  updatedAt: NestedRelation_updatedAt_operator
+  createdAt: NestedRelation_createdAt_operator
+  id: NestedRelation_id_operator
+  AND: [NestedRelation_where_and]
+  OR: [NestedRelation_where_or]
+}
+
+input NestedRelation_where_or {
+  topLevelRelation: NestedRelation_topLevelRelation_operator
+  array__link: NestedRelation_array__link_operator
+  array__id: NestedRelation_array__id_operator
+  updatedAt: NestedRelation_updatedAt_operator
+  createdAt: NestedRelation_createdAt_operator
+  id: NestedRelation_id_operator
+  AND: [NestedRelation_where_and]
+  OR: [NestedRelation_where_or]
+}
+
+type countNestedRelations {
+  totalDocs: Int
+}
+
+type nested_relationsDocAccess {
+  fields: NestedRelationsDocAccessFields
+  create: NestedRelationsCreateDocAccess
+  read: NestedRelationsReadDocAccess
+  update: NestedRelationsUpdateDocAccess
+  delete: NestedRelationsDeleteDocAccess
+}
+
+type NestedRelationsDocAccessFields {
+  topLevelRelation: NestedRelationsDocAccessFields_topLevelRelation
+  array: NestedRelationsDocAccessFields_array
+  blocks: NestedRelationsDocAccessFields_blocks
+  updatedAt: NestedRelationsDocAccessFields_updatedAt
+  createdAt: NestedRelationsDocAccessFields_createdAt
+}
+
+type NestedRelationsDocAccessFields_topLevelRelation {
+  create: NestedRelationsDocAccessFields_topLevelRelation_Create
+  read: NestedRelationsDocAccessFields_topLevelRelation_Read
+  update: NestedRelationsDocAccessFields_topLevelRelation_Update
+  delete: NestedRelationsDocAccessFields_topLevelRelation_Delete
+}
+
+type NestedRelationsDocAccessFields_topLevelRelation_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_topLevelRelation_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_topLevelRelation_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_topLevelRelation_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array {
+  create: NestedRelationsDocAccessFields_array_Create
+  read: NestedRelationsDocAccessFields_array_Read
+  update: NestedRelationsDocAccessFields_array_Update
+  delete: NestedRelationsDocAccessFields_array_Delete
+  fields: NestedRelationsDocAccessFields_array_Fields
+}
+
+type NestedRelationsDocAccessFields_array_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_Fields {
+  link: NestedRelationsDocAccessFields_array_link
+  id: NestedRelationsDocAccessFields_array_id
+}
+
+type NestedRelationsDocAccessFields_array_link {
+  create: NestedRelationsDocAccessFields_array_link_Create
+  read: NestedRelationsDocAccessFields_array_link_Read
+  update: NestedRelationsDocAccessFields_array_link_Update
+  delete: NestedRelationsDocAccessFields_array_link_Delete
+}
+
+type NestedRelationsDocAccessFields_array_link_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_link_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_link_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_link_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_id {
+  create: NestedRelationsDocAccessFields_array_id_Create
+  read: NestedRelationsDocAccessFields_array_id_Read
+  update: NestedRelationsDocAccessFields_array_id_Update
+  delete: NestedRelationsDocAccessFields_array_id_Delete
+}
+
+type NestedRelationsDocAccessFields_array_id_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_id_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_id_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_array_id_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_blocks {
+  create: NestedRelationsDocAccessFields_blocks_Create
+  read: NestedRelationsDocAccessFields_blocks_Read
+  update: NestedRelationsDocAccessFields_blocks_Update
+  delete: NestedRelationsDocAccessFields_blocks_Delete
+}
+
+type NestedRelationsDocAccessFields_blocks_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_blocks_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_blocks_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_blocks_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_updatedAt {
+  create: NestedRelationsDocAccessFields_updatedAt_Create
+  read: NestedRelationsDocAccessFields_updatedAt_Read
+  update: NestedRelationsDocAccessFields_updatedAt_Update
+  delete: NestedRelationsDocAccessFields_updatedAt_Delete
+}
+
+type NestedRelationsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_createdAt {
+  create: NestedRelationsDocAccessFields_createdAt_Create
+  read: NestedRelationsDocAccessFields_createdAt_Read
+  update: NestedRelationsDocAccessFields_createdAt_Update
+  delete: NestedRelationsDocAccessFields_createdAt_Delete
+}
+
+type NestedRelationsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NestedRelationsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NestedRelationsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NestedRelationsDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type PayloadKv {
   id: Int!
   key: String!
@@ -5321,7 +5663,7 @@ type PayloadLockedDocument {
   id: Int!
   document(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadLockedDocument_Document_Relationship
   globalSlug: String
-  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadLockedDocument_User_Relationship!
+  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadLockedDocument_User_Relationship
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -5345,9 +5687,10 @@ enum PayloadLockedDocument_Document_RelationTo {
   cyclical_relationship
   media
   sort
+  nested_relations
 }
 
-union PayloadLockedDocument_Document = User | Point | Post | CustomId | Relation | Dummy | ErrorOnHook | PayloadApiTestOne | PayloadApiTestTwo | ContentType | CyclicalRelationship | Media | Sort
+union PayloadLockedDocument_Document = User | Point | Post | CustomId | Relation | Dummy | ErrorOnHook | PayloadApiTestOne | PayloadApiTestTwo | ContentType | CyclicalRelationship | Media | Sort | NestedRelation
 
 type PayloadLockedDocument_User_Relationship {
   relationTo: PayloadLockedDocument_User_RelationTo
@@ -5404,6 +5747,7 @@ enum PayloadLockedDocument_document_Relation_RelationTo {
   cyclical_relationship
   media
   sort
+  nested_relations
 }
 
 input PayloadLockedDocument_globalSlug_operator {
@@ -5637,7 +5981,7 @@ type PayloadLockedDocumentsDeleteDocAccess {
 
 type PayloadPreference {
   id: Int!
-  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadPreference_User_Relationship!
+  user(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): PayloadPreference_User_Relationship
   key: String
   value: JSON
   updatedAt: DateTime
@@ -5934,6 +6278,7 @@ type Access {
   cyclical_relationship: cyclical_relationshipAccess
   media: mediaAccess
   sort: sortAccess
+  nested_relations: nested_relationsAccess
   payload_kv: payload_kvAccess
   payload_locked_documents: payload_locked_documentsAccess
   payload_preferences: payload_preferencesAccess
@@ -8318,6 +8663,209 @@ type SortDeleteAccess {
   where: JSONObject
 }
 
+type nested_relationsAccess {
+  fields: NestedRelationsFields
+  create: NestedRelationsCreateAccess
+  read: NestedRelationsReadAccess
+  update: NestedRelationsUpdateAccess
+  delete: NestedRelationsDeleteAccess
+}
+
+type NestedRelationsFields {
+  topLevelRelation: NestedRelationsFields_topLevelRelation
+  array: NestedRelationsFields_array
+  blocks: NestedRelationsFields_blocks
+  updatedAt: NestedRelationsFields_updatedAt
+  createdAt: NestedRelationsFields_createdAt
+}
+
+type NestedRelationsFields_topLevelRelation {
+  create: NestedRelationsFields_topLevelRelation_Create
+  read: NestedRelationsFields_topLevelRelation_Read
+  update: NestedRelationsFields_topLevelRelation_Update
+  delete: NestedRelationsFields_topLevelRelation_Delete
+}
+
+type NestedRelationsFields_topLevelRelation_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_topLevelRelation_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_topLevelRelation_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_topLevelRelation_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array {
+  create: NestedRelationsFields_array_Create
+  read: NestedRelationsFields_array_Read
+  update: NestedRelationsFields_array_Update
+  delete: NestedRelationsFields_array_Delete
+  fields: NestedRelationsFields_array_Fields
+}
+
+type NestedRelationsFields_array_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_Fields {
+  link: NestedRelationsFields_array_link
+  id: NestedRelationsFields_array_id
+}
+
+type NestedRelationsFields_array_link {
+  create: NestedRelationsFields_array_link_Create
+  read: NestedRelationsFields_array_link_Read
+  update: NestedRelationsFields_array_link_Update
+  delete: NestedRelationsFields_array_link_Delete
+}
+
+type NestedRelationsFields_array_link_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_link_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_link_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_link_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_id {
+  create: NestedRelationsFields_array_id_Create
+  read: NestedRelationsFields_array_id_Read
+  update: NestedRelationsFields_array_id_Update
+  delete: NestedRelationsFields_array_id_Delete
+}
+
+type NestedRelationsFields_array_id_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_id_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_id_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_array_id_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_blocks {
+  create: NestedRelationsFields_blocks_Create
+  read: NestedRelationsFields_blocks_Read
+  update: NestedRelationsFields_blocks_Update
+  delete: NestedRelationsFields_blocks_Delete
+}
+
+type NestedRelationsFields_blocks_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_blocks_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_blocks_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_blocks_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_updatedAt {
+  create: NestedRelationsFields_updatedAt_Create
+  read: NestedRelationsFields_updatedAt_Read
+  update: NestedRelationsFields_updatedAt_Update
+  delete: NestedRelationsFields_updatedAt_Delete
+}
+
+type NestedRelationsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_createdAt {
+  create: NestedRelationsFields_createdAt_Create
+  read: NestedRelationsFields_createdAt_Read
+  update: NestedRelationsFields_createdAt_Update
+  delete: NestedRelationsFields_createdAt_Delete
+}
+
+type NestedRelationsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NestedRelationsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NestedRelationsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type NestedRelationsDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type payload_kvAccess {
   fields: PayloadKvFields
   create: PayloadKvCreateAccess
@@ -8711,7 +9259,7 @@ type Mutation {
   logoutUser(allSessions: Boolean): String
   unlockUser(email: String!): Boolean!
   loginUser(email: String!, password: String): usersLoginResult
-  forgotPasswordUser(disableEmail: Boolean, expiration: Int, email: String!): Boolean!
+  forgotPasswordUser(email: String!): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPoint(data: mutationPointInput!, draft: Boolean, locale: LocaleInputType): Point
@@ -8765,6 +9313,10 @@ type Mutation {
   updateSort(id: Int!, autosave: Boolean, data: mutationSortUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): Sort
   deleteSort(id: Int!, trash: Boolean): Sort
   duplicateSort(id: Int!, data: mutationSortInput!): Sort
+  createNestedRelation(data: mutationNestedRelationInput!, draft: Boolean, locale: LocaleInputType): NestedRelation
+  updateNestedRelation(id: Int!, autosave: Boolean, data: mutationNestedRelationUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): NestedRelation
+  deleteNestedRelation(id: Int!, trash: Boolean): NestedRelation
+  duplicateNestedRelation(id: Int!, data: mutationNestedRelationInput!): NestedRelation
   createPayloadKv(data: mutationPayloadKvInput!, draft: Boolean, locale: LocaleInputType): PayloadKv
   updatePayloadKv(id: Int!, autosave: Boolean, data: mutationPayloadKvUpdateInput!, draft: Boolean, locale: LocaleInputType, trash: Boolean): PayloadKv
   deletePayloadKv(id: Int!, trash: Boolean): PayloadKv
@@ -9173,6 +9725,32 @@ input mutationSortUpdateInput {
   createdAt: String
 }
 
+input mutationNestedRelationInput {
+  topLevelRelation: Int
+  array: [mutationNestedRelation_ArrayInput]
+  blocks: JSON
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationNestedRelation_ArrayInput {
+  link: Int
+  id: String
+}
+
+input mutationNestedRelationUpdateInput {
+  topLevelRelation: Int
+  array: [mutationNestedRelationUpdate_ArrayInput]
+  blocks: JSON
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationNestedRelationUpdate_ArrayInput {
+  link: Int
+  id: String
+}
+
 input mutationPayloadKvInput {
   key: String!
   data: JSON!
@@ -9210,6 +9788,7 @@ enum PayloadLockedDocument_DocumentRelationshipInputRelationTo {
   cyclical_relationship
   media
   sort
+  nested_relations
 }
 
 input PayloadLockedDocument_UserRelationshipInput {
@@ -9248,6 +9827,7 @@ enum PayloadLockedDocumentUpdate_DocumentRelationshipInputRelationTo {
   cyclical_relationship
   media
   sort
+  nested_relations
 }
 
 input PayloadLockedDocumentUpdate_UserRelationshipInput {
