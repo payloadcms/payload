@@ -38,5 +38,18 @@ describe('formatLabels', () => {
     it('should allow no separator (used for building GraphQL label from name)', () => {
       expect(toWords('myGraphField', true)).toBe('MyGraphField')
     })
+
+    it('should not throw on numeric input (Postgres relationship IDs from query presets)', () => {
+      expect(toWords(5)).toBe('5')
+    })
+
+    it('should render an array of numeric IDs the way QueryPresetsWhereCell does', () => {
+      expect([5, 12].map((val) => toWords(val)).join(' or ')).toBe('5 or 12')
+    })
+
+    it('should fall back to empty string for nullish input', () => {
+      expect(toWords(null)).toBe('')
+      expect(toWords(undefined)).toBe('')
+    })
   })
 })
