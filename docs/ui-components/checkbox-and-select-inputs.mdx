@@ -1,0 +1,59 @@
+---
+title: Checkbox and Select Inputs
+label: Checkbox and Select Inputs
+order: 103
+desc: Build custom boolean and option controls with Payload's CheckboxInput and SelectInput components.
+keywords: ui, components, checkbox input, select input, options, custom field
+---
+
+`CheckboxInput` and `SelectInput` provide the input-level controls used by Payload's Checkbox and Select fields. They are useful when a Custom Field needs standard Admin styling while controlling its own state.
+
+## Import
+
+```tsx
+import { CheckboxInput, SelectInput } from '@payloadcms/ui'
+```
+
+## CheckboxInput
+
+<ComponentPreview component="ChoiceInputs" example="checkbox" />
+
+Use `checked` and `onToggle` to control the value. Set `partialChecked` to display the indeterminate treatment used by list-selection interfaces.
+
+## SelectInput
+
+<ComponentPreview component="ChoiceInputs" example="select" />
+
+`SelectInput` wraps [`ReactSelect`](/docs/ui-components/react-select) with Payload's field label, description, and validation structure. Its controlled `value` contains the stored option value rather than the complete option object.
+
+## CheckboxInput props
+
+| Prop             | Type                                   | Default | Description                                |
+| ---------------- | -------------------------------------- | ------- | ------------------------------------------ |
+| `checked`        | `boolean`                              | `false` | Controls the checked state.                |
+| `onToggle` \*    | `ChangeEventHandler<HTMLInputElement>` | —       | Receives changes from the native checkbox. |
+| `label`          | `StaticLabel`                          | —       | Displays the checkbox label.               |
+| `partialChecked` | `boolean`                              | `false` | Displays the indeterminate treatment.      |
+| `readOnly`       | `boolean`                              | `false` | Disables interaction.                      |
+| `required`       | `boolean`                              | `false` | Marks the native input as required.        |
+
+## SelectInput props
+
+| Prop          | Type                   | Default | Description                                   |
+| ------------- | ---------------------- | ------- | --------------------------------------------- |
+| `name` \*     | `string`               | —       | Names the select input.                       |
+| `path` \*     | `string`               | —       | Identifies the field and connects its UI.     |
+| `options` \*  | `OptionObject[]`       | —       | Supplies the available translated options.    |
+| `value`       | `string \| string[]`   | —       | Supplies the selected stored value or values. |
+| `onChange`    | `ReactSelect.onChange` | —       | Receives the selected option object.          |
+| `hasMany`     | `boolean`              | `false` | Enables multiple values.                      |
+| `isSortable`  | `boolean`              | `true`  | Enables reordering in multi-value mode.       |
+| `isClearable` | `boolean`              | `true`  | Allows the selected value to be cleared.      |
+| `readOnly`    | `boolean`              | `false` | Disables interaction.                         |
+| `showError`   | `boolean`              | Form    | Displays the current validation error.        |
+
+_\* An asterisk denotes that a prop is required._
+
+## Provider requirements
+
+Both inputs use Payload's translation context. `SelectInput` also composes the standard field label, description, and error components, which can read the surrounding form context in a Custom Field.

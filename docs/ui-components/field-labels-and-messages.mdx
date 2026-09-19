@@ -1,0 +1,73 @@
+---
+title: Field Labels and Messages
+label: Field Labels and Messages
+order: 101
+desc: Add Payload field labels, descriptions, and validation messages to Custom Components.
+keywords: ui, components, field label, field description, field error, validation, custom field
+---
+
+`FieldLabel`, `FieldDescription`, and `FieldError` provide the supporting text and validation treatment used around inputs in the Payload Admin Panel. Use them when a Custom Field needs to match Payload's field structure without rendering one of the complete field components.
+
+## Import
+
+```tsx
+import { FieldDescription, FieldError, FieldLabel } from '@payloadcms/ui'
+```
+
+## Labels
+
+<ComponentPreview component="FieldChrome" example="labels" />
+
+This example places `FieldLabel` above a native input to show how it fits into a complete Custom Field. Connect the label to its input with `htmlFor`. When `htmlFor` is omitted, `FieldLabel` can derive the matching field ID from `path` inside Payload's form context.
+
+## Descriptions and errors
+
+<ComponentPreview component="FieldChrome" example="messages" />
+
+`FieldDescription` renders helper text below the control, while `FieldError` positions validation feedback against the same field. `FieldError` can receive `message` and `showError` directly, or read the current message and submitted state from Payload's form context.
+
+## Common props
+
+### FieldLabel
+
+| Prop         | Type                | Default   | Description                                       |
+| ------------ | ------------------- | --------- | ------------------------------------------------- |
+| `label`      | `StaticLabel`       | —         | Supplies the translated visible label.            |
+| `htmlFor`    | `string`            | Generated | Associates the label with an input.               |
+| `path`       | `string`            | —         | Generates the input ID when `htmlFor` is omitted. |
+| `required`   | `boolean`           | `false`   | Displays Payload's required marker.               |
+| `localized`  | `boolean`           | `false`   | Displays the active locale beside the label.      |
+| `hideLocale` | `boolean`           | `false`   | Hides the active locale label.                    |
+| `as`         | `React.ElementType` | `'label'` | Changes the rendered element.                     |
+| `unstyled`   | `boolean`           | `false`   | Removes Payload's label presentation.             |
+
+### FieldDescription
+
+| Prop              | Type                | Default | Description                                   |
+| ----------------- | ------------------- | ------- | --------------------------------------------- |
+| `description` \*  | `StaticDescription` | —       | Supplies translated helper content.           |
+| `path`            | `string`            | —       | Adds the field-specific description class.    |
+| `className`       | `string`            | —       | Adds a custom class.                          |
+| `marginPlacement` | `'bottom' \| 'top'` | —       | Applies Payload's standard description space. |
+
+### FieldError
+
+| Prop         | Type                | Default   | Description                                |
+| ------------ | ------------------- | --------- | ------------------------------------------ |
+| `path` \*    | `string`            | —         | Reads validation state for this form path. |
+| `message`    | `string`            | Form      | Overrides the message from form state.     |
+| `showError`  | `boolean`           | Form      | Forces the validation message to render.   |
+| `alignCaret` | `'left' \| 'right'` | `'right'` | Positions the validation tooltip caret.    |
+
+_\* An asterisk denotes that a prop is required._
+
+## Accessibility
+
+- Associate visible labels with their inputs.
+- Use descriptions for guidance, not essential validation errors.
+- Keep validation messages specific and explain how to correct the value.
+- Preserve `aria-describedby` and error associations when composing a complete custom input.
+
+## Provider requirements
+
+These components use Payload's translation context. `FieldLabel` can also read form, locale, and edit-depth context, while `FieldError` reads form validation state when explicit values are not supplied. Those providers are already present inside Admin Panel Custom Components.

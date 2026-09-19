@@ -1,0 +1,97 @@
+---
+title: Document State
+label: Document State
+order: 96
+desc: Communicate document locks, editing takeovers, and unsaved changes in the Payload Admin Panel.
+keywords: ui, components, document, state, locked, takeover, unsaved, leave without saving
+---
+
+Payload's document state components communicate editing conflicts and protect users from losing work. The Admin Panel renders these states automatically during its standard document workflow; use the exports when composing or replacing an Edit View experience.
+
+## Import
+
+```tsx
+import {
+  DocumentLocked,
+  DocumentTakeOver,
+  LeaveWithoutSaving,
+  Locked,
+} from '@payloadcms/ui'
+```
+
+## Lock indicator
+
+`Locked` displays the compact lock icon used when another user is editing a document. Its tooltip identifies that user when their email or ID is available.
+
+<ComponentPreview component="DocumentState" example="lockIndicator" />
+
+## Locked document
+
+`DocumentLocked` interrupts editing and gives the user three appropriate paths: return to the previous view, inspect the document without editing, or take over editing.
+
+<ComponentPreview component="DocumentState" example="lockedDocument" />
+
+The component opens while `isActive` is true. Supply callbacks for each navigation or takeover outcome; the component coordinates its own modal visibility and clears Payload's route cache when required.
+
+## Editing taken over
+
+`DocumentTakeOver` is shown to the previous editor after another user takes control of the document. It lets them return to the dashboard or continue in read-only mode.
+
+<ComponentPreview component="DocumentState" example="takenOver" />
+
+## Unsaved changes
+
+`LeaveWithoutSaving` watches the current document form and opens a confirmation modal when an authenticated user attempts to navigate away from modified or invalid content.
+
+```tsx
+<LeaveWithoutSaving
+  onConfirm={() => {
+    analytics.track('Left document with unsaved changes')
+  }}
+/>
+```
+
+Set `disablePreventLeave` when another part of a custom workflow temporarily owns navigation. Use `onPrevent` to observe the attempted destination and `onConfirm` for work that must happen after the user accepts leaving.
+
+## Common props
+
+These are the props most commonly used with this component family. See the exported types in `@payloadcms/ui` for the complete list.
+
+### Locked
+
+| Prop        | Type         | Default | Description                                 |
+| ----------- | ------------ | ------- | ------------------------------------------- |
+| `user` \*   | `ClientUser` | —       | Identifies the user currently editing.      |
+| `className` | `string`     | —       | Adds a class to the lock indicator wrapper. |
+
+### DocumentLocked
+
+| Prop              | Type                             | Default | Description                                     |
+| ----------------- | -------------------------------- | ------- | ----------------------------------------------- |
+| `isActive` \*     | `boolean`                        | —       | Opens or closes the locked-document modal.      |
+| `handleGoBack` \* | `() => void`                     | —       | Returns the user to the previous safe location. |
+| `onReadOnly` \*   | `() => void`                     | —       | Switches the document into read-only mode.      |
+| `onTakeOver` \*   | `() => void`                     | —       | Takes control of editing the document.          |
+| `updatedAt`       | `number \| null`                 | —       | Displays the locking editor's last activity.    |
+| `user`            | `ClientUser \| string \| number` | —       | Identifies the locking user.                    |
+
+### DocumentTakeOver
+
+| Prop                       | Type         | Default | Description                                    |
+| -------------------------- | ------------ | ------- | ---------------------------------------------- |
+| `isActive` \*              | `boolean`    | —       | Opens or closes the takeover modal.            |
+| `handleBackToDashboard` \* | `() => void` | —       | Returns the previous editor to the dashboard.  |
+| `onReadOnly` \*            | `() => void` | —       | Continues with the document in read-only mode. |
+
+_\* An asterisk denotes that a prop is required._
+
+## Accessibility
+
+- Preserve the built-in modal focus management when composing conflict states.
+- Identify the other editor when that information can be shown safely.
+- Keep read-only and takeover actions explicit; they have meaning beyond ordinary navigation.
+- Do not rely on the lock icon alone when the editing conflict needs an explanation.
+
+## Provider requirements
+
+These components depend on the document, form, authentication, translation, modal, route-cache, and route-transition contexts supplied by the Admin Panel. They are intended for Custom Components rendered within Payload's document workflow, not standalone application status messages.
