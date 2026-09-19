@@ -48,6 +48,7 @@ export const findVersions: FindVersions = async function findVersions(
       locale,
       sort: sortArg || '-updatedAt',
       timestamps: true,
+      versions: true,
     })
   }
 
