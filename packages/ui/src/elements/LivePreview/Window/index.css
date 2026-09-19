@@ -1,5 +1,13 @@
 @layer payload-default {
-  .collection-edit:has(.live-preview-window--is-expanded) {
+  /* Collapse the fields only while the expanded preview is actually on-screen
+     (both classes present). When the preview is hidden — e.g. moved to a popup
+     via "open in new window", which sets `isLivePreviewing` false but leaves
+     `isExpanded` true — the fields must keep their width, otherwise both the
+     preview (display: none) and the fields (width: 0) vanish and the doc layout
+     collapses. */
+  .collection-edit:has(
+      .live-preview-window--is-expanded.live-preview-window--is-live-previewing
+    ) {
     .document-fields {
       width: 0;
     }
