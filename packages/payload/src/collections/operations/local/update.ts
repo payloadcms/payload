@@ -250,6 +250,9 @@ async function updateLocal<
   }
 
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+
+  // Preserve any existing file on the request (e.g., from outer hook) before overwriting
+  const __originalReqFile = req.file
   req.file = file ?? (await getFileByPath(filePath!))
 
   const args = {
@@ -276,12 +279,21 @@ async function updateLocal<
     where,
   }
 
+  let operationResult
   if (options.id) {
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    return updateByIDOperation<TSlug, TSelect>(args)
+    operationResult = await updateByIDOperation<TSlug, TSelect>(args)
+  } else {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    operationResult = await updateOperation<TSlug, TSelect>(args)
   }
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  return updateOperation<TSlug, TSelect>(args)
+
+  // Restore original request file if it existed before this operation
+  if (typeof __originalReqFile !== 'undefined') {
+    req.file = __originalReqFile
+  }
+
+  return operationResult
 }
 
 export { updateLocal }
