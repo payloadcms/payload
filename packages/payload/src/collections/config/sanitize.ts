@@ -28,6 +28,7 @@ import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints, duplicateEndpoint } from '../endpoints/index.js'
 import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
+import { validateListSearchableFields } from './listSearchableFields.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -382,6 +383,7 @@ export const sanitizeCollection = (
   }
 
   validateUseAsTitle(sanitized)
+  validateListSearchableFields(sanitized)
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
