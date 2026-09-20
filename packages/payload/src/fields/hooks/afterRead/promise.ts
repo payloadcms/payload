@@ -544,15 +544,14 @@ export const promise = async ({
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 
-          const { blockSelect, blockSelectMode } = getBlockSelect({
-            block: block!,
-            // TODO: fix this
-            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-            select: select?.[field.name]!,
-            selectMode: selectMode!,
-          })
-
           if (block) {
+            const { blockSelect, blockSelectMode } = getBlockSelect({
+              block,
+              // TODO: fix this
+              // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+              select: select?.[field.name]!,
+              selectMode: selectMode!,
+            })
             traverseFields({
               blockData: row,
               collection,
