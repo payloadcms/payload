@@ -387,7 +387,7 @@ export const promise = async ({
               ? fieldLabelPath
               : buildFieldLabel(
                   fieldLabelPath,
-                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${req.t('fields:block')} ${rowIndex + 1} (${getTranslatedLabel(block?.labels?.singular || blockTypeToMatch, req.i18n)})`,
+                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} > ${req.t('fields:block')} ${rowIndex + 1} (${getTranslatedLabel(block?.labels?.singular || blockTypeToMatch || 'unknown', req.i18n)})`,
                 )
 
           if (block) {
@@ -420,6 +420,14 @@ export const promise = async ({
                 submittedTopLevelFieldNames,
               }),
             )
+          } else if (!skipValidationFromHere) {
+            errors.push({
+              label: blockLabelPath,
+              message: req.t('validation:invalidBlock', {
+                block: blockTypeToMatch || 'unknown',
+              }),
+              path: `${path}.${rowIndex}.id`,
+            })
           }
         })
 
