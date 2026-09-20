@@ -111,13 +111,16 @@ export const Condition: React.FC<Props> = (props) => {
   )
 
   const handleOperatorChange = useCallback(
-    async (operator: Option<Operator>) => {
+    async (nextOperator: Option<Operator>) => {
       const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
-      const validOperatorValue = operatorValueTypes[operator.value] || 'any'
+      const validOperatorValue = operatorValueTypes[nextOperator.value] || 'any'
+      // `exists` stores 'true' / 'false', which no other operator can use
+      const leavingExists = operator === 'exists' && nextOperator.value !== 'exists'
       const isValidValue =
-        validOperatorValue === 'any' ||
-        typeof value === validOperatorValue ||
-        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
+        !leavingExists &&
+        (validOperatorValue === 'any' ||
+          typeof value === validOperatorValue ||
+          (validOperatorValue === 'boolean' && (value === 'true' || value === 'false')))
 
       if (!isValidValue) {
         // if the current value is not valid for the new operator
@@ -129,12 +132,12 @@ export const Condition: React.FC<Props> = (props) => {
         type: 'operator',
         andIndex,
         field: reducedField,
-        operator: operator.value,
+        operator: nextOperator.value,
         orIndex,
         value: isValidValue ? value : undefined,
       })
     },
-    [andIndex, reducedField, orIndex, updateCondition, value],
+    [andIndex, operator, reducedField, orIndex, updateCondition, value],
   )
 
   return (
