@@ -240,9 +240,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
     if (!cartID) {
       return
     }
-    const updatedCart = await getCart(cartID)
+    const updatedCart = await getCart(cartID, { secret: cartSecret })
     setCart(updatedCart)
-  }, [cartID, getCart])
+  }, [cartID, cartSecret, getCart])
 
   // Persist cart ID and secret to localStorage
   useEffect(() => {
