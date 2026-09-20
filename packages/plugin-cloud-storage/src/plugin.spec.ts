@@ -150,6 +150,27 @@ const adapter = () => ({
 })
 
 describe('cloudStoragePlugin', () => {
+  it('should insert the same fields when alwaysInsertFields is true', () => {
+    const createConfig = (enabled: boolean) =>
+      cloudStoragePlugin({
+        alwaysInsertFields: true,
+        collections: {
+          media: { adapter },
+        },
+        enabled,
+      } as any)({
+        collections: [{ fields: [], slug: 'media', upload: true }],
+      } as any)
+
+    const enabledFields = createConfig(true).collections?.[0]?.fields || []
+    const disabledFields = createConfig(false).collections?.[0]?.fields || []
+    const fieldNames = (fields: typeof enabledFields) =>
+      fields.map((field) => ('name' in field ? field.name : undefined))
+
+    expect(fieldNames(enabledFields)).toEqual(fieldNames(disabledFields))
+    expect(fieldNames(enabledFields)).toContain('prefix')
+  })
+
   it('should normalize a stored prefix during a server-mediated upload', async () => {
     const config = cloudStoragePlugin({
       collections: {
