@@ -1,5 +1,8 @@
+import type { GraphQLInputObjectType } from 'graphql'
 import type { Payload } from 'payload'
 
+import { configToSchema } from '@payloadcms/graphql'
+import { GraphQLNonNull } from 'graphql'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -291,6 +294,18 @@ query {
         .then((res) => res.json())
 
       expect(afterDelete.errors).toBeUndefined()
+    })
+
+    describe('nullable schema types', () => {
+      it('should not mark required virtual fields as non-null in the mutation input type', () => {
+        const { schema } = configToSchema(payload.config)
+        const inputType = schema.getType('mutationVirtualFieldInput') as GraphQLInputObjectType
+        const fields = inputType.getFields()
+
+        expect(fields.requiredTitle!.type instanceof GraphQLNonNull).toBe(true)
+        expect(fields.virtualComputed!.type instanceof GraphQLNonNull).toBe(false)
+        expect(fields.virtualFromRelation!.type instanceof GraphQLNonNull).toBe(false)
+      })
     })
   })
 })
