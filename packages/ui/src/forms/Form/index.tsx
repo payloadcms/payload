@@ -57,8 +57,10 @@ import {
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { shouldApplyInitialState } from './shouldApplyInitialState.js'
 
 const baseClass = 'form'
+const unappliedDocumentId = Symbol('unapplied-initial-state')
 
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
@@ -171,6 +173,9 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
+  const appliedDocumentIdRef = useRef<typeof id | symbol>(unappliedDocumentId)
+  const modifiedRef = useRef(modified)
+  modifiedRef.current = modified
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -809,16 +814,33 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [submittedFromProps])
 
   useEffect(() => {
-    if (initialState) {
-      contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({
-        type: 'REPLACE_STATE',
-        optimize: false,
-        sanitize: true,
-        state: initialState,
-      })
+    if (!initialState) {
+      return
     }
-  }, [initialState, dispatchFields])
+
+    const alreadyApplied = appliedDocumentIdRef.current !== unappliedDocumentId
+    const documentChanged = alreadyApplied && appliedDocumentIdRef.current !== id
+
+    if (
+      !shouldApplyInitialState({
+        alreadyApplied,
+        documentChanged,
+        hasInitialState: true,
+        modified: modifiedRef.current,
+      })
+    ) {
+      return
+    }
+
+    appliedDocumentIdRef.current = id
+    contextRef.current = { ...initContextState } as FormContextType
+    dispatchFields({
+      type: 'REPLACE_STATE',
+      optimize: false,
+      sanitize: true,
+      state: initialState,
+    })
+  }, [initialState, dispatchFields, id])
 
   useThrottledEffect(
     () => {
