@@ -115,6 +115,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const [submitted, setSubmitted] = useState(false)
   const [successfulSubmitCount, setSuccessfulSubmitCount] = useState(0)
 
+  const [formStateRefreshCounter, setFormStateRefreshCounter] = useState(0)
+
   /**
    * Tracks wether the form state passes validation.
    * For example the state could be submitted but invalid as field errors have been returned.
@@ -179,6 +181,11 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.fields = formState
 
   const prevFormState = useRef(formState)
+  const prevFormStateRefreshCounter = useRef(formStateRefreshCounter)
+
+  const requestFormStateRefresh = useCallback(() => {
+    setFormStateRefreshCounter((current) => current + 1)
+  }, [])
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -783,6 +790,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.formRef = formRef
   contextRef.current.reset = reset
   contextRef.current.replaceState = replaceState
+  contextRef.current.requestFormStateRefresh = requestFormStateRefresh
   contextRef.current.dispatchFields = dispatchFields
   contextRef.current.addFieldRow = addFieldRow
   contextRef.current.removeFieldRow = removeFieldRow
@@ -865,14 +873,20 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+      const hasFormStateChanged =
+        isFirstRenderRef.current || !dequal(formState, prevFormState.current)
+      const hasRequestedFormStateRefresh =
+        formStateRefreshCounter !== prevFormStateRefreshCounter.current
+
+      if ((hasFormStateChanged && modified) || hasRequestedFormStateRefresh) {
         executeOnChange(submitted)
       }
 
       prevFormState.current = formState
+      prevFormStateRefreshCounter.current = formStateRefreshCounter
       isFirstRenderRef.current = false
     },
-    [modified, submitted, formState],
+    [modified, submitted, formState, formStateRefreshCounter],
     250,
   )
 
