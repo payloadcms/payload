@@ -19,12 +19,21 @@ export const isPathMatchingRoute = ({
 
   const keys = []
 
-  const regex = pathToRegexp(viewPath, keys, {
-    sensitive,
-    strict,
-  })
+  // A view path that is not a valid path-to-regexp pattern (e.g. a stray ":")
+  // makes pathToRegexp throw, which would crash the whole admin render since
+  // this runs inside route-matching `.find` callbacks. Treat an unparseable
+  // pattern as a literal string and fall back to plain comparison.
+  let match: null | RegExpExecArray = null
 
-  const match = regex.exec(currentRoute)
+  try {
+    match = pathToRegexp(viewPath, keys, {
+      sensitive,
+      strict,
+    }).exec(currentRoute)
+  } catch {
+    match = null
+  }
+
   const viewRoute = match?.[0] || viewPath
 
   if (exact) {
