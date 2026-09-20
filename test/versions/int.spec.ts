@@ -35,6 +35,7 @@ import {
   draftWithUploadCollectionSlug,
   errorOnUnpublishSlug,
   localizedCollectionSlug,
+  nestedArraySelectCollectionSlug,
   localizedGlobalSlug,
   restoreAccessCollectionSlug,
   restoreAccessGlobalSlug,
@@ -1292,6 +1293,29 @@ describe('Versions', () => {
 
         await cleanupDocuments({
           collectionSlugs: [autosaveWithMultiSelectCollectionSlug],
+          payload,
+        })
+      })
+
+      it('should save draft with hasMany select nested two array levels deep', async () => {
+        const doc = await payload.create({
+          collection: nestedArraySelectCollectionSlug,
+          data: {},
+        })
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: nestedArraySelectCollectionSlug,
+          data: {
+            outer: [{ inner: [{ days: ['monday'] }] }],
+          },
+          draft: true,
+        })
+
+        expect(updated.outer?.[0]?.inner?.[0]?.days).toEqual(['monday'])
+
+        await cleanupDocuments({
+          collectionSlugs: [nestedArraySelectCollectionSlug],
           payload,
         })
       })
