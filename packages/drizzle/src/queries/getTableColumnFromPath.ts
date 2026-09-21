@@ -13,12 +13,12 @@ import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError, getFieldByPath } from 'payload'
 import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
-import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { isPostgresUUID } from '../utilities/isPostgresUUID.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { jsonBuildObject } from '../utilities/json.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
@@ -769,8 +769,8 @@ export const getTableColumnFromPath = ({
                   return null
                 }
 
-                // Do not add the UUID type column if incoming query value doesn't match UUID. If there aren't any collections with
-                // a custom ID type, we skip this check
+                // Do not add the UUID type column if the incoming query value cannot be bound to a uuid column.
+                // If there aren't any collections with a custom ID type, we skip this check.
                 // We need this because Postgres throws an error if querying by UUID column with a value that isn't a valid UUID.
                 if (
                   value &&
@@ -778,7 +778,7 @@ export const getTableColumnFromPath = ({
                   idType === 'uuid' &&
                   hasCustomCollectionWithCustomID
                 ) {
-                  if (!uuidValidate(value)) {
+                  if (!isPostgresUUID(value)) {
                     return null
                   }
                 }
@@ -787,7 +787,7 @@ export const getTableColumnFromPath = ({
                   Array.isArray(value) &&
                   idType === 'uuid' &&
                   hasCustomCollectionWithCustomID &&
-                  !value.some((val) => uuidValidate(val))
+                  !value.some((val) => isPostgresUUID(val))
                 ) {
                   return null
                 }
