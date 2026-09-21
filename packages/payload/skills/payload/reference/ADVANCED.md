@@ -123,6 +123,7 @@ await req.payload.jobs.queue({
     userEmail: 'user@example.com',
     userName: 'John',
   },
+  overrideAccess: true,
   waitUntil: new Date('2024-12-31'), // Optional: schedule for future
 })
 ```

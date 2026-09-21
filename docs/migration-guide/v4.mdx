@@ -100,12 +100,12 @@ Review the results afterwards. Leave the property off, or set it to `overrideAcc
 Run a typecheck after the codemod. Three patterns it cannot resolve:
 
 - **Spread arguments** — `payload.find({ ...args })`. The codemod cannot tell whether `args` already supplies the property.
-- **Aliased receivers** — `const db = payload; db.find({ ... })`. It matches `payload` and `.payload` only.
-- **Casts** — anything reaching the operation through `as any`.
+- **Aliased or cast receivers** — `const db = payload; db.find({ ... })` and `(payload as any).find({ ... })`. It matches `payload`, `.payload`, and their `.jobs` properties only.
+- **Non-literal arguments** — `payload.find(options)`. The codemod cannot safely modify the value at the call site.
 
-#### The jobs queue is unchanged
+#### Jobs operations use the same default
 
-`payload.jobs.queue`, `run`, `runByID`, `cancel`, and `cancelByID` keep their Payload 3 behavior. `overrideAccess` stays optional on those methods and still defaults to `true`. Migrating your collection, global, and auth calls does not cover your jobs calls.
+`payload.jobs.queue`, `run`, `runByID`, `cancel`, and `cancelByID` now also default `overrideAccess` to `false`. The option remains optional, but omitting it runs the corresponding `jobs.access.queue`, `jobs.access.run`, or `jobs.access.cancel` function. The codemod adds `overrideAccess: true` to these calls—including zero-argument `payload.jobs.run()` calls—to preserve Payload 3 behavior for review.
 
 ### Collection and Global Access Control callbacks receive `slug`
 
@@ -1219,9 +1219,11 @@ And update any `$ref` pointers you wrote by hand to point at `$defs`:
 
 Do not keep your additions on `definitions` while new ones land on `$defs`.
 
-### Jobs: generic collection access is denied by default
+### Jobs: access is enforced by default
 
-The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations that use `overrideAccess: false`. Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, and `payload.jobs.cancel()` continue to work as before.
+The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations because `overrideAccess` now defaults to `false`.
+
+Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, `payload.jobs.runByID()`, `payload.jobs.cancel()`, and `payload.jobs.cancelByID()` also default `overrideAccess` to `false`. They now run the corresponding `jobs.access.queue`, `jobs.access.run`, or `jobs.access.cancel` function when the option is omitted. Add `overrideAccess: true` to trusted server-side calls that must preserve the Payload 3 behavior of bypassing Jobs access control.
 
 If your application intentionally exposes the internal payload-jobs collection, configure only the access it needs through `jobsCollectionOverrides`. For example, the following enables read-only Admin Panel access for trusted administrators:
 

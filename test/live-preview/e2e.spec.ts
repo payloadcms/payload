@@ -317,7 +317,7 @@ describe('Live Preview', () => {
 
     test.afterEach(async () => {
       for (const id of documentIDs) {
-        await payload.delete({ id, collection: forbiddenURLSlug })
+        await payload.delete({ id, collection: forbiddenURLSlug, overrideAccess: true })
       }
       documentIDs.length = 0
     })
@@ -327,6 +327,7 @@ describe('Live Preview', () => {
       const doc = await payload.create({
         collection: forbiddenURLSlug,
         data: {},
+        overrideAccess: true,
       })
 
       documentIDs.push(doc.id)

@@ -237,6 +237,7 @@ test.suite({ config: './config.schedules.ts' })(
             input: {
               message: 'This task runs every second',
             },
+            overrideAccess: true,
           })
         }
         for (let i = 0; i < 3; i++) {
@@ -271,6 +272,7 @@ test.suite({ config: './config.schedules.ts' })(
             input: {
               message: 'This task runs every second - max 2 per second',
             },
+            overrideAccess: true,
           })
         }
         for (let i = 0; i < 3; i++) {
@@ -283,6 +285,7 @@ test.suite({ config: './config.schedules.ts' })(
       await payload.jobs.run({
         limit: 100,
         silent: true,
+        overrideAccess: true,
       })
 
       const allSimples = await payload.find({
@@ -309,6 +312,7 @@ test.suite({ config: './config.schedules.ts' })(
       // default queue is not scheduled to autorun
       await payload.jobs.run({
         silent: true,
+        overrideAccess: true,
       })
 
       const allSimples = await payload.find({
@@ -366,6 +370,7 @@ test.suite({ config: './config.schedules.ts' })(
         // default queue is not scheduled to autorun => run manually
         await payload.jobs.run({
           silent: true,
+          overrideAccess: true,
         })
       }
 

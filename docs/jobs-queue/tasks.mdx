@@ -383,10 +383,11 @@ After a task fails, you can inspect the job to understand what went wrong:
 const job = await payload.jobs.queue({
   task: 'processPayment',
   input: { orderId: '123', amount: 100 },
+  overrideAccess: true,
 })
 
 // Run the job
-await payload.jobs.run()
+await payload.jobs.run({ overrideAccess: true })
 
 // Check the job status
 const completedJob = await payload.findByID({

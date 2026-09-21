@@ -58,12 +58,12 @@ describe('Auth', () => {
 
       await payload.delete({
         collection: slug,
+        overrideAccess: true,
         where: {
           email: {
             exists: true,
           },
         },
-        overrideAccess: true,
       })
     })
 
@@ -175,8 +175,8 @@ describe('Auth', () => {
         const { docs } = await payload.find({
           collection: slug,
           limit: 1,
-          where: { email: { equals: devUser.email } },
           overrideAccess: true,
+          where: { email: { equals: devUser.email } },
         })
 
         await payload.update({
@@ -331,8 +331,8 @@ describe('Auth', () => {
           const lockedDocs = await payload.find({
             collection: 'payload-locked-documents',
             limit: 1,
-            pagination: false,
             overrideAccess: true,
+            pagination: false,
           })
 
           return lockedDocs.docs.length

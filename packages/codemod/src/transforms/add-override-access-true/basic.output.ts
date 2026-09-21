@@ -31,3 +31,9 @@ const scoped = await payload.find({
   collection: 'posts',
   overrideAccess: false,
 })
+
+// Jobs Local API operations also relied on the Payload 3 default
+await payload.jobs.queue({ input: {}, task: 'sync', overrideAccess: true })
+await req.payload.jobs.run({ silent: true, overrideAccess: true })
+await payload.jobs.run({ overrideAccess: true })
+await payload.jobs.queue({ input: {}, task: 'sync', overrideAccess: true } as never)

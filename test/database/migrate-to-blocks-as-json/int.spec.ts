@@ -327,10 +327,10 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
 
     const updatedGlobalVersions = await migratedPayload.findGlobalVersions({
       slug: 'global-versioned',
-      depth: 0,
       limit: 0,
-      overrideAccess: true,
       sort: 'createdAt',
+      depth: 0,
+      overrideAccess: true,
     })
 
     expect(updatedGlobalVersions.totalDocs).toBe(2)

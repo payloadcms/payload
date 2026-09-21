@@ -83,8 +83,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
   test.afterEach(async ({ payload }) => {
     await payload.delete({
       collection: 'payload-jobs',
-      where: {},
       overrideAccess: true,
+      where: {},
     })
   })
 
@@ -132,12 +132,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         // Get versions
         const versions = await payload.findVersions({
           collection: autosaveCollectionSlug,
+          overrideAccess: true,
           where: {
             parent: {
               equals: autosavePost.id,
             },
           },
-          overrideAccess: true,
         })
 
         const updatedPost = await payload.findByID({
@@ -208,12 +208,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         // Get the version ID
         const versions = await payload.findVersions({
           collection: autosaveCollectionSlug,
+          overrideAccess: true,
           where: {
             parent: {
               equals: autosavePost.id,
             },
           },
-          overrideAccess: true,
         })
 
         const versionID = versions.docs[0].id
@@ -277,12 +277,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const versions = await payload.findVersions({
           collection: autosaveCollectionSlug,
           locale: 'all',
+          overrideAccess: true,
           where: {
             parent: {
               equals: autosavePost.id,
             },
           },
-          overrideAccess: true,
         })
 
         expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle)
@@ -312,6 +312,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const query = {
           collection: draftCollectionSlug,
+          overrideAccess: true,
           where: {
             relation: {
               equals: draftPost.id,
@@ -349,6 +350,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           docs: [latestVersionData],
         } = await payload.findVersions({
           collection: autosaveCollectionSlug,
+          overrideAccess: true,
           where: {
             and: [
               {
@@ -361,7 +363,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
               },
             ],
           },
-          overrideAccess: true,
         })
 
         // Version itself should have new createdAt
@@ -410,8 +411,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         } = await payload.findVersions({
           collection: 'localized-posts',
           depth: 0,
-          where: { parent: { equals: res.id } },
           overrideAccess: true,
+          where: { parent: { equals: res.id } },
         })
         expect(resFromVersions?.version.blocks[0]?.array[0]?.relationship).toEqual(post.id)
       })
@@ -436,10 +437,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const getVersionsCount = async () => {
           const { totalDocs: versionsCount } = await payload.countVersions({
             collection: 'autosave-posts',
+            overrideAccess: true,
             where: {
               parent: { equals: post.id },
             },
-            overrideAccess: true,
           })
 
           return versionsCount
@@ -465,8 +466,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           collection: 'autosave-posts',
           data: { title: 'post-updated-2' },
           draft: true,
-          where: { id: { equals: post.id } },
           overrideAccess: true,
+          where: { id: { equals: post.id } },
         })
         expect(await getVersionsCount()).toBe(2)
       })
@@ -497,11 +498,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const { docs: latestVersions } = await payload.findVersions({
           collection: autosaveCollectionSlug,
           limit: 1,
+          overrideAccess: true,
           sort: '-updatedAt',
           where: {
             and: [{ parent: { equals: published.id } }, { latest: { equals: true } }],
           },
-          overrideAccess: true,
         })
 
         expect(latestVersions).toHaveLength(1)
@@ -532,8 +533,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const countAfterFirst = await payload.countVersions({
           collection: autosaveCollectionSlug,
-          where: { parent: { equals: published.id } },
           overrideAccess: true,
+          where: { parent: { equals: published.id } },
         })
 
         // Second autosave should update the existing draft, NOT create a new one
@@ -548,8 +549,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const countAfterSecond = await payload.countVersions({
           collection: autosaveCollectionSlug,
-          where: { parent: { equals: published.id } },
           overrideAccess: true,
+          where: { parent: { equals: published.id } },
         })
 
         expect(countAfterSecond.totalDocs).toBe(countAfterFirst.totalDocs)
@@ -566,8 +567,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const countAfterThird = await payload.countVersions({
           collection: autosaveCollectionSlug,
-          where: { parent: { equals: published.id } },
           overrideAccess: true,
+          where: { parent: { equals: published.id } },
         })
 
         expect(countAfterThird.totalDocs).toBe(countAfterFirst.totalDocs)
@@ -576,9 +577,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const { docs } = await payload.findVersions({
           collection: autosaveCollectionSlug,
           limit: 1,
+          overrideAccess: true,
           sort: '-updatedAt',
           where: { parent: { equals: published.id } },
-          overrideAccess: true,
         })
 
         expect(docs[0].version.title).toBe('Change 3')
@@ -596,8 +597,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         const docWithLocales = await payload.findByID({
-          collection,
           id: post.id,
+          collection,
           locale: 'all',
           overrideAccess: true,
         })
@@ -620,28 +621,36 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const originalDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
+            _status: 'published',
             description: 'Original description',
             title: 'Original Title',
-            _status: 'published',
           },
           draft: false,
           overrideAccess: true,
         })
 
         const duplicatedDoc = await payload.create({
-          duplicateFromID: originalDoc.id,
           collection: draftCollectionSlug,
           data: {
             _status: 'draft',
           },
           draft: true,
+          duplicateFromID: originalDoc.id,
           overrideAccess: true,
         })
 
         expect(duplicatedDoc._status).toBe('draft')
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id, overrideAccess: true })
-        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id, overrideAccess: true })
+        await payload.delete({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        await payload.delete({
+          id: duplicatedDoc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
       })
 
       test('should duplicate a draft document with empty required fields via local API', async ({
@@ -650,8 +659,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const originalDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
-            title: 'Draft with partial data',
             _status: 'draft',
+            title: 'Draft with partial data',
           },
           draft: true,
           overrideAccess: true,
@@ -669,8 +678,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(duplicatedDoc.id).not.toEqual(originalDoc.id)
         expect(duplicatedDoc.title).toContain('Draft with partial data')
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id, overrideAccess: true })
-        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id, overrideAccess: true })
+        await payload.delete({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        await payload.delete({
+          id: duplicatedDoc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
       })
 
       test('should duplicate a draft document with empty required fields via REST API without explicit draft param', async ({
@@ -680,8 +697,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const originalDoc = await payload.create({
           collection: draftCollectionSlug,
           data: {
-            title: 'REST draft partial',
             _status: 'draft',
+            title: 'REST draft partial',
           },
           draft: true,
           overrideAccess: true,
@@ -702,8 +719,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(doc._status).toBe('draft')
         expect(doc.id).not.toEqual(originalDoc.id)
 
-        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id, overrideAccess: true })
-        await payload.delete({ collection: draftCollectionSlug, id: doc.id, overrideAccess: true })
+        await payload.delete({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
+        await payload.delete({ id: doc.id, collection: draftCollectionSlug, overrideAccess: true })
       })
     })
 
@@ -717,8 +738,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const versionsPage2 = await payload.findVersions({
           collection: draftCollectionSlug,
           limit: 5,
-          page: 2,
           overrideAccess: true,
+          page: 2,
         })
 
         expect(versions.docs).toHaveLength(5)
@@ -733,15 +754,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const draftsAscending = await payload.find({
           collection: draftCollectionSlug,
           draft: true,
-          sort: 'title',
           overrideAccess: true,
+          sort: 'title',
         })
 
         const draftsDescending = await payload.find({
           collection: draftCollectionSlug,
           draft: true,
-          sort: '-title',
           overrideAccess: true,
+          sort: '-title',
         })
 
         expect(draftsAscending).toBeDefined()
@@ -756,16 +777,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           collection: draftCollectionSlug,
           draft: true,
           limit: 100,
-          sort: 'createdAt',
           overrideAccess: true,
+          sort: 'createdAt',
         })
 
         const draftsDescending = await payload.findVersions({
           collection: draftCollectionSlug,
           draft: true,
           limit: 100,
-          sort: '-createdAt',
           overrideAccess: true,
+          sort: '-createdAt',
         })
 
         expect(draftsAscending).toBeDefined()
@@ -783,13 +804,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         for (let i = 0; i < 100; i++) {
-          await payload.update({ collection: draftCollectionSlug, id: doc.id, data: {}, overrideAccess: true })
+          await payload.update({
+            id: doc.id,
+            collection: draftCollectionSlug,
+            data: {},
+            overrideAccess: true,
+          })
         }
         const res = await payload.findVersions({
           collection: draftCollectionSlug,
           limit: 0,
-          where: { parent: { equals: doc.id } },
           overrideAccess: true,
+          where: { parent: { equals: doc.id } },
         })
         expect(res.docs).toHaveLength(101)
       })
@@ -824,10 +850,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const versions = await payload.findVersions({
           collection: draftCollectionSlug,
+          overrideAccess: true,
           where: {
             parent: { equals: somePost.id },
           },
-          overrideAccess: true,
         })
 
         expect(versions.docs[0]!.version.title).toBe(updatedPost.title)
@@ -899,12 +925,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const versions = await payload.findVersions({
           collection: draftCollectionSlug,
+          overrideAccess: true,
           where: {
             parent: {
               equals: versionedPost.id,
             },
           },
-          overrideAccess: true,
         })
 
         const versionToRestore = versions.docs[versions.docs.length - 1]
@@ -971,8 +997,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const versions = await payload.findVersions({
           collection: draftCollectionSlug,
-          where: { parent: { equals: doc.id } },
           overrideAccess: true,
+          where: { parent: { equals: doc.id } },
         })
 
         const versionToRestore = versions.docs[versions.docs.length - 1]
@@ -997,7 +1023,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(restored.relationWithFilterOptions).toStrictEqual([target.id])
 
         await payload.delete({ id: doc.id, collection: draftCollectionSlug, overrideAccess: true })
-        await payload.delete({ id: target.id, collection: draftCollectionSlug, overrideAccess: true })
+        await payload.delete({
+          id: target.id,
+          collection: draftCollectionSlug,
+          overrideAccess: true,
+        })
       })
 
       test('should not copy current document fields into restored version', async ({ payload }) => {
@@ -1045,8 +1075,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         // Find versions and restore the original (oldest) version
         const versions = await payload.findVersions({
           collection: draftCollectionSlug,
-          where: { parent: { equals: doc.id } },
           overrideAccess: true,
+          where: { parent: { equals: doc.id } },
         })
 
         const originalVersion = versions.docs[versions.docs.length - 1]
@@ -1101,12 +1131,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       // get the version id of the original draft
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
+        overrideAccess: true,
         where: {
           parent: {
             equals: originalPost.id,
           },
         },
-        overrideAccess: true,
       })
 
       // restore the version
@@ -1157,12 +1187,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
+        overrideAccess: true,
         where: {
           parent: {
             equals: originalPost.id,
           },
         },
-        overrideAccess: true,
       })
 
       const oldestVersion = versions.docs[versions.docs.length - 1]
@@ -1185,20 +1215,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         overrideAccess: true,
       })
       for (let i = 0; i < 100; i++) {
-        await payload.update({ id: post.id, collection: draftCollectionSlug, data: {}, overrideAccess: true })
+        await payload.update({
+          id: post.id,
+          collection: draftCollectionSlug,
+          data: {},
+          overrideAccess: true,
+        })
       }
       const res = await payload.findVersions({
         collection: draftCollectionSlug,
-        where: { parent: { equals: post.id } },
         overrideAccess: true,
+        where: { parent: { equals: post.id } },
       })
       expect(res.totalDocs).toBe(101)
       expect(res.docs).toHaveLength(10)
       const resPaginationFalse = await payload.findVersions({
         collection: draftCollectionSlug,
+        overrideAccess: true,
         pagination: false,
         where: { parent: { equals: post.id } },
-        overrideAccess: true,
       })
 
       expect(resPaginationFalse.docs).toHaveLength(101)
@@ -1207,9 +1242,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const resPaginationFalseLimit0 = await payload.findVersions({
         collection: draftCollectionSlug,
         limit: 0,
+        overrideAccess: true,
         pagination: false,
         where: { parent: { equals: post.id } },
-        overrideAccess: true,
       })
       expect(resPaginationFalseLimit0.docs).toHaveLength(101)
       expect(resPaginationFalseLimit0.totalDocs).toBe(101)
@@ -1408,12 +1443,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const lastDocVersion = await payload.findVersions({
           collection: autosaveWithMultiSelectCollectionSlug,
           limit: 1,
+          overrideAccess: true,
           where: {
             parent: {
               equals: doc.id,
             },
           },
-          overrideAccess: true,
         })
         expect(lastDocVersion.docs[0]?.version.tag).toEqual(firstDocTag)
 
@@ -1476,15 +1511,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           collection: draftCollectionSlug,
           data: { _status: 'published' },
           draft: true,
+          overrideAccess: true,
           where: {
             id: { equals: doc.id },
           },
-          overrideAccess: true,
         })
 
         expect(updateManyResult.docs).toHaveLength(0)
         expect(updateManyResult.errors).toStrictEqual([
-          { id: doc.id, message: 'The following field is invalid: Group > Title', isPublic: true },
+          { id: doc.id, isPublic: true, message: 'The following field is invalid: Group > Title' },
         ])
       })
 
@@ -1511,12 +1546,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const versionsCount = await payload.countVersions({
           collection: autosaveCollectionSlug,
+          overrideAccess: true,
           where: {
             parent: {
               equals: id,
             },
           },
-          overrideAccess: true,
         })
 
         // This should not create a new version
@@ -1533,12 +1568,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const versionsCountAfter = await payload.countVersions({
           collection: autosaveCollectionSlug,
+          overrideAccess: true,
           where: {
             parent: {
               equals: id,
             },
           },
-          overrideAccess: true,
         })
 
         expect(versionsCount.totalDocs).toBe(versionsCountAfter.totalDocs)
@@ -1592,12 +1627,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'updated description',
           },
           draft: true,
+          overrideAccess: true,
           where: {
             id: {
               in: [doc.id],
             },
           },
-          overrideAccess: true,
         })
 
         const updatedDoc = updated.docs?.[0]
@@ -1605,10 +1640,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         // get the published doc
         const findResult = await payload.find({
           collection: draftCollectionSlug,
+          overrideAccess: true,
           where: {
             id: { equals: doc.id },
           },
-          overrideAccess: true,
         })
 
         const findDoc = findResult.docs?.[0]
@@ -1643,10 +1678,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         await payload.delete({
           collection: autosaveCollectionSlug,
+          overrideAccess: true,
           where: {
             id: { equals: postToDelete.id },
           },
-          overrideAccess: true,
         })
 
         const result = await payload.db.queryDrafts({
@@ -1723,12 +1758,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const versions = await payload.findVersions({
           collection: draftCollectionSlug,
+          overrideAccess: true,
           where: {
             parent: {
               equals: originalDraft.id,
             },
           },
-          overrideAccess: true,
         })
 
         expect(versions.docs).toHaveLength(3)
@@ -1758,8 +1793,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const initialVersions = await payload.findVersions({
           collection: draftCollectionSlug,
-          where: { parent: { equals: doc.id } },
           overrideAccess: true,
+          where: { parent: { equals: doc.id } },
         })
 
         expect(initialVersions.docs).toHaveLength(1)
@@ -1769,16 +1804,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
           overrideAccess: true,
+          unpublishAllLocales: true,
         })
 
         expect(unpublished._status).toBe('draft')
 
         const afterVersions = await payload.findVersions({
           collection: draftCollectionSlug,
-          where: { parent: { equals: doc.id } },
           overrideAccess: true,
+          where: { parent: { equals: doc.id } },
         })
 
         expect(afterVersions.docs).toHaveLength(1)
@@ -1802,8 +1837,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         await payload.updateGlobal({
           slug: draftGlobalSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
           overrideAccess: true,
+          unpublishAllLocales: true,
         })
 
         const afterVersions = await payload.findGlobalVersions({
@@ -1814,7 +1849,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         expect(afterVersions.docs).toHaveLength(initialCount)
         expect(afterVersions.docs[0].version._status).toBe('draft')
 
-        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+        await cleanupGlobal({ globalSlug: draftGlobalSlug, payload })
       })
 
       test('should update main table _status to draft when unpublishing', async ({ payload }) => {
@@ -1832,8 +1867,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           id: doc.id,
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
-          unpublishAllLocales: true,
           overrideAccess: true,
+          unpublishAllLocales: true,
         })
 
         const found = await payload.findByID({
@@ -1865,13 +1900,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           collection: draftCollectionSlug,
           data: { _status: 'draft' },
           locale: 'es',
-          unpublishAllLocales: true,
           overrideAccess: true,
+          unpublishAllLocales: true,
         })
 
         expect(unpublished._status).toBe('draft')
 
-        await payload.delete({ collection: draftCollectionSlug, id: doc.id, overrideAccess: true })
+        await payload.delete({ id: doc.id, collection: draftCollectionSlug, overrideAccess: true })
       })
 
       test('should unpublish a global with localized required fields from a non-default locale', async ({
@@ -1889,13 +1924,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: { _status: 'draft' },
           fallbackLocale: false,
           locale: 'es',
-          unpublishAllLocales: true,
           overrideAccess: true,
+          unpublishAllLocales: true,
         })
 
         expect(unpublished._status).toBe('draft')
 
-        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+        await cleanupGlobal({ globalSlug: draftGlobalSlug, payload })
       })
 
       test('should validate submitted collection fields when unpublishing', async ({ payload }) => {
@@ -1906,6 +1941,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'Valid description',
             title: 'Validate collection unpublish',
           },
+          overrideAccess: true,
         })
 
         try {
@@ -1917,11 +1953,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
                 _status: 'draft',
                 description: '',
               },
+              overrideAccess: true,
               unpublishAllLocales: true,
             }),
           ).rejects.toThrow(ValidationError)
         } finally {
-          await payload.delete({ id: doc.id, collection: draftCollectionSlug })
+          await payload.delete({
+            id: doc.id,
+            collection: draftCollectionSlug,
+            overrideAccess: true,
+          })
         }
       })
 
@@ -1937,6 +1978,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             },
             title: 'Validate nested collection unpublish',
           },
+          overrideAccess: true,
         })
 
         try {
@@ -1949,11 +1991,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
                 // @ts-expect-error dotted field paths are accepted at runtime
                 'group.textInGroup': '',
               },
+              overrideAccess: true,
               unpublishAllLocales: true,
             }),
           ).rejects.toThrow(ValidationError)
         } finally {
-          await payload.delete({ id: doc.id, collection: errorOnUnpublishSlug })
+          await payload.delete({
+            id: doc.id,
+            collection: errorOnUnpublishSlug,
+            overrideAccess: true,
+          })
         }
       })
 
@@ -1964,6 +2011,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             title: 'Validate global unpublish',
           },
+          overrideAccess: true,
         })
 
         try {
@@ -1974,6 +2022,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
                 _status: 'draft',
                 title: '',
               },
+              overrideAccess: true,
               unpublishAllLocales: true,
             }),
           ).rejects.toThrow(ValidationError)
@@ -2125,24 +2174,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const doc1Versions = await payload.findVersions({
           collection: versionCollectionSlug,
+          overrideAccess: true,
           sort: '-updatedAt',
           where: {
             parent: {
               equals: doc1.id,
             },
           },
-          overrideAccess: true,
         })
 
         const doc2Versions = await payload.findVersions({
           collection: versionCollectionSlug,
+          overrideAccess: true,
           sort: '-updatedAt',
           where: {
             parent: {
               equals: doc2.id,
             },
           },
-          overrideAccess: true,
         })
 
         // correctly retains 2 documents in the versions collection
@@ -2205,6 +2254,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const { docs } = await payload.findVersions({
           collection: draftCollectionSlug,
+          overrideAccess: true,
           where: {
             and: [
               {
@@ -2219,7 +2269,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
               },
             ],
           },
-          overrideAccess: true,
         })
 
         expect(docs[0]).toBeDefined()
@@ -2235,7 +2284,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       }) => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
-          data: { title: 'original', _status: 'draft' },
+          data: { _status: 'draft', title: 'original' },
           draft: true,
           overrideAccess: true,
         })
@@ -2271,8 +2320,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         // A new version was created as fallback instead of the in-place update
         const { totalDocs } = await payload.countVersions({
           collection: autosaveCollectionSlug,
-          where: { parent: { equals: doc.id } },
           overrideAccess: true,
+          where: { parent: { equals: doc.id } },
         })
 
         // create → 1 version, first autosave updates in place → still 1 version on autosave collection (it creates a new autosave),
@@ -2288,7 +2337,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       test('should propagate the error when createVersion also fails', async ({ payload }) => {
         const doc = await payload.create({
           collection: autosaveCollectionSlug,
-          data: { title: 'original', _status: 'draft' },
+          data: { _status: 'draft', title: 'original' },
           draft: true,
           overrideAccess: true,
         })
@@ -2502,10 +2551,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           _status: 'published',
         },
         draft: true,
+        overrideAccess: true,
         where: {
           id: { equals: publishedDoc.id },
         },
-        overrideAccess: true,
       })
 
       const republishedDoc = await payload.findByID({
@@ -2812,12 +2861,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
     test('should allow querying a draft doc from main collection', async ({ payload }) => {
       const findResults = await payload.find({
         collection: draftCollectionSlug,
+        overrideAccess: true,
         where: {
           title: {
             equals: originalTitle,
           },
         },
-        overrideAccess: true,
       })
 
       expect(findResults.docs[0].title).toStrictEqual(originalTitle)
@@ -2850,12 +2899,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       const findResults = await payload.findVersions({
         collection: draftCollectionSlug,
+        overrideAccess: true,
         where: {
           parent: {
             equals: id,
           },
         },
-        overrideAccess: true,
       })
 
       expect(findResults.totalDocs).toBe(11)
@@ -2872,12 +2921,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
         draft: true,
+        overrideAccess: true,
         where: {
           title: {
             equals: updatedTitle1,
           },
         },
-        overrideAccess: true,
       })
 
       expect(draftFindResults.docs).toHaveLength(0)
@@ -2889,12 +2938,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
         draft: true,
+        overrideAccess: true,
         where: {
           title: {
             equals: updatedTitle2,
           },
         },
-        overrideAccess: true,
       })
 
       expect(draftFindResults.docs[0].title).toStrictEqual(updatedTitle2)
@@ -2931,8 +2980,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       const publishedFindResults = await payload.find({
         collection: draftCollectionSlug,
-        where: query,
         overrideAccess: true,
+        where: query,
       })
 
       expect(publishedFindResults.docs).toHaveLength(1)
@@ -2941,8 +2990,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
         draft: true,
-        where: query,
         overrideAccess: true,
+        where: query,
       })
 
       expect(draftFindResults.docs).toHaveLength(1)
@@ -2955,12 +3004,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
         draft: true,
+        overrideAccess: true,
         where: {
           title: {
             equals: originalTitle,
           },
         },
-        overrideAccess: true,
       })
 
       expect(draftFindResults.docs).toHaveLength(0)
@@ -2979,12 +3028,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const byID = await payload.find({
         collection: draftCollectionSlug,
         draft: true,
+        overrideAccess: true,
         where: {
           id: {
             equals: firstDraft.id,
           },
         },
-        overrideAccess: true,
       })
 
       expect(byID.docs).toHaveLength(1)
@@ -2997,12 +3046,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const allDocs = await payload.find({
         collection: draftCollectionSlug,
         draft: true,
+        overrideAccess: true,
         where: {
           title: {
             like: 'title',
           },
         },
-        overrideAccess: true,
       })
 
       expect(allDocs.docs).toHaveLength(2)
@@ -3010,6 +3059,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const results = await payload.find({
         collection: draftCollectionSlug,
         draft: true,
+        overrideAccess: true,
         where: {
           and: [
             {
@@ -3024,7 +3074,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             },
           ],
         },
-        overrideAccess: true,
       })
 
       expect(results.docs).toHaveLength(1)
@@ -3530,8 +3579,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
-          publishAllLocales: true,
           overrideAccess: true,
+          publishAllLocales: true,
         })
 
         await wait(10)
@@ -3539,8 +3588,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const upd = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd2' },
-          publishAllLocales: true,
           overrideAccess: true,
+          publishAllLocales: true,
         })
 
         expect(upd.createdAt).toBe(doc.createdAt)
@@ -3549,12 +3598,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           docs: [latestVersionData],
         } = await payload.findGlobalVersions({
           slug: autoSaveGlobalSlug,
+          overrideAccess: true,
           where: {
             latest: {
               equals: true,
             },
           },
-          overrideAccess: true,
         })
 
         // Version itself should have new createdAt
@@ -3581,15 +3630,27 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           .findGlobalVersions({
             slug: 'max-versions',
             limit: 1,
-            sort: '-createdAt',
             overrideAccess: true,
+            sort: '-createdAt',
           })
           .then((r) => r.docs[0])
 
-      await payload.updateGlobal({ slug: 'max-versions', data: { title: '1' }, overrideAccess: true })
+      await payload.updateGlobal({
+        slug: 'max-versions',
+        data: { title: '1' },
+        overrideAccess: true,
+      })
       const version_1 = await getLatestVersion()
-      await payload.updateGlobal({ slug: 'max-versions', data: { title: '2' }, overrideAccess: true })
-      await payload.updateGlobal({ slug: 'max-versions', data: { title: '3' }, overrideAccess: true })
+      await payload.updateGlobal({
+        slug: 'max-versions',
+        data: { title: '2' },
+        overrideAccess: true,
+      })
+      await payload.updateGlobal({
+        slug: 'max-versions',
+        data: { title: '3' },
+        overrideAccess: true,
+      })
       const version_1_deleted = await payload.findGlobalVersionByID({
         id: version_1?.id as string,
         slug: 'max-versions',
@@ -3601,7 +3662,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
     test('findGlobalVersions - pagination should work correctly', async ({ payload }) => {
       for (let i = 0; i < 100; i++) {
-        await payload.updateGlobal({ slug: 'draft-unlimited-global', data: { title: 'title' }, overrideAccess: true })
+        await payload.updateGlobal({
+          slug: 'draft-unlimited-global',
+          data: { title: 'title' },
+          overrideAccess: true,
+        })
       }
       const res = await payload.findGlobalVersions({
         slug: 'draft-unlimited-global',
@@ -3611,8 +3676,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       expect(res.docs).toHaveLength(10)
       const resPaginationFalse = await payload.findGlobalVersions({
         slug: 'draft-unlimited-global',
-        pagination: false,
         overrideAccess: true,
+        pagination: false,
       })
       expect(resPaginationFalse.docs).toHaveLength(100)
       expect(resPaginationFalse.totalDocs).toBe(100)
@@ -3620,8 +3685,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const resPaginationFalseLimit0 = await payload.findGlobalVersions({
         slug: 'draft-unlimited-global',
         limit: 0,
-        pagination: false,
         overrideAccess: true,
+        pagination: false,
       })
       expect(resPaginationFalseLimit0.docs).toHaveLength(100)
       expect(resPaginationFalseLimit0.totalDocs).toBe(100)
@@ -3641,7 +3706,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       test('should findGlobalVersions with limit: 0', async ({ payload }) => {
         await payload.db.deleteVersions({ globalSlug: draftUnlimitedGlobalSlug, where: {} })
         for (let i = 0; i < 100; i++) {
-          await payload.updateGlobal({ slug: draftUnlimitedGlobalSlug, data: { title: 'global' }, overrideAccess: true })
+          await payload.updateGlobal({
+            slug: draftUnlimitedGlobalSlug,
+            data: { title: 'global' },
+            overrideAccess: true,
+          })
         }
 
         const res = await payload.findGlobalVersions({
@@ -3743,11 +3812,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
         const updated = await payload.updateGlobal({
           slug: draftGlobalSlug,
+          autosave: true,
           data: {
             title: 'updated title',
           },
           draft: true,
-          autosave: true,
           overrideAccess: true,
         })
 
@@ -3767,8 +3836,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             title: title2,
           },
-          publishAllLocales: true,
           overrideAccess: true,
+          publishAllLocales: true,
         })
 
         expect(updatedGlobal.title).toBe(title2)
@@ -3873,7 +3942,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           }),
         ).rejects.toThrow(Forbidden)
 
-        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        const current = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
         expect(current.title).toBe('current')
       })
 
@@ -3895,7 +3967,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           }),
         ).rejects.toThrow(Forbidden)
 
-        const current = await payload.findGlobal({ slug: restoreAccessNoVersionsGlobalSlug })
+        const current = await payload.findGlobal({
+          slug: restoreAccessNoVersionsGlobalSlug,
+          overrideAccess: true,
+        })
         expect(current.title).toBe('current')
       })
 
@@ -3921,16 +3996,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'historical' },
+          overrideAccess: true,
         })
 
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'current' },
+          overrideAccess: true,
         })
 
         const versions = await payload.findGlobalVersions({
           slug: restoreAccessGlobalSlug,
           limit: 100,
+          overrideAccess: true,
         })
 
         const target = versions.docs.find((doc) => doc.version.title === 'historical')
@@ -3942,6 +4020,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'reset' },
+          overrideAccess: true,
         })
 
         await payload.db.deleteVersions({
@@ -3977,7 +4056,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           }),
         ).rejects.toThrow(Forbidden)
 
-        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        const current = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
         expect(current.title).toBe('current')
       })
 
@@ -3991,6 +4073,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'unlocked' },
+          overrideAccess: true,
         })
 
         const restored = await payload.restoreGlobalVersion({
@@ -4019,7 +4102,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           }),
         ).rejects.toThrow(Forbidden)
 
-        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        const current = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
         expect(current.title).toBe('current')
       })
 
@@ -4039,7 +4125,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           }),
         ).rejects.toThrow(Forbidden)
 
-        const current = await payload.findGlobal({ slug: restoreAccessGlobalSlug })
+        const current = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          overrideAccess: true,
+        })
         expect(current.title).toBe('current')
       })
     })
@@ -4050,18 +4139,27 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       test.afterEach(async ({ payload }) => {
         for (const id of createdCollectionDocIDs) {
-          await payload.delete({ id, collection: restoreAccessCollectionSlug })
+          await payload.delete({
+            id,
+            collection: restoreAccessCollectionSlug,
+            overrideAccess: true,
+          })
         }
         createdCollectionDocIDs.length = 0
 
         for (const id of createdLocalizedDocIDs) {
-          await payload.delete({ id, collection: restoreAccessLocalizedCollectionSlug })
+          await payload.delete({
+            id,
+            collection: restoreAccessLocalizedCollectionSlug,
+            overrideAccess: true,
+          })
         }
         createdLocalizedDocIDs.length = 0
 
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { title: 'reset' },
+          overrideAccess: true,
         })
         await payload.db.deleteVersions({
           globalSlug: restoreAccessGlobalSlug,
@@ -4077,6 +4175,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const versions = await payload.findVersions({
           collection: restoreAccessCollectionSlug,
           limit: 100,
+          overrideAccess: true,
           where: { parent: { equals: docID } },
         })
         const target = versions.docs.find((doc) => doc.version._status === status)
@@ -4090,6 +4189,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const doc = await payload.create({
           collection: restoreAccessCollectionSlug,
           data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
         })
         createdCollectionDocIDs.push(doc.id)
 
@@ -4098,6 +4198,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           id: doc.id,
           collection: restoreAccessCollectionSlug,
           data: { _status: 'draft', title: 'unpublished' },
+          overrideAccess: true,
         })
 
         const publishedVersionID = await findCollectionVersionByStatus(payload, doc.id, 'published')
@@ -4118,6 +4219,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           id: doc.id,
           collection: restoreAccessCollectionSlug,
           draft: true,
+          overrideAccess: true,
         })
         expect(current._status).toBe('draft')
       })
@@ -4126,6 +4228,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const doc = await payload.create({
           collection: restoreAccessCollectionSlug,
           data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
         })
         createdCollectionDocIDs.push(doc.id)
 
@@ -4134,6 +4237,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           collection: restoreAccessCollectionSlug,
           data: { _status: 'draft', title: 'draft version' },
           draft: true,
+          overrideAccess: true,
         })
 
         const draftVersionID = await findCollectionVersionByStatus(payload, doc.id, 'draft')
@@ -4157,6 +4261,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const doc = await payload.create({
           collection: restoreAccessCollectionSlug,
           data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
         })
         createdCollectionDocIDs.push(doc.id)
 
@@ -4166,6 +4271,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           collection: restoreAccessCollectionSlug,
           data: { _status: 'draft', title: 'draft version' },
           draft: true,
+          overrideAccess: true,
         })
 
         const draftVersionID = await findCollectionVersionByStatus(payload, doc.id, 'draft')
@@ -4189,17 +4295,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
         })
 
         // Unpublish so the live global is a draft and a historical published version exists.
         await payload.updateGlobal({
           slug: restoreAccessGlobalSlug,
           data: { _status: 'draft', title: 'unpublished' },
+          overrideAccess: true,
         })
 
         const versions = await payload.findGlobalVersions({
           slug: restoreAccessGlobalSlug,
           limit: 100,
+          overrideAccess: true,
         })
         const publishedVersionID = versions.docs.find(
           (doc) => doc.version._status === 'published',
@@ -4215,7 +4324,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           }),
         ).rejects.toThrow(Forbidden)
 
-        const current = await payload.findGlobal({ draft: true, slug: restoreAccessGlobalSlug })
+        const current = await payload.findGlobal({
+          slug: restoreAccessGlobalSlug,
+          draft: true,
+          overrideAccess: true,
+        })
         expect(current._status).toBe('draft')
       })
 
@@ -4228,6 +4341,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           collection: restoreAccessLocalizedCollectionSlug,
           data: { _status: 'published', title: 'en published' },
           locale: 'en',
+          overrideAccess: true,
         })
         createdLocalizedDocIDs.push(doc.id)
 
@@ -4236,6 +4350,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           collection: restoreAccessLocalizedCollectionSlug,
           data: { _status: 'published', title: 'de published' },
           locale: 'de',
+          overrideAccess: true,
         })
 
         // Save a draft for `en` only. This leaves the live document fully published and creates a
@@ -4246,12 +4361,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: { _status: 'draft', title: 'en draft' },
           draft: true,
           locale: 'en',
+          overrideAccess: true,
         })
 
         const versions = await payload.findVersions({
           collection: restoreAccessLocalizedCollectionSlug,
           limit: 100,
           locale: 'all',
+          overrideAccess: true,
           sort: '-updatedAt',
           where: { parent: { equals: doc.id } },
         })
@@ -4291,8 +4408,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'kjnjyhbbdsfseankuhsjsfghb',
             title: originalTitle,
           },
-          publishAllLocales: true,
           overrideAccess: true,
+          publishAllLocales: true,
         })
 
         const publishedGlobal = await payload.findGlobal({
@@ -4521,11 +4638,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
         id: draft.id,
@@ -4571,11 +4689,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      const res = await payload.jobs.run()
+      const res = await payload.jobs.run({ overrideAccess: true })
 
       expect(res.jobStatus[Object.keys(res.jobStatus)[0]].status).toBe('error-reached-max-retries')
 
@@ -4603,6 +4722,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           title: 'my doc to publish from a secondary admin-capable auth collection',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       const req = await createLocalReq({ user: secondaryAdminUser }, payload)
@@ -4622,6 +4742,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const queuedJob = (
         await payload.find({
           collection: 'payload-jobs',
+          overrideAccess: true,
           where: {
             'input.doc.value': {
               equals: draft.id,
@@ -4637,7 +4758,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('success')
 
@@ -4645,6 +4766,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         id: draft.id,
         collection: draftCollectionSlug,
         draft: false,
+        overrideAccess: true,
       })
 
       expect(published._status).toBe('published')
@@ -4661,6 +4783,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           title: 'my doc restricted from the secondary auth collection',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       const req = await createLocalReq({ user: secondaryAdminUser }, payload)
@@ -4680,6 +4803,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
       const queuedJob = (
         await payload.find({
           collection: 'payload-jobs',
+          overrideAccess: true,
           where: {
             'input.doc.value': {
               equals: draft.id,
@@ -4690,13 +4814,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
 
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: draftCollectionSlug,
+        overrideAccess: true,
       })
 
       expect(retrieved._status).toBe('draft')
@@ -4712,6 +4837,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           title: 'my doc scheduled with a legacy bare user id',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       const currentDate = new Date()
@@ -4726,11 +4852,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       const queuedJob = (
         await payload.find({
           collection: 'payload-jobs',
+          overrideAccess: true,
           where: {
             'input.doc.value': {
               equals: draft.id,
@@ -4741,7 +4869,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
 
@@ -4749,6 +4877,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         id: draft.id,
         collection: draftCollectionSlug,
         draft: false,
+        overrideAccess: true,
       })
 
       expect(retrieved._status).toBe('draft')
@@ -4764,6 +4893,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           title: 'my doc scheduled with a zero user id',
         },
         draft: true,
+        overrideAccess: true,
       })
 
       const currentDate = new Date()
@@ -4781,11 +4911,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       const queuedJob = (
         await payload.find({
           collection: 'payload-jobs',
+          overrideAccess: true,
           where: {
             'input.doc.value': {
               equals: draft.id,
@@ -4796,7 +4928,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       // A `0` id must reach findByID (which fails here) rather than being dropped to an
       // overrideAccess publish, so the doc stays a draft.
@@ -4806,6 +4938,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         id: draft.id,
         collection: draftCollectionSlug,
         draft: false,
+        overrideAccess: true,
       })
 
       expect(retrieved._status).toBe('draft')
@@ -4836,11 +4969,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
         id: published.id,
@@ -4881,24 +5015,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await payload.delete({
         collection: draftCollectionSlug,
+        overrideAccess: true,
         where: {
           id: { equals: draft.id },
         },
-        overrideAccess: true,
       })
 
       const { docs } = await payload.find({
         collection: 'payload-jobs',
+        overrideAccess: true,
         where: {
           'input.doc.value': {
             equals: draft.id,
           },
         },
-        overrideAccess: true,
       })
 
       expect(docs[0]).toBeUndefined()
@@ -4934,6 +5069,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await payload.delete({
@@ -4944,12 +5080,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       const { docs } = await payload.find({
         collection: 'payload-jobs',
+        overrideAccess: true,
         where: {
           'input.doc.value': {
             equals: draft.id,
           },
         },
-        overrideAccess: true,
       })
 
       expect(docs[0]).toBeUndefined()
@@ -4981,11 +5117,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findGlobal({
         slug: draftGlobalSlug,
@@ -5017,11 +5154,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findGlobal({
         slug: draftGlobalSlug,
@@ -5108,12 +5246,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         ;[event] = (
           await payload.find({
             collection: 'payload-jobs',
+            overrideAccess: true,
             where: {
               'input.doc.value': {
                 equals: draftDoc.id,
               },
             },
-            overrideAccess: true,
           })
         ).docs
         expect(event).toBeDefined()
@@ -5137,8 +5275,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         const events = await getUpcomingScheduledPublishHandler({
-          collectionSlug: draftCollectionSlug,
           id: draftDoc.id,
+          collectionSlug: draftCollectionSlug,
           req,
         })
 
@@ -5158,18 +5296,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const req = await createLocalReq({ user }, payload)
 
         await payload.update({
+          id: draftDoc.id,
           collection: draftCollectionSlug,
           data: {
             restrictedToUpdate: true,
           },
-          id: draftDoc.id,
           overrideAccess: true,
         })
 
         await expect(
           getUpcomingScheduledPublishHandler({
-            collectionSlug: draftCollectionSlug,
             id: draftDoc.id,
+            collectionSlug: draftCollectionSlug,
             req,
           }),
         ).rejects.toMatchObject({ status: 403 })
@@ -5197,12 +5335,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         ;[event] = (
           await payload.find({
             collection: 'payload-jobs',
+            overrideAccess: true,
             where: {
               'input.doc.value': {
                 equals: draftDoc.id,
               },
             },
-            overrideAccess: true,
           })
         ).docs
 
@@ -5217,12 +5355,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         ;[event] = (
           await payload.find({
             collection: 'payload-jobs',
+            overrideAccess: true,
             where: {
               'input.doc.value': {
                 equals: String(draftDoc.id),
               },
             },
-            overrideAccess: true,
           })
         ).docs
 
@@ -5251,8 +5389,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         })
 
         const result = await payload.findByID({
-          collection: 'payload-jobs',
           id: unrelatedJob.id,
+          collection: 'payload-jobs',
           overrideAccess: true,
         })
 
@@ -5553,8 +5691,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
           },
           draft: false,
-          publishAllLocales: true,
           overrideAccess: true,
+          publishAllLocales: true,
         })
 
         const publishedAll = await payload.findByID({
@@ -5669,8 +5807,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             blocks: [
               {
-                blockType: 'block',
                 array: [],
+                blockType: 'block',
               },
             ],
             text: 'English with blocks',
@@ -5688,8 +5826,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             _status: 'published',
             blocks: [
               {
-                blockType: 'block',
                 array: [],
+                blockType: 'block',
               },
             ],
             text: 'English published with blocks',
@@ -5849,8 +5987,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
           data: {
             _status: 'published',
           },
-          publishAllLocales: true,
           overrideAccess: true,
+          publishAllLocales: true,
         })
 
         const publishedAll = await payload.findGlobal({
@@ -5925,12 +6063,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
         const allVersions = await payload.findGlobalVersions({
           slug: global,
           locale: 'all',
+          overrideAccess: true,
           where: {
             'version._status.en': {
               equals: 'published',
             },
           },
-          overrideAccess: true,
         })
 
         const versions = allVersions.docs

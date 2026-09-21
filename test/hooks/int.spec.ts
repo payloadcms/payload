@@ -1184,13 +1184,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(false)
     })
 
-    test('should default to true when overrideAccess is not specified in Local API', async ({
+    test('should default to false when overrideAccess is not specified in Local API', async ({
       payload,
     }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },
-        overrideAccess: true,
       })
 
       createdIDs.push(doc.id)
@@ -1198,13 +1197,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
       const result = await payload.findByID({
         collection: overrideAccessSlug,
         id: doc.id,
-        overrideAccess: true,
       })
 
       expect(result.beforeReadCalled).toBe(true)
       expect(result.afterReadCalled).toBe(true)
-      expect(result.beforeReadOverrideAccess).toBe(true)
-      expect(result.afterReadOverrideAccess).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(false)
+      expect(result.afterReadOverrideAccess).toBe(false)
     })
   })
 })

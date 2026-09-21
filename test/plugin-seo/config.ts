@@ -32,6 +32,7 @@ const generateTitle: GenerateTitle<Page> = async ({ doc, req }) => {
       id: doc.id,
       collection: pagesSlug,
       disableErrors: true,
+      overrideAccess: true,
       trash: true,
     })
 
@@ -54,7 +55,6 @@ const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
 }
 
 export default buildConfigWithDefaults({
-  suite: 'plugin-seo',
   config: {
     admin: {
       importMap: {
@@ -141,6 +141,7 @@ export default buildConfigWithDefaults({
         email: 'editor@example.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -149,8 +150,10 @@ export default buildConfigWithDefaults({
         email: 'non-admin@example.com',
         password: 'test',
       },
+      overrideAccess: true,
     })
 
     await seed(payload)
   },
+  suite: 'plugin-seo',
 })

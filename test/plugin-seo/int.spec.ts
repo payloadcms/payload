@@ -59,12 +59,12 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
     page = await payload.create({
       collection: 'pages',
       data: {
-        title: 'Test page',
         slug: 'test-page',
         featuredMedia: mediaDoc.id,
         meta: {
           title: 'Test page',
         },
+        title: 'Test page',
       },
       depth: 0,
       overrideAccess: true,
@@ -80,19 +80,21 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
         title: 'Readable page',
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     trashedPage = await payload.create({
       collection: pagesSlug,
       data: {
-        deletedAt: new Date().toISOString(),
         slug: 'trashed-page',
+        deletedAt: new Date().toISOString(),
         meta: {
           title: 'Trashed page',
         },
         title: 'Trashed page',
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     mediaDoc2 = await payload.create({
@@ -437,15 +439,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
     // Update it to mediaDoc2 and we expect to see different previousValue and value in the hook
     const context: { identicalCount?: number } = {}
     await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
+      context,
       data: {
         // this field has an afterChange hook that will increment req.context.identicalCount
         // when previousValue === value
         featuredMedia: mediaDoc2.id,
       },
       depth: 0,
-      context,
       overrideAccess: true,
     })
 
@@ -456,8 +458,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should add meta title', async ({ payload }) => {
     const pageWithTitle = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
           title: 'Hello, world!',
@@ -474,8 +476,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should add meta description', async ({ payload }) => {
     const pageWithDescription = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
           description: 'This is a test page',
@@ -492,8 +494,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should add meta image', async ({ payload }) => {
     const pageWithImage = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
           image: mediaDoc.id,
@@ -510,8 +512,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should add custom meta field', async ({ payload }) => {
     const pageWithCustomField = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
           ogTitle: 'Hello, world!',
@@ -528,30 +530,30 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
   test('should localize meta fields', async ({ payload }) => {
     await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
-          title: 'Hello, world!',
           description: 'This is a test page',
+          title: 'Hello, world!',
         },
       },
-      locale: 'en',
       depth: 0,
+      locale: 'en',
       overrideAccess: true,
     })
 
     const pageWithLocalizedMeta = await payload.update({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       data: {
         meta: {
-          title: 'Hola, mundo!',
           description: 'Esta es una página de prueba',
+          title: 'Hola, mundo!',
         },
       },
-      locale: 'es',
       depth: 0,
+      locale: 'es',
       overrideAccess: true,
     })
 
@@ -563,8 +565,8 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
 
     // query the page in the default locale
     const pageInDefaultLocale = await payload.findByID({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
       depth: 0,
       overrideAccess: true,
     })

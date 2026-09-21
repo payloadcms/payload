@@ -91,21 +91,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       await createPost(
         { payload },
         {
-          title: `test ${i}`,
-          category: category.id,
-          upload: uploadedImage,
+          array: [{ category: category.id }],
+          arrayHasMany: [{ category: [category.id] }],
+          blocks: [{ blockType: 'block', category: category.id }],
           categories,
           categoriesLocalized: categories,
-          polymorphic: {
-            relationTo: 'categories',
-            value: category.id,
+          category: category.id,
+          group: {
+            camelCaseCategory: category.id,
+            category: category.id,
           },
-          polymorphics: [
-            {
-              relationTo: 'categories',
-              value: category.id,
-            },
-          ],
+          localizedArray: [{ category: category.id }],
           localizedPolymorphic: {
             relationTo: 'categories',
             value: category.id,
@@ -116,14 +112,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
               value: category.id,
             },
           ],
-          group: {
-            category: category.id,
-            camelCaseCategory: category.id,
+          polymorphic: {
+            relationTo: 'categories',
+            value: category.id,
           },
-          array: [{ category: category.id }],
-          arrayHasMany: [{ category: [category.id] }],
-          localizedArray: [{ category: category.id }],
-          blocks: [{ blockType: 'block', category: category.id }],
+          polymorphics: [
+            {
+              relationTo: 'categories',
+              value: category.id,
+            },
+          ],
+          title: `test ${i}`,
+          upload: uploadedImage,
         },
       )
     }
@@ -132,12 +132,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should populate joins using findByID', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
+      collection: categoriesSlug,
       joins: {
         'group.relatedPosts': {
           sort: '-title',
         },
       },
-      collection: categoriesSlug,
       overrideAccess: true,
     })
 
@@ -150,14 +150,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should not populate joins if not selected', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
+      collection: categoriesSlug,
       joins: {
         'group.relatedPosts': {
           sort: '-title',
         },
       },
-      select: {},
-      collection: categoriesSlug,
       overrideAccess: true,
+      select: {},
     })
 
     expect(Object.keys(categoryWithPosts)).toStrictEqual(['id'])
@@ -166,18 +166,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should populate joins if selected', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
+      collection: categoriesSlug,
       joins: {
         'group.relatedPosts': {
           sort: '-title',
         },
       },
+      overrideAccess: true,
       select: {
         group: {
           relatedPosts: true,
         },
       },
-      collection: categoriesSlug,
-      overrideAccess: true,
     })
 
     expect(categoryWithPosts).toStrictEqual({
@@ -194,13 +194,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should count joins', async ({ payload }) => {
     let categoryWithPosts = await payload.findByID({
       id: category.id,
+      collection: categoriesSlug,
       joins: {
         'group.relatedPosts': {
-          sort: '-title',
           count: true,
+          sort: '-title',
         },
       },
-      collection: categoriesSlug,
       overrideAccess: true,
     })
 
@@ -209,14 +209,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     // With limit 1
     categoryWithPosts = await payload.findByID({
       id: category.id,
+      collection: categoriesSlug,
       joins: {
         'group.relatedPosts': {
-          sort: '-title',
           count: true,
           limit: 1,
+          sort: '-title',
         },
       },
-      collection: categoriesSlug,
       overrideAccess: true,
     })
 
@@ -228,7 +228,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       id: category.id,
       collection: categoriesSlug,
       joins: {
-        hasManyPosts: { limit: 1, count: true },
+        hasManyPosts: { count: true, limit: 1 },
       },
       overrideAccess: true,
     })
@@ -238,9 +238,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
   test('should populate relationships in joins', async ({ payload }) => {
     const { docs } = await payload.find({
-      limit: 1,
       collection: postsSlug,
       depth: 2,
+      limit: 1,
       overrideAccess: true,
     })
 
@@ -251,8 +251,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
   test('should populate relationships in joins with camelCase names', async ({ payload }) => {
     const { docs } = await payload.find({
-      limit: 1,
       collection: postsSlug,
+      limit: 1,
       overrideAccess: true,
     })
 
@@ -306,8 +306,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
   test('should populate uploads in joins', async ({ payload }) => {
     const { docs } = await payload.find({
-      limit: 1,
       collection: postsSlug,
+      limit: 1,
       overrideAccess: true,
     })
 
@@ -317,8 +317,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
   test('should join on polymorphic relationships', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
-      collection: categoriesSlug,
       id: category.id,
+      collection: categoriesSlug,
       overrideAccess: true,
     })
     expect(categoryWithPosts.polymorphic.docs[0]).toHaveProperty('id')
@@ -341,8 +341,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     await payload.create({
       collection: 'folderPoly1',
       data: {
-        folderPoly1Title: 'Poly 1 title',
         _h_folders: folderDoc.id,
+        folderPoly1Title: 'Poly 1 title',
       },
       depth: 0,
       overrideAccess: true,
@@ -351,8 +351,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     await payload.create({
       collection: 'folderPoly2',
       data: {
-        folderPoly2Title: 'Poly 2 Title',
         _h_folders: folderDoc.id,
+        folderPoly2Title: 'Poly 2 Title',
       },
       depth: 0,
       overrideAccess: true,
@@ -380,12 +380,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           },
         },
       },
+      overrideAccess: true,
       where: {
         id: {
           equals: folderDoc.id,
         },
       },
-      overrideAccess: true,
     })
 
     expect(result.docs[0]?.children.docs).toHaveLength(1)
@@ -405,19 +405,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       collection: 'folders',
       data: {
         name: 'childFolder',
-        folderType: ['folderPoly1'],
         _h_folders: folderDoc.id,
+        folderType: ['folderPoly1'],
       },
       overrideAccess: true,
     })
 
     const findFolder = await payload.find({
       collection: 'folders',
-      where: {
-        id: {
-          equals: folderDoc.id,
-        },
-      },
       joins: {
         children: {
           limit: 100_000,
@@ -439,13 +434,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
         },
       },
       overrideAccess: true,
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
     })
 
     expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
   })
 
   test('should query where with exists for hasMany select fields', async ({ payload }) => {
-    await payload.delete({ collection: 'folders', where: {}, overrideAccess: true })
+    await payload.delete({ collection: 'folders', overrideAccess: true, where: {} })
     const folderDoc = await payload.create({
       collection: 'folders',
       data: {
@@ -459,19 +459,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       collection: 'folders',
       data: {
         name: 'childFolder',
-        folderType: ['folderPoly1'],
         _h_folders: folderDoc.id,
+        folderType: ['folderPoly1'],
       },
       overrideAccess: true,
     })
 
     const findFolder = await payload.find({
       collection: 'folders',
-      where: {
-        id: {
-          equals: folderDoc.id,
-        },
-      },
       joins: {
         children: {
           limit: 100_000,
@@ -502,6 +497,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
         },
       },
       overrideAccess: true,
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
     })
 
     expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
@@ -510,6 +510,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should filter joins using where query', async ({ payload }) => {
     const categoryWithPosts = await payload.findByID({
       id: category.id,
+      collection: categoriesSlug,
       joins: {
         relatedPosts: {
           sort: '-title',
@@ -520,7 +521,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           },
         },
       },
-      collection: categoriesSlug,
       overrideAccess: true,
     })
 
@@ -559,10 +559,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should populate joins using find', async ({ payload }) => {
     const result = await payload.find({
       collection: categoriesSlug,
+      overrideAccess: true,
       where: {
         id: { equals: category.id },
       },
-      overrideAccess: true,
     })
 
     const [categoryWithPosts] = result.docs
@@ -575,17 +575,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should populate joins using find with hasMany relationships', async ({ payload }) => {
     const result = await payload.find({
       collection: categoriesSlug,
+      overrideAccess: true,
       where: {
         id: { equals: category.id },
       },
-      overrideAccess: true,
     })
     const otherResult = await payload.find({
       collection: categoriesSlug,
+      overrideAccess: true,
       where: {
         id: { equals: otherCategory.id },
       },
-      overrideAccess: true,
     })
 
     const [categoryWithPosts] = result.docs
@@ -605,12 +605,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     const post_1 = await createPost(
       { payload },
       {
-        title: `test es localized 1`,
         categoriesLocalized: [category.id],
         group: {
-          category: category.id,
           camelCaseCategory: category.id,
+          category: category.id,
         },
+        title: `test es localized 1`,
       },
       'es',
     )
@@ -618,29 +618,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     const post_2 = await createPost(
       { payload },
       {
-        title: `test es localized 2`,
         categoriesLocalized: [otherCategory.id],
         group: {
-          category: category.id,
           camelCaseCategory: category.id,
+          category: category.id,
         },
+        title: `test es localized 2`,
       },
       'es',
     )
 
     const resultEn = await payload.find({
       collection: categoriesSlug,
+      overrideAccess: true,
       where: {
         id: { equals: category.id },
       },
-      overrideAccess: true,
     })
     const otherResultEn = await payload.find({
       collection: categoriesSlug,
+      overrideAccess: true,
       where: {
         id: { equals: otherCategory.id },
       },
-      overrideAccess: true,
     })
 
     const [categoryWithPostsEn] = resultEn.docs
@@ -656,18 +656,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     const resultEs = await payload.find({
       collection: categoriesSlug,
       locale: 'es',
+      overrideAccess: true,
       where: {
         id: { equals: category.id },
       },
-      overrideAccess: true,
     })
     const otherResultEs = await payload.find({
       collection: categoriesSlug,
       locale: 'es',
+      overrideAccess: true,
       where: {
         id: { equals: otherCategory.id },
       },
-      overrideAccess: true,
     })
 
     const [categoryWithPostsEs] = resultEs.docs
@@ -682,12 +682,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     // clean up
     await payload.delete({
       collection: postsSlug,
+      overrideAccess: true,
       where: {
         id: {
           in: [post_1.id, post_2.id],
         },
       },
-      overrideAccess: true,
     })
   })
 
@@ -710,10 +710,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     const result = await payload.delete({
       collection: categoriesSlug,
       // id: category.id,
+      overrideAccess: true,
       where: {
         id: { equals: category.id },
       },
-      overrideAccess: true,
     })
 
     expect(result.docs[0].id).toStrictEqual(category.id)
@@ -733,18 +733,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       await createPost(
         { payload },
         {
-          title: 'filtered post',
           category: categoryWithFilteredPost.id,
           isFiltered: true,
+          title: 'filtered post',
         },
       )
 
       await createPost(
         { payload },
         {
-          title: 'unfiltered post',
           category: categoryWithFilteredPost.id,
           isFiltered: false,
+          title: 'unfiltered post',
         },
       )
 
@@ -785,38 +785,38 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test.beforeAll(async ({ payloadInstance: payload }) => {
       localizedCategory = await payload.create({
         collection: 'localized-categories',
-        locale: 'en',
         data: {
           name: 'localized category',
         },
+        locale: 'en',
         overrideAccess: true,
       })
       const post1 = await payload.create({
         collection: 'localized-posts',
-        locale: 'en',
         data: {
-          title: 'english post 1',
           category: localizedCategory.id,
+          title: 'english post 1',
         },
+        locale: 'en',
         overrideAccess: true,
       })
       await payload.update({
-        collection: 'localized-posts',
         id: post1.id,
-        locale: 'es',
+        collection: 'localized-posts',
         data: {
-          title: 'spanish post',
           category: localizedCategory.id,
+          title: 'spanish post',
         },
+        locale: 'es',
         overrideAccess: true,
       })
       await payload.create({
         collection: 'localized-posts',
-        locale: 'en',
         data: {
-          title: 'english post 2',
           category: localizedCategory.id,
+          title: 'english post 2',
         },
+        locale: 'en',
         overrideAccess: true,
       })
     })
@@ -843,20 +843,28 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
   test.describe('Joins with versions', () => {
     test.afterEach(async ({ payload }) => {
-      await payload.delete({ collection: 'versions', where: {}, overrideAccess: true })
-      await payload.delete({ collection: 'categories-versions', where: {}, overrideAccess: true })
+      await payload.delete({ collection: 'versions', overrideAccess: true, where: {} })
+      await payload.delete({ collection: 'categories-versions', overrideAccess: true, where: {} })
     })
 
     test('should populate joins when versions on both sides draft false', async ({ payload }) => {
-      const category = await payload.create({ collection: 'categories-versions', data: {}, overrideAccess: true })
-
-      const version = await payload.create({
-        collection: 'versions',
-        data: { title: 'version', categoryVersion: category.id },
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: {},
         overrideAccess: true,
       })
 
-      const res = await payload.find({ collection: 'categories-versions', draft: false, overrideAccess: true })
+      const version = await payload.create({
+        collection: 'versions',
+        data: { categoryVersion: category.id, title: 'version' },
+        overrideAccess: true,
+      })
+
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: false,
+        overrideAccess: true,
+      })
 
       expect(res.docs[0].relatedVersions.docs[0].id).toBe(version.id)
     })
@@ -864,15 +872,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should populate joins with hasMany relationships when versions on both sides draft false', async ({
       payload,
     }) => {
-      const category = await payload.create({ collection: 'categories-versions', data: {}, overrideAccess: true })
-
-      const version = await payload.create({
-        collection: 'versions',
-        data: { title: 'version', categoryVersions: [category.id] },
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: {},
         overrideAccess: true,
       })
 
-      const res = await payload.find({ collection: 'categories-versions', draft: false, overrideAccess: true })
+      const version = await payload.create({
+        collection: 'versions',
+        data: { categoryVersions: [category.id], title: 'version' },
+        overrideAccess: true,
+      })
+
+      const res = await payload.find({
+        collection: 'categories-versions',
+        draft: false,
+        overrideAccess: true,
+      })
 
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
     })
@@ -880,11 +896,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async ({
       payload,
     }) => {
-      const category = await payload.create({ collection: 'categories-versions', data: {}, overrideAccess: true })
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: {},
+        overrideAccess: true,
+      })
 
       const version = await payload.create({
         collection: 'versions',
-        data: { title: 'version', categoryVersion: category.id },
+        data: { categoryVersion: category.id, title: 'version' },
         overrideAccess: true,
       })
 
@@ -909,14 +929,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       const version = await payload.create({
         collection: 'versions',
-        data: { title: 'original-title', _status: 'draft', categoryVersion: category.id },
+        data: { _status: 'draft', categoryVersion: category.id, title: 'original-title' },
         draft: true,
         overrideAccess: true,
       })
 
       await payload.update({
-        collection: 'versions',
         id: version.id,
+        collection: 'versions',
         data: { title: 'updated-title' },
         draft: true,
         overrideAccess: true,
@@ -935,7 +955,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should populate joins when versions on both sides draft true payload.db.queryDrafts', async ({
       payload,
     }) => {
-      const category = await payload.create({ collection: 'categories-versions', data: {}, overrideAccess: true })
+      const category = await payload.create({
+        collection: 'categories-versions',
+        data: {},
+        overrideAccess: true,
+      })
 
       const version = await payload.create({
         collection: 'versions',
@@ -957,14 +981,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should have simple paginate for joins through REST', async ({ restClient }) => {
       const query = {
         depth: 1,
-        where: {
-          name: { equals: 'paginate example' },
-        },
         joins: {
           relatedPosts: {
-            sort: 'createdAt',
             limit: 4,
+            sort: 'createdAt',
           },
+        },
+        where: {
+          name: { equals: 'paginate example' },
         },
       }
       const pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
@@ -984,15 +1008,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should have simple paginate with page for joins through REST', async ({ restClient }) => {
       const query = {
         depth: 1,
-        where: {
-          name: { equals: 'paginate example' },
-        },
         joins: {
           relatedPosts: {
-            sort: 'createdAt',
             limit: 2,
             page: 1,
+            sort: 'createdAt',
           },
+        },
+        where: {
+          name: { equals: 'paginate example' },
         },
       }
       let pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
@@ -1024,11 +1048,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should respect access control for join collections', async ({ payload }) => {
       const { docs } = await payload.find({
         collection: categoriesJoinRestrictedSlug,
+        overrideAccess: false,
+        user,
         where: {
           name: { equals: 'categoryJoinRestricted' },
         },
-        overrideAccess: false,
-        user,
       })
       const [categoryWithRestrictedPosts] = docs
       expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
@@ -1042,8 +1066,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
         payload.findByID({
           id: category.id,
           collection: categoriesSlug,
-          overrideAccess: false,
-          user,
           joins: {
             relatedPosts: {
               where: {
@@ -1051,6 +1073,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
               },
             },
           },
+          overrideAccess: false,
+          user,
         }),
       ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
@@ -1070,8 +1094,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
         {
           collection: restrictedPostsSlug,
           data: {
-            title: 'restricted post',
             category: restrictedCategory.id,
+            title: 'restricted post',
           },
         },
       )
@@ -1379,16 +1403,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       const version = await payload.create({
         collection: 'versions',
-        data: { _status: 'draft', title: 'original-title', categoryVersion: category.id },
+        data: { _status: 'draft', categoryVersion: category.id, title: 'original-title' },
         draft: true,
         overrideAccess: true,
       })
 
       await payload.update({
-        collection: 'versions',
-        draft: true,
         id: version.id,
+        collection: 'versions',
         data: { title: 'updated-title' },
+        draft: true,
         overrideAccess: true,
       })
 
@@ -1557,7 +1581,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     payload,
     restClient,
   }) => {
-    const allCategories = await payload.find({ collection: categoriesSlug, pagination: false, overrideAccess: true })
+    const allCategories = await payload.find({
+      collection: categoriesSlug,
+      overrideAccess: true,
+      pagination: false,
+    })
 
     const allCategoriesByIds = await restClient
       .GET(`/categories`, {
@@ -1577,7 +1605,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should join with singular collection name', async ({ payload }) => {
     const {
       docs: [category],
-    } = await payload.find({ collection: categoriesSlug, limit: 1, depth: 0, overrideAccess: true })
+    } = await payload.find({ collection: categoriesSlug, depth: 0, limit: 1, overrideAccess: true })
 
     const singular = await payload.create({
       collection: 'singular',
@@ -1586,8 +1614,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     })
 
     const categoryWithJoins = await payload.findByID({
-      collection: categoriesSlug,
       id: category.id,
+      collection: categoriesSlug,
       overrideAccess: true,
     })
 
@@ -1601,13 +1629,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       docs: [res],
     } = await payload.find({
       collection: categoriesSlug,
-      where: {
-        id: { equals: category.id },
-      },
       joins: {
         relatedPosts: false,
       },
       overrideAccess: true,
+      where: {
+        id: { equals: category.id },
+      },
     })
 
     // removed from the result
@@ -1627,11 +1655,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     } = await restClient
       .GET(`/${categoriesSlug}`, {
         query: {
-          where: {
-            id: { equals: category.id },
-          },
           joins: {
             relatedPosts: false,
+          },
+          where: {
+            id: { equals: category.id },
           },
         },
       })
@@ -1648,39 +1676,62 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
   test('should have correct totalDocs', async ({ payload }) => {
     for (let i = 0; i < 50; i++) {
-      await payload.create({ collection: categoriesSlug, data: { name: 'totalDocs' }, overrideAccess: true })
+      await payload.create({
+        collection: categoriesSlug,
+        data: { name: 'totalDocs' },
+        overrideAccess: true,
+      })
     }
 
     const count = await payload.count({
       collection: categoriesSlug,
-      where: { name: { equals: 'totalDocs' } },
       overrideAccess: true,
+      where: { name: { equals: 'totalDocs' } },
     })
     expect(count.totalDocs).toBe(50)
 
     const find = await payload.find({
       collection: categoriesSlug,
       limit: 5,
-      where: { name: { equals: 'totalDocs' } },
       overrideAccess: true,
+      where: { name: { equals: 'totalDocs' } },
     })
     expect(find.totalDocs).toBe(50)
     expect(find.docs).toHaveLength(5)
 
-    await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } }, overrideAccess: true })
+    await payload.delete({
+      collection: categoriesSlug,
+      overrideAccess: true,
+      where: { name: { equals: 'totalDocs' } },
+    })
   })
 
   test('should self join', async ({ payload }) => {
     const doc_1 = await payload.create({ collection: 'self-joins', data: {}, overrideAccess: true })
-    const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0, overrideAccess: true })
+    const doc_2 = await payload.create({
+      collection: 'self-joins',
+      data: { rel: doc_1 },
+      depth: 0,
+      overrideAccess: true,
+    })
 
-    const data = await payload.findByID({ collection: 'self-joins', id: doc_1.id, depth: 1, overrideAccess: true })
+    const data = await payload.findByID({
+      id: doc_1.id,
+      collection: 'self-joins',
+      depth: 1,
+      overrideAccess: true,
+    })
 
     expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
   })
 
   test('should populate joins on depth 2', async ({ payload }) => {
-    const depthJoin_2 = await payload.create({ collection: 'depth-joins-2', data: {}, depth: 0, overrideAccess: true })
+    const depthJoin_2 = await payload.create({
+      collection: 'depth-joins-2',
+      data: {},
+      depth: 0,
+      overrideAccess: true,
+    })
     const depthJoin_1 = await payload.create({
       collection: 'depth-joins-1',
       data: { rel: depthJoin_2 },
@@ -1696,8 +1747,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     })
 
     const data = await payload.findByID({
-      collection: 'depth-joins-2',
       id: depthJoin_2.id,
+      collection: 'depth-joins-2',
       depth: 2,
       overrideAccess: true,
     })
@@ -1715,34 +1766,34 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should join across multiple collections', async ({ payload }) => {
       let parent = await payload.create({
         collection: 'multiple-collections-parents',
-        depth: 0,
         data: {},
+        depth: 0,
         overrideAccess: true,
       })
 
       const child_1 = await payload.create({
         collection: 'multiple-collections-1',
-        depth: 0,
         data: {
           parent,
           title: 'doc-1',
         },
+        depth: 0,
         overrideAccess: true,
       })
 
       const child_2 = await payload.create({
         collection: 'multiple-collections-2',
-        depth: 0,
         data: {
           parent,
           title: 'doc-2',
         },
+        depth: 0,
         overrideAccess: true,
       })
 
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 0,
         overrideAccess: true,
       })
@@ -1758,8 +1809,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       expect(child2Reference?.value).toBe(child_2.id)
 
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         overrideAccess: true,
       })
@@ -1776,8 +1827,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       // Pagination across collections
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1792,8 +1843,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       expect(parent.children?.hasNextPage).toBe(true)
 
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1809,8 +1860,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       // Sorting across collections
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1824,8 +1875,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       expect(parent.children.docs[1]?.value.title).toBe('doc-2')
 
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1840,8 +1891,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       // WHERE across collections
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1860,8 +1911,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       // WHERE by relationTo (join for specific collectionSlug)
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1877,9 +1928,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       // WHERE by relationTo with overrideAccess:false
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
-        overrideAccess: false,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1890,6 +1940,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             },
           },
         },
+        overrideAccess: false,
       })
 
       expect(parent.children?.docs).toHaveLength(1)
@@ -1897,8 +1948,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       // counting
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1912,8 +1963,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
       // counting filtered
       parent = await payload.findByID({
-        collection: 'multiple-collections-parents',
         id: parent.id,
+        collection: 'multiple-collections-parents',
         depth: 1,
         joins: {
           children: {
@@ -1934,12 +1985,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
   test.options({ db: 'drizzle' }).describe('Constrained joins', () => {
     test.afterEach(async ({ payload }) => {
-      await payload.delete({ collection: accessJoinArticlesSlug, where: {} })
-      await payload.delete({ collection: accessJoinNotesSlug, where: {} })
-      await payload.delete({ collection: accessJoinParentsSlug, where: {} })
-      await payload.delete({ collection: operatorHandlerJoinArticlesSlug, where: {} })
-      await payload.delete({ collection: operatorHandlerJoinNotesSlug, where: {} })
-      await payload.delete({ collection: operatorHandlerJoinParentsSlug, where: {} })
+      await payload.delete({ collection: accessJoinArticlesSlug, overrideAccess: true, where: {} })
+      await payload.delete({ collection: accessJoinNotesSlug, overrideAccess: true, where: {} })
+      await payload.delete({ collection: accessJoinParentsSlug, overrideAccess: true, where: {} })
+      await payload.delete({
+        collection: operatorHandlerJoinArticlesSlug,
+        overrideAccess: true,
+        where: {},
+      })
+      await payload.delete({
+        collection: operatorHandlerJoinNotesSlug,
+        overrideAccess: true,
+        where: {},
+      })
+      await payload.delete({
+        collection: operatorHandlerJoinParentsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     const createConstrainedJoinDocuments = async (payload: Payload) => {
@@ -1947,6 +2010,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
         collection: accessJoinParentsSlug,
         data: {},
         depth: 0,
+        overrideAccess: true,
       })
 
       const allowedChild = await payload.create({
@@ -1973,6 +2037,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           variantSelect: 'available',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const restrictedChild = await payload.create({
@@ -1994,6 +2059,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           variantSelect: 'available',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const missingAvailabilityChild = await payload.create({
@@ -2014,6 +2080,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           title: 'Niño',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const partialTagChild = await payload.create({
@@ -2034,6 +2101,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           title: 'available child',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       return {
@@ -2142,6 +2210,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           title: 'available note',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const absentScalarResult = await restClient
@@ -2221,6 +2290,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             },
           },
         },
+        overrideAccess: true,
       })
 
       expect(result.children.docs).toHaveLength(1)
@@ -2236,6 +2306,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           title: 'child without availability',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
@@ -2251,6 +2322,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             },
           },
         },
+        overrideAccess: true,
       })
       const resultReferences = result.children.docs
         .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
@@ -2271,6 +2343,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           title: 'child without availability',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
@@ -2286,6 +2359,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             },
           },
         },
+        overrideAccess: true,
       })
       const resultReferences = result.children.docs
         .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
@@ -2313,6 +2387,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           title: 'child without availability',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
@@ -2328,6 +2403,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             },
           },
         },
+        overrideAccess: true,
       })
       const resultReferences = result.children.docs
         .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
@@ -2355,6 +2431,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           title: 'child without availability',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
@@ -2370,6 +2447,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             },
           },
         },
+        overrideAccess: true,
       })
       const resultReferences = result.children.docs
         .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
@@ -2395,6 +2473,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             title: 'child without availability',
           },
           depth: 0,
+          overrideAccess: true,
         })
 
         const result = await payload.findByID({
@@ -2410,6 +2489,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
               },
             },
           },
+          overrideAccess: true,
         })
         const resultReferences = result.children.docs
           .map(({ relationTo, value }) => `${relationTo}:${value.id.toString()}`)
@@ -2442,6 +2522,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             },
           },
         },
+        overrideAccess: true,
       })
 
       expect(result.children.docs).toHaveLength(1)
@@ -2515,6 +2596,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           title: 'available child',
         },
         depth: 0,
+        overrideAccess: true,
       })
 
       const result = await payload.findByID({
@@ -2544,6 +2626,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           collection: operatorHandlerJoinParentsSlug,
           data: {},
           depth: 0,
+          overrideAccess: true,
         })
 
         const matchingChild = await payload.create({
@@ -2554,6 +2637,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             title: 'allowed',
           },
           depth: 0,
+          overrideAccess: true,
         })
         await payload.create({
           collection: operatorHandlerJoinNotesSlug,
@@ -2563,6 +2647,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             title: 'BLOCKED',
           },
           depth: 0,
+          overrideAccess: true,
         })
 
         const result = await payload.findByID({
@@ -3033,6 +3118,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           collection: operatorHandlerJoinParentsSlug,
           data: {},
           depth: 0,
+          overrideAccess: true,
         })
         const matchingChild = await payload.create({
           collection: operatorHandlerJoinArticlesSlug,
@@ -3041,6 +3127,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             parent,
           },
           depth: 0,
+          overrideAccess: true,
         })
         const excludedChild = await payload.create({
           collection: operatorHandlerJoinNotesSlug,
@@ -3049,6 +3136,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
             parent,
           },
           depth: 0,
+          overrideAccess: true,
         })
 
         const result = await payload.findByID({
@@ -3192,6 +3280,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           tags: ['available'],
           title: 'restricted child',
         },
+        overrideAccess: true,
       })
 
       const query = `query {
@@ -3240,7 +3329,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   })
 
   test('should support where querying by a top level join field', async ({ payload }) => {
-    const category = await payload.create({ collection: 'categories', data: {}, overrideAccess: true })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { category: category.id, title: 'my-title' },
@@ -3248,8 +3341,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     })
     const found = await payload.find({
       collection: 'categories',
-      where: { 'relatedPosts.title': { equals: 'my-title' } },
       overrideAccess: true,
+      where: { 'relatedPosts.title': { equals: 'my-title' } },
     })
 
     expect(found.docs).toHaveLength(1)
@@ -3257,7 +3350,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   })
 
   test('should support where querying by a join field as ID', async ({ payload }) => {
-    const category = await payload.create({ collection: 'categories', data: {}, overrideAccess: true })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     const post = await payload.create({
       collection: 'posts',
       data: { category: category.id, title: 'my-title' },
@@ -3265,8 +3362,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     })
     const found_1 = await payload.find({
       collection: 'categories',
-      where: { 'relatedPosts.id': { equals: post.id } },
       overrideAccess: true,
+      where: { 'relatedPosts.id': { equals: post.id } },
     })
 
     expect(found_1.docs).toHaveLength(1)
@@ -3274,8 +3371,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
     const found_2 = await payload.find({
       collection: 'categories',
-      where: { relatedPosts: { equals: post.id } },
       overrideAccess: true,
+      where: { relatedPosts: { equals: post.id } },
     })
 
     expect(found_2.docs).toHaveLength(1)
@@ -3285,7 +3382,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should support where querying by a join field with hasMany relationship', async ({
     payload,
   }) => {
-    const category = await payload.create({ collection: 'categories', data: {}, overrideAccess: true })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { categories: [category.id], title: 'my-title' },
@@ -3294,8 +3395,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
     const found = await payload.find({
       collection: 'categories',
-      where: { 'hasManyPosts.title': { equals: 'my-title' } },
       overrideAccess: true,
+      where: { 'hasManyPosts.title': { equals: 'my-title' } },
     })
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
@@ -3304,7 +3405,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should support where querying by a join field with relationship nested to a group', async ({
     payload,
   }) => {
-    const category = await payload.create({ collection: 'categories', data: {}, overrideAccess: true })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { group: { category: category.id }, title: 'my-category-title' },
@@ -3312,8 +3417,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     })
     const found = await payload.find({
       collection: 'categories',
-      where: { 'group.relatedPosts.title': { equals: 'my-category-title' } },
       overrideAccess: true,
+      where: { 'group.relatedPosts.title': { equals: 'my-category-title' } },
     })
 
     expect(found.docs).toHaveLength(1)
@@ -3323,7 +3428,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should support where querying by a join field with relationship nested to an array', async ({
     payload,
   }) => {
-    const category = await payload.create({ collection: 'categories', data: {}, overrideAccess: true })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     const post = await payload.create({
       collection: 'posts',
       data: { array: [{ category: category.id }], title: 'array-join-where-test' },
@@ -3331,19 +3440,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     })
     const found = await payload.find({
       collection: 'categories',
-      where: { 'arrayPosts.title': { equals: 'array-join-where-test' } },
       overrideAccess: true,
+      where: { 'arrayPosts.title': { equals: 'array-join-where-test' } },
     })
 
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
 
-    await payload.delete({ collection: 'posts', id: post.id, overrideAccess: true })
-    await payload.delete({ collection: 'categories', id: category.id, overrideAccess: true })
+    await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
+    await payload.delete({ id: category.id, collection: 'categories', overrideAccess: true })
   })
 
   test('should support where querying by a join field multiple times', async ({ payload }) => {
-    const category = await payload.create({ collection: 'categories', data: {}, overrideAccess: true })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
       data: { group: { category: category.id }, isFiltered: true, title: 'my-category-title' },
@@ -3352,6 +3465,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
     const found = await payload.find({
       collection: 'categories',
+      overrideAccess: true,
       where: {
         and: [
           {
@@ -3365,7 +3479,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           },
         ],
       },
-      overrideAccess: true,
     })
 
     expect(found.docs).toHaveLength(1)
@@ -3375,15 +3488,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
   test('should support where querying by a join field with hasMany relationship multiple times', async ({
     payload,
   }) => {
-    const category = await payload.create({ collection: 'categories', data: {}, overrideAccess: true })
+    const category = await payload.create({
+      collection: 'categories',
+      data: {},
+      overrideAccess: true,
+    })
     await payload.create({
       collection: 'posts',
-      data: { categories: [category.id], title: 'my-title', isFiltered: true },
+      data: { categories: [category.id], isFiltered: true, title: 'my-title' },
       overrideAccess: true,
     })
 
     const found = await payload.find({
       collection: 'categories',
+      overrideAccess: true,
       where: {
         and: [
           {
@@ -3397,7 +3515,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
           },
         ],
       },
-      overrideAccess: true,
     })
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
@@ -3411,13 +3528,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
 
         const response = await restClient.GET('/categories', {
           query: {
-            limit: 1,
             joins: {
               polymorphicJoin: {
                 limit: 1,
                 where: { x: { $raw: 'EXISTS(SELECT 1 FROM pg_sleep(3))' } },
               },
             },
+            limit: 1,
           },
         })
 
@@ -3431,13 +3548,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should reject unknown operators in polymorphic join where', async ({ restClient }) => {
       const response = await restClient.GET('/categories', {
         query: {
-          limit: 1,
           joins: {
             polymorphicJoin: {
               limit: 1,
               where: { x: { $raw: 'true' } },
             },
           },
+          limit: 1,
         },
       })
 
@@ -3447,13 +3564,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     test('should allow valid operators in polymorphic join where', async ({ restClient }) => {
       const response = await restClient.GET('/categories', {
         query: {
-          limit: 1,
           joins: {
             polymorphicJoin: {
               limit: 1,
               where: { title: { equals: 'test' } },
             },
           },
+          limit: 1,
         },
       })
 
@@ -3518,13 +3635,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       for (const where of payloads) {
         const response = await restClient.GET('/categories', {
           query: {
-            limit: 1,
             joins: {
               polymorphicJoin: {
                 limit: 1,
                 where,
               },
             },
+            limit: 1,
           },
         })
 
@@ -3537,13 +3654,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       // Arrays must be rejected the same as other value types.
       const response = await restClient.GET('/categories', {
         query: {
-          limit: 1,
           joins: {
             polymorphicJoin: {
               limit: 1,
               where: { x: { $raw: ['true'] } },
             },
           },
+          limit: 1,
         },
       })
 
@@ -3568,13 +3685,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       for (const path of badPaths) {
         const response = await restClient.GET('/categories', {
           query: {
-            limit: 1,
             joins: {
               polymorphicJoin: {
                 limit: 1,
                 where: { [path]: { equals: 'test' } },
               },
             },
+            limit: 1,
           },
         })
 
@@ -3587,13 +3704,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
       // buildSQLWhere. The $raw operator must still be rejected.
       const response = await restClient.GET('/categories', {
         query: {
-          limit: 1,
           joins: {
             relatedPosts: {
               limit: 1,
               where: { title: { $raw: 'true' } },
             },
           },
+          limit: 1,
         },
       })
 
@@ -3623,8 +3740,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
         payload.find({
           collection: postsSlug,
           limit: 1,
-          where: { title: { $raw: 'true' } } as any,
           overrideAccess: true,
+          where: { title: { $raw: 'true' } } as any,
         }),
       ).rejects.toBeTruthy()
     })
@@ -3675,7 +3792,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
     }) => {
       const response = await restClient.GET('/categories', {
         query: {
-          limit: 1,
           joins: {
             polymorphicJoin: {
               limit: 1,
@@ -3684,6 +3800,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', (
               },
             },
           },
+          limit: 1,
         },
       })
 
@@ -3699,11 +3816,11 @@ async function createPost(
 ) {
   return payload.create({
     collection: postsSlug,
-    locale,
     data: {
       title: 'test',
       ...overrides,
     },
+    locale,
     overrideAccess: true,
   })
 }

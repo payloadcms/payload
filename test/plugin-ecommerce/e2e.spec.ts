@@ -88,8 +88,8 @@ test.describe('Ecommerce Plugin', () => {
     const seededVariants = await payload.find({
       collection: 'variants',
       limit: 1,
-      where: { priceInUSD: { equals: 1999 } },
       overrideAccess: true,
+      where: { priceInUSD: { equals: 1999 } },
     })
 
     if (seededVariants.docs.length > 0) {
@@ -206,8 +206,8 @@ test.describe('Ecommerce Plugin', () => {
 
       const updatedProductResult = await payload.find({
         collection: 'products',
-        where: { id: { equals: editableProduct.id } },
         overrideAccess: true,
+        where: { id: { equals: editableProduct.id } },
       })
       expect(updatedProductResult.docs[0]?.priceInUSD).toBe(2499)
     })

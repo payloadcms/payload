@@ -30,8 +30,8 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
   test.afterEach(async ({ payload }) => {
     const relationshipDocs = await payload.find({
       collection: slug,
-      pagination: false,
       overrideAccess: true,
+      pagination: false,
       where: {
         filter: {
           equals: constrainedFilterValue,
@@ -41,16 +41,16 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
 
     for (const doc of relationshipDocs.docs) {
       await payload.delete({
-        collection: slug,
         id: doc.id,
+        collection: slug,
         overrideAccess: true,
       })
     }
 
     const relationDocs = await payload.find({
       collection: relationRestrictedSlug,
-      pagination: false,
       overrideAccess: true,
+      pagination: false,
       where: {
         name: {
           equals: constrainedRelationName,
@@ -60,8 +60,8 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
 
     for (const doc of relationDocs.docs) {
       await payload.delete({
-        collection: relationRestrictedSlug,
         id: doc.id,
+        collection: relationRestrictedSlug,
         overrideAccess: true,
       })
     }
@@ -85,6 +85,7 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
         relationshipRestrictedFiltered: relationDoc.id,
       },
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(doc.relationshipRestrictedFiltered).toBe(relationDoc.id)
@@ -138,18 +139,18 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
       const version1 = await payload.create({
         collection: versionedRelationshipFieldSlug,
         data: {
-          title: 'Version 1 Title',
           relationshipField: {
-            value: relatedDoc.id,
             relationTo: collection1Slug,
+            value: relatedDoc.id,
           },
+          title: 'Version 1 Title',
         },
         overrideAccess: true,
       })
 
       const version2 = await payload.update({
-        collection: versionedRelationshipFieldSlug,
         id: version1.id,
+        collection: versionedRelationshipFieldSlug,
         data: {
           title: 'Version 2 Title',
         },
@@ -158,14 +159,14 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
 
       const versions = await payload.findVersions({
         collection: versionedRelationshipFieldSlug,
+        limit: 1,
+        overrideAccess: true,
+        sort: '-updatedAt',
         where: {
           parent: {
             equals: version2.id,
           },
         },
-        sort: '-updatedAt',
-        limit: 1,
-        overrideAccess: true,
       })
 
       version2ID = versions.docs[0].id
@@ -185,8 +186,8 @@ test.suite({ config: './config.ts' })('Relationship Fields', () => {
       payload,
     }) => {
       const version2Data = await payload.findVersionByID({
-        collection: versionedRelationshipFieldSlug,
         id: version2ID,
+        collection: versionedRelationshipFieldSlug,
         locale: 'all',
         overrideAccess: true,
       })

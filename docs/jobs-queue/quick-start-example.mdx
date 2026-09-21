@@ -81,6 +81,7 @@ This defines a reusable task with a unique `slug`, an `inputSchema` that validat
               userEmail: doc.email,
               userName: doc.name,
             },
+            overrideAccess: true,
           })
         }
       },
@@ -292,6 +293,7 @@ export default buildConfig({
 await payload.jobs.queue({
   task: 'publishPost',
   input: { postId: '123' },
+  overrideAccess: true,
   waitUntil: new Date('2024-12-25T15:00:00Z'), // Runs once at this time
 })
 ```

@@ -16,6 +16,7 @@ test.suite({ config: './config.ts', cron: false })('Queues - CLI', () => {
       input: {
         message: 'hello!',
       },
+      overrideAccess: true,
     })
 
     const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE

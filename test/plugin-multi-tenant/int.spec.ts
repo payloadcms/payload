@@ -60,22 +60,22 @@ test.suite({
       test.beforeEach(async ({ payload }) => {
         anchorBarRelationships = await payload.find({
           collection: 'relationships',
+          overrideAccess: true,
           where: {
             'tenant.name': {
               equals: 'Anchor Bar',
             },
           },
-          overrideAccess: true,
         })
 
         blueDogRelationships = await payload.find({
           collection: 'relationships',
+          overrideAccess: true,
           where: {
             'tenant.name': {
               equals: 'Blue Dog',
             },
           },
-          overrideAccess: true,
         })
 
         // @ts-expect-error unsafe access okay in test
@@ -96,10 +96,10 @@ test.suite({
             relationship: anchorBarRelationships.docs[0].id,
             tenant: anchorBarTenantID,
           },
+          overrideAccess: true,
           req: {
             headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
           },
-          overrideAccess: true,
         })
 
         // @ts-expect-error unsafe access okay in test
@@ -118,10 +118,10 @@ test.suite({
               relationship: blueDogRelationships.docs[0].id,
               tenant: anchorBarTenantID,
             },
+            overrideAccess: true,
             req: {
               headers: new Headers([['cookie', `payload-tenant=${anchorBarTenantID}`]]),
             },
-            overrideAccess: true,
           }),
         ).rejects.toThrow('The following field is invalid: Relationship')
       })
@@ -139,8 +139,8 @@ test.suite({
               relationship: blueDogRelationships.docs[0].id,
               tenant: anchorBarTenantID,
             },
-            req: {},
             overrideAccess: true,
+            req: {},
           }),
         ).rejects.toThrow('The following field is invalid: Relationship')
       })
@@ -229,8 +229,8 @@ test.suite({
         data: {
           email: 'admin-empty-tenants@test.com',
           password: 'test',
-          tenants: [],
           roles: ['admin'],
+          tenants: [],
         },
         overrideAccess: true,
       })
@@ -335,10 +335,12 @@ test.suite({
       tenantA = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Membership Tenant A', domain: 'membership-a.test' },
+        overrideAccess: true,
       })
       tenantB = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Membership Tenant B', domain: 'membership-b.test' },
+        overrideAccess: true,
       })
       // @ts-expect-error The generated user type contains more fields than this test needs.
       tenantMemberUser = await payload.create({
@@ -348,23 +350,24 @@ test.suite({
           password: 'test',
           tenants: [{ tenant: tenantA.id }],
         },
+        overrideAccess: true,
       })
     })
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdRelationshipIDs) {
-        await payload.delete({ id, collection: relationshipsSlug })
+        await payload.delete({ id, collection: relationshipsSlug, overrideAccess: true })
       }
       createdRelationshipIDs.length = 0
 
       for (const id of createdAutosaveIDs) {
-        await payload.delete({ id, collection: autosaveGlobalSlug })
+        await payload.delete({ id, collection: autosaveGlobalSlug, overrideAccess: true })
       }
       createdAutosaveIDs.length = 0
 
-      await payload.delete({ id: tenantMemberUser.id, collection: usersSlug })
-      await payload.delete({ id: tenantA.id, collection: tenantsSlug })
-      await payload.delete({ id: tenantB.id, collection: tenantsSlug })
+      await payload.delete({ id: tenantMemberUser.id, collection: usersSlug, overrideAccess: true })
+      await payload.delete({ id: tenantA.id, collection: tenantsSlug, overrideAccess: true })
+      await payload.delete({ id: tenantB.id, collection: tenantsSlug, overrideAccess: true })
     })
 
     const loginAsTenantMember = async (restClient: NextRESTClient): Promise<string> => {
@@ -426,6 +429,7 @@ test.suite({
 
       const written = await payload.find({
         collection: relationshipsSlug,
+        overrideAccess: true,
         where: { title: { equals: 'Tenant B REST document' } },
       })
 
@@ -458,6 +462,7 @@ test.suite({
         id: ownDocument.id,
         collection: relationshipsSlug,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(unchangedDocument.tenant).toBe(tenantA.id)
@@ -479,6 +484,7 @@ test.suite({
 
       const written = await payload.find({
         collection: autosaveGlobalSlug,
+        overrideAccess: true,
         where: { title: { equals: 'Tenant B REST draft' } },
       })
 
@@ -614,8 +620,8 @@ test.suite({
 
       const remainingTenants = await payload.find({
         collection: tenantsSlug,
-        where: { id: { equals: tenant.id } },
         overrideAccess: true,
+        where: { id: { equals: tenant.id } },
       })
 
       expect(remainingTenants.docs).toHaveLength(0)
@@ -639,8 +645,8 @@ test.suite({
       const post = await payload.create({
         collection: multiTenantPostsSlug,
         data: {
-          title: 'Multi-tenant post',
           tenant: [tenant1.id, tenant2.id],
+          title: 'Multi-tenant post',
         },
         overrideAccess: true,
       })

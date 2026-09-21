@@ -90,12 +90,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       await payload.find({
         collection: arrayFieldsSlug,
         depth: 0,
+        overrideAccess: true,
         where: {
           title: {
             equals: 'array doc 1',
           },
         },
-        overrideAccess: true,
       })
     ).docs[0].id
 
@@ -103,12 +103,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       await payload.find({
         collection: uploadsSlug,
         depth: 0,
+        overrideAccess: true,
         where: {
           filename: {
             equals: 'payload.jpg',
           },
         },
-        overrideAccess: true,
       })
     ).docs[0].id
 
@@ -116,12 +116,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       await payload.find({
         collection: textFieldsSlug,
         depth: 0,
+        overrideAccess: true,
         where: {
           text: {
             equals: 'Seeded text document',
           },
         },
-        overrideAccess: true,
       })
     ).docs[0].id
 
@@ -129,12 +129,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       await payload.find({
         collection: richTextFieldsSlug,
         depth: 0,
+        overrideAccess: true,
         where: {
           title: {
             equals: 'Rich Text',
           },
         },
-        overrideAccess: true,
       })
     ).docs[0].id
   })
@@ -147,11 +147,11 @@ test.suite({ config: './config.ts' })('Lexical', () => {
             nodes: [
               {
                 type: 'heading',
-                tag: 'h1',
                 children: [],
                 direction: 'ltr',
                 format: '',
                 indent: 0,
+                tag: 'h1',
                 version: 1,
               },
             ],
@@ -249,6 +249,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const doc = await payload.create({
         collection: lexicalListsFeatureSlug,
         data: { onlyOrderedList: listData },
+        overrideAccess: true,
       })
       const invalidData = JSON.parse(JSON.stringify(listData))
 
@@ -272,6 +273,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const savedDoc = await payload.findByID({
         id: doc.id,
         collection: lexicalListsFeatureSlug,
+        overrideAccess: true,
       })
 
       expect(savedDoc.onlyOrderedList).toEqual(listData)
@@ -282,12 +284,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: richTextFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -321,12 +323,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: richTextFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -362,12 +364,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: richTextFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: richTextDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -389,6 +391,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           email: 'related-user@example.com',
           password: 'test-password',
         },
+        overrideAccess: true,
       })
 
       const originalReadAccess = payload.collections[usersSlug].config.access.read
@@ -418,6 +421,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         const doc = await payload.create({
           collection: lexicalRelationshipFieldsSlug,
           data: {},
+          overrideAccess: true,
         })
 
         // Simulate existing content referencing a collection outside enabledCollections.
@@ -432,6 +436,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           id: doc.id,
           collection: lexicalRelationshipFieldsSlug,
           depth: 2,
+          overrideAccess: true,
         })
 
         const storedNode = rendered.richText.root.children[0] as SerializedRelationshipNode
@@ -442,17 +447,22 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       }
     })
 
-    for (const { fieldName, relationTo, type } of [
-      { fieldName: 'richText', relationTo: textFieldsSlug, type: 'relationship' },
-      { fieldName: 'richText', relationTo: uploads2Slug, type: 'upload' },
-      { fieldName: 'richText', relationTo: usersSlug, type: 'upload' },
-      { fieldName: 'richText3', relationTo: uploadsSlug, type: 'upload' },
+    for (const { type, fieldName, relationTo } of [
+      { type: 'relationship', fieldName: 'richText', relationTo: textFieldsSlug },
+      { type: 'upload', fieldName: 'richText', relationTo: uploads2Slug },
+      { type: 'upload', fieldName: 'richText', relationTo: usersSlug },
+      { type: 'upload', fieldName: 'richText3', relationTo: uploadsSlug },
     ] as const) {
       test(`should enforce ${fieldName} collection restrictions for ${type} nodes referencing ${relationTo}`, async ({
         payload,
         restClient,
       }) => {
-        const { docs: targets } = await payload.find({ collection: relationTo, depth: 0, limit: 1 })
+        const { docs: targets } = await payload.find({
+          collection: relationTo,
+          depth: 0,
+          limit: 1,
+          overrideAccess: true,
+        })
         const targetID = targets[0].id
         const node = {
           id: 'test-upload-node',
@@ -473,6 +483,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         const doc = await payload.create({
           collection: lexicalRelationshipFieldsSlug,
           data: {},
+          overrideAccess: true,
         })
 
         // Simulate existing content referencing a collection not enabled for this field.
@@ -486,6 +497,7 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           id: doc.id,
           collection: lexicalRelationshipFieldsSlug,
           depth: 2,
+          overrideAccess: true,
         })
 
         expect(localDoc[fieldName].root.children[0].value).toBe(targetID)
@@ -547,52 +559,52 @@ test.suite({ config: './config.ts' })('Lexical', () => {
   test('ensure link nodes convert to markdown', async ({ payload }) => {
     const newLexicalDoc = await payload.create({
       collection: lexicalFieldsSlug,
-      depth: 0,
       data: {
-        title: 'Lexical Markdown Test',
         lexicalWithBlocks: {
           root: {
             type: 'root',
-            format: '',
-            indent: 0,
-            version: 1,
             children: [
               {
+                type: 'paragraph',
                 children: [
                   {
+                    type: 'autolink',
                     children: [
                       {
+                        type: 'text',
                         detail: 0,
                         format: 0,
                         mode: 'normal',
                         style: '',
                         text: 'link to payload',
-                        type: 'text',
                         version: 1,
                       },
                     ],
                     direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    type: 'autolink',
-                    version: 2,
                     fields: {
                       linkType: 'custom',
                       url: 'https://payloadcms.com',
                     },
+                    format: '',
+                    indent: 0,
+                    version: 2,
                   },
                 ],
                 direction: 'ltr',
                 format: '',
                 indent: 0,
-                type: 'paragraph',
                 version: 1,
               },
             ],
             direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
           },
         },
+        title: 'Lexical Markdown Test',
       },
+      depth: 0,
       overrideAccess: true,
     })
 
@@ -605,29 +617,29 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     test('exports upload node to markdown placeholder when unpopulated', async ({ payload }) => {
       const newLexicalDoc = await payload.create({
         collection: lexicalFieldsSlug,
-        depth: 0,
         data: {
-          title: 'Lexical Upload Markdown Unpopulated',
           lexicalWithBlocks: {
             root: {
               type: 'root',
-              format: '',
-              indent: 0,
-              version: 1,
               children: [
                 {
-                  format: '',
                   type: 'upload',
-                  version: 2,
+                  fields: {},
+                  format: '',
                   relationTo: 'uploads',
                   value: createdJPGDocID,
-                  fields: {},
+                  version: 2,
                 },
               ],
               direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
             },
           },
+          title: 'Lexical Upload Markdown Unpopulated',
         },
+        depth: 0,
         overrideAccess: true,
       })
 
@@ -638,8 +650,8 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const lexicalDoc = await payload.find({
         collection: lexicalFieldsSlug,
         depth: 0,
-        where: { title: { equals: lexicalDocData.title } },
         overrideAccess: true,
+        where: { title: { equals: lexicalDocData.title } },
       })
 
       const markdown = lexicalDoc.docs[0]?.lexicalWithBlocks_markdown as string
@@ -654,12 +666,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -679,12 +691,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -706,12 +718,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -740,12 +752,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -779,12 +791,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 0,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -814,12 +826,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 1,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -864,12 +876,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
         await payload.find({
           collection: lexicalFieldsSlug,
           depth: 2,
+          overrideAccess: true,
           where: {
             title: {
               equals: lexicalDocData.title,
             },
           },
-          overrideAccess: true,
         })
       ).docs[0] as never
 
@@ -911,12 +923,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const lexicalDocEN = await payload.find({
         collection: 'lexical-localized-fields',
         locale: 'en',
+        overrideAccess: true,
         where: {
           title: {
             equals: 'Localized Lexical en',
           },
         },
-        overrideAccess: true,
       })
 
       expect(lexicalDocEN.docs[0].lexicalBlocksLocalized.root.children[0].children[0].text).toEqual(
@@ -924,9 +936,9 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       )
 
       const lexicalDocES = await payload.findByID({
+        id: lexicalDocEN.docs[0].id,
         collection: 'lexical-localized-fields',
         locale: 'es',
-        id: lexicalDocEN.docs[0].id,
         overrideAccess: true,
       })
 
@@ -941,12 +953,12 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const lexicalDocEN = await payload.find({
         collection: 'lexical-localized-fields',
         locale: 'en',
+        overrideAccess: true,
         where: {
           title: {
             equals: 'Localized Lexical en',
           },
         },
-        overrideAccess: true,
       })
 
       expect(
@@ -959,9 +971,9 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       ).toEqual('English text in block')
 
       const lexicalDocES = await payload.findByID({
+        id: lexicalDocEN.docs[0].id,
         collection: 'lexical-localized-fields',
         locale: 'es',
-        id: lexicalDocEN.docs[0].id,
         overrideAccess: true,
       })
 
@@ -979,15 +991,15 @@ test.suite({ config: './config.ts' })('Lexical', () => {
     test('ensure hook within number field within lexical block runs', async ({ payload }) => {
       const lexicalDocEN = await payload.create({
         collection: 'lexical-localized-fields',
-        locale: 'en',
         data: {
-          title: 'Localized Lexical hooks',
           lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'some text' }),
           lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
             'Shared text',
             'English text in block',
           ) as any,
+          title: 'Localized Lexical hooks',
         },
+        locale: 'en',
         overrideAccess: true,
       })
 
@@ -997,10 +1009,10 @@ test.suite({ config: './config.ts' })('Lexical', () => {
 
       // update document with same data
       const lexicalDocENUpdated = await payload.update({
-        collection: 'lexical-localized-fields',
-        locale: 'en',
         id: lexicalDocEN.id,
+        collection: 'lexical-localized-fields',
         data: lexicalDocEN,
+        locale: 'en',
         overrideAccess: true,
       })
 
@@ -1023,33 +1035,33 @@ test.suite({ config: './config.ts' })('Lexical', () => {
       const doc = await payload.create({
         collection: 'lexical-autosave',
         data: {
-          title: 'Autosave test document',
           cta: [
             {
               richText: {
                 root: {
+                  type: 'root',
                   children: [
                     {
                       type: 'block',
-                      version: 2,
-                      format: '',
                       fields: {
                         id: 'block-id-1',
                         blockName: '',
                         blockTitle: 'Initial block title',
                         blockType: 'textBlock',
                       },
+                      format: '',
+                      version: 2,
                     },
                   ],
                   direction: null,
                   format: '',
                   indent: 0,
-                  type: 'root',
                   version: 1,
                 },
               },
             },
           ],
+          title: 'Autosave test document',
         },
         overrideAccess: true,
       })
@@ -1063,36 +1075,36 @@ test.suite({ config: './config.ts' })('Lexical', () => {
 
       // Simulate autosave by updating the document
       await payload.update({
-        collection: 'lexical-autosave',
         id: doc.id,
+        collection: 'lexical-autosave',
         data: {
-          title: 'Updated via autosave',
           cta: [
             {
               richText: {
                 root: {
+                  type: 'root',
                   children: [
                     {
                       type: 'block',
-                      version: 2,
-                      format: '',
                       fields: {
                         id: 'block-id-1',
                         blockName: '',
                         blockTitle: 'Updated block title',
                         blockType: 'textBlock',
                       },
+                      format: '',
+                      version: 2,
                     },
                   ],
                   direction: null,
                   format: '',
                   indent: 0,
-                  type: 'root',
                   version: 1,
                 },
               },
             },
           ],
+          title: 'Updated via autosave',
         },
         overrideAccess: true,
       })
@@ -1148,24 +1160,24 @@ test.suite({ config: './config.ts' })('Lexical', () => {
 
   const converterVariants = [
     {
-      label: 'Sync',
       heading: HeadingHTMLConverter,
+      label: 'Sync',
       link: LinkHTMLConverter({}),
       list: ListHTMLConverter,
+      noop: noopNodesToHTML,
       table: TableHTMLConverter,
       text: TextHTMLConverter,
       upload: UploadHTMLConverter,
-      noop: noopNodesToHTML,
     },
     {
-      label: 'Async',
       heading: HeadingHTMLConverterAsync,
+      label: 'Async',
       link: LinkHTMLConverterAsync({}),
       list: ListHTMLConverterAsync,
+      noop: noopNodesToHTMLAsync,
       table: TableHTMLConverterAsync,
       text: TextHTMLConverterAsync,
       upload: UploadHTMLConverterAsync,
-      noop: noopNodesToHTMLAsync,
     },
   ] as const
 
@@ -1292,9 +1304,9 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           fields: {},
           relationTo: 'uploads',
           value: {
+            id: '1',
             filename: 'test.pdf',
             height: 100,
-            id: '1',
             mimeType: 'application/pdf',
             sizes: {},
             url: '/uploads/test.pdf',
@@ -1356,9 +1368,9 @@ test.suite({ config: './config.ts' })('Lexical', () => {
               fields: { alt: 'A nice photo' },
               relationTo: 'uploads',
               value: {
+                id: '1',
                 filename: 'photo.jpg',
                 height: 600,
-                id: '1',
                 mimeType: 'image/jpeg',
                 sizes: {},
                 url: '/uploads/photo.jpg',
@@ -1546,9 +1558,9 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           fields: {},
           relationTo: 'uploads',
           value: {
+            id: '1',
             filename: 'photo.jpg',
             height: 600,
-            id: '1',
             mimeType: 'image/jpeg',
             sizes: {
               thumbnail: {

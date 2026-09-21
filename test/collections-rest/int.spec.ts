@@ -36,8 +36,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
   })
 
   test.afterEach(async ({ payload }) => {
-    for (const { collection, id } of createdInputBoundaryRecords.reverse()) {
-      await payload.delete({ collection: collection as any, id })
+    for (const { id, collection } of createdInputBoundaryRecords.reverse()) {
+      await payload.delete({ id, collection: collection as any, overrideAccess: true })
     }
 
     createdInputBoundaryRecords.length = 0
@@ -140,8 +140,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         data: {
           items: [],
         },
+        overrideAccess: true,
       })
-      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
       const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
         body: JSON.stringify({
@@ -157,6 +158,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         id: doc.id,
         collection: updateShapesSlug as any,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(response.status).toBe(400)
@@ -169,8 +171,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         data: {
           items: [],
         },
+        overrideAccess: true,
       })
-      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
       const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
         body: JSON.stringify({
@@ -202,8 +205,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         data: {
           content: [initialBlock],
         },
+        overrideAccess: true,
       })
-      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
       const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
         body: JSON.stringify({
@@ -219,6 +223,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         collection: updateShapesSlug as any,
         depth: 0,
         draft: true,
+        overrideAccess: true,
       })
 
       expect(updated.content).toHaveLength(1)
@@ -232,8 +237,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         data: {
           content: [],
         },
+        overrideAccess: true,
       })
-      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
       const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
         body: JSON.stringify({
@@ -265,13 +271,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         data: {
           name: 'related',
         },
+        overrideAccess: true,
       })
-      createdInputBoundaryRecords.push({ collection: relationSlug, id: relation.id })
+      createdInputBoundaryRecords.push({ id: relation.id, collection: relationSlug })
       const doc = await payload.create({
         collection: updateShapesSlug as any,
         data: {},
+        overrideAccess: true,
       })
-      createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
 
       const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
         body: JSON.stringify({
@@ -302,16 +310,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
           data: {
             name: 'related',
           },
+          overrideAccess: true,
         })
-        createdInputBoundaryRecords.push({ collection: relationSlug, id: relation.id })
+        createdInputBoundaryRecords.push({ id: relation.id, collection: relationSlug })
         const doc = await payload.create({
           collection: updateShapesSlug as any,
           data: {
             number: 1,
             relations: [relation.id],
           },
+          overrideAccess: true,
         })
-        createdInputBoundaryRecords.push({ collection: updateShapesSlug, id: doc.id })
+        createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
         let data
 
         if (shape === 'number object') {
@@ -439,10 +449,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
         expect(docs.pop().description).toEqual(description)
 
         const { docs: resDocs } = await payload.find({
-          limit: 10,
           collection: postsSlug,
-          where: { id: { in: ids } },
+          limit: 10,
           overrideAccess: true,
+          where: { id: { in: ids } },
         })
         expect(resDocs.at(-1).description).toEqual('to-update')
       })
@@ -609,8 +619,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
 
           const { docs, errors } = await payload.delete({
             collection: postsSlug,
-            where: { title: { equals: 'title' } },
             overrideAccess: true,
+            where: { title: { equals: 'title' } },
           })
 
           expect(errors).toHaveLength(0)
@@ -1614,7 +1624,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
             expect(result.docs.map((d: { id: number | string }) => d.id)).toContain(createdId)
           } finally {
             if (createdId !== undefined) {
-              await payload.delete({ collection: pointSlug, id: createdId, overrideAccess: true })
+              await payload.delete({ id: createdId, collection: pointSlug, overrideAccess: true })
             }
           }
         })
@@ -2118,7 +2128,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
           err = error
           errResult = result
 
-          return { status: 400, response: { modified: true } }
+          return { response: { modified: true }, status: 400 }
         },
       ]
 
@@ -2149,7 +2159,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
       let collection: SanitizedCollectionConfig
 
       payload.collections.posts.config.hooks.afterError = [
-        ({ error, result, collection: incomingCollection }) => {
+        ({ collection: incomingCollection, error, result }) => {
           err = error
           errResult = result
           collection = incomingCollection
@@ -2190,10 +2200,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
       const post = await createPost({ restClient })
       const id = typeof post.id === 'string' ? randomUUID() : 999
       await expect(
-        payload.findByID({ collection: 'posts', id, overrideAccess: true }),
+        payload.findByID({ id, collection: 'posts', overrideAccess: true }),
       ).rejects.toBeInstanceOf(NotFound)
       await expect(
-        payload.findByID({ collection: 'posts', id, disableErrors: true, overrideAccess: true }),
+        payload.findByID({ id, collection: 'posts', disableErrors: true, overrideAccess: true }),
       ).resolves.toBeNull()
     })
   })
@@ -2294,18 +2304,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
     await expect(
       payload.update({
         collection: 'disabled-bulk-edit-docs',
-        where: {},
         data: {},
         overrideAccess: false,
+        where: {},
       }),
     ).rejects.toBeInstanceOf(APIError)
 
     await expect(
       payload.update({
         collection: 'disabled-bulk-edit-docs',
-        where: {},
         data: {},
         overrideAccess: true,
+        where: {},
       }),
     ).resolves.toBeTruthy()
   })
@@ -2320,8 +2330,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
     await expect(
       payload.delete({
         collection: 'disabled-bulk-delete-docs',
-        where: {},
         overrideAccess: false,
+        where: {},
       }),
     ).rejects.toBeInstanceOf(APIError)
 
@@ -2333,8 +2343,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
 
     await expect(
       payload.delete({
-        collection: 'disabled-bulk-delete-docs',
         id: doc.id,
+        collection: 'disabled-bulk-delete-docs',
         overrideAccess: true,
       }),
     ).resolves.toBeTruthy()
@@ -2342,8 +2352,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('collections-res
     await expect(
       payload.delete({
         collection: 'disabled-bulk-delete-docs',
-        where: {},
         overrideAccess: true,
+        where: {},
       }),
     ).resolves.toBeTruthy()
   })
@@ -2370,7 +2380,7 @@ async function createPosts({ restClient }: { restClient: NextRESTClient }, count
 async function clearDocs({ payload }: { payload: Payload }): Promise<void> {
   await payload.delete({
     collection: postsSlug,
-    where: { id: { exists: true } },
     overrideAccess: true,
+    where: { id: { exists: true } },
   })
 }

@@ -87,6 +87,7 @@ schedule: [{ cron: '0 15 * * *', queue: 'default' }] // Runs every day at 3pm
 await payload.jobs.queue({
   task: 'publishPost',
   input: { postId: '123' },
+  overrideAccess: true,
   waitUntil: new Date('2024-12-25T15:00:00Z'), // Runs once at this specific time
 })
 
