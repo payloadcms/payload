@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -20,7 +21,7 @@ import {
   rewritePackageJson,
 } from './rewritePackageJson.js'
 import { runInstall } from './runInstall.js'
-import { RUNBOOK_RELATIVE_PATH } from './types.js'
+import { MIGRATION_GUIDE_RELATIVE_PATH, RUNBOOK_RELATIVE_PATH } from './types.js'
 
 export type UpgradeFlags = {
   dry: boolean
@@ -47,14 +48,11 @@ const defaultDeps = (): UpgradeDeps => ({
     return (await res.json()) as RegistryPackument
   },
   spawn: (command, args, options) =>
-    import('node:child_process').then(
-      ({ spawn }) =>
-        new Promise((resolveSpawn) => {
-          const child = spawn(command, args, { ...options, shell: false, stdio: 'inherit' })
-          child.on('close', (code) => resolveSpawn({ code: code ?? 1 }))
-          child.on('error', () => resolveSpawn({ code: 1 }))
-        }),
-    ),
+    new Promise((resolveSpawn) => {
+      const child = spawn(command, args, { ...options, shell: false, stdio: 'inherit' })
+      child.on('close', (code) => resolveSpawn({ code: code ?? 1 }))
+      child.on('error', () => resolveSpawn({ code: 1 }))
+    }),
 })
 
 /**
@@ -140,18 +138,24 @@ export async function runUpgrade(
   }
 
   // 7. REPORT
+  const distDir = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+  const migrationGuideAbsPath = join(distDir, MIGRATION_GUIDE_RELATIVE_PATH)
   const model: ReportModel = {
     floorsWritten: summary.floorsWritten,
+    migrationGuidePath: deps.exists(migrationGuideAbsPath) ? migrationGuideAbsPath : undefined,
     nextTarget: resolved.nextTarget,
     overridesRemoved: summary.overridesRemoved,
     placeholdersSkipped: summary.placeholdersSkipped,
-    runbookPath: resolve(dirname(fileURLToPath(import.meta.url)), '..', RUNBOOK_RELATIVE_PATH),
+    runbookPath: join(distDir, RUNBOOK_RELATIVE_PATH),
     transforms: results,
     versions,
   }
   console.log(renderReport(model))
 
-  return { failed }
+  // A resolution mismatch means the installed tree is not confirmed v4, so the
+  // run failed even when every transform succeeded (resolution over intent).
+  const resolutionFailed = versions.some((v) => !v.ok)
+  return { failed: failed || resolutionFailed }
 }
 
 function warnStaleNode(resolved: ResolvedVersions): void {
@@ -206,12 +210,19 @@ function readInstalledVersion(projectPath: string, name: string): string | undef
 }
 
 /**
- * Best-effort dirty-tree check. Real detection would shell out to `git
- * status`; until that lands, absence of a signal is treated as clean so the
- * warning never produces a false alarm.
+ * Best-effort dirty-tree check via `git status --porcelain`. Any failure (not a
+ * repo, git missing) yields no signal and is treated as clean, so the warning
+ * never produces a false alarm outside a working git tree.
  */
-function isGitTreeDirty(_projectPath: string): boolean {
-  return false
+function isGitTreeDirty(projectPath: string): boolean {
+  const result = spawnSync('git', ['status', '--porcelain'], {
+    cwd: projectPath,
+    encoding: 'utf8',
+  })
+  if (result.error || result.status !== 0) {
+    return false
+  }
+  return result.stdout.trim().length > 0
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

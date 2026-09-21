@@ -47,6 +47,24 @@ describe('renderReport', () => {
     expect(out).not.toContain('Floors written')
   })
 
+  it('points at the migration guide only when its path is present', () => {
+    const base = {
+      floorsWritten: [],
+      nextTarget: null,
+      overridesRemoved: [],
+      placeholdersSkipped: [],
+      runbookPath: '/x/runbook.md',
+      transforms: [],
+      versions: [],
+    }
+
+    const withGuide = renderReport({ ...base, migrationGuidePath: '/x/dist/runbook/v4.mdx' })
+    expect(withGuide).toContain('migration guide: /x/dist/runbook/v4.mdx')
+
+    const withoutGuide = renderReport(base)
+    expect(withoutGuide).not.toContain('migration guide:')
+  })
+
   it('renders a failed transform with [FAIL] and its error message', () => {
     const out = renderReport({
       floorsWritten: [],

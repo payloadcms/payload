@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
@@ -72,6 +72,36 @@ describe('runUpgrade', () => {
 
     expect(runTransforms).not.toHaveBeenCalled()
     expect(result.failed).toBe(true)
+  })
+
+  it('fails the run when the installed tree does not resolve to v4', async () => {
+    // No node_modules is written, so verifyResolution reads no installed
+    // version and the run must fail even though every transform succeeded.
+    const runTransforms = vi.fn().mockResolvedValue({ failed: false, results: [] })
+
+    const result = await runUpgrade(
+      { flags: { dry: false, force: true, tag: 'canary' }, path: makeProject() },
+      makeDeps(),
+      { runTransforms },
+    )
+
+    expect(result.failed).toBe(true)
+  })
+
+  it('succeeds when the installed tree resolves to the pinned v4 version', async () => {
+    const dir = makeProject()
+    const payloadPkg = join(dir, 'node_modules', 'payload', 'package.json')
+    mkdirSync(join(dir, 'node_modules', 'payload'), { recursive: true })
+    writeFileSync(payloadPkg, JSON.stringify({ version: '4.0.0-canary.20' }))
+    const runTransforms = vi.fn().mockResolvedValue({ failed: false, results: [] })
+
+    const result = await runUpgrade(
+      { flags: { dry: false, force: true, tag: 'canary' }, path: dir },
+      makeDeps(),
+      { runTransforms },
+    )
+
+    expect(result.failed).toBe(false)
   })
 
   it('dry run writes nothing, does not install or transform', async () => {

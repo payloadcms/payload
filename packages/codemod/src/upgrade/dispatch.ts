@@ -103,7 +103,7 @@ async function promptChoiceFromTerminal(agents: Agent[]): Promise<DispatchChoice
       ...agents.map((agent) => ({
         hint: `hand the prompt to \`${agent.command}\``,
         label: agent.label,
-        value: agent.id as string,
+        value: agent.id,
       })),
       {
         hint: 'pin versions, install, run the codemods now',

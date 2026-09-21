@@ -9,6 +9,8 @@ export type VersionReportRow = {
 
 export type ReportModel = {
   floorsWritten: string[]
+  /** Absolute path to the bundled migration guide, when it shipped with this build. */
+  migrationGuidePath?: string
   nextTarget: null | string
   overridesRemoved: string[]
   placeholdersSkipped: string[]
@@ -68,8 +70,11 @@ export function renderReport(model: ReportModel): string {
   )
   lines.push('')
 
-  lines.push('Not done by this command — see the runbook for the remaining steps:')
-  lines.push(`  ${model.runbookPath}`)
+  lines.push('Not done by this command. See these for the remaining steps:')
+  lines.push(`  runbook: ${model.runbookPath}`)
+  if (model.migrationGuidePath) {
+    lines.push(`  migration guide: ${model.migrationGuidePath}`)
+  }
 
   return lines.join('\n')
 }
