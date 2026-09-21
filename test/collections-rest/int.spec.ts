@@ -22,11 +22,25 @@ import {
   pointSlug,
   postsSlug,
   relationSlug,
+  updateShapesSlug,
 } from './config.js'
 
-test.suite({ config: './config.ts' })('collections-rest', () => {
+const createdInputBoundaryRecords: Array<{
+  collection: string
+  id: number | string
+}> = []
+
+test.suite({ config: './config.ts', resetBetweenTests: false })('collections-rest', () => {
   test.beforeEach(async ({ payload }) => {
     await clearDocs({ payload })
+  })
+
+  test.afterEach(async ({ payload }) => {
+    for (const { id, collection } of createdInputBoundaryRecords.reverse()) {
+      await payload.delete({ id, collection: collection as any, overrideAccess: true })
+    }
+
+    createdInputBoundaryRecords.length = 0
   })
 
   test.describe('CRUD', () => {
@@ -120,6 +134,231 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
       expect(doc.description).toEqual(description) // Check was not modified
     })
 
+    test('should reject invalid array update shapes', async ({ payload, restClient }) => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          items: [],
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
+        body: JSON.stringify({
+          items: {
+            $push: {
+              publicField: 'updated',
+              restrictedField: 'managed',
+            },
+          },
+        }),
+      })
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: updateShapesSlug as any,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      expect(response.status).toBe(400)
+      expect(updated.items).toEqual([])
+    })
+
+    test('should accept valid array update shapes', async ({ payload, restClient }) => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          items: [],
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
+        body: JSON.stringify({
+          items: [
+            {
+              publicField: 'updated',
+            },
+          ],
+        }),
+      })
+      const { doc: updated } = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(updated.items).toMatchObject([
+        {
+          publicField: 'updated',
+        },
+      ])
+    })
+
+    test('should reject invalid blocks update shapes', async ({ payload, restClient }) => {
+      const initialBlock = {
+        blockType: 'update-shape-block',
+        publicField: 'initial',
+        restrictedField: 'initial-managed',
+      }
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          content: [initialBlock],
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          content: {
+            blockType: 'update-shape-block',
+            publicField: 'updated',
+            restrictedField: 'updated-managed',
+          },
+        }),
+      })
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: updateShapesSlug as any,
+        depth: 0,
+        draft: true,
+        overrideAccess: true,
+      })
+
+      expect(updated.content).toHaveLength(1)
+      expect(updated.content[0]).toMatchObject(initialBlock)
+      expect(response.status).toBe(400)
+    })
+
+    test('should accept valid blocks update shapes', async ({ payload, restClient }) => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          content: [],
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          content: [
+            {
+              blockType: 'update-shape-block',
+              publicField: 'updated',
+            },
+          ],
+        }),
+      })
+      const { doc: updated } = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(updated.content).toMatchObject([
+        {
+          blockType: 'update-shape-block',
+          publicField: 'updated',
+        },
+      ])
+    })
+
+    test('should accept supported numeric and relationship update shapes', async ({
+      payload,
+      restClient,
+    }) => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: {
+          name: 'related',
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: relation.id, collection: relationSlug })
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {},
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          numbers: [1, 2],
+          polymorphicRelations: {
+            relationTo: relationSlug,
+            value: relation.id,
+          },
+        }),
+      })
+
+      expect(response.status).toBe(200)
+    })
+
+    for (const shape of [
+      'number object',
+      'relationship object',
+      'polymorphic relationship object',
+      'polymorphic relationship value types',
+      'hooked polymorphic relationship object',
+    ]) {
+      test(`should reject invalid ${shape} draft update shapes`, async ({
+        payload,
+        restClient,
+      }) => {
+        const relation = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'related',
+          },
+          overrideAccess: true,
+        })
+        createdInputBoundaryRecords.push({ id: relation.id, collection: relationSlug })
+        const doc = await payload.create({
+          collection: updateShapesSlug as any,
+          data: {
+            number: 1,
+            relations: [relation.id],
+          },
+          overrideAccess: true,
+        })
+        createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+        let data
+
+        if (shape === 'number object') {
+          data = { number: { value: 2 } }
+        } else if (shape === 'relationship object') {
+          data = { relations: { value: relation.id } }
+        } else if (shape === 'polymorphic relationship object') {
+          data = {
+            polymorphicRelations: {
+              $push: { relationTo: relationSlug, value: relation.id },
+              relationTo: relationSlug,
+              value: relation.id,
+            },
+          }
+        } else if (shape === 'polymorphic relationship value types') {
+          data = {
+            polymorphicRelations: {
+              relationTo: {},
+              value: {},
+            },
+          }
+        } else {
+          data = {
+            hookedPolymorphicRelations: {
+              relationTo: relationSlug,
+              value: relation.id,
+            },
+          }
+        }
+        const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+          body: JSON.stringify(data),
+        })
+
+        expect(response.status).toBe(400)
+      })
+    }
+
     test('can handle REST API requests with over 1mb of multipart/form-data', async ({
       payload,
       restClient,
@@ -210,10 +449,10 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         expect(docs.pop().description).toEqual(description)
 
         const { docs: resDocs } = await payload.find({
-          limit: 10,
           collection: postsSlug,
-          where: { id: { in: ids } },
+          limit: 10,
           overrideAccess: true,
+          where: { id: { in: ids } },
         })
         expect(resDocs.at(-1).description).toEqual('to-update')
       })
@@ -380,8 +619,8 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
 
           const { docs, errors } = await payload.delete({
             collection: postsSlug,
-            where: { title: { equals: 'title' } },
             overrideAccess: true,
+            where: { title: { equals: 'title' } },
           })
 
           expect(errors).toHaveLength(0)
@@ -980,6 +1219,40 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
         expect(emptyNotInResponse.status).toEqual(200)
       })
 
+      test.describe('text matching values', () => {
+        for (const operator of ['like', 'not_like', 'contains'] as const) {
+          test(`rejects object values for ${operator}`, async ({ restClient }) => {
+            const response = await restClient.GET(`/${postsSlug}`, {
+              query: {
+                where: {
+                  title: {
+                    [operator]: {
+                      pattern: 'title',
+                    },
+                  },
+                },
+              },
+            })
+
+            expect(response.status).toEqual(400)
+          })
+        }
+
+        test('rejects arrays containing object values', async ({ restClient }) => {
+          const response = await restClient.GET(`/${postsSlug}`, {
+            query: {
+              where: {
+                title: {
+                  like: [{ pattern: 'title' }],
+                },
+              },
+            },
+          })
+
+          expect(response.status).toEqual(400)
+        })
+      })
+
       test('like', async ({ restClient }) => {
         const post1 = await createPost({ restClient }, { title: 'prefix-value' })
 
@@ -1351,7 +1624,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
             expect(result.docs.map((d: { id: number | string }) => d.id)).toContain(createdId)
           } finally {
             if (createdId !== undefined) {
-              await payload.delete({ collection: pointSlug, id: createdId, overrideAccess: true })
+              await payload.delete({ id: createdId, collection: pointSlug, overrideAccess: true })
             }
           }
         })
@@ -1855,7 +2128,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
           err = error
           errResult = result
 
-          return { status: 400, response: { modified: true } }
+          return { response: { modified: true }, status: 400 }
         },
       ]
 
@@ -1886,7 +2159,7 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
       let collection: SanitizedCollectionConfig
 
       payload.collections.posts.config.hooks.afterError = [
-        ({ error, result, collection: incomingCollection }) => {
+        ({ collection: incomingCollection, error, result }) => {
           err = error
           errResult = result
           collection = incomingCollection
@@ -1927,10 +2200,10 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
       const post = await createPost({ restClient })
       const id = typeof post.id === 'string' ? randomUUID() : 999
       await expect(
-        payload.findByID({ collection: 'posts', id, overrideAccess: true }),
+        payload.findByID({ id, collection: 'posts', overrideAccess: true }),
       ).rejects.toBeInstanceOf(NotFound)
       await expect(
-        payload.findByID({ collection: 'posts', id, disableErrors: true, overrideAccess: true }),
+        payload.findByID({ id, collection: 'posts', disableErrors: true, overrideAccess: true }),
       ).resolves.toBeNull()
     })
   })
@@ -2031,18 +2304,18 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
     await expect(
       payload.update({
         collection: 'disabled-bulk-edit-docs',
-        where: {},
         data: {},
         overrideAccess: false,
+        where: {},
       }),
     ).rejects.toBeInstanceOf(APIError)
 
     await expect(
       payload.update({
         collection: 'disabled-bulk-edit-docs',
-        where: {},
         data: {},
         overrideAccess: true,
+        where: {},
       }),
     ).resolves.toBeTruthy()
   })
@@ -2057,8 +2330,8 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
     await expect(
       payload.delete({
         collection: 'disabled-bulk-delete-docs',
-        where: {},
         overrideAccess: false,
+        where: {},
       }),
     ).rejects.toBeInstanceOf(APIError)
 
@@ -2070,8 +2343,8 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
 
     await expect(
       payload.delete({
-        collection: 'disabled-bulk-delete-docs',
         id: doc.id,
+        collection: 'disabled-bulk-delete-docs',
         overrideAccess: true,
       }),
     ).resolves.toBeTruthy()
@@ -2079,8 +2352,8 @@ test.suite({ config: './config.ts' })('collections-rest', () => {
     await expect(
       payload.delete({
         collection: 'disabled-bulk-delete-docs',
-        where: {},
         overrideAccess: true,
+        where: {},
       }),
     ).resolves.toBeTruthy()
   })
@@ -2107,7 +2380,7 @@ async function createPosts({ restClient }: { restClient: NextRESTClient }, count
 async function clearDocs({ payload }: { payload: Payload }): Promise<void> {
   await payload.delete({
     collection: postsSlug,
-    where: { id: { exists: true } },
     overrideAccess: true,
+    where: { id: { exists: true } },
   })
 }

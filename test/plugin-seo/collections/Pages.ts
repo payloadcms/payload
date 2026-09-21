@@ -4,6 +4,27 @@ import { pagesSlug } from '../shared.js'
 
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
+  access: {
+    read: ({ req }) =>
+      req.user?.email === 'editor@example.com'
+        ? {
+            title: {
+              equals: 'Readable page',
+            },
+          }
+        : true,
+  },
+  hooks: {
+    afterRead: [
+      ({ doc, req }) => {
+        if (req.user?.email === 'editor@example.com' && doc.title === 'Test page') {
+          throw new Error('Read hooks should not run for an inaccessible document')
+        }
+
+        return doc
+      },
+    ],
+  },
   labels: {
     singular: 'Page',
     plural: 'Pages',
@@ -11,6 +32,7 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  trash: true,
   versions: {
     drafts: true,
   },

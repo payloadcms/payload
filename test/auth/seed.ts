@@ -21,7 +21,6 @@ export const seed: Config['onInit'] = async (payload) => {
     collection: apiKeysSlug,
     data: {
       apiKey: uuid(),
-      enableAPIKey: true,
     },
     overrideAccess: true,
   })
@@ -30,7 +29,6 @@ export const seed: Config['onInit'] = async (payload) => {
     collection: apiKeysSlug,
     data: {
       apiKey: uuid(),
-      enableAPIKey: true,
     },
     overrideAccess: true,
   })

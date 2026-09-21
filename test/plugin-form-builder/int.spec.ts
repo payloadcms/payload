@@ -1,3 +1,5 @@
+import type { PayloadRequest } from 'payload'
+
 import path from 'path'
 import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
@@ -21,8 +23,11 @@ const testImagePath = path.resolve(dirname, '../uploads/image.png')
 const testPdfPath = path.resolve(dirname, '../uploads/test-pdf.pdf')
 let form: Form
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
-  test.beforeEach(async ({ payload }) => {
+test.suite({
+  config: './config.ts',
+  resetBetweenTests: false,
+})('@payloadcms/plugin-form-builder', () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
     const formConfig: Omit<Form, 'createdAt' | 'id' | 'updatedAt'> = {
       confirmationType: 'message',
       confirmationMessage: {
@@ -82,6 +87,31 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-form-builder', () => {
       const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug, overrideAccess: true })
       expect(formSubmissions).toHaveLength(1)
     })
+
+    /* eslint-disable vitest/no-standalone-expect -- test is a custom Vitest test registrar. */
+    test('should restrict form data reads to admin collection users', async ({ payload }) => {
+      const formsCollection = payload.config.collections.find(({ slug }) => slug === formsSlug)!
+      const submissionsCollection = payload.config.collections.find(
+        ({ slug }) => slug === formSubmissionsSlug,
+      )!
+      const emailsField = formsCollection.fields.find(
+        (field) => 'name' in field && field.name === 'emails',
+      )!
+      const adminRequest = {
+        payload,
+        user: { collection: payload.config.admin.user },
+      } as PayloadRequest
+      const unrelatedRequest = {
+        payload,
+        user: { collection: 'customers' },
+      } as PayloadRequest
+
+      expect(await submissionsCollection.access.read({ req: adminRequest })).toBe(true)
+      expect(await submissionsCollection.access.read({ req: unrelatedRequest })).toBe(false)
+      expect(await emailsField.access?.read?.({ req: adminRequest })).toBe(true)
+      expect(await emailsField.access?.read?.({ req: unrelatedRequest })).toBe(false)
+    })
+    /* eslint-enable vitest/no-standalone-expect */
   })
 
   test.describe('form building', () => {
