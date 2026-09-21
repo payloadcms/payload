@@ -106,7 +106,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     routes: { api },
   } = config
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { i18n, t } = useTranslation()
 
   const { getDocumentSlots, getFormState } = useServerFunctions()
@@ -401,6 +402,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               form.formState,
               overrides,
               getUploadHandler({ collectionSlug }),
+              config.collections.find(({ slug }) => slug === collectionSlug)?.upload
+                ?.allowRestrictedFileTypes,
             ),
             credentials: 'include',
             method: 'POST',
@@ -581,6 +584,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       actionURL,
       code,
       collectionSlug,
+      config.collections,
       getUploadHandler,
       getFormState,
       docPermissions,

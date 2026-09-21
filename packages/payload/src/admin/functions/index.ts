@@ -1,6 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type { Locale, SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { Slugify } from '../../fields/baseFields/slug/types.js'
@@ -25,12 +25,14 @@ export type InitReqResult = {
   locale?: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
+  /** The authenticated user after read access for client-facing consumers. */
+  user?: PayloadRequest['user']
 }
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
   renderComponent?: ComponentRenderer
-} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
+} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>

@@ -1,30 +1,13 @@
-import type { Payload } from 'payload'
+import { expect } from 'vitest'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, expect, it } from 'vitest'
+import { test } from '../__helpers/int/vitest.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { describe } from '../__helpers/int/vitest.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-let payload: Payload
-
-describe(
+test.suite({ config: './config.ts', db: (adapter) => adapter.startsWith('sqlite') })(
   'database - sqlite bound parameters limit',
-  { db: (type) => type.startsWith('sqlite') },
   () => {
-    beforeAll(async () => {
-      ;({ payload } = await initPayloadInt(dirname))
-    })
-
-    afterAll(async () => {
-      await payload.destroy()
-    })
-
-    it('should not use bound parameters for where querying on ID with IN if limitedBoundParameters: true', async () => {
+    test('should not use bound parameters for where querying on ID with IN if limitedBoundParameters: true', async ({
+      payload,
+    }) => {
       const defaultExecute = payload.db.drizzle.$client.execute.bind(payload.db.drizzle.$client)
 
       // Limit bounds parameters length
@@ -98,7 +81,9 @@ describe(
       }
     })
 
-    it('should avoid ambiguous column name errors when limitedBoundParameters: true and multiple joins are present', async () => {
+    test('should avoid ambiguous column name errors when limitedBoundParameters: true and multiple joins are present', async ({
+      payload,
+    }) => {
       payload.db.limitedBoundParameters = true
 
       const simpleLocalizedDoc = await payload.create({

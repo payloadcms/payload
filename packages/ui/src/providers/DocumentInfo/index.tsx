@@ -131,7 +131,8 @@ const DocumentInfo: React.FC<
   )
 
   const { getPreference, setPreference } = usePreferences()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const { localeIsLoading } = useLocaleLoading()
 
   const isInitializing = useMemo(

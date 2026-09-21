@@ -2,8 +2,11 @@ import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical
 import type { useAuth } from '@payloadcms/ui'
 import type {
   Access,
+  ArrayField,
   AuthenticatedUser,
+  BlocksField,
   BulkOperationResult,
+  CollapsibleField,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
@@ -12,14 +15,21 @@ import type {
   JobTaskStatus,
   JoinQuery,
   MeOperationResult,
+  NamedGroupField,
+  NamedTab,
   PaginatedDocs,
   PayloadRequest,
   PayloadTypesShape,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
+  RowField,
   SelectType,
+  TabsField,
+  TextField,
   TypedCollectionSelect,
   TypeWithVersion,
+  UnnamedGroupField,
+  UnnamedTab,
   UntypedPayloadTypes,
   Where,
 } from 'payload'
@@ -91,6 +101,22 @@ describe('Types testing', () => {
 
   test('sanitized global readVersions access is required', () => {
     expect<SanitizedGlobalConfig['access']['readVersions']>().type.toBe<Access>()
+  })
+
+  describe('field duplication configuration', () => {
+    test('should only expose disableDuplicate on fields that own data', () => {
+      expect<ArrayField>().type.toHaveProperty('disableDuplicate')
+      expect<BlocksField>().type.toHaveProperty('disableDuplicate')
+      expect<NamedGroupField>().type.toHaveProperty('disableDuplicate')
+      expect<NamedTab>().type.toHaveProperty('disableDuplicate')
+      expect<TextField>().type.toHaveProperty('disableDuplicate')
+
+      expect<CollapsibleField>().type.not.toHaveProperty('disableDuplicate')
+      expect<RowField>().type.not.toHaveProperty('disableDuplicate')
+      expect<TabsField>().type.not.toHaveProperty('disableDuplicate')
+      expect<UnnamedGroupField>().type.not.toHaveProperty('disableDuplicate')
+      expect<UnnamedTab>().type.not.toHaveProperty('disableDuplicate')
+    })
   })
 
   test('should fall back when generated types do not include jobs', () => {

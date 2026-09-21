@@ -11,6 +11,7 @@ import {
   getRequestLanguage,
   parseCookies,
 } from 'payload'
+import { applyUserReadAccess } from 'payload/internal'
 import * as qs from 'qs-esm'
 
 // Registers the dev reload strategy before the `getPayload` call below can
@@ -65,6 +66,10 @@ export async function initReq({
   })
 
   const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+  const hasOptionsUserOverride = Object.hasOwn(optionsOverrides, 'user')
+  const hasReqUserOverride = Object.hasOwn(reqOverrides ?? {}, 'user')
+  const hasUserOverride = hasOptionsUserOverride || hasReqUserOverride
+  const userOverride = hasOptionsUserOverride ? optionsOverrides.user : reqOverrides?.user
 
   // Parse the active URL's query string so that `req.query` (and thus
   // `getRequestLocale`, access checks, etc.) reflect things like `?locale=es`
@@ -107,9 +112,39 @@ export async function initReq({
     payload,
   )
 
+  if (hasUserOverride && userOverride == null) {
+    req.user = null
+  }
+
   const locale = await getRequestLocale({ req })
 
   req.locale = locale?.code
+
+  let userWithReadAccess = req.user
+
+  if (!hasUserOverride && req.user) {
+    try {
+      const collectionSlug = req.user.collection ?? payload.config.admin.user
+      const collection = payload.collections[collectionSlug]?.config
+
+      if (!collection?.auth) {
+        throw new Error('Authenticated user collection not found')
+      }
+
+      userWithReadAccess = await applyUserReadAccess({
+        collection,
+        depth: collection.auth.depth,
+        overrideAccess: false,
+        req,
+        showHiddenFields: false,
+        user: req.user,
+      })
+    } catch (error) {
+      payload.logger.error({ err: error })
+      req.user = null
+      userWithReadAccess = null
+    }
+  }
 
   const permissions = await getAccessResults({ req })
 
@@ -120,5 +155,6 @@ export async function initReq({
     locale,
     permissions,
     req,
+    user: userWithReadAccess,
   }
 }

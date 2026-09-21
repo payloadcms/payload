@@ -149,6 +149,7 @@ export const renderRoot = async ({
     permissions,
     req,
     req: { payload },
+    user,
   } = await initReq({
     configPromise: config,
     importMap,
@@ -269,7 +270,7 @@ export const renderRoot = async ({
     config,
     i18n: req.i18n,
     importMap,
-    user: viewType === 'createFirstUser' ? true : req.user,
+    user: viewType === 'createFirstUser' ? true : user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -344,6 +345,7 @@ export const renderRoot = async ({
       payload: req.payload,
       searchParams,
       server: req.server,
+      user,
       viewActions,
     } satisfies AdminViewServerPropsOnly,
   })
@@ -372,7 +374,7 @@ export const renderRoot = async ({
           permissions={permissions}
           req={req}
           searchParams={searchParams}
-          user={req.user}
+          user={user}
           viewActions={viewActions}
           viewKey={key}
           viewType={viewType}

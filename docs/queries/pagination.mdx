@@ -18,11 +18,11 @@ All paginated responses include documents nested within a `docs` array, and retu
 
 All Payload APIs support the pagination controls below. With them, you can create paginated lists of documents within your application:
 
-| Control      | Default | Description                                                               |
-| ------------ | ------- | ------------------------------------------------------------------------- |
-| `limit`      | `10`    | Limits the number of documents returned per page. [More details](#limit). |
-| `pagination` | `true`  | Set to `false` to disable pagination and return all documents.            |
-| `page`       | `1`     | Get a specific page number.                                               |
+| Control      | Default                         | Description                                                                                                      |
+| ------------ | ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `limit`      | `10` when pagination is enabled | Limits the number of documents returned per page. [More details](#limit).                                        |
+| `pagination` | `true`                          | Set to `false` to disable pagination calculations and document count queries. This respects any specified limit. |
+| `page`       | `1`                             | Get a specific page number.                                                                                      |
 
 ## Local API
 
@@ -138,7 +138,9 @@ await payload.find({
 
 Disabling pagination can improve performance by reducing the overhead of pagination calculations and improve query speed.
 
-For `find` operations within the Local API, you can disable pagination to retrieve all documents from a collection by passing `pagination: false` to the `find` local operation.
+For `find` operations within the Local API, you can disable pagination calculations and document count queries by passing `pagination: false` to the `find` local operation. If you do not specify a `limit`, Payload returns all matching documents. If you specify a positive `limit`, Payload still applies that limit.
+
+You can also set `limit: 0` to return all matching documents and disable pagination automatically.
 
 To do this, set `pagination: false` in your query:
 

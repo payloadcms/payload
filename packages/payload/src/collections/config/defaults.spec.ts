@@ -3,7 +3,25 @@ import type { CollectionConfig } from './types.js'
 
 import { describe, expect, it } from 'vitest'
 
-import { addDefaultsToCollectionConfig } from './defaults.js'
+import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
+
+describe('addDefaultsToAuthConfig', () => {
+  it('should default the forgot password request interval to 15 seconds', () => {
+    const auth = addDefaultsToAuthConfig({})
+
+    expect(auth.forgotPassword.minRequestInterval).toBe(15000)
+  })
+
+  it('should allow the forgot password request interval to be disabled', () => {
+    const auth = addDefaultsToAuthConfig({
+      forgotPassword: {
+        minRequestInterval: 0,
+      },
+    })
+
+    expect(auth.forgotPassword.minRequestInterval).toBe(0)
+  })
+})
 
 const req = {} as PayloadRequest
 

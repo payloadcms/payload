@@ -13,8 +13,8 @@ export { extractJWT } from '../auth/extractJWT.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 
-export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
-export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
+export { getFromImportMap } from '../cli/commands/generateImportMap/utilities/getFromImportMap.js'
+export { parsePayloadComponent } from '../cli/commands/generateImportMap/utilities/parsePayloadComponent.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -41,6 +41,7 @@ export {
 } from '../config/orderable/fractional-indexing.js'
 export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
 export { combineQueries } from '../database/combineQueries.js'
+export { isNestedRelationshipQuery } from '../database/isNestedRelationshipQuery.js'
 
 export { APIError, APIErrorName } from '../errors/APIError.js'
 export { MissingEditorProp } from '../errors/MissingEditorProp.js'
@@ -103,8 +104,18 @@ export {
 export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types.js'
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
-export { validOperators, validOperatorSet } from '../types/constants.js'
+export {
+  hasManyRelationshipOperators,
+  hasManyRelationshipOperatorSet,
+  validOperators,
+  validOperatorSet,
+} from '../types/constants.js'
+export type { HasManyRelationshipOperator } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
+export {
+  getSanitizedUploadFilename,
+  uploadRequiresServerValidation,
+} from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
@@ -129,11 +140,19 @@ export {
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
 export { extractID } from '../utilities/extractID.js'
+
+export {
+  expandOwnDottedKey,
+  hasUnsupportedFieldPathSegment,
+  setOwnProperty,
+} from '../utilities/fieldPath.js'
+
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
+
 export { formatErrors } from '../utilities/formatErrors.js'
 
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
@@ -184,6 +203,8 @@ export { parseDocumentID } from '../utilities/parseDocumentID.js'
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
+
+export { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
 
 export { sanitizeUrl } from '../utilities/sanitizeUrl.js'
 

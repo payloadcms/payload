@@ -21,6 +21,8 @@ import { Regression2 } from './collections/Regression-2/index.js'
 import { RestrictedTrash } from './collections/RestrictedTrash/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
+  accessRelationChildSlug,
+  accessRelationParentSlug,
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   differentiatedTrashSlug,
@@ -35,6 +37,7 @@ import {
   inheritedReadVersionsVirtualRelatedSlug,
   inheritedReadVersionsVirtualSlug,
   nonAdminEmail,
+  postReferencesSlug,
   publicUserEmail,
   publicUsersSlug,
   readNotUpdateGlobalSlug,
@@ -46,6 +49,7 @@ import {
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
+  selfReferentialSlug,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
@@ -99,7 +103,6 @@ function isUser(user?: any): user is {
 export const getConfig: () => Partial<Config> = () => ({
   admin: {
     autoLogin: false,
-    user: 'users',
     components: {
       views: {
         dashboard: {
@@ -111,6 +114,7 @@ export const getConfig: () => Partial<Config> = () => ({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: 'users',
   },
   baseAccess: {
     collections: {
@@ -125,8 +129,8 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'titleblock',
       fields: [
         {
-          type: 'text',
           name: 'title',
+          type: 'text',
         },
       ],
     },
@@ -180,6 +184,10 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: publicUsersSlug,
+      access: {
+        create: () => true,
+        read: () => true,
+      },
       auth: true,
       fields: [],
       versions: false,
@@ -188,9 +196,19 @@ export const getConfig: () => Partial<Config> = () => ({
       slug,
       access: {
         ...openAccess,
+        // Unauthenticated callers cannot read posts titled "archived".
+        read: ({ req }) => (req.user ? true : { title: { not_equals: 'archived' } }),
         update: () => false,
       },
       fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'title2',
+          type: 'text',
+        },
         {
           name: 'restrictedField',
           type: 'text',
@@ -249,15 +267,93 @@ export const getConfig: () => Partial<Config> = () => ({
           collection: 'relation-restricted',
           on: 'post',
         },
+        {
+          name: 'reference',
+          type: 'relationship',
+          relationTo: postReferencesSlug,
+        },
+        {
+          name: 'references',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: postReferencesSlug,
+        },
+        {
+          name: 'polymorphicReference',
+          type: 'relationship',
+          relationTo: [postReferencesSlug, unrestrictedSlug],
+        },
       ],
       versions: false,
     },
     {
+      slug: postReferencesSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'post',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: slug,
+        },
+        {
+          name: 'singlePost',
+          type: 'relationship',
+          hasMany: false,
+          relationTo: slug,
+        },
+        {
+          name: 'joinedPosts',
+          type: 'join',
+          collection: slug,
+          on: 'reference',
+        },
+        {
+          name: 'joinedPostsMany',
+          type: 'join',
+          collection: slug,
+          on: 'references',
+        },
+        {
+          name: 'polymorphicJoinedPosts',
+          type: 'join',
+          collection: [slug, unrestrictedSlug],
+          on: 'reference',
+        },
+        {
+          name: 'joinedPostsPolymorphicOn',
+          type: 'join',
+          collection: slug,
+          on: 'polymorphicReference',
+        },
+      ],
+    },
+    {
       slug: unrestrictedSlug,
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'restrictedName',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'reference',
+          type: 'relationship',
+          relationTo: postReferencesSlug,
         },
         {
           name: 'info',
@@ -278,6 +374,32 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'relationship',
           hasMany: true,
           relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'userRestrictedDoc',
+          type: 'relationship',
+          relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'fullyRestrictedDocs',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: fullyRestrictedSlug,
+        },
+        {
+          name: 'restrictedUserDocs',
+          type: 'relationship',
+          access: {
+            read: () => false,
+          },
+          hasMany: true,
+          relationTo: createNotUpdateCollectionSlug,
+        },
+        {
+          name: 'restrictedRelatedItems',
+          type: 'join',
+          collection: fullyRestrictedSlug,
+          on: 'unrestrictedDoc',
         },
         {
           name: 'createNotUpdateDocs',
@@ -348,6 +470,23 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'restrictedName',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'unrestrictedDoc',
+          type: 'relationship',
+          relationTo: unrestrictedSlug,
+        },
       ],
       versions: false,
     },
@@ -372,7 +511,14 @@ export const getConfig: () => Partial<Config> = () => ({
       access: {
         create: () => true,
         delete: () => false,
-        read: () => true,
+        read: ({ req }) =>
+          req.user
+            ? true
+            : {
+                name: {
+                  not_equals: 'archived',
+                },
+              },
         update: ({ req }) => ({
           name: {
             equals: req.user?.email,
@@ -405,6 +551,11 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
         },
       ],
       versions: false,
@@ -561,6 +712,17 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: false,
         },
       ],
+      hooks: {
+        beforeDelete: [
+          ({ id, req }) => {
+            const beforeDeleteCalls = req.context.beforeDeleteCalls
+
+            if (Array.isArray(beforeDeleteCalls)) {
+              beforeDeleteCalls.push(id)
+            }
+          },
+        ],
+      },
       labels: {
         plural: 'Doc Level Access',
         singular: 'Doc Level Access',
@@ -613,8 +775,8 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'hiddenWithDefault',
           type: 'text',
-          hidden: true,
           defaultValue: 'default value',
+          hidden: true,
         },
       ],
       versions: false,
@@ -680,25 +842,25 @@ export const getConfig: () => Partial<Config> = () => ({
     {
       slug: 'fields-and-top-access',
       access: {
-        readVersions: () => ({
-          'version.secret': {
-            equals: 'will-success-access-read',
-          },
-        }),
         read: () => ({
           secret: {
             equals: 'will-success-access-read',
           },
         }),
+        readVersions: () => ({
+          'version.secret': {
+            equals: 'will-success-access-read',
+          },
+        }),
       },
-      versions: { drafts: true },
       fields: [
         {
-          type: 'text',
           name: 'secret',
+          type: 'text',
           access: { read: () => false },
         },
       ],
+      versions: { drafts: true },
     },
     {
       slug: inheritedReadVersionsSlug,
@@ -787,6 +949,13 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'where-cache-same',
       access: {
         // All operations return the same where query
+        create: () => true,
+        delete: ({ req: { user } }) => {
+          if (isUser(user) && user.roles?.includes('admin')) {
+            return { userRole: { equals: 'admin' } }
+          }
+          return false
+        },
         read: ({ req: { user } }) => {
           if (isUser(user) && user.roles?.includes('admin')) {
             return { userRole: { equals: 'admin' } }
@@ -799,13 +968,6 @@ export const getConfig: () => Partial<Config> = () => ({
           }
           return false
         },
-        delete: ({ req: { user } }) => {
-          if (isUser(user) && user.roles?.includes('admin')) {
-            return { userRole: { equals: 'admin' } }
-          }
-          return false
-        },
-        create: () => true,
       },
       fields: [
         {
@@ -827,6 +989,13 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'where-cache-unique',
       access: {
         // Each operation returns a unique where query
+        create: () => true,
+        delete: ({ req: { user } }) => {
+          if (isUser(user) && user.roles?.includes('admin')) {
+            return { deleteRole: { equals: 'admin' } }
+          }
+          return false
+        },
         read: ({ req: { user } }) => {
           if (isUser(user) && user.roles?.includes('admin')) {
             return { readRole: { equals: 'admin' } }
@@ -839,13 +1008,6 @@ export const getConfig: () => Partial<Config> = () => ({
           }
           return false
         },
-        delete: ({ req: { user } }) => {
-          if (isUser(user) && user.roles?.includes('admin')) {
-            return { deleteRole: { equals: 'admin' } }
-          }
-          return false
-        },
-        create: () => true,
       },
       fields: [
         {
@@ -927,6 +1089,81 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
       versions: false,
+    },
+    // Parent collection whose read access returns a where constraint, with a
+    // relationship to a child collection that ALSO returns a where constraint.
+    {
+      slug: accessRelationParentSlug,
+      access: {
+        ...openAccess,
+        // Unauthenticated callers only see "published" parents.
+        read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'status',
+          type: 'text',
+        },
+        {
+          name: 'child',
+          type: 'relationship',
+          relationTo: accessRelationChildSlug,
+        },
+      ],
+    },
+    {
+      slug: accessRelationChildSlug,
+      access: {
+        ...openAccess,
+        // Child also constrains read access with a where query.
+        read: ({ req: { user } }) => (user ? true : { createdAt: { exists: true } }),
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'nested',
+          type: 'group',
+          fields: [
+            {
+              name: 'isActive',
+              type: 'checkbox',
+              defaultValue: true,
+            },
+          ],
+        },
+      ],
+    },
+    // Self-referential relationship on a collection whose read access returns a where
+    // constraint. Querying through `parent` must apply that constraint to the related doc.
+    {
+      slug: selfReferentialSlug,
+      access: {
+        ...openAccess,
+        read: ({ req: { user } }) => (user ? true : { isPublic: { equals: true } }),
+      },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+        {
+          name: 'isPublic',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: selfReferentialSlug,
+        },
+      ],
     },
   ],
   globals: [
@@ -1032,208 +1269,207 @@ export const getConfig: () => Partial<Config> = () => ({
       versions: false,
     },
   ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: nonAdminEmail,
-        password: 'test',
-      },
-    })
-
-    // Regular user - can access admin panel but has limited delete permissions
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: regularUserEmail,
-        password: 'test',
-        roles: ['user'],
-      },
-    })
-
-    await payload.create({
-      collection: publicUsersSlug,
-      data: {
-        email: publicUserEmail,
-        password: 'test',
-      },
-    })
-
-    await payload.create({
-      collection: slug,
-      data: {
-        restrictedField: 'restricted',
-      },
-    })
-
-    await payload.create({
-      collection: readOnlySlug,
-      data: {
-        name: 'read-only',
-      },
-    })
-
-    await payload.create({
-      collection: blocksFieldAccessSlug,
-      data: {
-        title: 'Blocks Field Access Test Document',
-        editableBlocks: [
-          {
-            blockType: 'testBlock',
-            title: 'Editable Block',
-            content: 'This block should be fully editable',
-          },
-        ],
-        readOnlyBlocks: [
-          {
-            blockType: 'testBlock2',
-            title: 'Read-Only Block',
-            content: 'This block should be read-only due to field access control',
-          },
-        ],
-        editableBlockRefs: [
-          {
-            blockType: 'titleblock',
-            title: 'Editable Block Reference',
-          },
-        ],
-        readOnlyBlockRefs: [
-          {
-            blockType: 'titleblock',
-            title: 'Read-Only Block Reference',
-          },
-        ],
-        tabReadOnlyTest: {
-          tabReadOnlyBlocks: [
-            {
-              blockType: 'testBlock3',
-              title: 'Tab Read-Only Block',
-              content: 'This block is read-only and inside a tab',
-            },
-          ],
-          tabReadOnlyBlockRefs: [
-            {
-              blockType: 'titleblock',
-              title: 'Tab Read-Only Block Reference',
-            },
-          ],
-        },
-      },
-    })
-
-    await payload.create({
-      collection: restrictedVersionsSlug,
-      data: {
-        name: 'versioned',
-      },
-    })
-
-    await payload.create({
-      collection: siblingDataSlug,
-      data: {
-        array: [
-          {
-            allowPublicReadability: true,
-            text: firstArrayText,
-          },
-          {
-            allowPublicReadability: false,
-            text: secondArrayText,
-          },
-        ],
-      },
-    })
-
-    await payload.updateGlobal({
-      slug: userRestrictedGlobalSlug,
-      data: {
-        name: 'dev@payloadcms.com',
-      },
-    })
-
-    await payload.create({
-      collection: 'regression1',
-      data: {
-        richText4: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
-        array: [{ art: buildEditorState<DefaultNodeTypes>({ text: 'Text2' }) }],
-        arrayWithAccessFalse: [
-          { richText6: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }) },
-        ],
-        group1: {
-          text: 'Text4',
-          richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text5' }),
-        },
-        blocks: [
-          {
-            blockType: 'myBlock3',
-            richText7: buildEditorState<DefaultNodeTypes>({ text: 'Text6' }),
-            blockName: 'My Block 1',
-          },
-        ],
-        blocks3: [
-          {
-            blockType: 'myBlock2',
-            richText5: buildEditorState<DefaultNodeTypes>({ text: 'Text7' }),
-            blockName: 'My Block 2',
-          },
-        ],
-        tab1: {
-          richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
-          blocks2: [
-            {
-              blockType: 'myBlock',
-              richText3: buildEditorState<DefaultNodeTypes>({ text: 'Text9' }),
-              blockName: 'My Block 3',
-            },
-          ],
-        },
-      },
-    })
-
-    await payload.create({
-      collection: 'regression2',
-      data: {
-        array: [
-          {
-            richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
-          },
-        ],
-        group: {
-          text: 'Text2',
-          richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }),
-        },
-      },
-    })
-
-    // Seed read-restricted collection
-    await seedReadRestricted(payload)
-
-    // Seed trash access control collections
-    await payload.create({
-      collection: differentiatedTrashSlug,
-      data: {
-        title: 'Differentiated Doc 1',
-        _status: 'published',
-      },
-    })
-
-    await payload.create({
-      collection: restrictedTrashSlug,
-      data: {
-        title: 'Restricted Doc 1',
-        _status: 'published',
-      },
-    })
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
+
+export const seed: NonNullable<Config['onInit']> = async (payload) => {
+  await payload.create({
+    collection: 'users',
+    data: {
+      email: devUser.email,
+      password: devUser.password,
+    },
+  })
+
+  await payload.create({
+    collection: 'users',
+    data: {
+      email: nonAdminEmail,
+      password: 'test',
+    },
+  })
+
+  // Regular user - can access admin panel but has limited delete permissions
+  await payload.create({
+    collection: 'users',
+    data: {
+      email: regularUserEmail,
+      password: 'test',
+      roles: ['user'],
+    },
+  })
+
+  await payload.create({
+    collection: publicUsersSlug,
+    data: {
+      email: publicUserEmail,
+      password: 'test',
+    },
+  })
+
+  await payload.create({
+    collection: slug,
+    data: {
+      restrictedField: 'restricted',
+    },
+  })
+
+  await payload.create({
+    collection: readOnlySlug,
+    data: {
+      name: 'read-only',
+    },
+  })
+
+  await payload.create({
+    collection: blocksFieldAccessSlug,
+    data: {
+      editableBlockRefs: [
+        {
+          blockType: 'titleblock',
+          title: 'Editable Block Reference',
+        },
+      ],
+      editableBlocks: [
+        {
+          blockType: 'testBlock',
+          content: 'This block should be fully editable',
+          title: 'Editable Block',
+        },
+      ],
+      readOnlyBlockRefs: [
+        {
+          blockType: 'titleblock',
+          title: 'Read-Only Block Reference',
+        },
+      ],
+      readOnlyBlocks: [
+        {
+          blockType: 'testBlock2',
+          content: 'This block should be read-only due to field access control',
+          title: 'Read-Only Block',
+        },
+      ],
+      tabReadOnlyTest: {
+        tabReadOnlyBlockRefs: [
+          {
+            blockType: 'titleblock',
+            title: 'Tab Read-Only Block Reference',
+          },
+        ],
+        tabReadOnlyBlocks: [
+          {
+            blockType: 'testBlock3',
+            content: 'This block is read-only and inside a tab',
+            title: 'Tab Read-Only Block',
+          },
+        ],
+      },
+      title: 'Blocks Field Access Test Document',
+    },
+  })
+
+  await payload.create({
+    collection: restrictedVersionsSlug,
+    data: {
+      name: 'versioned',
+    },
+  })
+
+  await payload.create({
+    collection: siblingDataSlug,
+    data: {
+      array: [
+        {
+          allowPublicReadability: true,
+          text: firstArrayText,
+        },
+        {
+          allowPublicReadability: false,
+          text: secondArrayText,
+        },
+      ],
+    },
+  })
+
+  await payload.updateGlobal({
+    slug: userRestrictedGlobalSlug,
+    data: {
+      name: 'dev@payloadcms.com',
+    },
+  })
+
+  await payload.create({
+    collection: 'regression1',
+    data: {
+      array: [{ art: buildEditorState<DefaultNodeTypes>({ text: 'Text2' }) }],
+      arrayWithAccessFalse: [{ richText6: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }) }],
+      blocks: [
+        {
+          blockName: 'My Block 1',
+          blockType: 'myBlock3',
+          richText7: buildEditorState<DefaultNodeTypes>({ text: 'Text6' }),
+        },
+      ],
+      blocks3: [
+        {
+          blockName: 'My Block 2',
+          blockType: 'myBlock2',
+          richText5: buildEditorState<DefaultNodeTypes>({ text: 'Text7' }),
+        },
+      ],
+      group1: {
+        richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text5' }),
+        text: 'Text4',
+      },
+      richText4: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
+      tab1: {
+        blocks2: [
+          {
+            blockName: 'My Block 3',
+            blockType: 'myBlock',
+            richText3: buildEditorState<DefaultNodeTypes>({ text: 'Text9' }),
+          },
+        ],
+        richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
+      },
+    },
+  })
+
+  await payload.create({
+    collection: 'regression2',
+    data: {
+      array: [
+        {
+          richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text1' }),
+        },
+      ],
+      group: {
+        richText1: buildEditorState<DefaultNodeTypes>({ text: 'Text3' }),
+        text: 'Text2',
+      },
+    },
+  })
+
+  // Seed read-restricted collection
+  await seedReadRestricted(payload)
+
+  // Seed trash access control collections
+  await payload.create({
+    collection: differentiatedTrashSlug,
+    data: {
+      _status: 'published',
+      title: 'Differentiated Doc 1',
+    },
+  })
+
+  await payload.create({
+    collection: restrictedTrashSlug,
+    data: {
+      _status: 'published',
+      title: 'Restricted Doc 1',
+    },
+  })
+}

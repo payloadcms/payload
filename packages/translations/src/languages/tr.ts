@@ -61,6 +61,7 @@ export const trTranslations: DefaultTranslationsObject = {
     notRedirected: 'Yönlendirilmediniz mi? <0>Buradan giriş yapın</0>',
     passed: 'Doğrulama Başarılı',
     passwordResetSuccessfully: 'Parola başarıyla sıfırlandı.',
+    resend: 'Yeniden gönder',
     resetPassword: 'Parolayı Sıfırla',
     resetPasswordExpiration: 'Parola Geçerlik Süresini Sıfırla',
     resetPasswordToken: 'Parola tokenini sıfırla',
