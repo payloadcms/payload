@@ -83,10 +83,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         'drizzle-kit/api',
       ],
     },
-    outputFileTracingIncludes: {
-      ...(nextConfig.outputFileTracingIncludes || {}),
-      '**/*': [...(nextConfig.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
-    },
     turbopack: {
       ...(nextConfig.turbopack || {}),
     },
