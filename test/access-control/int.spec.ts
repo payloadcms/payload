@@ -165,7 +165,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
       // Should respect PublicReadabilityAccess function and not be sent
       expect(doc.array?.[1].text).toBeUndefined()
 
-      // Retrieve with default of overriding access
       const docOverride = await payload.findByID({
         id,
         collection: siblingDataSlug,
@@ -1185,7 +1184,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
           { restrictedField: 'restricted' },
         )
 
-        const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: true })
+        const retrievedDoc = await payload.findByID({ id, collection: slug })
 
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
@@ -1283,7 +1282,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
           id: post1.id,
           collection: slug,
           data: { restrictedField: restricted.id },
-          overrideAccess: true,
         })
 
         expect(doc).toMatchObject({ id: post1.id })
@@ -1320,7 +1318,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         const doc = await payload.update({
           collection: slug,
           data: { restrictedField: restricted.id },
-          overrideAccess: true,
           where: {
             id: { equals: post1.id },
           },
@@ -1361,7 +1358,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
           id: restricted.id,
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
-          overrideAccess: true,
         })
 
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
@@ -1398,7 +1394,6 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
-          overrideAccess: true,
           where: {
             id: { equals: restricted.id },
           },

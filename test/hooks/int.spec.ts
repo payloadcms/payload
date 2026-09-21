@@ -1190,7 +1190,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },
-        overrideAccess: true,
+        // TODO:: Update test when overrideAccess default is flipped to false
       })
 
       createdIDs.push(doc.id)
@@ -1198,7 +1198,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
       const result = await payload.findByID({
         collection: overrideAccessSlug,
         id: doc.id,
-        overrideAccess: true,
+        // TODO:: Update test when overrideAccess default is flipped to false
       })
 
       expect(result.beforeReadCalled).toBe(true)
