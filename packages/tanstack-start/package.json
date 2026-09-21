@@ -81,8 +81,8 @@
     "@vitejs/plugin-react": "^6.0.0",
     "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "vite": ">=8.0.0"
   },
   "peerDependencies": {
