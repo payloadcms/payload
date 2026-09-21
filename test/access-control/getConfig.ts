@@ -34,6 +34,7 @@ import {
   hiddenFieldsSlug,
   inheritedReadVersionsGlobalSlug,
   inheritedReadVersionsSlug,
+  inheritedReadVersionsVirtualGlobalSlug,
   inheritedReadVersionsVirtualRelatedSlug,
   inheritedReadVersionsVirtualSlug,
   nonAdminEmail,
@@ -1183,6 +1184,26 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'visible',
           type: 'checkbox',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: inheritedReadVersionsVirtualGlobalSlug,
+      access: {
+        read: () => ({ relatedLabel: { equals: 'allowed' } }),
+        update: () => true,
+      },
+      fields: [
+        {
+          name: 'related',
+          type: 'relationship',
+          relationTo: inheritedReadVersionsVirtualRelatedSlug,
+        },
+        {
+          name: 'relatedLabel',
+          type: 'text',
+          virtual: 'related.label',
         },
       ],
       versions: true,
