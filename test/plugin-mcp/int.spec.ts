@@ -4,7 +4,7 @@ import type { UploadInstructions } from 'payload'
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { describe, expect, vi } from 'vitest'
+import { describe, expect, onTestFinished, vi } from 'vitest'
 
 import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 
@@ -2388,13 +2388,18 @@ test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests:
         getApiKey,
         payload,
       }) => {
-        await payload.create({
+        const post = await payload.create({
           collection: 'posts',
           data: {
             content: 'Content for test post.',
             title: 'Test Post for Finding',
           },
         })
+
+        onTestFinished(async () => {
+          await payload.delete({ collection: 'posts', id: post.id })
+        })
+
         const apiKey = await getApiKey()
         const client = await mcp.connect(apiKey)
         const callResponse = await client.callTool({
