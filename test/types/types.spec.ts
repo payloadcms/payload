@@ -1,8 +1,11 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { useAuth } from '@payloadcms/ui'
 import type {
+  ArrayField,
   AuthenticatedUser,
+  BlocksField,
   BulkOperationResult,
+  CollapsibleField,
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
   CollectionBeforeValidateHook,
@@ -24,12 +27,19 @@ import type {
   JobTaskStatus,
   JoinQuery,
   MeOperationResult,
+  NamedGroupField,
+  NamedTab,
   PaginatedDocs,
   PayloadRequest,
   PayloadTypesShape,
+  RowField,
   SelectType,
+  TabsField,
+  TextField,
   TypedCollectionSelect,
   TypeWithVersion,
+  UnnamedGroupField,
+  UnnamedTab,
   UntypedPayloadTypes,
   Validate,
   ValidateCollectionOptions,
@@ -186,8 +196,8 @@ describe('Types testing', () => {
         locale: null,
       })
       expect(payload.validateGlobal).type.not.toBeCallableWith({
-        fallbackLocale: null,
         slug: 'menu',
+        fallbackLocale: null,
         locale: null,
       })
       expect<{
@@ -259,6 +269,22 @@ describe('Types testing', () => {
         locale: [],
       }
       expect(invalidOptions).type.toBe<ValidateCollectionOptions<'pages'>>()
+    })
+  })
+
+  describe('field duplication configuration', () => {
+    test('should only expose disableDuplicate on fields that own data', () => {
+      expect<ArrayField>().type.toHaveProperty('disableDuplicate')
+      expect<BlocksField>().type.toHaveProperty('disableDuplicate')
+      expect<NamedGroupField>().type.toHaveProperty('disableDuplicate')
+      expect<NamedTab>().type.toHaveProperty('disableDuplicate')
+      expect<TextField>().type.toHaveProperty('disableDuplicate')
+
+      expect<CollapsibleField>().type.not.toHaveProperty('disableDuplicate')
+      expect<RowField>().type.not.toHaveProperty('disableDuplicate')
+      expect<TabsField>().type.not.toHaveProperty('disableDuplicate')
+      expect<UnnamedGroupField>().type.not.toHaveProperty('disableDuplicate')
+      expect<UnnamedTab>().type.not.toHaveProperty('disableDuplicate')
     })
   })
 
@@ -1738,8 +1764,8 @@ describe('Types testing', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
+            title: 'Test',
           },
           draft: false,
         })
@@ -1758,8 +1784,8 @@ describe('Types testing', () => {
         expect(payload.create).type.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
+            title: 'Test',
           },
         })
       })
@@ -1794,9 +1820,9 @@ describe('Types testing', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             description: 'Description',
             invalidProperty: 'should error',
+            title: 'Test',
           },
           draft: false,
         })
@@ -1804,8 +1830,8 @@ describe('Types testing', () => {
         expect(payload.create).type.not.toBeCallableWith({
           collection: 'draft-posts',
           data: {
-            title: 'Test',
             invalidProperty: 'should error',
+            title: 'Test',
           },
           draft: true,
         })
@@ -1849,32 +1875,32 @@ describe('Types testing', () => {
 
       test('findByID with draft:true on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: true,
         })
       })
 
       test('findByID with draft:false on non-draft collection should error', () => {
         expect(payload.findByID).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: false,
         })
       })
 
       test('findByID with draft:true on draft-enabled collection should work', () => {
         expect(payload.findByID).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           draft: true,
         })
       })
 
       test('update with draft:true on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           data: { title: 'Test' },
           draft: true,
         })
@@ -1882,8 +1908,8 @@ describe('Types testing', () => {
 
       test('update with draft:false on non-draft collection should error', () => {
         expect(payload.update).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           data: { title: 'Test' },
           draft: false,
         })
@@ -1891,8 +1917,8 @@ describe('Types testing', () => {
 
       test('update with draft:true on draft-enabled collection should work', () => {
         expect(payload.update).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           data: { title: 'Test' },
           draft: true,
         })
@@ -1900,24 +1926,24 @@ describe('Types testing', () => {
 
       test('duplicate with draft:true on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: true,
         })
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
         expect(payload.duplicate).type.not.toBeCallableWith({
-          collection: 'pages',
           id: 1,
+          collection: 'pages',
           draft: false,
         })
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
         expect(payload.duplicate).type.toBeCallableWith({
-          collection: 'draft-posts',
           id: 1,
+          collection: 'draft-posts',
           draft: true,
         })
       })

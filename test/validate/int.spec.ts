@@ -6,12 +6,11 @@ import fs from 'fs/promises'
 import path from 'path'
 import { createLocalReq, getFileByPath } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
-import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
   accessEvents,
@@ -49,9 +48,6 @@ import {
 let payload: Payload
 let restClient: NextRESTClient
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
 const formatGraphQLID = (id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
@@ -78,9 +74,10 @@ function buildNestedFieldValidateBlockRichText(value: string) {
   }
 }
 
-describe('validate Local API', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local API', () => {
+  test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
+    payload = payloadInstance
+    restClient = restClientInstance
 
     await payload.updateGlobal({
       slug: validationGlobalSlug,
@@ -111,11 +108,11 @@ describe('validate Local API', () => {
     })
   })
 
-  beforeEach(() => {
+  test.beforeEach(() => {
     clearValidationEvents()
   })
 
-  afterEach(async () => {
+  test.afterEach(async () => {
     await Promise.all([
       payload.delete({
         collection: publishCollectionSlug,
@@ -173,12 +170,8 @@ describe('validate Local API', () => {
     await fs.rm(validationPublishUploadsDir, { force: true, recursive: true })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('collections', () => {
-    it('should fall back to collection update access with the validate operation', async () => {
+  test.describe('collections', () => {
+    test('should fall back to collection update access with the validate operation', async () => {
       await expect(
         payload.validate({
           collection: validationFallbackCollectionSlug,
@@ -203,7 +196,7 @@ describe('validate Local API', () => {
       expect(fallbackAccessEvents.every(({ operation }) => operation === 'validate')).toBe(true)
     })
 
-    it('should deny collection validation when its update access fallback denies it', async () => {
+    test('should deny collection validation when its update access fallback denies it', async () => {
       await expect(
         payload.validate({
           collection: validationFallbackCollectionSlug,
@@ -218,7 +211,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should prefer explicit collection validate access over its update access fallback', async () => {
+    test('should prefer explicit collection validate access over its update access fallback', async () => {
       await expect(
         payload.validate({
           collection: validationDeniedCollectionSlug,
@@ -233,7 +226,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should let an explicit null user override an authenticated reused collection request', async () => {
+    test('should let an explicit null user override an authenticated reused collection request', async () => {
       const req = {
         user: {
           id: 'authenticated-user',
@@ -263,7 +256,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should fall back to field update access with the validate operation', async () => {
+    test('should fall back to field update access with the validate operation', async () => {
       const excludedResult = await payload.validate({
         collection: validationFallbackCollectionSlug,
         context: {
@@ -313,7 +306,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should prefer explicit field validate access over its update access fallback', async () => {
+    test('should prefer explicit field validate access over its update access fallback', async () => {
       const result = await payload.validate({
         collection: validationFallbackCollectionSlug,
         context: {
@@ -338,7 +331,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should expose fallback-derived entity and field validation permissions', async () => {
+    test('should expose fallback-derived entity and field validation permissions', async () => {
       const req = await createLocalReq(
         {
           context: {
@@ -380,7 +373,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBeUndefined()
     })
 
-    it('should apply update access fallback constraints to stored collection validation', async () => {
+    test('should apply update access fallback constraints to stored collection validation', async () => {
       const stored = await payload.create({
         collection: validationWhereCollectionSlug,
         data: {
@@ -420,7 +413,7 @@ describe('validate Local API', () => {
       expect(fallbackAccessEvents.every(({ operation }) => operation === 'validate')).toBe(true)
     })
 
-    it('should isolate operation-sensitive entity and nested field permission discovery', async () => {
+    test('should isolate operation-sensitive entity and nested field permission discovery', async () => {
       const req = await createLocalReq(
         {
           context: {
@@ -566,7 +559,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('update')
     })
 
-    it('should validate explicit locales and tag only the invalid locale', async () => {
+    test('should validate explicit locales and tag only the invalid locale', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
         data: {
@@ -592,7 +585,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should not honor fallbackLocale when the checked locale has no value of its own', async () => {
+    test('should not honor fallbackLocale when the checked locale has no value of its own', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
         data: {
@@ -619,7 +612,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should ignore internal projection flags passed to the public collection validate API', async () => {
+    test('should ignore internal projection flags passed to the public collection validate API', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
         data: {
@@ -646,7 +639,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should ignore internal trash-source flags passed to the public collection validate API', async () => {
+    test('should ignore internal trash-source flags passed to the public collection validate API', async () => {
       const stored = await seedPublishCollection({
         de: 'German optional',
         deletedAt: new Date().toISOString(),
@@ -664,7 +657,7 @@ describe('validate Local API', () => {
       ).rejects.toThrow(/not found/i)
     })
 
-    it('should resolve all to every available locale through locale filtering', async () => {
+    test('should resolve all to every available locale through locale filtering', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         context: {
@@ -686,7 +679,7 @@ describe('validate Local API', () => {
       expect(localeFilterOperationEvents).toEqual(['validate'])
     })
 
-    it('should not duplicate a non-localized field error once per resolved locale', async () => {
+    test('should not duplicate a non-localized field error once per resolved locale', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         context: {
@@ -702,7 +695,7 @@ describe('validate Local API', () => {
       expect(result.errors.filter((error) => error.path === 'summary')).toHaveLength(1)
     })
 
-    it('should deduplicate explicit locales in deterministic order', async () => {
+    test('should deduplicate explicit locales in deterministic order', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         context: {
@@ -719,7 +712,7 @@ describe('validate Local API', () => {
       expect(localePassEvents.map(({ localeAtStart }) => localeAtStart)).toEqual(['es', 'en'])
     })
 
-    it('should reject empty, unknown, and unavailable locale selectors', async () => {
+    test('should reject empty, unknown, and unavailable locale selectors', async () => {
       await expect(
         payload.validate({
           collection: validationCollectionSlug,
@@ -757,7 +750,7 @@ describe('validate Local API', () => {
       ).rejects.toThrow('es')
     })
 
-    it('should cap concurrent locale passes at three with isolated request state', async () => {
+    test('should cap concurrent locale passes at three with isolated request state', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         context: {
@@ -784,7 +777,7 @@ describe('validate Local API', () => {
       ).toBe(true)
     })
 
-    it('should isolate mutable access data and request state between collection locale passes', async () => {
+    test('should isolate mutable access data and request state between collection locale passes', async () => {
       const candidateData = {
         isolation: { marker: 'caller' },
         summary: 'candidate summary',
@@ -866,7 +859,7 @@ describe('validate Local API', () => {
       expect(req.transactionID).toBe(transactionID)
     })
 
-    it('should return field errors for invalid create data without creating a document', async () => {
+    test('should return field errors for invalid create data without creating a document', async () => {
       const req = {
         operation: 'update',
       } satisfies Partial<PayloadRequest>
@@ -895,7 +888,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('update')
     })
 
-    it('should return a successful result for valid create data', async () => {
+    test('should return a successful result for valid create data', async () => {
       const req = {
         operation: 'read',
       } satisfies Partial<PayloadRequest>
@@ -916,7 +909,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('read')
     })
 
-    it('should run validation hooks in order with the validate operation and unchanged context', async () => {
+    test('should run validation hooks in order with the validate operation and unchanged context', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         context: {
@@ -949,7 +942,7 @@ describe('validate Local API', () => {
       ).toBe(true)
     })
 
-    it('should pass the validate operation into fields nested inside a Lexical block', async () => {
+    test('should pass the validate operation into fields nested inside a Lexical block', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         data: {
@@ -970,7 +963,7 @@ describe('validate Local API', () => {
       expect(nestedBlockFieldValidateEvent?.requestOperation).toBe('validate')
     })
 
-    it('should pass the validate operation into beforeChange hooks nested inside a Lexical block', async () => {
+    test('should pass the validate operation into beforeChange hooks nested inside a Lexical block', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         data: {
@@ -991,7 +984,7 @@ describe('validate Local API', () => {
       expect(nestedBlockFieldBeforeChangeEvent?.requestOperation).toBe('validate')
     })
 
-    it('should apply defaults before validating required fields', async () => {
+    test('should apply defaults before validating required fields', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         data: {
@@ -1008,7 +1001,7 @@ describe('validate Local API', () => {
       expect(hookEvents.find(({ hook }) => hook === 'fieldValidate')).toBeDefined()
     })
 
-    it('should reject create simulation without data at runtime', async () => {
+    test('should reject create simulation without data at runtime', async () => {
       await expect(
         payload.validate({
           collection: validationCollectionSlug,
@@ -1017,7 +1010,7 @@ describe('validate Local API', () => {
       ).rejects.toThrow('Validation create simulation requires data')
     })
 
-    it('should reject a missing locale at runtime', async () => {
+    test('should reject a missing locale at runtime', async () => {
       await expect(
         payload.validate({
           collection: validationCollectionSlug,
@@ -1029,7 +1022,7 @@ describe('validate Local API', () => {
       ).rejects.toThrow('Validation requires a locale')
     })
 
-    it('should merge partial update data over the stored locale without persisting it', async () => {
+    test('should merge partial update data over the stored locale without persisting it', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
         data: {
@@ -1065,7 +1058,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should use the published collection as the validation base unless draft is true', async () => {
+    test('should use the published collection as the validation base unless draft is true', async () => {
       const draft = await seedPublishCollection({
         de: 'German optional',
         en: 'English draft',
@@ -1158,7 +1151,7 @@ describe('validate Local API', () => {
       expect(versionsAfter).toEqual(versionsBefore)
     })
 
-    it('should validate a partial update with an unchanged stored point representation', async () => {
+    test('should validate a partial update with an unchanged stored point representation', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
         data: {
@@ -1184,7 +1177,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should execute first-class collection validation access and throw on denial', async () => {
+    test('should execute first-class collection validation access and throw on denial', async () => {
       const req = {
         operation: 'delete',
       } satisfies Partial<PayloadRequest>
@@ -1208,7 +1201,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('delete')
     })
 
-    it('should restore the caller request operation after a collection hook throws', async () => {
+    test('should restore the caller request operation after a collection hook throws', async () => {
       const req = {
         operation: 'create',
       } satisfies Partial<PayloadRequest>
@@ -1231,7 +1224,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('create')
     })
 
-    it('should return a validation result instead of throwing when a collection hook throws a ValidationError', async () => {
+    test('should return a validation result instead of throwing when a collection hook throws a ValidationError', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
         context: {
@@ -1256,8 +1249,8 @@ describe('validate Local API', () => {
     })
   })
 
-  describe('globals', () => {
-    it('should fall back to global update access with the validate operation', async () => {
+  test.describe('globals', () => {
+    test('should fall back to global update access with the validate operation', async () => {
       await expect(
         payload.validateGlobal({
           slug: validationFallbackGlobalSlug,
@@ -1282,7 +1275,7 @@ describe('validate Local API', () => {
       expect(fallbackAccessEvents.every(({ operation }) => operation === 'validate')).toBe(true)
     })
 
-    it('should deny global validation when its update access fallback denies it', async () => {
+    test('should deny global validation when its update access fallback denies it', async () => {
       await expect(
         payload.validateGlobal({
           slug: validationFallbackGlobalSlug,
@@ -1297,7 +1290,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should let an explicit null user override an authenticated reused global request', async () => {
+    test('should let an explicit null user override an authenticated reused global request', async () => {
       const req = {
         user: {
           id: 'authenticated-user',
@@ -1327,7 +1320,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should fall back to global field update access with the validate operation', async () => {
+    test('should fall back to global field update access with the validate operation', async () => {
       const excludedResult = await payload.validateGlobal({
         slug: validationFallbackGlobalSlug,
         context: {
@@ -1377,7 +1370,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should expose fallback-derived global and field validation permissions', async () => {
+    test('should expose fallback-derived global and field validation permissions', async () => {
       const req = await createLocalReq(
         {
           context: {
@@ -1419,7 +1412,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBeUndefined()
     })
 
-    it('should prefer explicit global validate access over its update access fallback', async () => {
+    test('should prefer explicit global validate access over its update access fallback', async () => {
       await expect(
         payload.validateGlobal({
           slug: validationDeniedGlobalSlug,
@@ -1434,7 +1427,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should load a draft-only global only when draft validation is requested', async () => {
+    test('should load a draft-only global only when draft validation is requested', async () => {
       const versionsBefore = await payload.countGlobalVersions({
         global: validationDraftSourceGlobalSlug,
       })
@@ -1474,7 +1467,7 @@ describe('validate Local API', () => {
       expect(versionsAfter).toEqual(versionsBefore)
     })
 
-    it('should resolve an access-constrained draft when no matching main global exists', async () => {
+    test('should resolve an access-constrained draft when no matching main global exists', async () => {
       const req = {
         operation: 'read',
       } satisfies Partial<PayloadRequest>
@@ -1498,7 +1491,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('read')
     })
 
-    it('should reject a Where policy that filters out the persisted main global', async () => {
+    test('should reject a Where policy that filters out the persisted main global', async () => {
       await expect(
         payload.validateGlobal({
           slug: validationAccessSourceGlobalSlug,
@@ -1519,7 +1512,7 @@ describe('validate Local API', () => {
       expect(globalValidationSourceEvents).toEqual([])
     })
 
-    it('should ignore internal projection flags passed to the public global validate API', async () => {
+    test('should ignore internal projection flags passed to the public global validate API', async () => {
       const result = await payload.validateGlobal({
         slug: validationGlobalSlug,
         data: {
@@ -1536,7 +1529,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should isolate mutable access data and request state between global locale passes', async () => {
+    test('should isolate mutable access data and request state between global locale passes', async () => {
       const candidateData = {
         isolation: { marker: 'caller' },
         summary: 'candidate summary',
@@ -1610,7 +1603,7 @@ describe('validate Local API', () => {
       expect(user.isolation.marker).toBe('caller')
     })
 
-    it('should validate valid partial global data without persisting it', async () => {
+    test('should validate valid partial global data without persisting it', async () => {
       const req = {
         operation: 'read',
       } satisfies Partial<PayloadRequest>
@@ -1640,7 +1633,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('read')
     })
 
-    it('should return errors for invalid partial global data without persisting it', async () => {
+    test('should return errors for invalid partial global data without persisting it', async () => {
       const req = {
         operation: 'update',
       } satisfies Partial<PayloadRequest>
@@ -1670,7 +1663,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('update')
     })
 
-    it('should validate partial global data with an unchanged stored point representation', async () => {
+    test('should validate partial global data with an unchanged stored point representation', async () => {
       const result = await payload.validateGlobal({
         slug: validationGlobalSlug,
         data: {
@@ -1685,7 +1678,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should use the published global as the validation base unless draft is true', async () => {
+    test('should use the published global as the validation base unless draft is true', async () => {
       await seedPublishGlobal({
         de: 'German optional',
         en: 'English draft',
@@ -1760,7 +1753,7 @@ describe('validate Local API', () => {
       expect(versionsAfter).toEqual(versionsBefore)
     })
 
-    it('should execute first-class global validation access and throw on denial', async () => {
+    test('should execute first-class global validation access and throw on denial', async () => {
       const req = {
         operation: 'delete',
       } satisfies Partial<PayloadRequest>
@@ -1780,7 +1773,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('delete')
     })
 
-    it('should restore the caller request operation after a global hook throws', async () => {
+    test('should restore the caller request operation after a global hook throws', async () => {
       const req = {
         operation: 'create',
       } satisfies Partial<PayloadRequest>
@@ -1799,7 +1792,7 @@ describe('validate Local API', () => {
       expect(req.operation).toBe('create')
     })
 
-    it('should return a validation result instead of throwing when a global hook throws a ValidationError', async () => {
+    test('should return a validation result instead of throwing when a global hook throws a ValidationError', async () => {
       const result = await payload.validateGlobal({
         slug: validationGlobalSlug,
         context: {
@@ -1820,8 +1813,8 @@ describe('validate Local API', () => {
     })
   })
 
-  describe('REST API', () => {
-    it('should use collection update access when validate access is not configured', async () => {
+  test.describe('REST API', () => {
+    test('should use collection update access when validate access is not configured', async () => {
       const response = await restClient.POST(
         `/${validationFallbackCollectionSlug}/validate?locale=en`,
         {
@@ -1842,7 +1835,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should use global update access when validate access is not configured', async () => {
+    test('should use global update access when validate access is not configured', async () => {
       const response = await restClient.POST(
         `/globals/${validationFallbackGlobalSlug}/validate?locale=en`,
         {
@@ -1863,7 +1856,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should deny global REST validation when explicit validate access denies it', async () => {
+    test('should deny global REST validation when explicit validate access denies it', async () => {
       const response = await restClient.POST(
         `/globals/${validationDeniedGlobalSlug}/validate?locale=en`,
         {
@@ -1876,7 +1869,7 @@ describe('validate Local API', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should return 404 for a nonexistent collection document', async () => {
+    test('should return 404 for a nonexistent collection document', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
         data: {
@@ -1894,7 +1887,7 @@ describe('validate Local API', () => {
       expect(response.status).toBe(404)
     })
 
-    it('should return invalid collection create validation without creating a document', async () => {
+    test('should return invalid collection create validation without creating a document', async () => {
       const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
         body: JSON.stringify({
           summary: 'candidate summary',
@@ -1918,7 +1911,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should return valid collection create validation', async () => {
+    test('should return valid collection create validation', async () => {
       const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
         body: JSON.stringify({
           summary: 'candidate summary',
@@ -1933,7 +1926,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should return 400 for missing or empty locales and malformed data', async () => {
+    test('should return 400 for missing or empty locales and malformed data', async () => {
       const missingLocale = await restClient.POST(`/${validationCollectionSlug}/validate`, {
         body: JSON.stringify({
           summary: 'candidate summary',
@@ -1965,7 +1958,7 @@ describe('validate Local API', () => {
       expect(malformedJSON.status).toBe(400)
     })
 
-    it('should accept repeated and all locale selectors', async () => {
+    test('should accept repeated and all locale selectors', async () => {
       const repeatedLocale = await restClient.POST(
         `/${validationCollectionSlug}/validate?locale=en&locale=es`,
         {
@@ -1998,7 +1991,7 @@ describe('validate Local API', () => {
       expect(localeFilterOperationEvents).toEqual(['validate'])
     })
 
-    it('should use the latest collection draft as the REST validation base', async () => {
+    test('should use the latest collection draft as the REST validation base', async () => {
       const draft = await seedPublishCollection({
         de: 'German optional',
         en: 'English draft',
@@ -2040,7 +2033,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should use the latest global draft as the REST validation base', async () => {
+    test('should use the latest global draft as the REST validation base', async () => {
       await seedPublishGlobal({
         de: 'German optional',
         en: 'English draft',
@@ -2077,7 +2070,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should merge by-ID validation data without persisting it', async () => {
+    test('should merge by-ID validation data without persisting it', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
         data: {
@@ -2113,7 +2106,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should validate global data without persisting it', async () => {
+    test('should validate global data without persisting it', async () => {
       const response = await restClient.POST(
         `/globals/${validationGlobalSlug}/validate?locale=en`,
         {
@@ -2140,7 +2133,7 @@ describe('validate Local API', () => {
       expect(afterValidation.title).toBe('Stored global title')
     })
 
-    it('should return valid global validation without persisting it', async () => {
+    test('should return valid global validation without persisting it', async () => {
       const response = await restClient.POST(
         `/globals/${validationGlobalSlug}/validate?locale=en`,
         {
@@ -2157,7 +2150,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should deny collection REST validation when explicit validate access denies it', async () => {
+    test('should deny collection REST validation when explicit validate access denies it', async () => {
       const response = await restClient.POST(
         `/${validationDeniedCollectionSlug}/validate?locale=en`,
         {
@@ -2170,7 +2163,7 @@ describe('validate Local API', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should keep body control-shaped fields as data without changing trusted access inputs', async () => {
+    test('should keep body control-shaped fields as data without changing trusted access inputs', async () => {
       const collection = payload.collections[validationCollectionSlug]!
       const validate = collection.config.access.validate
       const accessRequests: unknown[] = []
@@ -2234,7 +2227,7 @@ describe('validate Local API', () => {
       ])
     })
 
-    it('should validate each requested locale independently when sibling localized fields are omitted', async () => {
+    test('should validate each requested locale independently when sibling localized fields are omitted', async () => {
       const draft = await payload.create({
         collection: validationCustomButtonsCollectionSlug,
         data: {
@@ -2322,10 +2315,10 @@ describe('validate Local API', () => {
     })
   })
 
-  describe('GraphQL API', () => {
+  test.describe('GraphQL API', () => {
     let graphqlUserID: number | string
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       const user = await payload.create({
         collection: 'users',
         data: {
@@ -2344,11 +2337,11 @@ describe('validate Local API', () => {
       })
     })
 
-    afterAll(async () => {
+    test.afterAll(async () => {
       await payload.delete({ id: graphqlUserID, collection: 'users' })
     })
 
-    it('should return a validation result for an invalid collection create candidate without persisting it', async () => {
+    test('should return a validation result for an invalid collection create candidate without persisting it', async () => {
       const docsBefore = await payload.count({ collection: writeTargetsSlug })
 
       const query = `mutation {
@@ -2372,7 +2365,7 @@ describe('validate Local API', () => {
       expect(await payload.count({ collection: writeTargetsSlug })).toEqual(docsBefore)
     })
 
-    it('should return a valid result for a valid collection create candidate', async () => {
+    test('should return a valid result for a valid collection create candidate', async () => {
       const query = `mutation {
         validateValidationWriteTarget(data: { title: "GraphQL candidate" }) {
           valid
@@ -2390,7 +2383,7 @@ describe('validate Local API', () => {
       expect(data.validateValidationWriteTarget).toEqual({ errors: [], valid: true })
     })
 
-    it('should validate a stored collection document by id without persisting the candidate', async () => {
+    test('should validate a stored collection document by id without persisting the candidate', async () => {
       const target = await createWriteTarget()
 
       const query = `mutation {
@@ -2413,7 +2406,7 @@ describe('validate Local API', () => {
       ).resolves.toMatchObject({ title: 'stored target' })
     })
 
-    it('should return a validation result for a global document', async () => {
+    test('should return a validation result for a global document', async () => {
       const query = `mutation {
         validateValidationWriteTargetSetting(data: { title: "" }) {
           valid
@@ -2435,8 +2428,8 @@ describe('validate Local API', () => {
     })
   })
 
-  describe('write safety', () => {
-    it('should reject a create that reuses the validation request before a row is written', async () => {
+  test.describe('write safety', () => {
+    test('should reject a create that reuses the validation request before a row is written', async () => {
       await expect(runWriteAttempt('create')).rejects.toThrow(
         'Payload writes are not allowed during validation',
       )
@@ -2444,7 +2437,7 @@ describe('validate Local API', () => {
       expect(await payload.count({ collection: writeTargetsSlug })).toEqual({ totalDocs: 0 })
     })
 
-    it('should reject an update that reuses the validation request before a row is written', async () => {
+    test('should reject an update that reuses the validation request before a row is written', async () => {
       const target = await createWriteTarget()
 
       await expect(runWriteAttempt('update', target.id)).rejects.toThrow(
@@ -2461,7 +2454,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should reject a bulk update that reuses the validation request before a row is written', async () => {
+    test('should reject a bulk update that reuses the validation request before a row is written', async () => {
       const target = await createWriteTarget()
 
       await expect(runWriteAttempt('updateMany', target.id)).rejects.toThrow(
@@ -2478,7 +2471,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should reject a delete that reuses the validation request before a row is removed', async () => {
+    test('should reject a delete that reuses the validation request before a row is removed', async () => {
       const target = await createWriteTarget()
 
       await expect(runWriteAttempt('delete', target.id)).rejects.toThrow(
@@ -2495,7 +2488,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should reject a bulk delete that reuses the validation request before a row is removed', async () => {
+    test('should reject a bulk delete that reuses the validation request before a row is removed', async () => {
       const target = await createWriteTarget()
 
       await expect(runWriteAttempt('deleteMany', target.id)).rejects.toThrow(
@@ -2512,7 +2505,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should reject a global update that reuses the validation request before data is written', async () => {
+    test('should reject a global update that reuses the validation request before data is written', async () => {
       await payload.updateGlobal({
         slug: validationWriteTargetGlobalSlug,
         data: {
@@ -2533,7 +2526,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should reject a collection version restore before the document is written', async () => {
+    test('should reject a collection version restore before the document is written', async () => {
       const target = await createWriteTarget()
 
       await payload.update({
@@ -2571,7 +2564,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should reject a global version restore before the global is written', async () => {
+    test('should reject a global version restore before the global is written', async () => {
       await payload.updateGlobal({
         slug: validationWriteTargetGlobalSlug,
         data: {
@@ -2607,7 +2600,7 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should reject an upload that reuses the validation request before a row or file is written', async () => {
+    test('should reject an upload that reuses the validation request before a row or file is written', async () => {
       await fs.mkdir(validationUploadsDir, { recursive: true })
 
       await expect(runWriteAttempt('upload')).rejects.toThrow(
@@ -2618,7 +2611,7 @@ describe('validate Local API', () => {
       await expect(fs.stat(path.join(validationUploadsDir, 'blocked.txt'))).rejects.toThrow()
     })
 
-    it('should reject a version save that reuses the validation request before a version is written', async () => {
+    test('should reject a version save that reuses the validation request before a version is written', async () => {
       const target = await createWriteTarget()
       const versionsBefore = await payload.countVersions({
         collection: writeTargetsSlug,
@@ -2644,7 +2637,7 @@ describe('validate Local API', () => {
       expect(versionsAfter).toEqual(versionsBefore)
     })
 
-    it('should reject a job queue call that reuses the validation request before a job is written', async () => {
+    test('should reject a job queue call that reuses the validation request before a job is written', async () => {
       const jobsBefore = await payload.count({ collection: 'payload-jobs' })
 
       await expect(runWriteAttempt('jobsQueue')).rejects.toThrow(
@@ -2654,7 +2647,81 @@ describe('validate Local API', () => {
       expect(await payload.count({ collection: 'payload-jobs' })).toEqual(jobsBefore)
     })
 
-    it('should reject a login that reuses the validation request before login attempts are recorded', async () => {
+    test('should reject schedule handling before job statistics are written', async () => {
+      const scheduleTask = payload.config.jobs?.tasks?.find(
+        ({ slug }) => slug === 'validationWriteGuardProbe',
+      )
+
+      if (!scheduleTask) {
+        throw new Error('Expected validationWriteGuardProbe task')
+      }
+
+      const originalSchedule = scheduleTask.schedule
+      const jobsBefore = await payload.count({ collection: 'payload-jobs' })
+      const statsBefore = structuredClone(
+        await payload.db.findGlobal({ slug: 'payload-jobs-stats' }),
+      )
+
+      scheduleTask.schedule = [
+        {
+          cron: '* * * * * *',
+          queue: 'validation-write-guard',
+        },
+      ]
+
+      try {
+        const outcome = await runWriteAttempt('jobsHandleSchedules').then(
+          () => ({ error: null }),
+          (error: unknown) => ({ error }),
+        )
+
+        expect(await payload.db.findGlobal({ slug: 'payload-jobs-stats' })).toEqual(statsBefore)
+        expect(await payload.count({ collection: 'payload-jobs' })).toEqual(jobsBefore)
+        expect(outcome.error).toHaveProperty(
+          'message',
+          'Payload writes are not allowed during validation.',
+        )
+      } finally {
+        scheduleTask.schedule = originalSchedule
+      }
+    })
+
+    test('should reject forgot password before the request interval reservation is written', async () => {
+      const originalRequestedAt = '2000-01-01T00:00:00.000Z'
+      const user = await payload.create({
+        collection: 'users',
+        data: {
+          email: 'validation-write-guard-forgot-password@example.com',
+          password: 'correct-password',
+        },
+      })
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection: 'users',
+        data: {
+          resetPasswordRequestedAt: originalRequestedAt,
+        },
+      })
+
+      try {
+        await expect(runWriteAttempt('forgotPassword')).rejects.toThrow(
+          'Payload writes are not allowed during validation',
+        )
+
+        const userAfter = await payload.findByID({
+          id: user.id,
+          collection: 'users',
+          showHiddenFields: true,
+        })
+
+        expect(userAfter.resetPasswordRequestedAt).toEqual(originalRequestedAt)
+      } finally {
+        await payload.delete({ id: user.id, collection: 'users' })
+      }
+    })
+
+    test('should reject a login that reuses the validation request before login attempts are recorded', async () => {
       const user = await payload.create({
         collection: 'users',
         data: {
@@ -2680,7 +2747,7 @@ describe('validate Local API', () => {
       }
     })
 
-    it('should reject a logout that reuses the validation request before a session is removed', async () => {
+    test('should reject a logout that reuses the validation request before a session is removed', async () => {
       const usersBefore = await payload.count({ collection: 'users' })
 
       await expect(runWriteAttempt('logout')).rejects.toThrow(
@@ -2690,7 +2757,7 @@ describe('validate Local API', () => {
       expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
     })
 
-    it('should reject a refresh that reuses the validation request before a session is written', async () => {
+    test('should reject a refresh that reuses the validation request before a session is written', async () => {
       const usersBefore = await payload.count({ collection: 'users' })
 
       await expect(runWriteAttempt('refresh')).rejects.toThrow(
@@ -2700,7 +2767,7 @@ describe('validate Local API', () => {
       expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
     })
 
-    it('should reject a reset password that reuses the validation request before a password is written', async () => {
+    test('should reject a reset password that reuses the validation request before a password is written', async () => {
       const usersBefore = await payload.count({ collection: 'users' })
 
       await expect(runWriteAttempt('resetPassword')).rejects.toThrow(
@@ -2710,7 +2777,7 @@ describe('validate Local API', () => {
       expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
     })
 
-    it('should reject a verify email that reuses the validation request before a user is written', async () => {
+    test('should reject a verify email that reuses the validation request before a user is written', async () => {
       const usersBefore = await payload.count({ collection: 'users' })
 
       await expect(runWriteAttempt('verifyEmail')).rejects.toThrow(
@@ -2737,6 +2804,8 @@ async function runWriteAttempt(
     | 'create'
     | 'delete'
     | 'deleteMany'
+    | 'forgotPassword'
+    | 'jobsHandleSchedules'
     | 'jobsQueue'
     | 'login'
     | 'logout'

@@ -229,11 +229,26 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       })
       break
 
+    case 'forgotPassword':
+      await req.payload.forgotPassword({
+        collection: 'users',
+        data: { email: 'validation-write-guard-forgot-password@example.com' },
+        req,
+      })
+      break
+
+    case 'jobsHandleSchedules':
+      await req.payload.jobs.handleSchedules({
+        allQueues: true,
+        req,
+      })
+      break
+
     case 'jobsQueue':
       await req.payload.jobs.queue({
-        task: 'validationWriteGuardProbe',
         input: {},
         req,
+        task: 'validationWriteGuardProbe',
       })
       break
 
@@ -521,6 +536,8 @@ const validationCollection: CollectionConfig = {
         'create',
         'delete',
         'deleteMany',
+        'forgotPassword',
+        'jobsHandleSchedules',
         'jobsQueue',
         'login',
         'logout',
@@ -1320,123 +1337,125 @@ const validationNonLocalizedCollection: CollectionConfig = {
 }
 
 export default buildConfigWithDefaults({
-  admin: {
-    autoLogin: {
-      email: devUser.email,
-      password: devUser.password,
-    },
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    validationCollection,
-    validationFallbackCollection,
-    validationWhereCollection,
-    publishCollection,
-    validationCustomButtonsCollection,
-    validationDeniedCollection,
-    validationNonLocalizedCollection,
-    {
-      slug: writeTargetsSlug,
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-      ],
-      versions: true,
-    },
-    {
-      slug: validationUploadsSlug,
-      fields: [],
-      upload: {
-        staticDir: validationUploadsDir,
+  config: {
+    admin: {
+      autoLogin: {
+        email: devUser.email,
+        password: devUser.password,
       },
-      versions: false,
-    },
-    {
-      slug: validationPublishUploadsSlug,
-      access: {
-        validate: () => true,
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          localized: true,
-          required: true,
-        },
-      ],
-      upload: {
-        imageSizes: [
+    },
+    collections: [
+      validationCollection,
+      validationFallbackCollection,
+      validationWhereCollection,
+      publishCollection,
+      validationCustomButtonsCollection,
+      validationDeniedCollection,
+      validationNonLocalizedCollection,
+      {
+        slug: writeTargetsSlug,
+        fields: [
           {
-            name: 'thumbnail',
-            height: 64,
-            width: 64,
+            name: 'title',
+            type: 'text',
+            required: true,
           },
         ],
-        staticDir: validationPublishUploadsDir,
+        versions: true,
       },
-      versions: {
-        drafts: {
-          validate: false,
+      {
+        slug: validationUploadsSlug,
+        fields: [],
+        upload: {
+          staticDir: validationUploadsDir,
+        },
+        versions: false,
+      },
+      {
+        slug: validationPublishUploadsSlug,
+        access: {
+          validate: () => true,
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            localized: true,
+            required: true,
+          },
+        ],
+        upload: {
+          imageSizes: [
+            {
+              name: 'thumbnail',
+              height: 64,
+              width: 64,
+            },
+          ],
+          staticDir: validationPublishUploadsDir,
+        },
+        versions: {
+          drafts: {
+            validate: false,
+          },
         },
       },
-    },
-  ],
-  globals: [
-    validationGlobal,
-    validationFallbackGlobal,
-    validationDeniedGlobal,
-    validationWriteTargetGlobal,
-    validationDraftSourceGlobal,
-    validationAccessSourceGlobal,
-    publishGlobal,
-  ],
-  jobs: {
-    deleteJobOnComplete: false,
-    tasks: [
-      {
-        slug: 'validationWriteGuardProbe',
-        inputSchema: [],
-        outputSchema: [],
-        handler: () => ({ output: {} }),
-      },
     ],
-  },
-  localization: {
-    defaultLocale: 'en',
-    filterAvailableLocales: ({ locales, req }) => {
-      localeFilterOperationEvents.push(req.operation)
-      const availableLocaleCodes = req.context.availableLocaleCodes as string[] | undefined
+    globals: [
+      validationGlobal,
+      validationFallbackGlobal,
+      validationDeniedGlobal,
+      validationWriteTargetGlobal,
+      validationDraftSourceGlobal,
+      validationAccessSourceGlobal,
+      publishGlobal,
+    ],
+    jobs: {
+      deleteJobOnComplete: false,
+      tasks: [
+        {
+          slug: 'validationWriteGuardProbe',
+          handler: () => ({ output: {} }),
+          inputSchema: [],
+          outputSchema: [],
+        },
+      ],
+    },
+    localization: {
+      defaultLocale: 'en',
+      filterAvailableLocales: ({ locales, req }) => {
+        localeFilterOperationEvents.push(req.operation)
+        const availableLocaleCodes = req.context.availableLocaleCodes as string[] | undefined
 
-      return availableLocaleCodes
-        ? locales.filter(({ code }) => availableLocaleCodes.includes(code))
-        : locales
+        return availableLocaleCodes
+          ? locales.filter(({ code }) => availableLocaleCodes.includes(code))
+          : locales
+      },
+      locales: [
+        {
+          code: 'en',
+          label: 'English',
+        },
+        {
+          code: 'es',
+          label: 'Spanish',
+        },
+        {
+          code: 'de',
+          fallbackLocale: 'en',
+          label: 'German',
+        },
+        {
+          code: 'fr',
+          label: 'French',
+        },
+      ],
     },
-    locales: [
-      {
-        code: 'en',
-        label: 'English',
-      },
-      {
-        code: 'es',
-        label: 'Spanish',
-      },
-      {
-        code: 'de',
-        fallbackLocale: 'en',
-        label: 'German',
-      },
-      {
-        code: 'fr',
-        label: 'French',
-      },
-    ],
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     if (process.env.NODE_ENV === 'test') {
       return
     }
@@ -1449,4 +1468,5 @@ export default buildConfigWithDefaults({
       },
     })
   },
+  suite: 'validate',
 })

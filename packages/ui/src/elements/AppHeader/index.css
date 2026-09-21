@@ -125,12 +125,14 @@
     margin-right: var(--spacer-3);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1440px) {
     .app-header__actions {
       max-width: 500px;
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .app-header__gradient-placeholder {
       right: var(--spacer-3);
@@ -141,6 +143,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .app-header__wrapper {
       align-items: flex-start;

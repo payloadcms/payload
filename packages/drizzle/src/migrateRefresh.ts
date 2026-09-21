@@ -1,3 +1,5 @@
+import type { MigrationResult } from 'payload'
+
 import {
   commitTransaction,
   createLocalReq,
@@ -16,7 +18,7 @@ import { parseError } from './utilities/parseError.js'
 /**
  * Run all migration down functions before running up
  */
-export async function migrateRefresh(this: DrizzleAdapter) {
+export async function migrateRefresh(this: DrizzleAdapter): Promise<MigrationResult> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -26,7 +28,7 @@ export async function migrateRefresh(this: DrizzleAdapter) {
 
   if (!existingMigrations?.length) {
     payload.logger.info({ msg: 'No migrations to rollback.' })
-    return
+    return { migrated: [], rolledBack: [] }
   }
 
   payload.logger.info({
@@ -34,6 +36,8 @@ export async function migrateRefresh(this: DrizzleAdapter) {
   })
 
   const req = await createLocalReq({}, payload)
+  const migrated: string[] = []
+  const rolledBack: string[] = []
 
   // Reverse order of migrations to rollback
   existingMigrations.reverse()
@@ -67,13 +71,14 @@ export async function migrateRefresh(this: DrizzleAdapter) {
         })
       }
       await commitTransaction(req)
+      rolledBack.push(migration.name)
     } catch (err: unknown) {
       await killTransaction(req)
       payload.logger.error({
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back.`),
       })
-      process.exit(1)
+      throw err
     }
   }
 
@@ -93,6 +98,7 @@ export async function migrateRefresh(this: DrizzleAdapter) {
         req,
       })
       await commitTransaction(req)
+      migrated.push(migration.name)
 
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
@@ -101,7 +107,9 @@ export async function migrateRefresh(this: DrizzleAdapter) {
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back.`),
       })
-      process.exit(1)
+      throw err
     }
   }
+
+  return { migrated, rolledBack }
 }

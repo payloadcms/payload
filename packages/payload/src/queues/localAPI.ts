@@ -44,6 +44,8 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   }): Promise<HandleSchedulesResult> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
+    assertNoValidationWrite(newReq)
+
     return await handleSchedules({
       allQueues: args?.allQueues,
       queue: args?.queue,

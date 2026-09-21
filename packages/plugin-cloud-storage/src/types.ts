@@ -22,11 +22,26 @@ export interface File {
 
 export type ClientUploadsConfig = { access?: UploadInstructionsAccess } | boolean
 
+/**
+ * Reference to a client-uploaded object, returned by an upload handler and
+ * submitted with the document. Always carries the signed receipt; `prefix`
+ * locates the stored object.
+ */
+export type UploadReference = {
+  _objectKey?: string
+  prefix: string
+  signedReceipt: `${string}.${string}`
+}
+
 export type HandleUpload = (args: {
   collection: CollectionConfig
   data: any
   file: File
   req: PayloadRequest
+  /**
+   * Pre-resolved storage path (`_objectKey` folded in, contained beneath the collection prefix).
+   */
+  storageFilePath: string
 }) =>
   | Partial<FileData & TypeWithID>
   | Promise<Partial<FileData & TypeWithID>>
@@ -42,6 +57,10 @@ export type HandleDelete = (args: {
   doc: FileData & TypeWithID & TypeWithPrefix
   filename: string
   req: PayloadRequest
+  /**
+   * Pre-resolved storage path of the object to delete.
+   */
+  storageFilePath: string
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
@@ -72,7 +91,7 @@ export interface GeneratedAdapter {
   handleDelete: HandleDelete
   handleUpload: HandleUpload
   name: string
-  onInit?: () => void
+  onInit?: () => Promise<void> | void
   staticHandler: StaticHandler
   /** Generates upload instructions when supported. */
   uploadInstructions?: {

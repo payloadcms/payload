@@ -69,7 +69,6 @@ describe('Locked Documents', () => {
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lockedDocumentsTest',
     })
   })
 

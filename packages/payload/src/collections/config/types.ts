@@ -236,6 +236,8 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   overrideAccess?: boolean
   previousDoc: T
   req: PayloadRequest
+  /** Resolved field selection for the operation's response. */
+  select?: SelectType
 }) => any
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
@@ -828,7 +830,9 @@ export interface SanitizedCollectionConfig
     Required<Pick<CollectionConfig, 'admin' | 'custom' | 'indexes' | 'timestamps'>> {
   _sanitized: true
   access: Pick<CollectionAccess, 'admin' | 'readVersions'> &
-    Required<Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'unlock' | 'update' | 'validate'>>
+    Required<
+      Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'unlock' | 'update' | 'validate'>
+    >
   auth: Auth
   endpoints: Endpoint[] | false
   /**

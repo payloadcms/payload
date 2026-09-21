@@ -51,8 +51,8 @@ export const TANSTACK_TEMPLATE_FILES = [
   },
   {
     destination: 'src',
-    relativePath: 'payload-foundation.css',
-    sourcePath: 'payload-foundation.css',
+    relativePath: 'payload.css',
+    sourcePath: 'payload.css',
   },
   {
     destination: 'src',
