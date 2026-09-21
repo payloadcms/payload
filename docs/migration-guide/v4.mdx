@@ -434,7 +434,6 @@ Properties filled during sanitization, including `auth.jwtOrder`, root routes, G
 Code that consumes these properties may now need to handle `undefined`:
 
 ```ts
-await global.access.readVersions(args)
 const views = global.admin.components?.views
 const interfaceName = global.typescript?.interface
 ```
