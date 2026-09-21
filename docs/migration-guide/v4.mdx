@@ -22,6 +22,57 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### JWT authentication is versioned without moving token data
+
+Payload 4 keeps the decoded JWT payload flat, so integrations can continue reading `id`, `collection`, `sid`, `email`, and fields selected by `saveToJWT` from the same paths as Payload 3.
+
+Payload now reserves `id`, `collection`, `email`, `sid`, `iat`, and `exp`. A `saveToJWT` alias using one of those names is ignored, and Payload writes the trusted value after collecting fields configured with `saveToJWT`. This prevents an alias such as `saveToJWT: 'id'` or `saveToJWT: 'collection'` from changing which user or collection the signed token authenticates as.
+
+The token's signed protected header now contains `authVersion: 1`. This marker identifies tokens issued by the fixed authentication format. It lives in the header, rather than the payload, because earlier configurations could alias a field to any payload key. Payload rejects tokens that do not contain the supported header version.
+
+```ts
+// Decoded payload: unchanged paths
+{
+  id: 'user-id',
+  collection: 'users',
+  sid: 'session-id',
+  email: 'user@example.com',
+  role: 'super-admin', // from saveToJWT
+  iat: 1750000000,
+  exp: 1750007200,
+}
+
+// Signed protected header
+{
+  alg: 'HS256',
+  typ: 'JWT',
+  authVersion: 1,
+}
+```
+
+Tokens issued by a patched Payload 3 release already contain the same `authVersion: 1` protected-header marker and remain valid after upgrading to Payload 4, provided the signing secrets and authentication collection configuration remain compatible.
+
+Tokens issued by an unpatched Payload release do not contain the marker and are rejected. There is no safe compatibility fallback because a legacy token might have been signed after its trusted identity fields were overwritten. When upgrading directly from an unpatched release:
+
+- Users must sign in again after deployment.
+- Integrations must reissue stored bearer tokens.
+- Expect a temporary spike in `401` responses until clients discard their stored tokens.
+
+Raw-token consumers do not need to change token data paths, and `/me` returns the same data for a valid new token. External validators and integrations that mint Payload-compatible JWTs must set and check the protected-header version. Import Payload's shared version instead of hardcoding it:
+
+```ts
+import { decodeProtectedHeader } from 'jose'
+import { JWT_AUTH_VERSION } from 'payload'
+
+if (decodeProtectedHeader(token).authVersion !== JWT_AUTH_VERSION) {
+  throw new Error('Unsupported Payload token')
+}
+```
+
+A token is also rejected if its `collection` is not auth-enabled or has `disableLocalStrategy` enabled.
+
+See [Token Data](../authentication/token-data) for the full token data shape.
+
 ### Collection and Global Access Control callbacks receive `slug`
 
 Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
@@ -1838,3 +1889,46 @@ The Admin UI styles were migrated from SCSS to plain CSS. The `@payloadcms/ui/sc
 The `--theme-elevation-*` scale was removed. Use the semantic `--color-*` tokens (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`) or the raw `--ramp-*` palette instead. See [Customizing CSS](../admin/customizing-css) for the full list of available tokens.
 
 Any custom component `.scss` files you authored should be renamed to `.css` and updated to plain CSS syntax — Payload no longer ships a SCSS toolchain.
+
+### Ecommerce Stripe confirmations use an atomic transaction claim
+
+Stripe confirmation now atomically claims the existing ecommerce transaction before creating an order,
+marking the cart as purchased, and decrementing inventory. Retries return the canonical order only when
+the succeeded transaction and order are linked in both directions. Ambiguous state fails closed.
+
+PostgreSQL users must generate and run a database migration that adds `processing` to the ecommerce
+transaction status enum. No order field, unique index, or data backfill is required. The public
+`confirm-order` response continues to include `transactionID`, including on retries. This is a breaking
+security change for custom payment adapters: after provider validation, they must call the new
+`finalizeOrder` argument instead of creating orders themselves. The bundled Stripe adapter is updated in
+the same release. See the [payment confirmation guidance](../ecommerce/payments#confirmation-retries) for
+transactionless database failure behavior and reconciliation guidance.
+
+### Stripe REST proxy requires an explicit method allowlist
+
+`@payloadcms/plugin-stripe` no longer accepts `rest: true`. To enable the REST proxy in v4, use
+an object with a non-empty `allowedMethods` array of exact Stripe SDK method names, such as
+`subscriptions.list`:
+
+```diff
+stripePlugin({
+- rest: true,
++ rest: {
++   allowedMethods: ['subscriptions.list'],
++ },
+})
+```
+
+Wildcards are not supported. The optional `rest.access` callback can further restrict the
+endpoint. Without it, the proxy requires an authenticated user allowed to access the Payload
+admin panel. See the [Stripe REST proxy documentation](../plugins/stripe#stripe-rest-proxy) for
+configuration and security guidance.
+
+If you previously used `rest: false`, remove the property; omitting `rest` disables the proxy.
+
+### API keys: v4-only changes on top of the shared 3.x/4 security fix
+
+- `apiKeyLast4` is a new persisted field on every `auth.useAPIKey` collection. Generate and run a schema migration. Legacy rows backfill on the next successful API-key authentication.
+- `enableAPIKey` is removed. Revoke by setting `apiKey: null`.
+- `hasAPIKey` (3.x virtual field) is removed. Use `apiKeyLast4` and `docPermissions.fields.apiKey`.
+- Custom `access.read` on the generated `apiKey` field is inert — reads are hardcoded to deny.

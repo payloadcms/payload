@@ -1,5 +1,6 @@
 import type { CollectionSlug } from 'payload'
 
+import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -934,6 +935,118 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
     })
 
     test.describe('trashing documents with validation issues', () => {
+      test('should validate submitted fields when trashing a document', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'Validate trash update',
+          },
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: doc.id,
+              collection: postsSlug,
+              data: {
+                deletedAt: new Date().toISOString(),
+                title: '',
+              },
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await payload.delete({
+            id: doc.id,
+            collection: postsSlug,
+            trash: true,
+          })
+        }
+      })
+
+      test('should validate submitted fields when updating a trashed document', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: {
+            deletedAt: new Date().toISOString(),
+            title: 'Validate trashed update',
+          },
+        })
+
+        try {
+          await expect(
+            payload.update({
+              id: doc.id,
+              collection: postsSlug,
+              data: {
+                title: '',
+              },
+              trash: true,
+            }),
+          ).rejects.toThrow(ValidationError)
+        } finally {
+          await payload.delete({
+            id: doc.id,
+            collection: postsSlug,
+            trash: true,
+          })
+        }
+      })
+
+      test('should allow trashing a draft with an omitted incomplete rich text field', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: {
+            richText: {
+              root: {
+                children: [
+                  {
+                    fields: {
+                      blockName: '',
+                      blockType: 'myBlock',
+                      id: 'incomplete-rich-text-block',
+                      radios: 'option2',
+                      someText: 'Optional text',
+                    },
+                    format: '',
+                    type: 'block',
+                    version: 2,
+                  },
+                ],
+                direction: null,
+                format: '',
+                indent: 0,
+                type: 'root',
+                version: 1,
+              },
+            },
+            title: 'Incomplete rich text draft',
+          },
+          draft: true,
+        })
+
+        try {
+          const trashedDoc = await payload.update({
+            id: doc.id,
+            collection: postsSlug,
+            data: {
+              deletedAt: new Date().toISOString(),
+            },
+          })
+
+          expect(trashedDoc.deletedAt).toBeDefined()
+        } finally {
+          await payload.delete({
+            id: doc.id,
+            collection: postsSlug,
+            trash: true,
+          })
+        }
+      })
+
       test('should allow trashing documents with empty required fields (draft scenario)', async ({
         payload,
       }) => {

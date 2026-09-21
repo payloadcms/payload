@@ -988,6 +988,9 @@ importers:
       sanitize-filename:
         specifier: 1.6.4
         version: 1.6.4
+      sax:
+        specifier: 1.6.1
+        version: 1.6.1
       ts-essentials:
         specifier: 10.0.3
         version: 10.0.3(@typescript/typescript6@6.0.2)
@@ -1026,6 +1029,9 @@ importers:
         specifier: 0.0.33
         version: 0.0.33
       '@types/range-parser':
+        specifier: 1.2.7
+        version: 1.2.7
+      '@types/sax':
         specifier: 1.2.7
         version: 1.2.7
       '@types/ws':
@@ -1582,7 +1588,7 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0
       '@azure/storage-blob':
-        specifier: ^12.11.0
+        specifier: ^12.33.0
         version: 12.33.0
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
@@ -8723,6 +8729,9 @@ packages:
   '@types/request@2.48.13':
     resolution: {integrity: sha512-FGJ6udDNUCjd19pp0Q3iTiDkwhYup7J8hpMW9c4k53NrccQFFWKRho6hvtPPEhnXWKvukfwAlB6DbDz4yhH5Gg==}
 
+  '@types/sax@1.2.7':
+    resolution: {integrity: sha512-rO73L89PJxeYM3s3pPPjiPgVVcymqU490g0YO5n5By0k2Erzj6tay/4lr1CHAAU4JyOWd1rpQ8bCf6cZfHU96A==}
+
   '@types/semver@7.7.1':
     resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
@@ -14375,6 +14384,10 @@ packages:
     resolution: {integrity: sha512-vcF3Ckow6g939GMA4PeU7b2K/9FALXk2KF9J87txdHzXbUF9XRQRwSxcAs/fGaTnJeBFd7UoV22j3lzMLdM0Pw==}
     engines: {node: '>=14.0.0'}
     hasBin: true
+
+  sax@1.6.1:
+    resolution: {integrity: sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q==}
+    engines: {node: '>=11.0.0'}
 
   saxes@6.0.0:
     resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
@@ -22679,6 +22692,10 @@ snapshots:
       '@types/tough-cookie': 4.0.5
       form-data: 2.5.6
 
+  '@types/sax@1.2.7':
+    dependencies:
+      '@types/node': 24.12.3
+
   '@types/semver@7.7.1': {}
 
   '@types/shelljs@0.8.15':
@@ -29050,6 +29067,8 @@ snapshots:
       chokidar: 3.6.0
       immutable: 4.3.9
       source-map-js: 1.2.1
+
+  sax@1.6.1: {}
 
   saxes@6.0.0:
     dependencies:

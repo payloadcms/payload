@@ -2767,6 +2767,21 @@ describe('Versions', () => {
       expect(await newDiff.locator('p').first().innerHTML()).toEqual(newHTML)
     })
 
+    test('should respect relationship read access in rich text diffs', async () => {
+      await navigateToDiffVersionView()
+
+      const richtext = page.locator('[data-field-path="richtextWithConstrainedRelationship"]')
+      const oldRelationshipInfo = richtext.locator(
+        '.html-diff__diff-old .lexical-relationship-diff__info',
+      )
+      const newRelationshipInfo = richtext.locator(
+        '.html-diff__diff-new .lexical-relationship-diff__info',
+      )
+
+      await expect(oldRelationshipInfo).not.toHaveText('Document 3')
+      await expect(newRelationshipInfo).toHaveText('Document 2')
+    })
+
     test('correctly renders diff for richtext fields with custom Diff component', async () => {
       await navigateToDiffVersionView()
 

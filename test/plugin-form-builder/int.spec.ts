@@ -1,3 +1,5 @@
+import type { PayloadRequest } from 'payload'
+
 import path from 'path'
 import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
@@ -84,6 +86,31 @@ test.suite({
       const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug })
       expect(formSubmissions).toHaveLength(1)
     })
+
+    /* eslint-disable vitest/no-standalone-expect -- test is a custom Vitest test registrar. */
+    test('should restrict form data reads to admin collection users', async ({ payload }) => {
+      const formsCollection = payload.config.collections.find(({ slug }) => slug === formsSlug)!
+      const submissionsCollection = payload.config.collections.find(
+        ({ slug }) => slug === formSubmissionsSlug,
+      )!
+      const emailsField = formsCollection.fields.find(
+        (field) => 'name' in field && field.name === 'emails',
+      )!
+      const adminRequest = {
+        payload,
+        user: { collection: payload.config.admin.user },
+      } as PayloadRequest
+      const unrelatedRequest = {
+        payload,
+        user: { collection: 'customers' },
+      } as PayloadRequest
+
+      expect(await submissionsCollection.access.read({ req: adminRequest })).toBe(true)
+      expect(await submissionsCollection.access.read({ req: unrelatedRequest })).toBe(false)
+      expect(await emailsField.access?.read?.({ req: adminRequest })).toBe(true)
+      expect(await emailsField.access?.read?.({ req: unrelatedRequest })).toBe(false)
+    })
+    /* eslint-enable vitest/no-standalone-expect */
   })
 
   test.describe('form building', () => {

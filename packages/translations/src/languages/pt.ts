@@ -60,6 +60,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     notRedirected: 'Não foi redirecionado? <0>Faça login aqui</0>',
     passed: 'Autenticação Aprovada',
     passwordResetSuccessfully: 'Redefinição de senha realizada com sucesso.',
+    resend: 'Reenviar',
     resetPassword: 'Redefinir Senha',
     resetPasswordExpiration: 'Tempo Limite para Redefinição de Senha',
     resetPasswordToken: 'Token para Redefinição de Senha',
