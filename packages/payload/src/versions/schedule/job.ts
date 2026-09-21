@@ -4,13 +4,13 @@ import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { SchedulePublishTaskInput } from './types.js'
 
 type Args = {
-  adminUserSlug: string
+  authCollectionSlugs: string[]
   collections: string[]
   globals: string[]
 }
 
 export const getSchedulePublishTask = ({
-  adminUserSlug,
+  authCollectionSlugs,
   collections,
   globals,
 }: Args): TaskConfig<{ input: SchedulePublishTaskInput; output: object }> => {
@@ -19,19 +19,24 @@ export const getSchedulePublishTask = ({
     handler: async ({ input, req }) => {
       const _status = input?.type === 'publish' || !input?.type ? 'published' : 'draft'
 
-      const userID = input.user
-
       let user: null | User = null
 
-      if (userID) {
+      if (input.user != null) {
+        if (typeof input.user !== 'object') {
+          // Legacy jobs lack enough information to restore the scheduling user identity safely, so fail closed.
+          throw new Error(
+            'Scheduled publish job is missing the scheduling user auth collection and cannot run.',
+          )
+        }
+
         user = (await req.payload.findByID({
-          id: userID,
-          collection: adminUserSlug,
+          id: input.user.value,
+          collection: input.user.relationTo,
           depth: 0,
           overrideAccess: true,
         })) as User
 
-        user.collection = adminUserSlug
+        user.collection = input.user.relationTo
       }
 
       if (input.doc) {
@@ -100,7 +105,7 @@ export const getSchedulePublishTask = ({
       {
         name: 'user',
         type: 'relationship',
-        relationTo: adminUserSlug,
+        relationTo: authCollectionSlugs,
       },
     ],
   }

@@ -15,24 +15,24 @@ import { createMcpClient } from './mcpClient.js'
 type McpSetup = {
   getApiKey: (rbac?: TestRBAC) => Promise<string>
   getLimitedApiKey: () => Promise<string>
-  limitedUserId: string
-  userId: string
+  limitedUserId: number | string
+  userId: number | string
 }
 
-type McpTestContext = McpSetup & {
+type McpTestContext = {
   mcp: McpClient
   payload: Payload
   protocolEra: ProtocolEra
   restClient: NextRESTClient
-}
+} & McpSetup
 
 type McpTestFunction = (context: McpTestContext) => Promise<void> | void
 
 const payloadTest = base.extend<'mcpSetup', McpSetup>(
   'mcpSetup',
-  { auto: true },
-  async ({ payload, restClient }) => {
-    const loginResponse: { user: { id: string } } = await restClient
+  { auto: true, scope: 'file' },
+  async ({ payloadInstance: payload, restClientInstance: restClient }, { onCleanup }) => {
+    const loginResponse: { user: { id: number | string } } = await restClient
       .POST('/users/login', {
         body: JSON.stringify({ email: devUser.email, password: devUser.password }),
       })
@@ -88,6 +88,14 @@ const payloadTest = base.extend<'mcpSetup', McpSetup>(
 
       return apiKey
     }
+
+    onCleanup(() =>
+      payload.delete({
+        id: limitedUserId,
+        collection: 'users',
+        overrideAccess: true,
+      }),
+    )
 
     return { getApiKey, getLimitedApiKey, limitedUserId, userId }
   },

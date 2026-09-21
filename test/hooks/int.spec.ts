@@ -26,7 +26,7 @@ import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
-test.suite({ config: './config.ts' })('Hooks', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
   test.options({ db: 'mongo' }).describe('transform actions', () => {
     test('should create and not throw an error', async ({ payload }) => {
       // the collection has hooks that will cause an error if transform actions is not handled properly
@@ -494,7 +494,7 @@ test.suite({ config: './config.ts' })('Hooks', () => {
     let hookUser
     let hookUserToken
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const email = 'dontrefresh@payloadcms.com'
 
       hookUser = await payload.create({
@@ -1184,13 +1184,12 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       expect(result.afterReadOverrideAccess).toBe(false)
     })
 
-    test('should default to true when overrideAccess is not specified in Local API', async ({
+    test('should default to false when overrideAccess is not specified in Local API', async ({
       payload,
     }) => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },
-        overrideAccess: true,
       })
 
       createdIDs.push(doc.id)
@@ -1198,13 +1197,12 @@ test.suite({ config: './config.ts' })('Hooks', () => {
       const result = await payload.findByID({
         collection: overrideAccessSlug,
         id: doc.id,
-        overrideAccess: true,
       })
 
       expect(result.beforeReadCalled).toBe(true)
       expect(result.afterReadCalled).toBe(true)
-      expect(result.beforeReadOverrideAccess).toBe(true)
-      expect(result.afterReadOverrideAccess).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(false)
+      expect(result.afterReadOverrideAccess).toBe(false)
     })
   })
 })

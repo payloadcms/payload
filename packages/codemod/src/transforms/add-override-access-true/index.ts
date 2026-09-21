@@ -34,15 +34,18 @@ const LOCAL_API_OPERATIONS = new Set([
   'updateGlobal',
 ])
 
+const JOBS_LOCAL_API_OPERATIONS = new Set(['cancel', 'cancelByID', 'queue', 'run', 'runByID'])
+
 /**
  * Adds an explicit `overrideAccess: true` to Local API calls that omit it,
  * preserving the Payload 3 default of skipping access control now that
  * Payload 4 changes the default to `false`.
  *
- * Only matches calls on a receiver named `payload` — `payload.find(...)` and
- * `req.payload.find(...)`. Internal operations such as `findOperation(...)` are
- * deliberately never matched: a missing value means `false` there, so inserting
- * `true` would disable access control on every REST and GraphQL request.
+ * Only matches calls on a receiver named `payload` — `payload.find(...)`,
+ * `req.payload.find(...)`, and their `payload.jobs.*` equivalents. Internal
+ * operations such as `findOperation(...)` are deliberately never matched: a
+ * missing value means `false` there, so inserting `true` would disable access
+ * control on every REST and GraphQL request.
  *
  * Detection is purely syntactic so the transform works on JavaScript projects,
  * where ts-morph has no type information to consult.
@@ -69,30 +72,40 @@ export const addOverrideAccessTrue: Transform = {
           return
         }
 
-        if (!LOCAL_API_OPERATIONS.has(callee.getName())) {
-          return
-        }
+        const receiver = callee.getExpression()
+        const isLocalAPICall =
+          LOCAL_API_OPERATIONS.has(callee.getName()) && isPayloadReceiver({ receiver })
+        const isJobsLocalAPICall =
+          JOBS_LOCAL_API_OPERATIONS.has(callee.getName()) && isPayloadJobsReceiver({ receiver })
 
-        if (!isPayloadReceiver(callee.getExpression())) {
+        if (!isLocalAPICall && !isJobsLocalAPICall) {
           return
         }
 
         const [firstArg] = node.getArguments()
 
-        if (!firstArg || !Node.isObjectLiteralExpression(firstArg)) {
+        if (!firstArg && isJobsLocalAPICall) {
+          const openParen = node.getFirstChildByKindOrThrow(SyntaxKind.OpenParenToken)
+          insertions.push({ position: openParen.getEnd(), text: '{ overrideAccess: true }' })
           return
         }
 
-        if (firstArg.getProperty('overrideAccess')) {
+        const object = firstArg && getObjectLiteral({ node: firstArg })
+
+        if (!object) {
+          return
+        }
+
+        if (object.getProperty('overrideAccess')) {
           return
         }
 
         // A spread may already carry the property. Refuse to guess.
-        if (firstArg.getProperties().some((property) => Node.isSpreadAssignment(property))) {
+        if (object.getProperties().some((property) => Node.isSpreadAssignment(property))) {
           return
         }
 
-        insertions.push(planInsertion(firstArg))
+        insertions.push(planInsertion({ object }))
       })
 
       if (insertions.length === 0) {
@@ -119,6 +132,21 @@ type Insertion = {
   text: string
 }
 
+/** Handles an object wrapped in the common `as SomeType` assertion. */
+const getObjectLiteral = ({ node }: { node: Node }): ObjectLiteralExpression | undefined => {
+  if (Node.isObjectLiteralExpression(node)) {
+    return node
+  }
+
+  if (Node.isAsExpression(node)) {
+    const expression = node.getExpression()
+
+    if (Node.isObjectLiteralExpression(expression)) {
+      return expression
+    }
+  }
+}
+
 /**
  * Works out where to put `overrideAccess: true` and what to write, without
  * asking ts-morph to insert a property node.
@@ -132,7 +160,7 @@ type Insertion = {
  * The property goes last so the surrounding formatting is left alone. Callers are
  * expected to run ESLint's `perfectionist/sort-objects` fixer afterwards.
  */
-const planInsertion = (object: ObjectLiteralExpression): Insertion => {
+const planInsertion = ({ object }: { object: ObjectLiteralExpression }): Insertion => {
   const properties = object.getProperties()
   const isSingleLine = !object.getText().includes('\n')
 
@@ -182,7 +210,7 @@ const planInsertion = (object: ObjectLiteralExpression): Insertion => {
  * syntactically as an identifier named `payload` or any property access ending
  * in `.payload`.
  */
-const isPayloadReceiver = (receiver: Node): boolean => {
+const isPayloadReceiver = ({ receiver }: { receiver: Node }): boolean => {
   if (Node.isIdentifier(receiver)) {
     return receiver.getText() === 'payload'
   }
@@ -192,4 +220,13 @@ const isPayloadReceiver = (receiver: Node): boolean => {
   }
 
   return false
+}
+
+/** True for `payload.jobs` and property-access chains ending in `.payload.jobs`. */
+const isPayloadJobsReceiver = ({ receiver }: { receiver: Node }): boolean => {
+  if (!Node.isPropertyAccessExpression(receiver) || receiver.getName() !== 'jobs') {
+    return false
+  }
+
+  return isPayloadReceiver({ receiver: receiver.getExpression() })
 }

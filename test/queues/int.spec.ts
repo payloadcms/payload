@@ -112,6 +112,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'protected job',
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -131,6 +132,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'protected job',
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -163,6 +165,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'protected job',
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -201,16 +204,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(response.status).toBe(200)
     })
 
-    test('will fail access control on local api .queue when passing overrideAccess: false', async ({
-      payload,
-    }) => {
+    test('should fail access control on local api .queue by default', async ({ payload }) => {
       await expect(
         payload.jobs.queue({
           task: 'CreateSimple',
           input: {
             message: 'from single task',
           },
-          overrideAccess: false,
         }),
       ).rejects.toThrow(Forbidden)
     })
@@ -232,14 +232,8 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(result.input.message).toBe('from single task')
     })
 
-    test('will fail access control on local api .run when passing overrideAccess: false', async ({
-      payload,
-    }) => {
-      await expect(
-        payload.jobs.run({
-          overrideAccess: false,
-        }),
-      ).rejects.toThrow(Forbidden)
+    test('should fail access control on local api .run by default', async ({ payload }) => {
+      await expect(payload.jobs.run()).rejects.toThrow(Forbidden)
     })
 
     test('will pass access control on local api .run when passing overrideAccess: false', async ({
@@ -254,13 +248,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(result).toBeDefined()
     })
 
-    test('will fail access control on local api .runByID when passing overrideAccess: false', async ({
-      payload,
-    }) => {
+    test('should fail access control on local api .runByID by default', async ({ payload }) => {
       await expect(
         payload.jobs.runByID({
           id: '1',
-          overrideAccess: false,
         }),
       ).rejects.toThrow(Forbidden)
     })
@@ -276,6 +267,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
 
       const result = await payload.jobs.runByID({
@@ -288,9 +280,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(result).toBeDefined()
     })
 
-    test('will fail access control on local api .cancel when passing overrideAccess: false', async ({
-      payload,
-    }) => {
+    test('should fail access control on local api .cancel by default', async ({ payload }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue a job without running it
@@ -299,6 +289,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -308,7 +299,6 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
               equals: job.id,
             },
           },
-          overrideAccess: false,
         }),
       ).rejects.toThrow(Forbidden)
 
@@ -337,6 +327,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.cancel({
@@ -361,9 +352,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(jobAfterCancel.error?.cancelled).toBe(true)
     })
 
-    test('will fail access control on local api .cancelByID when passing overrideAccess: false', async ({
-      payload,
-    }) => {
+    test('should fail access control on local api .cancelByID by default', async ({ payload }) => {
       payload.config.jobs.deleteJobOnComplete = false
 
       // Queue a job without running it
@@ -372,12 +361,12 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
 
       await expect(
         payload.jobs.cancelByID({
           id: job.id,
-          overrideAccess: false,
         }),
       ).rejects.toThrow(Forbidden)
 
@@ -406,6 +395,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
 
       await payload.jobs.cancelByID({
@@ -476,7 +466,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     expect(retrievedPost.jobStep1Ran).toBeFalsy()
     expect(retrievedPost.jobStep2Ran).toBeFalsy()
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const postAfterJobs = await payload.findByID({
       collection: 'posts',
@@ -509,7 +499,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     expect(retrievedPost.jobStep1Ran).toBeFalsy()
     expect(retrievedPost.jobStep2Ran).toBeFalsy()
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const postAfterJobs = await payload.findByID({
       collection: 'posts',
@@ -529,12 +519,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -566,12 +557,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -603,12 +595,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -642,12 +635,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -681,12 +675,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -720,12 +715,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -759,12 +755,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -796,12 +793,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -833,6 +831,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
@@ -847,7 +846,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       !firstGotNoJobs ||
       new Date().getTime() - firstGotNoJobs.getTime() < 3000
     ) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         if (hasJobsRemaining) {
@@ -927,6 +926,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       },
       queue: 'multi-worker',
       task: 'CreateSimple',
+      overrideAccess: true,
     })
 
     const workerCount = 10
@@ -936,6 +936,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           queue: 'multi-worker',
           silent: true,
           limit: 1,
+          overrideAccess: true,
         }),
       ),
     )
@@ -967,6 +968,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         message,
       },
       task: 'CreateSimple',
+      overrideAccess: true,
     })
 
     const workerCount = 10
@@ -975,6 +977,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         payload.jobs.runByID({
           id: job.id,
           silent: true,
+          overrideAccess: true,
         }),
       ),
     )
@@ -1000,6 +1003,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'task 1',
       },
+      overrideAccess: true,
     })
 
     await new Promise((resolve) => setTimeout(resolve, 100))
@@ -1009,11 +1013,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'task 2',
       },
+      overrideAccess: true,
     })
 
     await payload.jobs.run({
       sequential: true,
       silent: true,
+      overrideAccess: true,
     })
 
     const allSimples = await payload.find({
@@ -1034,6 +1040,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'task 1',
       },
+      overrideAccess: true,
     })
 
     await new Promise((resolve) => setTimeout(resolve, 100))
@@ -1043,12 +1050,14 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'task 2',
       },
+      overrideAccess: true,
     })
 
     await payload.jobs.run({
       sequential: true,
       silent: true,
       processingOrder: '-createdAt',
+      overrideAccess: true,
     })
 
     const allSimples = await payload.find({
@@ -1072,6 +1081,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'task 1',
       },
+      overrideAccess: true,
     })
 
     await new Promise((resolve) => setTimeout(resolve, 100))
@@ -1082,12 +1092,14 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'task 2',
       },
+      overrideAccess: true,
     })
 
     await payload.jobs.run({
       sequential: true,
       silent: true,
       queue: 'lifo',
+      overrideAccess: true,
     })
 
     const allSimples = await payload.find({
@@ -1108,9 +1120,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello!',
       },
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1128,6 +1141,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'deleteJobOnComplete test',
       },
+      overrideAccess: true,
     })
 
     const before = await payload.findByID({
@@ -1138,7 +1152,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     })
     expect(before?.id).toBe(id)
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const after = await payload.findByID({
       collection: 'payload-jobs',
@@ -1153,6 +1167,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     const { id } = await payload.jobs.queue({
       workflow: 'failsImmediately',
       input: {},
+      overrideAccess: true,
     })
 
     const before = await payload.findByID({
@@ -1163,7 +1178,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     })
     expect(before?.id).toBe(id)
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const after = await payload.findByID({
       collection: 'payload-jobs',
@@ -1183,6 +1198,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello!',
       },
+      overrideAccess: true,
     })
 
     const before = await payload.findByID({
@@ -1193,7 +1209,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     })
     expect(before?.id).toBe(id)
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const after = await payload.findByID({
       collection: 'payload-jobs',
@@ -1212,9 +1228,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'from single task',
       },
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1247,12 +1264,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'queued before task removal',
         },
+        overrideAccess: true,
       })
 
       // Simulate a deploy that removed the 'CreateSimple' task from config
       payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
 
-      await payload.jobs.run({ silent: true })
+      await payload.jobs.run({ silent: true, overrideAccess: true })
 
       const jobAfterRun = await payload.findByID({
         collection: 'payload-jobs',
@@ -1275,11 +1293,12 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'queued before referenced task removal',
         },
+        overrideAccess: true,
       })
 
       payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
 
-      await payload.jobs.run({ silent: true })
+      await payload.jobs.run({ silent: true, overrideAccess: true })
 
       const jobAfterRun = await payload.findByID({
         collection: 'payload-jobs',
@@ -1301,9 +1320,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     const job = await payload.jobs.queue({
       workflow: 'throwsInHandlerNoRetries',
       input: {},
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -1324,11 +1344,12 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     const job = await payload.jobs.queue({
       workflow: 'throwsInHandlerRetries1',
       input: {},
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
       }
@@ -1361,6 +1382,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
             postTitle,
           },
           workflow: 'longRunning',
+          overrideAccess: true,
         })
 
         const worker = spawn(
@@ -1439,6 +1461,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           const replacementWorkerResult = await payload.jobs.runByID({
             id: job.id,
             silent: true,
+            overrideAccess: true,
           })
           const completedJob = await payload.findByID({
             id: job.id,
@@ -1479,10 +1502,12 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: { postTitle },
         queue: 'worker-recovery',
         workflow: 'longRunning',
+        overrideAccess: true,
       })
       const originalWorker = payload.jobs.run({
         queue: 'worker-recovery',
         silent: true,
+        overrideAccess: true,
       })
 
       // Wait until the first worker starts, then let its short lease expire as if it stopped.
@@ -1508,6 +1533,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
             limit: 1,
             queue: 'worker-recovery',
             silent: true,
+            overrideAccess: true,
           }),
         ),
       )
@@ -1543,15 +1569,16 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(payload.config.jobs.processingLease.duration).toBe(20 * 60 * 1000)
       expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
       payload.config.jobs.deleteJobOnComplete = false
-      payload.config.jobs.processingLease.duration = 600
-      payload.config.jobs.processingLease.safetyBuffer = 50
+      payload.config.jobs.processingLease.duration = 5000
+      payload.config.jobs.processingLease.safetyBuffer = 300
 
       const postTitle = 'created by the healthy worker'
       const job = await payload.jobs.queue({
         input: { postTitle },
         workflow: 'longRunning',
+        overrideAccess: true,
       })
-      const firstWorker = payload.jobs.run({ silent: true })
+      const firstWorker = payload.jobs.run({ silent: true, overrideAccess: true })
 
       await expect
         .poll(
@@ -1566,9 +1593,9 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         )
         .toBeTruthy()
       // Wait longer than the original lease. Heartbeats must keep the first worker active.
-      await wait(900)
+      await wait(6000)
 
-      const secondWorkerResult = await payload.jobs.run({ silent: true })
+      const secondWorkerResult = await payload.jobs.run({ silent: true, overrideAccess: true })
       const firstWorkerResult = await firstWorker
       const completedJob = await payload.findByID({
         id: job.id,
@@ -1599,12 +1626,16 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       const job = await payload.jobs.queue({
         input: { postTitle },
         workflow: 'longRunning',
+        overrideAccess: true,
       })
 
-      const unresponsiveWorkerResult = await payload.jobs.run({ silent: true })
+      const unresponsiveWorkerResult = await payload.jobs.run({
+        silent: true,
+        overrideAccess: true,
+      })
       // Give the replacement worker the normal lease so it can finish the long-running job.
       Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
-      const replacementWorkerResult = await payload.jobs.run({ silent: true })
+      const replacementWorkerResult = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       const completedJob = await payload.findByID({
         id: job.id,
@@ -1637,8 +1668,9 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       const job = await payload.jobs.queue({
         input: { postTitle },
         workflow: 'longRunning',
+        overrideAccess: true,
       })
-      const timedOutWorker = payload.jobs.run({ silent: true })
+      const timedOutWorker = payload.jobs.run({ silent: true, overrideAccess: true })
 
       await expect
         .poll(
@@ -1656,7 +1688,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       // Give the replacement worker the normal lease so it can finish the long-running job.
       Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
 
-      const replacementWorkerResult = await payload.jobs.run({ silent: true })
+      const replacementWorkerResult = await payload.jobs.run({ silent: true, overrideAccess: true })
       const timedOutWorkerResult = await timedOutWorker
       const completedJob = await payload.findByID({
         id: job.id,
@@ -1690,6 +1722,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'from single task',
       },
+      overrideAccess: true,
     })
 
     await restClient.GET('/payload-jobs/run?silent=true', {
@@ -1834,10 +1867,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
     }
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1860,6 +1894,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
     }
 
@@ -1870,6 +1905,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       await payload.jobs.run({
         limit: Math.min(maxTasksPerRun, numberOfTasks - offset),
         silent: true,
+        overrideAccess: true,
       })
     }
 
@@ -1891,10 +1927,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
     }
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1914,12 +1951,14 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
     }
 
     await payload.jobs.run({
       limit: 42,
       silent: true,
+      overrideAccess: true,
     })
 
     const allSimples = await payload.find({
@@ -1941,22 +1980,25 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'hello',
         },
+        overrideAccess: true,
       })
       await payload.jobs.queue({
         task: 'CreateSimple',
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
       await payload.jobs.queue({
         task: 'CreateSimpleWithDuplicateMessage',
         input: {
           message: 'hello',
         },
+        overrideAccess: true,
       })
     }
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1987,9 +2029,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'external',
       },
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -2007,9 +2050,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'externalWorkflow',
       },
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -2031,6 +2075,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
       lastJobID = job.id
     }
@@ -2041,6 +2086,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     await payload.jobs.runByID({
       id: lastJobID,
       silent: true,
+      overrideAccess: true,
     })
 
     const allSimples = await payload.find({
@@ -2079,6 +2125,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: 'from single task',
         },
+        overrideAccess: true,
       })
       lastJobID = job.id
     }
@@ -2093,6 +2140,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           equals: lastJobID,
         },
       },
+      overrideAccess: true,
     })
 
     const allSimples = await payload.find({
@@ -2130,6 +2178,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           message: `from single task ${i}`,
         },
+        overrideAccess: true,
       })
     }
 
@@ -2140,6 +2189,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           equals: 'from single task 2',
         },
       },
+      overrideAccess: true,
     })
 
     const allSimples = await payload.find({
@@ -2173,9 +2223,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello!',
       },
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -2216,12 +2267,13 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello!',
       },
+      overrideAccess: true,
     })
 
     let hasJobsRemaining = true
 
     while (hasJobsRemaining) {
-      const response = await payload.jobs.run({ silent: true })
+      const response = await payload.jobs.run({ silent: true, overrideAccess: true })
 
       if (response.noJobsRemaining) {
         hasJobsRemaining = false
@@ -2255,8 +2307,9 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     const job = await payload.jobs.queue({
       workflow: 'longRunning',
       input: {},
+      overrideAccess: true,
     })
-    void payload.jobs.run({ silent: true }).catch((_ignored) => {})
+    void payload.jobs.run({ silent: true, overrideAccess: true }).catch((_ignored) => {})
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
     // Should be in processing - ensure job is running
@@ -2272,6 +2325,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     // Should be in processing - cancel job
     await payload.jobs.cancelByID({
       id: job.id,
+      overrideAccess: true,
     })
 
     // Wait 4 seconds. This ensures that the job has enough time to finish
@@ -2295,7 +2349,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     expect(jobAfterRun.processingUntil).toBeFalsy()
 
     // Ensure job is not retried
-    const runResponse = await payload.jobs.run({ silent: true })
+    const runResponse = await payload.jobs.run({ silent: true, overrideAccess: true })
     expect(runResponse.noJobsRemaining).toBe(true)
     expect(runResponse.jobStatus).toBeUndefined()
   })
@@ -2306,8 +2360,9 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     const job = await payload.jobs.queue({
       workflow: 'longRunning',
       input: {},
+      overrideAccess: true,
     })
-    void payload.jobs.run({ silent: true }).catch((_ignored) => {})
+    void payload.jobs.run({ silent: true, overrideAccess: true }).catch((_ignored) => {})
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
     // Cancel all jobs
@@ -2317,6 +2372,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
 
     // Wait 4 seconds. This ensures that the job has enough time to finish
@@ -2354,8 +2410,9 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           shouldCancel: false,
         },
+        overrideAccess: true,
       })
-      const runResponse = await payload.jobs.run({ silent: true })
+      const runResponse = await payload.jobs.run({ silent: true, overrideAccess: true })
       expect(runResponse.remainingJobsFromQueried).toBe(1)
       expect(runResponse.jobStatus?.[job.id]?.status).toBe('error')
 
@@ -2371,7 +2428,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(jobAfterRun.totalTried).toBe(1)
       expect(jobAfterRun.hasError).toBe(false)
 
-      const runResponse2 = await payload.jobs.run({ silent: true })
+      const runResponse2 = await payload.jobs.run({ silent: true, overrideAccess: true })
       expect(runResponse2.remainingJobsFromQueried).toBe(1)
       expect(runResponse2.jobStatus?.[job.id]?.status).toBe('error')
 
@@ -2407,9 +2464,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           shouldCancel: true,
         },
+        overrideAccess: true,
       })
 
-      const runResponse = await payload.jobs.run({ silent: true })
+      const runResponse = await payload.jobs.run({ silent: true, overrideAccess: true })
       expect(runResponse.remainingJobsFromQueried).toBe(0)
       expect(runResponse.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
 
@@ -2427,7 +2485,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(jobAfterRun.processingUntil).toBeFalsy()
 
       // Run again to ensure the job is not retried
-      const runResponse2 = await payload.jobs.run({ silent: true })
+      const runResponse2 = await payload.jobs.run({ silent: true, overrideAccess: true })
       expect(runResponse2.remainingJobsFromQueried).toBe(0)
       expect(runResponse2.jobStatus).toBeUndefined()
 
@@ -2457,8 +2515,9 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           shouldCancel: false,
         },
+        overrideAccess: true,
       })
-      const runResponse = await payload.jobs.run({ silent: true })
+      const runResponse = await payload.jobs.run({ silent: true, overrideAccess: true })
       expect(runResponse.remainingJobsFromQueried).toBe(1)
       expect(runResponse.jobStatus?.[job.id]?.status).toBe('error')
 
@@ -2474,7 +2533,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(jobAfterRun.totalTried).toBe(1)
       expect(jobAfterRun.hasError).toBe(false)
 
-      const runResponse2 = await payload.jobs.run({ silent: true })
+      const runResponse2 = await payload.jobs.run({ silent: true, overrideAccess: true })
       expect(runResponse2.remainingJobsFromQueried).toBe(1)
       expect(runResponse2.jobStatus?.[job.id]?.status).toBe('error')
 
@@ -2510,10 +2569,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           shouldCancel: true,
         },
+        overrideAccess: true,
       })
       console.log('running job')
 
-      const runResponse = await payload.jobs.run({ silent: true })
+      const runResponse = await payload.jobs.run({ silent: true, overrideAccess: true })
       console.log('runResponse', runResponse)
       expect(runResponse.remainingJobsFromQueried).toBe(0)
       expect(runResponse.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
@@ -2532,7 +2592,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(jobAfterRun.processingUntil).toBeFalsy()
 
       // Run again to ensure the job is not retried
-      const runResponse2 = await payload.jobs.run({ silent: true })
+      const runResponse2 = await payload.jobs.run({ silent: true, overrideAccess: true })
       expect(runResponse2.remainingJobsFromQueried).toBe(0)
       expect(runResponse2.jobStatus).toBeUndefined()
 
@@ -2554,9 +2614,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
     const job = await payload.jobs.queue({
       task: 'ThrowError',
       input: {},
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -2583,9 +2644,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         amount,
       },
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: true })
+    await payload.jobs.run({ silent: true, overrideAccess: true })
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -2627,9 +2689,10 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         amount,
       },
+      overrideAccess: true,
     })
 
-    await payload.jobs.run({ silent: false })
+    await payload.jobs.run({ silent: false, overrideAccess: true })
 
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
@@ -2650,6 +2713,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       input: {
         message: 'hello!',
       },
+      overrideAccess: true,
     })
 
     await waitUntilAutorunIsDone({
@@ -2678,6 +2742,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           resourceId: 'resource-1',
         },
+        overrideAccess: true,
       })
 
       expect(job.concurrencyKey).toBe('exclusive:resource-1')
@@ -2693,6 +2758,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         input: {
           resourceId: 'resource-1',
         },
+        overrideAccess: true,
       })
 
       expect(job.concurrencyKey).toBeFalsy()
@@ -2708,6 +2774,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           resourceId: 'resource-A',
           delayMs: 200,
         },
+        overrideAccess: true,
       })
 
       const job2 = await payload.jobs.queue({
@@ -2716,10 +2783,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           resourceId: 'resource-B',
           delayMs: 200,
         },
+        overrideAccess: true,
       })
 
       // Run jobs - they should run in parallel since they have different keys
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       // Both jobs should be completed
       const job1After = await payload.findByID({
@@ -2749,6 +2817,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           resourceId: 'same-resource',
           delayMs: 100,
         },
+        overrideAccess: true,
       })
 
       const job2 = await payload.jobs.queue({
@@ -2757,6 +2826,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           resourceId: 'same-resource',
           delayMs: 100,
         },
+        overrideAccess: true,
       })
 
       // Both jobs should have the same concurrency key
@@ -2764,7 +2834,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(job2.concurrencyKey).toBe('exclusive:same-resource')
 
       // Run jobs with limit 10 - due to exclusive concurrency, only one should run
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       // Check job states - one should be complete, the other still pending
       const job1After = await payload.findByID({
@@ -2785,7 +2855,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(job2After.processingUntil).toBeFalsy()
 
       // Run jobs again - now the second job should complete
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       const job2Final = await payload.findByID({
         collection: 'payload-jobs',
@@ -2804,19 +2874,22 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         payload.jobs.queue({
           workflow: 'exclusiveConcurrency',
           input: { resourceId: 'race-test', delayMs: 50 },
+          overrideAccess: true,
         }),
         payload.jobs.queue({
           workflow: 'exclusiveConcurrency',
           input: { resourceId: 'race-test', delayMs: 50 },
+          overrideAccess: true,
         }),
         payload.jobs.queue({
           workflow: 'exclusiveConcurrency',
           input: { resourceId: 'race-test', delayMs: 50 },
+          overrideAccess: true,
         }),
       ])
 
       // Run with high limit - exclusive concurrency should still only run one at a time
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       // Count completed jobs - should be exactly 1
       const jobsAfterFirstRun = await Promise.all(
@@ -2833,7 +2906,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(completedCount).toBe(1)
 
       // Run again - should complete another one
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       const jobsAfterSecondRun = await Promise.all(
         jobs.map((job) =>
@@ -2849,7 +2922,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(completedCount2).toBe(2)
 
       // Run once more - all should be complete
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       const jobsAfterThirdRun = await Promise.all(
         jobs.map((job) =>
@@ -2877,6 +2950,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           resourceId: 'same-resource',
           delayMs: 100,
         },
+        overrideAccess: true,
       })
 
       const job2 = await payload.jobs.queue({
@@ -2885,6 +2959,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
           resourceId: 'same-resource',
           delayMs: 100,
         },
+        overrideAccess: true,
       })
 
       // Neither should have a concurrency key
@@ -2892,7 +2967,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(job2.concurrencyKey).toBeFalsy()
 
       // Run jobs - both should run in parallel since there's no concurrency control
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       // Both jobs should be completed
       const job1After = await payload.findByID({
@@ -2919,25 +2994,29 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       const concurrentJob1 = await payload.jobs.queue({
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'shared-key', delayMs: 50 },
+        overrideAccess: true,
       })
 
       const concurrentJob2 = await payload.jobs.queue({
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'shared-key', delayMs: 50 },
+        overrideAccess: true,
       })
 
       const differentKeyJob = await payload.jobs.queue({
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'different-key', delayMs: 50 },
+        overrideAccess: true,
       })
 
       const noConcurrencyJob = await payload.jobs.queue({
         workflow: 'noConcurrency',
         input: { resourceId: 'any', delayMs: 50 },
+        overrideAccess: true,
       })
 
       // Run all jobs
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       const results = await Promise.all([
         payload.findByID({
@@ -2972,7 +3051,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(results[3].completedAt).toBeDefined()
 
       // Run again to complete the blocked job
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       const concurrentJob2After = await payload.findByID({
         collection: 'payload-jobs',
@@ -2989,22 +3068,25 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       const jobA = await payload.jobs.queue({
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'fifo-test', delayMs: 10 },
+        overrideAccess: true,
       })
       await wait(10) // Small delay to ensure different createdAt
 
       const jobB = await payload.jobs.queue({
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'fifo-test', delayMs: 10 },
+        overrideAccess: true,
       })
       await wait(10)
 
       const jobC = await payload.jobs.queue({
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'fifo-test', delayMs: 10 },
+        overrideAccess: true,
       })
 
       // Run first cycle - jobA should complete
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       let results = await Promise.all([
         payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
@@ -3017,7 +3099,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(results[2].completedAt).toBeFalsy() // C waiting
 
       // Run second cycle - jobB should complete (not C)
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       results = await Promise.all([
         payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
@@ -3030,7 +3112,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(results[2].completedAt).toBeFalsy() // C still waiting
 
       // Run third cycle - jobC should complete
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       results = await Promise.all([
         payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
@@ -3053,6 +3135,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'lifo-test', delayMs: 10 },
         queue: 'lifo',
+        overrideAccess: true,
       })
       await wait(10) // Small delay to ensure different createdAt
 
@@ -3060,6 +3143,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'lifo-test', delayMs: 10 },
         queue: 'lifo',
+        overrideAccess: true,
       })
       await wait(10)
 
@@ -3067,10 +3151,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'lifo-test', delayMs: 10 },
         queue: 'lifo',
+        overrideAccess: true,
       })
 
       // Run first cycle with LIFO order - jobC (newest) should complete
-      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
+      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo', overrideAccess: true })
 
       let results = await Promise.all([
         payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
@@ -3083,7 +3168,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(results[2].completedAt).toBeDefined() // C completed (newest)
 
       // Run second cycle - jobB should complete (not A)
-      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
+      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo', overrideAccess: true })
 
       results = await Promise.all([
         payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
@@ -3096,7 +3181,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       expect(results[2].completedAt).toBeDefined() // C completed
 
       // Run third cycle - jobA should complete
-      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
+      await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo', overrideAccess: true })
 
       results = await Promise.all([
         payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
@@ -3118,10 +3203,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       await payload.jobs.queue({
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'running-test', delayMs: 500 },
+        overrideAccess: true,
       })
 
       // Start the job running (don't await completion)
-      const runPromise = payload.jobs.run({ silent: true, limit: 1 })
+      const runPromise = payload.jobs.run({ silent: true, limit: 1, overrideAccess: true })
 
       // Wait a bit for the job to start processing
       await wait(50)
@@ -3130,10 +3216,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       const pendingJob = await payload.jobs.queue({
         workflow: 'exclusiveConcurrency',
         input: { resourceId: 'running-test', delayMs: 50 },
+        overrideAccess: true,
       })
 
       // Try to run the pending job - should be blocked
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       // Check that pendingJob didn't complete (runningJob still processing)
       const pendingJobStatus = await payload.findByID({
@@ -3149,7 +3236,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       await runPromise
 
       // Now run again - pendingJob should complete
-      await payload.jobs.run({ silent: true, limit: 10 })
+      await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
       const pendingJobFinal = await payload.findByID({
         collection: 'payload-jobs',
@@ -3170,6 +3257,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
       const defaultQueueJob = await payload.jobs.queue({
         workflow: 'queueSpecificConcurrency',
         input: { resourceId: 'queue-test', delayMs: 100 },
+        overrideAccess: true,
         // default queue
       })
 
@@ -3177,6 +3265,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         workflow: 'queueSpecificConcurrency',
         input: { resourceId: 'queue-test', delayMs: 100 },
         queue: 'lifo',
+        overrideAccess: true,
       })
 
       // Jobs should have different concurrency keys because they include the queue name
@@ -3185,8 +3274,8 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
 
       // Both should run in parallel since they have different keys
       await Promise.all([
-        payload.jobs.run({ silent: true, limit: 10, queue: 'default' }),
-        payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' }),
+        payload.jobs.run({ silent: true, limit: 10, queue: 'default', overrideAccess: true }),
+        payload.jobs.run({ silent: true, limit: 10, queue: 'lifo', overrideAccess: true }),
       ])
 
       const results = await Promise.all([
@@ -3211,16 +3300,19 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         const jobA = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'supersedes-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         const jobB = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'supersedes-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         const jobC = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'supersedes-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         // Job A and B should have been deleted when C was queued
@@ -3261,10 +3353,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         const runningJob = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'supersedes-running-test', delayMs: 500 },
+          overrideAccess: true,
         })
 
         // Start the job running (don't await completion)
-        const runPromise = payload.jobs.run({ silent: true, limit: 1 })
+        const runPromise = payload.jobs.run({ silent: true, limit: 1, overrideAccess: true })
 
         // Wait for job to start processing
         await wait(50)
@@ -3273,6 +3366,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         const newJob = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'supersedes-running-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         // The running job should NOT be deleted
@@ -3298,7 +3392,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         await runPromise
 
         // Now run the new job
-        await payload.jobs.run({ silent: true, limit: 10 })
+        await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
         const finalResults = await Promise.all([
           payload.findByID({ collection: 'payload-jobs', id: runningJob.id, overrideAccess: true }),
@@ -3317,26 +3411,31 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         const job1 = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'sequential-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         const job2 = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'sequential-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         const job3 = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'sequential-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         const job4 = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'sequential-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         const job5 = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'sequential-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         // Count how many jobs still exist
@@ -3365,7 +3464,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         expect(lastExistingJob.id).toBe(job5.id) // Last job should be the survivor
 
         // Run it to completion
-        await payload.jobs.run({ silent: true, limit: 10 })
+        await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
         const finalJob = await payload.findByID({
           collection: 'payload-jobs',
@@ -3385,10 +3484,11 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         const runningJob = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'middle-test', delayMs: 300 },
+          overrideAccess: true,
         })
 
         // Start job A running (don't await)
-        const runPromise = payload.jobs.run({ silent: true, limit: 1 })
+        const runPromise = payload.jobs.run({ silent: true, limit: 1, overrideAccess: true })
 
         // Wait for job to start
         await wait(50)
@@ -3397,12 +3497,14 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         const middleJob = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'middle-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         // Queue third job - should delete middleJob
         const latestJob = await payload.jobs.queue({
           workflow: 'supersedesConcurrency',
           input: { resourceId: 'middle-test', delayMs: 10 },
+          overrideAccess: true,
         })
 
         // Check states immediately after queuing
@@ -3438,7 +3540,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         await runPromise
 
         // Run again to process the latest job
-        await payload.jobs.run({ silent: true, limit: 10 })
+        await payload.jobs.run({ silent: true, limit: 10, overrideAccess: true })
 
         const finalResults = await Promise.all([
           payload.findByID({ collection: 'payload-jobs', id: runningJob.id, overrideAccess: true }),
@@ -3473,6 +3575,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         task: 'CreateSimple',
         input: { message: 'baseline-job' },
         queue: 'autorunSecond',
+        overrideAccess: true,
       })
 
       _internal_jobSystemGlobals.shouldAutoRun = true
@@ -3504,6 +3607,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         task: 'CreateSimple',
         input: { message: 'during-failure' },
         queue: 'autorunSecond',
+        overrideAccess: true,
       })
 
       // Enable autorun — first cron tick will fail, but handler is wrapped in try/catch
@@ -3518,6 +3622,7 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
         task: 'CreateSimple',
         input: { message: 'after-recovery' },
         queue: 'autorunSecond',
+        overrideAccess: true,
       })
 
       // Wait for cron to pick up the new job on subsequent ticks

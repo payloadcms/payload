@@ -45,7 +45,7 @@ export const overwriteExistingFilesSchema = z
   ._default(z.boolean(), false)
   .check(z.describe('Overwrite existing files.'))
 export const overrideAccessSchema = z
-  ._default(z.boolean(), true)
+  ._default(z.boolean(), false)
   .check(z.describe('Bypass access control.'))
 export const overrideLockSchema = z
   ._default(z.boolean(), true)

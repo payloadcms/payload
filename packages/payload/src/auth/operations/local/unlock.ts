@@ -14,7 +14,7 @@ export type Options<TSlug extends AuthCollectionSlug> = {
   collection: TSlug
   context?: RequestContext
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
-  overrideAccess: boolean
+  overrideAccess?: boolean
   req?: Partial<PayloadRequest>
 }
 

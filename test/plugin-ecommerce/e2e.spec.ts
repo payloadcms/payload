@@ -49,6 +49,7 @@ test.describe('Ecommerce Plugin', () => {
     const productWithPrice = await payload.create({
       collection: 'products',
       data: {
+        name: 'Multi-currency product',
         priceInEUR: 2599,
         priceInEUREnabled: true,
         priceInUSD: 1999,
@@ -63,6 +64,7 @@ test.describe('Ecommerce Plugin', () => {
     const zeroPriceProduct = await payload.create({
       collection: 'products',
       data: {
+        name: 'Zero-price product',
         priceInUSD: 0,
         priceInUSDEnabled: true,
       },
@@ -74,7 +76,9 @@ test.describe('Ecommerce Plugin', () => {
     // Create a product with no price set
     const noPriceProduct = await payload.create({
       collection: 'products',
-      data: {},
+      data: {
+        name: 'No-price product',
+      },
       overrideAccess: true,
     })
     noPriceProductId = noPriceProduct.id
@@ -84,8 +88,8 @@ test.describe('Ecommerce Plugin', () => {
     const seededVariants = await payload.find({
       collection: 'variants',
       limit: 1,
-      where: { priceInUSD: { equals: 1999 } },
       overrideAccess: true,
+      where: { priceInUSD: { equals: 1999 } },
     })
 
     if (seededVariants.docs.length > 0) {
@@ -171,6 +175,7 @@ test.describe('Ecommerce Plugin', () => {
       const editableProduct = await payload.create({
         collection: 'products',
         data: {
+          name: 'Editable-price product',
           priceInUSD: 999,
           priceInUSDEnabled: true,
         },
@@ -201,8 +206,8 @@ test.describe('Ecommerce Plugin', () => {
 
       const updatedProductResult = await payload.find({
         collection: 'products',
-        where: { id: { equals: editableProduct.id } },
         overrideAccess: true,
+        where: { id: { equals: editableProduct.id } },
       })
       expect(updatedProductResult.docs[0]?.priceInUSD).toBe(2499)
     })

@@ -17,6 +17,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { getRequestOrigin } from '../../utilities/getRequestOrigin.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 
@@ -47,8 +48,9 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     'username' in data && typeof data?.username === 'string'
       ? data.username.toLowerCase().trim()
       : null
-
   let args = incomingArgs
+  let hasSentEmail = false
+  let releaseRequestInterval: (() => Promise<void>) | null = null
 
   if (incomingArgs.collection.config.auth.disableLocalStrategy) {
     throw new Forbidden(incomingArgs.req.t)
@@ -83,24 +85,18 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       },
       req,
     } = args
+    const minRequestInterval = collectionConfig.auth.forgotPassword.minRequestInterval ?? 15000
 
     // /////////////////////////////////////
     // Forget password
     // /////////////////////////////////////
 
-    let token: string = crypto.randomBytes(20).toString('hex')
     type UserDoc = {
       email?: string
       id: number | string
       resetPasswordExpiration?: string
+      resetPasswordRequestedAt?: string
       resetPasswordToken?: string
-    }
-
-    if (!sanitizedEmail && !sanitizedUsername) {
-      throw new APIError(
-        `Missing ${loginWithUsername ? 'username' : 'email'}.`,
-        httpStatus.BAD_REQUEST,
-      )
     }
 
     let whereConstraint: Where = {}
@@ -126,23 +122,77 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       where: whereConstraint,
     })
 
-    let user = await payload.db.findOne<UserDoc>({
-      collection: collectionConfig.slug,
-      req,
-      where: whereConstraint,
-    })
+    const now = Date.now()
+    let token: string = crypto.randomBytes(20).toString('hex')
+    const resetPasswordExpiration = new Date(
+      now + (collectionConfig.auth?.forgotPassword?.expiration ?? expiration ?? 3600000),
+    ).toISOString()
+    let user: null | UserDoc
+
+    if (!disableEmail && minRequestInterval > 0) {
+      const requestedAt = new Date(now).toISOString()
+      const reservationReq = isolateObjectProperty(req, 'transactionID')
+      reservationReq.transactionID = undefined
+
+      user = (await payload.db.updateOne({
+        collection: collectionConfig.slug,
+        data: {
+          resetPasswordRequestedAt: requestedAt,
+        },
+        options: { atomic: true },
+        req: reservationReq,
+        where: {
+          and: [
+            whereConstraint,
+            {
+              or: [
+                { resetPasswordRequestedAt: { exists: false } },
+                { resetPasswordRequestedAt: { equals: null } },
+                {
+                  resetPasswordRequestedAt: {
+                    less_than_equal: new Date(now - minRequestInterval).toISOString(),
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      })) as null | UserDoc
+
+      if (user) {
+        const userID = user.id
+        releaseRequestInterval = async () => {
+          await payload.db.updateOne({
+            collection: collectionConfig.slug,
+            data: { resetPasswordRequestedAt: null },
+            options: { atomic: true },
+            req: reservationReq,
+            where: {
+              and: [
+                { id: { equals: userID } },
+                { resetPasswordRequestedAt: { equals: requestedAt } },
+              ],
+            },
+          })
+        }
+      }
+    } else {
+      user = await payload.db.findOne<UserDoc>({
+        collection: collectionConfig.slug,
+        req,
+        where: whereConstraint,
+      })
+    }
 
     // We don't want to indicate specifically that an email was not found,
     // as doing so could lead to the exposure of registered emails.
     // Therefore, we prefer to fail silently.
     if (!user) {
-      await commitTransaction(args.req)
+      if (shouldCommit) {
+        await commitTransaction(args.req)
+      }
       return null
     }
-
-    const resetPasswordExpiration = new Date(
-      Date.now() + (collectionConfig.auth?.forgotPassword?.expiration ?? expiration ?? 3600000),
-    ).toISOString()
 
     user = await payload.update({
       id: user.id,
@@ -190,6 +240,7 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
         subject,
         to: user.email,
       })
+      hasSentEmail = true
     }
 
     // /////////////////////////////////////
@@ -221,6 +272,15 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     return token
   } catch (error: unknown) {
     await killTransaction(args.req)
+
+    if (!hasSentEmail && releaseRequestInterval) {
+      try {
+        await releaseRequestInterval()
+      } catch (err) {
+        args.req.payload.logger.error({ err, msg: 'Failed to release forgot-password interval' })
+      }
+    }
+
     throw error
   }
 }

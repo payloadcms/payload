@@ -31,6 +31,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
       user,
     },
     searchParams = {},
+    user: userWithReadAccess,
     versions,
   } = args
 
@@ -119,6 +120,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     redirectAfterDuplicate,
     searchParams,
     server: req.server,
+    user: userWithReadAccess,
     versions,
     viewType: 'document',
   })
