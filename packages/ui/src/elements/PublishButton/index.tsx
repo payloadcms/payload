@@ -5,7 +5,7 @@ import type { PublishButtonClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, hasAutosaveEnabled, hasLocalizeStatusEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -68,12 +68,10 @@ export function PublishButton({
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
 
-  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
-
-  useEffect(() => {
-    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
-    setHasLocalizedFields(hasLocalizedField)
-  }, [entityConfig?.fields])
+  const hasLocalizedFields = React.useMemo(
+    () => Boolean(entityConfig?.fields && traverseForLocalizedFields(entityConfig.fields)),
+    [entityConfig?.fields],
+  )
 
   const isSpecificLocalePublishEnabled = localization && hasLocalizedFields && hasPublishPermission
 

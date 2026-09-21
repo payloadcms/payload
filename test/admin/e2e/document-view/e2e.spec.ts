@@ -763,13 +763,44 @@ describe('Document View', () => {
       await expect(publishButton).not.toContainText('Publish in')
     })
 
-    test('should show publish all locales as a secondary option when localized fields exist', async () => {
-      await navigateToDoc(page, localizedURL)
-      await page.locator('#action-save-popup').click()
+    test('should publish all locales from the secondary option', async () => {
+      const localizedDocument = await payload.create({
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'English draft',
+        },
+        draft: true,
+        locale: 'en',
+      })
 
-      const publishAllLocalesButton = page.locator('#publish-all-locales')
-      await expect(publishAllLocalesButton).toBeVisible()
-      await expect(publishAllLocalesButton).toContainText('Publish all locales')
+      await payload.update({
+        id: localizedDocument.id,
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'Spanish draft',
+        },
+        draft: true,
+        locale: 'es',
+      })
+
+      await page.goto(localizedURL.edit(localizedDocument.id))
+      await saveDocAndAssert(page, '#publish-all-locales')
+
+      const publishedDocuments = await payload.find({
+        collection: localizedCollectionSlug,
+        draft: true,
+        locale: 'all',
+        where: {
+          id: {
+            equals: localizedDocument.id,
+          },
+        },
+      })
+
+      expect(publishedDocuments.docs[0]?._status).toEqual({
+        en: 'published',
+        es: 'published',
+      })
     })
 
     test('should show published status after publishing specific locale', async () => {

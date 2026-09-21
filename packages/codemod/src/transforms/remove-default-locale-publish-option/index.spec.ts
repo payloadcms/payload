@@ -56,4 +56,29 @@ describe('remove-default-locale-publish-option', () => {
     expect(result.filesChanged).toEqual(['/input.ts'])
     expect(result.notes).toEqual([expect.stringContaining("was set to 'all'")])
   })
+
+  it("removes the property from a shorthand localization config and emits an 'all' note", async () => {
+    const input = await fixture('shorthand.input.ts')
+    const output = await fixture('shorthand.output.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('input.ts', input)
+
+    const result = await removeDefaultLocalePublishOption.apply({ packageJsons: [], project })
+
+    expect(sourceFile.getFullText()).toBe(output)
+    expect(result.filesChanged).toEqual(['/input.ts'])
+    expect(result.notes).toEqual([expect.stringContaining("was set to 'all'")])
+  })
+
+  it('emits a manual migration note for a dynamic localization config', async () => {
+    const input = await fixture('dynamic.input.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('input.ts', input)
+
+    const result = await removeDefaultLocalePublishOption.apply({ packageJsons: [], project })
+
+    expect(sourceFile.getFullText()).toBe(input)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([expect.stringContaining('migrate manually')])
+  })
 })
