@@ -18,6 +18,7 @@ import { verifyClientUploadReceipt } from './clientUploadReceipt.js'
 import { docWithFilenameExists } from './docWithFilenameExists.js'
 import { getFileContentRequirement, HEADER_PROBE_BYTE_LENGTH } from './getFileContentRequirement.js'
 import { getImageSize } from './getImageSize.js'
+import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { getStagedFile } from './stagedUpload.js'
 
 export const getFileFromUploadInstructions = async ({
@@ -159,10 +160,10 @@ export const getFileFromUploadInstructions = async ({
 }
 
 /**
- * Whether the request's `uploadEdits` query param carries a crop or resize edit - mirrors the
- * raw `req.query.uploadEdits` read in generateFileData.ts's `shouldReupload`/`cropData` checks,
- * since a full parse (with its `data`/`originalDoc` focal-point fallback) isn't available yet
- * at this point in the request lifecycle.
+ * Whether the request's `uploadEdits` query param carries a crop or resize edit - reads the raw
+ * `req.query.uploadEdits`, since a full parse (with its `data`/`originalDoc` focal-point
+ * fallback, done in generateFileData.ts) isn't available yet at this point in the request
+ * lifecycle.
  */
 const requestHasSizeEdits = (req: PayloadRequest): boolean => {
   const uploadEdits = req.query?.uploadEdits
@@ -170,8 +171,7 @@ const requestHasSizeEdits = (req: PayloadRequest): boolean => {
     return false
   }
 
-  const { crop, heightInPixels, widthInPixels } = uploadEdits as UploadEdits
-  return Boolean(crop || heightInPixels || widthInPixels)
+  return hasCropOrResizeEdit(uploadEdits as UploadEdits)
 }
 
 /**
