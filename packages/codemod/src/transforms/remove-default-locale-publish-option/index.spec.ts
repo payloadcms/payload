@@ -81,4 +81,16 @@ describe('remove-default-locale-publish-option', () => {
     expect(result.filesChanged).toEqual([])
     expect(result.notes).toEqual([expect.stringContaining('migrate manually')])
   })
+
+  it('emits a manual migration note for a reassigned localization config', async () => {
+    const input = await fixture('reassigned.input.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    const sourceFile = project.createSourceFile('input.ts', input)
+
+    const result = await removeDefaultLocalePublishOption.apply({ packageJsons: [], project })
+
+    expect(sourceFile.getFullText()).toBe(input)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([expect.stringContaining('migrate manually')])
+  })
 })

@@ -3,9 +3,10 @@ import type {
   ObjectLiteralExpression,
   PropertyAssignment,
   ShorthandPropertyAssignment,
+  VariableDeclaration,
 } from 'ts-morph'
 
-import { Node, SyntaxKind } from 'ts-morph'
+import { Node, SyntaxKind, VariableDeclarationKind } from 'ts-morph'
 
 import type { Transform } from '../../types.js'
 
@@ -113,7 +114,7 @@ function resolveLocalizationObject({
     ?.getDeclarations()
     .find(Node.isVariableDeclaration)
 
-  return resolveLocalizationInitializer({ initializer: variableDeclaration?.getInitializer() })
+  return resolveLocalizationVariable({ variableDeclaration })
 }
 
 function resolveLocalizationInitializer({
@@ -139,8 +140,24 @@ function resolveLocalizationInitializer({
       .map((definition) => definition.getDeclarationNode())
       .find(Node.isVariableDeclaration)
 
-    return resolveLocalizationInitializer({ initializer: variableDeclaration?.getInitializer() })
+    return resolveLocalizationVariable({ variableDeclaration })
   }
 
   return { isUnresolved: true }
+}
+
+function resolveLocalizationVariable({
+  variableDeclaration,
+}: {
+  variableDeclaration: undefined | VariableDeclaration
+}): LocalizationResolution {
+  if (
+    !variableDeclaration ||
+    variableDeclaration.getVariableStatement()?.getDeclarationKind() !==
+      VariableDeclarationKind.Const
+  ) {
+    return { isUnresolved: true }
+  }
+
+  return resolveLocalizationInitializer({ initializer: variableDeclaration.getInitializer() })
 }
