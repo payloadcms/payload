@@ -1,5 +1,3 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
-
 import { initI18n } from '@payloadcms/translations'
 import fs from 'fs/promises'
 import { compile } from 'json-schema-to-typescript'
@@ -9,13 +7,19 @@ import type { SanitizedConfig } from '../../config/types.js'
 import { addSelectGenericsToGeneratedTypes } from '../../utilities/addSelectGenericsToGeneretedTypes.js'
 import { configToJSONSchema } from '../../utilities/configToJSONSchema.js'
 import { getLogger } from '../../utilities/logger.js'
+import { strictObject } from '../../utilities/zod.js'
 import { defineCLICommand } from '../defineCLICommand.js'
-import { strictObject } from '../zod.js'
+
+export type GenerateTypesResult = {
+  outputFile: string
+  types?: string
+  written: boolean
+}
 
 export async function generateTypes(
   config: SanitizedConfig,
   options?: { log?: boolean; returnString?: boolean },
-): Promise<string | void> {
+): Promise<GenerateTypesResult> {
   const logger = getLogger('payload', 'sync')
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
@@ -25,9 +29,7 @@ export async function generateTypes(
     logger.info('Compiling TS types for Collections and Globals...')
   }
 
-  const languages = Object.keys(config.i18n.supportedLanguages) as AcceptedLanguages[]
-
-  const language = languages.includes('en') ? 'en' : config.i18n.fallbackLanguage
+  const language = 'en' in config.i18n.supportedLanguages ? 'en' : config.i18n.fallbackLanguage
 
   const i18n = await initI18n({ config: config.i18n, context: 'api', language })
 
@@ -77,7 +79,7 @@ export async function generateTypes(
 
   // Return the generated types instead of writing them to disk.
   if (options?.returnString) {
-    return compiled
+    return { outputFile, types: compiled, written: false }
   }
 
   // Diff the compiled types against the existing types file
@@ -85,7 +87,7 @@ export async function generateTypes(
     const existingTypes = await fs.readFile(outputFile, 'utf-8')
 
     if (compiled === existingTypes) {
-      return
+      return { outputFile, written: false }
     }
   } catch (_) {
     // swallow err
@@ -95,14 +97,17 @@ export async function generateTypes(
   if (shouldLog) {
     logger.info(`Types written to ${outputFile}`)
   }
+
+  return { outputFile, written: true }
 }
 
 export const createGenerateTypesCommand = defineCLICommand({
   description: 'Generate TypeScript types from the Payload config.',
-  handler: async ({ getConfig }) => {
+  handler: async ({ getConfig, isJSON }) => {
     const config = await getConfig()
+    const result = await generateTypes(config, { log: !isJSON })
 
-    await generateTypes(config)
+    return { result }
   },
   helpGroup: 'Core commands',
   input: strictObject({}),

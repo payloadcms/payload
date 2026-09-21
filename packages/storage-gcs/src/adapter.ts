@@ -48,47 +48,39 @@ export function createGcsAdapter({
         getStorageClient,
         useCompositePrefixes,
       }),
+      requiresUploadReceipt: true,
       useInAdmin: true,
     },
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         bucket,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    handleUpload: async ({ data, file }) => {
+    handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({
         acl,
         bucket,
         buffer: file.buffer,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
-        useCompositePrefixes,
+        storageFilePath,
       })
 
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>
       getFile({
         bucket,
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
         uploadReference,
         useCompositePrefixes,

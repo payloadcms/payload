@@ -13,53 +13,59 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'folders',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
-  },
-  collections: [
-    {
-      slug: folderSlug,
-      folders: {
+    collections: [
+      {
+        slug: folderSlug,
         admin: {
-          components: {
-            Icon: {
-              clientProps: { color: 'var(--theme-success-400)' },
-              path: './components/ColoredFolderIcon.tsx#ColoredFolderIcon',
+          useAsTitle: 'name',
+        },
+        fields: [
+          { name: 'name', type: 'text', required: true },
+          { name: 'folderSlug', type: 'text' },
+        ],
+        folders: {
+          admin: {
+            components: {
+              Icon: {
+                clientProps: { color: 'var(--theme-success-400)' },
+                path: './components/ColoredFolderIcon.tsx#ColoredFolderIcon',
+              },
             },
           },
+          collectionSpecific: { fieldName: 'folderType' },
+          joinField: { name: 'documentsAndFolders' },
+          parentFieldName: 'folder',
         },
-        collectionSpecific: { fieldName: 'folderType' },
-        joinField: { name: 'documentsAndFolders' },
-        parentFieldName: 'folder',
+        versions: false,
       },
-      admin: {
-        useAsTitle: 'name',
+      Posts,
+      Media,
+      TranslatedLabels,
+    ],
+    globals: [
+      {
+        slug: 'global',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+        ],
+        versions: false,
       },
-      fields: [
-        { name: 'name', type: 'text', required: true },
-        { name: 'folderSlug', type: 'text' },
-      ],
-      versions: false,
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
-    Posts,
-    Media,
-    TranslatedLabels,
-  ],
-  globals: [
-    {
-      slug: 'global',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-  ],
-  onInit: async (payload) => {
+  },
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -68,8 +74,5 @@ export default buildConfigWithDefaults({
       },
     })
     await seed(payload)
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

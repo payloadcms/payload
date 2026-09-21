@@ -2,11 +2,9 @@ import type { Payload, PayloadRequest } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
 import { Types } from 'mongoose'
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -18,9 +16,7 @@ import type {
 } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { clearAndSeedEverything } from './seed.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -34,31 +30,15 @@ import {
   usersSlug,
 } from './shared.js'
 
-let restClient: NextRESTClient
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
 type EasierChained = { id: string; relation: EasierChained }
 
-describe('Relationships', () => {
-  beforeAll(async () => {
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  beforeEach(async () => {
-    await clearAndSeedEverything(payload)
+test.suite({ config: './config.ts' })('Relationships', () => {
+  test.beforeEach(async ({ restClient }) => {
     await restClient.login({ slug: usersSlug, credentials: devUser })
   })
 
-  describe('Querying', () => {
-    describe('Relationships', () => {
+  test.describe('Querying', () => {
+    test.describe('Relationships', () => {
       let post: Post
       let relation: Relation
       let filteredRelation: Relation
@@ -72,7 +52,7 @@ describe('Relationships', () => {
       let generatedCustomIdNumber: number
       const nameToQuery = 'name'
 
-      beforeEach(async () => {
+      test.beforeEach(async ({ payload }) => {
         relation = await payload.create({
           collection: relationSlug,
           data: {
@@ -145,32 +125,35 @@ describe('Relationships', () => {
           },
         })
 
-        post = await createPost({
-          chainedRelation: chained.id,
-          customIdNumberRelation: customIdNumberRelation.id,
-          customIdRelation: customIdRelation.id,
-          defaultAccessRelation: defaultAccessRelation.id,
-          filteredRelation: filteredRelation.id,
-          maxDepthRelation: relation.id,
-          relationField: relation.id,
-        })
+        post = await createPost(
+          { payload },
+          {
+            chainedRelation: chained.id,
+            customIdNumberRelation: customIdNumberRelation.id,
+            customIdRelation: customIdRelation.id,
+            defaultAccessRelation: defaultAccessRelation.id,
+            filteredRelation: filteredRelation.id,
+            maxDepthRelation: relation.id,
+            relationField: relation.id,
+          },
+        )
 
-        await createPost() // Extra post to allow asserting totalDoc count
+        await createPost({ payload }) // Extra post to allow asserting totalDoc count
       })
 
-      it('should prevent an unauthorized population of strict access', async () => {
+      test('should prevent an unauthorized population of strict access', async ({ restClient }) => {
         const doc = await restClient
           .GET(`/${slug}/${post.id}`, { auth: false })
           .then((res) => res.json())
         expect(doc.defaultAccessRelation).toEqual(defaultAccessRelation.id)
       })
 
-      it('should populate strict access when authorized', async () => {
+      test('should populate strict access when authorized', async ({ restClient }) => {
         const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
         expect(doc.defaultAccessRelation).toEqual(defaultAccessRelation)
       })
 
-      it('should use filterOptions to limit relationship options', async () => {
+      test('should use filterOptions to limit relationship options', async ({ restClient }) => {
         const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
 
         expect(doc.filteredRelation).toMatchObject({ id: filteredRelation.id })
@@ -202,7 +185,9 @@ describe('Relationships', () => {
         expect(response.status).toEqual(400)
       })
 
-      it('should count totalDocs correctly when using or in where query and relation contains hasMany relationship fields', async () => {
+      test('should count totalDocs correctly when using or in where query and relation contains hasMany relationship fields', async ({
+        payload,
+      }) => {
         const user = (
           await payload.find({
             collection: 'users',
@@ -268,7 +253,7 @@ describe('Relationships', () => {
       })
 
       // https://github.com/payloadcms/payload/issues/4240
-      it('should allow querying by relationship id field', async () => {
+      test('should allow querying by relationship id field', async ({ payload }) => {
         /**
          * This test shows something which breaks on postgres but not on mongodb.
          */
@@ -335,7 +320,9 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
-      it('should allow querying by relationships with an object where as AND', async () => {
+      test('should allow querying by relationships with an object where as AND', async ({
+        payload,
+      }) => {
         const director = await payload.create({
           collection: 'directors',
           data: { name: 'Director1', localized: 'Director1_Localized' },
@@ -370,7 +357,7 @@ describe('Relationships', () => {
         expect(falseRes).toStrictEqual([])
       })
 
-      it('should allow querying within blocks', async () => {
+      test('should allow querying within blocks', async ({ payload }) => {
         const rel = await payload.create({
           collection: relationSlug,
           data: {
@@ -399,7 +386,7 @@ describe('Relationships', () => {
         expect(docs[0].id).toBe(doc.id)
       })
 
-      it('should allow querying within tabs-blocks-tabs', async () => {
+      test('should allow querying within tabs-blocks-tabs', async ({ payload }) => {
         const movie = await payload.create({ collection: 'movies', data: { name: 'Pulp Fiction' } })
 
         const { id } = await payload.create({
@@ -431,7 +418,7 @@ describe('Relationships', () => {
         expect(result.docs[0].id).toBe(id)
       })
 
-      it('should allow query hasMany select in relationship', async () => {
+      test('should allow query hasMany select in relationship', async ({ payload }) => {
         const movie = await payload.create({ collection: 'movies', data: { select: ['a', 'b'] } })
         const doc = await payload.create({
           collection: 'directors',
@@ -446,7 +433,9 @@ describe('Relationships', () => {
         expect(res.docs[0].id).toBe(doc.id)
       })
 
-      it('should query through a transitive has-many join using the related table alias', async () => {
+      test('should query through a transitive has-many join using the related table alias', async ({
+        payload,
+      }) => {
         const artist = await payload.create({
           collection: 'transitive-join-artists',
           data: {},
@@ -471,7 +460,7 @@ describe('Relationships', () => {
         expect(docs[0]?.id).toBe(artist.id)
       })
 
-      it('should allow 4x deep querying', async () => {
+      test('should allow 4x deep querying', async ({ payload }) => {
         const movie_1 = await payload.create({
           collection: 'movies',
           data: { name: 'random_movie_1' },
@@ -502,7 +491,7 @@ describe('Relationships', () => {
       // filter Payload hands to Mongoose — not in the returned docs.
       test.options({ db: 'mongo' })(
         'should not duplicate IDs in $in when querying through a relationship',
-        async () => {
+        async ({ payload }) => {
           const movie = await payload.create({
             collection: 'movies',
             data: { name: 'dup_test_movie' },
@@ -531,8 +520,8 @@ describe('Relationships', () => {
         },
       )
 
-      describe('hasMany relationships', () => {
-        describe('has-many relationship operators', () => {
+      test.describe('hasMany relationships', () => {
+        test.describe('has-many relationship operators', () => {
           let directorWithoutMovies: Director
           let electricCarsDirector: Director
           let electricCarsMovieID: number | string
@@ -540,7 +529,7 @@ describe('Relationships', () => {
           let recallsDirector: Director
           let recallsMovieID: number | string
 
-          beforeEach(async () => {
+          test.beforeEach(async ({ payload }) => {
             const recallsMovie = await payload.create({
               collection: 'movies',
               data: { name: 'recalls', select: ['a'] },
@@ -575,7 +564,7 @@ describe('Relationships', () => {
             })
           })
 
-          it('should find documents where some related documents match', async () => {
+          test('should find documents where some related documents match', async ({ payload }) => {
             const { docs } = await payload.find({
               collection: 'directors',
               depth: 0,
@@ -592,7 +581,7 @@ describe('Relationships', () => {
             expect(foundDirectorIDs).toContain(recallsDirector.id)
           })
 
-          it('should find documents where no related documents match', async () => {
+          test('should find documents where no related documents match', async ({ payload }) => {
             const { docs } = await payload.find({
               collection: 'directors',
               depth: 0,
@@ -609,7 +598,9 @@ describe('Relationships', () => {
             expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
           })
 
-          it('should find documents where every related document matches', async () => {
+          test('should find documents where every related document matches', async ({
+            payload,
+          }) => {
             const { docs } = await payload.find({
               collection: 'directors',
               depth: 0,
@@ -626,7 +617,9 @@ describe('Relationships', () => {
             expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
           })
 
-          it('should query has-many relationship operators through REST', async () => {
+          test('should query has-many relationship operators through REST', async ({
+            restClient,
+          }) => {
             const response = await restClient.GET('/directors', {
               query: {
                 depth: 0,
@@ -644,7 +637,7 @@ describe('Relationships', () => {
             expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
           })
 
-          it('should support direct relationship ID conditions', async () => {
+          test('should support direct relationship ID conditions', async ({ payload }) => {
             const { docs } = await payload.find({
               collection: 'directors',
               depth: 0,
@@ -659,7 +652,9 @@ describe('Relationships', () => {
             expect(foundDirectorIDs).toContain(directorWithoutMovies.id)
           })
 
-          it('should apply a compound query to the same related document', async () => {
+          test('should apply a compound query to the same related document', async ({
+            payload,
+          }) => {
             const { docs } = await payload.find({
               collection: 'directors',
               depth: 0,
@@ -675,7 +670,9 @@ describe('Relationships', () => {
             expect(docs).toHaveLength(0)
           })
 
-          it('should evaluate nested equals against related documents instead of joined rows', async () => {
+          test('should evaluate nested equals against related documents instead of joined rows', async ({
+            payload,
+          }) => {
             const { docs } = await payload.find({
               collection: 'directors',
               depth: 0,
@@ -689,7 +686,9 @@ describe('Relationships', () => {
             expect(docs).toHaveLength(4)
           })
 
-          it('should support nested has-many operators on a localized relationship inside a block', async () => {
+          test('should support nested has-many operators on a localized relationship inside a block', async ({
+            payload,
+          }) => {
             const mixedBlock = await payload.create({
               collection: 'blocks',
               data: {
@@ -745,7 +744,7 @@ describe('Relationships', () => {
           // `near` on a point field is not implemented by the drizzle sqlite adapter
           test.options({ db: (adapter) => !adapter.startsWith('sqlite') })(
             'should support equals with a geospatial nested query',
-            async () => {
+            async ({ payload }) => {
               const nearbyMovie = await payload.create({
                 collection: 'movies',
                 data: { name: 'nearby', location: [10, 20] },
@@ -769,7 +768,9 @@ describe('Relationships', () => {
           )
         })
 
-        it('should query two hasMany levels deep when the middle document has multiple relations', async () => {
+        test('should query two hasMany levels deep when the middle document has multiple relations', async ({
+          payload,
+        }) => {
           const alpha = await payload.create({
             collection: 'movies',
             data: { name: 'Alpha' },
@@ -801,7 +802,7 @@ describe('Relationships', () => {
           expect(docs.map(({ id }) => id)).toStrictEqual([parent.id])
         })
 
-        it('should retrieve totalDocs correctly with hasMany,', async () => {
+        test('should retrieve totalDocs correctly with hasMany,', async ({ payload }) => {
           const movie1 = await payload.create({
             collection: 'movies',
             data: {},
@@ -891,7 +892,7 @@ describe('Relationships', () => {
           expect(result.docs[0]?.id).toBe(dir_3.id)
         })
 
-        it('should query using "contains" by hasMany relationship field', async () => {
+        test('should query using "contains" by hasMany relationship field', async ({ payload }) => {
           const movie1 = await payload.create({
             collection: 'movies',
             data: {},
@@ -940,34 +941,37 @@ describe('Relationships', () => {
           expect(query2.totalDocs).toStrictEqual(2)
         })
 
-        test.options({ db: 'mongo' })('should treat an ObjectId as a relationship ID', async () => {
-          const movie = await payload.create({ collection: 'movies', data: {} })
+        test.options({ db: 'mongo' })(
+          'should treat an ObjectId as a relationship ID',
+          async ({ payload }) => {
+            const movie = await payload.create({ collection: 'movies', data: {} })
 
-          const director = await payload.create({
-            collection: 'directors',
-            data: {
-              movies: [movie.id],
-            },
-          })
-
-          const { docs } = await payload.find({
-            collection: 'directors',
-            depth: 0,
-            where: {
-              movies: {
-                contains: new Types.ObjectId(String(movie.id)),
+            const director = await payload.create({
+              collection: 'directors',
+              data: {
+                movies: [movie.id],
               },
-            },
-          })
+            })
 
-          expect(docs).toHaveLength(1)
-          expect(docs[0]?.id).toBe(director.id)
-        })
+            const { docs } = await payload.find({
+              collection: 'directors',
+              depth: 0,
+              where: {
+                movies: {
+                  contains: new Types.ObjectId(String(movie.id)),
+                },
+              },
+            })
+
+            expect(docs).toHaveLength(1)
+            expect(docs[0]?.id).toBe(director.id)
+          },
+        )
 
         // all operator is not supported in Postgres yet for any fields
         test.options({ db: 'mongo' })(
           'should query using "all" by hasMany relationship field',
-          async () => {
+          async ({ payload }) => {
             const movie1 = await payload.create({
               collection: 'movies',
               data: {},
@@ -1007,7 +1011,7 @@ describe('Relationships', () => {
           },
         )
 
-        it('should query using "in" by hasMany relationship field', async () => {
+        test('should query using "in" by hasMany relationship field', async ({ payload }) => {
           const tree1 = await payload.create({
             collection: treeSlug,
             data: {
@@ -1059,8 +1063,8 @@ describe('Relationships', () => {
         })
       })
 
-      describe('sorting by relationships', () => {
-        it('should sort by a property of a relationship', async () => {
+      test.describe('sorting by relationships', () => {
+        test('should sort by a property of a relationship', async ({ payload }) => {
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
 
@@ -1146,7 +1150,7 @@ describe('Relationships', () => {
           expect(localized_res_2.docs).toStrictEqual([movie_1, movie_2])
         })
 
-        it('should sort by a property of a nested relationship', async () => {
+        test('should sort by a property of a nested relationship', async ({ payload }) => {
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
 
@@ -1185,7 +1189,7 @@ describe('Relationships', () => {
           expect(res_2.docs[1].id).toBe(movie.id)
         })
 
-        it('should sort by multiple properties of a relationship', async () => {
+        test('should sort by multiple properties of a relationship', async ({ payload }) => {
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
 
@@ -1226,7 +1230,7 @@ describe('Relationships', () => {
           expect(res_2.docs).toStrictEqual([movie_2, movie_1])
         })
 
-        it('should sort by a property of a hasMany relationship', async () => {
+        test('should sort by a property of a hasMany relationship', async ({ payload }) => {
           const movie1 = await payload.create({
             collection: 'movies',
             data: {
@@ -1268,15 +1272,15 @@ describe('Relationships', () => {
         })
       })
 
-      describe('Custom ID', () => {
-        it('should query a custom id relation', async () => {
+      test.describe('Custom ID', () => {
+        test('should query a custom id relation', async ({ restClient }) => {
           const { customIdRelation } = await restClient
             .GET(`/${slug}/${post.id}`)
             .then((res) => res.json())
           expect(customIdRelation).toMatchObject({ id: generatedCustomId })
         })
 
-        it('should query a custom id number relation', async () => {
+        test('should query a custom id number relation', async ({ restClient }) => {
           const { customIdNumberRelation } = await restClient
             .GET(`/${slug}/${post.id}`)
             .then((res) => res.json())
@@ -1284,8 +1288,8 @@ describe('Relationships', () => {
         })
       })
 
-      describe('depth', () => {
-        it('should populate one level by default', async () => {
+      test.describe('depth', () => {
+        test('should populate one level by default', async ({ restClient }) => {
           const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
           const chainedRel = doc?.chainedRelation as EasierChained
 
@@ -1293,7 +1297,7 @@ describe('Relationships', () => {
           expect(chainedRel.relation).toEqual(chained2.id)
         })
 
-        it('should populate to depth', async () => {
+        test('should populate to depth', async ({ restClient }) => {
           const doc = await restClient
             .GET(`/${slug}/${post.id}`, {
               query: {
@@ -1308,7 +1312,7 @@ describe('Relationships', () => {
           expect(depth0.relation.relation).toEqual(chained3.id)
         })
 
-        it('should only populate ID if depth 0', async () => {
+        test('should only populate ID if depth 0', async ({ restClient }) => {
           const doc = await restClient
             .GET(`/${slug}/${post.id}`, {
               query: {
@@ -1319,7 +1323,7 @@ describe('Relationships', () => {
           expect(doc?.chainedRelation).toEqual(chained.id)
         })
 
-        it('should respect maxDepth at field level', async () => {
+        test('should respect maxDepth at field level', async ({ restClient }) => {
           const doc = await restClient
             .GET(`/${slug}/${post.id}`, {
               query: {
@@ -1333,8 +1337,8 @@ describe('Relationships', () => {
           expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
         })
 
-        describe('Local API', () => {
-          it('should populate to depth via local API find', async () => {
+        test.describe('Local API', () => {
+          test('should populate to depth via local API find', async ({ payload }) => {
             const result = await payload.find({
               collection: slug,
               depth: 2,
@@ -1351,7 +1355,7 @@ describe('Relationships', () => {
             expect(chainedRel.relation.relation as unknown as string).toEqual(chained3.id)
           })
 
-          it('should only populate ID if depth 0 via local API find', async () => {
+          test('should only populate ID if depth 0 via local API find', async ({ payload }) => {
             const result = await payload.find({
               collection: slug,
               depth: 0,
@@ -1365,7 +1369,7 @@ describe('Relationships', () => {
             expect(doc?.chainedRelation).toEqual(chained.id)
           })
 
-          it('should respect maxDepth at field level via local API find', async () => {
+          test('should respect maxDepth at field level via local API find', async ({ payload }) => {
             const result = await payload.find({
               collection: slug,
               depth: 1,
@@ -1382,7 +1386,7 @@ describe('Relationships', () => {
             expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
           })
 
-          it('should use depth option even if req.query.depth is set', async () => {
+          test('should use depth option even if req.query.depth is set', async ({ payload }) => {
             const result = await payload.find({
               collection: slug,
               depth: 0,
@@ -1398,7 +1402,9 @@ describe('Relationships', () => {
             expect(doc?.chainedRelation).toEqual(chained.id)
           })
 
-          it('should ignore req.query.depth when no depth option is provided', async () => {
+          test('should ignore req.query.depth when no depth option is provided', async ({
+            payload,
+          }) => {
             // When no depth option is provided, req.query.depth should be ignored
             // and the default depth behavior should apply
             const result = await payload.find({
@@ -1419,13 +1425,13 @@ describe('Relationships', () => {
         })
       })
 
-      describe('with localization', () => {
+      test.describe('with localization', () => {
         let relation1: Relation
         let relation2: Relation
         let localizedPost1: PostsLocalized
         let localizedPost2: PostsLocalized
 
-        beforeEach(async () => {
+        test.beforeEach(async ({ payload }) => {
           relation1 = await payload.create<Relation>({
             collection: relationSlug,
             data: {
@@ -1467,7 +1473,7 @@ describe('Relationships', () => {
             locale: 'de',
           })
         })
-        it('should find two docs for german locale', async () => {
+        test('should find two docs for german locale', async ({ payload }) => {
           const { docs } = await payload.find<PostsLocalized>({
             collection: slugWithLocalizedRel,
             locale: 'de',
@@ -1483,7 +1489,9 @@ describe('Relationships', () => {
           expect(mappedIds).toContain(localizedPost2.id)
         })
 
-        it("shouldn't find a relationship query outside of the specified locale", async () => {
+        test("shouldn't find a relationship query outside of the specified locale", async ({
+          payload,
+        }) => {
           const { docs } = await payload.find<PostsLocalized>({
             collection: slugWithLocalizedRel,
             locale: 'en',
@@ -1497,7 +1505,9 @@ describe('Relationships', () => {
           expect(docs.map((doc) => doc?.id)).not.toContain(localizedPost2.id)
         })
 
-        it('should query a non-localized hasMany relationship nested under a localized array', async () => {
+        test('should query a non-localized hasMany relationship nested under a localized array', async ({
+          payload,
+        }) => {
           const movie = await payload.create({
             collection: 'movies',
             data: { name: 'Jackie Brown' },
@@ -1526,7 +1536,7 @@ describe('Relationships', () => {
         })
       })
 
-      it('should allow update removing a relationship', async () => {
+      test('should allow update removing a relationship', async ({ restClient }) => {
         const response = await restClient.PATCH(`/${slug}/${post.id}`, {
           body: JSON.stringify({
             customIdRelation: null,
@@ -1540,12 +1550,12 @@ describe('Relationships', () => {
       })
     })
 
-    describe('Nested Querying', () => {
+    test.describe('Nested Querying', () => {
       let thirdLevelID: string
       let secondLevelID: string
       let firstLevelID: string
 
-      beforeEach(async () => {
+      test.beforeEach(async ({ payload }) => {
         const thirdLevelDoc = await payload.create({
           collection: 'chained',
           data: {
@@ -1576,7 +1586,7 @@ describe('Relationships', () => {
         firstLevelID = firstLevelDoc.id
       })
 
-      it('should allow querying one level deep', async () => {
+      test('should allow querying one level deep', async ({ payload }) => {
         const query1 = await payload.find({
           collection: 'chained',
           where: {
@@ -1602,7 +1612,7 @@ describe('Relationships', () => {
         expect(query2.docs[0].id).toStrictEqual(secondLevelID)
       })
 
-      it('should allow querying two levels deep', async () => {
+      test('should allow querying two levels deep', async ({ payload }) => {
         const query = await payload.find({
           collection: 'chained',
           where: {
@@ -1616,7 +1626,7 @@ describe('Relationships', () => {
         expect(query.docs[0].id).toStrictEqual(firstLevelID)
       })
 
-      it('should allow querying on id two levels deep', async () => {
+      test('should allow querying on id two levels deep', async ({ payload, restClient }) => {
         const query = await payload.find({
           collection: 'chained',
           where: {
@@ -1645,7 +1655,7 @@ describe('Relationships', () => {
         expect(queryREST.docs[0].id).toStrictEqual(firstLevelID)
       })
 
-      it('should allow querying within array nesting', async () => {
+      test('should allow querying within array nesting', async ({ payload }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
@@ -1677,7 +1687,7 @@ describe('Relationships', () => {
       })
     })
 
-    it('should allow querying within block nesting', async () => {
+    test('should allow querying within block nesting', async ({ payload }) => {
       const director = await payload.create({
         collection: 'directors',
         data: { name: 'Test Director' },
@@ -1707,7 +1717,7 @@ describe('Relationships', () => {
       expect(result.docs[0]!.id).toBe(doc.id)
     })
 
-    it('should allow querying polymorphic in an array', async () => {
+    test('should allow querying polymorphic in an array', async ({ payload }) => {
       const director = await payload.create({
         collection: 'directors',
         data: { name: 'direcotr' },
@@ -1725,7 +1735,7 @@ describe('Relationships', () => {
       expect(res.docs[0].id).toBe(movie.id)
     })
 
-    it('should allow querying hasMany in array', async () => {
+    test('should allow querying hasMany in array', async ({ payload }) => {
       const director = await payload.create({
         collection: 'directors',
         data: { name: 'Test Director1337' },
@@ -1748,10 +1758,10 @@ describe('Relationships', () => {
       expect(res2.docs[0].id).toBe(movie.id)
     })
 
-    describe('Nested Querying Separate Collections', () => {
+    test.describe('Nested Querying Separate Collections', () => {
       let director: Director
 
-      beforeEach(async () => {
+      test.beforeEach(async ({ payload }) => {
         // 1. create a director
         director = await payload.create({
           collection: 'directors',
@@ -1779,7 +1789,7 @@ describe('Relationships', () => {
         })
       })
 
-      it('should allow querying two levels deep', async () => {
+      test('should allow querying two levels deep', async ({ payload }) => {
         const query = await payload.find({
           collection: 'screenings',
           where: {
@@ -1792,7 +1802,7 @@ describe('Relationships', () => {
         expect(query.docs).toHaveLength(1)
       })
     })
-    describe('Multiple Docs', () => {
+    test.describe('Multiple Docs', () => {
       const movieList = [
         'Pulp Fiction',
         'Reservoir Dogs',
@@ -1811,7 +1821,7 @@ describe('Relationships', () => {
         'Insidious',
       ]
 
-      beforeEach(async () => {
+      test.beforeEach(async ({ payload }) => {
         await Promise.all(
           movieList.map(async (movie) => {
             return await payload.create({
@@ -1824,7 +1834,7 @@ describe('Relationships', () => {
         )
       })
 
-      it('should return more than 10 docs in relationship', async () => {
+      test('should return more than 10 docs in relationship', async ({ payload }) => {
         const allMovies = await payload.find({
           collection: 'movies',
           limit: 20,
@@ -1852,7 +1862,7 @@ describe('Relationships', () => {
         expect(director.docs[0].movies.length).toBeGreaterThan(10)
       })
 
-      it('should allow clearing hasMany relationships', async () => {
+      test('should allow clearing hasMany relationships', async ({ payload }) => {
         const fiveMovies = await payload.find({
           collection: 'movies',
           depth: 0,
@@ -1883,8 +1893,8 @@ describe('Relationships', () => {
       })
     })
 
-    describe('Hierarchy', () => {
-      it('finds 1 root item with equals', async () => {
+    test.describe('Hierarchy', () => {
+      test('finds 1 root item with equals', async ({ payload }) => {
         const {
           docs: [item],
           totalDocs: count,
@@ -1898,7 +1908,7 @@ describe('Relationships', () => {
         expect(item.text).toBe('root')
       })
 
-      it('finds 1 root item with exists', async () => {
+      test('finds 1 root item with exists', async ({ payload }) => {
         const {
           docs: [item],
           totalDocs: count,
@@ -1912,7 +1922,7 @@ describe('Relationships', () => {
         expect(item.text).toBe('root')
       })
 
-      it('finds 1 sub item with equals', async () => {
+      test('finds 1 sub item with equals', async ({ payload }) => {
         const {
           docs: [item],
           totalDocs: count,
@@ -1926,7 +1936,7 @@ describe('Relationships', () => {
         expect(item.text).toBe('sub')
       })
 
-      it('finds 1 sub item with exists', async () => {
+      test('finds 1 sub item with exists', async ({ payload }) => {
         const {
           docs: [item],
           totalDocs: count,
@@ -1942,9 +1952,11 @@ describe('Relationships', () => {
     })
   })
 
-  describe('Writing', () => {
-    describe('With transactions', () => {
-      it('should be able to create filtered relations within a transaction', async () => {
+  test.describe('Writing', () => {
+    test.describe('With transactions', () => {
+      test('should be able to create filtered relations within a transaction', async ({
+        payload,
+      }) => {
         const req = {} as PayloadRequest
         req.transactionID = await payload.db.beginTransaction?.()
         const related = await payload.create({
@@ -1970,8 +1982,8 @@ describe('Relationships', () => {
       })
     })
 
-    describe('With passing an object', () => {
-      it('should create with passing an object', async () => {
+    test.describe('With passing an object', () => {
+      test('should create with passing an object', async ({ payload }) => {
         const movie = await payload.create({ collection: 'movies', data: {} })
         const result = await payload.create({
           collection: 'object-writes',
@@ -1992,7 +2004,7 @@ describe('Relationships', () => {
         expect(result.onePoly).toStrictEqual({ relationTo: 'movies', value: movie })
       })
 
-      it('should update with passing an object', async () => {
+      test('should update with passing an object', async ({ payload }) => {
         const movie = await payload.create({ collection: 'movies', data: {} })
         const { id } = await payload.create({ collection: 'object-writes', data: {} })
         const result = await payload.update({
@@ -2015,7 +2027,7 @@ describe('Relationships', () => {
         expect(result.onePoly).toStrictEqual({ relationTo: 'movies', value: movie })
       })
 
-      it('should allow a localized hasMany relationship inside a block', async () => {
+      test('should allow a localized hasMany relationship inside a block', async ({ payload }) => {
         const director1 = await payload.create({
           collection: 'directors',
           data: { name: 'director-1' },
@@ -2042,8 +2054,11 @@ describe('Relationships', () => {
     })
   })
 
-  describe('Polymorphic Relationships', () => {
-    it('should allow REST querying on polymorphic relationships', async () => {
+  test.describe('Polymorphic Relationships', () => {
+    test('should allow REST querying on polymorphic relationships', async ({
+      payload,
+      restClient,
+    }) => {
       const movie = await payload.create({
         collection: 'movies',
         data: {
@@ -2109,7 +2124,7 @@ describe('Relationships', () => {
     // all operator is not supported in Postgres yet for any fields
     test.options({ db: 'mongo' })(
       'should allow REST all querying on polymorphic relationships',
-      async () => {
+      async ({ payload, restClient }) => {
         const movie = await payload.create({
           collection: 'movies',
           data: {
@@ -2142,7 +2157,9 @@ describe('Relationships', () => {
       },
     )
 
-    it('should allow querying on polymorphic relationships with an object syntax', async () => {
+    test('should allow querying on polymorphic relationships with an object syntax', async ({
+      payload,
+    }) => {
       const movie = await payload.create({
         collection: 'movies',
         data: {
@@ -2188,7 +2205,9 @@ describe('Relationships', () => {
       expect(res_2.docs).toHaveLength(0)
     })
 
-    it('should allow querying on hasMany polymorphic relationships with an object syntax', async () => {
+    test('should allow querying on hasMany polymorphic relationships with an object syntax', async ({
+      payload,
+    }) => {
       const movie = await payload.create({
         collection: 'movies',
         data: {
@@ -2224,7 +2243,9 @@ describe('Relationships', () => {
       expect(res.docs[0].id).toBe(id)
     })
 
-    it('should allow querying on localized polymorphic relationships with an object syntax', async () => {
+    test('should allow querying on localized polymorphic relationships with an object syntax', async ({
+      payload,
+    }) => {
       const movie = await payload.create({
         collection: 'movies',
         data: {
@@ -2258,7 +2279,9 @@ describe('Relationships', () => {
       expect(res.docs[0].id).toBe(id)
     })
 
-    it('should allow querying on hasMany localized polymorphic relationships with an object syntax', async () => {
+    test('should allow querying on hasMany localized polymorphic relationships with an object syntax', async ({
+      payload,
+    }) => {
       const movie = await payload.create({
         collection: 'movies',
         data: {
@@ -2294,7 +2317,9 @@ describe('Relationships', () => {
       expect(res.docs[0].id).toBe(id)
     })
 
-    it('should update document that polymorphicaly joined to another collection', async () => {
+    test('should update document that polymorphicaly joined to another collection', async ({
+      payload,
+    }) => {
       const item = await payload.create({ collection: 'items', data: { status: 'pending' } })
 
       await payload.create({
@@ -2311,25 +2336,33 @@ describe('Relationships', () => {
       expect(updated.status).toBe('completed')
     })
 
-    it('should validate the format of text id relationships', async () => {
+    test('should validate the format of text id relationships', async ({ payload }) => {
       await expect(async () =>
-        createPost({
-          // @ts-expect-error Sending bad data to test error handling
-          customIdRelation: 1234,
-        }),
+        createPost(
+          { payload },
+          {
+            // @ts-expect-error Sending bad data to test error handling
+            customIdRelation: 1234,
+          },
+        ),
       ).rejects.toThrow('The following field is invalid: Custom Id Relation')
     })
 
-    it('should validate the format of number id relationships', async () => {
+    test('should validate the format of number id relationships', async ({ payload }) => {
       await expect(async () =>
-        createPost({
-          // @ts-expect-error Sending bad data to test error handling
-          customIdNumberRelation: 'bad-input',
-        }),
+        createPost(
+          { payload },
+          {
+            // @ts-expect-error Sending bad data to test error handling
+            customIdNumberRelation: 'bad-input',
+          },
+        ),
       ).rejects.toThrow('The following field is invalid: Custom Id Number Relation')
     })
 
-    it('should query a polymorphic relationship field with mixed custom ids and default', async () => {
+    test('should query a polymorphic relationship field with mixed custom ids and default', async ({
+      payload,
+    }) => {
       const customIDNumber = await payload.create({
         collection: 'custom-id-number',
         data: { id: 999 },
@@ -2481,6 +2514,6 @@ describe('Relationships', () => {
   })
 })
 
-async function createPost(overrides?: Partial<Post>) {
+async function createPost({ payload }: { payload: Payload }, overrides?: Partial<Post>) {
   return payload.create({ collection: slug, data: { title: 'title', ...overrides } })
 }

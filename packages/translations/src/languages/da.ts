@@ -58,6 +58,7 @@ export const daTranslations: DefaultTranslationsObject = {
     notRedirected: 'Ikke omdirigeret? <0>Log ind her</0>',
     passed: 'Godkendt',
     passwordResetSuccessfully: 'Adgangskode nulstillet.',
+    resend: 'Send igen',
     resetPassword: 'Nulstil adgangskode',
     resetPasswordExpiration: 'Nulstil udløbsdato for adgangskoden',
     resetPasswordToken: 'Nulstil adgangskode token',

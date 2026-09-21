@@ -1,19 +1,15 @@
 import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals, getPayload } from 'payload'
 import { wait } from 'payload/shared'
-import { describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { runCLICommand } from '../__helpers/shared/runCLICommand.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
-describe('Queues - CLI', () => {
+test.suite({ config: './config.ts', cron: false })('Queues - CLI', () => {
   test('ensure consecutive getPayload call with cron: true will autorun jobs', async ({
     config,
+    payload,
   }) => {
-    const payload = await getPayload({
-      config,
-    })
-
     await payload.jobs.queue({
       workflow: 'inlineTaskTest',
       queue: 'autorunSecond',
@@ -21,6 +17,8 @@ describe('Queues - CLI', () => {
         message: 'hello!',
       },
     })
+
+    const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
 
     process.env.PAYLOAD_DROP_DATABASE = 'false'
 
@@ -50,20 +48,22 @@ describe('Queues - CLI', () => {
     // Wait 3 seconds to ensure all currently-running crons are done. If we shut down the db while a function is running, it can cause issues
     // Cron function runs may persist after a test has finished
     await wait(3000)
-    // Now we can destroy the payload instance
-    await _payload2.destroy()
-    await payload.destroy()
+    // getPayload may return the fixture-owned instance for the same config. Leave that instance
+    // connected for the fixture's next per-test reset; the file-scoped fixture destroys it later.
+    if (_payload2 !== payload) {
+      await _payload2.destroy()
+    }
     _internal_resetJobSystemGlobals()
+
+    if (previousDropDatabase === undefined) {
+      delete process.env.PAYLOAD_DROP_DATABASE
+    } else {
+      process.env.PAYLOAD_DROP_DATABASE = previousDropDatabase
+    }
   })
 
-  it('can run migrate CLI without jobs attempting to run', async () => {
-    await runCLICommand(
-      {
-        command: 'migrate',
-        configPath: `${import.meta.dirname}/config.ts`,
-      },
-      { cwd: import.meta.dirname },
-    )
+  test('can run migrate CLI without jobs attempting to run', async ({ cli }) => {
+    await cli('migrate')
 
     // Wait 3 seconds to let potential autorun crons trigger
     await new Promise((resolve) => setTimeout(resolve, 3000))

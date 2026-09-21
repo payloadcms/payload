@@ -16,6 +16,7 @@ import {
   getRequestLanguage,
   parseCookies,
 } from 'payload'
+import { applyUserReadAccess } from 'payload/internal'
 
 import { getRequestLocale } from './getRequestLocale.js'
 import { selectiveCache } from './selectiveCache.js'
@@ -51,7 +52,7 @@ export const initReq = async function ({
   const headers = await serverAdapter.getHeaders()
   const cookies = parseCookies(headers)
 
-  const partialResult = await partialReqCache.get(async () => {
+  const getPartialResult = async () => {
     const config = await configPromise
     const payload = await getPayload({ config, cron: true, importMap })
     const languageCode = getRequestLanguage({
@@ -79,63 +80,95 @@ export const initReq = async function ({
       responseHeaders,
       user,
     }
-  }, 'global')
+  }
 
-  return reqCache
-    .get(async () => {
-      const { i18n, languageCode, payload, responseHeaders, user } = partialResult
+  const partialResult = await partialReqCache.get(getPartialResult, 'global')
 
-      const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+  const getResult = async () => {
+    const { i18n, languageCode, payload, responseHeaders, user } = partialResult
 
-      const req = await createLocalReq(
-        {
-          req: {
-            headers,
-            host: headers.get('host'),
-            i18n: i18n as I18n,
-            responseHeaders,
-            server: serverAdapter,
-            user,
-            ...(reqOverrides || {}),
-          },
-          ...(optionsOverrides || {}),
-        },
-        payload,
-      )
+    const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+    const hasOptionsUserOverride = Object.hasOwn(optionsOverrides, 'user')
+    const hasReqUserOverride = Object.hasOwn(reqOverrides ?? {}, 'user')
+    const hasUserOverride = hasOptionsUserOverride || hasReqUserOverride
+    const userOverride = hasOptionsUserOverride ? optionsOverrides.user : reqOverrides?.user
 
-      const locale = await getRequestLocale({
-        req,
-      })
-
-      req.locale = locale?.code
-
-      const permissions = await getAccessResults({
-        req,
-      })
-
-      return {
-        cookies,
-        headers,
-        languageCode,
-        locale,
-        permissions,
-        req,
-      }
-    }, key)
-    .then((result) => {
-      // Shallow-copy req before returning to prevent
-      // mutations from propagating to the cached req object.
-      // This ensures parallel operations using the same cache key don't affect each other.
-      return {
-        ...result,
+    const req = await createLocalReq(
+      {
         req: {
-          ...result.req,
-          ...(result.req?.context
-            ? {
-                context: { ...result.req.context },
-              }
-            : {}),
+          headers,
+          host: headers.get('host'),
+          i18n: i18n as I18n,
+          responseHeaders,
+          server: serverAdapter,
+          user,
+          ...(reqOverrides || {}),
         },
+        ...(optionsOverrides || {}),
+      },
+      payload,
+    )
+
+    if (hasUserOverride && userOverride == null) {
+      req.user = null
+    }
+
+    let userWithReadAccess = req.user
+
+    const locale = await getRequestLocale({ req })
+    req.locale = locale?.code
+
+    if (!hasUserOverride && req.user) {
+      try {
+        const collectionSlug = req.user.collection ?? payload.config.admin.user
+        const collection = payload.collections[collectionSlug]?.config
+
+        if (!collection?.auth) {
+          throw new Error('Authenticated user collection not found')
+        }
+
+        userWithReadAccess = await applyUserReadAccess({
+          collection,
+          depth: collection.auth.depth,
+          overrideAccess: false,
+          req,
+          showHiddenFields: false,
+          user: req.user,
+        })
+      } catch (error) {
+        payload.logger.error({ err: error })
+        req.user = null
+        userWithReadAccess = null
       }
-    })
+    }
+
+    const permissions = await getAccessResults({ req })
+
+    return {
+      cookies,
+      headers,
+      languageCode,
+      locale,
+      permissions,
+      req,
+      user: userWithReadAccess,
+    }
+  }
+
+  return reqCache.get(getResult, key, overrides).then((result) => {
+    // Shallow-copy req before returning to prevent
+    // mutations from propagating to the cached req object.
+    // This ensures parallel operations using the same cache key don't affect each other.
+    return {
+      ...result,
+      req: {
+        ...result.req,
+        ...(result.req?.context
+          ? {
+              context: { ...result.req.context },
+            }
+          : {}),
+      },
+    }
+  })
 }

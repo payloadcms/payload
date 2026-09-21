@@ -1,14 +1,15 @@
 import * as z from 'zod/mini'
 
 import { defineCLICommand } from '../../defineCLICommand.js'
-import { strictObject } from '../../zod.js'
+import { strictObject } from '../../../utilities/zod.js'
 import { build } from './build.js'
 
 export const createBuildCommand = defineCLICommand({
-  handler: async ({ args, getConfig }) => {
+  handler: async ({ args, getConfig, isJSON }) => {
     return build({
       config: await getConfig(),
       forwardedArgs: args.frameworkArgs,
+      isJSON,
       skipTypes: !args.types,
     })
   },

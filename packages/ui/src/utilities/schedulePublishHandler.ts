@@ -109,7 +109,13 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
         global,
         locale: localeToPublish,
         timezone,
-        user: user.id,
+        user:
+          user && user.collection
+            ? {
+                relationTo: user.collection,
+                value: user.id,
+              }
+            : undefined,
       },
       task: 'schedulePublish',
       waitUntil: date,

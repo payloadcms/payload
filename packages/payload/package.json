@@ -120,7 +120,6 @@
     "@payloadcms/translations": "workspace:*",
     "@standard-schema/spec": "1.1.0",
     "@types/busboy": "1.5.4",
-    "ajv": "8.20.0",
     "bson-objectid": "2.0.4",
     "busboy": "^1.6.0",
     "ci-info": "4.4.0",
@@ -145,12 +144,13 @@
     "qs-esm": "8.0.1",
     "range-parser": "1.2.1",
     "sanitize-filename": "1.6.4",
+    "sax": "1.6.1",
     "ts-essentials": "10.0.3",
     "tsx": "4.22.4",
-    "undici": "7.28.0",
+    "undici": "7.29.1",
     "uuid": "14.0.0",
     "ws": "^8.16.0",
-    "zod": "^4.2.0"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
@@ -160,6 +160,7 @@
     "@types/nodemailer": "^8.0.0",
     "@types/pluralize": "0.0.33",
     "@types/range-parser": "1.2.7",
+    "@types/sax": "1.2.7",
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "10.1.0",

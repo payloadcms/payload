@@ -6,6 +6,7 @@ import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
 import { getBeforeChangeHook } from '../hooks/beforeChange.js'
+import { getNormalizeUploadPrefixFieldHook } from '../hooks/normalizeUploadPrefix.js'
 
 interface Args {
   adapter?: GeneratedAdapter
@@ -45,6 +46,13 @@ export const getFields = ({
       hidden: true,
       readOnly: true,
     },
+  }
+
+  // Server-owned key segment; hidden from the API and admin, read internally via showHiddenFields.
+  const baseObjectKeyField: TextField = {
+    name: '_objectKey',
+    type: 'text',
+    hidden: true,
   }
 
   const fields = [...collection.fields, ...(adapter?.fields || [])]
@@ -198,7 +206,23 @@ export const getFields = ({
     defaultValue:
       existingPrefixField?.defaultValue ??
       (useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : ''),
+    hooks: {
+      ...existingPrefixField?.hooks,
+      beforeChange: [
+        ...(existingPrefixField?.hooks?.beforeChange || []),
+        getNormalizeUploadPrefixFieldHook({ collectionPrefix: prefix, useCompositePrefixes }),
+      ],
+    },
   } as TextField)
+
+  const existingObjectKeyFieldIndex = fields.findIndex(
+    (existingField) => 'name' in existingField && existingField.name === '_objectKey',
+  )
+  if (existingObjectKeyFieldIndex > -1) {
+    fields.splice(existingObjectKeyFieldIndex, 1)
+  }
+
+  fields.push({ ...baseObjectKeyField } as TextField)
 
   return fields
 }

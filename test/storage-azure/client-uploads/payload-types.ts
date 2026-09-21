@@ -227,6 +227,7 @@ export interface MediaHeaderOnly {
  */
 export interface MediaHeaderOnlyWithSize {
   id: string;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -465,6 +466,7 @@ export interface MediaHeaderOnlySelect<T extends boolean = true> {
  * via the `definition` "media-header-only-with-sizes_select".
  */
 export interface MediaHeaderOnlyWithSizesSelect<T extends boolean = true> {
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

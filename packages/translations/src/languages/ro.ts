@@ -62,6 +62,7 @@ export const roTranslations: DefaultTranslationsObject = {
     notRedirected: 'Nu ați fost redirecționat? <0>Autentificați-vă aici</0>',
     passed: 'Autentificare reușită',
     passwordResetSuccessfully: 'Resetarea parolei a fost realizată cu succes.',
+    resend: 'Retrimite',
     resetPassword: 'Resetează parola',
     resetPasswordExpiration: 'Resetați expirarea parolei',
     resetPasswordToken: 'Resetați token-ul parolei',

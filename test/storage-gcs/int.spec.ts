@@ -4,11 +4,9 @@ import type { Payload } from 'payload'
 import { Storage } from '@google-cloud/storage'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -19,10 +17,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let restClient: NextRESTClient
-let payload: Payload
-
-describe('@payloadcms/storage-gcs', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/storage-gcs', () => {
   let bucket: Bucket
 
   const clearBucket = async () => {
@@ -30,9 +25,7 @@ describe('@payloadcms/storage-gcs', () => {
     await Promise.all(files.map((file) => file.delete()))
   }
 
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+  test.beforeAll(async () => {
     const client = new Storage({
       apiEndpoint: process.env.GCS_ENDPOINT,
       projectId: process.env.GCS_PROJECT_ID,
@@ -47,21 +40,19 @@ describe('@payloadcms/storage-gcs', () => {
     await clearBucket()
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+  test.afterEach(async () => {
     await clearBucket()
   })
 
   async function verifyUploads({
     collectionSlug,
     filePrefix = '',
+    payload,
     uploadId,
   }: {
     collectionSlug: string
     filePrefix?: string
+    payload: Payload
     uploadId: number | string
   }) {
     const uploadData = (await payload.findByID({
@@ -81,7 +72,7 @@ describe('@payloadcms/storage-gcs', () => {
     }
   }
 
-  it('can upload', async () => {
+  test('can upload', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
@@ -89,11 +80,11 @@ describe('@payloadcms/storage-gcs', () => {
     })
 
     expect(upload.id).toBeTruthy()
-    await verifyUploads({ collectionSlug: mediaSlug, uploadId: upload.id })
+    await verifyUploads({ collectionSlug: mediaSlug, payload, uploadId: upload.id })
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
   })
 
-  it('can upload with prefix', async () => {
+  test('can upload with prefix', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithPrefixSlug,
       data: {},
@@ -104,6 +95,7 @@ describe('@payloadcms/storage-gcs', () => {
     await verifyUploads({
       collectionSlug: mediaWithPrefixSlug,
       filePrefix: prefix,
+      payload,
       uploadId: upload.id,
     })
     expect(upload.url).toEqual(
@@ -111,14 +103,14 @@ describe('@payloadcms/storage-gcs', () => {
     )
   })
 
-  it('returns 404 for non-existing file', async () => {
+  test('returns 404 for non-existing file', async ({ restClient }) => {
     const response = await restClient.GET(`/${mediaSlug}/file/nonexistent.png`)
     expect(response.status).toBe(404)
   })
 
-  it('has prefix field by default even when plugin is disabled', async () => {
+  test('has prefix field by default even when plugin is disabled', async ({ payload }) => {
     // This collection uses a gcsStorage plugin with enabled: false.
-    // The upload will use local storage, but the prefix field should still exist.
+    // The upload uses local storage, but the prefix field still exists.
     const upload = await payload.create({
       collection: mediaWithAlwaysInsertFieldsSlug,
       data: {
