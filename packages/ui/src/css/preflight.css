@@ -399,6 +399,7 @@ SOFTWARE.
 */
 
   [hidden]:where(:not([hidden='until-found'])) {
+    /* stylelint-disable-next-line plugin/no-important -- TODO: pre-existing; revisit whether specificity can win instead */
     display: none !important;
   }
 }
