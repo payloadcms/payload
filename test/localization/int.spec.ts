@@ -37,6 +37,16 @@ import {
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  publicationAccessGlobalSlug,
+  publicationAccessSlug,
+  publicationAsyncFieldHookSlug,
+  publicationBeforeOperationGlobalSlug,
+  publicationBeforeOperationSanitizeGlobalSlug,
+  publicationBeforeOperationSlug,
+  publicationFieldAccessGlobalSlug,
+  publicationFieldAccessSlug,
+  publicationHookGlobalSlug,
+  publicationHookSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -51,12 +61,12 @@ import {
 const collection = localizedPostsSlug
 const global = 'global-text'
 
-test.suite({ config: './config.ts' })('Localization', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', () => {
   test.describe('Localization with fallback true', () => {
     let post1: LocalizedPost
     let postWithLocalizedData: LocalizedPost
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       post1 = await payload.create({
         collection,
         data: {
@@ -106,10 +116,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('create english', async ({ payload }) => {
         const allDocs = await payload.find({
           collection,
+          overrideAccess: true,
           where: {
             title: { equals: post1.title },
           },
-          overrideAccess: true,
         })
         expect(allDocs.docs).toContainEqual(expect.objectContaining(post1))
       })
@@ -219,8 +229,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
           collection,
-          locale: portugueseLocale,
           fallbackLocale: 'none',
+          locale: portugueseLocale,
           overrideAccess: true,
         })
 
@@ -232,7 +242,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         let spanishData
         let localizedDoc
 
-        test.beforeEach(async ({ payload }) => {
+        test.beforeAll(async ({ payloadInstance: payload }) => {
           englishData = {
             localizedCheckbox: false,
           }
@@ -376,12 +386,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         test('by localized field value - default locale', async ({ payload }) => {
           const result = await payload.find({
             collection,
+            overrideAccess: true,
             where: {
               title: {
                 equals: englishTitle,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
@@ -391,12 +401,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const result = await payload.find({
             collection,
             locale: spanishLocale,
+            overrideAccess: true,
             where: {
               title: {
                 equals: spanishTitle,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
@@ -406,33 +416,45 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const result = await payload.find({
             collection,
             locale: 'all',
+            overrideAccess: true,
             where: {
               'title.es': {
                 equals: spanishTitle,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
         })
 
         test('by localized field value with sorting', async ({ payload }) => {
-          const doc_1 = await payload.create({ collection, data: { title: 'word_b' }, overrideAccess: true })
-          const doc_2 = await payload.create({ collection, data: { title: 'word_a' }, overrideAccess: true })
-          const doc_3 = await payload.create({ collection, data: { title: 'word_c' }, overrideAccess: true })
+          const doc_1 = await payload.create({
+            collection,
+            data: { title: 'word_b' },
+            overrideAccess: true,
+          })
+          const doc_2 = await payload.create({
+            collection,
+            data: { title: 'word_a' },
+            overrideAccess: true,
+          })
+          const doc_3 = await payload.create({
+            collection,
+            data: { title: 'word_c' },
+            overrideAccess: true,
+          })
 
           await payload.create({ collection, data: { title: 'others_c' }, overrideAccess: true })
 
           const { docs } = await payload.find({
             collection,
+            overrideAccess: true,
             sort: 'title',
             where: {
               title: {
                 like: 'word',
               },
             },
-            overrideAccess: true,
           })
 
           expect(docs).toHaveLength(3)
@@ -449,8 +471,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
               localizedAccentPostOne = await payload.create({
                 collection,
                 data: {
-                  title: 'non accent post',
                   localizedDescription: 'something',
+                  title: 'non accent post',
                 },
                 locale: englishLocale,
                 overrideAccess: true,
@@ -459,8 +481,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
               localizedAccentPostTwo = await payload.create({
                 collection,
                 data: {
-                  title: 'accent post',
                   localizedDescription: 'veterinarian',
+                  title: 'accent post',
                 },
                 locale: englishLocale,
                 overrideAccess: true,
@@ -470,8 +492,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 id: localizedAccentPostOne.id,
                 collection,
                 data: {
-                  title: 'non accent post',
                   localizedDescription: 'valami',
+                  title: 'non accent post',
                 },
                 locale: hungarianLocale,
                 overrideAccess: true,
@@ -481,8 +503,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 id: localizedAccentPostTwo.id,
                 collection,
                 data: {
-                  title: 'accent post',
                   localizedDescription: 'állatorvos',
+                  title: 'accent post',
                 },
                 locale: hungarianLocale,
                 overrideAccess: true,
@@ -492,14 +514,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
             test('should sort alphabetically even with accented letters', async ({ payload }) => {
               const sortByDescriptionQuery = await payload.find({
                 collection,
+                locale: hungarianLocale,
+                overrideAccess: true,
                 sort: 'description',
                 where: {
                   title: {
                     like: 'accent',
                   },
                 },
-                locale: hungarianLocale,
-                overrideAccess: true,
               })
 
               expect(sortByDescriptionQuery.docs[0].id).toEqual(localizedAccentPostTwo.id)
@@ -514,8 +536,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const document = await payload.create({
           collection: localizedDateFieldsSlug,
           data: {
-            localizedDate: new Date().toISOString(),
             date: new Date().toISOString(),
+            localizedDate: new Date().toISOString(),
           },
           overrideAccess: true,
         })
@@ -526,8 +548,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const document = await payload.create({
           collection: localizedDateFieldsSlug,
           data: {
-            localizedDate: new Date().toISOString(),
             date: new Date().toISOString(),
+            localizedDate: new Date().toISOString(),
           },
           overrideAccess: true,
         })
@@ -540,9 +562,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('Localized Sort Count', () => {
       const expectedTotalDocs = 5
       const posts: LocalizedSort[] = []
-      test.beforeEach(async ({ payload }) => {
-        posts.length = 0
-
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         for (let i = 1; i <= expectedTotalDocs; i++) {
           const post = await payload.create({
             collection: localizedSortSlug,
@@ -576,8 +596,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
         const sortByIdQuery = await payload.find({
           collection: localizedSortSlug,
-          sort: 'id',
           overrideAccess: true,
+          sort: 'id',
         })
 
         expect(simpleQuery.totalDocs).toEqual(expectedTotalDocs)
@@ -588,13 +608,13 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should have correct totalDocs when sorted by localized fields', async ({ payload }) => {
         const sortByTitleQuery = await payload.find({
           collection: localizedSortSlug,
-          sort: 'title',
           overrideAccess: true,
+          sort: 'title',
         })
         const sortByDateQuery = await payload.find({
           collection: localizedSortSlug,
-          sort: 'date',
           overrideAccess: true,
+          sort: 'date',
         })
 
         expect(sortByTitleQuery.totalDocs).toEqual(expectedTotalDocs)
@@ -604,8 +624,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should return correct order when sorted by localized fields', async ({ payload }) => {
         const { docs: docsAsc } = await payload.find({
           collection: localizedSortSlug,
-          sort: 'title',
           overrideAccess: true,
+          sort: 'title',
         })
         docsAsc.forEach((doc, i) => {
           expect(posts[i].id).toBe(doc.id)
@@ -613,8 +633,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         const { docs: docsDesc } = await payload.find({
           collection: localizedSortSlug,
-          sort: '-title',
           overrideAccess: true,
+          sort: '-title',
         })
         docsDesc.forEach((doc, i) => {
           expect(posts.at(posts.length - i - 1).id).toBe(doc.id)
@@ -653,12 +673,16 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         for (let i = 0; i < randomWords.length; i++) {
           const en = randomWords[i]
-          const post = await payload.create({ collection: 'localized-sort', data: { title: en }, overrideAccess: true })
+          const post = await payload.create({
+            collection: 'localized-sort',
+            data: { title: en },
+            overrideAccess: true,
+          })
           const es = randomWordsSpanish[i]
           await payload.update({
+            id: post.id,
             collection: 'localized-sort',
             data: { title: es },
-            id: post.id,
             locale: 'es',
             overrideAccess: true,
           })
@@ -673,9 +697,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         const { docs: randomWordsEnAsc } = await payload.find({
           collection: localizedSortSlug,
+          overrideAccess: true,
           sort: 'title',
           where: q,
-          overrideAccess: true,
         })
         randomWordsEnAsc.forEach((doc, i) => {
           expect(ascSortedWordsEn[i]).toBe(doc.title)
@@ -683,9 +707,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         const { docs: randomWordsEnDesc } = await payload.find({
           collection: localizedSortSlug,
+          overrideAccess: true,
           sort: '-title',
           where: q,
-          overrideAccess: true,
         })
 
         randomWordsEnDesc.forEach((doc, i) => {
@@ -699,10 +723,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
         // Fetch sorted words in Spanish (ascending)
         const { docs: randomWordsEsAsc } = await payload.find({
           collection: localizedSortSlug,
-          sort: 'title',
-          where: q,
           locale: 'es',
           overrideAccess: true,
+          sort: 'title',
+          where: q,
         })
 
         randomWordsEsAsc.forEach((doc, i) => {
@@ -712,10 +736,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
         // Fetch sorted words in Spanish (descending)
         const { docs: randomWordsEsDesc } = await payload.find({
           collection: localizedSortSlug,
-          sort: '-title',
-          where: q,
           locale: 'es',
           overrideAccess: true,
+          sort: '-title',
+          where: q,
         })
 
         randomWordsEsDesc.forEach((doc, i) => {
@@ -729,7 +753,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       let localizedRelation2: LocalizedPost
       let withRelationship: WithLocalizedRelationship
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         localizedRelation = await createLocalizedPost(
           { payload },
           {
@@ -771,12 +795,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         test('can query localized relationship', async ({ payload }) => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
+            overrideAccess: true,
             where: {
               'localizedRelationship.title': {
                 equals: localizedRelation.title,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -786,12 +810,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
+            overrideAccess: true,
             where: {
               'localizedRelationship.title': {
                 equals: relationSpanishTitle,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -801,12 +825,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
             locale: 'all',
+            overrideAccess: true,
             where: {
               'localizedRelationship.title.es': {
                 equals: relationSpanishTitle,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -833,12 +857,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         test('default locale', async ({ payload }) => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
+            overrideAccess: true,
             where: {
               'localizedRelationHasManyField.title': {
                 equals: localizedRelation.title,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs.map(({ id }) => id)).toContain(withRelationship.id)
@@ -846,12 +870,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           // Second relationship
           const result2 = await payload.find({
             collection: withLocalizedRelSlug,
+            overrideAccess: true,
             where: {
               'localizedRelationHasManyField.title': {
                 equals: localizedRelation2.title,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result2.docs.map(({ id }) => id)).toContain(withRelationship.id)
@@ -861,12 +885,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
+            overrideAccess: true,
             where: {
               'localizedRelationHasManyField.title': {
                 equals: relationSpanishTitle,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -875,12 +899,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const result2 = await payload.find({
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
+            overrideAccess: true,
             where: {
               'localizedRelationHasManyField.title': {
                 equals: relationSpanishTitle2,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result2.docs[0].id).toEqual(withRelationship.id)
@@ -904,8 +928,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
             return payload.find({
               collection: withLocalizedRelSlug,
               locale: 'all',
-              where,
               overrideAccess: true,
+              where,
             })
           }
 
@@ -950,12 +974,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         test('by id', async ({ payload }) => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
+            overrideAccess: true,
             where: {
               'localizedRelationMultiRelationTo.value': {
                 equals: localizedRelation.id,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -964,12 +988,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const result2 = await payload.find({
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
+            overrideAccess: true,
             where: {
               'localizedRelationMultiRelationTo.value': {
                 equals: localizedRelation.id,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result2.docs[0].id).toEqual(withRelationship.id)
@@ -980,12 +1004,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         test('by id', async ({ payload }) => {
           const result = await payload.find({
             collection: withLocalizedRelSlug,
+            overrideAccess: true,
             where: {
               'localizedRelationMultiRelationToHasMany.value': {
                 equals: localizedRelation.id,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result.docs[0].id).toEqual(withRelationship.id)
@@ -994,12 +1018,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const result2 = await payload.find({
             collection: withLocalizedRelSlug,
             locale: spanishLocale,
+            overrideAccess: true,
             where: {
               'localizedRelationMultiRelationToHasMany.value': {
                 equals: localizedRelation.id,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result2.docs[0].id).toEqual(withRelationship.id)
@@ -1007,12 +1031,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           // Second relationship
           const result3 = await payload.find({
             collection: withLocalizedRelSlug,
+            overrideAccess: true,
             where: {
               'localizedRelationMultiRelationToHasMany.value': {
                 equals: localizedRelation2.id,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result3.docs[0].id).toEqual(withRelationship.id)
@@ -1020,12 +1044,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
           // Second relationship - spanish locale
           const result4 = await payload.find({
             collection: withLocalizedRelSlug,
+            overrideAccess: true,
             where: {
               'localizedRelationMultiRelationToHasMany.value': {
                 equals: localizedRelation2.id,
               },
             },
-            overrideAccess: true,
           })
 
           expect(result4.docs[0].id).toEqual(withRelationship.id)
@@ -1117,15 +1141,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('Localized - GraphQL', () => {
       let token
 
-      test.beforeEach(async ({ restClient }) => {
+      test.beforeAll(async ({ restClientInstance: restClient }) => {
         const query = `mutation {
           loginUser(email: "dev@payloadcms.com", password: "test") {
             token
-            user {
-              relation {
-                title
-              }
-            }
           }
         }`
 
@@ -1301,7 +1320,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('Localized - Arrays', () => {
       let docID
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         const englishDoc = await payload.create({
           collection: arrayCollectionSlug,
           data: {
@@ -1581,14 +1600,26 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const doc = await payload.create({
           collection: withRequiredLocalizedFields,
           data: {
+            myTab: {
+              group: {
+                nestedArray2: [
+                  {
+                    nestedText: 'hello',
+                  },
+                  {
+                    nestedText: 'goodbye',
+                  },
+                ],
+                nestedText: 'hello',
+              },
+              text: 'hello',
+            },
             nav: {
               layout: [
                 {
                   blockType: 'text',
-                  text: englishText,
                   nestedArray: [
                     {
-                      text: 'hello',
                       l2: [
                         {
                           l3: [
@@ -1602,9 +1633,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
                           ],
                         },
                       ],
+                      text: 'hello',
                     },
                     {
-                      text: 'goodbye',
                       l2: [
                         {
                           l3: [
@@ -1618,24 +1649,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
                           ],
                         },
                       ],
+                      text: 'goodbye',
                     },
                   ],
+                  text: englishText,
                 },
               ],
-            },
-            myTab: {
-              text: 'hello',
-              group: {
-                nestedText: 'hello',
-                nestedArray2: [
-                  {
-                    nestedText: 'hello',
-                  },
-                  {
-                    nestedText: 'goodbye',
-                  },
-                ],
-              },
             },
             title: 'hello',
           },
@@ -1647,14 +1666,26 @@ test.suite({ config: './config.ts' })('Localization', () => {
           id: doc.id,
           collection: withRequiredLocalizedFields,
           data: {
+            myTab: {
+              group: {
+                nestedArray2: [
+                  {
+                    nestedText: 'hola',
+                  },
+                  {
+                    nestedText: 'adios',
+                  },
+                ],
+                nestedText: 'hola',
+              },
+              text: 'hola',
+            },
             nav: {
               layout: [
                 {
                   blockType: 'text',
-                  text: spanishText,
                   nestedArray: [
                     {
-                      text: 'hola',
                       l2: [
                         {
                           l3: [
@@ -1668,9 +1699,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
                           ],
                         },
                       ],
+                      text: 'hola',
                     },
                     {
-                      text: 'adios',
                       l2: [
                         {
                           l3: [
@@ -1684,26 +1715,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
                           ],
                         },
                       ],
+                      text: 'adios',
                     },
                   ],
+                  text: spanishText,
                 },
               ],
             },
             title: 'hello',
-            myTab: {
-              text: 'hola',
-              group: {
-                nestedText: 'hola',
-                nestedArray2: [
-                  {
-                    nestedText: 'hola',
-                  },
-                  {
-                    nestedText: 'adios',
-                  },
-                ],
-              },
-            },
           },
           locale: spanishLocale,
           overrideAccess: true,
@@ -1744,8 +1763,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const post = await payload.create({
           collection,
           data: {
-            title: englishTitle,
             description: 'keep me',
+            title: englishTitle,
           },
           overrideAccess: true,
         })
@@ -1763,8 +1782,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const duplicated = await payload.duplicate({
           id: post.id,
           collection,
-          selectedLocales: [spanishLocale],
           overrideAccess: true,
+          selectedLocales: [spanishLocale],
         })
 
         const allLocales = await payload.findByID({
@@ -1796,27 +1815,27 @@ test.suite({ config: './config.ts' })('Localization', () => {
         expect(result.groupLocalized?.title).toBe('hello en')
 
         await payload.update({
-          collection: groupSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: groupSlug,
           data: {
             groupLocalized: {
               title: 'hello es',
             },
           },
+          locale: spanishLocale,
           overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: englishLocale,
-          id: result.id,
           overrideAccess: true,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: spanishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
@@ -1829,39 +1848,39 @@ test.suite({ config: './config.ts' })('Localization', () => {
       }) => {
         const result = await payload.create({
           collection: groupSlug,
-          locale: englishLocale,
           data: {
             group: {
               title: 'hello en',
             },
           },
+          locale: englishLocale,
           overrideAccess: true,
         })
 
         expect(result.group.title).toBe('hello en')
 
         await payload.update({
-          collection: groupSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: groupSlug,
           data: {
             group: {
               title: 'hello es',
             },
           },
+          locale: spanishLocale,
           overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: englishLocale,
-          id: result.id,
           overrideAccess: true,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: spanishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
@@ -1874,57 +1893,57 @@ test.suite({ config: './config.ts' })('Localization', () => {
       }) => {
         const result = await payload.create({
           collection: groupSlug,
-          locale: englishLocale,
           data: {
             deep: {
+              array: [{ title: 'hello en' }],
               blocks: [
                 {
                   blockType: 'first',
                   title: 'hello en',
                 },
               ],
-              array: [{ title: 'hello en' }],
             },
           },
+          locale: englishLocale,
           overrideAccess: true,
         })
 
         expect(result.deep.array[0].title).toBe('hello en')
 
         await payload.update({
-          collection: groupSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: groupSlug,
           data: {
             deep: {
-              blocks: [
-                {
-                  blockType: 'first',
-                  title: 'hello es',
-                  id: result.deep.blocks[0].id,
-                },
-              ],
               array: [
                 {
                   id: result.deep.array[0].id,
                   title: 'hello es',
                 },
               ],
+              blocks: [
+                {
+                  id: result.deep.blocks[0].id,
+                  blockType: 'first',
+                  title: 'hello es',
+                },
+              ],
             },
           },
+          locale: spanishLocale,
           overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: englishLocale,
-          id: result.id,
           overrideAccess: true,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: groupSlug,
           locale: spanishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
@@ -1949,6 +1968,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
         expect(doc.groupLocalizedRow.text).toBe('hello world')
 
         const docES = await payload.update({
+          id: doc.id,
           collection: 'groups',
           data: {
             groupLocalizedRow: {
@@ -1956,17 +1976,26 @@ test.suite({ config: './config.ts' })('Localization', () => {
             },
           },
           locale: 'es',
-          id: doc.id,
           overrideAccess: true,
         })
 
         expect(docES.groupLocalizedRow.text).toBe('hola world or something')
 
         // check if docES didnt break EN
-        const docEN = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'en', overrideAccess: true })
+        const docEN = await payload.findByID({
+          id: doc.id,
+          collection: 'groups',
+          locale: 'en',
+          overrideAccess: true,
+        })
         expect(docEN.groupLocalizedRow.text).toBe('hello world')
 
-        const all = await payload.findByID({ collection: 'groups', id: doc.id, locale: 'all', overrideAccess: true })
+        const all = await payload.findByID({
+          id: doc.id,
+          collection: 'groups',
+          locale: 'all',
+          overrideAccess: true,
+        })
 
         expect(all.groupLocalizedRow.en.text).toBe('hello world')
         expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
@@ -1975,10 +2004,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should not crash on empty localized tab', async ({ payload }) => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             tabLocalized: {},
           },
+          locale: englishLocale,
           overrideAccess: true,
         })
 
@@ -1990,40 +2019,40 @@ test.suite({ config: './config.ts' })('Localization', () => {
       }) => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             tabLocalized: {
               title: 'hello en',
             },
           },
+          locale: englishLocale,
           overrideAccess: true,
         })
 
         expect(result.tabLocalized?.title).toBe('hello en')
 
         await payload.update({
-          collection: tabSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: tabSlug,
           data: {
             tabLocalized: {
               title: 'hello es',
             },
           },
+          locale: spanishLocale,
           overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
         const docEs = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
@@ -2034,7 +2063,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should properly create/update/read localized tab field', async ({ payload }) => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             tabLocalized: {
               array: [
@@ -2044,34 +2072,35 @@ test.suite({ config: './config.ts' })('Localization', () => {
               ],
             },
           },
+          locale: englishLocale,
           overrideAccess: true,
         })
 
         expect(result.tabLocalized.array[0].title).toBe('hello en')
 
         await payload.update({
-          collection: tabSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: tabSlug,
           data: {
             tabLocalized: {
               array: [{ title: 'hello es' }],
             },
           },
+          locale: spanishLocale,
           overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
         const docEs = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
@@ -2084,39 +2113,39 @@ test.suite({ config: './config.ts' })('Localization', () => {
       }) => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             tab: {
               title: 'hello en',
             },
           },
+          locale: englishLocale,
           overrideAccess: true,
         })
 
         expect(result.tab.title).toBe('hello en')
 
         await payload.update({
-          collection: tabSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: tabSlug,
           data: {
             tab: {
               title: 'hello es',
             },
           },
+          locale: spanishLocale,
           overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: result.id,
           overrideAccess: true,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
@@ -2129,57 +2158,57 @@ test.suite({ config: './config.ts' })('Localization', () => {
       }) => {
         const result = await payload.create({
           collection: tabSlug,
-          locale: englishLocale,
           data: {
             deep: {
+              array: [{ title: 'hello en' }],
               blocks: [
                 {
                   blockType: 'first',
                   title: 'hello en',
                 },
               ],
-              array: [{ title: 'hello en' }],
             },
           },
+          locale: englishLocale,
           overrideAccess: true,
         })
 
         expect(result.deep.array[0].title).toBe('hello en')
 
         await payload.update({
-          collection: tabSlug,
-          locale: spanishLocale,
           id: result.id,
+          collection: tabSlug,
           data: {
             deep: {
-              blocks: [
-                {
-                  blockType: 'first',
-                  title: 'hello es',
-                  id: result.deep.blocks[0].id,
-                },
-              ],
               array: [
                 {
                   id: result.deep.array[0].id,
                   title: 'hello es',
                 },
               ],
+              blocks: [
+                {
+                  id: result.deep.blocks[0].id,
+                  blockType: 'first',
+                  title: 'hello es',
+                },
+              ],
             },
           },
+          locale: spanishLocale,
           overrideAccess: true,
         })
 
         const docEn = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: result.id,
           overrideAccess: true,
         })
         const docEs = await payload.findByID({
+          id: result.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: result.id,
           overrideAccess: true,
         })
 
@@ -2194,7 +2223,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
       }) => {
         const docEs = await payload.create({
           collection: tabSlug,
-          locale: spanishLocale,
           data: {
             tabLocalized: {
               group: {
@@ -2202,13 +2230,13 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             },
           },
+          locale: spanishLocale,
           overrideAccess: true,
         })
 
         await payload.update({
-          collection: tabSlug,
-          locale: englishLocale,
           id: docEs.id,
+          collection: tabSlug,
           data: {
             tabLocalized: {
               group: {
@@ -2216,20 +2244,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             },
           },
+          locale: englishLocale,
           overrideAccess: true,
         })
 
         const readEn = await payload.findByID({
+          id: docEs.id,
           collection: tabSlug,
           locale: englishLocale,
-          id: docEs.id,
           overrideAccess: true,
         })
 
         const readEs = await payload.findByID({
+          id: docEs.id,
           collection: tabSlug,
           locale: spanishLocale,
-          id: docEs.id,
           overrideAccess: true,
         })
 
@@ -2259,7 +2288,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             content: [
               {
-                blockType: 'blockInsideBlock',
                 array: [
                   {
                     link: {
@@ -2272,6 +2300,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'blockInsideBlock',
                 content: [
                   {
                     blockType: 'textBlock',
@@ -2287,19 +2316,17 @@ test.suite({ config: './config.ts' })('Localization', () => {
         id = doc.id
 
         const retrievedInEN = await payload.findByID({
-          collection: 'blocks-fields',
           id,
+          collection: 'blocks-fields',
           overrideAccess: true,
         })
 
         await payload.update({
-          collection: 'blocks-fields',
           id,
-          locale: 'es',
+          collection: 'blocks-fields',
           data: {
             content: [
               {
-                blockType: 'blockInsideBlock',
                 array: [
                   {
                     link: {
@@ -2312,6 +2339,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'blockInsideBlock',
                 content: [
                   {
                     blockType: 'textBlock',
@@ -2321,12 +2349,13 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          locale: 'es',
           overrideAccess: true,
         })
 
         const retrieved = await payload.findByID({
-          collection: 'blocks-fields',
           id,
+          collection: 'blocks-fields',
           locale: 'all',
           overrideAccess: true,
         })
@@ -2366,26 +2395,26 @@ test.suite({ config: './config.ts' })('Localization', () => {
           {
             blockName: '1',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc.id,
             myGroup: {
               text: 'hello in english 1',
             },
+            relationWithinBlock: randomDoc.id,
           },
           {
             blockName: '2',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc.id,
             myGroup: {
               text: 'hello in english 2',
             },
+            relationWithinBlock: randomDoc.id,
           },
           {
             blockName: '3',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc.id,
             myGroup: {
               text: 'hello in english 3',
             },
+            relationWithinBlock: randomDoc.id,
           },
         ]
 
@@ -2393,33 +2422,31 @@ test.suite({ config: './config.ts' })('Localization', () => {
           {
             blockName: '1',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc2.id,
             myGroup: {
               text: 'hello in spanish 1',
             },
+            relationWithinBlock: randomDoc2.id,
           },
           {
             blockName: '2',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc2.id,
             myGroup: {
               text: 'hello in spanish 2',
             },
+            relationWithinBlock: randomDoc2.id,
           },
           {
             blockName: '3',
             blockType: 'someBlock',
-            relationWithinBlock: randomDoc2.id,
             myGroup: {
               text: 'hello in spanish 3',
             },
+            relationWithinBlock: randomDoc2.id,
           },
         ]
 
         const createdEnDoc = await payload.create({
           collection: 'nested-arrays',
-          locale: 'en',
-          depth: 0,
           data: {
             arrayWithBlocks: [
               {
@@ -2427,14 +2454,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'en',
           overrideAccess: true,
         })
 
         const updatedEsDoc = await payload.update({
-          collection: 'nested-arrays',
           id: createdEnDoc.id,
-          depth: 0,
-          locale: 'es',
+          collection: 'nested-arrays',
           data: {
             arrayWithBlocks: [
               {
@@ -2442,6 +2469,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -2463,8 +2492,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const enDoc2 = await payload.findByID({
           id: createdEnDoc.id,
           collection: 'nested-arrays',
-          locale: 'en',
           depth: 0,
+          locale: 'en',
           overrideAccess: true,
         })
         removeId(enDoc2.arrayWithBlocks[0].blocksWithinArray)
@@ -2489,8 +2518,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         const createdEnDoc = await payload.create({
           collection: 'nested-arrays',
-          locale: 'en',
-          depth: 0,
           data: {
             arrayWithLocalizedRelation: [
               {
@@ -2498,14 +2525,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'en',
           overrideAccess: true,
         })
 
         const updatedEsDoc = await payload.update({
-          collection: 'nested-arrays',
           id: createdEnDoc.id,
-          depth: 0,
-          locale: 'es',
+          collection: 'nested-arrays',
           data: {
             arrayWithLocalizedRelation: [
               {
@@ -2514,6 +2541,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -2527,8 +2556,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const enDoc2 = await payload.findByID({
           id: createdEnDoc.id,
           collection: 'nested-arrays',
-          locale: 'en',
           depth: 0,
+          locale: 'en',
           overrideAccess: true,
         })
         expect(enDoc2.arrayWithLocalizedRelation).toHaveLength(1)
@@ -2540,7 +2569,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should update localized block', async ({ payload }) => {
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
             content: [
               {
@@ -2554,6 +2582,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -2568,16 +2597,16 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 // since the parent is localized, and the primary key in the block table
                 // consists only of the ID. That's why it's removed in `copyToLocale`.
                 // id: doc.content?.[0]?.id,
-                blockName: null,
                 array: [],
+                blockName: null,
                 blockType: 'blockInsideBlock',
                 content: [
                   {
                     // Same as above.
                     // id: doc.content?.[0]?.content?.[0]?.id,
-                    text: 'some-text',
                     blockName: null,
                     blockType: 'textBlock',
+                    text: 'some-text',
                   },
                 ],
               },
@@ -2597,7 +2626,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
       }) => {
         const doc = await payload.create({
           collection: 'nested',
-          locale: 'en',
           data: {
             blocks: [
               {
@@ -2612,6 +2640,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -2637,7 +2666,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const updatedDoc = await payload.update({
           id: doc.id,
           collection: 'nested',
-          locale: 'es',
           data: {
             blocks: [
               {
@@ -2654,6 +2682,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -2683,12 +2712,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
       }) => {
         const doc = await payload.create({
           collection: 'localized-posts',
-          locale: 'en',
           data: {
-            title: 'some-localized-title',
             description: 'some-not-localized-description',
             localizedDescription: 'some-localized-description',
+            title: 'some-localized-title',
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -2712,12 +2741,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const updatedDoc = await payload.update({
           id: doc.id,
           collection: 'localized-posts',
-          locale: 'es',
           data: {
-            title: 'some-localized-title-es',
             description: 'some-not-localized-description-es',
             localizedDescription: 'some-localized-description-es',
+            title: 'some-localized-title-es',
           },
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -2763,11 +2792,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
           data: {
             array: [
               {
-                relation: {
-                  value: randomDoc.id,
-                  relationTo: 'localized-posts',
-                },
-                hasManyRelation: [randomDoc.id, randomDoc2.id],
                 hasManyPolyRelation: [
                   {
                     relationTo: 'localized-posts',
@@ -2778,9 +2802,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     value: randomDoc2.id,
                   },
                 ],
+                hasManyRelation: [randomDoc.id, randomDoc2.id],
                 number: [1, 2],
-                text: ['hello', 'goodbye'],
+                relation: {
+                  relationTo: 'localized-posts',
+                  value: randomDoc.id,
+                },
                 select: ['one'],
+                text: ['hello', 'goodbye'],
               },
             ],
           },
@@ -2788,17 +2817,11 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
 
         await payload.update({
-          collection: 'nested-field-tables',
           id: newDoc.id,
-          locale: 'es',
+          collection: 'nested-field-tables',
           data: {
             array: [
               {
-                relation: {
-                  value: randomDoc2.id,
-                  relationTo: 'localized-posts',
-                },
-                hasManyRelation: [randomDoc2.id, randomDoc.id],
                 hasManyPolyRelation: [
                   {
                     relationTo: 'localized-posts',
@@ -2809,18 +2832,24 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     value: randomDoc.id,
                   },
                 ],
+                hasManyRelation: [randomDoc2.id, randomDoc.id],
+                number: [3, 4],
+                relation: {
+                  relationTo: 'localized-posts',
+                  value: randomDoc2.id,
+                },
                 select: ['two', 'three'],
                 text: ['hola', 'adios'],
-                number: [3, 4],
               },
             ],
           },
+          locale: 'es',
           overrideAccess: true,
         })
 
         const retrieved = await payload.findByID({
-          collection: 'nested-field-tables',
           id: newDoc.id,
+          collection: 'nested-field-tables',
           depth: 0,
           locale: 'all',
           overrideAccess: true,
@@ -2833,12 +2862,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         expect(retrieved.array.es[0].hasManyRelation).toEqual([randomDoc2.id, randomDoc.id])
 
         expect(retrieved.array.en[0].hasManyPolyRelation).toEqual([
-          { value: randomDoc.id, relationTo: 'localized-posts' },
-          { value: randomDoc2.id, relationTo: 'localized-posts' },
+          { relationTo: 'localized-posts', value: randomDoc.id },
+          { relationTo: 'localized-posts', value: randomDoc2.id },
         ])
         expect(retrieved.array.es[0].hasManyPolyRelation).toEqual([
-          { value: randomDoc2.id, relationTo: 'localized-posts' },
-          { value: randomDoc.id, relationTo: 'localized-posts' },
+          { relationTo: 'localized-posts', value: randomDoc2.id },
+          { relationTo: 'localized-posts', value: randomDoc.id },
         ])
 
         expect(retrieved.array.en[0].number).toEqual([1, 2])
@@ -2871,7 +2900,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         const docEn = await payload.create({
           collection: 'nested-field-tables',
-          depth: 0,
           data: {
             blocks: [
               {
@@ -2912,6 +2940,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          depth: 0,
           overrideAccess: true,
         })
 
@@ -2921,8 +2950,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         const docEs = await payload.update({
           id: docEn.id,
-          depth: 0,
-          locale: 'es',
           collection: 'nested-field-tables',
           data: {
             blocks: [
@@ -2964,6 +2991,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          depth: 0,
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -2972,10 +3001,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
         expect(docEs.blocks[2].nestedBlocks[0].relation.value).toBe(randomDoc2.id)
 
         const docAll = await payload.findByID({
-          collection: 'nested-field-tables',
           id: docEn.id,
-          locale: 'all',
+          collection: 'nested-field-tables',
           depth: 0,
+          locale: 'all',
           overrideAccess: true,
         })
 
@@ -3008,11 +3037,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         const docEn = await payload.create({
           collection: 'nested-field-tables',
-          depth: 0,
           data: {
             blocks: [
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3021,9 +3048,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3032,9 +3059,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3043,9 +3070,11 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
             ],
           },
+          depth: 0,
           overrideAccess: true,
         })
 
@@ -3055,13 +3084,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         const docEs = await payload.update({
           id: docEn.id,
-          depth: 0,
-          locale: 'es',
           collection: 'nested-field-tables',
           data: {
             blocks: [
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3070,9 +3096,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3081,9 +3107,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
               {
-                blockType: 'block',
                 array: [
                   {
                     relation: {
@@ -3092,9 +3118,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
                     },
                   },
                 ],
+                blockType: 'block',
               },
             ],
           },
+          depth: 0,
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -3103,10 +3132,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
         expect(docEs.blocks[2].array[0].relation.value).toBe(randomDoc2.id)
 
         const docAll = await payload.findByID({
-          collection: 'nested-field-tables',
           id: docEn.id,
-          locale: 'all',
+          collection: 'nested-field-tables',
           depth: 0,
+          locale: 'all',
           overrideAccess: true,
         })
 
@@ -3124,38 +3153,38 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('localized with unique should work for each locale', async ({ payload }) => {
         await payload.create({
           collection: 'localized-posts',
+          data: {
+            unique: 'text',
+          },
           locale: 'ar',
-          data: {
-            unique: 'text',
-          },
           overrideAccess: true,
         })
 
         await payload.create({
           collection: 'localized-posts',
+          data: {
+            unique: 'text',
+          },
           locale: 'en',
-          data: {
-            unique: 'text',
-          },
           overrideAccess: true,
         })
 
         await payload.create({
           collection: 'localized-posts',
-          locale: 'es',
           data: {
             unique: 'text',
           },
+          locale: 'es',
           overrideAccess: true,
         })
 
         await expect(
           payload.create({
             collection: 'localized-posts',
-            locale: 'en',
             data: {
               unique: 'text',
             },
+            locale: 'en',
             overrideAccess: true,
           }),
         ).rejects.toBeTruthy()
@@ -3168,20 +3197,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         await payload.create({
           collection: localizedPostsSlug,
-          locale: 'en',
           data: {
             unique: uniqueValue,
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
         try {
           await payload.create({
             collection: localizedPostsSlug,
-            locale: 'en',
             data: {
               unique: uniqueValue,
             },
+            locale: 'en',
             overrideAccess: true,
           })
           expect.unreachable('Should have thrown a ValidationError')
@@ -3205,28 +3234,28 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
         await payload.create({
           collection: withRequiredLocalizedFields,
-          locale: 'en',
           data: {
-            title: 'Test title 1',
-            seoTitle: uniqueValue,
             nav: {
               layout: blockData,
             },
+            seoTitle: uniqueValue,
+            title: 'Test title 1',
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
         try {
           await payload.create({
             collection: withRequiredLocalizedFields,
-            locale: 'en',
             data: {
-              title: 'Test title 2',
-              seoTitle: uniqueValue,
               nav: {
                 layout: blockData,
               },
+              seoTitle: uniqueValue,
+              title: 'Test title 2',
             },
+            locale: 'en',
             overrideAccess: true,
           })
           expect.unreachable('Should have thrown a ValidationError')
@@ -3245,16 +3274,16 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('Copying To Locale', () => {
       let user: User
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         user = (
           await payload.find({
             collection: 'users',
+            overrideAccess: true,
             where: {
               email: {
                 equals: devUser.email,
               },
             },
-            overrideAccess: true,
           })
         ).docs[0] as unknown as User
 
@@ -3265,12 +3294,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const doc = await payload.create({
           collection: 'localized-posts',
           data: {
-            title: 'Hello',
             group: {
               children: 'Children',
             },
-            unique: 'unique-field',
             localizedCheckbox: true,
+            title: 'Hello',
+            unique: 'unique-field',
           },
           overrideAccess: true,
         })
@@ -3278,11 +3307,11 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const req = await createLocalReq({ user }, payload)
 
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'localized-posts',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'localized-posts',
         })) as LocalizedPost
 
         expect(res.title).toBe('Hello')
@@ -3297,7 +3326,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
         // and that's where the bug occurs.
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
             content: [
               {
@@ -3311,17 +3339,18 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
 
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
         })) as BlocksField
 
         expect(res.content?.[0]?.content?.[0]?.text).toBe('some-text')
@@ -3333,7 +3362,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
         // and that's where the bug occurs.
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
             tabContent: [
               {
@@ -3342,16 +3370,17 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'pt',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
         })) as BlocksField
 
         expect(res.tabContent?.[0]?.text).toBe('some-text')
@@ -3360,7 +3389,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should copy localized nested to arrays', async ({ payload }) => {
         const doc = await payload.create({
           collection: 'nested',
-          locale: 'en',
           data: {
             topLevelArray: [
               {
@@ -3369,17 +3397,18 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
 
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'nested',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'nested',
         })) as Nested
 
         expect(res.topLevelArray?.[0]?.localizedText).toBe('some-localized-text')
@@ -3400,7 +3429,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('should copy localized arrays', async ({ payload }) => {
         const doc = await payload.create({
           collection: 'nested',
-          locale: 'en',
           data: {
             topLevelArrayLocalized: [
               {
@@ -3408,17 +3436,18 @@ test.suite({ config: './config.ts' })('Localization', () => {
               },
             ],
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
         const req = await createLocalReq({ user }, payload)
 
         const res = (await copyDataFromLocaleHandler({
+          collectionSlug: 'nested',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'nested',
         })) as Nested
 
         expect(res.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
@@ -3484,39 +3513,39 @@ test.suite({ config: './config.ts' })('Localization', () => {
         // Create a document with content in en locale
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
-            title: 'English Title',
             content: [
               {
                 blockType: 'blockInsideBlock',
-                text: 'English block text',
                 content: [
                   {
                     blockType: 'textBlock',
                     text: 'Nested English text',
                   },
                 ],
+                text: 'English block text',
               },
             ],
+            title: 'English Title',
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
         // Add content to Spanish locale separately
         await payload.update({
-          collection: 'blocks-fields',
           id: doc.id,
-          locale: 'es',
+          collection: 'blocks-fields',
           data: {
-            title: 'Spanish Title',
             content: [
               {
                 blockType: 'blockInsideBlock',
                 text: 'Spanish block text',
               },
             ],
+            title: 'Spanish Title',
           },
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -3535,12 +3564,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const req = await createLocalReq({ user }, payload)
 
         await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
+          overrideData: true,
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
-          overrideData: true,
         })
 
         // CRITICAL: Verify English data is NOT lost after copy operation
@@ -3559,8 +3588,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const esDocAfter = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'es',
           draft: true,
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -3574,17 +3603,17 @@ test.suite({ config: './config.ts' })('Localization', () => {
         // Create a document with draft content
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
-          draft: true,
           data: {
-            title: 'Draft English Title',
             content: [
               {
                 blockType: 'blockInsideBlock',
                 text: 'Draft block text',
               },
             ],
+            title: 'Draft English Title',
           },
+          draft: true,
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -3592,8 +3621,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const draftBefore = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: true,
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -3603,19 +3632,19 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const req = await createLocalReq({ user }, payload)
 
         await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
         })
 
         // Verify the source draft is not lost
         const draftAfter = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: true,
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -3629,22 +3658,22 @@ test.suite({ config: './config.ts' })('Localization', () => {
         // Create published doc in en
         const doc = await payload.create({
           collection: 'blocks-fields',
-          locale: 'en',
           data: {
             title: 'Published EN',
           },
+          locale: 'en',
           overrideAccess: true,
         })
 
         // Create draft with different content
         await payload.update({
-          collection: 'blocks-fields',
           id: doc.id,
-          locale: 'en',
-          draft: true,
+          collection: 'blocks-fields',
           data: {
             title: 'Draft EN',
           },
+          draft: true,
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -3652,15 +3681,15 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const enPublishedBefore = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: false,
+          locale: 'en',
           overrideAccess: true,
         })
         const enDraftBefore = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: true,
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -3671,20 +3700,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const req = await createLocalReq({ user }, payload)
 
         await copyDataFromLocaleHandler({
+          collectionSlug: 'blocks-fields',
+          docID: doc.id,
           fromLocale: 'en',
+          overrideData: true,
           req,
           toLocale: 'es',
-          docID: doc.id,
-          collectionSlug: 'blocks-fields',
-          overrideData: true,
         })
 
         // Verify published content in source locale is NOT overwritten
         const enPublishedAfter = await payload.findByID({
           id: doc.id,
           collection: 'blocks-fields',
-          locale: 'en',
           draft: false,
+          locale: 'en',
           overrideAccess: true,
         })
 
@@ -3699,8 +3728,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
               collection,
-              locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
+              locale: portugueseLocale,
               overrideAccess: true,
             })
 
@@ -3714,8 +3743,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
               collection,
-              locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar', spanishLocale],
+              locale: portugueseLocale,
               overrideAccess: true,
             })
 
@@ -3727,8 +3756,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const result = await payload.findByID({
               id: postWithLocalizedData.id,
               collection,
-              locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
+              locale: portugueseLocale,
               overrideAccess: true,
             })
 
@@ -3741,8 +3770,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           test('should allow fallback locale to be an array', async ({ payload }) => {
             const result = await payload.findGlobal({
               slug: global,
-              locale: portugueseLocale,
               fallbackLocale: [spanishLocale, englishLocale],
+              locale: portugueseLocale,
               overrideAccess: true,
             })
 
@@ -3755,8 +3784,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           }) => {
             const result = await payload.findGlobal({
               slug: global,
-              locale: portugueseLocale,
               fallbackLocale: ['hu', spanishLocale],
+              locale: portugueseLocale,
               overrideAccess: true,
             })
             expect(result).toBeDefined()
@@ -3766,8 +3795,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           test('should return undefined if no fallback locales exist', async ({ payload }) => {
             const result = await payload.findGlobal({
               slug: global,
-              locale: portugueseLocale,
               fallbackLocale: ['hu', 'ar'],
+              locale: portugueseLocale,
               overrideAccess: true,
             })
 
@@ -3866,7 +3895,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const { data } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['es', 'en'] },
+                query: { fallbackLocale: ['es', 'en'], locale: 'pt' },
               })
               .then((res) => res.json())
             console.log(data)
@@ -3889,7 +3918,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['hu', 'ar', 'es'] },
+                query: { fallbackLocale: ['hu', 'ar', 'es'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3911,7 +3940,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['hu', 'ar'] },
+                query: { fallbackLocale: ['hu', 'ar'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3930,7 +3959,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['es', 'en'] },
+                query: { fallbackLocale: ['es', 'en'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3949,7 +3978,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['hu', 'ar', 'es'] },
+                query: { fallbackLocale: ['hu', 'ar', 'es'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3966,7 +3995,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
             const { data: queryResult } = await restClient
               .GRAPHQL_POST({
                 body: JSON.stringify({ query }),
-                query: { locale: 'pt', fallbackLocale: ['hu', 'ar'] },
+                query: { fallbackLocale: ['hu', 'ar'], locale: 'pt' },
               })
               .then((res) => res.json())
 
@@ -3981,7 +4010,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     let post1: LocalizedPost
     let postWithLocalizedData: LocalizedPost
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       if (payload.config.localization) {
         payload.config.localization.fallback = false
       }
@@ -4017,10 +4046,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
       test('create english', async ({ payload }) => {
         const allDocs = await payload.find({
           collection,
+          overrideAccess: true,
           where: {
             title: { equals: post1.title },
           },
-          overrideAccess: true,
         })
         expect(allDocs.docs).toContainEqual(expect.objectContaining(post1))
       })
@@ -4064,8 +4093,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const fallbackDoc = await payload.findByID({
           id: post1.id,
           collection,
-          locale: portugueseLocale,
           fallbackLocale: englishLocale,
+          locale: portugueseLocale,
           overrideAccess: true,
         })
 
@@ -4089,8 +4118,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const localizedFallback: any = await payload.findByID({
           id: postWithLocalizedData.id,
           collection,
-          locale: portugueseLocale,
           fallbackLocale: false,
+          locale: portugueseLocale,
           overrideAccess: true,
         })
 
@@ -4108,8 +4137,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
 
         await payload.update({
-          collection: allFieldsLocalizedSlug,
           id: originalPost.id,
+          collection: allFieldsLocalizedSlug,
           data: {
             selfRelation: originalPost.id,
           },
@@ -4118,20 +4147,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
         })
 
         const spanishPostWithEnglishFallback = await payload.findByID({
-          collection: allFieldsLocalizedSlug,
           id: originalPost.id,
-          locale: 'es',
+          collection: allFieldsLocalizedSlug,
           fallbackLocale: 'en',
+          locale: 'es',
           overrideAccess: true,
         })
 
         expect(spanishPostWithEnglishFallback.text).toBe('Post EN')
 
         const spanishPostWithNoFallback = await payload.findByID({
-          collection: allFieldsLocalizedSlug,
           id: originalPost.id,
-          locale: 'es',
+          collection: allFieldsLocalizedSlug,
           fallbackLocale: false,
+          locale: 'es',
           overrideAccess: true,
         })
 
@@ -4150,12 +4179,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.beforeEach(async ({ payload }) => {
       await payload.delete({
         collection: allFieldsLocalizedSlug,
+        overrideAccess: true,
         where: {
           id: {
             exists: true,
           },
         },
-        overrideAccess: true,
       })
     })
     test('should only nest the top level localized field values under locale keys', async ({
@@ -4164,11 +4193,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
       const doc = await payload.create({
         collection: allFieldsLocalizedSlug,
         data: {
-          t1: {
-            t2: {
-              text: 'EN Deep Text',
-            },
-          },
+          _status: 'draft',
           g1: {
             g2: {
               g2a1: [{ text: 'EN Deep 1' }, { text: 'EN Deep 2' }],
@@ -4193,16 +4218,20 @@ test.suite({ config: './config.ts' })('Localization', () => {
           },
           number: 100,
           select: 'option1',
+          t1: {
+            t2: {
+              text: 'EN Deep Text',
+            },
+          },
           text: 'English text',
-          _status: 'draft',
         },
         locale: 'en',
         overrideAccess: true,
       })
 
       const allLocalesDoc = await payload.findByID({
-        collection: allFieldsLocalizedSlug,
         id: doc.id,
+        collection: allFieldsLocalizedSlug,
         locale: 'all',
         overrideAccess: true,
       })
@@ -4268,22 +4297,22 @@ test.suite({ config: './config.ts' })('Localization', () => {
       const doc = await payload.create({
         collection: noLocalizedFieldsCollectionSlug,
         data: {
-          text: 'title',
           group: {
             en: {
               text: 'some text',
             },
           },
+          text: 'title',
         },
         overrideAccess: true,
       })
 
       const queriedDoc = await payload.find({
         collection: noLocalizedFieldsCollectionSlug,
+        overrideAccess: true,
         where: {
           'group.en.text': { equals: 'some text' },
         },
-        overrideAccess: true,
       })
 
       expect(queriedDoc.docs).toHaveLength(1)
@@ -4292,6 +4321,764 @@ test.suite({ config: './config.ts' })('Localization', () => {
   })
 
   test.describe('localize status', () => {
+    test.describe('publication authorization', () => {
+      const createdDocuments: Array<{ collection: string; id: number | string }> = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const { id, collection } of createdDocuments) {
+          await payload.delete({ id, collection: collection as any, overrideAccess: true })
+        }
+        createdDocuments.length = 0
+      })
+
+      test('should authorize publishAllLocales during collection create', async ({ payload }) => {
+        await expect(
+          payload.create({
+            collection: publicationAccessSlug as any,
+            data: { title: 'unauthorized publication' },
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should expose publishAllLocales intent to collection create beforeOperation hooks', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.create({
+            collection: publicationBeforeOperationSlug as any,
+            data: { title: 'unauthorized publication' },
+            overrideAccess: true,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication is not allowed in beforeOperation')
+      })
+
+      test('should authorize publishAllLocales during collection update by ID', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should authorize unpublishAllLocales during collection update by ID', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            unpublishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should expose publishAllLocales intent to collection update beforeOperation hooks', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationBeforeOperationSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationBeforeOperationSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationBeforeOperationSlug as any,
+            data: {},
+            overrideAccess: true,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication is not allowed in beforeOperation')
+      })
+
+      test('should pass publication data to collection bulk update access', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'bulk draft' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            collection: publicationAccessSlug as any,
+            data: { _status: 'published' },
+            overrideAccess: false,
+            where: { id: { equals: doc.id } },
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should authorize publishAllLocales during collection bulk update', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'bulk draft' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+            where: { id: { equals: doc.id } },
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should expose publishAllLocales intent to collection bulk beforeOperation hooks', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationBeforeOperationSlug as any,
+          data: { _status: 'draft', title: 'bulk draft' },
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationBeforeOperationSlug })
+
+        await expect(
+          payload.update({
+            collection: publicationBeforeOperationSlug as any,
+            data: {},
+            overrideAccess: true,
+            publishAllLocales: true,
+            where: { id: { equals: doc.id } },
+          }),
+        ).rejects.toThrow('Publication is not allowed in beforeOperation')
+      })
+
+      test('should authorize publishAllLocales during global update', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: publicationAccessGlobalSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationAccessGlobalSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should expose publishAllLocales intent to global beforeOperation hooks', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: publicationBeforeOperationGlobalSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationBeforeOperationGlobalSlug as any,
+            data: {},
+            overrideAccess: true,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication is not allowed in beforeOperation')
+      })
+
+      test('should preserve global beforeOperation sanitization of publishAllLocales', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: publicationBeforeOperationSanitizeGlobalSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationBeforeOperationSanitizeGlobalSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: publicationBeforeOperationSanitizeGlobalSlug as any,
+          context: { sanitizePublicationIntent: true },
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findGlobal({
+          slug: publicationBeforeOperationSanitizeGlobalSlug as any,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should preserve async sibling field hook removal of publishAllLocales intent', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAsyncFieldHookSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAsyncFieldHookSlug })
+        await payload.update({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          context: { removePublicationIntent: true },
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should remove synthesized status when beforeOperation changes the update to a draft', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAsyncFieldHookSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAsyncFieldHookSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          context: { saveAsDraft: true },
+          data: {},
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('draft')
+        expect(unchanged._status[spanishLocale]).not.toBe('published')
+      })
+
+      test('should restore an explicit status when beforeOperation neutralizes the publish flag', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAsyncFieldHookSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAsyncFieldHookSlug })
+
+        // The caller sends an explicit `_status: 'draft'` alongside `publishAllLocales: true`.
+        // The synthesized 'published' overwrites it before beforeOperation, then the saveAsDraft
+        // hook clears the publish flag. The explicit 'draft' must be restored (hadStatus branch),
+        // and the neutralized publish intent must not leak to the other locale.
+        await payload.update({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          context: { saveAsDraft: true },
+          data: { _status: 'draft' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('draft')
+        expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      test('should respect _status field access when unpublishing all locales', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          unpublishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: false,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      test('should not infer field access from an already-published active locale', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          context: { comparePublicationStatus: true },
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should not infer field access from an already-draft active locale', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: defaultLocale,
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          unpublishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('draft')
+        expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      test('should expose differing locale status to field beforeValidate hooks', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationFieldAccessSlug as any,
+            context: { validatePublicationStatus: true },
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: true,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status validation is not allowed')
+      })
+
+      test('should not infer create field access from duplicated publication status', async ({
+        payload,
+      }) => {
+        const original = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: original.id, collection: publicationFieldAccessSlug })
+
+        const duplicate = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { title: 'duplicate' },
+          duplicateFromID: original.id,
+          locale: defaultLocale,
+          overrideAccess: false,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: duplicate.id, collection: publicationFieldAccessSlug })
+
+        const unchanged = await payload.findByID({
+          id: duplicate.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('draft')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should not infer global field access from an already-published active locale', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+          overrideAccess: true,
+        })
+
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          context: { comparePublicationStatus: true },
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          draft: true,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should expose differing global status to field beforeValidate hooks', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationFieldAccessGlobalSlug as any,
+            context: { validatePublicationStatus: true },
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: true,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status validation is not allowed')
+      })
+
+      test('should publish accessible collection locales when locale is all', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationAccessSlug as any,
+          data: {},
+          locale: 'all',
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: publicationAccessSlug as any,
+          draft: false,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(published._status[defaultLocale]).toBe('published')
+        expect(published._status[spanishLocale]).toBe('published')
+        expect(published._status.xx).not.toBe('published')
+      })
+
+      test('should publish accessible global locales when locale is all', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: globalWithDraftsSlug,
+          data: { _status: 'draft', text: 'draft' },
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+
+        await payload.updateGlobal({
+          slug: globalWithDraftsSlug,
+          data: {},
+          locale: 'all',
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+
+        const published = await payload.findGlobal({
+          slug: globalWithDraftsSlug,
+          draft: false,
+          locale: 'all',
+          overrideAccess: true,
+        })
+        expect(published._status[defaultLocale]).toBe('published')
+        expect(published._status[spanishLocale]).toBe('published')
+        expect(published._status.xx).not.toBe('published')
+      })
+
+      test('should expose publishAllLocales intent to collection hooks', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: publicationHookSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationHookSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationHookSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: true,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status changes are not allowed')
+      })
+
+      test('should expose differing locale status to collection hooks', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: publicationHookSlug as any,
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationHookSlug })
+        await payload.update({
+          id: doc.id,
+          collection: publicationHookSlug as any,
+          context: { seedPublicationStatus: true },
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationHookSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: true,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status changes are not allowed')
+      })
+
+      test('should expose differing locale status to global hooks', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: publicationHookGlobalSlug as any,
+          context: { seedPublicationStatus: true },
+          data: { _status: 'published', title: 'published' },
+          overrideAccess: true,
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationHookGlobalSlug as any,
+          context: { seedPublicationStatus: true },
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+          overrideAccess: true,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationHookGlobalSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: true,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status changes are not allowed')
+      })
+
+      test('should reject contradictory all-locale publication flags', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          overrideAccess: true,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            overrideAccess: true,
+            publishAllLocales: true,
+            unpublishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+    })
+
     test.describe('collections', () => {
       test.describe('on create', () => {
         test('should set other locales to draft upon creation', async ({ payload }) => {
@@ -4304,17 +5091,17 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'Localized Metadata EN',
               _status: 'published',
+              text: 'Localized Metadata EN',
             },
             locale: defaultLocale,
             overrideAccess: true,
           })
 
           const esDoc = await payload.findByID({
-            locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
+            locale: spanishLocale,
             overrideAccess: true,
           })
 
@@ -4325,22 +5112,29 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'Localized Metadata EN',
               _status: 'published',
+              text: 'Localized Metadata EN',
             },
             locale: defaultLocale,
-            publishAllLocales: true,
             overrideAccess: true,
+            publishAllLocales: true,
           })
 
           const esDoc = await payload.findByID({
-            locale: spanishLocale,
             id: doc.id,
             collection: allFieldsLocalizedSlug,
+            locale: spanishLocale,
+            overrideAccess: true,
+          })
+          const allLocalesDoc = await payload.findByID({
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+            locale: 'all',
             overrideAccess: true,
           })
 
           expect(esDoc._status).toContain('published')
+          expect(allLocalesDoc._status.xx).not.toBe('published')
         })
       })
 
@@ -4353,8 +5147,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'english draft 1',
               _status: 'draft',
+              text: 'english draft 1',
             },
             draft: true,
             locale: defaultLocale,
@@ -4362,11 +5156,11 @@ test.suite({ config: './config.ts' })('Localization', () => {
           })
           // update english published 1
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'english published 1',
               _status: 'published',
+              text: 'english published 1',
             },
             locale: defaultLocale,
             overrideAccess: true,
@@ -4374,11 +5168,11 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
           // create spanish draft 1
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'spanish draft 1',
               _status: 'draft',
+              text: 'spanish draft 1',
             },
             draft: true,
             locale: spanishLocale,
@@ -4386,22 +5180,22 @@ test.suite({ config: './config.ts' })('Localization', () => {
           })
           // update spanish published 1
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'spanish published 1',
               _status: 'published',
+              text: 'spanish published 1',
             },
             locale: spanishLocale,
             overrideAccess: true,
           })
           // update spanish draft 2
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'spanish draft 2',
               _status: 'draft',
+              text: 'spanish draft 2',
             },
             draft: true,
             locale: spanishLocale,
@@ -4409,10 +5203,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
           })
 
           const publishedDoc = await payload.findByID({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
-            locale: 'all',
+            collection: allFieldsLocalizedSlug,
             draft: false,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4422,8 +5216,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           expect(publishedDoc.text!.es).toBe('spanish published 1')
 
           const latestVersionDoc = await payload.findByID({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             draft: true,
             locale: 'all',
             overrideAccess: true,
@@ -4439,18 +5233,18 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'Localized Metadata EN',
               _status: 'published',
+              text: 'Localized Metadata EN',
             },
             locale: defaultLocale,
             overrideAccess: true,
           })
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'Localized Metadata ES',
               _status: 'draft',
+              text: 'Localized Metadata ES',
             },
             draft: true,
             locale: spanishLocale,
@@ -4458,8 +5252,9 @@ test.suite({ config: './config.ts' })('Localization', () => {
           })
 
           const esPublished = await payload.find({
-            locale: spanishLocale,
             collection: allFieldsLocalizedSlug,
+            locale: spanishLocale,
+            overrideAccess: true,
             where: {
               and: [
                 {
@@ -4474,14 +5269,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 },
               ],
             },
-            overrideAccess: true,
           })
           expect(esPublished.totalDocs).toBe(0)
 
           const esDraft = await payload.find({
-            locale: spanishLocale,
             collection: allFieldsLocalizedSlug,
             draft: true,
+            locale: spanishLocale,
+            overrideAccess: true,
             where: {
               and: [
                 {
@@ -4496,16 +5291,16 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 },
               ],
             },
-            overrideAccess: true,
           })
 
           expect(esDraft.totalDocs).toBe(1)
           expect(esDraft.docs[0]!.text).toBe('Localized Metadata ES')
 
           const enPublished = await payload.find({
-            locale: defaultLocale,
             collection: allFieldsLocalizedSlug,
             draft: true,
+            locale: defaultLocale,
+            overrideAccess: true,
             where: {
               and: [
                 {
@@ -4520,7 +5315,6 @@ test.suite({ config: './config.ts' })('Localization', () => {
                 },
               ],
             },
-            overrideAccess: true,
           })
           expect(enPublished.totalDocs).toBe(1)
           expect(enPublished.docs[0]!.text).toBe('Localized Metadata EN')
@@ -4532,19 +5326,19 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'en published',
               _status: 'published',
+              text: 'en published',
             },
             locale: defaultLocale,
             overrideAccess: true,
           })
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'en draft',
               _status: 'draft',
+              text: 'en draft',
             },
             draft: true,
             locale: defaultLocale,
@@ -4552,21 +5346,21 @@ test.suite({ config: './config.ts' })('Localization', () => {
           })
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'es published',
               _status: 'published',
+              text: 'es published',
             },
             locale: spanishLocale,
             overrideAccess: true,
           })
 
           const mainDocument = await payload.findByID({
-            locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4576,10 +5370,10 @@ test.suite({ config: './config.ts' })('Localization', () => {
           expect(mainDocument.text!.en).toBe('en published')
 
           const latestVersion = await payload.findByID({
-            locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: true,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4593,41 +5387,41 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
-              text: 'en draft',
               _status: 'draft',
+              text: 'en draft',
             },
             locale: defaultLocale,
             overrideAccess: true,
           })
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'es draft',
               _status: 'draft',
+              text: 'es draft',
             },
             locale: spanishLocale,
             overrideAccess: true,
           })
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
+            collection: allFieldsLocalizedSlug,
             data: {
-              text: 'en published',
               _status: 'published',
+              text: 'en published',
             },
             locale: 'en',
-            publishAllLocales: true,
             overrideAccess: true,
+            publishAllLocales: true,
           })
 
           const mainDocument = await payload.findByID({
-            locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4637,18 +5431,18 @@ test.suite({ config: './config.ts' })('Localization', () => {
           expect(mainDocument.text!.es).toBe('es draft')
 
           await payload.update({
-            collection: allFieldsLocalizedSlug,
             id: doc.id,
-            unpublishAllLocales: true,
+            collection: allFieldsLocalizedSlug,
             data: {},
             overrideAccess: true,
+            unpublishAllLocales: true,
           })
 
           const unpublishedDocument = await payload.findByID({
-            locale: 'all',
             id: doc.id,
             collection: allFieldsLocalizedSlug,
             draft: false,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4668,8 +5462,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'english draft 1',
               _status: 'draft',
+              text: 'english draft 1',
             },
             draft: true,
             locale: defaultLocale,
@@ -4679,8 +5473,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'english published 1',
               _status: 'published',
+              text: 'english published 1',
             },
             locale: defaultLocale,
             overrideAccess: true,
@@ -4690,8 +5484,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'spanish draft 1',
               _status: 'draft',
+              text: 'spanish draft 1',
             },
             draft: true,
             locale: spanishLocale,
@@ -4701,8 +5495,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'spanish published 1',
               _status: 'published',
+              text: 'spanish published 1',
             },
             locale: spanishLocale,
             overrideAccess: true,
@@ -4711,8 +5505,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'spanish draft 2',
               _status: 'draft',
+              text: 'spanish draft 2',
             },
             draft: true,
             locale: spanishLocale,
@@ -4721,8 +5515,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
           const publishedDoc = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: false,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4750,8 +5544,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const doc = await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'en published',
               _status: 'published',
+              text: 'en published',
             },
             locale: defaultLocale,
             overrideAccess: true,
@@ -4760,8 +5554,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'en draft',
               _status: 'draft',
+              text: 'en draft',
             },
             draft: true,
             locale: defaultLocale,
@@ -4771,8 +5565,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'es published',
               _status: 'published',
+              text: 'es published',
             },
             locale: spanishLocale,
             overrideAccess: true,
@@ -4780,8 +5574,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
           const mainDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: false,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4792,8 +5586,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
           const latestVersion = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: true,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4807,8 +5601,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           const doc = await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'en draft',
               _status: 'draft',
+              text: 'en draft',
             },
             locale: defaultLocale,
             overrideAccess: true,
@@ -4817,8 +5611,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'es draft',
               _status: 'draft',
+              text: 'es draft',
             },
             locale: spanishLocale,
             overrideAccess: true,
@@ -4827,18 +5621,18 @@ test.suite({ config: './config.ts' })('Localization', () => {
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
             data: {
-              text: 'en published',
               _status: 'published',
+              text: 'en published',
             },
             locale: defaultLocale,
-            publishAllLocales: true,
             overrideAccess: true,
+            publishAllLocales: true,
           })
 
           const mainDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: false,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4849,15 +5643,15 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
           await payload.updateGlobal({
             slug: globalWithDraftsSlug,
-            unpublishAllLocales: true,
             data: {},
             overrideAccess: true,
+            unpublishAllLocales: true,
           })
 
           const unpublishedDocument = await payload.findGlobal({
             slug: globalWithDraftsSlug,
-            locale: 'all',
             draft: false,
+            locale: 'all',
             overrideAccess: true,
           })
 
@@ -4870,7 +5664,7 @@ test.suite({ config: './config.ts' })('Localization', () => {
     test.describe('fallback behavior', () => {
       let allFieldsPostWithLocalizedData: any
 
-      test.beforeEach(async ({ payload }) => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         allFieldsPostWithLocalizedData = await payload.create({
           collection: allFieldsLocalizedSlug,
           data: {
@@ -4926,8 +5720,8 @@ test.suite({ config: './config.ts' })('Localization', () => {
         const localizedFallback: any = await payload.findByID({
           id: allFieldsPostWithLocalizedData.id,
           collection: allFieldsLocalizedSlug,
-          locale: portugueseLocale,
           fallbackLocale: 'none',
+          locale: portugueseLocale,
           overrideAccess: true,
         })
 
@@ -4949,12 +5743,12 @@ test.suite({ config: './config.ts' })('Localization', () => {
 
       const result2 = await payload.countVersions({
         collection: localizedDraftsSlug,
+        overrideAccess: true,
         where: {
           'version.title': {
             equals: 'Localized Drafts EN',
           },
         },
-        overrideAccess: true,
       })
       expect(result2.totalDocs).toBe(1)
     })
@@ -4964,14 +5758,14 @@ test.suite({ config: './config.ts' })('Localization', () => {
     }) => {
       await payload.updateGlobal({
         slug: globalWithDraftsSlug,
-        data: { text: 'global count en', _status: 'published' },
+        data: { _status: 'published', text: 'global count en' },
         locale: defaultLocale,
         overrideAccess: true,
       })
 
       await payload.updateGlobal({
         slug: globalWithDraftsSlug,
-        data: { text: 'global count es', _status: 'published' },
+        data: { _status: 'published', text: 'global count es' },
         locale: spanishLocale,
         overrideAccess: true,
       })
@@ -4981,15 +5775,15 @@ test.suite({ config: './config.ts' })('Localization', () => {
       const inEnglish = await payload.countGlobalVersions({
         global: globalWithDraftsSlug,
         locale: defaultLocale,
-        where: englishWhere,
         overrideAccess: true,
+        where: englishWhere,
       })
 
       const inSpanish = await payload.countGlobalVersions({
         global: globalWithDraftsSlug,
         locale: spanishLocale,
-        where: englishWhere,
         overrideAccess: true,
+        where: englishWhere,
       })
 
       expect(inEnglish.totalDocs).toBeGreaterThan(0)

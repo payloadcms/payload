@@ -112,6 +112,10 @@ export {
 } from '../types/constants.js'
 export type { HasManyRelationshipOperator } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
+export {
+  getSanitizedUploadFilename,
+  uploadRequiresServerValidation,
+} from '../uploads/getFileTypeIdentity.js'
 export { isImage } from '../uploads/isImage.js'
 export { matchMimeType } from '../uploads/matchMimeType.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
@@ -136,11 +140,19 @@ export {
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
 export { extractID } from '../utilities/extractID.js'
+
+export {
+  expandOwnDottedKey,
+  hasUnsupportedFieldPathSegment,
+  setOwnProperty,
+} from '../utilities/fieldPath.js'
+
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
+
 export { formatErrors } from '../utilities/formatErrors.js'
 
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
@@ -191,6 +203,8 @@ export { parseDocumentID } from '../utilities/parseDocumentID.js'
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
+
+export { sanitizeUploadPrefix } from '../utilities/sanitizeUploadPrefix.js'
 
 export { sanitizeUrl } from '../utilities/sanitizeUrl.js'
 

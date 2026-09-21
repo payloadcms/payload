@@ -35,14 +35,15 @@ export interface R2StorageOptions {
   enabled?: boolean
   /**
    * When true, the collection-level prefix and document-level prefix are combined
-   * (compositional). When false (default), document prefix overrides collection
-   * prefix entirely.
+   * (compositional). When false (default), a document prefix already within the
+   * collection prefix is used as-is for new uploads; otherwise it is nested beneath it.
+   * Existing files retain their stored prefixes for reads, URLs, and cleanup.
    *
-   * Example:
-   * - collection prefix: `collection-prefix/`
-   * - document prefix: `document-prefix/`
-   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
-   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   * Example with a document prefix already contained by the collection prefix:
+   * - collection prefix: `uploads/`
+   * - document prefix: `uploads/documents/`
+   * - resulting prefix with useCompositePrefixes=true: `uploads/uploads/documents/`
+   * - resulting prefix with useCompositePrefixes=false: `uploads/documents/`
    *
    * @default false
    */

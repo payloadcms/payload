@@ -58,6 +58,7 @@ export const thTranslations: DefaultTranslationsObject = {
     notRedirected: 'ไม่ได้รับการเปลี่ยนเส้นทางใช่หรือไม่? <0>เข้าสู่ระบบที่นี่</0>',
     passed: 'การยืนยันตัวตนสำเร็จ',
     passwordResetSuccessfully: 'รีเซ็ตรหัสผ่านเรียบร้อยแล้ว',
+    resend: 'ส่งอีกครั้ง',
     resetPassword: 'รีเซ็ตรหัสผ่าน',
     resetPasswordExpiration: 'วันหมดอายุสำหรับการรีเซ็ตรหัสผ่าน',
     resetPasswordToken: 'Token รีเซ็ตรหัสผ่าน',

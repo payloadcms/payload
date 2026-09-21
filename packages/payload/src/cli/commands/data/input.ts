@@ -2,9 +2,42 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import * as z from 'zod/mini'
 
-export const localFileSchema = z
-  .string()
-  .check(z.minLength(1), z.describe('Local upload file path.'))
+import type { CollectionSlug } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
+import type { File } from '../../../uploads/types.js'
+
+import {
+  externalURLInputSchema,
+  resolveURLUploadInput,
+} from '../../../uploads/resolveURLUploadInput.js'
+
+export const localFileSchema = z.union([
+  z.string().check(z.minLength(1), z.describe('Local upload file path.')),
+  externalURLInputSchema,
+])
+
+type LocalFileInput = z.infer<typeof localFileSchema>
+
+/** Resolves a CLI upload input to either a local path or a downloaded Payload file. */
+export const resolveCLIFile = async ({
+  slug,
+  input,
+  req,
+}: {
+  input?: LocalFileInput
+  req: PayloadRequest
+  slug: CollectionSlug
+}): Promise<{ file?: File; filePath?: string }> => {
+  if (!input) {
+    return {}
+  }
+
+  if (typeof input === 'string') {
+    return { filePath: path.resolve(process.cwd(), input) }
+  }
+
+  return { file: await resolveURLUploadInput({ slug, input, req, requireAllowList: false }) }
+}
 
 export const parseBoolean = (value: string): boolean => {
   if (value === 'true') {
@@ -34,6 +67,9 @@ export const parseJSON = (value: string): unknown => {
     throw new Error(error instanceof Error ? error.message : 'Invalid JSON.')
   }
 }
+
+export const parseFile = (value: string): unknown =>
+  value.startsWith('{') || value.startsWith('@') ? parseJSON(value) : value
 
 export const parseDocuments = (value: string, previous: unknown): unknown[] => {
   const parsed = parseJSON(value)

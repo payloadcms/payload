@@ -68,4 +68,95 @@
   .auth-fields__api-key > .btn.btn--style-secondary {
     align-self: flex-start;
   }
+
+  .auth-fields .field-type.api-key input {
+    width: 100%;
+    min-height: var(--spacer-5);
+    padding: 0 var(--spacer-2);
+    border: var(--stroke-width-small) solid transparent;
+    border-radius: var(--radius-medium);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-family: var(--font-family-mono);
+  }
+
+  .api-key__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .api-key__label .copy-to-clipboard {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--spacer-4) - var(--spacer-1));
+    height: calc(var(--spacer-4) - var(--spacer-1));
+    line-height: 0;
+  }
+
+  .api-key__input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .auth-fields .field-type.api-key .api-key__input-wrap--has-regenerate input {
+    padding-right: calc(var(--spacer-5) * 2);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .api-key__input-wrap--highlighted {
+    border-radius: var(--radius-medium);
+    box-shadow: 0 0 0 2px var(--color-border-success-strong);
+  }
+
+  .api-key__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacer-2);
+  }
+
+  .api-key__toggle-button-wrap {
+    display: flex;
+    align-self: stretch;
+  }
+
+  .api-key__visibility-button.btn,
+  .api-key__regenerate-button.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-5);
+    min-height: var(--spacer-5);
+    margin: 0;
+    padding: 0 var(--spacer-1);
+  }
+
+  .api-key__visibility-button.btn {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    height: 100%;
+    border: 0;
+    background: transparent;
+  }
+
+  .api-key__visibility-button--with-regenerate.btn {
+    right: var(--spacer-5);
+  }
+
+  .api-key__regenerate-button.btn {
+    border-left: var(--stroke-width-small) solid var(--color-border);
+    border-radius: 0 var(--radius-medium) var(--radius-medium) 0;
+    background: var(--color-bg-secondary);
+  }
+
+  .api-key__revoke-button.btn {
+    color: var(--color-text-danger);
+    border-color: var(--color-border-danger-strong);
+  }
 }
