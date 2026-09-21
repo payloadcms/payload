@@ -249,6 +249,23 @@ Run `migrate-versions-default` if you want zero schema changes — it adds `vers
 
 Run `remove-versions-true` to clean up any bare `versions: true` that is now the default.
 
+### Version read access inherits collection and global read access
+
+When `readVersions` is not configured, version access now inherits the Collection or Global `read` Access Control instead of requiring an authenticated user by default.
+
+This means a public `read` function can make historical and unpublished versions publicly readable, while a query constraint returned by `read` is also applied to version documents. If you want to preserve the previous authenticated-only behavior, configure `readVersions` explicitly:
+
+```ts
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  access: {
+    read: () => true,
+    readVersions: ({ req: { user } }) => Boolean(user),
+  },
+  fields: [],
+}
+```
+
 ### List View Select API is now the default
 
 The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
