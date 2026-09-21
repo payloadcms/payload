@@ -44,7 +44,7 @@
     "@swc/core": "1.15.3",
     "@types/node": "24.12.3",
     "rimraf": "6.0.1",
-    "typescript": "6.0.3",
+    "typescript": "catalog:",
     "vitest": "5.0.1"
   },
   "engines": {
