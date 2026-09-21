@@ -54,6 +54,7 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
+              - 'vitest.config.ts'
             needs_tests:
               - '.github/workflows/main.yml'
               - '.github/actions/start-services/**'
@@ -61,6 +62,7 @@ jobs:
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
+              - 'vitest.config.ts'
             templates:
               - 'templates/**'
             # Also gates tests-unit via its own `if`. Excludes plain `packages/**/*.ts` changes on
@@ -244,6 +246,12 @@ jobs:
         run: pnpm test:unit
         env:
           NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
+
+      - name: Browser setup
+        uses: ./.github/actions/setup-playwright
+
+      - name: Component Tests
+        run: pnpm test:components
 
   tests-types:
     runs-on: ubuntu-24.04

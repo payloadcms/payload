@@ -22,7 +22,7 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
-  'packages/**/*.spec.ts',
+  'packages/**/*.spec.{ts,tsx}',
   'next-env.d.ts',
   '**/app',
   // The TanStack app dirs (shippable `app-tanstack` + its test duplicates) are
@@ -54,7 +54,7 @@ export const rootEslintConfig = [
       ...defaultESLintIgnores,
       'packages/eslint-*/**',
       'test/live-preview/next-app',
-      'packages/**/*.spec.ts',
+      'packages/**/*.spec.{ts,tsx}',
       'templates/**',
       'examples/**',
       'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
