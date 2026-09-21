@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.89.0",
+  "version": "3.90.1",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -86,7 +86,7 @@
     "docker:start": "pnpm docker:clean && docker compose -f test/docker-compose.yml --profile all up -d --wait",
     "docker:test": "pnpm runts test/__helpers/shared/db/mongodb/run-test-connection.ts && pnpm runts test/__helpers/shared/db/mongodb-atlas/run-test-connection.ts",
     "force:build": "pnpm run build:core:force",
-    "lint": "turbo run lint --log-order=grouped --continue --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
+    "lint": "turbo run lint --concurrency=2 --log-order=grouped --continue --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
     "lint-staged": "lint-staged",
     "lint:fix": "turbo run lint:fix --log-order=grouped --continue --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
     "lint:scss": "stylelint \"packages/ui/src/**/*.scss\" \"templates/**/*.scss\"",

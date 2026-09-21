@@ -58,6 +58,7 @@ export const roTranslations: DefaultTranslationsObject = {
     newPassword: 'Parolă nouă',
     passed: 'Autentificare reușită',
     passwordResetSuccessfully: 'Resetarea parolei a fost realizată cu succes.',
+    resend: 'Retrimite',
     resetPassword: 'Resetează parola',
     resetPasswordExpiration: 'Resetați expirarea parolei',
     resetPasswordToken: 'Resetați token-ul parolei',

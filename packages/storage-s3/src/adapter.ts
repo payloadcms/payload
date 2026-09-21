@@ -34,6 +34,7 @@ export function createS3Adapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
     clientUploads,
+    requiresClientUploadReceipt: true,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -45,46 +46,37 @@ export function createS3Adapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         bucket,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    handleUpload: async ({ data, file }) => {
+    handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({
         acl,
         bucket,
         buffer: file.buffer,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
+        storageFilePath,
         tempFilePath: file.tempFilePath,
-        useCompositePrefixes,
       })
 
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { clientUploadContext, filename } }) =>
       getFile({
         bucket,
         client: getStorageClient(),
         clientUploadContext,
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
         signedDownloads,
         useCompositePrefixes,

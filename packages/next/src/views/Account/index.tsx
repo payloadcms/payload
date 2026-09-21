@@ -17,7 +17,12 @@ import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
-export async function AccountView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function AccountView({
+  initPageResult,
+  params,
+  searchParams,
+  user: userWithReadAccess,
+}: AdminViewServerProps) {
   const {
     languageOptions,
     locale,
@@ -89,6 +94,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
       req,
       schemaPath: collectionConfig.slug,
       skipValidation: true,
+      user: userWithReadAccess,
     })
 
     // Fetch document lock state
@@ -119,12 +125,12 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
             languageOptions={languageOptions}
             payload={payload}
             theme={theme}
-            user={user}
+            user={userWithReadAccess}
           />
         }
         apiURL={formatAdminURL({
           apiRoute: api,
-          path: `/${userSlug}${user?.id ? `/${user.id}` : ''}`,
+          path: `/${userSlug}/${user.id}`,
         })}
         collectionSlug={userSlug}
         currentEditor={currentEditor}
@@ -134,7 +140,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
         hasTrashPermission={hasTrashPermission}
-        id={user?.id}
+        id={user.id}
         initialData={data}
         initialState={formState}
         isEditing
@@ -150,6 +156,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
             hideTabs
             permissions={permissions}
             req={req}
+            user={userWithReadAccess}
           />
           <HydrateAuthProvider permissions={permissions} />
           {RenderServerComponent({
@@ -167,7 +174,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
               permissions,
               routeSegments: [],
               searchParams,
-              user,
+              user: userWithReadAccess,
             } satisfies DocumentViewServerPropsOnly,
           })}
           <AccountClient />

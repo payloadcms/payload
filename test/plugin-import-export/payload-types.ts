@@ -199,6 +199,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -276,6 +277,32 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'content';
+          }
+        | {
+            faqs?:
+              | {
+                  question?: string | null;
+                  answer?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
+                        [k: string]: unknown;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faqSection';
           }
       )[]
     | null;
@@ -725,6 +752,7 @@ export interface PostsWithS3Export {
     | number
     | boolean
     | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -988,6 +1016,7 @@ export interface PostsWithS3Import {
       | boolean
       | null;
   };
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1372,6 +1401,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1434,6 +1464,19 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faqSection?:
+          | T
+          | {
+              faqs?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -1740,6 +1783,7 @@ export interface PostsWithS3ExportSelect<T extends boolean = true> {
   fields?: T;
   collectionSlug?: T;
   where?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1946,6 +1990,7 @@ export interface PostsWithS3ImportSelect<T extends boolean = true> {
         issues?: T;
         issueDetails?: T;
       };
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

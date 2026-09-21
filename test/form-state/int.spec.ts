@@ -1,25 +1,30 @@
 import type { FieldState, FormState, Payload, User } from 'payload'
-import type React from 'react'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
-import { createLocalReq } from 'payload'
+import { createLocalReq, getAccessResults } from 'payload'
+import React from 'react'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
+import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { renderDocumentHandler } from '../../packages/next/src/views/Document/handleServerFunction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
 
 let payload: Payload
 let restClient: NextRESTClient
 let user: User
+const createdAutosavePostTitles: string[] = []
+const createdUserIDs: (number | string)[] = []
 
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
@@ -49,8 +54,78 @@ describe('Form State', () => {
     user = data.user
   })
 
+  afterEach(async () => {
+    vi.unstubAllGlobals()
+
+    for (const title of createdAutosavePostTitles) {
+      await payload.delete({
+        collection: autosavePostsSlug,
+        where: {
+          title: {
+            equals: title,
+          },
+        },
+      })
+    }
+    createdAutosavePostTitles.length = 0
+
+    for (const id of createdUserIDs) {
+      await payload.delete({ id, collection: 'users' })
+    }
+    createdUserIDs.length = 0
+  })
+
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  it('should respect field create access when initializing an autosave draft', async () => {
+    const editor = await payload.create({
+      collection: 'users',
+      data: {
+        email: 'editor@example.com',
+        password: 'test-password',
+      },
+    })
+    createdUserIDs.push(editor.id)
+
+    const req = await createLocalReq({ user: editor }, payload)
+    const permissions = await getAccessResults({ req })
+    const restrictedValue = 'client supplied'
+    const title = 'Access filtered autosave'
+    createdAutosavePostTitles.push(title)
+    vi.stubGlobal('React', React)
+
+    await renderDocumentHandler({
+      collectionSlug: autosavePostsSlug,
+      cookies: new Map(),
+      docID: undefined as never,
+      importMap: payload.importMap,
+      initialData: {
+        restrictedValue,
+        title,
+      },
+      locale: undefined,
+      permissions,
+      redirectAfterCreate: false,
+      redirectAfterDelete: false,
+      redirectAfterDuplicate: false,
+      req,
+    })
+
+    const { docs } = await payload.find({
+      collection: autosavePostsSlug,
+      draft: true,
+      overrideAccess: true,
+      where: {
+        title: {
+          equals: title,
+        },
+      },
+    })
+
+    expect(docs).toHaveLength(1)
+    expect(docs[0]).not.toHaveProperty('restrictedValue', restrictedValue)
   })
 
   it('should build entire form state', async () => {

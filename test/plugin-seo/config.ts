@@ -2,7 +2,12 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import type { GenerateDescription, GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
+import type {
+  GenerateDescription,
+  GenerateImage,
+  GenerateTitle,
+  GenerateURL,
+} from '@payloadcms/plugin-seo/types'
 import type { Field } from 'payload'
 import type { Page } from 'plugin-seo/payload-types.js'
 
@@ -16,9 +21,22 @@ import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { PagesWithImportedFields } from './collections/PagesWithImportedFields.js'
 import { Users } from './collections/Users.js'
+import { SiteSettings } from './globals/SiteSettings.js'
 import { seed } from './seed/index.js'
+import { pagesSlug, siteSettingsSlug } from './shared.js'
 
-const generateTitle: GenerateTitle<Page> = ({ doc }) => {
+const generateTitle: GenerateTitle<Page> = async ({ doc, req }) => {
+  if (doc?.id) {
+    const storedPage = await req.payload.findByID({
+      id: doc.id,
+      collection: pagesSlug,
+      disableErrors: true,
+      trash: true,
+    })
+
+    return `Website.com — ${storedPage?.title || doc.title}`
+  }
+
   return `Website.com — ${doc?.title}`
 }
 
@@ -30,8 +48,13 @@ const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
   return `https://yoursite.com/${locale ? locale + '/' : ''}${doc?.slug || ''}`
 }
 
+const generateImage: GenerateImage<Page> = ({ doc }) => {
+  return typeof doc?.featuredMedia === 'object' ? doc.featuredMedia.id : doc?.featuredMedia || ''
+}
+
 export default buildConfigWithDefaults({
   collections: [Users, Pages, Media, PagesWithImportedFields],
+  globals: [SiteSettings],
   i18n: {
     supportedLanguages: {
       en,
@@ -98,8 +121,10 @@ export default buildConfigWithDefaults({
         ]
       },
       generateDescription,
+      generateImage,
       generateTitle,
       generateURL,
+      globals: [siteSettingsSlug],
       tabbedUI: true,
       uploadsCollection: 'media',
     }),

@@ -11,6 +11,7 @@ import { createFolder } from '../__helpers/e2e/folders/createFolder.js'
 import { createFolderDoc } from '../__helpers/e2e/folders/createFolderDoc.js'
 import { createFolderFromDoc } from '../__helpers/e2e/folders/createFolderFromDoc.js'
 import { expectNoResultsAndCreateFolderButton } from '../__helpers/e2e/folders/expectNoResultsAndCreateFolderButton.js'
+import { openFolderDrawer } from '../__helpers/e2e/folders/openFolderDrawer.js'
 import { selectFolderAndConfirmMove } from '../__helpers/e2e/folders/selectFolderAndConfirmMove.js'
 import { selectFolderAndConfirmMoveFromList } from '../__helpers/e2e/folders/selectFolderAndConfirmMoveFromList.js'
 import {
@@ -97,12 +98,13 @@ test.describe('Folders', () => {
       await folderPill.click()
 
       const createFolderButton = page.getByRole('button', { name: 'Create folder' })
-      await createFolderButton.click()
 
-      const drawer = page.locator('dialog .collection-edit--payload-folders')
+      const drawer = await openFolderDrawer({
+        openDrawer: () => createFolderButton.click(),
+        page,
+      })
       const selectLocator = drawer.locator('#field-folderType')
 
-      await expect(drawer).toBeVisible()
       await expect
         .poll(async () => {
           const options = await getSelectInputValue<true>({ multiSelect: true, selectLocator })
@@ -139,11 +141,12 @@ test.describe('Folders', () => {
         .locator('.list-header__title-and-actions .create-new-doc-in-folder__button')
         .filter({ hasText: 'Create folder' })
       await expect(createButton).toBeVisible()
-      await createButton.click()
 
       // The folder drawer should open successfully without React serialization errors
-      const drawer = page.locator('dialog .collection-edit--payload-folders')
-      await expect(drawer).toBeVisible()
+      const drawer = await openFolderDrawer({
+        openDrawer: () => createButton.click(),
+        page,
+      })
 
       const selectLocator = drawer.locator('#field-folderType')
       await expect(selectLocator).toBeVisible()
@@ -298,13 +301,15 @@ test.describe('Folders', () => {
     test('should keep autosave drawer open after autosave when creating from folder view', async () => {
       await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
 
-      const folderDrawer = page.locator('dialog .collection-edit--payload-folders')
-      await page
-        .locator(
-          '.list-header__title-and-actions .create-new-doc-in-folder__button:has-text("Create folder")',
-        )
-        .click()
-      await expect(folderDrawer).toBeVisible()
+      const folderDrawer = await openFolderDrawer({
+        openDrawer: () =>
+          page
+            .locator(
+              '.list-header__title-and-actions .create-new-doc-in-folder__button:has-text("Create folder")',
+            )
+            .click(),
+        page,
+      })
       await folderDrawer.locator('#field-name').fill('Autosave Folder')
       await selectInput({
         multiSelect: true,

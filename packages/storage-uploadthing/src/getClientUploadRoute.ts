@@ -5,6 +5,11 @@ import {
   type PayloadRequest,
   type UploadCollectionSlug,
 } from 'payload'
+import {
+  assertClientUploadAccess,
+  assertClientUploadAllowed,
+  createClientUploadReceipt,
+} from 'payload/internal'
 
 type Args = {
   access?: (args: {
@@ -43,7 +48,7 @@ export const getClientUploadRoute = ({
         ...('blob' in routerInputConfig ? routerInputConfig.blob : {}),
       },
     })
-      .middleware(async ({ req: rawReq }) => {
+      .middleware(async ({ files, req: rawReq }) => {
         const req = rawReq as PayloadRequest
 
         const collectionSlug = req.searchParams.get('collectionSlug')
@@ -52,18 +57,41 @@ export const getClientUploadRoute = ({
           throw new APIError('No payload was provided')
         }
 
+        await assertClientUploadAccess({ collectionSlug, req })
+
         if (!(await access({ collectionSlug, req }))) {
           throw new Forbidden()
         }
 
-        return {}
+        for (const file of files) {
+          assertClientUploadAllowed({
+            collection: req.payload.collections[collectionSlug]?.config,
+            filename: file.name,
+            mimeType: file.type,
+          })
+        }
+
+        return {
+          collectionSlug,
+          filename: files[0]!.name,
+          user: {
+            userCollection: req.user?.collection ?? null,
+            userID: req.user?.id ?? null,
+          },
+        }
       })
-      .onUploadComplete(() => {}),
+      .onUploadComplete(({ file, metadata, req: rawReq }) => ({
+        signedReceipt: createClientUploadReceipt({
+          collectionSlug: metadata.collectionSlug,
+          context: { key: file.key },
+          filename: metadata.filename,
+          req: rawReq as PayloadRequest,
+          user: metadata.user,
+        }),
+      })),
   } satisfies FileRouter
 
   const { POST } = createRouteHandler({ config: { token }, router: uploadRouter })
 
-  return async (req) => {
-    return POST(req)
-  }
+  return (req) => POST(req)
 }

@@ -40,6 +40,7 @@ export const buildBrowseByFolderView = async (
     params,
     query: queryFromArgs,
     searchParams,
+    user: userWithReadAccess,
   } = args
 
   const {
@@ -50,7 +51,6 @@ export const buildBrowseByFolderView = async (
       payload,
       payload: { config },
       query: queryFromReq,
-      user,
     },
     visibleEntities,
   } = initPageResult
@@ -157,7 +157,7 @@ export const buildBrowseByFolderView = async (
     permissions,
     searchParams,
     subfolders,
-    user,
+    user: userWithReadAccess,
   }
 
   // const folderViewSlots = renderFolderViewSlots({

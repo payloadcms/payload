@@ -1,8 +1,9 @@
 import type { DefaultDocumentIDType, PaginatedDocs, Payload } from 'payload'
 
 import path from 'path'
+import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relationship } from './payload-types.js'
@@ -10,6 +11,7 @@ import type { Relationship } from './payload-types.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
+  autosaveGlobalSlug,
   menuSlug,
   multiTenantPostsSlug,
   relationshipsSlug,
@@ -468,6 +470,267 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       await payload.delete({ id: user.id, collection: usersSlug })
       await payload.delete({ id: tenantA.id, collection: tenantsSlug })
       await payload.delete({ id: tenantB.id, collection: tenantsSlug })
+    })
+  })
+
+  describe('tenant field write isolation', () => {
+    let tenantA: { id: DefaultDocumentIDType }
+    let tenantB: { id: DefaultDocumentIDType }
+    let user: { id: DefaultDocumentIDType }
+    const createdRelationshipIDs: DefaultDocumentIDType[] = []
+    const createdAutosaveIDs: DefaultDocumentIDType[] = []
+
+    beforeEach(async () => {
+      tenantA = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Write Isolation Tenant A', domain: 'write-isolation-a.test' },
+      })
+      tenantB = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Write Isolation Tenant B', domain: 'write-isolation-b.test' },
+      })
+      // @ts-expect-error unsafe access okay in test
+      user = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'write-isolation-user@test.com',
+          password: 'test',
+          tenants: [{ tenant: tenantA.id }],
+        },
+      })
+    })
+
+    afterEach(async () => {
+      for (const id of createdRelationshipIDs) {
+        await payload.delete({ id, collection: relationshipsSlug })
+      }
+      createdRelationshipIDs.length = 0
+
+      for (const id of createdAutosaveIDs) {
+        await payload.delete({ id, collection: autosaveGlobalSlug })
+      }
+      createdAutosaveIDs.length = 0
+
+      await payload.delete({ id: user.id, collection: usersSlug })
+      await payload.delete({ id: tenantA.id, collection: tenantsSlug })
+      await payload.delete({ id: tenantB.id, collection: tenantsSlug })
+    })
+
+    it('should reject creating a document with a tenant the user is not assigned to', async () => {
+      await expect(
+        payload.create({
+          collection: relationshipsSlug,
+          data: { tenant: tenantB.id, title: 'Injected into Tenant B' },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+
+    it('should reject relocating an existing document into a tenant the user is not assigned to', async () => {
+      const ownDoc = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantA.id, title: 'Owned by Tenant A' },
+        overrideAccess: false,
+        user,
+      })
+
+      createdRelationshipIDs.push(ownDoc.id)
+
+      await expect(
+        payload.update({
+          id: ownDoc.id,
+          collection: relationshipsSlug,
+          data: { tenant: tenantB.id },
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+
+    const loginAsWriteIsolationUser = async (): Promise<string> => {
+      const result = await restClient
+        .POST('/users/login', {
+          auth: false,
+          body: JSON.stringify({ email: 'write-isolation-user@test.com', password: 'test' }),
+        })
+        .then((res) => res.json())
+
+      return result.token
+    }
+
+    it('should reject a REST create that assigns a tenant the user is not a member of', async () => {
+      const tenantAToken = await loginAsWriteIsolationUser()
+
+      const response = await restClient.POST('/relationships', {
+        auth: false,
+        body: JSON.stringify({ tenant: tenantB.id, title: 'INJECTED over REST' }),
+        headers: { Authorization: `JWT ${tenantAToken}` },
+      })
+
+      expect(response.status).toBe(400)
+
+      // The original report could not read the document back, so assert against the
+      // database with access control off rather than against the response.
+      const written = await payload.find({
+        collection: relationshipsSlug,
+        where: { title: { equals: 'INJECTED over REST' } },
+      })
+
+      expect(written.docs).toHaveLength(0)
+    })
+
+    it('should reject a REST update that moves a document into another tenant', async () => {
+      const tenantAToken = await loginAsWriteIsolationUser()
+      const ownDoc = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantA.id, title: 'Owned by Tenant A' },
+        overrideAccess: false,
+        user,
+      })
+
+      createdRelationshipIDs.push(ownDoc.id)
+
+      const response = await restClient.PATCH(`/relationships/${ownDoc.id}`, {
+        auth: false,
+        body: JSON.stringify({ tenant: tenantB.id }),
+        headers: { Authorization: `JWT ${tenantAToken}` },
+      })
+
+      expect(response.status).toBe(400)
+
+      const unchanged = await payload.findByID({
+        id: ownDoc.id,
+        collection: relationshipsSlug,
+        depth: 0,
+      })
+
+      expect(unchanged.tenant).toBe(tenantA.id)
+    })
+
+    it('should reject a REST draft create that assigns a tenant the user is not a member of', async () => {
+      const tenantAToken = await loginAsWriteIsolationUser()
+
+      const response = await restClient.POST('/autosave-global?draft=true', {
+        auth: false,
+        body: JSON.stringify({ tenant: tenantB.id, title: 'INJECTED draft over REST' }),
+        headers: { Authorization: `JWT ${tenantAToken}` },
+      })
+
+      expect(response.status).toBe(400)
+
+      const written = await payload.find({
+        collection: autosaveGlobalSlug,
+        where: { title: { equals: 'INJECTED draft over REST' } },
+      })
+
+      expect(written.docs).toHaveLength(0)
+    })
+
+    it('should reject creating a draft with a tenant the user is not assigned to', async () => {
+      await expect(
+        payload.create({
+          collection: autosaveGlobalSlug,
+          data: { tenant: tenantB.id, title: 'Injected draft into Tenant B' },
+          draft: true,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+
+    it('should reject relocating a document into another tenant through a draft update', async () => {
+      const ownDoc = await payload.create({
+        collection: autosaveGlobalSlug,
+        data: { tenant: tenantA.id, title: 'Owned by Tenant A' },
+        overrideAccess: false,
+        user,
+      })
+
+      createdAutosaveIDs.push(ownDoc.id)
+
+      await expect(
+        payload.update({
+          id: ownDoc.id,
+          collection: autosaveGlobalSlug,
+          data: { tenant: tenantB.id },
+          draft: true,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+
+    it('should allow a draft write in a tenant the user is assigned to', async () => {
+      const ownDraft = await payload.create({
+        collection: autosaveGlobalSlug,
+        data: { tenant: tenantA.id, title: 'Draft owned by Tenant A' },
+        draft: true,
+        overrideAccess: false,
+        user,
+      })
+
+      createdAutosaveIDs.push(ownDraft.id)
+
+      const updated = await payload.update({
+        id: ownDraft.id,
+        collection: autosaveGlobalSlug,
+        data: { title: 'Draft owned by Tenant A, edited' },
+        draft: true,
+        overrideAccess: false,
+        user,
+      })
+
+      expect(updated.title).toBe('Draft owned by Tenant A, edited')
+    })
+
+    it('should leave the tenant untouched on a partial update that omits it', async () => {
+      // The request never sends the tenant, so Payload backfills it from the stored doc
+      // before the enforcement hook runs. A title-only edit must not trip the check.
+      const ownDoc = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantA.id, title: 'Owned by Tenant A' },
+        overrideAccess: false,
+        user,
+      })
+
+      createdRelationshipIDs.push(ownDoc.id)
+
+      const updated = await payload.update({
+        id: ownDoc.id,
+        collection: relationshipsSlug,
+        data: { title: 'Edited title only' },
+        depth: 0,
+        overrideAccess: false,
+        user,
+      })
+
+      expect(updated.title).toBe('Edited title only')
+      expect(updated.tenant).toBe(tenantA.id)
+    })
+
+    it('should reject clearing the tenant through a draft update', async () => {
+      // Drafts skip field validation, so the required rule does not fire. The enforcement
+      // hook is what rejects an explicit clear of an existing tenant.
+      const ownDraft = await payload.create({
+        collection: autosaveGlobalSlug,
+        data: { tenant: tenantA.id, title: 'Owned by Tenant A' },
+        overrideAccess: false,
+        user,
+      })
+
+      createdAutosaveIDs.push(ownDraft.id)
+
+      await expect(
+        payload.update({
+          id: ownDraft.id,
+          collection: autosaveGlobalSlug,
+          data: { tenant: null },
+          draft: true,
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow(ValidationError)
     })
   })
 

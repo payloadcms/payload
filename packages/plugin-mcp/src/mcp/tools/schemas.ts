@@ -415,11 +415,6 @@ export const toolSchemas = {
     description: 'Sends a password reset email to a user.',
     parameters: z.object({
       collection: z.string().describe('The collection containing the user (e.g., "users")'),
-      disableEmail: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to disable sending the email (for testing)'),
       email: z.string().email().describe('The user email address'),
     }),
   },

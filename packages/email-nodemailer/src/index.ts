@@ -40,9 +40,16 @@ export const nodemailerAdapter = async (
     defaultFromAddress,
     defaultFromName,
     sendEmail: async (message) => {
+      const from =
+        typeof message.from === 'object' && message.from
+          ? message.from.name
+            ? `${message.from.name} <${message.from.address}>`
+            : message.from.address
+          : message.from
+
       return await transport.sendMail({
         ...message,
-        from: message.from || `${defaultFromName} <${defaultFromAddress}>`,
+        from: from || `${defaultFromName} <${defaultFromAddress}>`,
         ...(overrideRecipientAddress ? { to: overrideRecipientAddress } : {}),
       })
     },
