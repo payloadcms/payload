@@ -114,7 +114,23 @@ export const AccessJoinArticles: CollectionConfig = {
       }
 
       if (req.context.useNestedJSONAccessConstraint) {
-        return { 'settings.approved': { exists: false } }
+        return { 'settings.approved': { equals: true } }
+      }
+
+      if (req.context.useNestedJSONExistsAccessConstraint) {
+        return { 'settings.approved': { exists: true } }
+      }
+
+      if (req.context.useAbsentJSONAccessConstraint) {
+        return { 'extras.flag': { equals: 1 } }
+      }
+
+      if (req.context.useAbsentJSONExistsAccessConstraint) {
+        return { 'extras.flag': { exists: false } }
+      }
+
+      if (req.context.useUnsupportedJSONOperatorAccessConstraint) {
+        return { 'settings.approved': { not_equals: true } }
       }
 
       return {
@@ -187,6 +203,10 @@ export const AccessJoinArticles: CollectionConfig = {
     },
     {
       name: 'settings',
+      type: 'json',
+    },
+    {
+      name: 'extras',
       type: 'json',
     },
     {

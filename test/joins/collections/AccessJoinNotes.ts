@@ -114,7 +114,24 @@ export const AccessJoinNotes: CollectionConfig = {
       }
 
       if (req.context.useNestedJSONAccessConstraint) {
-        return { 'settings.approved': { exists: false } }
+        return { 'settings.approved': { equals: true } }
+      }
+
+      if (req.context.useNestedJSONExistsAccessConstraint) {
+        return { 'settings.approved': { exists: true } }
+      }
+
+      // `extras` only exists on the articles collection, so this target contributes no constraint.
+      if (req.context.useAbsentJSONAccessConstraint) {
+        return true
+      }
+
+      if (req.context.useAbsentJSONExistsAccessConstraint) {
+        return true
+      }
+
+      if (req.context.useUnsupportedJSONOperatorAccessConstraint) {
+        return { 'settings.approved': { not_equals: true } }
       }
 
       return {
