@@ -112,6 +112,11 @@ export const payloadCloudPlugin =
       ...(config.globals || []),
       {
         slug: 'payload-cloud-instance',
+        access: {
+          read: () => false,
+          readVersions: () => false,
+          update: () => false,
+        },
         admin: {
           hidden: true,
         },
@@ -140,11 +145,7 @@ export const payloadCloudPlugin =
           overrideAccess: true,
         })
 
-        if (retrievedGlobal.instance === process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
-          return true
-        } else {
-          process.env.PAYLOAD_CLOUD_JOBS_INSTANCE = ''
-        }
+        return retrievedGlobal.instance === process.env.PAYLOAD_CLOUD_JOBS_INSTANCE
       }
 
       return false

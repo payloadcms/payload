@@ -21,9 +21,13 @@ const testUserCredentials = {
   password: '123456',
 }
 
-test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
-  test.beforeEach(async ({ payload }) => {
-    post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 }, overrideAccess: true })
+test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sdk', () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
+    post = await payload.create({
+      collection: 'posts',
+      data: { number: 1, number2: 3 },
+      overrideAccess: true,
+    })
     postTrash = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString(), text: 'fixture-trash' },
@@ -34,7 +38,11 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
       data: { ...testUserCredentials },
       overrideAccess: true,
     })
-    await payload.updateGlobal({ slug: 'global', data: { text: 'some-global' }, overrideAccess: true })
+    await payload.updateGlobal({
+      slug: 'global',
+      data: { text: 'some-global' },
+      overrideAccess: true,
+    })
   })
 
   test('should execute find', async ({ payload, sdk }) => {
@@ -51,7 +59,7 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
     const resultPaginationFalse = await sdk.find({ collection: 'posts', pagination: false })
     expect(resultPaginationFalse.docs).toHaveLength(41)
     expect(resultPaginationFalse.totalDocs).toBe(41)
-    await payload.delete({ collection: 'posts', where: { id: { in: ids } }, overrideAccess: true })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: { id: { in: ids } } })
   })
 
   test('should return no docs for an empty array in `in` condition', async ({ sdk }) => {
@@ -92,25 +100,25 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
   })
 
   test('should execute findByID', async ({ sdk }) => {
-    const result = await sdk.findByID({ collection: 'posts', id: post.id })
+    const result = await sdk.findByID({ id: post.id, collection: 'posts' })
 
     expect(result.id).toBe(post.id)
   })
 
   test('should execute findByID with trash', async ({ sdk }) => {
     expect(
-      await sdk.findByID({ collection: 'posts', id: postTrash.id, disableErrors: true }),
+      await sdk.findByID({ id: postTrash.id, collection: 'posts', disableErrors: true }),
     ).toBeNull()
-    expect((await sdk.findByID({ collection: 'posts', id: postTrash.id, trash: true })).id).toEqual(
+    expect((await sdk.findByID({ id: postTrash.id, collection: 'posts', trash: true })).id).toEqual(
       postTrash.id,
     )
   })
 
   test('should execute findByID with disableErrors: true', async ({ sdk }) => {
     const result = await sdk.findByID({
-      disableErrors: true,
-      collection: 'posts',
       id: typeof post.id === 'string' ? randomUUID() : 999,
+      collection: 'posts',
+      disableErrors: true,
     })
 
     expect(result).toBeNull()
@@ -119,9 +127,13 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
   test('should execute findVersionByID', async ({ payload, sdk }) => {
     const {
       docs: [version],
-    } = await payload.findVersions({ collection: 'posts', where: { parent: { equals: post.id } }, overrideAccess: true })
+    } = await payload.findVersions({
+      collection: 'posts',
+      overrideAccess: true,
+      where: { parent: { equals: post.id } },
+    })
 
-    const result = await sdk.findVersionByID({ collection: 'posts', id: version.id })
+    const result = await sdk.findVersionByID({ id: version.id, collection: 'posts' })
 
     expect(result.id).toBe(version.id)
   })
@@ -131,16 +143,16 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
       docs: [trashVersion],
     } = await payload.findVersions({
       collection: 'posts',
+      overrideAccess: true,
       trash: true,
       where: { parent: { equals: postTrash.id } },
-      overrideAccess: true,
     })
 
     expect(
-      await sdk.findVersionByID({ collection: 'posts', id: trashVersion.id, disableErrors: true }),
+      await sdk.findVersionByID({ id: trashVersion.id, collection: 'posts', disableErrors: true }),
     ).toBeNull()
     expect(
-      (await sdk.findVersionByID({ collection: 'posts', id: trashVersion.id, trash: true })).id,
+      (await sdk.findVersionByID({ id: trashVersion.id, collection: 'posts', trash: true })).id,
     ).toBe(trashVersion.id)
   })
 
@@ -153,7 +165,7 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
   test('should execute create with file', async ({ sdk }) => {
     const filePath = path.join(dirname, './image.jpg')
     const { file, handle } = await createStreamableFile(filePath)
-    const res = await sdk.create({ collection: 'media', file, data: {} })
+    const res = await sdk.create({ collection: 'media', data: {}, file })
     expect(res.id).toBeTruthy()
     await handle.close()
   })
@@ -178,8 +190,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
 
   test('should execute update (by ID)', async ({ sdk }) => {
     const result = await sdk.update({
-      collection: 'posts',
       id: post.id,
+      collection: 'posts',
       data: { text: 'updated-text' },
     })
 
@@ -188,8 +200,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
 
   test('should execute update (by ID) with trash', async ({ sdk }) => {
     const result = await sdk.update({
-      collection: 'posts',
       id: postTrash.id,
+      collection: 'posts',
       data: { text: 'updated-trash-by-id' },
       trash: true,
     })
@@ -200,8 +212,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
   test('should execute update (bulk)', async ({ sdk }) => {
     const result = await sdk.update({
       collection: 'posts',
-      where: { id: { equals: post.id } },
       data: { text: 'updated-text-bulk' },
+      where: { id: { equals: post.id } },
     })
 
     expect(result.docs[0].text).toBe('updated-text-bulk')
@@ -210,9 +222,9 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
   test('should execute update (bulk) with trash', async ({ sdk }) => {
     const result = await sdk.update({
       collection: 'posts',
-      where: { id: { equals: postTrash.id } },
       data: { text: 'updated-trash-bulk' },
       trash: true,
+      where: { id: { equals: postTrash.id } },
     })
 
     expect(result.docs[0].text).toBe('updated-trash-bulk')
@@ -225,7 +237,12 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
 
     expect(result.id).toBe(post.id)
     expect(
-      await payload.findByID({ collection: 'posts', id: post.id, disableErrors: true, overrideAccess: true }),
+      await payload.findByID({
+        id: post.id,
+        collection: 'posts',
+        disableErrors: true,
+        overrideAccess: true,
+      }),
     ).toBeNull()
   })
 
@@ -236,15 +253,15 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
       overrideAccess: true,
     })
 
-    await sdk.delete({ collection: 'posts', id: trashed.id, trash: true })
+    await sdk.delete({ id: trashed.id, collection: 'posts', trash: true })
 
     expect(
       await payload.findByID({
+        id: trashed.id,
         collection: 'posts',
         disableErrors: true,
-        id: trashed.id,
-        trash: true,
         overrideAccess: true,
+        trash: true,
       }),
     ).toBeNull()
   })
@@ -252,11 +269,16 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
   test('should execute delete (bulk)', async ({ payload, sdk }) => {
     const post = await payload.create({ collection: 'posts', data: {}, overrideAccess: true })
 
-    const result = await sdk.delete({ where: { id: { equals: post.id } }, collection: 'posts' })
+    const result = await sdk.delete({ collection: 'posts', where: { id: { equals: post.id } } })
 
     expect(result.docs[0].id).toBe(post.id)
     expect(
-      await payload.findByID({ collection: 'posts', id: post.id, disableErrors: true, overrideAccess: true }),
+      await payload.findByID({
+        id: post.id,
+        collection: 'posts',
+        disableErrors: true,
+        overrideAccess: true,
+      }),
     ).toBeNull()
   })
 
@@ -280,41 +302,58 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
 
     expect(
       await payload.findByID({
+        id: trashedA.id,
         collection: 'posts',
         disableErrors: true,
-        id: trashedA.id,
-        trash: true,
         overrideAccess: true,
+        trash: true,
       }),
     ).toBeNull()
     expect(
       await payload.findByID({
+        id: trashedB.id,
         collection: 'posts',
         disableErrors: true,
-        id: trashedB.id,
-        trash: true,
         overrideAccess: true,
+        trash: true,
       }),
     ).toBeNull()
   })
 
   test('should execute restoreVersion', async ({ payload, sdk }) => {
-    const post = await payload.create({ collection: 'posts', data: { text: 'old' }, overrideAccess: true })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { text: 'old' },
+      overrideAccess: true,
+    })
 
     const {
       docs: [currentVersion],
-    } = await payload.findVersions({ collection: 'posts', where: { parent: { equals: post.id } }, overrideAccess: true })
+    } = await payload.findVersions({
+      collection: 'posts',
+      overrideAccess: true,
+      where: { parent: { equals: post.id } },
+    })
 
-    await payload.update({ collection: 'posts', id: post.id, data: { text: 'new' }, overrideAccess: true })
+    await payload.update({
+      id: post.id,
+      collection: 'posts',
+      data: { text: 'new' },
+      overrideAccess: true,
+    })
 
     const result = await sdk.restoreVersion({
-      collection: 'posts',
       id: currentVersion.id,
+      collection: 'posts',
     })
 
     expect(result.text).toBe('old')
 
-    const resultDB = await payload.findByID({ collection: 'posts', id: post.id, overrideAccess: true })
+    const resultDB = await payload.findByID({
+      id: post.id,
+      collection: 'posts',
+      overrideAccess: true,
+    })
 
     expect(resultDB.text).toBe('old')
   })
@@ -363,8 +402,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
     await payload.updateGlobal({ slug: 'global', data: { text: 'new' }, overrideAccess: true })
 
     const { version: result } = await sdk.restoreGlobalVersion({
-      slug: 'global',
       id: currentVersion.id,
+      slug: 'global',
     })
 
     expect(result.text).toBe('old')
@@ -426,10 +465,10 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
     expect(resForgotPassword.message).toBeTruthy()
 
     const afterForgotPassword = await payload.findByID({
-      showHiddenFields: true,
-      collection: 'users',
       id: user.id,
+      collection: 'users',
       overrideAccess: true,
+      showHiddenFields: true,
     })
 
     expect(afterForgotPassword.resetPasswordToken).toBeTruthy()
@@ -496,8 +535,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
 
       try {
         await sdk.findByID({
-          collection: 'posts',
           id: invalidId,
+          collection: 'posts',
         })
       } catch (err) {
         thrownError = err as PayloadSDKError
@@ -513,9 +552,9 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
       const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
 
       const result = await sdk.findByID({
-        disableErrors: true,
-        collection: 'posts',
         id: invalidId,
+        collection: 'posts',
+        disableErrors: true,
       })
 
       expect(result).toBeNull()
@@ -540,8 +579,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
 
       try {
         await sdk.update({
-          collection: emailsSlug,
           id: doc2.id,
+          collection: emailsSlug,
           data: { email: testEmail },
         })
       } catch (err) {
@@ -560,8 +599,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
 
       try {
         await sdk.delete({
-          collection: 'posts',
           id: invalidId,
+          collection: 'posts',
         })
       } catch (err) {
         thrownError = err as PayloadSDKError
@@ -578,8 +617,8 @@ test.suite({ config: './config.ts' })('@payloadcms/sdk', () => {
 
       try {
         await sdk.findByID({
-          collection: 'posts',
           id: invalidId,
+          collection: 'posts',
         })
       } catch (err) {
         thrownError = err as PayloadSDKError

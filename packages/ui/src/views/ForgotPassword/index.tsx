@@ -72,17 +72,6 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
   return (
     <Fragment>
       <ForgotPasswordForm />
-      <Button
-        buttonStyle="ghost"
-        className={`${forgotPasswordBaseClass}__back`}
-        el="link"
-        url={formatAdminURL({
-          adminRoute,
-          path: loginRoute,
-        })}
-      >
-        {i18n.t('authentication:backToLogin')}
-      </Button>
     </Fragment>
   )
 }

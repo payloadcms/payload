@@ -1,4 +1,4 @@
-import type { Config, Field, FieldSchemaMap, UploadCollectionSlug } from 'payload'
+import type { CollectionSlug, Config, Field, FieldSchemaMap, UploadCollectionSlug } from 'payload'
 
 import { sanitizeFields } from 'payload'
 
@@ -6,6 +6,7 @@ import type { UploadFeaturePropsClient } from '../client/index.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
+import { filterEnabledRelationshipCollections } from '../../relationship/shared/filterEnabledRelationshipCollections.js'
 import { createNode } from '../../typeUtilities.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
@@ -58,24 +59,29 @@ export type UploadFeatureProps = {
   maxDepth?: number
 } & ExclusiveUploadFeatureProps
 
+export type UploadFeatureServerProps = {
+  /** Collection policy resolved during feature initialization. */
+  enabledCollectionSlugs: CollectionSlug[]
+} & UploadFeatureProps
+
 export const UploadFeature = createServerFeature<
   UploadFeatureProps,
-  UploadFeatureProps,
+  UploadFeatureServerProps,
   UploadFeaturePropsClient
 >({
-  feature: ({ config: _config, isRoot, parentIsLocalized, props }) => {
-    if (!props) {
-      props = { collections: {} }
+  feature: ({ config: _config, isRoot, parentIsLocalized, props: unsanitizedProps }) => {
+    const props: UploadFeatureServerProps = {
+      ...unsanitizedProps,
+      collections: unsanitizedProps?.collections ?? {},
+      enabledCollectionSlugs: filterEnabledRelationshipCollections(_config.collections, {
+        ...unsanitizedProps,
+        uploads: true,
+      }).map(({ slug }) => slug),
     }
 
     const clientProps: UploadFeaturePropsClient = {
       collections: {},
-    }
-    if (props.disabledCollections) {
-      clientProps.disabledCollections = props.disabledCollections
-    }
-    if (props.enabledCollections) {
-      clientProps.enabledCollections = props.enabledCollections
+      enabledCollectionSlugs: props.enabledCollectionSlugs,
     }
 
     if (props.collections) {
@@ -135,6 +141,9 @@ export const UploadFeature = createServerFeature<
               }
               return allSubFields
             }
+            if (!props.enabledCollectionSlugs.includes(node.relationTo)) {
+              return null
+            }
             const collection = req ? req.payload.collections[node?.relationTo] : null
 
             if (collection) {
@@ -166,7 +175,7 @@ export const UploadFeature = createServerFeature<
                 req,
                 showHiddenFields,
               }) => {
-                if (!node?.value) {
+                if (!node?.value || !props.enabledCollectionSlugs.includes(node.relationTo)) {
                   return node
                 }
                 const collection = req.payload.collections[node?.relationTo]

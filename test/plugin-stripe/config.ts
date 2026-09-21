@@ -35,7 +35,9 @@ export default buildConfigWithDefaults({
       stripePlugin({
         isTestKey: true,
         logs: true,
-        rest: false,
+        rest: {
+          allowedMethods: ['customers.list'],
+        },
         stripeSecretKey: process.env.STRIPE_SECRET_KEY,
         stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
         sync: [
@@ -96,6 +98,7 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+        roles: ['admin'],
       },
       overrideAccess: true,
     })

@@ -104,8 +104,10 @@ export type ServerComponentProps = {
    * framework-specific renderer directly.
    */
   renderComponent?: ComponentRenderer
+  /** Request object. Use `req.user` (full principal) for access-control checks. */
   req: PayloadRequest
   siblingData: Data
+  /** Authenticated user with field read access applied. Use for values sent to the client; use `req.user` for access checks. */
   user: User
   value?: unknown
 }

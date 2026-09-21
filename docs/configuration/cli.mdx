@@ -347,6 +347,26 @@ pnpm payload createDocuments \
   --documents '[{"data":{"alt":"Company logo"},"file":"./images/logo.png"}]'
 ```
 
+Upload input can also use an external URL. Payload applies the upload collection's `pasteURL`, allow-list, safe-fetch, header, and file-size settings before creating or updating the document:
+
+The trusted local CLI does not require an explicit allow-list. If one is configured, both the initial URL and redirects must match it. `pasteURL: false` disables URL uploads.
+
+```sh
+pnpm payload createDocuments \
+  --slug media \
+  --documents '[{"data":{"alt":"Company logo"},"file":{"source":"externalURL","url":"https://example.com/logo.png"}}]'
+```
+
+For `updateDocument`, pass the same object through `--file`:
+
+```sh
+pnpm payload updateDocument \
+  --slug media \
+  --id 1 \
+  --data '{"alt":"Updated logo"}' \
+  --file '{"source":"externalURL","url":"https://example.com/logo.png"}'
+```
+
 For longer input, put the array in a file:
 
 ```json

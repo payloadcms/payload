@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 
 import type { SanitizedStripePluginConfig, StripeWebhookHandler } from '../types.js'
 
-import { deepen } from '../utilities/deepen.js'
+import { deepen, getSyncedFields } from '../utilities/deepen.js'
 
 type HandleCreatedOrUpdated = (
   args: {
@@ -67,15 +67,11 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
     const foundDoc = payloadQuery.docs[0] as any
 
     // combine all properties of the Stripe doc and match their respective fields within the document
-    let syncedData = syncConfig.fields.reduce(
-      (acc, field) => {
-        const { fieldPath, stripeProperty } = field
-
-        acc[fieldPath] = stripeDoc[stripeProperty]
-        return acc
-      },
-      {} as Record<string, any>,
-    )
+    let syncedData = getSyncedFields({
+      data: stripeDoc,
+      fields: syncConfig.fields,
+      source: 'stripe',
+    })
 
     syncedData = deepen({
       ...syncedData,
