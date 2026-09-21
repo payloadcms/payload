@@ -11,8 +11,10 @@ import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
+import { ALLOWED_HEADING_TAGS } from '../constants.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
+import { headingValidation } from './validate.js'
 
 export type SerializedHeadingNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
   StronglyTypedElementNode<_SerializedHeadingNode, 'heading', T>
@@ -80,12 +82,15 @@ export const HeadingFeature = createServerFeature<
                 ]
                   .filter(Boolean)
                   .join(' ')
-                return `<${node?.tag}${style ? ` style='${style}'` : ''}>${childrenText}</${node?.tag}>`
+                const tag = ALLOWED_HEADING_TAGS.has(node.tag) ? node.tag : 'h1'
+
+                return `<${tag}${style ? ` style='${style}'` : ''}>${childrenText}</${tag}>`
               },
               nodeTypes: [HeadingNode.getType()],
             },
           },
           node: HeadingNode,
+          validations: [headingValidation({ enabledHeadingSizes })],
         }),
       ],
       sanitizedServerFeatureProps: props,

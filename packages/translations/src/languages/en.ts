@@ -58,6 +58,7 @@ export const enTranslations = {
     newPassword: 'New Password',
     passed: 'Authentication Passed',
     passwordResetSuccessfully: 'Password reset successfully.',
+    resend: 'Resend',
     resetPassword: 'Reset Password',
     resetPasswordExpiration: 'Reset Password Expiration',
     resetPasswordToken: 'Reset Password Token',

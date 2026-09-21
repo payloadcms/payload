@@ -108,7 +108,7 @@ export const handleEndpoints = async ({
     }
 
     const req = new Request(url, {
-      // @ts-expect-error // TODO: check if this is required
+      // @ts-expect-error RequestInit does not include cache in the type
       cache: request.cache,
       credentials: request.credentials,
       headers: request.headers,

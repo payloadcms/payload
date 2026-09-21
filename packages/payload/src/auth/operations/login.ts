@@ -14,17 +14,18 @@ import {
   UnverifiedEmail,
   ValidationError,
 } from '../../errors/index.js'
-import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction, Forbidden, initTransaction } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { applyUserReadAccess } from '../applyUserReadAccess.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
 import { jwtSign } from '../jwt.js'
 import { addSessionToUser, revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
@@ -95,8 +96,6 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     overrideAccess = false,
     req,
     req: {
-      fallbackLocale,
-      locale,
       payload,
       payload: { secret },
     },
@@ -218,6 +217,8 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
   user.collection = collectionConfig.slug
   user._strategy = 'local-jwt'
 
+  const authenticatedHash = user.hash
+  const authenticatedSalt = user.salt
   const authResult = await authenticateLocalStrategy({ doc: user, password })
   user = sanitizeInternalFields(user)
 
@@ -293,6 +294,37 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
       fieldsToSignArgs.sid = sid
     }
 
+    if (
+      authResult.shouldUpdatePasswordHash &&
+      typeof authenticatedHash === 'string' &&
+      typeof authenticatedSalt === 'string'
+    ) {
+      try {
+        const { hash, salt } = await generatePasswordSaltHash({
+          collection: collectionConfig,
+          isPasswordAuthenticated: true,
+          password,
+          req,
+        })
+
+        await payload.db.updateOne({
+          collection: collectionConfig.slug,
+          data: { hash, salt },
+          req,
+          select: { id: true },
+          where: {
+            id: { equals: user.id },
+            hash: { equals: authenticatedHash },
+            salt: { equals: authenticatedSalt },
+          },
+        })
+      } catch (err) {
+        // Rehashing is opportunistic and is retried on the next login, so a failure here
+        // must not reject an otherwise valid login or discard the session already created
+        payload.logger.error({ err, msg: 'Failed to update the stored password hash' })
+      }
+    }
+
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
     if (maxLoginAttemptsEnabled) {
@@ -349,42 +381,19 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     // afterRead - Fields
     // /////////////////////////////////////
 
-    user = await afterRead({
+    const userWithReadAccess = await applyUserReadAccess({
       collection: collectionConfig,
-      context: req.context,
       depth: depth!,
-      doc: user,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      draft: undefined,
-      fallbackLocale: fallbackLocale!,
-      global: null,
-      locale: locale!,
       overrideAccess,
       req,
       showHiddenFields: showHiddenFields!,
+      user,
     })
-
-    // /////////////////////////////////////
-    // afterRead - Collection
-    // /////////////////////////////////////
-
-    if (collectionConfig.hooks?.afterRead?.length) {
-      for (const hook of collectionConfig.hooks.afterRead) {
-        user =
-          (await hook({
-            collection: args.collection?.config,
-            context: req.context,
-            doc: user,
-            overrideAccess,
-            req,
-          })) || user
-      }
-    }
 
     let result: LoginResult<TSlug> = {
       exp,
       token,
-      user,
+      user: userWithReadAccess,
     }
 
     // /////////////////////////////////////

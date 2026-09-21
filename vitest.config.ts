@@ -39,6 +39,9 @@ export default defineConfig({
     },
     projects: [
       {
+        esbuild: {
+          jsx: 'automatic',
+        },
         test: {
           include: ['packages/**/*.spec.ts'],
           name: 'unit',

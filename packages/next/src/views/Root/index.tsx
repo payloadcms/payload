@@ -126,6 +126,7 @@ export const RootPage = async ({
     permissions,
     req,
     req: { payload },
+    user: userWithReadAccess,
   } = await initReq({
     configPromise: config,
     importMap,
@@ -153,7 +154,7 @@ export const RootPage = async ({
         config: payload.config,
         route: currentRoute,
         searchParams,
-        user: req.user,
+        user: userWithReadAccess,
       }),
     )
   }
@@ -248,7 +249,7 @@ export const RootPage = async ({
     config,
     i18n: req.i18n,
     importMap,
-    user: viewType === 'createFirstUser' ? true : req.user,
+    user: viewType === 'createFirstUser' ? true : userWithReadAccess,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -327,6 +328,7 @@ export const RootPage = async ({
       params,
       payload: req.payload,
       searchParams,
+      user: userWithReadAccess,
       viewActions,
     } satisfies AdminViewServerPropsOnly,
   })
@@ -350,7 +352,7 @@ export const RootPage = async ({
           permissions={permissions}
           req={req}
           searchParams={searchParams}
-          user={req.user}
+          user={userWithReadAccess}
           viewActions={viewActions}
           viewType={viewType}
           visibleEntities={{

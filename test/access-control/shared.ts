@@ -2,6 +2,7 @@ export const firstArrayText = 'first-array-text'
 export const secondArrayText = 'second-array-text'
 
 export const slug = 'posts'
+export const postReferencesSlug = 'post-references'
 export const unrestrictedSlug = 'unrestricted'
 export const readOnlySlug = 'read-only-collection'
 export const readOnlyGlobalSlug = 'read-only-global'
@@ -32,6 +33,10 @@ export const authSlug = 'auth-collection'
 export const whereCacheSameSlug = 'where-cache-same'
 export const whereCacheUniqueSlug = 'where-cache-unique'
 export const asyncParentSlug = 'async-parent'
+
+export const accessRelationParentSlug = 'access-relation-parent'
+export const accessRelationChildSlug = 'access-relation-child'
+export const selfReferentialSlug = 'self-referential'
 
 // Trash access control slugs
 export const differentiatedTrashSlug = 'differentiated-trash'
