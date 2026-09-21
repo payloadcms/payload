@@ -185,20 +185,21 @@
   }
 
   [data-dropdown-key='text'] {
-    & .toolbar-popup__dropdown-item {
-      padding: 0 var(--spacer-4);
+    /* Reserved on every item, not just the active one, so the checkmark never overlaps the item icon. */
+    & .toolbar-popup__dropdown-item::before {
+      content: '';
+      flex-shrink: 0;
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+      background-color: currentColor;
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M12.277 3.584a.5.5 0 0 1 .139.693l-5 7.5a.5.5 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.57 4.662-6.993a.5.5 0 0 1 .693-.139' fill='black'/%3E%3C/svg%3E");
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      visibility: hidden;
     }
 
     & .toolbar-popup__dropdown-item.active::before {
-      content: '';
-      position: absolute;
-      inset-inline-start: var(--spacer-2-5);
-      top: 50%;
-      width: var(--spacer-1);
-      height: var(--spacer-2);
-      border: solid var(--color-text-onselected-strong);
-      border-width: 0 1px 1px 0;
-      transform: translateY(-60%) rotate(45deg);
+      visibility: visible;
     }
 
     .btn__icon {
