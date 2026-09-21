@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { useWatchForm } from '../../Form/context.js'
+import { useForm } from '../../Form/context.js'
 
 type RowLabelType<T = unknown> = {
   readonly data: T
@@ -21,7 +21,7 @@ type Props<T> = {
 } & Omit<RowLabelType<T>, 'data'>
 
 export const RowLabelProvider: React.FC<Props<unknown>> = ({ children, path, rowNumber }) => {
-  const { getDataByPath, getSiblingData } = useWatchForm()
+  const { getDataByPath, getSiblingData } = useForm()
   const collapsibleData = getSiblingData(path)
   const arrayData = getDataByPath(path)
 
