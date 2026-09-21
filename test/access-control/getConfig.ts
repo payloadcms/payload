@@ -21,6 +21,8 @@ import { Regression2 } from './collections/Regression-2/index.js'
 import { RestrictedTrash } from './collections/RestrictedTrash/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
+  accessRelationChildSlug,
+  accessRelationParentSlug,
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   differentiatedTrashSlug,
@@ -31,6 +33,7 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   nonAdminEmail,
+  postReferencesSlug,
   publicUserEmail,
   publicUsersSlug,
   readNotUpdateGlobalSlug,
@@ -42,6 +45,7 @@ import {
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
+  selfReferentialSlug,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
@@ -157,6 +161,10 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: publicUsersSlug,
+      access: {
+        create: () => true,
+        read: () => true,
+      },
       auth: true,
       fields: [],
       versions: false,
@@ -165,9 +173,19 @@ export const getConfig: () => Partial<Config> = () => ({
       slug,
       access: {
         ...openAccess,
+        // Unauthenticated callers cannot read posts titled "archived".
+        read: ({ req }) => (req.user ? true : { title: { not_equals: 'archived' } }),
         update: () => false,
       },
       fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'title2',
+          type: 'text',
+        },
         {
           name: 'restrictedField',
           type: 'text',
@@ -226,15 +244,93 @@ export const getConfig: () => Partial<Config> = () => ({
           collection: 'relation-restricted',
           on: 'post',
         },
+        {
+          name: 'reference',
+          type: 'relationship',
+          relationTo: postReferencesSlug,
+        },
+        {
+          name: 'references',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: postReferencesSlug,
+        },
+        {
+          name: 'polymorphicReference',
+          type: 'relationship',
+          relationTo: [postReferencesSlug, unrestrictedSlug],
+        },
       ],
       versions: false,
     },
     {
+      slug: postReferencesSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'post',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: slug,
+        },
+        {
+          name: 'singlePost',
+          type: 'relationship',
+          hasMany: false,
+          relationTo: slug,
+        },
+        {
+          name: 'joinedPosts',
+          type: 'join',
+          collection: slug,
+          on: 'reference',
+        },
+        {
+          name: 'joinedPostsMany',
+          type: 'join',
+          collection: slug,
+          on: 'references',
+        },
+        {
+          name: 'polymorphicJoinedPosts',
+          type: 'join',
+          collection: [slug, unrestrictedSlug],
+          on: 'reference',
+        },
+        {
+          name: 'joinedPostsPolymorphicOn',
+          type: 'join',
+          collection: slug,
+          on: 'polymorphicReference',
+        },
+      ],
+    },
+    {
       slug: unrestrictedSlug,
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'restrictedName',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'reference',
+          type: 'relationship',
+          relationTo: postReferencesSlug,
         },
         {
           name: 'info',
@@ -255,6 +351,32 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'relationship',
           hasMany: true,
           relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'userRestrictedDoc',
+          type: 'relationship',
+          relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'fullyRestrictedDocs',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: fullyRestrictedSlug,
+        },
+        {
+          name: 'restrictedUserDocs',
+          type: 'relationship',
+          access: {
+            read: () => false,
+          },
+          hasMany: true,
+          relationTo: createNotUpdateCollectionSlug,
+        },
+        {
+          name: 'restrictedRelatedItems',
+          type: 'join',
+          collection: fullyRestrictedSlug,
+          on: 'unrestrictedDoc',
         },
         {
           name: 'createNotUpdateDocs',
@@ -325,6 +447,23 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'restrictedName',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'unrestrictedDoc',
+          type: 'relationship',
+          relationTo: unrestrictedSlug,
+        },
       ],
       versions: false,
     },
@@ -349,7 +488,14 @@ export const getConfig: () => Partial<Config> = () => ({
       access: {
         create: () => true,
         delete: () => false,
-        read: () => true,
+        read: ({ req }) =>
+          req.user
+            ? true
+            : {
+                name: {
+                  not_equals: 'archived',
+                },
+              },
         update: ({ req }) => ({
           name: {
             equals: req.user?.email,
@@ -382,6 +528,11 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
         },
       ],
       versions: false,
@@ -538,6 +689,17 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: false,
         },
       ],
+      hooks: {
+        beforeDelete: [
+          ({ id, req }) => {
+            const beforeDeleteCalls = req.context.beforeDeleteCalls
+
+            if (Array.isArray(beforeDeleteCalls)) {
+              beforeDeleteCalls.push(id)
+            }
+          },
+        ],
+      },
       labels: {
         plural: 'Doc Level Access',
         singular: 'Doc Level Access',
@@ -855,6 +1017,81 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
       versions: false,
+    },
+    // Parent collection whose read access returns a where constraint, with a
+    // relationship to a child collection that ALSO returns a where constraint.
+    {
+      slug: accessRelationParentSlug,
+      access: {
+        ...openAccess,
+        // Unauthenticated callers only see "published" parents.
+        read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'status',
+          type: 'text',
+        },
+        {
+          name: 'child',
+          type: 'relationship',
+          relationTo: accessRelationChildSlug,
+        },
+      ],
+    },
+    {
+      slug: accessRelationChildSlug,
+      access: {
+        ...openAccess,
+        // Child also constrains read access with a where query.
+        read: ({ req: { user } }) => (user ? true : { createdAt: { exists: true } }),
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'nested',
+          type: 'group',
+          fields: [
+            {
+              name: 'isActive',
+              type: 'checkbox',
+              defaultValue: true,
+            },
+          ],
+        },
+      ],
+    },
+    // Self-referential relationship on a collection whose read access returns a where
+    // constraint. Querying through `parent` must apply that constraint to the related doc.
+    {
+      slug: selfReferentialSlug,
+      access: {
+        ...openAccess,
+        read: ({ req: { user } }) => (user ? true : { isPublic: { equals: true } }),
+      },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+        {
+          name: 'isPublic',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: selfReferentialSlug,
+        },
+      ],
     },
   ],
   globals: [

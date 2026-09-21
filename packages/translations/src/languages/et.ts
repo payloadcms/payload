@@ -58,6 +58,7 @@ export const etTranslations: DefaultTranslationsObject = {
     notRedirected: 'Ei suunatud ümber? <0>Logi siin sisse</0>',
     passed: 'Autentimine õnnestus',
     passwordResetSuccessfully: 'Parool edukalt lähtestatud.',
+    resend: 'Saada uuesti',
     resetPassword: 'Lähtesta parool',
     resetPasswordExpiration: 'Parooli lähtestamise aegumistähtaeg',
     resetPasswordToken: 'Parooli lähtestamise võti',

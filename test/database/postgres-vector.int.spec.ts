@@ -12,6 +12,13 @@ import { test } from '../__helpers/int/vitest.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// Read through the primary. `payload.db.drizzle` is the withReplicas() handle whose reads
+// default to a replica, which races replication lag right after a write.
+const primaryDb = (payload: BasePayload): PostgresDB => {
+  const adapter = payload.db as PostgresAdapter
+  return adapter.primaryDrizzle ?? adapter.drizzle
+}
+
 test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
   'postgres vector custom column',
   () => {
@@ -112,7 +119,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
 
       const similarity = sql<number>`1 - (${cosineDistance(payload.db.tables.posts.embedding, catEmbedding)})`
 
-      const db = payload.db.drizzle as PostgresDB
+      const db = primaryDb(payload)
 
       const res = await db
         .select()
@@ -234,7 +241,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
 
       const distance = sql<number>`(${l2Distance(payload.db.tables.posts.embedding, catEmbedding)})`
 
-      const db = payload.db.drizzle as PostgresDB
+      const db = primaryDb(payload)
 
       const res = await db
         .select()
@@ -346,7 +353,7 @@ test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
 
       const similarity = sql<number>`1 - (${jaccardDistance(payload.db.tables.posts.embedding, catEmbedding)})`
 
-      const db = payload.db.drizzle as PostgresDB
+      const db = primaryDb(payload)
 
       const res = await db
         .select()
