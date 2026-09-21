@@ -1932,3 +1932,20 @@ If you previously used `rest: false`, remove the property; omitting `rest` disab
 - `enableAPIKey` is removed. Revoke by setting `apiKey: null`.
 - `hasAPIKey` (3.x virtual field) is removed. Use `apiKeyLast4` and `docPermissions.fields.apiKey`.
 - Custom `access.read` on the generated `apiKey` field is inert — reads are hardcoded to deny.
+
+### Upload `abortOnLimit` now defaults to `true`
+
+The Payload-wide [`upload.abortOnLimit`](../upload/overview#payload-wide-upload-options) option now defaults to `true`. A file that is bigger than the configured `fileSize` limit now returns an HTTP 413 error by default. Previously, the file was truncated to the limit without any error, and the upload continued.
+
+If your application depends on the old truncate-on-limit behavior, set `abortOnLimit: false` explicitly:
+
+```diff
+export default buildConfig({
+  upload: {
++   abortOnLimit: false,
+    limits: {
+      fileSize: 5000000,
+    },
+  },
+})
+```
