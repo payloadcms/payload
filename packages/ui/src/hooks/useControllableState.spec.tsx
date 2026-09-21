@@ -1,5 +1,5 @@
-import { Activity, useEffect } from 'react'
-import { describe, expect, test } from 'vitest'
+import { Activity, Profiler, useEffect } from 'react'
+import { describe, expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { configure } from 'vitest-browser-react/pure'
 
@@ -50,6 +50,26 @@ describe('useControllableState', () => {
     await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
     await screen.rerender(<StateFixture value="prop" />)
     await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'prop')
+  })
+
+  test('should avoid an extra render when the prop catches up with local state', async () => {
+    const onRender = vi.fn()
+    const screen = await render(<StateFixture value="prop" />, {
+      wrapper: ({ children }) => (
+        <Profiler id="StateFixture" onRender={onRender}>
+          {children}
+        </Profiler>
+      ),
+    })
+
+    await screen.getByRole('button', { name: 'Set local' }).click()
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+    onRender.mockClear()
+
+    await screen.rerender(<StateFixture value="local" />)
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+
+    expect(onRender).toHaveBeenCalledTimes(1)
   })
 
   test('should compose functional updates in the same event', async () => {
