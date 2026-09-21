@@ -12,6 +12,7 @@ import { transforms as registry } from '../registry.js'
 import { runTransforms as defaultRunTransforms } from '../runner.js'
 import { loadPackageJsons, serializePackageJson } from '../utils/packageJson.js'
 import { loadProject } from '../utils/project.js'
+import { resolveDefaultTag } from './defaultTag.js'
 import { detectPackageManager } from './detectPackageManager.js'
 import { renderReport } from './report.js'
 import { resolveVersions } from './resolveVersions.js'
@@ -26,7 +27,8 @@ import { MIGRATION_GUIDE_RELATIVE_PATH, RUNBOOK_RELATIVE_PATH } from './types.js
 export type UpgradeFlags = {
   dry: boolean
   force: boolean
-  tag: string
+  /** Explicit --tag; when absent the default is derived from the running version. */
+  tag?: string
 }
 
 type RunUpgradeArgs = {
@@ -80,7 +82,8 @@ export async function runUpgrade(
   }
 
   // 2. RESOLVE VERSIONS
-  const resolved = await resolveVersions({ fetchRegistry: deps.fetchRegistry, tag: flags.tag })
+  const tag = flags.tag ?? resolveDefaultTag()
+  const resolved = await resolveVersions({ fetchRegistry: deps.fetchRegistry, tag })
   warnStaleNode(resolved)
 
   // 3. REWRITE package.json

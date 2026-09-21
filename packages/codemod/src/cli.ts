@@ -28,7 +28,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
 
     if (flags.upgrade === 'run') {
       const { failed } = await runUpgrade({
-        flags: { dry: flags.dry, force: flags.force, tag: flags.tag ?? 'canary' },
+        flags: { dry: flags.dry, force: flags.force, tag: flags.tag },
         path: flags.path,
       })
       if (failed) {
@@ -40,7 +40,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
     const { failed } = await runDispatch({
       agentFlag: flags.agent,
       path: flags.path,
-      upgradeFlags: { dry: flags.dry, force: flags.force, tag: flags.tag ?? 'canary' },
+      upgradeFlags: { dry: flags.dry, force: flags.force, tag: flags.tag },
     })
     if (failed) {
       process.exitCode = 1

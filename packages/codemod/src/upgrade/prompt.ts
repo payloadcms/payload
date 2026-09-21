@@ -33,7 +33,8 @@ Run this from the project root:
 
     ${command} upgrade run
 
-Add \`--tag <dist-tag>\` to resolve Payload from a non-default dist-tag (default is \`canary\`).
+By default it resolves Payload from the dist-tag this CLI was installed under (\`beta\` when you
+ran \`@payloadcms/codemod@beta\`, else \`canary\`). Add \`--tag <dist-tag>\` to pin a specific one.
 This pins the Payload packages to v4, removes conflicting overrides, writes the toolchain
 floors, installs, and runs the AST transforms. Read its report:
 - It prints the resolved payload version, the required Next target, and the path to the

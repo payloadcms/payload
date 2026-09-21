@@ -41,7 +41,7 @@ the prompt instead of prompting.
 `npx @payloadcms/codemod upgrade run` performs the deterministic v3 -> v4 slice against the current
 directory (run it from your project root):
 
-1. Resolves the current Payload canary from the npm registry (override with `--tag <dist-tag>`).
+1. Resolves the current Payload version from the npm registry, using the dist-tag this CLI was installed under (`beta` if run as `@payloadcms/codemod@beta`, else `canary`; override with `--tag <dist-tag>`).
 2. Rewrites `package.json`: pins `payload` + every `@payloadcms/*` to that exact version in
    lockstep, removes dependency overrides pinning them, converts their carets to exact, and writes
    the TypeScript / `@types/node` / `engines.node` floors. The `@payloadcms/eslint-*` packages are
@@ -56,7 +56,7 @@ prints the required Next target.
 
 Flags:
 
-- `--tag <dist-tag>`: dist-tag to resolve Payload versions from (default `canary`).
+- `--tag <dist-tag>`: dist-tag to resolve Payload versions from. Defaults to the dist-tag this CLI was installed under (`beta` when run as `@payloadcms/codemod@beta`, else `canary`).
 - `--dry`: preview the `package.json` changes and planned steps; write and install nothing.
 - `--force`: skip the dirty-git-tree warning.
 
