@@ -50,7 +50,6 @@ export class Main {
     // @ts-expect-error bad typings
     this.args = arg(
       {
-        '--agent': String,
         '--branch': String,
         '--db': String,
         '--db-accept-recommended': Boolean,
@@ -65,9 +64,6 @@ export class Main {
 
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
-
-        // Agent
-        '--no-agent': Boolean,
 
         // Package manager
         '--no-deps': Boolean,

@@ -222,10 +222,8 @@ export async function createProject(
     template: 'template' in args ? args.template : undefined,
   })
 
-  if (!cliArgs['--no-agent']) {
-    for (const { content, fileName } of buildAgentConfigFiles()) {
-      await fse.writeFile(path.resolve(projectDir, fileName), content)
-    }
+  for (const { content, fileName } of buildAgentConfigFiles()) {
+    await fse.writeFile(path.resolve(projectDir, fileName), content)
   }
 
   if (!cliArgs['--no-deps']) {
