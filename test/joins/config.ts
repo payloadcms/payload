@@ -1,11 +1,26 @@
+import {
+  postgresAdapter,
+  type PostgresOperatorHandler,
+  postgresUnaccent,
+  sql,
+} from '@payloadcms/db-postgres'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { createFolderField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { defaultPostgresUrl } from '../dbAdapters.js'
+import { AccessJoinArticles } from './collections/AccessJoinArticles.js'
+import { AccessJoinNotes } from './collections/AccessJoinNotes.js'
+import { AccessJoinParents } from './collections/AccessJoinParents.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
+import {
+  OperatorHandlerJoinArticles,
+  OperatorHandlerJoinNotes,
+  OperatorHandlerJoinParents,
+} from './collections/OperatorHandlerJoins.js'
 import { Posts } from './collections/Posts.js'
 import { SelfJoins } from './collections/SelfJoins.js'
 import { Singular } from './collections/Singular.js'
@@ -27,9 +42,75 @@ const foldersSlug = 'folders'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const caseInsensitiveCustomFieldHandler: PostgresOperatorHandler = {
+  name: 'case-insensitive-custom-field',
+  fieldTypes: ['text'],
+  operators: ['not_equals'],
+  transformOperands: ({ column, field, value }) => {
+    if (field.custom?.useCaseInsensitiveComparison?.()) {
+      return {
+        column: sql`lower(${column})`,
+        value: sql`lower(${value})`,
+      }
+    }
+
+    return { column, value }
+  },
+}
+
+const emptyInAvailabilityHandler: PostgresOperatorHandler = {
+  name: 'empty-in-availability',
+  fieldTypes: ['text'],
+  operators: ['in'],
+  transformOperands: ({ column, field, value }) => {
+    if (field.name === 'availability' && Array.isArray(value) && value.length === 0) {
+      return {
+        column,
+        value: ['available'],
+      }
+    }
+
+    return { column, value }
+  },
+}
+
+const systemIDOperatorHandler: PostgresOperatorHandler = {
+  name: 'system-id-constraint',
+  operators: ['not_equals'],
+  transformOperands: ({ column, field, value }) => {
+    if (field.name === 'id' && 'columnType' in column) {
+      return {
+        column: sql`'same-value'`,
+        value: 'same-value',
+      }
+    }
+
+    return { column, value }
+  },
+}
+
 export default buildConfigWithDefaults({
   suite: 'joins',
   config: {
+    ...(process.env.PAYLOAD_DATABASE === 'postgres'
+      ? {
+          db: postgresAdapter({
+            extensions: ['unaccent'],
+            pool: {
+              connectionString:
+                process.env.POSTGRES_URL || process.env.DATABASE_URL || defaultPostgresUrl,
+            },
+            query: {
+              operatorHandlers: [
+                postgresUnaccent(),
+                caseInsensitiveCustomFieldHandler,
+                emptyInAvailabilityHandler,
+                systemIDOperatorHandler,
+              ],
+            },
+          }),
+        }
+      : {}),
     admin: {
       importMap: {
         baseDir: path.resolve(dirname),
@@ -37,6 +118,12 @@ export default buildConfigWithDefaults({
       user: 'users',
     },
     collections: [
+      AccessJoinArticles,
+      AccessJoinNotes,
+      AccessJoinParents,
+      OperatorHandlerJoinArticles,
+      OperatorHandlerJoinNotes,
+      OperatorHandlerJoinParents,
       {
         slug: 'users',
         auth: true,

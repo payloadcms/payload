@@ -330,6 +330,7 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
       limit: 0,
       sort: 'createdAt',
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(updatedGlobalVersions.totalDocs).toBe(2)

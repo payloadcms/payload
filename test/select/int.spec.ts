@@ -24,7 +24,7 @@ import { devUser } from '../credentials.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('Select', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => {
   test.describe('Local API - Base', () => {
     let post: Post
     let postId: number | string
@@ -32,7 +32,7 @@ test.suite({ config: './config.ts' })('Select', () => {
     let point: Point
     let pointId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       post = await createPost({ payload })
       postId = post.id
 
@@ -767,7 +767,7 @@ test.suite({ config: './config.ts' })('Select', () => {
     let post: LocalizedPost
     let postId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       post = await createLocalizedPost({ payload })
       postId = post.id
     })
@@ -1445,7 +1445,7 @@ test.suite({ config: './config.ts' })('Select', () => {
     let post: DeepPost
     let postId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       post = await createDeepPost({ payload })
       postId = post.id
     })
@@ -1535,7 +1535,7 @@ test.suite({ config: './config.ts' })('Select', () => {
     let post: VersionedPost
     let postId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       post = await createVersionedPost({ payload })
       postId = post.id
     })
@@ -1779,7 +1779,7 @@ test.suite({ config: './config.ts' })('Select', () => {
 
   test.describe('Local API - Globals', () => {
     let globalPost: GlobalPost
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       globalPost = await payload.updateGlobal({
         slug: 'global-post',
         data: {
@@ -1941,7 +1941,7 @@ test.suite({ config: './config.ts' })('Select', () => {
     let post: Post
     let postId: number | string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       post = await createPost({ payload })
       postId = post.id
     })
@@ -2110,7 +2110,7 @@ test.suite({ config: './config.ts' })('Select', () => {
   test.describe('REST API - Logged in', () => {
     let token: string | undefined
 
-    test.beforeEach(async ({ restClient }) => {
+    test.beforeAll(async ({ restClientInstance: restClient }) => {
       const response = await restClient.POST(`/users/login`, {
         body: JSON.stringify({
           email: devUser.email,
@@ -2184,7 +2184,7 @@ test.suite({ config: './config.ts' })('Select', () => {
       slug: string
     }
     let expectedHomePageOverride: { additional: string; id: number | string }
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       homePage = await payload.create({
         collection: 'pages',
         data: {

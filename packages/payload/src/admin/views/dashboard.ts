@@ -33,4 +33,4 @@ export type WidgetServerProps<TWidget extends { data?: unknown } | never = never
     : [WidgetSlugFromWidget<{ data?: unknown } & Exclude<TWidget, never>>] extends [never]
       ? string
       : WidgetSlugFromWidget<{ data?: unknown } & Exclude<TWidget, never>>
-} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
+} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>

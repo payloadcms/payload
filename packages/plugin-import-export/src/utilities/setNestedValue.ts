@@ -1,6 +1,5 @@
 import { APIError } from 'payload'
-
-import { hasUnsupportedFieldPathSegment } from './fieldPath.js'
+import { hasUnsupportedFieldPathSegment, setOwnProperty } from 'payload/shared'
 
 const MAX_UNVERIFIED_SPARSE_ARRAY_GAP = 1
 
@@ -44,6 +43,10 @@ const getSourceValue = (source: unknown, part: string): unknown => {
 
   const key = Array.isArray(source) && isArrayIndex(part) ? Number(part) : part
 
+  if (!Object.hasOwn(source, key)) {
+    return undefined
+  }
+
   return (source as Record<number | string, unknown>)[key]
 }
 
@@ -74,7 +77,7 @@ export const setNestedValue = (
 ): void => {
   const parts = path.split('.')
 
-  if (hasUnsupportedFieldPathSegment(parts)) {
+  if (hasUnsupportedFieldPathSegment({ segments: parts })) {
     throw new APIError('Invalid field path.', 400, null, true)
   }
 
@@ -93,14 +96,15 @@ export const setNestedValue = (
     const nextPart = parts[i + 1] ?? lastPart
     const nextSource = getSourceValue(sourceCurrent, part)
 
-    const nextValue = currentRecord[key]
+    const hasOwnNextValue = Object.hasOwn(currentRecord, key)
+    const nextValue = hasOwnNextValue ? currentRecord[key] : undefined
 
-    if (
-      !Object.prototype.hasOwnProperty.call(currentRecord, key) ||
-      typeof nextValue !== 'object' ||
-      nextValue === null
-    ) {
-      currentRecord[key] = isArrayIndex(nextPart) ? [] : createObject()
+    if (!hasOwnNextValue || typeof nextValue !== 'object' || nextValue === null) {
+      setOwnProperty({
+        key,
+        target: currentRecord,
+        value: isArrayIndex(nextPart) ? [] : createObject(),
+      })
     }
 
     current = currentRecord[key] as Record<string, unknown> | unknown[]
@@ -110,5 +114,5 @@ export const setNestedValue = (
   const lastKey = getPathKey(current, lastPart, sourceCurrent)
   const finalRecord = current as Record<number | string, unknown>
 
-  finalRecord[lastKey] = value
+  setOwnProperty({ key: lastKey, target: finalRecord, value })
 }

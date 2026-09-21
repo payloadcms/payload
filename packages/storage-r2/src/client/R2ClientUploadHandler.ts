@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientUploadHandler, getFileKey } from '@payloadcms/plugin-cloud-storage/client'
+import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 import { formatAdminURL } from 'payload/shared'
 
 import type {
@@ -19,20 +19,13 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     docPrefix,
     endpointPath,
     file,
-    prefix,
     props: { chunkSize = 5 * 1024 * 1024 },
     serverURL,
     updateFilename,
   }): Promise<R2StorageUploadReference | undefined> => {
-    const { sanitizedDocPrefix } = getFileKey({
-      collectionPrefix: prefix,
-      docPrefix,
-      filename: file.name,
-    })
-
     const params: R2StorageMultipartUploadHandlerParams = {
       collection: collectionSlug,
-      docPrefix: sanitizedDocPrefix,
+      docPrefix,
       fileName: file.name,
       fileType: file.type,
     }
@@ -50,8 +43,13 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
       throw new Error('Failed to initialize multipart upload')
     }
 
-    const { filename: sanitizedFilename, ...multipartUpload } = (await multipart.json()) as {
+    const {
+      filename: sanitizedFilename,
+      uploadReference,
+      ...multipartUpload
+    } = (await multipart.json()) as {
       filename?: string
+      uploadReference: R2StorageUploadReference
     } & Pick<R2MultipartUpload, 'key' | 'uploadId'>
 
     if (sanitizedFilename && sanitizedFilename !== file.name) {
@@ -62,6 +60,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
 
     params.multipartId = multipartUpload.uploadId
     params.multipartKey = multipartUpload.key
+    params.signedReceipt = uploadReference.signedReceipt
 
     const partTotal = Math.ceil(file.size / chunkSize)
 
@@ -93,11 +92,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
           throw new Error(`Failed to complete multipart upload`)
         }
 
-        const key = await complete.text()
-        return {
-          key,
-          prefix: sanitizedDocPrefix,
-        }
+        return { prefix: uploadReference.prefix, signedReceipt: uploadReference.signedReceipt }
       }
     }
   },

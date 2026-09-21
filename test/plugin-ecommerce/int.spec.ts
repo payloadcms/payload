@@ -1,9 +1,123 @@
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'url'
-import { expect } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { test } from '../__helpers/int/vitest.js'
+
+const stripeMock = vi.hoisted(() => {
+  const customers = new Map<string, { email: string; id: string; object: 'customer' }>()
+  let paymentIntentSequence = 0
+  const paymentIntents = new Map<
+    string,
+    {
+      amount: number
+      client_secret: string
+      currency: string
+      customer: string
+      id: string
+      metadata: Record<string, string>
+      object: 'payment_intent'
+      status: 'succeeded'
+    }
+  >()
+
+  return {
+    createCustomer: (email: string) => {
+      const customer = {
+        id: `cus_test_${customers.size + 1}`,
+        email,
+        object: 'customer' as const,
+      }
+
+      customers.set(email, customer)
+
+      return customer
+    },
+    createPaymentIntent: ({
+      amount,
+      currency,
+      customer,
+      metadata,
+    }: {
+      amount: number
+      currency: string
+      customer: string
+      metadata: Record<string, string>
+    }) => {
+      const id = `pi_test_${++paymentIntentSequence}`
+      const paymentIntent = {
+        id,
+        amount,
+        client_secret: `${id}_secret_test`,
+        currency: currency.toLowerCase(),
+        customer,
+        metadata,
+        object: 'payment_intent' as const,
+        status: 'succeeded' as const,
+      }
+
+      paymentIntents.set(id, paymentIntent)
+
+      return paymentIntent
+    },
+    findCustomer: (email: string) => customers.get(email),
+    findPaymentIntent: (id: string) => paymentIntents.get(id),
+    reset: () => {
+      customers.clear()
+      paymentIntents.clear()
+    },
+  }
+})
+
+const stripeMockModule = () => ({
+  default: class Stripe {
+    customers = {
+      create: ({ email }: { email: string }) => Promise.resolve(stripeMock.createCustomer(email)),
+      list: ({ email }: { email: string }) =>
+        Promise.resolve({
+          data: stripeMock.findCustomer(email) ? [stripeMock.findCustomer(email)] : [],
+          has_more: false,
+          object: 'list',
+          url: '/v1/customers',
+        }),
+    }
+
+    paymentIntents = {
+      create: (data: {
+        amount: number
+        currency: string
+        customer: string
+        metadata: Record<string, string>
+      }) => Promise.resolve(stripeMock.createPaymentIntent(data)),
+      retrieve: (id: string) => {
+        const paymentIntent = stripeMock.findPaymentIntent(id)
+
+        if (!paymentIntent) {
+          return Promise.reject(new Error(`Unknown test PaymentIntent: ${id}`))
+        }
+
+        return Promise.resolve(paymentIntent)
+      },
+    }
+  },
+})
+
+// The plugin imports the `stripe` package by bare specifier from its own source,
+// so the test file cannot resolve it directly. Resolve it from the plugin package
+// instead, then target stripe's ESM build (the entry Vitest loads for the plugin's
+// `import Stripe from 'stripe'`) so the mock intercepts the real request.
+const stripeEntry = createRequire(
+  fileURLToPath(new URL('../../packages/plugin-ecommerce/package.json', import.meta.url)),
+)
+  .resolve('stripe')
+  .replace(/\/cjs\/stripe\.cjs\.node\.js$/, '/esm/stripe.esm.node.js')
+
+vi.doMock(stripeEntry, stripeMockModule)
+
+const originalStripeSecretKey = process.env.STRIPE_SECRET_KEY
+process.env.STRIPE_SECRET_KEY = 'sk_test_offline'
 
 // Helper to create a guest cart with items
 async function createGuestCartWithItems(
@@ -15,8 +129,8 @@ async function createGuestCartWithItems(
     .POST('/carts', {
       auth: false,
       body: JSON.stringify({
-        items: [],
         currency: 'USD',
+        items: [],
       }),
     })
     .then((res) => res.json())
@@ -42,7 +156,19 @@ async function createGuestCartWithItems(
   return { cartId, cartSecret }
 }
 
-test.suite({ config: './config.ts' })('ecommerce', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () => {
+  test.beforeEach(() => {
+    stripeMock.reset()
+  })
+
+  test.afterAll(() => {
+    if (originalStripeSecretKey === undefined) {
+      delete process.env.STRIPE_SECRET_KEY
+    } else {
+      process.env.STRIPE_SECRET_KEY = originalStripeSecretKey
+    }
+  })
+
   test('should add a variants collection', async ({ payload }) => {
     const variants = await payload.find({
       collection: 'variants',
@@ -283,7 +409,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     let productId: string
     let variantId: string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       // Get an existing product and variant from seed data
       const products = await payload.find({
         collection: 'products',
@@ -307,8 +433,8 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -347,8 +473,8 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -385,8 +511,8 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -446,8 +572,8 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -587,8 +713,8 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -671,8 +797,8 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -747,7 +873,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
     let productId: string
     let variantId: string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -792,9 +918,9 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       const userCartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -836,8 +962,8 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
         .POST('/carts', {
           auth: false,
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -878,9 +1004,9 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       const userCartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -942,9 +1068,9 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       const userCartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -977,8 +1103,8 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
         .POST('/carts', {
           auth: false,
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1023,9 +1149,9 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       const userCartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1046,7 +1172,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
   test.describe('authenticated user cart operations', () => {
     let productId: string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1080,9 +1206,9 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       const cartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1119,9 +1245,9 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       const cartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1165,9 +1291,9 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       const cartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1180,7 +1306,7 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
   test.describe('cart transfer to user', () => {
     let productId: string
 
-    test.beforeEach(async ({ payload }) => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1244,5 +1370,135 @@ test.suite({ config: './config.ts' })('ecommerce', () => {
       expect(userCartResponse.id).toBe(guestCartId)
       expect(userCartResponse.items).toHaveLength(1)
     })
+  })
+
+  test.describe('Stripe payment settlement', () => {
+    test.for([
+      { concurrent: true, requestOrder: 'simultaneous' },
+      { concurrent: false, requestOrder: 'sequential replay' },
+    ])(
+      'should settle $requestOrder confirmation requests only once',
+      async ({ concurrent }, { payload, restClient }) => {
+        const customerEmail = 'stripe-replay@example.com'
+        const products = await payload.find({
+          collection: 'products',
+          limit: 1,
+          overrideAccess: true,
+          where: {
+            name: {
+              equals: 'Hat',
+            },
+          },
+        })
+        const product = products.docs[0]!
+
+        await payload.update({
+          id: product.id,
+          collection: 'products',
+          data: {
+            inventory: 10,
+          },
+          overrideAccess: true,
+        })
+
+        const productBefore = await payload.findByID({
+          id: product.id,
+          collection: 'products',
+          depth: 0,
+          overrideAccess: true,
+        })
+        const startingInventory = productBefore.inventory!
+        const { cartId, cartSecret } = await createGuestCartWithItems(restClient, product.id)
+        const initiateResponse = await restClient.POST('/payments/stripe/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail,
+            secret: cartSecret,
+          }),
+        })
+        const initiateBody = await initiateResponse.json()
+
+        expect(initiateResponse.status).toBe(200)
+
+        const paymentIntentID = initiateBody.paymentIntentID as string
+        const confirmationRequest = () =>
+          restClient.POST('/payments/stripe/confirm-order', {
+            auth: false,
+            body: JSON.stringify({
+              cartID: cartId,
+              customerEmail,
+              paymentIntentID,
+              secret: cartSecret,
+            }),
+          })
+        const [firstResponse, secondResponse] = concurrent
+          ? await Promise.all([confirmationRequest(), confirmationRequest()])
+          : [await confirmationRequest(), await confirmationRequest()]
+        const [firstBody, secondBody] = await Promise.all([
+          firstResponse.json(),
+          secondResponse.json(),
+        ])
+
+        expect(firstResponse.status).toBe(200)
+        expect(secondResponse.status).toBe(200)
+        expect(firstBody).toEqual(secondBody)
+        expect(firstBody.orderID).toBeTruthy()
+        expect(firstBody.transactionID).toBeTruthy()
+        expect(secondBody.transactionID).toBe(firstBody.transactionID)
+
+        const transactions = await payload.find({
+          collection: 'transactions',
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            'stripe.paymentIntentID': {
+              equals: paymentIntentID,
+            },
+          },
+        })
+
+        expect(transactions.totalDocs).toBe(1)
+        expect(transactions.docs[0]?.cart).toBe(cartId)
+        expect(transactions.docs[0]?.customerEmail).toBe(customerEmail)
+        expect(transactions.docs[0]?.status).toBe('succeeded')
+        expect(transactions.docs[0]?.order).toBe(firstBody.orderID)
+        expect(transactions.docs[0]?.id).toBe(firstBody.transactionID)
+
+        const canonicalOrders = await payload.find({
+          collection: 'orders',
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            transactions: {
+              equals: transactions.docs[0]?.id,
+            },
+          },
+        })
+
+        expect(canonicalOrders.totalDocs).toBe(1)
+        expect(canonicalOrders.docs[0]?.id).toBe(firstBody.orderID)
+        expect(canonicalOrders.docs[0]?.transactions).toEqual([transactions.docs[0]?.id])
+
+        const purchasedCart = await payload.findByID({
+          id: cartId,
+          collection: 'carts',
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(purchasedCart.purchasedAt).toBeTruthy()
+        expect(purchasedCart.status).toBe('purchased')
+
+        const productAfter = await payload.findByID({
+          id: product.id,
+          collection: 'products',
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        expect(productAfter.inventory).toBe(startingInventory - 1)
+      },
+    )
   })
 })

@@ -1,3 +1,4 @@
+import type { File } from '@payloadcms/plugin-cloud-storage/types'
 import type { S3StorageOptions } from '@payloadcms/storage-s3'
 import type { StorageAdapter } from 'payload'
 
@@ -21,6 +22,7 @@ import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
+import { r2UploadEndpoints } from './r2.js'
 import {
   collectionPrefix,
   mediaSlug,
@@ -38,10 +40,14 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+export const uploadedTestFiles = new Map<string, { prefix?: string } & File>()
+
 export type BuildPluginCloudStorageIntConfigArgs = {
   /** When false, S3 uses non-composite prefix resolution (single stored prefix segment; pre-composite behavior). */
   useCompositePrefixes: boolean
 }
+
+export const recordedCleanupTargets: Array<{ filename: string; prefix?: string }> = []
 
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
@@ -162,8 +168,13 @@ export function buildPluginCloudStorageIntConfig({
       [testMetadataSlug]: {
         adapter: () => ({
           name: 'test-metadata-adapter',
-          handleDelete: () => Promise.resolve(),
+          handleDelete: ({ doc, filename }) => {
+            recordedCleanupTargets.push({ filename, prefix: doc.prefix })
+            uploadedTestFiles.delete(filename)
+          },
           handleUpload: ({ data, file }) => {
+            uploadedTestFiles.set(file.filename, { ...file, prefix: data.prefix })
+
             const metadata = {
               ...data,
               bucketName: 'test-bucket',
@@ -178,6 +189,7 @@ export function buildPluginCloudStorageIntConfig({
           },
           staticHandler: () => new Response('Not found', { status: 404 }),
         }),
+        prefix: 'test-metadata',
       },
     },
   })
@@ -204,6 +216,7 @@ export function buildPluginCloudStorageIntConfig({
         TestMetadata,
         Users,
       ],
+      endpoints: r2UploadEndpoints,
       plugins: [testMetadataPlugin],
       storage: storagePlugin ? [storagePlugin] : [],
       typescript: {

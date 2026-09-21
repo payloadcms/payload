@@ -127,6 +127,7 @@ export const createPayloadRequest = async ({
     headers: req.headers,
     isGraphQL,
     payload,
+    req,
   })
 
   req.user = user
