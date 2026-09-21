@@ -5,6 +5,7 @@ import type { UploadConfig } from './types.js'
 
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
+import { validateUploadFilename } from './validateUploadFilename.js'
 
 type Options = {
   collection: CollectionConfig
@@ -101,6 +102,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     },
     index: true,
     label: ({ t }) => t('upload:fileName'),
+    validate: validateUploadFilename,
   }
 
   // Only set unique: true if the collection does not have a compound index

@@ -1,11 +1,11 @@
 import type { PopulationPromise } from '../../typesServer.js'
-import type { RelationshipFeatureProps } from './index.js'
+import type { RelationshipFeatureServerProps } from './index.js'
 import type { SerializedRelationshipNode } from './nodes/RelationshipNode.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 
 export const relationshipPopulationPromiseHOC = (
-  props: RelationshipFeatureProps,
+  props: RelationshipFeatureServerProps,
 ): PopulationPromise<SerializedRelationshipNode> => {
   const relationshipPopulationPromise: PopulationPromise<SerializedRelationshipNode> = ({
     currentDepth,
@@ -17,7 +17,7 @@ export const relationshipPopulationPromiseHOC = (
     req,
     showHiddenFields,
   }) => {
-    if (node?.value) {
+    if (node?.value && props.enabledCollectionSlugs.includes(node.relationTo)) {
       // @ts-expect-error
       const id = node?.value?.id || node?.value // for backwards-compatibility
 
@@ -25,7 +25,7 @@ export const relationshipPopulationPromiseHOC = (
 
       if (collection) {
         const populateDepth =
-          props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
+          props.maxDepth !== undefined && props.maxDepth < depth ? props.maxDepth : depth
 
         populationPromises.push(
           populate({

@@ -1,0 +1,106 @@
+---
+title: Upload
+label: Upload
+order: 290
+desc: Extend Payload's upload-enabled Collection interface while preserving form and upload behavior.
+keywords: ui, component, upload, file, media, custom upload, upload collection
+---
+
+The `Upload` component is the file interface used by upload-enabled Collection Edit Views. It coordinates file selection, form state, existing file details, image adjustments, preview sizes, and upload status.
+
+## Import
+
+```tsx
+import { Upload, useDocumentInfo } from '@payloadcms/ui'
+```
+
+## Edit View usage
+
+Render `Upload` from a custom `admin.components.edit.Upload` component. That location supplies the form and document contexts the component requires.
+
+```tsx
+'use client'
+
+import { Upload, useDocumentInfo } from '@payloadcms/ui'
+
+export function CustomUpload() {
+  const { collectionSlug, docConfig, initialState } = useDocumentInfo()
+
+  const uploadConfig =
+    docConfig && 'upload' in docConfig ? docConfig.upload : undefined
+
+  // `collectionSlug` and `uploadConfig` are required, and `docConfig` is
+  // undefined until the document's config has resolved
+  if (!collectionSlug || !uploadConfig) {
+    return null
+  }
+
+  return (
+    <Upload
+      collectionSlug={collectionSlug}
+      initialState={initialState}
+      uploadConfig={uploadConfig}
+    />
+  )
+}
+```
+
+Configure the component on an upload-enabled Collection:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  upload: true,
+  admin: {
+    components: {
+      edit: {
+        Upload: '/components/CustomUpload',
+      },
+    },
+  },
+}
+```
+
+## File selection
+
+The empty `Upload` state composes Payload's `Dropzone` for drag, drop, paste, and file selection behavior.
+
+<ComponentPreview component="Dropzone" example="basic" />
+
+Use [`Dropzone`](/docs/ui-components/dropzone) directly when you only need file intake. Use `Upload` when the file must participate in an upload-enabled Collection's form and persistence workflow.
+
+## Custom actions
+
+Pass `customActions` to place additional controls beside Payload's upload actions.
+
+```tsx
+<Upload
+  collectionSlug={collectionSlug}
+  customActions={[<MyUploadAction key="my-action" />]}
+  initialState={initialState}
+  uploadConfig={uploadConfig}
+/>
+```
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop                | Type                                  | Default | Description                                              |
+| ------------------- | ------------------------------------- | ------- | -------------------------------------------------------- |
+| `collectionSlug` \* | `string`                              | —       | Identifies the upload-enabled Collection.                |
+| `uploadConfig` \*   | `SanitizedCollectionConfig['upload']` | —       | Supplies the Collection's sanitized upload options.      |
+| `initialState`      | `FormState`                           | —       | Supplies an initial file from the surrounding Edit View. |
+| `onChange`          | `(file?: File) => void`               | —       | Runs when the selected file changes.                     |
+| `customActions`     | `ReactNode[]`                         | —       | Adds controls beside the built-in upload actions.        |
+| `UploadControls`    | `ReactNode`                           | —       | Supplies custom controls for the upload workflow.        |
+
+_\* An asterisk denotes that a prop is required._
+
+## Provider requirements
+
+`Upload` is not a standalone website file input. It consumes Payload's Config, DocumentInfo, Form, Translation, Modal, UploadControls, and UploadEdits contexts. Use it in the upload Edit View override shown above rather than constructing those providers manually.
+
+For the complete customization path, see [Customizing the Upload UI](/docs/upload/overview#customizing-the-upload-ui).

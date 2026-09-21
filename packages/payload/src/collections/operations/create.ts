@@ -20,12 +20,18 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
+import { APIError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import {
+  getExternalUploadSource,
+  getUploadDestination,
+  sanitizeUploadData,
+} from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -38,6 +44,13 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  buildAllLocalesPublicationHookDoc,
+  getAllLocalesPublicationStatus,
+  hasAuthorizedAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -67,9 +80,46 @@ export const createOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  let externalUploadSource: ReturnType<typeof getExternalUploadSource>
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+
+    // Keep a remote URL only as an ephemeral file source, then strip all submitted generated
+    // identity before untrusted create hooks run. The fetched file receives new server-owned
+    // identity before persistence.
+    if (args.collection.config.upload && !args.overrideAccess) {
+      externalUploadSource = getExternalUploadSource(args.data)
+      const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
+      const sanitizedData = sanitizeUploadData(args.data, 'create')
+      args = {
+        ...args,
+        data:
+          typeof sanitizedData === 'object' && sanitizedData !== null
+            ? {
+                ...sanitizedData,
+                ...(prefix !== undefined ? { prefix } : {}),
+                ...(objectKey !== undefined ? { _objectKey: objectKey } : {}),
+              }
+            : sanitizedData,
+      }
+    }
+
+    const initialCollectionConfig = args.collection.config
+    const initialPublishAllLocales =
+      !args.draft && (args.publishAllLocales ?? !hasLocalizeStatusEnabled(initialCollectionConfig))
+    const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
+      ),
+      publishAllLocales: initialPublishAllLocales,
+      unpublishAllLocales: false,
+    })
+
+    const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+      data: args.data,
+      status: initialAllLocalesPublicationStatus,
+    })
 
     ensureUsernameOrEmail<TSlug>({
       authOptions: args.collection.config.auth,
@@ -121,19 +171,45 @@ export const createOperation = async <
 
     let { data } = args
 
-    const publishAllLocales =
-      !draft &&
-      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    // For creates there is no existing doc — always publish all locales when not a draft.
+    let publishAllLocales =
+      !draft && (publishAllLocalesArg ?? !hasLocalizeStatusEnabled(collectionConfig))
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales,
+      unpublishAllLocales: false,
+    })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
+
+    if (requestedAllLocalesPublicationStatus && !allLocalesPublicationStatus) {
+      publishAllLocales = false
+    }
+
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
     if (isSavingDraft) {
       data._status = 'draft'
     }
 
+    const isDuplicating = duplicateFromID !== undefined && duplicateFromID !== null
+
+    if (isDuplicating && collectionConfig.disableDuplicate === true) {
+      throw new APIError(
+        `The collection with slug ${String(collectionConfig.slug)} cannot be duplicated.`,
+        400,
+      )
+    }
+
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
 
-    if (duplicateFromID) {
+    if (isDuplicating) {
       const duplicateResult = await getDuplicateDocumentData({
         id: duplicateFromID,
         collectionConfig,
@@ -164,7 +240,8 @@ export const createOperation = async <
       config,
       data,
       draft: isSavingDraft,
-      isDuplicating: Boolean(duplicateFromID),
+      externalUploadSource,
+      isDuplicating,
       operation: 'create',
       originalDoc: duplicatedFromDoc,
       overwriteExistingFiles,
@@ -179,15 +256,37 @@ export const createOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
+    let statusFieldAccess = false
+    const publicationFieldPolicyDoc = buildAllLocalesPublicationHookDoc({
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      status: allLocalesPublicationStatus,
+    })
+
     data = await beforeValidate({
       collection: collectionConfig,
       context: req.context,
       data,
       doc: duplicatedFromDoc,
+      docForHooks: publicationFieldPolicyDoc,
       global: null,
+      onFieldAccess: ({ accessResult, path }) => {
+        if (path === '_status') {
+          statusFieldAccess = accessResult
+        }
+      },
       operation: 'create',
       overrideAccess: overrideAccess!,
       req,
+    })
+
+    const publicationStatusIsAuthorized =
+      statusFieldAccess && data._status === allLocalesPublicationStatus
+
+    const publicationHookDoc = buildAllLocalesPublicationHookDoc({
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
+      status: publicationStatusIsAuthorized ? allLocalesPublicationStatus : undefined,
     })
 
     // /////////////////////////////////////
@@ -202,7 +301,7 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
-            originalDoc: duplicatedFromDoc,
+            originalDoc: publicationHookDoc,
             req,
           })) || data
       }
@@ -220,35 +319,60 @@ export const createOperation = async <
             context: req.context,
             data,
             operation: 'create',
-            originalDoc: duplicatedFromDoc,
+            originalDoc: publicationHookDoc,
             req,
           })) || data
       }
     }
 
+    const publicationData = { ...data }
+
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
+
+    let statusFieldValue: unknown
+    const docWithLocalesForFields = !statusFieldAccess
+      ? { ...duplicatedFromDocWithLocales, _status: {} }
+      : duplicatedFromDocWithLocales
 
     const resultWithLocales = await beforeChange<JsonObject>({
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: duplicatedFromDoc,
-      docWithLocales: duplicatedFromDocWithLocales,
+      doc: publicationHookDoc,
+      docWithLocales: docWithLocalesForFields,
       global: null,
+      onDataProcessed: (processedData) => {
+        statusFieldValue = processedData._status
+      },
       operation: 'create',
       overrideAccess,
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
+    const hasAuthorizedPublicationStatus = hasAuthorizedAllLocalesPublicationStatus({
+      data: publicationData,
+      fieldAccessDenied: !statusFieldAccess,
+      fieldValue: statusFieldValue,
+      status: allLocalesPublicationStatus,
+    })
+
+    if (
+      allLocalesPublicationStatus &&
+      !hasAuthorizedPublicationStatus &&
+      statusFieldAccess &&
+      typeof statusFieldValue === 'undefined' &&
+      typeof duplicatedFromDocWithLocales._status === 'object' &&
+      duplicatedFromDocWithLocales._status !== null
+    ) {
+      resultWithLocales._status = { ...duplicatedFromDocWithLocales._status }
+    }
     if (
       config.localization &&
-      collectionConfig.versions &&
-      collectionConfig.versions.drafts &&
-      collectionConfig.versions.drafts.localizeStatus &&
-      publishAllLocales
+      hasLocalizeStatusEnabled(collectionConfig) &&
+      hasAuthorizedPublicationStatus
     ) {
       let accessibleLocaleCodes = config.localization.localeCodes
 
@@ -453,6 +577,13 @@ export const createOperation = async <
 
     return result
   } catch (error: unknown) {
+    await unlinkTempFiles({
+      collectionConfig: args.collection.config,
+      config: args.req.payload.config,
+      req: args.req,
+    }).catch((unlinkError) => {
+      args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
+    })
     await killTransaction(args.req)
     throw error
   }

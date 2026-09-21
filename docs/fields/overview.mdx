@@ -363,6 +363,36 @@ export const MyField: Field = {
 
 For full details on Field-level Access Control, see the [Field Access Control](../access-control/fields) documentation.
 
+### Disabling Field Duplication
+
+Fields are copied from the source document when a document is duplicated. To prevent a field's
+source value from being copied, set `disableDuplicate` to `true`:
+
+```ts
+import type { Field } from 'payload'
+
+export const MyField: Field = {
+  name: 'secret',
+  type: 'text',
+  disableDuplicate: true, // highlight-line
+  defaultValue: 'new-secret',
+}
+```
+
+This option is available on fields that store their own value, including named groups and tabs. For
+layout-only rows, collapsibles, unnamed groups, and unnamed tabs, set it on the nested fields that
+own the values you do not want copied.
+
+When the field is omitted from the duplicate request, Payload applies its normal create defaults.
+For groups, nested field defaults are applied. Arrays and blocks use their field-level default value,
+if configured, and then apply nested defaults to the default rows or blocks. Setting
+`disableDuplicate` on a nested field preserves its parent row or block and applies that field's
+default.
+
+Request data may still provide a value for the field, subject to its normal `create` access control.
+The option is not bypassed by `overrideAccess`, and `beforeDuplicate` hooks do not run for a disabled
+field or its descendants.
+
 ### Default Values
 
 Fields can be optionally prefilled with initial values. This is used in both the [Admin Panel](../admin/overview) as well as API requests to populate missing or undefined field values during the `create` or `update` operations.
@@ -519,7 +549,6 @@ import {
   relationship,
   richText,
   select,
-  tabs,
   text,
   textarea,
   upload,

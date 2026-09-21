@@ -1,0 +1,41 @@
+---
+title: ReactSelect
+label: ReactSelect
+order: 220
+desc: Select one or more options with Payload's ReactSelect component.
+keywords: ui, component, select, dropdown, option, form
+---
+
+The `ReactSelect` component adapts `react-select` to Payload's styles and interaction patterns. It is also exported as `Select`.
+
+## Import
+
+```tsx
+import { ReactSelect } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="ReactSelect" example="basic" />
+
+Store the selected option object rather than only its value. Use `isMulti` when users can select more than one option.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop           | Type                                  | Default   | Description                                     |
+| -------------- | ------------------------------------- | --------- | ----------------------------------------------- |
+| `options` \*   | `Option[] \| OptionGroup[]`           | —         | Options displayed in the menu.                  |
+| `value`        | `Option \| Option[]`                  | —         | Selected option or options.                     |
+| `onChange`     | `(value: Option \| Option[]) => void` | —         | Runs when the selection changes.                |
+| `placeholder`  | `string \| LabelFunction`             | Localized | Sets the empty-state label.                     |
+| `isMulti`      | `boolean`                             | `false`   | Allows multiple selected values.                |
+| `isClearable`  | `boolean`                             | `true`    | Displays a control for clearing the value.      |
+| `isSearchable` | `boolean`                             | `true`    | Allows options to be filtered by typing.        |
+| `isCreatable`  | `boolean`                             | `false`   | Allows users to create values not in `options`. |
+| `disabled`     | `boolean`                             | `false`   | Prevents interaction.                           |
+| `isLoading`    | `boolean`                             | `false`   | Displays the loading state.                     |
+| `showError`    | `boolean`                             | `false`   | Applies the validation error style.             |
+
+_\* An asterisk denotes that a prop is required._

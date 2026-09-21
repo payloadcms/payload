@@ -2,6 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  access: {
+    create: ({ req }) =>
+      !req.headers.has('x-disallow-create') &&
+      (Boolean(req.user) || req.headers.has('x-public-create')),
+    update: ({ req }) => Boolean(req.user) && !req.headers.has('x-disallow-update'),
+  },
   upload: {
     disableLocalStorage: true,
     focalPoint: true,

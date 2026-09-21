@@ -1,0 +1,38 @@
+---
+title: Thumbnail
+label: Thumbnail
+order: 260
+desc: Preview an uploaded file or render a file fallback with Payload's Thumbnail component.
+keywords: ui, component, thumbnail, image, upload, file
+---
+
+The `Thumbnail` component previews an image URL and falls back to a file graphic when no valid image is available.
+
+## Import
+
+```tsx
+import { Thumbnail } from '@payloadcms/ui'
+```
+
+## File fallback
+
+<ComponentPreview component="Thumbnail" example="fallback" />
+
+## Sizes
+
+<ComponentPreview component="Thumbnail" example="sizes" />
+
+Pass the document through `doc` when possible so the image receives its filename as alternative text.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop            | Type                                                   | Default    | Description                                  |
+| --------------- | ------------------------------------------------------ | ---------- | -------------------------------------------- |
+| `fileSrc`       | `string`                                               | —          | Image URL to preview.                        |
+| `doc`           | `Record<string, unknown>`                              | —          | Supplies file metadata such as `filename`.   |
+| `size`          | `'small' \| 'medium' \| 'large' \| 'expand' \| 'none'` | `'medium'` | Sets the thumbnail dimensions.               |
+| `width`         | `number`                                               | —          | Sets the rendered image width.               |
+| `height`        | `number`                                               | —          | Sets the rendered image height.              |
+| `imageCacheTag` | `string`                                               | —          | Adds a cache-busting value to the image URL. |

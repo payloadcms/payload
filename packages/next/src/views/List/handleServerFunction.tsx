@@ -33,9 +33,10 @@ export const renderListHandler: ServerFunction<
       payload: { config },
       user,
     },
+    user: userWithReadAccess,
   } = args
 
-  if (!req.user) {
+  if (!user) {
     throw new UnauthorizedError()
   }
 
@@ -119,6 +120,7 @@ export const renderListHandler: ServerFunction<
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    user: userWithReadAccess,
     viewType: 'list',
   })
 
