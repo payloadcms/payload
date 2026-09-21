@@ -1,5 +1,5 @@
 import { Activity, useEffect } from 'react'
-import { expect, test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { configure } from 'vitest-browser-react/pure'
 
@@ -7,83 +7,85 @@ import { useControllableState } from './useControllableState.js'
 
 configure({ reactStrictMode: true })
 
-test('should use the initial prop value', async () => {
-  const screen = await render(<StateFixture value="prop" />)
+describe('useControllableState', () => {
+  test('should use the initial prop value', async () => {
+    const screen = await render(<StateFixture value="prop" />)
 
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'prop')
-})
-
-for (const value of [null, undefined]) {
-  test(`should use the fallback for ${String(value)}`, async () => {
-    const screen = await render(<StateFixture value={value} />)
-
-    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'fallback')
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'prop')
   })
-}
 
-for (const value of ['', 0, false]) {
-  test(`should preserve the falsy value ${JSON.stringify(value)}`, async () => {
-    const screen = await render(<StateFixture value={value} />)
+  for (const value of [null, undefined]) {
+    test(`should use the fallback for ${String(value)}`, async () => {
+      const screen = await render(<StateFixture value={value} />)
 
-    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', String(value))
+      await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'fallback')
+    })
+  }
+
+  for (const value of ['', 0, false]) {
+    test(`should preserve the falsy value ${JSON.stringify(value)}`, async () => {
+      const screen = await render(<StateFixture value={value} />)
+
+      await expect.element(screen.getByRole('status')).toHaveProperty('textContent', String(value))
+    })
+  }
+
+  test('should preserve local updates when the prop is unchanged', async () => {
+    const screen = await render(<StateFixture value="prop" />)
+
+    await screen.getByRole('button', { name: 'Set local' }).click()
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+    await screen.rerender(<StateFixture value="prop" />)
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
   })
-}
 
-test('should preserve local updates when the prop is unchanged', async () => {
-  const screen = await render(<StateFixture value="prop" />)
+  test('should let changed props override local updates, including the original prop', async () => {
+    const screen = await render(<StateFixture value="prop" />)
 
-  await screen.getByRole('button', { name: 'Set local' }).click()
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
-  await screen.rerender(<StateFixture value="prop" />)
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
-})
+    await screen.getByRole('button', { name: 'Set local' }).click()
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+    await screen.rerender(<StateFixture value="changed" />)
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'changed')
+    await screen.getByRole('button', { name: 'Set local' }).click()
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+    await screen.rerender(<StateFixture value="prop" />)
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'prop')
+  })
 
-test('should let changed props override local updates, including the original prop', async () => {
-  const screen = await render(<StateFixture value="prop" />)
+  test('should compose functional updates in the same event', async () => {
+    const screen = await render(<StateFixture value="prop" />)
 
-  await screen.getByRole('button', { name: 'Set local' }).click()
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
-  await screen.rerender(<StateFixture value="changed" />)
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'changed')
-  await screen.getByRole('button', { name: 'Set local' }).click()
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
-  await screen.rerender(<StateFixture value="prop" />)
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'prop')
-})
+    await screen.getByRole('button', { name: 'Append twice' }).click()
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'prop!!')
+  })
 
-test('should compose functional updates in the same event', async () => {
-  const screen = await render(<StateFixture value="prop" />)
+  test('should preserve local updates when Strict Mode replays mount effects', async () => {
+    const screen = await render(<StateFixture shouldUpdateOnMount value="prop" />)
 
-  await screen.getByRole('button', { name: 'Append twice' }).click()
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'prop!!')
-})
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+  })
 
-test('should preserve local updates when Strict Mode replays mount effects', async () => {
-  const screen = await render(<StateFixture shouldUpdateOnMount value="prop" />)
+  test('should preserve local updates across Activity hide and show', async () => {
+    const screen = await render(<ActivityFixture value="prop" />)
 
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
-})
+    await screen.getByRole('button', { name: 'Set local' }).click()
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+    await screen.rerender(<ActivityFixture isHidden value="prop" />)
+    await expect.element(screen.getByRole('status', { includeHidden: true })).not.toBeVisible()
+    await screen.rerender(<ActivityFixture value="prop" />)
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+  })
 
-test('should preserve local updates across Activity hide and show', async () => {
-  const screen = await render(<ActivityFixture value="prop" />)
+  test('should apply a prop changed while Activity is hidden', async () => {
+    const screen = await render(<ActivityFixture value="prop" />)
 
-  await screen.getByRole('button', { name: 'Set local' }).click()
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
-  await screen.rerender(<ActivityFixture isHidden value="prop" />)
-  await expect.element(screen.getByRole('status', { includeHidden: true })).not.toBeVisible()
-  await screen.rerender(<ActivityFixture value="prop" />)
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
-})
-
-test('should apply a prop changed while Activity is hidden', async () => {
-  const screen = await render(<ActivityFixture value="prop" />)
-
-  await screen.getByRole('button', { name: 'Set local' }).click()
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
-  await screen.rerender(<ActivityFixture isHidden value="changed" />)
-  await expect.element(screen.getByRole('status', { includeHidden: true })).not.toBeVisible()
-  await screen.rerender(<ActivityFixture value="changed" />)
-  await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'changed')
+    await screen.getByRole('button', { name: 'Set local' }).click()
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'local')
+    await screen.rerender(<ActivityFixture isHidden value="changed" />)
+    await expect.element(screen.getByRole('status', { includeHidden: true })).not.toBeVisible()
+    await screen.rerender(<ActivityFixture value="changed" />)
+    await expect.element(screen.getByRole('status')).toHaveProperty('textContent', 'changed')
+  })
 })
 
 type StateFixtureProps = {
