@@ -25,7 +25,7 @@ const initialCLIEnvironment = {
   PAYLOAD_TEST_CLI_CONFIG_LOG: process.env.PAYLOAD_TEST_CLI_CONFIG_LOG,
 }
 
-test.suite({ config: './config.ts' })('CLI', () => {
+test.suite('CLI', { config: './config.ts' }, () => {
   const uploadServers: TestFileServer[] = []
 
   test.beforeEach(async () => {

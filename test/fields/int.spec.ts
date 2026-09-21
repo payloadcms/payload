@@ -43,7 +43,7 @@ import {
 
 let user: any
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Fields', () => {
+test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     await restClient.login({
       slug: 'users',

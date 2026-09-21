@@ -100,7 +100,7 @@ function draft2020Violations(schema: unknown, rootPath: string): string[] {
   walk(schema, rootPath)
   return errors
 }
-test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/plugin-mcp', () => {
+test.suite('@payloadcms/plugin-mcp', { config: './config.ts', resetBetweenTests: false }, () => {
   test.afterEach(() => {
     vi.unstubAllEnvs()
   })

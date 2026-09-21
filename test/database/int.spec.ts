@@ -55,7 +55,7 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('database', () => {
+test.suite('database', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     payload.db.migrationDir = path.join(dirname, './migrations')
 

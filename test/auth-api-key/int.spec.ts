@@ -11,7 +11,7 @@ import {
   usersSlug,
 } from './shared.js'
 
-test.suite({ config: './config.ts' })('API key reveal access', () => {
+test.suite('API key reveal access', { config: './config.ts' }, () => {
   const loginAdmin = async ({ restClient }) => {
     await restClient.login({
       slug: usersSlug,

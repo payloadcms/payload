@@ -34,7 +34,7 @@ const signedURLBody = (
     mimeType,
   })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', () => {
+test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()

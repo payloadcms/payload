@@ -17,7 +17,7 @@ const dirname = path.dirname(filename)
 // path for temp config created after initial migration which should have blocks as json enabled
 const tempConfigPath = path.resolve(dirname, 'GENERATED_after_migration.config.ts')
 
-test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
+test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
   test('should migrate to blocks as json', async () => {
     // seed initital data
     const payload = await getPayload({ config })

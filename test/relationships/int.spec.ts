@@ -32,7 +32,7 @@ import {
 
 type EasierChained = { id: string; relation: EasierChained }
 
-test.suite({ config: './config.ts' })('Relationships', () => {
+test.suite('Relationships', { config: './config.ts' }, () => {
   test.beforeEach(async ({ restClient }) => {
     await restClient.login({ slug: usersSlug, credentials: devUser })
   })

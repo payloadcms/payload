@@ -15,8 +15,9 @@ let payload: Payload
 let restClient: NextRESTClient
 
 const { password } = devUser
-test.suite({ config: './config.ts', resetBetweenTests: false })(
+test.suite(
   'JWT authentication read access',
+  { config: './config.ts', resetBetweenTests: false },
   () => {
     test.beforeAll(({ payloadInstance, restClientInstance }) => {
       payload = payloadInstance

@@ -24,7 +24,7 @@ const dirname = path.dirname(filename)
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: './config.ts' })('Queues - Payload', () => {
+test.suite('Queues - Payload', { config: './config.ts' }, () => {
   let processingLeaseDefaults: {
     duration: number
     safetyBuffer: number

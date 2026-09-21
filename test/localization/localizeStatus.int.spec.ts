@@ -12,7 +12,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration', () => {
+test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' }, () => {
   test.beforeEach(async () => {
     if (process.env.PAYLOAD_DATABASE === 'mongodb' || !process.env.PAYLOAD_DATABASE) {
       // Wait for MongoDB to finish building indexes to avoid

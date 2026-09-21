@@ -257,8 +257,9 @@ const getAccentCollections = () => [
 const initPayload = async (config: Promise<SanitizedConfig>): Promise<Payload> =>
   new BasePayload().init({ config: await config })
 
-test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
+test.suite(
   'postgres operator handlers - postgresUnaccent() behavior',
+  { db: (adapter) => adapter.startsWith('postgres') },
   () => {
     const activePayloads: Payload[] = []
 

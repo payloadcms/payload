@@ -31,7 +31,7 @@ let token: string
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Joins Field', () => {
+test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, () => {
   let category: Category
   let otherCategory: Category
   let categoryID

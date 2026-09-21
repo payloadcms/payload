@@ -15,7 +15,7 @@ const dirname = path.dirname(filename)
 
 const migrationDir = path.join(dirname, './migrations')
 
-test.suite({ config: './config.ts' })('migrations CLI', () => {
+test.suite('migrations CLI', { config: './config.ts' }, () => {
   test.afterEach(() => {
     removeFiles(migrationDir)
   })
