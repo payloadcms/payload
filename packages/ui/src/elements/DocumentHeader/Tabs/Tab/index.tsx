@@ -25,6 +25,7 @@ export const DefaultDocumentTab: React.FC<{
   permissions?: SanitizedPermissions
   req: PayloadRequest
   tabConfig: { readonly Pill_Component?: React.FC } & DocumentTabConfig
+  user?: PayloadRequest['user']
 }> = (props) => {
   const {
     apiURL,
@@ -33,6 +34,7 @@ export const DefaultDocumentTab: React.FC<{
     permissions,
     req,
     tabConfig: { href: tabHref, isActive: tabIsActive, label, newTab, Pill, Pill_Component },
+    user,
   } = props
 
   let href = typeof tabHref === 'string' ? tabHref : ''
@@ -84,7 +86,7 @@ export const DefaultDocumentTab: React.FC<{
                 permissions,
                 req,
                 server: req.server,
-                user: req.user,
+                user,
               } satisfies DocumentTabServerPropsOnly,
             })}
           </Fragment>

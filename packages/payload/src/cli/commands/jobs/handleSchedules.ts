@@ -1,7 +1,7 @@
 import * as z from 'zod/mini'
 
+import { strictObject } from '../../../utilities/zod.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
-import { strictObject } from '../../zod.js'
 
 export const createJobsHandleSchedulesCommand = defineCLICommand({
   description: 'Queue due scheduled jobs.',

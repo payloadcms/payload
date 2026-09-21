@@ -1,40 +1,14 @@
-import type { Payload } from 'payload'
+import { expect, vitest } from 'vitest'
 
-import assert from 'assert'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { withoutAutoRun } from './utilities.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-const describePostgres = process.env.PAYLOAD_DATABASE?.startsWith('postgres')
-  ? describe
-  : describe.skip
-
-let payload: Payload
-
-describePostgres('queues - postgres logs', () => {
-  beforeAll(async () => {
-    const initialized = await initPayloadInt(
-      dirname,
-      undefined,
-      undefined,
-      'config.postgreslogs.ts',
-    )
-    assert(initialized.payload)
-    assert(initialized.restClient)
-    ;({ payload } = initialized)
-  })
-
-  afterAll(async () => {
-    await payload?.destroy()
-  })
-
-  it('ensure running jobs uses minimal db calls', async () => {
+test.suite({
+  config: './config.postgreslogs.ts',
+  cron: false,
+  db: (adapter) => adapter.startsWith('postgres'),
+})('queues - postgres logs', () => {
+  test('ensure running jobs uses minimal db calls', async ({ payload }) => {
     await withoutAutoRun(async () => {
       await payload.jobs.queue({
         task: 'DoNothingTask',

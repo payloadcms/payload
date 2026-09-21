@@ -15,6 +15,11 @@ concurrency:
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+  NODE_OPTIONS: --max-old-space-size=4096
+  NODE_HEAP_HIGH: --max-old-space-size=8192
+
+permissions:
+  contents: read
 
 jobs:
   changes:
@@ -163,6 +168,8 @@ jobs:
 
       - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+        env:
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
       - name: Lint CSS
         env:
@@ -236,7 +243,7 @@ jobs:
       - name: Unit Tests
         run: pnpm test:unit
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   tests-types:
     runs-on: ubuntu-24.04
@@ -253,7 +260,7 @@ jobs:
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
 
   # Generate the integration test matrix from TypeScript config
   int-matrix:
@@ -314,7 +321,7 @@ jobs:
 
       - name: Integration Tests
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -505,8 +512,6 @@ jobs:
     needs: [changes, build]
     if: needs.changes.outputs.needs_visual == 'true'
     timeout-minutes: 30
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v5
 
@@ -591,6 +596,14 @@ jobs:
       - name: Run visual regression tests
         run: docker exec visual-regression bash -lc "bash .github/scripts/visual/run-visual-suites.sh -- --fully-parallel"
 
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: test-results-visual-regression
+          path: test/test-results/
+          if-no-files-found: ignore
+          retention-days: 1
+
       - name: Stop visual regression container
         if: always()
         run: docker stop visual-regression
@@ -650,7 +663,7 @@ jobs:
           pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
 
       - name: Setup Playwright
@@ -660,7 +673,7 @@ jobs:
       - name: Runs Template Int Tests
         run: pnpm --filter ${{ matrix.template }} run test:int
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -668,7 +681,7 @@ jobs:
       - name: Runs Template E2E Tests
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
@@ -836,7 +849,7 @@ jobs:
         continue-on-error: true
         run: pnpm test:int:summary
         env:
-          NODE_OPTIONS: --max-old-space-size=8096
+          NODE_OPTIONS: ${{ env.NODE_HEAP_HIGH }}
           PAYLOAD_DATABASE: content-api
 
       - name: Dump Content API logs on failure

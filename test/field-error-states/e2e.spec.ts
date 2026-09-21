@@ -58,7 +58,6 @@ describe('Field Error States', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fielderrorstates',
     })
   })
 

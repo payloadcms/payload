@@ -1,15 +1,16 @@
-import type { DefaultDocumentIDType, PaginatedDocs, Payload } from 'payload'
+import type { DefaultDocumentIDType, PaginatedDocs } from 'payload'
 
-import path from 'path'
+import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relationship } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
+  autosaveGlobalSlug,
   menuSlug,
   multiTenantPostsSlug,
   relationshipsSlug,
@@ -17,17 +18,13 @@ import {
   usersSlug,
 } from './shared.js'
 
-let payload: Payload
-let restClient: NextRESTClient
 let token: string
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('@payloadcms/plugin-multi-tenant', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+test.suite({
+  config: './config.ts',
+  resetBetweenTests: false,
+})('@payloadcms/plugin-multi-tenant', () => {
+  test.beforeAll(async ({ restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {
         body: JSON.stringify({
@@ -40,12 +37,8 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     token = data.token
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('tenants', () => {
-    it('should create a tenant', async () => {
+  test.describe('tenants', () => {
+    test('should create a tenant', async ({ payload }) => {
       const tenant1 = await payload.create({
         collection: tenantsSlug,
         data: {
@@ -57,13 +50,13 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       expect(tenant1).toHaveProperty('id')
     })
 
-    describe('relationships', () => {
+    test.describe('relationships', () => {
       let anchorBarRelationships: PaginatedDocs<Relationship>
       let blueDogRelationships: PaginatedDocs<Relationship>
       let anchorBarTenantID: DefaultDocumentIDType
       let blueDogTenantID: DefaultDocumentIDType
 
-      beforeEach(async () => {
+      test.beforeEach(async ({ payload }) => {
         anchorBarRelationships = await payload.find({
           collection: 'relationships',
           where: {
@@ -89,7 +82,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         blueDogTenantID = blueDogRelationships.docs[0].tenant.id
       })
 
-      it('ensure relationship document with relationship within same tenant can be created', async () => {
+      test('ensure relationship document with relationship within same tenant can be created', async ({
+        payload,
+      }) => {
         const newRelationship = await payload.create({
           collection: 'relationships',
           data: {
@@ -107,7 +102,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         expect(newRelationship.relationship?.title).toBe('Owned by bar with no ac')
       })
 
-      it('ensure relationship document with relationship to different tenant cannot be created if tenant header passed', async () => {
+      test('ensure relationship document with relationship to different tenant cannot be created if tenant header passed', async ({
+        payload,
+      }) => {
         await expect(
           payload.create({
             collection: 'relationships',
@@ -124,7 +121,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         ).rejects.toThrow('The following field is invalid: Relationship')
       })
 
-      it('ensure relationship document with relationship to different tenant cannot be created even if no tenant header passed', async () => {
+      test('ensure relationship document with relationship to different tenant cannot be created even if no tenant header passed', async ({
+        payload,
+      }) => {
         // Should filter based on data.tenant instead of tenant cookie
         await expect(
           payload.create({
@@ -142,8 +141,10 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  describe('access control for users with no tenant memberships', () => {
-    it('should return Forbidden error (not 500) for user with no tenants', async () => {
+  test.describe('access control for users with no tenant memberships', () => {
+    test('should return Forbidden error (not 500) for user with no tenants', async ({
+      payload,
+    }) => {
       // Create a user with no tenant memberships
       const noTenantUser = await payload.create({
         collection: usersSlug,
@@ -181,7 +182,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       await payload.delete({ id: noTenantUser.id, collection: usersSlug })
     })
 
-    it('should allow user with no tenants to access their own user document', async () => {
+    test('should allow user with no tenants to access their own user document', async ({
+      payload,
+    }) => {
       // Create a user with no tenant memberships
       const noTenantUser = await payload.create({
         collection: usersSlug,
@@ -207,7 +210,9 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       await payload.delete({ id: noTenantUser.id, collection: usersSlug })
     })
 
-    it('should allow admin with empty tenants array to access all documents', async () => {
+    test('should allow admin with empty tenants array to access all documents', async ({
+      payload,
+    }) => {
       // Create an admin user with empty tenants array
       const adminUser = await payload.create({
         collection: usersSlug,
@@ -246,8 +251,10 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  describe('access control with user object passed directly', () => {
-    it('should enforce tenant access when user object is fetched from database', async () => {
+  test.describe('access control with user object passed directly', () => {
+    test('should enforce tenant access when user object is fetched from database', async ({
+      payload,
+    }) => {
       // Create two tenants
       const tenantA = await payload.create({
         collection: tenantsSlug,
@@ -299,8 +306,274 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     })
   })
 
-  describe('tenant cleanup on delete', () => {
-    it('should delete a tenant that has a global collection document without hanging', async () => {
+  test.describe('tenant membership enforcement on writes', () => {
+    let tenantA: { id: DefaultDocumentIDType }
+    let tenantB: { id: DefaultDocumentIDType }
+    let tenantMemberUser: { id: DefaultDocumentIDType }
+    const createdRelationshipIDs: DefaultDocumentIDType[] = []
+    const createdAutosaveIDs: DefaultDocumentIDType[] = []
+
+    test.beforeEach(async ({ payload }) => {
+      tenantA = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Membership Tenant A', domain: 'membership-a.test' },
+      })
+      tenantB = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Membership Tenant B', domain: 'membership-b.test' },
+      })
+      // @ts-expect-error The generated user type contains more fields than this test needs.
+      tenantMemberUser = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'tenant-member@test.com',
+          password: 'test',
+          tenants: [{ tenant: tenantA.id }],
+        },
+      })
+    })
+
+    test.afterEach(async ({ payload }) => {
+      for (const id of createdRelationshipIDs) {
+        await payload.delete({ id, collection: relationshipsSlug })
+      }
+      createdRelationshipIDs.length = 0
+
+      for (const id of createdAutosaveIDs) {
+        await payload.delete({ id, collection: autosaveGlobalSlug })
+      }
+      createdAutosaveIDs.length = 0
+
+      await payload.delete({ id: tenantMemberUser.id, collection: usersSlug })
+      await payload.delete({ id: tenantA.id, collection: tenantsSlug })
+      await payload.delete({ id: tenantB.id, collection: tenantsSlug })
+    })
+
+    const loginAsTenantMember = async (restClient: NextRESTClient): Promise<string> => {
+      const result = await restClient
+        .POST('/users/login', {
+          auth: false,
+          body: JSON.stringify({ email: 'tenant-member@test.com', password: 'test' }),
+        })
+        .then((response) => response.json())
+
+      return result.token
+    }
+
+    test('should reject creating a document with an unassigned tenant', async ({ payload }) => {
+      await expect(
+        payload.create({
+          collection: relationshipsSlug,
+          data: { tenant: tenantB.id, title: 'Tenant B document' },
+          overrideAccess: false,
+          user: tenantMemberUser,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+
+    test('should reject moving a document to an unassigned tenant', async ({ payload }) => {
+      const ownDocument = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantA.id, title: 'Tenant A document' },
+        overrideAccess: false,
+        user: tenantMemberUser,
+      })
+
+      createdRelationshipIDs.push(ownDocument.id)
+
+      await expect(
+        payload.update({
+          id: ownDocument.id,
+          collection: relationshipsSlug,
+          data: { tenant: tenantB.id },
+          overrideAccess: false,
+          user: tenantMemberUser,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+
+    test('should reject a REST create with an unassigned tenant', async ({
+      payload,
+      restClientInstance: restClient,
+    }) => {
+      const tenantMemberToken = await loginAsTenantMember(restClient)
+
+      const response = await restClient.POST('/relationships', {
+        auth: false,
+        body: JSON.stringify({ tenant: tenantB.id, title: 'Tenant B REST document' }),
+        headers: { Authorization: `JWT ${tenantMemberToken}` },
+      })
+
+      expect(response.status).toBe(400)
+
+      const written = await payload.find({
+        collection: relationshipsSlug,
+        where: { title: { equals: 'Tenant B REST document' } },
+      })
+
+      expect(written.docs).toHaveLength(0)
+    })
+
+    test('should reject a REST update that moves a document to an unassigned tenant', async ({
+      payload,
+      restClientInstance: restClient,
+    }) => {
+      const tenantMemberToken = await loginAsTenantMember(restClient)
+      const ownDocument = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantA.id, title: 'Tenant A document' },
+        overrideAccess: false,
+        user: tenantMemberUser,
+      })
+
+      createdRelationshipIDs.push(ownDocument.id)
+
+      const response = await restClient.PATCH(`/relationships/${ownDocument.id}`, {
+        auth: false,
+        body: JSON.stringify({ tenant: tenantB.id }),
+        headers: { Authorization: `JWT ${tenantMemberToken}` },
+      })
+
+      expect(response.status).toBe(400)
+
+      const unchangedDocument = await payload.findByID({
+        id: ownDocument.id,
+        collection: relationshipsSlug,
+        depth: 0,
+      })
+
+      expect(unchangedDocument.tenant).toBe(tenantA.id)
+    })
+
+    test('should reject a REST draft create with an unassigned tenant', async ({
+      payload,
+      restClientInstance: restClient,
+    }) => {
+      const tenantMemberToken = await loginAsTenantMember(restClient)
+
+      const response = await restClient.POST('/autosave-global?draft=true', {
+        auth: false,
+        body: JSON.stringify({ tenant: tenantB.id, title: 'Tenant B REST draft' }),
+        headers: { Authorization: `JWT ${tenantMemberToken}` },
+      })
+
+      expect(response.status).toBe(400)
+
+      const written = await payload.find({
+        collection: autosaveGlobalSlug,
+        where: { title: { equals: 'Tenant B REST draft' } },
+      })
+
+      expect(written.docs).toHaveLength(0)
+    })
+
+    test('should reject creating a draft with an unassigned tenant', async ({ payload }) => {
+      await expect(
+        payload.create({
+          collection: autosaveGlobalSlug,
+          data: { tenant: tenantB.id, title: 'Tenant B draft' },
+          draft: true,
+          overrideAccess: false,
+          user: tenantMemberUser,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+
+    test('should reject moving a draft to an unassigned tenant', async ({ payload }) => {
+      const ownDocument = await payload.create({
+        collection: autosaveGlobalSlug,
+        data: { tenant: tenantA.id, title: 'Tenant A draft' },
+        overrideAccess: false,
+        user: tenantMemberUser,
+      })
+
+      createdAutosaveIDs.push(ownDocument.id)
+
+      await expect(
+        payload.update({
+          id: ownDocument.id,
+          collection: autosaveGlobalSlug,
+          data: { tenant: tenantB.id },
+          draft: true,
+          overrideAccess: false,
+          user: tenantMemberUser,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+
+    test('should allow a draft write in an assigned tenant', async ({ payload }) => {
+      const ownDraft = await payload.create({
+        collection: autosaveGlobalSlug,
+        data: { tenant: tenantA.id, title: 'Tenant A draft' },
+        draft: true,
+        overrideAccess: false,
+        user: tenantMemberUser,
+      })
+
+      createdAutosaveIDs.push(ownDraft.id)
+
+      const updatedDocument = await payload.update({
+        id: ownDraft.id,
+        collection: autosaveGlobalSlug,
+        data: { title: 'Updated Tenant A draft' },
+        draft: true,
+        overrideAccess: false,
+        user: tenantMemberUser,
+      })
+
+      expect(updatedDocument.title).toBe('Updated Tenant A draft')
+    })
+
+    test('should preserve the tenant when a partial update omits it', async ({ payload }) => {
+      const ownDocument = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantA.id, title: 'Tenant A document' },
+        overrideAccess: false,
+        user: tenantMemberUser,
+      })
+
+      createdRelationshipIDs.push(ownDocument.id)
+
+      const updatedDocument = await payload.update({
+        id: ownDocument.id,
+        collection: relationshipsSlug,
+        data: { title: 'Updated Tenant A document' },
+        depth: 0,
+        overrideAccess: false,
+        user: tenantMemberUser,
+      })
+
+      expect(updatedDocument.title).toBe('Updated Tenant A document')
+      expect(updatedDocument.tenant).toBe(tenantA.id)
+    })
+
+    test('should reject clearing the tenant during a draft update', async ({ payload }) => {
+      const ownDraft = await payload.create({
+        collection: autosaveGlobalSlug,
+        data: { tenant: tenantA.id, title: 'Tenant A draft' },
+        overrideAccess: false,
+        user: tenantMemberUser,
+      })
+
+      createdAutosaveIDs.push(ownDraft.id)
+
+      await expect(
+        payload.update({
+          id: ownDraft.id,
+          collection: autosaveGlobalSlug,
+          data: { tenant: null },
+          draft: true,
+          overrideAccess: false,
+          user: tenantMemberUser,
+        }),
+      ).rejects.toThrow(ValidationError)
+    })
+  })
+
+  test.describe('tenant cleanup on delete', () => {
+    test('should delete a tenant that has a global collection document without hanging', async ({
+      payload,
+    }) => {
       const tenant = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Cleanup Tenant', domain: 'cleanup-tenant.test' },
@@ -324,8 +597,8 @@ describe('@payloadcms/plugin-multi-tenant', () => {
     }, 20000)
   })
 
-  describe('hasMany tenant field filtering', () => {
-    it('should not double-wrap tenant arrays in filterOptions', async () => {
+  test.describe('hasMany tenant field filtering', () => {
+    test('should not double-wrap tenant arrays in filterOptions', async ({ payload }) => {
       const tenant1 = await payload.create({
         collection: tenantsSlug,
         data: { name: 'Tenant 1', domain: 'tenant1.test' },

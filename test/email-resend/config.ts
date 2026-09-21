@@ -8,21 +8,27 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'email-resend',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [],
+
+    // NOTE: The from address and api key should be properly set
+    // See email-resend README for more information
+    email: resendAdapter({
+      apiKey: process.env.RESEND_API_KEY || '',
+      defaultFromAddress: 'dev@payloadcms.com',
+      defaultFromName: 'Payload CMS',
+    }),
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [],
-
-  // NOTE: The from address and api key should be properly set
-  // See email-resend README for more information
-  email: resendAdapter({
-    apiKey: process.env.RESEND_API_KEY || '',
-    defaultFromAddress: 'dev@payloadcms.com',
-    defaultFromName: 'Payload CMS',
-  }),
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -38,8 +44,5 @@ export default buildConfigWithDefaults({
     })
 
     payload.logger.info({ email, msg: 'Email sent' })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

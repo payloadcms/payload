@@ -1,5 +1,6 @@
 import { writeFileSync } from 'fs'
-import { defineCLICommand, strictObject } from 'payload/cli'
+import { strictObject } from 'payload'
+import { defineCLICommand } from 'payload/cli'
 
 import { testFilePath } from './testFilePath.js'
 

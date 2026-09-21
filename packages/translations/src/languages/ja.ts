@@ -60,6 +60,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     notRedirected: 'リダイレクトされませんでしたか？<0>こちらからログインしてください</0>',
     passed: '認証が通りました',
     passwordResetSuccessfully: 'パスワードが正常にリセットされました。',
+    resend: '再送信',
     resetPassword: 'パスワード再発行',
     resetPasswordExpiration: 'パスワードリセットの有効期限',
     resetPasswordToken: 'パスワードリセット用トークン',

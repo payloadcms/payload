@@ -61,7 +61,6 @@ describe('Query Presets', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'querypresets',
     })
 
     const allDocs = (

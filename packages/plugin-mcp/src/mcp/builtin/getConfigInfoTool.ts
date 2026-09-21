@@ -1,4 +1,4 @@
-import { getAccessResults, isEntityHidden } from 'payload'
+import { getAccessResults, getConfigInfoInputSchema, isEntityHidden } from 'payload'
 
 import { defineTool } from '../../defineTool.js'
 
@@ -11,6 +11,7 @@ export const getConfigInfoTool = defineTool({
     title: 'Config Info',
   },
   description: 'List the Payload collection and global slugs visible to this MCP client.',
+  input: getConfigInfoInputSchema,
 }).handler(async ({ authorizedMCP, req }) => {
   const user = req.user
   const permissions = authorizedMCP.overrideAccess ? null : await getAccessResults({ req })

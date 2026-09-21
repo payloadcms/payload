@@ -45,7 +45,6 @@ process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
 
 // Hide the test suite arg from commander so the CLI only parses its own args
 // e.g. `[node, payloadCLI.ts, fields, info]` becomes `[node, payloadCLI.ts, info]`.
-console.log('before', process.argv)
 process.argv = [process.execPath, filename, ...cliArgs]
 
 await bin()

@@ -37,6 +37,7 @@ export const renderListHandler: ServerFunction<
       payload: { config },
       user,
     },
+    user: userWithReadAccess,
   } = args
 
   if (!req.user) {
@@ -124,6 +125,7 @@ export const renderListHandler: ServerFunction<
     redirectAfterDuplicate,
     searchParams: {},
     server: req.server,
+    user: userWithReadAccess,
     viewType: 'list',
   })
 

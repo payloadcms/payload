@@ -402,6 +402,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               form.formState,
               overrides,
               getUploadHandler({ collectionSlug }),
+              config.collections.find(({ slug }) => slug === collectionSlug)?.upload
+                ?.allowRestrictedFileTypes,
             ),
             credentials: 'include',
             method: 'POST',
@@ -582,6 +584,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       actionURL,
       code,
       collectionSlug,
+      config.collections,
       getUploadHandler,
       getFormState,
       docPermissions,

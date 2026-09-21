@@ -1,16 +1,15 @@
-import { z } from 'zod'
+import { countDocumentsInputSchema } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
   'Count documents in any collection by passing the collection slug and optional where clause.'
 
 export const countDocumentsTool = defineCollectionTool({
   access: (args) =>
-    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.read),
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.slug]?.read),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,
@@ -19,28 +18,17 @@ export const countDocumentsTool = defineCollectionTool({
     title: 'Count Documents',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    locale: z.string().describe('Optional: locale code to count documents in').optional(),
-    trash: z
-      .boolean()
-      .describe('Optional: include soft-deleted documents when trash is enabled on the collection')
-      .optional(),
-    where: whereSchema
-      .describe(
-        'Optional: where clause for filtering. Use field names with Payload operators, and/or arrays for grouping. Example: {"title":{"contains":"test"}}',
-      )
-      .optional(),
-  }),
-}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
+  input: countDocumentsInputSchema,
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
   const { locale, trash, where } = input
 
-  logger.info(`Counting documents in collection: ${collectionSlug}`)
+  logger.info(`Counting documents in collection: ${slug}`)
 
   try {
     const result = await payload.count({
-      collection: collectionSlug,
+      collection: slug,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
       ...(locale ? { locale } : {}),
@@ -52,19 +40,19 @@ export const countDocumentsTool = defineCollectionTool({
       content: [
         {
           type: 'text',
-          text: `Collection "${collectionSlug}" contains ${result.totalDocs} matching documents.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          text: `Collection "${slug}" contains ${result.totalDocs} matching documents.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
       doc: result,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error counting documents in ${collectionSlug}: ${errorMessage}`)
+    logger.error(`Error counting documents in ${slug}: ${errorMessage}`)
     return {
       content: [
         {
           type: 'text',
-          text: `❌ **Error counting documents in collection "${collectionSlug}":** ${errorMessage}`,
+          text: `❌ **Error counting documents in collection "${slug}":** ${errorMessage}`,
         },
       ],
       isError: true,

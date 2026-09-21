@@ -21,6 +21,7 @@ export const TestMetadata: CollectionConfig = {
   ],
   upload: {
     adminThumbnail: 'thumbnail',
+    formatOptions: { format: 'webp' },
     imageSizes: [
       {
         name: 'thumbnail',
