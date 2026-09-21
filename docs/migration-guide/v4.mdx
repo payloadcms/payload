@@ -22,9 +22,175 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### JWT authentication is versioned without moving token data
+
+Payload 4 keeps the decoded JWT payload flat, so integrations can continue reading `id`, `collection`, `sid`, `email`, and fields selected by `saveToJWT` from the same paths as Payload 3.
+
+Payload now reserves `id`, `collection`, `email`, `sid`, `iat`, and `exp`. A `saveToJWT` alias using one of those names is ignored, and Payload writes the trusted value after collecting fields configured with `saveToJWT`. This prevents an alias such as `saveToJWT: 'id'` or `saveToJWT: 'collection'` from changing which user or collection the signed token authenticates as.
+
+The token's signed protected header now contains `authVersion: 1`. This marker identifies tokens issued by the fixed authentication format. It lives in the header, rather than the payload, because earlier configurations could alias a field to any payload key. Payload rejects tokens that do not contain the supported header version.
+
+```ts
+// Decoded payload: unchanged paths
+{
+  id: 'user-id',
+  collection: 'users',
+  sid: 'session-id',
+  email: 'user@example.com',
+  role: 'super-admin', // from saveToJWT
+  iat: 1750000000,
+  exp: 1750007200,
+}
+
+// Signed protected header
+{
+  alg: 'HS256',
+  typ: 'JWT',
+  authVersion: 1,
+}
+```
+
+Tokens issued by a patched Payload 3 release already contain the same `authVersion: 1` protected-header marker and remain valid after upgrading to Payload 4, provided the signing secrets and authentication collection configuration remain compatible.
+
+Tokens issued by an unpatched Payload release do not contain the marker and are rejected. There is no safe compatibility fallback because a legacy token might have been signed after its trusted identity fields were overwritten. When upgrading directly from an unpatched release:
+
+- Users must sign in again after deployment.
+- Integrations must reissue stored bearer tokens.
+- Expect a temporary spike in `401` responses until clients discard their stored tokens.
+
+Raw-token consumers do not need to change token data paths, and `/me` returns the same data for a valid new token. External validators and integrations that mint Payload-compatible JWTs must set and check the protected-header version. Import Payload's shared version instead of hardcoding it:
+
+```ts
+import { decodeProtectedHeader } from 'jose'
+import { JWT_AUTH_VERSION } from 'payload'
+
+if (decodeProtectedHeader(token).authVersion !== JWT_AUTH_VERSION) {
+  throw new Error('Unsupported Payload token')
+}
+```
+
+A token is also rejected if its `collection` is not auth-enabled or has `disableLocalStrategy` enabled.
+
+See [Token Data](../authentication/token-data) for the full token data shape.
+
 ### Collection and Global Access Control callbacks receive `slug`
 
 Collection and Global Access Control callback arguments now include the document's `slug`. This additive property is unlikely to affect most projects, but code that manually invokes access callbacks or `executeAccess` must now pass `slug`. Code that validates, enumerates, or compares the exact callback argument shape may also need updating.
+
+### Custom bin scripts replaced by native CLI commands
+
+The `config.bin` API has been removed. Custom commands are now registered through `config.cli.commands` and use the same schema-backed CLI API as Payload's built-in commands.
+
+In Payload 3.x, config entries connected a command name to a script path:
+
+```ts
+// payload.config.ts
+export default buildConfig({
+  bin: [
+    {
+      key: 'seed',
+      scriptPath: path.resolve(dirname, 'seed.ts'),
+    },
+  ],
+})
+```
+
+The imported module had to expose a specially named `script` function:
+
+```ts
+// seed.ts
+import type { SanitizedConfig } from 'payload'
+
+import payload from 'payload'
+
+export const script = async (config: SanitizedConfig) => {
+  await payload.init({ config })
+  // Seed the database...
+  process.exit(0)
+}
+```
+
+In Payload 4.0, define a real CLI command instead:
+
+```ts
+// seed.ts
+import { strictObject, z } from 'payload'
+import { defineCLICommand } from 'payload/cli'
+
+export const seedCommand = defineCLICommand({
+  description: 'Seed the database.',
+  input: strictObject({
+    clear: z
+      ._default(z.boolean(), false)
+      .check(z.describe('Delete existing documents first.')),
+  }),
+  handler: async ({ args, getPayload }) => {
+    const payload = await getPayload()
+
+    if (args.clear) {
+      // Delete existing documents...
+    }
+
+    // Seed the database...
+    payload.logger.info('Successfully seeded!')
+  },
+})
+```
+
+Register the command export in your Payload config:
+
+```ts
+// payload.config.ts
+export default buildConfig({
+  cli: {
+    commands: {
+      seed: './seed.js#seedCommand',
+    },
+  },
+})
+```
+
+When migrating custom scripts:
+
+- Replace `bin` entries with entries in the `cli.commands` map. The map key becomes the command name.
+- Replace the exported `script(config)` function with a schema-backed command created by `defineCLICommand`.
+- Register commands by import path to keep them out of the Payload config's module graph. Paths use the existing `PayloadComponent` syntax, resolve relative to `payload.config.ts`, and support default or named exports. Direct `CLICommand` values are also accepted.
+- Define the handler's semantic input with a Standard Schema implementation such as Zod. Supported top-level properties become options automatically; use `cli` only to mark positional arguments, hide fields, or override unusual shell syntax.
+- Use the provided `getPayload()` function so Payload can shut down database connections after the command finishes.
+- Return an exit code from the handler when needed. Do not call `process.exit()` from the command.
+
+Payload adds built-in command import references to `cli.commands` while sanitizing the config, then applies project entries over those defaults. All built-ins are named exports from `payload/cli/builtin`, and Payload imports a referenced module only once even when it provides several commands. The sanitized map therefore contains the complete local CLI, and built-in and custom commands use the same loader. Custom commands appear in `payload --help` and receive Standard Schema validation and generated shell help. A command with the same map key as a built-in command replaces it, while `false` disables that command. Set `cli: false` to disable the entire Payload CLI. Command names are case-sensitive. Because custom commands must be registered before the CLI parses input, the Payload config is now loaded before displaying root CLI help.
+
+See the [Payload CLI documentation](../configuration/cli) for the complete API.
+
+### `migrateCLI` removed
+
+The undocumented `migrateCLI` export has been removed. It accepted an already-sanitized config, a minimist-shaped `parsedArgs` object, and a special `migrationDir` override. This duplicated migration command registration and kept the old argument format alive after the main CLI moved to Commander.
+
+If application code needs migration behavior rather than command-line parsing, call the database adapter directly through an initialized Payload instance:
+
+```ts
+await payload.db.migrate()
+```
+
+The adapter also exposes the corresponding `migrateDown`, `migrateFresh`, `migrateRefresh`, `migrateReset`, `migrateStatus`, and `createMigration` methods.
+
+If you need to execute the real CLI from JavaScript, use the existing generic `payload.bin()` method. It starts the same CLI process a user would run in a terminal and returns its exit code:
+
+```ts
+import payload from 'payload'
+
+const { code } = await payload.bin({
+  args: ['migrate:create', '--file', migrationPath],
+  cwd: projectDirectory,
+})
+```
+
+The spawned CLI discovers the Payload config from `cwd` or `PAYLOAD_CONFIG_PATH`. Configure a custom migration directory through your database adapter instead of passing it as a programmatic CLI override.
+
+### Generator helpers now return result objects
+
+`generateTypes` now returns `{ types, outputFile, written }` instead of returning the generated source directly when using `returnString: true`. `generateImportMap` now returns `{ outputFile, written }`, and `payload.db.generateSchema()` returns `{ outputFile }`. Code that ignores these return values does not need to change.
 
 ### Default query depth reduced to `1`
 
@@ -743,9 +909,9 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 `lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
 
-### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.48.0`
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.50.0`
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.48.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.50.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -769,7 +935,7 @@ If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.fe
 
 **Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.48.0`. None of them require action for typical Payload usage.
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.50.0`. None of them require action for typical Payload usage.
 
 ### Lexical: `EXPERIMENTAL_TableFeature` renamed to `TableFeature`
 
@@ -1522,7 +1688,7 @@ createAPIKeyFields({
 
 The MCP plugin was refactored. The public config API, the built-in tool inputs, and API-key authentication changed. Update your plugin config and recreate MCP credentials as user API keys.
 
-**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools. For collections, this includes tools like `getCollectionSchema`, `findDocuments`, `countDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `duplicateDocument`, and `findDistinct`, plus version tools when versions are enabled. For globals, this includes `getGlobalSchema`, `findGlobal`, and `updateGlobal`, plus version tools when versions are enabled. Turn individual operations off via simple config keys like `tools: { create: false }`.
+**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools. For collections, this includes tools like `getCollectionSchema`, `findDocuments`, `countDocuments`, `createDocuments`, `updateDocument`, `deleteDocuments`, `duplicateDocument`, and `findDistinct`, plus version tools when versions are enabled. For globals, this includes `getGlobalSchema`, `findGlobal`, and `updateGlobal`, plus version tools when versions are enabled. Turn individual operations off via simple config keys like `tools: { create: false }`.
 
 ```diff
 mcpPlugin({
@@ -1587,7 +1753,9 @@ const result = await req.payload.find({
 })
 ```
 
-For custom collection and global tools, do not add `collectionSlug` / `globalSlug` yourself. Payload adds the slug input to the MCP schema automatically, and the handler receives the resolved slug as a top-level argument.
+Collection and global tool calls now use `slug` instead of `collectionSlug` or `globalSlug`. Update saved tool inputs and any code that calls these tools directly.
+
+For custom collection and global tools, do not add `slug` yourself. Payload adds it to the MCP schema automatically, and the handler receives the resolved slug as a top-level argument.
 
 ```ts
 defineCollectionTool({
@@ -1595,24 +1763,41 @@ defineCollectionTool({
   input: z.object({
     id: z.string(),
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
-  // collectionSlug is resolved from the tool call
+}).handler(async ({ slug, input, req }) => {
+  // slug is resolved from the tool call
 })
 ```
 
-**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocument` / `updateDocument`. Pass the target collection as `collectionSlug`; document fields live under `data` alongside options like `depth`, `draft` and `locale`. For update and delete calls, pass `id` or `where` as top-level arguments. `_status`, `id`, `createdAt` and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
+**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocuments` / `updateDocument`. Pass the target collection as `slug`. For creates, pass a `documents` array whose items contain `data` and an optional `file`; for updates, pass `data` with an `id` or `where` at the top level. Options such as `depth`, `draft`, and `locale` also remain at the top level. `_status`, `id`, `createdAt`, and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
 
 ```ts
-// arguments to a `createDocument` tool call
+// arguments to a `createDocuments` tool call
 
 // before
 { title: 'Hello', _status: 'draft', draft: true, depth: 2 }
 
 // after
-{ collectionSlug: 'posts', data: { title: 'Hello' }, draft: true, depth: 2 }
+{
+  slug: 'posts',
+  documents: [{ data: { title: 'Hello' } }],
+  draft: true,
+  depth: 2,
+}
 ```
 
-**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per auth collection via its `tools` map, and pass the target auth collection as `collectionSlug`. Like every MCP item, auth tools now use default MCP access unless you provide an `access` callback, so unauthenticated auth tools such as `login` need `access: () => true`.
+`createDocuments` and `updateDocument` now return affected document IDs instead of complete documents by default. Add `returning: true` to preserve the previous response. If the call uses `select`, it must also set `returning: true`.
+
+**MCP URL uploads require an explicit allow-list.** Previously, MCP could download a URL when the upload collection's `pasteURL` was unset. Configure `upload.pasteURL.allowList` for collections that accept MCP URL uploads. The initial URL and any redirect targets must match; `skipSafeFetch` does not bypass this requirement. Base64 and upload-reference inputs are unaffected.
+
+```ts
+upload: {
+  pasteURL: {
+    allowList: [{ hostname: 'cdn.example.com', protocol: 'https' }],
+  },
+}
+```
+
+**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per auth collection via its `tools` map, and pass the target auth collection as `slug`. Like every MCP item, auth tools now use default MCP access unless you provide an `access` callback, so unauthenticated auth tools such as `login` need `access: () => true`.
 
 ```diff
 - mcpPlugin({ experimental: { tools: { auth: { enabled: true } } } })
@@ -1670,7 +1855,7 @@ Because the `payload-mcp-api-keys` collection config was removed, run your norma
 
 By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.
 
-**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4.
+**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`. It no longer depends on Zod directly; its built-in tools use the Zod Mini export from `payload`. If your custom tools use regular Zod, install Zod v4 in your project and import it directly.
 
 ### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
 
@@ -1704,3 +1889,46 @@ The Admin UI styles were migrated from SCSS to plain CSS. The `@payloadcms/ui/sc
 The `--theme-elevation-*` scale was removed. Use the semantic `--color-*` tokens (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`) or the raw `--ramp-*` palette instead. See [Customizing CSS](../admin/customizing-css) for the full list of available tokens.
 
 Any custom component `.scss` files you authored should be renamed to `.css` and updated to plain CSS syntax — Payload no longer ships a SCSS toolchain.
+
+### Ecommerce Stripe confirmations use an atomic transaction claim
+
+Stripe confirmation now atomically claims the existing ecommerce transaction before creating an order,
+marking the cart as purchased, and decrementing inventory. Retries return the canonical order only when
+the succeeded transaction and order are linked in both directions. Ambiguous state fails closed.
+
+PostgreSQL users must generate and run a database migration that adds `processing` to the ecommerce
+transaction status enum. No order field, unique index, or data backfill is required. The public
+`confirm-order` response continues to include `transactionID`, including on retries. This is a breaking
+security change for custom payment adapters: after provider validation, they must call the new
+`finalizeOrder` argument instead of creating orders themselves. The bundled Stripe adapter is updated in
+the same release. See the [payment confirmation guidance](../ecommerce/payments#confirmation-retries) for
+transactionless database failure behavior and reconciliation guidance.
+
+### Stripe REST proxy requires an explicit method allowlist
+
+`@payloadcms/plugin-stripe` no longer accepts `rest: true`. To enable the REST proxy in v4, use
+an object with a non-empty `allowedMethods` array of exact Stripe SDK method names, such as
+`subscriptions.list`:
+
+```diff
+stripePlugin({
+- rest: true,
++ rest: {
++   allowedMethods: ['subscriptions.list'],
++ },
+})
+```
+
+Wildcards are not supported. The optional `rest.access` callback can further restrict the
+endpoint. Without it, the proxy requires an authenticated user allowed to access the Payload
+admin panel. See the [Stripe REST proxy documentation](../plugins/stripe#stripe-rest-proxy) for
+configuration and security guidance.
+
+If you previously used `rest: false`, remove the property; omitting `rest` disables the proxy.
+
+### API keys: v4-only changes on top of the shared 3.x/4 security fix
+
+- `apiKeyLast4` is a new persisted field on every `auth.useAPIKey` collection. Generate and run a schema migration. Legacy rows backfill on the next successful API-key authentication.
+- `enableAPIKey` is removed. Revoke by setting `apiKey: null`.
+- `hasAPIKey` (3.x virtual field) is removed. Use `apiKeyLast4` and `docPermissions.fields.apiKey`.
+- Custom `access.read` on the generated `apiKey` field is inert — reads are hardcoded to deny.

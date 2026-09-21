@@ -1,3 +1,5 @@
+import type { MigrationResult } from 'payload'
+
 import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
 import prompts from 'prompts'
 
@@ -8,27 +10,27 @@ import type { MongooseAdapter } from './index.js'
  */
 export async function migrateFresh(
   this: MongooseAdapter,
-  { forceAcceptWarning = false }: { forceAcceptWarning?: boolean },
-): Promise<void> {
+  {
+    forceAcceptWarning = false,
+    shouldPrompt = true,
+  }: { forceAcceptWarning?: boolean; shouldPrompt?: boolean },
+): Promise<MigrationResult> {
   const { payload } = this
 
   if (!forceAcceptWarning) {
-    const { confirm: acceptWarning } = await prompts(
-      {
-        name: 'confirm',
-        type: 'confirm',
-        initial: false,
-        message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
+    if (!shouldPrompt) {
+      return { cancelled: true, migrated: [], rolledBack: [] }
+    }
+
+    const { confirm: acceptWarning } = await prompts({
+      name: 'confirm',
+      type: 'confirm',
+      initial: false,
+      message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
+    })
 
     if (!acceptWarning) {
-      process.exit(0)
+      return { cancelled: true, migrated: [], rolledBack: [] }
     }
   }
 
@@ -44,6 +46,7 @@ export async function migrateFresh(
   })
 
   const req = { payload }
+  const migrated: string[] = []
 
   // Run all migrate up
   for (const migration of migrationFiles) {
@@ -62,6 +65,7 @@ export async function migrateFresh(
       })
 
       await commitTransaction(req)
+      migrated.push(migration.name)
 
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
@@ -73,4 +77,6 @@ export async function migrateFresh(
       throw err
     }
   }
+
+  return { batch: 1, migrated, rolledBack: [] }
 }

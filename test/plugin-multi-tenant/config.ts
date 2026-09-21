@@ -1,4 +1,4 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { baseConfig } from './config.base.js'
+import { baseConfig, seed } from './config.base.js'
 
-export default buildConfigWithDefaults(baseConfig)
+export default buildConfigWithDefaults({ suite: 'plugin-multi-tenant', config: baseConfig, seed })

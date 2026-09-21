@@ -59,6 +59,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     notRedirected: 'Не сте пренасочени? <0>Влезте тук</0>',
     passed: 'Удостоверението е успешно',
     passwordResetSuccessfully: 'Паролата е променена успешно.',
+    resend: 'Изпрати отново',
     resetPassword: 'Възстанови парола',
     resetPasswordExpiration: 'Нулиране на изтичане на паролата',
     resetPasswordToken: 'Ключ за възстановяване на парола',

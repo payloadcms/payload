@@ -12,30 +12,36 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  // ...extend config here
-  collections: [
-    PostsCollection,
-    {
-      slug: 'simple',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-        },
-      ],
-      versions: false,
+  suite: 'lexical-mdx',
+  config: {
+    // ...extend config here
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
     },
-    MediaCollection,
-  ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+    collections: [
+      PostsCollection,
+      {
+        slug: 'simple',
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      MediaCollection,
+    ],
+    cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
+    editor: lexicalEditor({}),
+    globals: [],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  editor: lexicalEditor({}),
-  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
-  globals: [],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -66,17 +72,14 @@ export default buildConfigWithDefaults({
     for (const file of mdxFiles) {
       await payload.create({
         collection: 'posts',
-        depth: 0,
         context: {
           seed: true,
         },
         data: {
           docPath: file,
         },
+        depth: 0,
       })
     }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

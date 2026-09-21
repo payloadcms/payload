@@ -11,6 +11,13 @@ export const _internal_safeFetchGlobal = {
   lookup,
 }
 
+const buildBlockedFetchError = (hostname: string): Error =>
+  new Error(
+    `Blocked unsafe attempt to ${hostname}. This host resolves to a private or internal address. ` +
+      `If this is a trusted destination, allowlist it via the upload collection's "skipSafeFetch" option ` +
+      `(https://payloadcms.com/docs/upload/overview#skip-safe-fetch).`,
+  )
+
 const isSafeIp = (ip: string) => {
   try {
     if (!ip) {
@@ -45,7 +52,7 @@ const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
       }
 
       if (ips.some((ip) => !isSafeIp(ip))) {
-        callback(new Error(`Blocked unsafe attempt to ${hostname}`), address, family)
+        callback(buildBlockedFetchError(hostname), address, family)
         return
       }
 
@@ -85,7 +92,7 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>): Promis
 
     if (ipaddr.isValid(hostname)) {
       if (!isSafeIp(hostname)) {
-        throw new Error(`Blocked unsafe attempt to ${hostname}`)
+        throw buildBlockedFetchError(hostname)
       }
     }
     return (await undiciFetch(url, {

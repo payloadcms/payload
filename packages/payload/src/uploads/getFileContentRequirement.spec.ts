@@ -41,7 +41,7 @@ describe('getFileContentRequirement', () => {
     ).toBe('full')
   })
 
-  it('does not require content when allowRestrictedFileTypes bypasses the mime type check', () => {
+  it('requires the full file when a mime type allow list overrides restricted type checks', () => {
     expect(
       getFileContentRequirement({
         mimeType: 'video/mp4',
@@ -50,7 +50,7 @@ describe('getFileContentRequirement', () => {
           mimeTypes: ['video/*'],
         }),
       }),
-    ).toBe('none')
+    ).toBe('full')
   })
 
   it('requires only the header for an image with no configured adjustments', () => {

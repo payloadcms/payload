@@ -1,30 +1,15 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { childrenSlug, globalSlug, parentsSlug, readAccessLog, resetAccessLog } from './shared.js'
-
-let payload: Payload
-let restClient: NextRESTClient
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 const childIDs: (number | string)[] = []
 const parentIDs: (number | string)[] = []
 
-describe('field access collection context', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterEach(async () => {
+test.suite({ config: './config.ts' })('field access collection context', () => {
+  test.afterEach(async ({ payload }) => {
     for (const id of parentIDs) {
       await payload.delete({ id, collection: parentsSlug })
     }
@@ -38,11 +23,7 @@ describe('field access collection context', () => {
     resetAccessLog()
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should pass collectionSlug to local create field access callbacks', async () => {
+  test('should pass collectionSlug to local create field access callbacks', async ({ payload }) => {
     const doc = await payload.create({
       collection: parentsSlug,
       data: {
@@ -62,7 +43,9 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass collectionSlug to REST create field access callbacks', async () => {
+  test('should pass collectionSlug to REST create field access callbacks', async ({
+    restClient,
+  }) => {
     const response = await restClient.POST(`/${parentsSlug}`, {
       body: JSON.stringify({
         accessCreateProbe: 'rest create',
@@ -82,7 +65,7 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass collectionSlug to local read field access callbacks', async () => {
+  test('should pass collectionSlug to local read field access callbacks', async ({ payload }) => {
     const doc = await payload.create({
       collection: parentsSlug,
       data: {
@@ -108,7 +91,10 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass collectionSlug to REST read field access callbacks', async () => {
+  test('should pass collectionSlug to REST read field access callbacks', async ({
+    payload,
+    restClient,
+  }) => {
     const doc = await payload.create({
       collection: parentsSlug,
       data: {
@@ -131,7 +117,10 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass collectionSlug to GraphQL read field access callbacks', async () => {
+  test('should pass collectionSlug to GraphQL read field access callbacks', async ({
+    payload,
+    restClient,
+  }) => {
     const doc = await payload.create({
       collection: parentsSlug,
       data: {
@@ -165,7 +154,9 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass child collectionSlug when reading populated relationship children', async () => {
+  test('should pass child collectionSlug when reading populated relationship children', async ({
+    payload,
+  }) => {
     const child = await payload.create({
       collection: childrenSlug,
       data: {
@@ -202,7 +193,7 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass collectionSlug to update field access callbacks', async () => {
+  test('should pass collectionSlug to update field access callbacks', async ({ payload }) => {
     const doc = await payload.create({
       collection: parentsSlug,
       data: {
@@ -230,7 +221,7 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass collectionSlug to findDistinct field access callbacks', async () => {
+  test('should pass collectionSlug to findDistinct field access callbacks', async ({ payload }) => {
     const firstDoc = await payload.create({
       collection: parentsSlug,
       data: {
@@ -265,7 +256,9 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass collectionSlug when building collection field permissions', async () => {
+  test('should pass collectionSlug when building collection field permissions', async ({
+    payload,
+  }) => {
     // payload.auth() calls getEntityPermissions for all registered collections,
     // which calls populateFieldPermissions → field.access[operation] for each field.
     const req = await createLocalReq({}, payload)
@@ -284,7 +277,9 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should leave collectionSlug undefined and set globalSlug for global field access callbacks', async () => {
+  test('should leave collectionSlug undefined and set globalSlug for global field access callbacks', async ({
+    payload,
+  }) => {
     await payload.updateGlobal({
       slug: globalSlug,
       data: {
@@ -316,7 +311,9 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should pass child collectionSlug when reading a populated relationship child from a global', async () => {
+  test('should pass child collectionSlug when reading a populated relationship child from a global', async ({
+    payload,
+  }) => {
     const child = await payload.create({
       collection: childrenSlug,
       data: {

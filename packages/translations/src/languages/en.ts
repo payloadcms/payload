@@ -61,6 +61,7 @@ export const enTranslations = {
     notRedirected: 'Not redirected? <0>Log in here</0>',
     passed: 'Authentication Passed',
     passwordResetSuccessfully: 'Password reset successfully.',
+    resend: 'Resend',
     resetPassword: 'Reset Password',
     resetPasswordExpiration: 'Reset Password Expiration',
     resetPasswordToken: 'Reset Password Token',
