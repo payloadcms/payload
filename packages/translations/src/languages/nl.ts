@@ -61,6 +61,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     notRedirected: 'Niet omgeleid? <0>Log hier in</0>',
     passed: 'Authenticatie Geslaagd',
     passwordResetSuccessfully: 'Wachtwoord succesvol opnieuw ingesteld.',
+    resend: 'Opnieuw verzenden',
     resetPassword: 'Wachtwoord herstellen',
     resetPasswordExpiration: 'Vervaltijd van wachtwoord herstellen',
     resetPasswordToken: 'Token van wachtwoordreset',

@@ -59,6 +59,7 @@ export const slTranslations: DefaultTranslationsObject = {
     notRedirected: 'Niste bili preusmerjeni? <0>Prijavite se tukaj</0>',
     passed: 'Avtentikacija uspešna',
     passwordResetSuccessfully: 'Geslo uspešno ponastavljeno.',
+    resend: 'Pošlji znova',
     resetPassword: 'Ponastavi geslo',
     resetPasswordExpiration: 'Potek ponastavitve gesla',
     resetPasswordToken: 'Žeton za ponastavitev gesla',

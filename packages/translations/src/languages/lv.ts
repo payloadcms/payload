@@ -59,6 +59,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     notRedirected: 'Netika pāradresēts? <0>Piesakieties šeit</0>',
     passed: 'Autentifikācija veiksmīga',
     passwordResetSuccessfully: 'Parole veiksmīgi atiestatīta.',
+    resend: 'Nosūtīt vēlreiz',
     resetPassword: 'Atiestatīt paroli',
     resetPasswordExpiration: 'Paroles atiestatīšanas termiņš',
     resetPasswordToken: 'Paroles atiestatīšanas tokens',

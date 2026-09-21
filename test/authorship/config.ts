@@ -1,3 +1,5 @@
+import type { Config } from 'payload'
+
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { createCreatedByField, createUpdatedByField } from 'payload'
@@ -20,17 +22,36 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export default buildConfigWithDefaults(
-  {
+export const seed: NonNullable<Config['onInit']> = async (payload) => {
+  await payload.create({
+    collection: usersSlug,
+    data: {
+      email: devUser.email,
+      password: devUser.password,
+    },
+  })
+
+  // A second user used by access-control tests; `users` read is restricted to own record.
+  await payload.create({
+    collection: usersSlug,
+    data: {
+      email: 'other@payloadcms.com',
+      password: devUser.password,
+    },
+  })
+}
+
+export default buildConfigWithDefaults({
+  config: {
     collections: [
       {
         slug: usersSlug,
-        auth: true,
         access: {
           // Users can only read their own record — used to verify that authorship
           // relationships fall back to an id reference when the reader lacks access.
           read: ({ req: { user } }) => (user ? { id: { equals: user.id } } : false),
         },
+        auth: true,
         fields: [],
         // Auth-session writes on login churn version docs, which flakes on Atlas with
         // "catalog changes" errors; auth records don't need versioning here.
@@ -157,29 +178,11 @@ export default buildConfigWithDefaults(
         ],
       },
     ],
-    onInit: async (payload) => {
-      await payload.create({
-        collection: usersSlug,
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-      })
-
-      // A second user used by access-control tests; `users` read is restricted to own record.
-      await payload.create({
-        collection: usersSlug,
-        data: {
-          email: 'other@payloadcms.com',
-          password: devUser.password,
-        },
-      })
-    },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  {
-    disableAutoLogin: true,
-  },
-)
+  disableAutoLogin: true,
+  seed,
+  suite: 'authorship',
+})

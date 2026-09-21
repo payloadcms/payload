@@ -60,6 +60,7 @@ export const viTranslations: DefaultTranslationsObject = {
     notRedirected: 'Không được chuyển hướng? <0>Đăng nhập tại đây</0>',
     passed: 'Xác thực thành công',
     passwordResetSuccessfully: 'Đặt lại mật khẩu thành công.',
+    resend: 'Gửi lại',
     resetPassword: 'Tạo lại mật khẩu',
     resetPasswordExpiration: 'Hạn tạo lại mật khẩu ',
     resetPasswordToken: 'Tạo lại token cho mật khẩu',

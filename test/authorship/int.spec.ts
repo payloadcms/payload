@@ -1,13 +1,11 @@
 import type { Payload } from 'payload'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Admin, Post, User } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
   adminsSlug,
@@ -26,9 +24,6 @@ type TestUser = Admin | User
 let payload: Payload
 let restClient: NextRESTClient
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
 let user: TestUser
 let admin: TestUser
 let otherUser: TestUser
@@ -46,9 +41,10 @@ const createPost = async ({ data, user }: { data: Partial<Post>; user?: TestUser
   return doc
 }
 
-describe('Authorship', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+test.suite({ config: './config.ts', resetBetweenTests: false })('Authorship', () => {
+  test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
+    payload = payloadInstance
+    restClient = restClientInstance
 
     const userDoc = (
       await payload.find({
@@ -80,25 +76,21 @@ describe('Authorship', () => {
     otherUser = { ...otherUserDoc, collection: usersSlug }
   })
 
-  afterEach(async () => {
+  test.afterEach(async () => {
     for (const id of createdPostIDs) {
       await payload.delete({ id, collection: postsSlug }).catch(() => null)
     }
     createdPostIDs.length = 0
   })
 
-  afterAll(async () => {
-    await payload?.destroy()
-  })
-
-  it('should set createdBy and updatedBy from req.user on create', async () => {
+  test('should set createdBy and updatedBy from req.user on create', async () => {
     const post = await createPost({ data: { title: 'created' }, user })
 
     expect(post.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
     expect(post.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
-  it('should keep createdBy as an id reference when the reader lacks access to the related user', async () => {
+  test('should keep createdBy as an id reference when the reader lacks access to the related user', async () => {
     const post = await createPost({ data: { title: 'restricted' }, user })
 
     // `otherUser` can only read their own user record, so populating `user` is denied
@@ -115,7 +107,7 @@ describe('Authorship', () => {
     expect(read.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
-  it('should populate createdBy when the reader has access to the related user', async () => {
+  test('should populate createdBy when the reader has access to the related user', async () => {
     const post = await createPost({ data: { title: 'own' }, user })
 
     const read = await payload.findByID({
@@ -131,7 +123,7 @@ describe('Authorship', () => {
     expect(createdBy.value.id).toBe(user.id)
   })
 
-  it('should set updatedBy on update and leave createdBy unchanged', async () => {
+  test('should set updatedBy on update and leave createdBy unchanged', async () => {
     const post = await createPost({ data: { title: 'created' }, user })
 
     const updated = await payload.update({
@@ -146,7 +138,7 @@ describe('Authorship', () => {
     expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
-  it('should not change createdBy when explicitly provided on update (immutable via Local API)', async () => {
+  test('should not change createdBy when explicitly provided on update (immutable via Local API)', async () => {
     const post = await createPost({ data: { title: 'created' }, user })
 
     const updated = await payload.update({
@@ -160,7 +152,7 @@ describe('Authorship', () => {
     expect(updated.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
-  it('should honor an explicit updatedBy on update via Local API', async () => {
+  test('should honor an explicit updatedBy on update via Local API', async () => {
     const post = await createPost({ data: { title: 'created' }, user })
 
     // With overrideAccess bypassed, an explicit updatedBy is honored over the acting user.
@@ -175,7 +167,7 @@ describe('Authorship', () => {
     expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
-  it('should let an explicit value in data override the system user', async () => {
+  test('should let an explicit value in data override the system user', async () => {
     const post = await createPost({
       data: {
         createdBy: { relationTo: adminsSlug, value: admin.id },
@@ -187,7 +179,7 @@ describe('Authorship', () => {
     expect(post.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
-  it('should clear updatedBy when null is explicitly passed even with a user present', async () => {
+  test('should clear updatedBy when null is explicitly passed even with a user present', async () => {
     const post = await createPost({ data: { title: 'created' }, user })
 
     const updated = await payload.update({
@@ -201,7 +193,7 @@ describe('Authorship', () => {
     expect(updated.updatedBy).toBeFalsy()
   })
 
-  it('should leave updatedBy unchanged when updating without a user', async () => {
+  test('should leave updatedBy unchanged when updating without a user', async () => {
     const post = await createPost({ data: { title: 'created' }, user })
 
     const updated = await payload.update({
@@ -214,14 +206,14 @@ describe('Authorship', () => {
     expect(updated.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
-  it('should support polymorphic tracking across multiple auth collections', async () => {
+  test('should support polymorphic tracking across multiple auth collections', async () => {
     const post = await createPost({ data: { title: 'by admin' }, user: admin })
 
     expect(post.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
     expect(post.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
-  it('should ignore a client-provided createdBy (no spoofing) when overrideAccess is false', async () => {
+  test('should ignore a client-provided createdBy (no spoofing) when overrideAccess is false', async () => {
     const created = await payload.create({
       collection: postsSlug,
       data: {
@@ -238,7 +230,7 @@ describe('Authorship', () => {
     expect(created.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
-  it('should ignore a client-provided null createdBy (no clearing) when overrideAccess is false', async () => {
+  test('should ignore a client-provided null createdBy (no clearing) when overrideAccess is false', async () => {
     const created = await payload.create({
       collection: postsSlug,
       data: { createdBy: null, title: 'no clear create' },
@@ -253,7 +245,7 @@ describe('Authorship', () => {
     expect(created.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
-  it('should ignore a client-provided updatedBy (no spoofing) when overrideAccess is false', async () => {
+  test('should ignore a client-provided updatedBy (no spoofing) when overrideAccess is false', async () => {
     const post = await createPost({ data: { title: 'no spoof update' }, user })
 
     const updated = await payload.update({
@@ -271,7 +263,7 @@ describe('Authorship', () => {
     expect(updated.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
-  it('should stamp updatedBy on every doc in a bulk update', async () => {
+  test('should stamp updatedBy on every doc in a bulk update', async () => {
     const post1 = await createPost({ data: { title: 'bulk a' }, user })
     const post2 = await createPost({ data: { title: 'bulk b' }, user })
 
@@ -289,7 +281,7 @@ describe('Authorship', () => {
     }
   })
 
-  it('should stamp createdBy from the duplicating user on duplicate', async () => {
+  test('should stamp createdBy from the duplicating user on duplicate', async () => {
     const post = await createPost({ data: { title: 'original' }, user })
 
     // The beforeDuplicate hook clears the copied author, so the duplicate is
@@ -306,7 +298,7 @@ describe('Authorship', () => {
     expect(duplicated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
-  it('should not change updatedBy when a user logs in', async () => {
+  test('should not change updatedBy when a user logs in', async () => {
     const email = `login-check-${Date.now()}@x.com`
 
     const createdUser = await payload.create({
@@ -322,18 +314,18 @@ describe('Authorship', () => {
     })
 
     const afterLogin = await payload.findByID({
-      collection: usersSlug,
       id: createdUser.id,
+      collection: usersSlug,
       depth: 0,
     })
 
     // Session writes on login must not bump the user's authorship metadata.
     expect(afterLogin.updatedBy).toEqual(createdUser.updatedBy)
 
-    await payload.delete({ collection: usersSlug, id: createdUser.id }).catch(() => null)
+    await payload.delete({ id: createdUser.id, collection: usersSlug }).catch(() => null)
   })
 
-  it('should not inject authorship fields when authorship is false', () => {
+  test('should not inject authorship fields when authorship is false', () => {
     const fields = payload.collections[noAuthorshipSlug].config.fields
     const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
 
@@ -341,7 +333,7 @@ describe('Authorship', () => {
     expect(names).not.toContain('updatedBy')
   })
 
-  it('should only inject createdBy when updatedBy is disabled', () => {
+  test('should only inject createdBy when updatedBy is disabled', () => {
     const fields = payload.collections[createdOnlySlug].config.fields
     const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
 
@@ -349,7 +341,7 @@ describe('Authorship', () => {
     expect(names).not.toContain('updatedBy')
   })
 
-  it('should only inject updatedBy when createdBy is disabled', () => {
+  test('should only inject updatedBy when createdBy is disabled', () => {
     const fields = payload.collections[updatedOnlySlug].config.fields
     const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
 
@@ -357,7 +349,7 @@ describe('Authorship', () => {
     expect(names).not.toContain('createdBy')
   })
 
-  it('should stamp only createdBy when updatedBy is disabled', async () => {
+  test('should stamp only createdBy when updatedBy is disabled', async () => {
     const created = await payload.create({
       collection: createdOnlySlug,
       data: { title: 'created' },
@@ -369,8 +361,8 @@ describe('Authorship', () => {
     expect(created).not.toHaveProperty('updatedBy')
 
     const updated = await payload.update({
-      collection: createdOnlySlug,
       id: created.id,
+      collection: createdOnlySlug,
       data: { title: 'updated' },
       depth: 0,
       user: admin,
@@ -380,10 +372,10 @@ describe('Authorship', () => {
     expect(updated.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
     expect(updated).not.toHaveProperty('updatedBy')
 
-    await payload.delete({ collection: createdOnlySlug, id: created.id }).catch(() => null)
+    await payload.delete({ id: created.id, collection: createdOnlySlug }).catch(() => null)
   })
 
-  it('should stamp only updatedBy when createdBy is disabled', async () => {
+  test('should stamp only updatedBy when createdBy is disabled', async () => {
     const created = await payload.create({
       collection: updatedOnlySlug,
       data: { title: 'created' },
@@ -395,8 +387,8 @@ describe('Authorship', () => {
     expect(created).not.toHaveProperty('createdBy')
 
     const updated = await payload.update({
-      collection: updatedOnlySlug,
       id: created.id,
+      collection: updatedOnlySlug,
       data: { title: 'updated' },
       depth: 0,
       user: admin,
@@ -406,10 +398,10 @@ describe('Authorship', () => {
     expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
     expect(updated).not.toHaveProperty('createdBy')
 
-    await payload.delete({ collection: updatedOnlySlug, id: created.id }).catch(() => null)
+    await payload.delete({ id: created.id, collection: updatedOnlySlug }).catch(() => null)
   })
 
-  it('should track authorship on globals', async () => {
+  test('should track authorship on globals', async () => {
     const updated = await payload.updateGlobal({
       slug: menuSlug,
       data: { title: 'menu' },
@@ -421,7 +413,7 @@ describe('Authorship', () => {
     expect(updated.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
-  it('should apply overrides from createCreatedByField / createUpdatedByField while preserving stamping', async () => {
+  test('should apply overrides from createCreatedByField / createUpdatedByField while preserving stamping', async () => {
     const created = await payload.create({
       collection: customAuthorshipSlug,
       data: { title: 'custom' },
@@ -433,8 +425,8 @@ describe('Authorship', () => {
     expect(created.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
 
     const updated = await payload.update({
-      collection: customAuthorshipSlug,
       id: created.id,
+      collection: customAuthorshipSlug,
       data: { title: 'custom updated' },
       depth: 0,
       user: admin,
@@ -463,10 +455,10 @@ describe('Authorship', () => {
     expect(updatedByField.label).toBe('Editor')
     expect(updatedByField.relationTo).toEqual([usersSlug, adminsSlug])
 
-    await payload.delete({ collection: customAuthorshipSlug, id: created.id }).catch(() => null)
+    await payload.delete({ id: created.id, collection: customAuthorshipSlug }).catch(() => null)
   })
 
-  it('should use a user-defined raw createdBy field as-is (no stamping or spoof protection)', async () => {
+  test('should use a user-defined raw createdBy field as-is (no stamping or spoof protection)', async () => {
     const rawCreatedByField = payload.collections[rawAuthorshipSlug].config.fields.find(
       (field) => 'name' in field && field.name === 'createdBy',
     ) as { hooks?: { beforeChange?: unknown[] }; relationTo?: string[] }
@@ -497,17 +489,17 @@ describe('Authorship', () => {
     })
     expect(spoofed.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
 
-    await payload.delete({ collection: rawAuthorshipSlug, id: created.id }).catch(() => null)
-    await payload.delete({ collection: rawAuthorshipSlug, id: spoofed.id }).catch(() => null)
+    await payload.delete({ id: created.id, collection: rawAuthorshipSlug }).catch(() => null)
+    await payload.delete({ id: spoofed.id, collection: rawAuthorshipSlug }).catch(() => null)
   })
 
-  describe('GraphQL', () => {
-    beforeAll(async () => {
+  test.describe('GraphQL', () => {
+    test.beforeAll(async () => {
       // Default access only allows the admin-panel user collection (`users` here).
       await restClient.login({ slug: usersSlug })
     })
 
-    it('should return polymorphic createdBy / updatedBy on a collection query', async () => {
+    test('should return polymorphic createdBy / updatedBy on a collection query', async () => {
       const post = await createPost({ data: { title: 'gql post' }, user })
 
       const query = `query {
@@ -542,7 +534,7 @@ describe('Authorship', () => {
       expect(data.Post.updatedBy.value.id).toBe(user.id)
     })
 
-    it('should resolve the Admin union branch for admin-authored docs', async () => {
+    test('should resolve the Admin union branch for admin-authored docs', async () => {
       const post = await createPost({ data: { title: 'gql admin post' }, user: admin })
 
       const query = `query {
@@ -566,7 +558,7 @@ describe('Authorship', () => {
       expect(data.Post.createdBy.value.id).toBe(admin.id)
     })
 
-    it('should return authorship on a global query', async () => {
+    test('should return authorship on a global query', async () => {
       await payload.updateGlobal({
         slug: menuSlug,
         data: { title: 'gql menu' },
@@ -595,7 +587,7 @@ describe('Authorship', () => {
       expect(data.Menu.updatedBy.value.id).toBe(user.id)
     })
 
-    it('should ignore a client-provided createdBy in a create mutation', async () => {
+    test('should ignore a client-provided createdBy in a create mutation', async () => {
       const mutation = `mutation {
         createPost(data: { title: "gql spoof", createdBy: { relationTo: admins, value: ${typeof admin.id === 'number' ? admin.id : `"${admin.id}"`} } }) {
           id

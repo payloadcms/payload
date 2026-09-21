@@ -59,6 +59,7 @@ export const koTranslations: DefaultTranslationsObject = {
     notRedirected: '리디렉션되지 않았습니까? <0>여기에서 로그인하세요</0>',
     passed: '인증 통과',
     passwordResetSuccessfully: '비밀번호가 성공적으로 재설정되었습니다.',
+    resend: '다시 보내기',
     resetPassword: '비밀번호 재설정',
     resetPasswordExpiration: '비밀번호 재설정 만료',
     resetPasswordToken: '비밀번호 재설정 토큰',

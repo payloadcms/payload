@@ -60,6 +60,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     notRedirected: 'Չուղղվե՞ցիք։ <0>Մուտք գործեք այստեղ</0>',
     passed: 'Հաստատված է',
     passwordResetSuccessfully: 'Գաղտնաբառը հաջողությամբ վերականգնվել է։',
+    resend: 'Կրկին ուղարկել',
     resetPassword: 'Վերականգնել գաղտնաբառը',
     resetPasswordExpiration: 'Գաղտնաբառի վերականգնման ժամկետի ավարտ',
     resetPasswordToken: 'Գաղտնաբառի վերականգնման թոքեն',

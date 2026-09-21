@@ -59,6 +59,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     notRedirected: 'Ikke omdirigert? <0>Logg inn her</0>',
     passed: 'Autentisering bestått',
     passwordResetSuccessfully: 'Passordet er tilbakestilt.',
+    resend: 'Send på nytt',
     resetPassword: 'Tilbakestill passord',
     resetPasswordExpiration: 'Tilbakestill passordets utløpsdato',
     resetPasswordToken: 'Tilbakestill passordet-token',

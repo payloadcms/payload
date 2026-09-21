@@ -55,54 +55,57 @@ const baseAccess: BaseAccess = {
 }
 
 export default buildConfigWithDefaults({
-  baseAccess,
-  collections: [
-    {
-      slug: postsSlug,
-      access: {
-        create: () => true,
-        delete: () => true,
-        read: () => ({
-          status: {
-            equals: 'published',
+  suite: 'base-access',
+  config: {
+    baseAccess,
+    collections: [
+      {
+        slug: postsSlug,
+        access: {
+          create: () => true,
+          delete: () => true,
+          read: () => ({
+            status: {
+              equals: 'published',
+            },
+          }),
+          update: () => true,
+        },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
           },
-        }),
-        update: () => true,
+          {
+            name: 'tenant',
+            type: 'text',
+          },
+          {
+            name: 'status',
+            type: 'text',
+          },
+        ],
+        versions: false,
       },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
+    ],
+    globals: [
+      {
+        slug: settingsSlug,
+        access: {
+          read: () => true,
+          update: () => true,
         },
-        {
-          name: 'tenant',
-          type: 'text',
-        },
-        {
-          name: 'status',
-          type: 'text',
-        },
-      ],
-      versions: false,
-    },
-  ],
-  globals: [
-    {
-      slug: settingsSlug,
-      access: {
-        read: () => true,
-        update: () => true,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+        ],
+        versions: false,
       },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-      versions: false,
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

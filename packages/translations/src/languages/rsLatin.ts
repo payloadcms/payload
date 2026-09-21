@@ -60,6 +60,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     notRedirected: 'Niste preusmereni? <0>Prijavite se ovde</0>',
     passed: 'Autentifikacija prošla',
     passwordResetSuccessfully: 'Lozinka uspešno resetovana.',
+    resend: 'Pošalji ponovo',
     resetPassword: 'Promena lozinke',
     resetPasswordExpiration: 'Promena roka trajanja lozinke',
     resetPasswordToken: 'Promena lozinke tokena',

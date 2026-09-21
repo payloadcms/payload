@@ -60,6 +60,7 @@ export const arTranslations: DefaultTranslationsObject = {
     notRedirected: 'لم يتم إعادة التوجيه؟ <0>تسجيل الدخول من هنا</0>',
     passed: 'تمت المصادقة',
     passwordResetSuccessfully: 'تمت إعادة تعيين كلمة المرور بنجاح.',
+    resend: 'إعادة الإرسال',
     resetPassword: 'إعادة تعيين كلمة المرور',
     resetPasswordExpiration: 'انتهاء صلاحيّة إعادة تعيين كلمة المرور',
     resetPasswordToken: 'رمز إعادة تعيين كلمة المرور',

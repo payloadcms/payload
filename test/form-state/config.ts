@@ -11,13 +11,19 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [PostsCollection, AutosavePostsCollection, ConditionsCollection],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'form-state',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [PostsCollection, AutosavePostsCollection, ConditionsCollection],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -32,8 +38,5 @@ export default buildConfigWithDefaults({
         title: 'example post',
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

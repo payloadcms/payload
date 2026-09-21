@@ -12,6 +12,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
+import { countChangedFieldsInRows } from '../../utilities/countChangedFields.js'
 import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowComparison.js'
 
 const baseClass = 'iterable-diff'
@@ -70,6 +71,14 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
                 valueFromRow,
                 valueToRow,
               })
+              const changeCount = countChangedFieldsInRows({
+                config,
+                field,
+                locales: selectedLocales,
+                parentIsLocalized: parentIsLocalized || field.localized,
+                valueFromRows: [valueFromRow],
+                valueToRows: [valueToRow],
+              })
 
               if (!versionFields?.length) {
                 // Rows without a diff create "holes" in the baseVersionField.rows (=versionFields) array - this is to maintain the correct row indexes.
@@ -85,6 +94,7 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
               return (
                 <div className={`${baseClass}__row`} key={i}>
                   <DiffCollapser
+                    changeCount={changeCount}
                     fields={fields}
                     hideGutter={true}
                     Label={

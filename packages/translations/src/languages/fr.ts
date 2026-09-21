@@ -61,6 +61,7 @@ export const frTranslations: DefaultTranslationsObject = {
     notRedirected: 'Non redirigé ? <0>Connectez-vous ici</0>',
     passed: 'Authentification réussie',
     passwordResetSuccessfully: 'Réinitialisation du mot de passe réussie.',
+    resend: 'Renvoyer',
     resetPassword: 'Réinitialiser le mot de passe',
     resetPasswordExpiration: 'Réinitialiser l’expiration du mot de passe',
     resetPasswordToken: 'Réinitialiser le jeton de mot de passe',

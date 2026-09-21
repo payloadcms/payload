@@ -265,6 +265,19 @@ Each Custom Component receives the following props by default:
   default props per component.
 </Banner>
 
+#### Server principal vs. read-filtered user
+
+Server Components that render an authenticated user receive two representations of that user, and choosing the wrong one either leaks data or breaks access checks:
+
+- **`user`** (the top-level prop, e.g. on views and field components) is the authenticated user with **field read access applied** — read-restricted fields are removed and relationships are populated according to read access. Use it for anything passed toward Client Components or rendered to the page, so restricted data never reaches the client.
+- **`req.user`** (from the `req` prop, or `initPageResult.req.user` in views) is the **complete server principal** with access bypassed. Use it for access-control checks, Local API queries, and role/authorization gating — `user` may omit fields your access logic relies on (for example a role stored in a read-restricted field).
+
+<Banner type="warning">
+  **Security:** Never pass `req.user` toward a Client Component or into client
+  React state — use `user`. Conversely, never rely on `user` for authorization
+  decisions — use `req.user`.
+</Banner>
+
 ### Custom Props
 
 It is also possible to pass custom props to your Custom Components. To do this, you can use either the `clientProps` or `serverProps` properties depending on whether your prop is [serializable](https://react.dev/reference/rsc/use-client#serializable-types), and whether your component is a Server or Client Component.
