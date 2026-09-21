@@ -6,6 +6,7 @@ import type {
   I18nOptions,
   TFunction,
 } from '@payloadcms/translations'
+import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec'
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
@@ -36,7 +37,7 @@ import type {
   ImportMap,
   Imports,
   InternalImportMap,
-} from '../bin/generateImportMap/index.js'
+} from '../cli/commands/generateImportMap/generateImportMap.js'
 import type {
   Collection,
   CollectionAccess,
@@ -71,7 +72,7 @@ import type {
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { MaybePromise, PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
 /**
@@ -144,12 +145,88 @@ export type ResolvedComponent<
   serverProps?: TComponentServerProps
 }
 
-export type BinScriptConfig = {
-  key: string
-  scriptPath: string
+/** Shared resources used while the Payload CLI is running. */
+export type CLIRuntime = {
+  /** Directory containing the Payload config, used to resolve relative command paths. */
+  configDir: string
+  destroy: () => Promise<void>
+  getConfig: () => Promise<SanitizedConfig>
+  getPayload: (options?: Omit<InitOptions, 'config'>) => Promise<Payload>
+  readonly isScheduled: boolean
+  markScheduled: () => void
 }
 
-export type BinScript = (config: SanitizedConfig) => Promise<void> | void
+export type CLICommandDescription = {
+  aliases?: string[]
+  description: string
+  examples?: string[]
+  inputSchema: Record<string, unknown>
+  name: string
+}
+
+export type CLIGlobalOptionDescription = {
+  description: string
+  flags: string
+}
+
+export type CLIHelp = {
+  commands: CLICommandDescription[]
+  globalOptions: CLIGlobalOptionDescription[]
+  output: (args?: { command?: string }) => void
+}
+
+export type CLIInputSchema<
+  Input extends Record<string, unknown> = Record<string, unknown>,
+  Output extends Record<string, unknown> = Input,
+> = StandardJSONSchemaV1<Input, Output> & StandardSchemaV1<Input, Output>
+
+export type CLIFieldOverride =
+  | 'argument'
+  | {
+      flags?: string
+      parse?: (value: string, previous: unknown) => unknown
+      type?: 'option'
+    }
+  | {
+      parse?: (value: string, previous: unknown) => unknown
+      position?: number
+      syntax?: string
+      type: 'argument'
+    }
+  | false
+
+/** A schema-backed command definition created with `defineCLICommand`. */
+export type CLICommand = {
+  aliases?: string[]
+  allowUnknownOption: boolean
+  cli: false | Partial<Record<string, CLIFieldOverride>>
+  description: string
+  examples?: string[]
+  handler: (context: {
+    args: Record<string, unknown>
+    getConfig: CLIRuntime['getConfig']
+    getPayload: CLIRuntime['getPayload']
+    help: CLIHelp
+    isJSON: boolean
+  }) => MaybePromise<CLICommandResult | number | void>
+  helpGroup?: string
+  input: CLIInputSchema
+  readonly schema: Record<string, unknown>
+}
+
+/** Structured data and an optional exit code returned by a Payload CLI command. */
+export type CLICommandResult = {
+  /** Process exit code. Omit this, or use `0`, when the command succeeds. */
+  exitCode?: number
+  /** Data included under `result` when the command uses JSON output. */
+  result?: unknown
+}
+
+/** A CLI command definition, import reference, or `false` to disable the command. */
+export type CLICommandEntry = CLICommand | PayloadComponent
+
+/** CLI commands keyed by their command-line name. */
+export type CLICommands = Record<string, CLICommandEntry>
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -158,7 +235,7 @@ type Prettify<T> = {
 /**
  * @experimental The plugin API (`order`, `slug`, `options`) may change before being declared stable.
  */
-export type Plugin = ((config: Config) => Config | Promise<Config>) & {
+export type Plugin = ((config: Config) => MaybePromise<Config>) & {
   /** @experimental Plugin options exposed for cross-plugin mutation. */
   options?: Record<string, unknown>
   /** @experimental Execution order - lower values run first. Defaults to 0. */
@@ -512,6 +589,10 @@ export type ServerProps = {
    * Optional because non-framework contexts (jobs, scripts, tests) may not have an adapter attached.
    */
   readonly server: ServerAdapter
+  /**
+   * Authenticated user with field read access applied. Use for values sent to the client.
+   * For access-control checks use the full principal at `req.user`.
+   */
   readonly user?: User
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
@@ -707,7 +788,7 @@ export type FetchAPIFileUploadOptions = {
   /**
    * Returns a HTTP 413 when the file is bigger than the size limit if `true`.
    * Otherwise, it will add a `truncated = true` to the resulting file structure.
-   * @default false
+   * @default true
    */
   abortOnLimit?: boolean | undefined
   /**
@@ -753,6 +834,12 @@ export type FetchAPIFileUploadOptions = {
    * // myFileName.ext --> myFileNamee.xt
    */
   preserveExtension?: boolean | number | undefined
+  /**
+   * Maximum size in bytes for the complete raw multipart request, including files, fields, headers, and boundaries.
+   * Must be a non-negative safe integer. Set to `Infinity` to disable the request-wide limit.
+   * @default 50 * 1024 * 1024
+   */
+  requestSizeLimit?: number | undefined
   /**
    * Response which will be send to client if file size limit exceeded when `abortOnLimit` set to `true`.
    * @default 'File size limit has been reached'
@@ -1367,8 +1454,6 @@ export type Config = {
    * Define Collection and Global access constraints that are combined with document Access Control using AND semantics.
    */
   baseAccess?: BaseAccess
-  /** Custom Payload bin scripts can be injected via the config. */
-  bin?: BinScriptConfig[]
   blocks?: Block[]
   /**
    * Pass additional options to the parser used to process `multipart/form-data` requests.
@@ -1379,6 +1464,13 @@ export type Config = {
    * @experimental This property is experimental and may change in future releases. Use at your own risk.
    */
   bodyParser?: Partial<BusboyConfig>
+  /** Customize the Payload CLI, or set to `false` to disable it. */
+  cli?:
+    | {
+        /** Add, replace, or disable commands by name. Built-in commands are added during sanitization. */
+        commands?: CLICommands
+      }
+    | false
   /**
    * Manage the datamodel of your application
    *
@@ -1737,8 +1829,8 @@ export interface SanitizedConfig
       Config,
       | 'admin'
       | 'auth'
-      | 'bin'
       | 'blocks'
+      | 'cli'
       | 'collections'
       | 'cookiePrefix'
       | 'cors'
@@ -1767,7 +1859,6 @@ export interface SanitizedConfig
     Required<
       Pick<
         Config,
-        | 'bin'
         | 'cookiePrefix'
         | 'cors'
         | 'csrf'
@@ -1787,6 +1878,11 @@ export interface SanitizedConfig
   admin: SanitizedAdminConfig
   auth: Required<NonNullable<Config['auth']>>
   blocks: FlattenedBlock[]
+  cli:
+    | {
+        commands: CLICommands
+      }
+    | false
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>

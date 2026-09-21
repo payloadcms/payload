@@ -33,7 +33,16 @@ type Args = {
  */
 export const generateSlug =
   ({ name, localized, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
-  async ({ collection, context, data, operation, originalDoc, req, value }) => {
+  async ({
+    collection,
+    context,
+    data,
+    operation,
+    originalDoc,
+    overrideAccess = false,
+    req,
+    value,
+  }) => {
     const slugify = (valueToSlugify: unknown) =>
       customSlugify
         ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
@@ -47,7 +56,14 @@ export const generateSlug =
     //  - Takes a fresh `<singular>-<N>` fallback — not the original's slug, not a source-derived one
     //  - Skips the explicit-collision check below (see generateSlugBeforeDuplicate).
     if (collection && consumeSlugDuplicateFallback(context, name)) {
-      return await getSlugFallbackValue({ collection, field: name, locale, req, slugify })
+      return await getSlugFallbackValue({
+        collection,
+        field: name,
+        locale,
+        overrideAccess,
+        req,
+        slugify,
+      })
     }
 
     const storedSlug = originalDoc?.[name]
@@ -77,6 +93,7 @@ export const generateSlug =
             draftsEnabled: hasDraftsEnabled(collection),
             field: name,
             locale,
+            overrideAccess,
             req,
             value: slugified,
           }))
@@ -113,6 +130,7 @@ export const generateSlug =
         draftsEnabled: hasDraftsEnabled(collection),
         field: name,
         locale,
+        overrideAccess,
         req,
         value: derived as string,
       })
@@ -127,5 +145,12 @@ export const generateSlug =
       return undefined
     }
 
-    return await getSlugFallbackValue({ collection, field: name, locale, req, slugify })
+    return await getSlugFallbackValue({
+      collection,
+      field: name,
+      locale,
+      overrideAccess,
+      req,
+      slugify,
+    })
   }

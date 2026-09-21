@@ -1,17 +1,123 @@
-import path from 'path'
-import { type Payload } from 'payload'
+import { createRequire } from 'node:module'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 
-let payload: Payload
-let restClient: NextRESTClient
+const stripeMock = vi.hoisted(() => {
+  const customers = new Map<string, { email: string; id: string; object: 'customer' }>()
+  let paymentIntentSequence = 0
+  const paymentIntents = new Map<
+    string,
+    {
+      amount: number
+      client_secret: string
+      currency: string
+      customer: string
+      id: string
+      metadata: Record<string, string>
+      object: 'payment_intent'
+      status: 'succeeded'
+    }
+  >()
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+  return {
+    createCustomer: (email: string) => {
+      const customer = {
+        email,
+        id: `cus_test_${customers.size + 1}`,
+        object: 'customer' as const,
+      }
+
+      customers.set(email, customer)
+
+      return customer
+    },
+    createPaymentIntent: ({
+      amount,
+      currency,
+      customer,
+      metadata,
+    }: {
+      amount: number
+      currency: string
+      customer: string
+      metadata: Record<string, string>
+    }) => {
+      const id = `pi_test_${++paymentIntentSequence}`
+      const paymentIntent = {
+        amount,
+        client_secret: `${id}_secret_test`,
+        currency: currency.toLowerCase(),
+        customer,
+        id,
+        metadata,
+        object: 'payment_intent' as const,
+        status: 'succeeded' as const,
+      }
+
+      paymentIntents.set(id, paymentIntent)
+
+      return paymentIntent
+    },
+    findCustomer: (email: string) => customers.get(email),
+    findPaymentIntent: (id: string) => paymentIntents.get(id),
+    reset: () => {
+      customers.clear()
+      paymentIntents.clear()
+    },
+  }
+})
+
+const stripeMockModule = () => ({
+  default: class Stripe {
+    customers = {
+      create: ({ email }: { email: string }) => Promise.resolve(stripeMock.createCustomer(email)),
+      list: ({ email }: { email: string }) =>
+        Promise.resolve({
+          data: stripeMock.findCustomer(email) ? [stripeMock.findCustomer(email)] : [],
+          has_more: false,
+          object: 'list',
+          url: '/v1/customers',
+        }),
+    }
+
+    paymentIntents = {
+      create: (data: {
+        amount: number
+        currency: string
+        customer: string
+        metadata: Record<string, string>
+      }) => Promise.resolve(stripeMock.createPaymentIntent(data)),
+      retrieve: (id: string) => {
+        const paymentIntent = stripeMock.findPaymentIntent(id)
+
+        if (!paymentIntent) {
+          return Promise.reject(new Error(`Unknown test PaymentIntent: ${id}`))
+        }
+
+        return Promise.resolve(paymentIntent)
+      },
+    }
+  },
+})
+
+// The plugin imports the `stripe` package by bare specifier from its own source,
+// so the test file cannot resolve it directly. Resolve it from the plugin package
+// instead, then target stripe's ESM build (the entry Vitest loads for the plugin's
+// `import Stripe from 'stripe'`) so the mock intercepts the real request.
+const stripeEntry = createRequire(
+  fileURLToPath(new URL('../../packages/plugin-ecommerce/package.json', import.meta.url)),
+)
+  .resolve('stripe')
+  .replace(/\/cjs\/stripe\.cjs\.node\.js$/, '/esm/stripe.esm.node.js')
+
+vi.doMock(stripeEntry, stripeMockModule)
+
+const originalStripeSecretKey = process.env.STRIPE_SECRET_KEY
+process.env.STRIPE_SECRET_KEY = 'sk_test_offline'
 
 // Helper to create a guest cart with items
 async function createGuestCartWithItems(
@@ -50,18 +156,20 @@ async function createGuestCartWithItems(
   return { cartId, cartSecret }
 }
 
-describe('ecommerce', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () => {
+  test.beforeEach(() => {
+    stripeMock.reset()
   })
 
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
+  test.afterAll(() => {
+    if (originalStripeSecretKey === undefined) {
+      delete process.env.STRIPE_SECRET_KEY
+    } else {
+      process.env.STRIPE_SECRET_KEY = originalStripeSecretKey
     }
   })
 
-  it('should add a variants collection', async () => {
+  test('should add a variants collection', async ({ payload }) => {
     const variants = await payload.find({
       collection: 'variants',
       depth: 0,
@@ -71,7 +179,7 @@ describe('ecommerce', () => {
     expect(variants).toBeTruthy()
   })
 
-  it('should only merge plugin translations for supportedLanguages', () => {
+  test('should only merge plugin translations for supportedLanguages', ({ payload }) => {
     // The shared test buildConfig defaults supportedLanguages to { de, en, es }.
     const supportedLangKeys = Object.keys(payload.config.i18n.supportedLanguages).sort()
     expect(supportedLangKeys).toEqual(['de', 'en', 'es'])
@@ -88,8 +196,8 @@ describe('ecommerce', () => {
     expect(arTranslations?.['plugin-ecommerce']).toBeUndefined()
   })
 
-  describe('guest cart access', () => {
-    it('should allow guest users to create carts', async () => {
+  test.describe('guest cart access', () => {
+    test('should allow guest users to create carts', async ({ restClient }) => {
       // Create a cart without authentication
       const cartResponse = await restClient
         .POST('/carts', {
@@ -105,7 +213,7 @@ describe('ecommerce', () => {
       expect(cartResponse.doc.secret).toBeTruthy() // Secret should be returned on creation
     })
 
-    it('should allow access to cart with valid secret', async () => {
+    test('should allow access to cart with valid secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -129,7 +237,7 @@ describe('ecommerce', () => {
       expect(readResponse.secret).toBeUndefined() // Secret should NOT be returned on subsequent reads
     })
 
-    it('should allow updating cart with valid secret', async () => {
+    test('should allow updating cart with valid secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -158,7 +266,7 @@ describe('ecommerce', () => {
       expect(updateResponse.doc.purchasedAt).toBeTruthy()
     })
 
-    it('should allow deleting cart with valid secret', async () => {
+    test('should allow deleting cart with valid secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -180,7 +288,7 @@ describe('ecommerce', () => {
       expect(deleteResponse).toBeTruthy()
     })
 
-    it('should deny access without valid secret', async () => {
+    test('should deny access without valid secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -200,7 +308,7 @@ describe('ecommerce', () => {
       expect(readResponse.status).toBe(403)
     })
 
-    it('should deny access with incorrect secret', async () => {
+    test('should deny access with incorrect secret', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -221,7 +329,7 @@ describe('ecommerce', () => {
       expect(readResponse.status).toBe(404)
     })
 
-    it('should not expose secret field directly', async () => {
+    test('should not expose secret field directly', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -244,7 +352,7 @@ describe('ecommerce', () => {
       expect(readResponse.secret).toBeUndefined()
     })
 
-    it('should deny creating cart with custom secret', async () => {
+    test('should deny creating cart with custom secret', async ({ restClient }) => {
       // Try to create a cart with a custom secret
       const createResponse = await restClient.POST('/carts', {
         auth: false,
@@ -260,7 +368,7 @@ describe('ecommerce', () => {
       expect(result.doc.secret).not.toBe('custom-secret')
     })
 
-    it('should deny updating secret field', async () => {
+    test('should deny updating secret field', async ({ restClient }) => {
       // Create a cart without authentication
       const createResponse = await restClient
         .POST('/carts', {
@@ -296,11 +404,11 @@ describe('ecommerce', () => {
     })
   })
 
-  describe('cart item endpoints', () => {
+  test.describe('cart item endpoints', () => {
     let productId: string
     let variantId: string
 
-    beforeAll(async () => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       // Get an existing product and variant from seed data
       const products = await payload.find({
         collection: 'products',
@@ -315,8 +423,8 @@ describe('ecommerce', () => {
       variantId = variants.docs[0]?.id as string
     })
 
-    describe('add-item endpoint', () => {
-      it('should add an item to a guest cart', async () => {
+    test.describe('add-item endpoint', () => {
+      test('should add an item to a guest cart', async ({ restClient }) => {
         // Create a cart without authentication
         const createResponse = await restClient
           .POST('/carts', {
@@ -357,7 +465,7 @@ describe('ecommerce', () => {
         expect(cartResponse.items[0].quantity).toBe(2)
       })
 
-      it('should add item with variant to cart', async () => {
+      test('should add item with variant to cart', async ({ restClient }) => {
         const createResponse = await restClient
           .POST('/carts', {
             auth: false,
@@ -395,7 +503,7 @@ describe('ecommerce', () => {
         expect(cartResponse.items[0].variant).toBeTruthy()
       })
 
-      it('should increment quantity when adding same item', async () => {
+      test('should increment quantity when adding same item', async ({ restClient }) => {
         const createResponse = await restClient
           .POST('/carts', {
             auth: false,
@@ -442,7 +550,7 @@ describe('ecommerce', () => {
         expect(cartResponse.items[0].quantity).toBe(5)
       })
 
-      it('should require cart ID to add item', async () => {
+      test('should require cart ID to add item', async ({ restClient }) => {
         const addItemResponse = await restClient.POST(`/carts/nonexistent-cart-id/add-item`, {
           auth: false,
           body: JSON.stringify({
@@ -456,7 +564,7 @@ describe('ecommerce', () => {
         expect(addItemResponse.status).not.toBe(200)
       })
 
-      it('should require product in add item request', async () => {
+      test('should require product in add item request', async ({ restClient }) => {
         const createResponse = await restClient
           .POST('/carts', {
             auth: false,
@@ -484,8 +592,8 @@ describe('ecommerce', () => {
       })
     })
 
-    describe('remove-item endpoint', () => {
-      it('should remove an item from cart', async () => {
+    test.describe('remove-item endpoint', () => {
+      test('should remove an item from cart', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         // Get cart to find item ID
@@ -517,7 +625,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items).toHaveLength(0)
       })
 
-      it('should fail to remove nonexistent item', async () => {
+      test('should fail to remove nonexistent item', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         const removeResponse = await restClient
@@ -534,8 +642,8 @@ describe('ecommerce', () => {
       })
     })
 
-    describe('update-item endpoint', () => {
-      it('should update item quantity directly', async () => {
+    test.describe('update-item endpoint', () => {
+      test('should update item quantity directly', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         const cartBefore = await restClient
@@ -565,7 +673,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items[0].quantity).toBe(5)
       })
 
-      it('should increment item quantity with $inc operator', async () => {
+      test('should increment item quantity with $inc operator', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         const cartBefore = await restClient
@@ -596,7 +704,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items[0].quantity).toBe(initialQuantity + 3)
       })
 
-      it('should decrement item quantity with $inc operator', async () => {
+      test('should decrement item quantity with $inc operator', async ({ restClient }) => {
         // First create a cart with quantity > 1
         const createResponse = await restClient
           .POST('/carts', {
@@ -650,7 +758,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items[0].quantity).toBe(3)
       })
 
-      it('should remove item when quantity reaches zero', async () => {
+      test('should remove item when quantity reaches zero', async ({ restClient }) => {
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
 
         const cartBefore = await restClient
@@ -679,8 +787,8 @@ describe('ecommerce', () => {
       })
     })
 
-    describe('clear endpoint', () => {
-      it('should clear all items from cart', async () => {
+    test.describe('clear endpoint', () => {
+      test('should clear all items from cart', async ({ restClient }) => {
         // Create cart with multiple items
         const createResponse = await restClient
           .POST('/carts', {
@@ -745,7 +853,7 @@ describe('ecommerce', () => {
         expect(cartAfter.items).toHaveLength(0)
       })
 
-      it('should fail to clear nonexistent cart', async () => {
+      test('should fail to clear nonexistent cart', async ({ restClient }) => {
         const clearResponse = await restClient.POST(`/carts/nonexistent-cart-id/clear`, {
           auth: false,
           body: JSON.stringify({
@@ -758,11 +866,11 @@ describe('ecommerce', () => {
     })
   })
 
-  describe('cart merge endpoint', () => {
+  test.describe('cart merge endpoint', () => {
     let productId: string
     let variantId: string
 
-    beforeAll(async () => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -776,7 +884,7 @@ describe('ecommerce', () => {
       variantId = variants.docs[0]?.id as string
     })
 
-    it('should merge guest cart into user cart', async () => {
+    test('should merge guest cart into user cart', async ({ payload, restClient }) => {
       // Create a guest cart with items
       const { cartId: guestCartId, cartSecret } = await createGuestCartWithItems(
         restClient,
@@ -842,7 +950,7 @@ describe('ecommerce', () => {
       expect(mergedCart.items.length).toBeGreaterThanOrEqual(1)
     })
 
-    it('should combine quantities when merging same items', async () => {
+    test('should combine quantities when merging same items', async ({ payload, restClient }) => {
       // Create guest cart with product (quantity 3)
       const createResponse = await restClient
         .POST('/carts', {
@@ -927,7 +1035,7 @@ describe('ecommerce', () => {
       expect(mergedItem.quantity).toBe(5) // 3 + 2
     })
 
-    it('should delete source cart after merge', async () => {
+    test('should delete source cart after merge', async ({ payload, restClient }) => {
       const { cartId: guestCartId, cartSecret } = await createGuestCartWithItems(
         restClient,
         productId,
@@ -976,7 +1084,7 @@ describe('ecommerce', () => {
       expect(guestCartResponse.status).toBe(404)
     })
 
-    it('should require authentication for merge', async () => {
+    test('should require authentication for merge', async ({ restClient }) => {
       const { cartId: guestCartId, cartSecret } = await createGuestCartWithItems(
         restClient,
         productId,
@@ -1010,7 +1118,7 @@ describe('ecommerce', () => {
       expect(mergeResponse.message).toContain('Authentication required')
     })
 
-    it('should fail merge with invalid source secret', async () => {
+    test('should fail merge with invalid source secret', async ({ payload, restClient }) => {
       const { cartId: guestCartId } = await createGuestCartWithItems(restClient, productId)
 
       const testUser = await payload.create({
@@ -1052,10 +1160,10 @@ describe('ecommerce', () => {
     })
   })
 
-  describe('authenticated user cart operations', () => {
+  test.describe('authenticated user cart operations', () => {
     let productId: string
 
-    beforeAll(async () => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1063,7 +1171,10 @@ describe('ecommerce', () => {
       productId = products.docs[0]?.id as string
     })
 
-    it('should allow authenticated users to access their cart without secret', async () => {
+    test('should allow authenticated users to access their cart without secret', async ({
+      payload,
+      restClient,
+    }) => {
       const testUser = await payload.create({
         collection: 'users',
         data: {
@@ -1099,7 +1210,10 @@ describe('ecommerce', () => {
       expect(getResponse.id).toBe(cartId)
     })
 
-    it('should allow authenticated users to add items without secret', async () => {
+    test('should allow authenticated users to add items without secret', async ({
+      payload,
+      restClient,
+    }) => {
       const testUser = await payload.create({
         collection: 'users',
         data: {
@@ -1141,7 +1255,10 @@ describe('ecommerce', () => {
       expect(addItemResponse.success).toBe(true)
     })
 
-    it('should not generate secret for authenticated user carts', async () => {
+    test('should not generate secret for authenticated user carts', async ({
+      payload,
+      restClient,
+    }) => {
       const testUser = await payload.create({
         collection: 'users',
         data: {
@@ -1173,10 +1290,10 @@ describe('ecommerce', () => {
     })
   })
 
-  describe('cart transfer to user', () => {
+  test.describe('cart transfer to user', () => {
     let productId: string
 
-    beforeAll(async () => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const products = await payload.find({
         collection: 'products',
         limit: 1,
@@ -1184,7 +1301,10 @@ describe('ecommerce', () => {
       productId = products.docs[0]?.id as string
     })
 
-    it('should allow transferring guest cart to user by updating customer field', async () => {
+    test('should allow transferring guest cart to user by updating customer field', async ({
+      payload,
+      restClient,
+    }) => {
       // Create guest cart with items
       const { cartId: guestCartId, cartSecret } = await createGuestCartWithItems(
         restClient,
@@ -1235,5 +1355,128 @@ describe('ecommerce', () => {
       expect(userCartResponse.id).toBe(guestCartId)
       expect(userCartResponse.items).toHaveLength(1)
     })
+  })
+
+  test.describe('Stripe payment settlement', () => {
+    test.for([
+      { concurrent: true, requestOrder: 'simultaneous' },
+      { concurrent: false, requestOrder: 'sequential replay' },
+    ])(
+      'should settle $requestOrder confirmation requests only once',
+      async ({ concurrent }, { payload, restClient }) => {
+        const customerEmail = 'stripe-replay@example.com'
+        const products = await payload.find({
+          collection: 'products',
+          limit: 1,
+          where: {
+            name: {
+              equals: 'Hat',
+            },
+          },
+        })
+        const product = products.docs[0]!
+
+        await payload.update({
+          id: product.id,
+          collection: 'products',
+          data: {
+            inventory: 10,
+          },
+        })
+
+        const productBefore = await payload.findByID({
+          id: product.id,
+          collection: 'products',
+          depth: 0,
+        })
+        const startingInventory = productBefore.inventory!
+        const { cartId, cartSecret } = await createGuestCartWithItems(restClient, product.id)
+        const initiateResponse = await restClient.POST('/payments/stripe/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail,
+            secret: cartSecret,
+          }),
+        })
+        const initiateBody = await initiateResponse.json()
+
+        expect(initiateResponse.status).toBe(200)
+
+        const paymentIntentID = initiateBody.paymentIntentID as string
+        const confirmationRequest = () =>
+          restClient.POST('/payments/stripe/confirm-order', {
+            auth: false,
+            body: JSON.stringify({
+              cartID: cartId,
+              customerEmail,
+              paymentIntentID,
+              secret: cartSecret,
+            }),
+          })
+        const [firstResponse, secondResponse] = concurrent
+          ? await Promise.all([confirmationRequest(), confirmationRequest()])
+          : [await confirmationRequest(), await confirmationRequest()]
+        const [firstBody, secondBody] = await Promise.all([
+          firstResponse.json(),
+          secondResponse.json(),
+        ])
+
+        expect(firstResponse.status).toBe(200)
+        expect(secondResponse.status).toBe(200)
+        expect(firstBody).toEqual(secondBody)
+        expect(firstBody.orderID).toBeTruthy()
+        expect(firstBody.transactionID).toBeTruthy()
+        expect(secondBody.transactionID).toBe(firstBody.transactionID)
+
+        const transactions = await payload.find({
+          collection: 'transactions',
+          depth: 0,
+          where: {
+            'stripe.paymentIntentID': {
+              equals: paymentIntentID,
+            },
+          },
+        })
+
+        expect(transactions.totalDocs).toBe(1)
+        expect(transactions.docs[0]?.cart).toBe(cartId)
+        expect(transactions.docs[0]?.customerEmail).toBe(customerEmail)
+        expect(transactions.docs[0]?.status).toBe('succeeded')
+        expect(transactions.docs[0]?.order).toBe(firstBody.orderID)
+        expect(transactions.docs[0]?.id).toBe(firstBody.transactionID)
+
+        const canonicalOrders = await payload.find({
+          collection: 'orders',
+          depth: 0,
+          where: {
+            transactions: {
+              equals: transactions.docs[0]?.id,
+            },
+          },
+        })
+
+        expect(canonicalOrders.totalDocs).toBe(1)
+        expect(canonicalOrders.docs[0]?.id).toBe(firstBody.orderID)
+        expect(canonicalOrders.docs[0]?.transactions).toEqual([transactions.docs[0]?.id])
+
+        const purchasedCart = await payload.findByID({
+          id: cartId,
+          collection: 'carts',
+          depth: 0,
+        })
+
+        expect(purchasedCart.purchasedAt).toBeTruthy()
+        expect(purchasedCart.status).toBe('purchased')
+
+        const productAfter = await payload.findByID({
+          id: product.id,
+          collection: 'products',
+          depth: 0,
+        })
+
+        expect(productAfter.inventory).toBe(startingInventory - 1)
+      },
+    )
   })
 })

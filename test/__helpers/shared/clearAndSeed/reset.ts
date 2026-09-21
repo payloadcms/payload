@@ -23,26 +23,43 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
     }
   } else if ('drizzle' in _payload.db) {
     const db = _payload.db as unknown as DrizzleAdapter
+    // Fixture writes must target the primary when the adapter has read replicas.
+    const drizzle = db.primaryDrizzle ?? db.drizzle
 
-    // Alternative to: await db.drizzle.execute(sql`drop schema public cascade; create schema public;`)
-
-    // Deleting the schema causes issues when restoring the database from a snapshot later on. That's why we only delete the table data here,
-    // To avoid having to re-create any table schemas / indexes / whatever
-    const schema = db.drizzle._.schema
-    if (!schema) {
+    // Preserve the schema so cached snapshots can be restored without rebuilding tables or indexes.
+    const tableNames = Object.keys(db.tables)
+    if (!tableNames.length) {
       return
     }
 
-    const queries = Object.values(schema)
-      .map((table: any) => {
-        return `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${table.dbName};`
-      })
-      .join('')
+    const schemaPrefix = db.schemaName ? `"${db.schemaName.replaceAll('"', '""')}".` : ''
+    const tableReferences = tableNames.map((tableName) => {
+      const escapedTableName = tableName.replaceAll('"', '""')
 
-    await db.execute({
-      drizzle: db.drizzle,
-      raw: queries,
+      return `${schemaPrefix}"${escapedTableName}"`
     })
+
+    if (db.name === 'postgres') {
+      await db.execute({
+        drizzle,
+        raw: `TRUNCATE TABLE ${tableReferences.join(',')} CONTINUE IDENTITY CASCADE;`,
+      })
+    } else {
+      await db.execute({ drizzle, raw: 'PRAGMA foreign_keys = off' })
+
+      try {
+        for (const tableReference of tableReferences) {
+          await db.execute({ drizzle, raw: `DELETE FROM ${tableReference};` })
+        }
+      } finally {
+        await db.execute({ drizzle, raw: 'PRAGMA foreign_keys = on' })
+      }
+    }
+
+    if (db.primaryDrizzle) {
+      // Keep subsequent test reads on the primary until the replica catches up.
+      db.lastWriteTimestamp = Date.now()
+    }
   } else if (
     'clearDatabase' in _payload.db &&
     typeof (_payload.db as any).clearDatabase === 'function'

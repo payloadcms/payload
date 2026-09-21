@@ -47,8 +47,6 @@ let context: BrowserContext
 describe('Block fields', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ serverURL } = await initPayloadE2ENoConfig({
       dirname,
     }))
@@ -65,8 +63,6 @@ describe('Block fields', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
 
     if (client) {
@@ -550,7 +546,7 @@ describe('Block fields', () => {
 
     test('should disable paste when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
@@ -575,7 +571,7 @@ describe('Block fields', () => {
 
     test('should enable paste after copying a compatible field', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const fieldPopupBtn = page
         .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
@@ -854,7 +850,7 @@ describe('Block fields', () => {
 
     test('should disable paste on a nested block row when the clipboard is empty', async () => {
       await page.goto(url.create)
-      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+      await page.localStorage.removeItem('_payloadClipboard')
 
       const rowPopupBtn = page
         .locator('#blocks-2-subBlocks-row-0 .collapsible__actions button.array-actions__button')

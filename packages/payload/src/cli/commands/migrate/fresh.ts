@@ -1,0 +1,29 @@
+import * as z from 'zod/mini'
+
+import { strictObject } from '../../../utilities/zod.js'
+import { defineCLICommand } from '../../defineCLICommand.js'
+import { initializeMigration } from './initialize.js'
+
+export const createMigrateFreshCommand = defineCLICommand({
+  description: 'Run all migrations from a clean database.',
+  handler: async ({ args, getPayload, isJSON }) => {
+    const { adapter, payload } = await initializeMigration({ getPayload })
+
+    const result = await adapter.migrateFresh({
+      forceAcceptWarning: args.forceAcceptWarning,
+      shouldPrompt: !isJSON,
+    })
+
+    if (!isJSON) {
+      payload.logger.info(result?.cancelled ? 'Cancelled.' : 'Done.')
+    }
+
+    return result ? { result } : undefined
+  },
+  helpGroup: 'Migration commands',
+  input: strictObject({
+    forceAcceptWarning: z
+      .optional(z.boolean())
+      .check(z.describe('Skip the destructive migration warning.')),
+  }),
+})

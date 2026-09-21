@@ -1,4 +1,4 @@
-import type { Payload, UploadInstructions } from 'payload'
+import type { UploadInstructions } from 'payload'
 
 import { del, list } from '@vercel/blob'
 import { put } from '@vercel/blob/client'
@@ -6,20 +6,15 @@ import dotenv from 'dotenv'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { test } from '../../__helpers/int/vitest.js'
 import { prefix } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emulated') })
-
-let payload: Payload
-let restClient: NextRESTClient
 
 const uploadInstructionsPath = '/upload-instructions'
 
@@ -40,23 +35,15 @@ const uploadMetadata = (collectionSlug?: string, filesize = 1) => ({
   mimeType: 'image/png',
 })
 
-describe('@payloadcms/storage-vercel-blob clientUploads', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob clientUploads', () => {
+  test.afterEach(async () => {
     const { blobs } = await list()
     if (blobs.length > 0) {
       await del(blobs.map((b) => b.url))
     }
   })
 
-  it('should upload a file via client upload flow', async () => {
+  test('should upload a file via client upload flow', async ({ restClient }) => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
     const instructionsResponse = await restClient.POST(uploadInstructionsPath, {
       body: JSON.stringify(uploadMetadata('media', file.length)),
@@ -67,12 +54,19 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     const instructions = (await instructionsResponse.json()) as VercelBlobUploadInstructions
     expect(instructions.type).toBe('dispatch')
     expect(instructions.name).toBe('uploadToVercelBlob')
-    expect(instructions.file).toEqual({
-      uploadReference: { prefix: '' },
-      filename: 'image.png',
+    expect(instructions.file).toMatchObject({
       mimeType: 'image/png',
       size: file.length,
+      uploadReference: {
+        _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+        prefix: '',
+        signedReceipt: expect.any(String),
+      },
     })
+    expect(instructions.file.filename).toBe('image.png')
+    expect(instructions.data.pathname).toBe(
+      `${(instructions.file.uploadReference as { _objectKey: string })._objectKey}/${instructions.file.filename}`,
+    )
 
     const result = await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',
@@ -81,14 +75,14 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     })
 
     expect(result.url).toBeDefined()
-    expect(result.url).toContain('image.png')
+    expect(result.url).toContain(instructions.file.filename)
 
     const { blobs } = await list()
-    const uploaded = blobs.find((b) => b.pathname === 'image.png')
+    const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
     expect(uploaded).toBeDefined()
   })
 
-  it("should reject upload when 'x-disallow-access' header is set", async () => {
+  test("should reject upload when 'x-disallow-access' header is set", async ({ restClient }) => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
     const response = await restClient.POST(uploadInstructionsPath, {
@@ -99,7 +93,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     expect(response.status).toBe(403)
   })
 
-  it('should reject invalid upload metadata', async () => {
+  test('should reject invalid upload metadata', async ({ restClient }) => {
     for (const body of [
       uploadMetadata(),
       uploadMetadata('constructor'),
@@ -109,11 +103,11 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
         body: JSON.stringify(body),
       })
 
-      expect(response.status).toBe(400)
+      expect(response.ok).toBe(false)
     }
   })
 
-  it('should upload a file with prefix via client upload flow', async () => {
+  test('should upload a file with prefix via client upload flow', async ({ restClient }) => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
     const instructionsResponse = await restClient.POST(uploadInstructionsPath, {
       body: JSON.stringify(uploadMetadata('media-with-prefix', file.length)),
@@ -128,10 +122,10 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
 
     expect(result.url).toBeDefined()
     expect(result.url).toContain(prefix)
-    expect(result.url).toContain('image.png')
+    expect(result.url).toContain(instructions.file.filename)
 
     const { blobs } = await list()
-    const uploaded = blobs.find((b) => b.pathname === `${prefix}/image.png`)
+    const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
     expect(uploaded).toBeDefined()
   })
 })

@@ -75,11 +75,11 @@ export type MCPAccessArgs = {
 }
 
 export type CollectionMCPAccessArgs = {
-  collectionSlug: CollectionSlug
+  slug: CollectionSlug
 } & MCPAccessArgs
 
 export type GlobalMCPAccessArgs = {
-  globalSlug: GlobalSlug
+  slug: GlobalSlug
 } & MCPAccessArgs
 
 export type ToolHandlerArgs<TSchema = undefined> = {
@@ -90,11 +90,11 @@ export type ToolHandlerArgs<TSchema = undefined> = {
 }
 
 export type CollectionToolHandlerArgs<TSchema = undefined> = {
-  collectionSlug: CollectionSlug
+  slug: CollectionSlug
 } & ToolHandlerArgs<TSchema>
 
 export type GlobalToolHandlerArgs<TSchema = undefined> = {
-  globalSlug: GlobalSlug
+  slug: GlobalSlug
 } & ToolHandlerArgs<TSchema>
 
 export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
