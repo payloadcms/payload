@@ -172,4 +172,18 @@ describe('cloudStoragePlugin', () => {
 
     expect(data.prefix).toBe('tenant/acme')
   })
+
+  it('should insert the prefix field with alwaysInsertFields when the plugin is enabled', () => {
+    const config = cloudStoragePlugin({
+      alwaysInsertFields: true,
+      collections: {
+        media: { adapter },
+      },
+    } as any)({
+      collections: [{ fields: [], slug: 'media', upload: true }],
+    } as any)
+    const fields = config.collections?.[0]?.fields || []
+
+    expect(fields.some((field) => 'name' in field && field.name === 'prefix')).toBe(true)
+  })
 })
