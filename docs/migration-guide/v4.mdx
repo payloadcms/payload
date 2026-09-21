@@ -429,12 +429,12 @@ Properties filled during sanitization, including `auth.jwtOrder`, root routes, G
 
 ### Sanitized global config types now match runtime defaults
 
-`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `access.readVersions`, `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
+`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
 
 Code that consumes these properties may now need to handle `undefined`:
 
 ```ts
-if (global.access.readVersions) await global.access.readVersions(args)
+await global.access.readVersions(args)
 const views = global.admin.components?.views
 const interfaceName = global.typescript?.interface
 ```
