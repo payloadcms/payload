@@ -63,6 +63,10 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
     path: clientHandler,
   }
 
+  if (!enabled) {
+    return
+  }
+
   if (!config.admin.components) {
     config.admin.components = {}
   }
