@@ -1832,6 +1832,7 @@ describe('Joins Field', () => {
           },
           articleTags: ['available'],
           availability: 'available',
+          content: [{ blockType: 'hero', tags: ['available'] }],
           details: {
             articleTags: ['available'],
             mixedTags: ['available'],
@@ -1839,6 +1840,9 @@ describe('Joins Field', () => {
             tags: ['available'],
           },
           extras: { flag: 1 },
+          items: [{ label: 'approved', tags: ['available'] }],
+          localizedTags: ['available'],
+          localizedTitle: 'approved',
           mixedTags: ['available'],
           owner: user,
           parent,
@@ -1861,6 +1865,9 @@ describe('Joins Field', () => {
             tags: ['available'],
           },
           details_status: 'available',
+          items: [{ label: 'blocked' }],
+          localizedTags: ['unavailable'],
+          localizedTitle: 'blocked',
           mixedTags: 'not-permitted',
           owner: user,
           parent,
@@ -2460,34 +2467,196 @@ describe('Joins Field', () => {
       expect(result.children.totalDocs).toBe(2)
     })
 
-    it('should reject polymorphic join constraints for localized has-many fields', async () => {
-      const { parent } = await createConstrainedJoinDocuments()
+    it('should apply localized has-many select access constraints', async () => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments()
 
-      await expect(
-        payload.findByID({
-          id: parent.id,
-          collection: accessJoinParentsSlug,
-          context: { useLocalizedHasManyAccessConstraint: true },
-          depth: 1,
-          overrideAccess: false,
-          user,
-        }),
-      ).rejects.toThrow('The following path cannot be queried: localizedTags.equals')
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useLocalizedHasManyAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
     })
 
-    it('should reject polymorphic join constraints for has-many fields in arrays', async () => {
+    it('should scope localized has-many select constraints to the requested locale', async () => {
+      const { parent } = await createConstrainedJoinDocuments()
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useLocalizedHasManyAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        locale: 'es',
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(0)
+      expect(result.children.totalDocs).toBe(0)
+    })
+
+    it('should apply localized scalar access constraints', async () => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments()
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useLocalizedScalarAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    it('should scope localized access constraints to the requested locale', async () => {
+      const { parent } = await createConstrainedJoinDocuments()
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useLocalizedScalarAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        locale: 'es',
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(0)
+      expect(result.children.totalDocs).toBe(0)
+    })
+
+    it('should apply negated localized scalar access constraints as an absence check', async () => {
+      const { allowedChild, parent, restrictedChild } = await createConstrainedJoinDocuments()
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useLocalizedScalarNotEqualsAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const resultIDs = result.children.docs.map(({ value }) => value.id.toString())
+
+      expect(resultIDs).not.toContain(allowedChild.id.toString())
+      expect(resultIDs).toContain(restrictedChild.id.toString())
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    it('should apply has-many select access constraints inside arrays', async () => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments()
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useArrayHasManyAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const resultIDs = result.children.docs.map(({ value }) => value.id.toString())
+
+      expect(resultIDs).not.toContain(allowedChild.id.toString())
+      expect(result.children.totalDocs).toBe(3)
+    })
+
+    it('should apply scalar access constraints inside arrays', async () => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments()
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        context: { useArrayScalarAccessConstraint: true },
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
+    })
+
+    it('should reject negated access constraints on a path stored in many rows', async () => {
       const { parent } = await createConstrainedJoinDocuments()
 
       await expect(
         payload.findByID({
           id: parent.id,
           collection: accessJoinParentsSlug,
-          context: { useArrayHasManyAccessConstraint: true },
+          context: { useArrayNotEqualsAccessConstraint: true },
           depth: 1,
           overrideAccess: false,
           user,
         }),
-      ).rejects.toThrow('The following path cannot be queried: items.tags.exists')
+      ).rejects.toThrow('The following path cannot be queried: items.label.not_equals')
+    })
+
+    it('should filter a polymorphic join on a path stored in block rows', async () => {
+      const { allowedChild, parent } = await createConstrainedJoinDocuments()
+
+      const result = await payload.findByID({
+        id: parent.id,
+        collection: accessJoinParentsSlug,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+            where: { 'content.hero.tags': { equals: 'available' } },
+          },
+        },
+        overrideAccess: false,
+        user,
+      })
+
+      expect(result.children.docs).toHaveLength(1)
+      expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
+      expect(result.children.totalDocs).toBe(1)
     })
 
     it('should reject unsupported has-many select access operators', async () => {

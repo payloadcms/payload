@@ -7,6 +7,10 @@ import type { DrizzleAdapter, GenericTable } from '../types.js'
 
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { sanitizePathSegment } from '../utilities/sanitizePathSegment.js'
+import {
+  createPolymorphicJoinStorageChain,
+  type PolymorphicJoinStorageChain,
+} from './createPolymorphicJoinStorageChain.js'
 
 export type ScalarWhereField = {
   field: FlattenedField
@@ -23,16 +27,24 @@ export type JSONPathWhereField = {
   type: 'jsonPath'
 }
 
+export type SeparateRowsWhereField = {
+  /** Ordered child tables to correlate through, ending at the table holding the value. */
+  chain: PolymorphicJoinStorageChain
+  field: FlattenedField
+  type: 'separateRows'
+}
+
 type CollectionWhereField =
   | { field: FlattenedField; type: 'hasManySelect' }
   | JSONPathWhereField
   | ScalarWhereField
+  | SeparateRowsWhereField
 
 export type WherePathPlan = {
   columnPath: string
   fieldsByCollection: Map<string, CollectionWhereField>
   schemaPath: string
-  type: 'hasManySelect' | 'invalid' | 'jsonPath' | 'mixedSelect' | 'scalar'
+  type: 'hasManySelect' | 'invalid' | 'jsonPath' | 'mixedSelect' | 'scalar' | 'separateRows'
 }
 
 export type PolymorphicJoinWherePlan = Map<string, WherePathPlan>
@@ -73,7 +85,7 @@ export const createPolymorphicJoinWherePlan = ({
       throw new Error(`Polymorphic join collection "${collection}" has no database table`)
     }
 
-    return { collection, collectionConfig, table }
+    return { collection, collectionConfig, table, tableName }
   })
   const schemaPathsByColumnPath = new Map<string, Set<string>>()
   const schemaPaths = new Set(getWhereSchemaPaths(where))
@@ -94,13 +106,14 @@ export const createPolymorphicJoinWherePlan = ({
     let isFieldPresent = schemaPath === 'id' || schemaPath === 'relationTo'
     let hasJSONPath = false
     let hasManySelect = false
+    let hasSeparateRows = false
     let hasScalarSelect = false
     let hasScalarNonOption = false
     let hasUnsupportedFieldShape = false
     const scalarQueryValueSignatures = new Set<string>()
     const optionSignatures = new Set<string>()
 
-    for (const { collection, collectionConfig, table } of collectionContexts) {
+    for (const { collection, collectionConfig, table, tableName } of collectionContexts) {
       // `getFieldByPath` does not narrow its field list when a segment's field has no subfields,
       // so it resolves `title.tags` to an unrelated top-level `tags`. Confirm every ancestor is
       // actually traversable before trusting the result, otherwise the path is treated as absent
@@ -178,7 +191,24 @@ export const createPolymorphicJoinWherePlan = ({
         fieldAtPath.pathHasLocalized ||
         pathHasSeparateRows({ fields: collectionConfig.flattenedFields, path: schemaPath })
       ) {
-        hasUnsupportedFieldShape = true
+        const chain = createPolymorphicJoinStorageChain({
+          adapter,
+          fields: collectionConfig.flattenedFields,
+          schemaPath,
+          tableName,
+        })
+
+        if (!chain) {
+          hasUnsupportedFieldShape = true
+          continue
+        }
+
+        hasSeparateRows = true
+        fieldsByCollection.set(collection, {
+          type: 'separateRows',
+          chain,
+          field: fieldAtPath.field,
+        })
         continue
       }
 
@@ -235,9 +265,15 @@ export const createPolymorphicJoinWherePlan = ({
     const hasIncompatibleJSONPath =
       hasJSONPath && (hasManySelect || scalarQueryValueSignatures.size > 0)
 
+    // A localized or separate-row path is reached through correlated subqueries, which cannot be
+    // combined with a main-table column or a `json` column on the same path.
+    const hasIncompatibleSeparateRows =
+      hasSeparateRows && (hasJSONPath || hasManySelect || scalarQueryValueSignatures.size > 0)
+
     const isInvalid =
       isBaseInvalid ||
       hasIncompatibleJSONPath ||
+      hasIncompatibleSeparateRows ||
       (!isMixedSelect &&
         ((hasManySelect && scalarQueryValueSignatures.size > 0) ||
           scalarQueryValueSignatures.size > 1))
@@ -245,13 +281,15 @@ export const createPolymorphicJoinWherePlan = ({
     plan.set(schemaPath, {
       type: isInvalid
         ? 'invalid'
-        : hasJSONPath
-          ? 'jsonPath'
-          : isMixedSelect
-            ? 'mixedSelect'
-            : hasManySelect
-              ? 'hasManySelect'
-              : 'scalar',
+        : hasSeparateRows
+          ? 'separateRows'
+          : hasJSONPath
+            ? 'jsonPath'
+            : isMixedSelect
+              ? 'mixedSelect'
+              : hasManySelect
+                ? 'hasManySelect'
+                : 'scalar',
       columnPath,
       fieldsByCollection,
       schemaPath,

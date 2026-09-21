@@ -42,6 +42,22 @@ export const AccessJoinNotes: CollectionConfig = {
         return { 'items.tags': { exists: false } }
       }
 
+      if (req.context.useLocalizedScalarAccessConstraint) {
+        return { localizedTitle: { equals: 'approved' } }
+      }
+
+      if (req.context.useLocalizedScalarNotEqualsAccessConstraint) {
+        return { localizedTitle: { not_equals: 'approved' } }
+      }
+
+      if (req.context.useArrayScalarAccessConstraint) {
+        return { 'items.label': { equals: 'approved' } }
+      }
+
+      if (req.context.useArrayNotEqualsAccessConstraint) {
+        return { 'items.label': { not_equals: 'approved' } }
+      }
+
       if (req.context.useNotEqualsAccessConstraint) {
         return { tags: { not_equals: 'unavailable' } }
       }
@@ -184,6 +200,11 @@ export const AccessJoinNotes: CollectionConfig = {
       options: ['available', 'unavailable'],
     },
     {
+      name: 'localizedTitle',
+      type: 'text',
+      localized: true,
+    },
+    {
       name: 'localizedTags',
       type: 'select',
       hasMany: true,
@@ -207,6 +228,10 @@ export const AccessJoinNotes: CollectionConfig = {
       name: 'items',
       type: 'array',
       fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
         {
           name: 'tags',
           type: 'select',

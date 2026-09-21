@@ -938,13 +938,11 @@ export const getTableColumnFromPath = ({
 
           const idColumn = (aliasTable ?? adapter.tables[tableName]).id
           if (locale && isFieldLocalized && adapter.payload.config.localization) {
-            const conditions = [
-              eq(idColumn, adapter.tables[newTableName].parent),
-              eq(adapter.tables[newTableName]._locale, locale),
-            ]
+            const conditions = [eq(idColumn, adapter.tables[newTableName].parent)]
 
+            // Select value tables name their locale column `locale`, not `_locale`.
             if (locale !== 'all') {
-              conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+              conditions.push(eq(adapter.tables[newTableName].locale, locale))
             }
 
             addJoinTable({
