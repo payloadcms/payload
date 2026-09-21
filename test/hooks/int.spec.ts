@@ -27,7 +27,7 @@ import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
 test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
-  test.options({ db: 'mongo' }).describe('transform actions', () => {
+  test.options.describe('transform actions', { db: 'mongo' }, () => {
     test('should create and not throw an error', async ({ payload }) => {
       // the collection has hooks that will cause an error if transform actions is not handled properly
       const doc = await payload.create({

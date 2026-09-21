@@ -72,8 +72,9 @@ test.suite('CLI', { config: './config.ts' }, () => {
     await expect(access(importMapFile)).rejects.toThrow()
   })
 
-  test.options({ db: 'drizzle' })(
+  test.options(
     'generate:db-schema --no-log --json',
+    { db: 'drizzle' },
     async ({ cli }) => {
       await expect(access(schemaFile)).rejects.toThrow()
 
@@ -90,7 +91,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.options({ db: 'drizzle' })('generate:db-schema --help', async ({ cli }) => {
+  test.options('generate:db-schema --help', { db: 'drizzle' }, async ({ cli }) => {
     await expect(access(schemaFile)).rejects.toThrow()
 
     const output = await cli('generate:db-schema --help')
@@ -738,8 +739,9 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.options({ db: 'drizzle' })(
+  test.options(
     `updateDocument --slug pages --id <page-id> --data '{"title":"Updated"}' --override-access false --json`,
+    { db: 'drizzle' },
     async ({ cli, payload }) => {
       const page = await payload.create({
         collection: 'pages',
@@ -1041,8 +1043,9 @@ test.suite('CLI', { config: './config.ts' }, () => {
     expect(jobsAfter.docs).toHaveLength(0)
   })
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'jobs:run --all-queues --limit 1 --json',
+    { db: 'mongo' },
     async ({ cli, payload }) => {
       await payload.jobs.queue({ input: {}, task: 'noop' } as never)
       const jobsBefore = (await payload.find({
@@ -1071,7 +1074,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.options({ db: 'mongo' })('jobs:run --help', async ({ cli, payload }) => {
+  test.options('jobs:run --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await payload.jobs.queue({ input: {}, task: 'noop' } as never)
     const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
       docs: Array<{ title: string }>
@@ -1088,7 +1091,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     expect(pagesAfter.docs.map(({ title }) => title)).not.toContain('CLI job ran')
   })
 
-  test.options({ db: 'mongo' })('migrate --json', async ({ cli, payload }) => {
+  test.options('migrate --json', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create pending --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
@@ -1114,7 +1117,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.options({ db: 'mongo' })('migrate --help', async ({ cli, payload }) => {
+  test.options('migrate --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create pending --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
@@ -1166,7 +1169,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     await expect(access(migrationsDirectory)).rejects.toThrow()
   })
 
-  test.options({ db: 'mongo' })('migrate:down --json', async ({ cli, payload }) => {
+  test.options('migrate:down --json', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create down --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_down.ts'))!
@@ -1191,7 +1194,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.options({ db: 'mongo' })('migrate:down --help', async ({ cli, payload }) => {
+  test.options('migrate:down --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create down --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_down.ts'))!
@@ -1205,8 +1208,9 @@ test.suite('CLI', { config: './config.ts' }, () => {
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
   })
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'migrate:fresh --force-accept-warning --json',
+    { db: 'mongo' },
     async ({ cli, payload }) => {
       await cli('migrate:create fresh --force-accept-warning --json')
       const migrationName = (await readdir(migrationsDirectory))
@@ -1235,7 +1239,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     CLI_COMMAND_TEST_TIMEOUT,
   )
 
-  test.options({ db: 'mongo' })('migrate:fresh --help', async ({ cli, payload }) => {
+  test.options('migrate:fresh --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create fresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_fresh.ts'))!
@@ -1251,7 +1255,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
   })
 
-  test.options({ db: 'mongo' })('migrate:refresh --json', async ({ cli, payload }) => {
+  test.options('migrate:refresh --json', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create refresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_refresh.ts'))!
@@ -1279,7 +1283,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.options({ db: 'mongo' })('migrate:refresh --help', async ({ cli, payload }) => {
+  test.options('migrate:refresh --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create refresh --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_refresh.ts'))!
@@ -1303,7 +1307,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     )
   })
 
-  test.options({ db: 'mongo' })('migrate:reset --json', async ({ cli, payload }) => {
+  test.options('migrate:reset --json', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create reset --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_reset.ts'))!
@@ -1328,7 +1332,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
   })
 
-  test.options({ db: 'mongo' })('migrate:reset --help', async ({ cli, payload }) => {
+  test.options('migrate:reset --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await cli('migrate:create reset --force-accept-warning --json')
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_reset.ts'))!

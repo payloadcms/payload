@@ -2660,7 +2660,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     expect(resInSecond.totalDocs).toBe(1)
   })
 
-  test.options({ db: 'mongo' }).describe('indexes', () => {
+  test.options.describe('indexes', { db: 'mongo' }, () => {
     let indexes
     const definitions: Record<string, IndexDirection> = {}
     const options: Record<string, IndexOptions> = {}
@@ -2719,7 +2719,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     })
   })
 
-  test.options({ db: 'mongo' }).describe('version indexes', () => {
+  test.options.describe('version indexes', { db: 'mongo' }, () => {
     let indexes
     const definitions: Record<string, IndexDirection> = {}
     const options: Record<string, IndexOptions> = {}
@@ -3594,7 +3594,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       expect((idFields[0].admin?.disabled as { filter?: boolean })?.filter).toBe(true)
     })
 
-    test.options({ db: 'mongo' })('should query exists true', async ({ payload }) => {
+    test.options('should query exists true', { db: 'mongo' }, async ({ payload }) => {
       await payload.delete({ collection: 'array-fields', where: {} })
 
       const withoutCollapsed = await payload.create({
@@ -3642,7 +3642,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       expect(res.docs[0].id).toBe(withCollapsed.id)
     })
 
-    test.options({ db: 'mongo' })('should query exists false', async ({ payload }) => {
+    test.options('should query exists false', { db: 'mongo' }, async ({ payload }) => {
       await payload.delete({ collection: 'array-fields', where: {} })
 
       const withoutCollapsed = await payload.create({
@@ -4357,8 +4357,9 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
 
     // TODO: re-enable on sqlite once the drizzle sqlite adapter's createJSONQuery supports
     // lexical's `{root: {children: [...]}}` shape
-    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
+    test.options(
       'should query based on richtext data within a block',
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -4385,8 +4386,9 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     )
 
     // TODO: re-enable on sqlite — see note above.
-    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
+    test.options(
       'should query based on richtext data within a localized block, specifying locale',
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -4413,8 +4415,9 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
     )
 
     // TODO: re-enable on sqlite — see note above.
-    test.options({ db: (adapter) => adapter.startsWith('sqlite') === false })(
+    test.options(
       'should query based on richtext data within a localized block, without specifying locale',
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async ({ payload }) => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -5238,8 +5241,9 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
         ).rejects.toBeTruthy()
       })
 
-      test.options({ db: 'drizzle' })(
+      test.options(
         'should disallow unsafe query values',
+        { db: 'drizzle' },
         async ({ payload }) => {
           await expect(
             payload.find({

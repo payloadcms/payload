@@ -176,6 +176,9 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
   resets and seeds once for the file, and the suite keeps responsibility for between-test cleanup.
   New suites should use the default per-test reset behavior.
 - Use `test.suite('My Feature', {}, () => { ... })` only for integration tests that do not use Payload
+- Use `test.options('Name', { db: 'drizzle' }, callback)` for database-specific tests, and
+  `test.options.describe('Name', { db: 'mongo' }, callback)` for database-specific groups.
+  Keep the name first and use one call so VS Code does not discover the options as a fake test.
 
 ```typescript
 import { expect } from 'vitest'

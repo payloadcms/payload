@@ -1276,8 +1276,9 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
 
   test.describe('worker recovery', () => {
     // The child process can share the file-backed SQLite test database.
-    test.options({ db: (type) => type.startsWith('sqlite') })(
+    test.options(
       'should recover a job after its worker process is killed',
+      { db: (type) => type.startsWith('sqlite') },
       async ({ payload }) => {
         _internal_jobSystemGlobals.shouldAutoRun = false
         payload.config.jobs.deleteJobOnComplete = false

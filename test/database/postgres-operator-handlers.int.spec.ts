@@ -45,9 +45,10 @@ const runOperatorHandlerConfigSuite = (
       secret: 'secret',
     })
 
-  test
-    .options({ db: (adapter) => adapter.startsWith('postgres') })
-    .describe(`${label} operator handlers - config surface`, () => {
+  test.options.describe(
+    `${label} operator handlers - config surface`,
+    { db: (adapter) => adapter.startsWith('postgres') },
+    () => {
       test('rejects at initialization when a handler requires a Postgres extension that is not configured, naming the handler and the extension', async () => {
         const config = await buildConfigWithOperatorHandlers([
           {
@@ -145,7 +146,8 @@ const runOperatorHandlerConfigSuite = (
           await payload.destroy()
         }
       })
-    })
+    },
+  )
 }
 
 runOperatorHandlerConfigSuite('postgres', 'operator-handlers', (operatorHandlers) =>

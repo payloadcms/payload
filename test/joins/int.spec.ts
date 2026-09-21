@@ -1848,7 +1848,7 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
     })
   })
 
-  test.options({ db: 'drizzle' }).describe('Constrained joins', () => {
+  test.options.describe('Constrained joins', { db: 'drizzle' }, () => {
     test.afterEach(async ({ payload }) => {
       await payload.delete({ collection: accessJoinArticlesSlug, where: {} })
       await payload.delete({ collection: accessJoinNotesSlug, where: {} })
@@ -2299,8 +2299,9 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       )
     })
 
-    test.options({ db: (adapter) => adapter === 'postgres' })(
+    test.options(
       'should apply configured operator handlers to null-only in join constraints',
+      { db: (adapter) => adapter === 'postgres' },
       async ({ payload }) => {
         const { allowedChild, parent, partialTagChild } =
           await createConstrainedJoinDocuments(payload)
@@ -2364,8 +2365,9 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       expect(result.children.docs[0]?.value.id).toBe(allowedChild.id)
     })
 
-    test.options({ db: (adapter) => adapter === 'postgres' })(
+    test.options(
       'should reject polymorphic join access constraints that cannot be applied',
+      { db: (adapter) => adapter === 'postgres' },
       async ({ payload }) => {
         const { parent } = await createConstrainedJoinDocuments(payload)
 
@@ -2453,8 +2455,9 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       expect(result.children.totalDocs).toBe(1)
     })
 
-    test.options({ db: (adapter) => adapter === 'postgres' })(
+    test.options(
       'should preserve field-specific operator handling across polymorphic join targets',
+      { db: (adapter) => adapter === 'postgres' },
       async ({ payload }) => {
         const parent = await payload.create({
           collection: operatorHandlerJoinParentsSlug,
@@ -2917,8 +2920,9 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       expect(result.children.totalDocs).toBe(matchingChildren.length)
     })
 
-    test.options({ db: (adapter) => adapter === 'postgres' })(
+    test.options(
       'should apply configured operator handlers to polymorphic join constraints',
+      { db: (adapter) => adapter === 'postgres' },
       async ({ payload }) => {
         const { children, parent } = await createConstrainedJoinDocuments(payload)
 
@@ -2942,8 +2946,9 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       },
     )
 
-    test.options({ db: (adapter) => adapter === 'postgres' })(
+    test.options(
       'should apply configured operator handlers to custom IDs in polymorphic join constraints',
+      { db: (adapter) => adapter === 'postgres' },
       async ({ payload }) => {
         const parent = await payload.create({
           collection: operatorHandlerJoinParentsSlug,
@@ -2990,8 +2995,9 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
       },
     )
 
-    test.options({ db: (adapter) => adapter === 'postgres' })(
+    test.options(
       'should apply configured operator handlers to system IDs in polymorphic join constraints',
+      { db: (adapter) => adapter === 'postgres' },
       async ({ payload }) => {
         const { allowedChild, parent } = await createConstrainedJoinDocuments(payload)
 
@@ -3307,8 +3313,9 @@ test.suite('Joins Field', { config: './config.ts', resetBetweenTests: false }, (
   })
 
   test.describe('Polymorphic join query validation', () => {
-    test.options({ db: (adapter) => adapter === 'postgres' })(
+    test.options(
       'should reject unknown operators and not delay response',
+      { db: (adapter) => adapter === 'postgres' },
       async ({ restClient }) => {
         const startTime = Date.now()
 

@@ -205,13 +205,22 @@ const testWithFixtures = vitestTest.extend<IntegrationFixtures>({
  * })
  */
 export const test = Object.assign(testWithFixtures, {
-  options: (options: TestOptions) => {
-    const shouldRun = matchesDatabase(options)
-
-    return Object.assign(testWithFixtures.runIf(shouldRun), {
-      describe: testWithFixtures.describe.runIf(shouldRun),
-    })
-  },
+  // A single name-first call prevents static discovery from treating the options as another test.
+  options: Object.assign(
+    (
+      name: string,
+      options: TestOptions,
+      testFunction: NonNullable<Parameters<typeof testWithFixtures>[2]>,
+      timeout?: number,
+    ) => testWithFixtures.runIf(matchesDatabase(options))(name, testFunction, timeout),
+    {
+      describe: (
+        name: string,
+        options: TestOptions,
+        factory: NonNullable<Parameters<typeof testWithFixtures.describe>[2]>,
+      ) => testWithFixtures.describe.runIf(matchesDatabase(options))(name, factory),
+    },
+  ),
   // The name must come first so Vitest's static discovery builds the correct test hierarchy.
   suite(
     this: typeof testWithFixtures,
