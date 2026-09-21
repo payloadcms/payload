@@ -22,7 +22,7 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
-  'packages/**/*.spec.{ts,tsx}',
+  'packages/**/*.spec.*',
   'next-env.d.ts',
   '**/app',
   // The TanStack app dirs (shippable `app-tanstack` + its test duplicates) are
@@ -31,8 +31,8 @@ export const defaultESLintIgnores = [
   // `packages/tanstack-start` and is linted there.
   '**/app-tanstack/components/**',
   '**/app-tanstack/router.tsx',
-  'src/**/*.spec.ts',
-  'tools/**/*.spec.ts',
+  'src/**/*.spec.*',
+  'tools/**/*.spec.*',
   'packages/payload/rollup.dts.config.mjs',
   'scripts/**/*.js',
   'packages/plugin-mcp/bin.js',
@@ -54,7 +54,7 @@ export const rootEslintConfig = [
       ...defaultESLintIgnores,
       'packages/eslint-*/**',
       'test/live-preview/next-app',
-      'packages/**/*.spec.{ts,tsx}',
+      'packages/**/*.spec.*',
       'templates/**',
       'examples/**',
       'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
