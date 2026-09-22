@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import type { Payload } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { createLocalReq } from './createLocalReq.js'
 
@@ -121,5 +122,53 @@ describe('createLocalReq - URL construction', () => {
 
     expect(result.url).toBe('http://localhost/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
+  })
+})
+
+describe('createLocalReq - locale', () => {
+  const localizedPayload = {
+    config: {
+      i18n: { fallbackLanguage: 'en' },
+      localization: {
+        defaultLocale: 'en',
+        localeCodes: ['en', 'es'],
+      },
+    },
+  } as unknown as Payload
+
+  const createReq = (req: Record<string, unknown>): PayloadRequest =>
+    ({
+      // Provided so `createLocalReq` skips loading translations, keeping this a unit test.
+      i18n: { t: (key: string) => key },
+      ...req,
+    }) as unknown as PayloadRequest
+
+  it('should not mutate the locale of the req it is given', async () => {
+    const req = createReq({ locale: 'en' })
+
+    const result = await createLocalReq({ locale: 'es', req }, localizedPayload)
+
+    expect(req.locale).toBe('en')
+    expect(result.locale).toBe('es')
+  })
+
+  it('should not mutate the fallbackLocale of the req it is given', async () => {
+    const req = createReq({ fallbackLocale: 'en', locale: 'en' })
+
+    const result = await createLocalReq(
+      { fallbackLocale: 'es', locale: 'es', req },
+      localizedPayload,
+    )
+
+    expect(req.locale).toBe('en')
+    expect(req.fallbackLocale).toBe('en')
+    expect(result.locale).toBe('es')
+    expect(result.fallbackLocale).toBe('es')
+  })
+
+  it('should still resolve the locale when no req is given', async () => {
+    const result = await createLocalReq({ locale: 'es' }, localizedPayload)
+
+    expect(result.locale).toBe('es')
   })
 })

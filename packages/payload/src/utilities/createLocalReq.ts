@@ -116,16 +116,25 @@ export const createLocalReq: CreateLocalReq = async (
     const defaultLocale = localization.defaultLocale
     const localeCandidate = locale || req?.locale || req?.query?.locale
 
-    req.locale =
+    const resolvedLocale =
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
 
     const sanitizedFallback = sanitizeFallbackLocale({
       fallbackLocale: fallbackLocale!,
-      locale: req.locale,
+      locale: resolvedLocale,
       localization,
     })
 
-    req.fallbackLocale = sanitizedFallback!
+    /**
+     * Assign onto a copy rather than mutating `req`: a caller passing its own `req` with a
+     * different `locale` must not have the nested call's locale leak into the operation
+     * that triggered it, where `mergeLocaleActions` would read it back. See #18246.
+     */
+    req = {
+      ...req,
+      fallbackLocale: sanitizedFallback!,
+      locale: resolvedLocale,
+    }
   }
 
   const i18n =
