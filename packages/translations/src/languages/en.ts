@@ -8,6 +8,9 @@ export const enTranslations = {
     alreadyActivated: 'Already Activated',
     alreadyLoggedIn: 'Already logged in',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'An API key is generated when you save.',
+    apiKeyIsHidden:
+      'This API key is stored as a one-way hash and cannot be shown again. Generate a new one if you no longer have it.',
     authenticated: 'Authenticated',
     backToLogin: 'Back to login',
     beginCreateFirstUser: 'Create your first user to begin.',
@@ -16,6 +19,7 @@ export const enTranslations = {
       "If the email address is associated with an account, you will receive instructions to reset your password shortly. Please check your spam or junk mail folder if you don't see the email in your inbox.",
     confirmGeneration: 'Confirm Generation',
     confirmPassword: 'Confirm Password',
+    copyAPIKeyNow: 'Copy this API key now. It will not be shown again.',
     createFirstUser: 'Create first user',
     createUser: 'Create user',
     emailNotValid: 'The email provided is not valid',

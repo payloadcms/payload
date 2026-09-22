@@ -68,4 +68,20 @@
   .auth-fields__api-key > .btn.btn--style-secondary {
     align-self: flex-start;
   }
+
+  .api-key {
+    gap: var(--spacer-2);
+  }
+
+  .api-key__hidden-note,
+  .api-key__reveal-note {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .api-key__reveal-note {
+    color: var(--color-text-brand);
+  }
 }

@@ -8,6 +8,9 @@ export const arTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'تمّ التّفعيل بالفعل',
     alreadyLoggedIn: 'تمّ تسجيل الدّخول بالفعل',
     apiKey: 'مفتاح API',
+    apiKeyGeneratedOnSave: 'يتم إنشاء مفتاح API عند الحفظ.',
+    apiKeyIsHidden:
+      'يتم تخزين مفتاح API هذا كقيمة تجزئة أحادية الاتجاه ولا يمكن عرضه مرة أخرى. يرجى إنشاء مفتاح جديد إذا لم يعد لديك المفتاح الحالي.',
     authenticated: 'مصادق عليه',
     backToLogin: 'العودة لتسجيل الدخول',
     beginCreateFirstUser: 'أنشئ أول مستخدم للبدء.',
@@ -16,6 +19,7 @@ export const arTranslations: DefaultTranslationsObject = {
       'إذا كان عنوان البريد الإلكتروني مرتبطًا بحساب، فستتلقى تعليمات لإعادة تعيين كلمة المرور قريبًا. يرجى التحقق من مجلد البريد العشوائي أو السبام إذا لم تر البريد الإلكتروني في صندوق الوارد.',
     confirmGeneration: 'تأكيد التّوليد',
     confirmPassword: 'تأكيد كلمة المرور',
+    copyAPIKeyNow: 'انسخ مفتاح واجهة برمجة التطبيقات هذا الآن. لن يتم عرضه مرة أخرى.',
     createFirstUser: 'إنشاء المستخدم الأوّل',
     createUser: 'إنشاء مستخدم',
     emailNotValid: 'البريد الإلكتروني غير صالح',

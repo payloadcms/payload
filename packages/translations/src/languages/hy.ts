@@ -8,6 +8,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Արդեն ակտիվացված է',
     alreadyLoggedIn: 'Արդեն մուտք եք գործել',
     apiKey: 'API բանալի',
+    apiKeyGeneratedOnSave: 'API ստեղնը ստեղծվում է պահելու պահին:',
+    apiKeyIsHidden:
+      'Այս API բանալին պահվում է որպես միաուղղղված հեշ և այլևս չի կարող ցուցադրվել: Ստեղծեք նոր բանալի, եթե այն այլևս չունեք:',
     authenticated: 'Հաստատված',
     backToLogin: 'Վերադառնալ մուտքի էջ',
     beginCreateFirstUser: 'Սկսելու համար ստեղծեք ձեր առաջին օգտատերերը:',
@@ -16,6 +19,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Եթե էլ. փոստի հասցեն կապված է հաշվի հետ, Դուք կարճ ժամանակում կստանաք գաղտնաբառը վերականգնելու հրահանգներ։ Խնդրում ենք ստուգել Ձեր սպամ կամ անցանկալի փոստի թղթապանակը, եթե էլ. նամակը մուտքի արկղում չէ։',
     confirmGeneration: 'Հաստատել ստեղծումը',
     confirmPassword: 'Հաստատել գաղտնաբառը',
+    copyAPIKeyNow: 'Պատճենեք այս API բանալին հիմա։ Այն այլևս չի ցուցադրվելու։',
     createFirstUser: 'Ստեղծել առաջին օգտահաշիվը',
     createUser: 'Ստեղծել օգտատեր',
     emailNotValid: 'Տրամադրված էլ. փոստը վավեր չէ',

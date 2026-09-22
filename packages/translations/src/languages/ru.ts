@@ -8,6 +8,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Уже активирован',
     alreadyLoggedIn: 'Уже вошли в систему',
     apiKey: 'API ключ',
+    apiKeyGeneratedOnSave: 'Ключ API генерируется при сохранении.',
+    apiKeyIsHidden:
+      'Этот ключ API хранится в виде одностороннего хеша и не может быть показан повторно. Сгенерируйте новый ключ, если у вас его больше нет.',
     authenticated: 'Аутентифицирован',
     backToLogin: 'Вернуться к входу',
     beginCreateFirstUser: 'Создайте первого пользователя, чтобы начать.',
@@ -16,6 +19,7 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Если указанный адрес электронной почты связан с аккаунтом, вы скоро получите инструкции по сбросу пароля. Пожалуйста, проверьте папку со спамом или нежелательной почтой, если вы не видите письма во входящих.',
     confirmGeneration: 'Подтвердить генерацию',
     confirmPassword: 'Подтверждение пароля',
+    copyAPIKeyNow: 'Скопируйте этот ключ API сейчас. Он больше не будет отображаться.',
     createFirstUser: 'Создание первого пользователя',
     createUser: 'Создать пользователя',
     emailNotValid: 'Указанный адрес электронной почты неверен',

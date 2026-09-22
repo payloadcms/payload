@@ -8,6 +8,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'ইতিমধ্যে সক্রিয়',
     alreadyLoggedIn: 'ইতিমধ্যে লগইন করা আছে',
     apiKey: 'এপিআই কী',
+    apiKeyGeneratedOnSave: 'সংরক্ষণ করার সময় একটি API কী তৈরি হয়।',
+    apiKeyIsHidden:
+      'এই API কী একমুখী হ্যাশ হিসেবে সংরক্ষিত থাকে এবং এটি পুনরায় প্রদর্শন করা সম্ভব নয়। আপনি যদি এটি আর না রাখেন, তাহলে একটি নতুন কী তৈরি করুন।',
     authenticated: 'প্রমাণিত',
     backToLogin: 'লগইনে ফিরে যান',
     beginCreateFirstUser: 'শুরু করার জন্য আপনার প্রথম ব্যবহারকারী তৈরি করুন।',
@@ -16,6 +19,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
       'ইমেইল ঠিকানা যদি কোনো অ্যাকাউন্টের সাথে যুক্ত থাকে, তাহলে আপনি শীঘ্রই পাসওয়ার্ড রিসেট করার নির্দেশনা পাবেন। আপনার ইনবক্সে ইমেইল না দেখলে স্প্যাম বা জাঙ্ক মেইল ফোল্ডার চেক করুন।',
     confirmGeneration: 'জেনারেশন নিশ্চিত করুন',
     confirmPassword: 'পাসওয়ার্ড নিশ্চিত করুন',
+    copyAPIKeyNow: 'এখনই এই API কীটি কপি করুন। এটি আর কখনো প্রদর্শিত হবে না।',
     createFirstUser: 'প্রথম ব্যবহারকারী তৈরি করুন',
     createUser: 'ব্যবহারকারী তৈরি করুন',
     emailNotValid: 'প্রদত্ত ইমেইলটি বৈধ নয়',

@@ -1,9 +1,7 @@
 import type { Config } from 'payload'
 
-import { v4 as uuid } from 'uuid'
-
 import { devUser } from '../credentials.js'
-import { apiKeysSlug } from './shared.js'
+import { apiKeysSlug, seededAPIKeyOne, seededAPIKeyTwo } from './shared.js'
 
 export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
@@ -19,7 +17,7 @@ export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
     collection: apiKeysSlug,
     data: {
-      apiKey: uuid(),
+      apiKey: seededAPIKeyOne,
       enableAPIKey: true,
     },
   })
@@ -27,7 +25,7 @@ export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
     collection: apiKeysSlug,
     data: {
-      apiKey: uuid(),
+      apiKey: seededAPIKeyTwo,
       enableAPIKey: true,
     },
   })

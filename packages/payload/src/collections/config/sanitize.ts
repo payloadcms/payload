@@ -9,7 +9,7 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import { apiKeyCollectionEndpoints, authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
@@ -158,6 +158,14 @@ export const sanitizeCollection = (
     if (sanitized.auth) {
       for (const endpoint of authCollectionEndpoints) {
         sanitized.endpoints.push(endpoint)
+      }
+
+      // `auth` may still be the `true` shorthand here, which enables auth with defaults -
+      // and those do not include API keys.
+      if (typeof sanitized.auth === 'object' && sanitized.auth.useAPIKey) {
+        for (const endpoint of apiKeyCollectionEndpoints) {
+          sanitized.endpoints.push(endpoint)
+        }
       }
     }
 

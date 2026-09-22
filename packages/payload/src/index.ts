@@ -304,9 +304,16 @@ export interface UntypedPayloadTypes {
     _verificationToken?: null | string
     /** Whether the email is verified. Only with `auth.verify`. */
     _verified?: boolean | null
-    /** The user's API key. Only with `auth.useAPIKey`, once enabled for this user. */
+    /**
+     * The user's API key. Stored as a one-way hash, so it is only ever returned in the
+     * response of the request that set or generated it - every other read is `null`.
+     * Only with `auth.useAPIKey`.
+     */
     apiKey?: null | string
-    /** Internal lookup index for the API key. Hidden (needs `showHiddenFields`). Only with `auth.useAPIKey`. */
+    /**
+     * @deprecated The lookup index API keys used before they were stored as one-way
+     * hashes. Read only by `migrateAPIKeysToHash`; removed in the next major.
+     */
     apiKeyIndex?: null | string
     /** Slug of the auth collection this user belongs to. Always present; identifies the source collection. */
     collection: string
@@ -1423,6 +1430,12 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { generateAPIKey, hashAPIKey } from './auth/apiKeys/hash.js'
+export { migrateAPIKeysToHash } from './auth/apiKeys/migrateToHash.js'
+export type {
+  MigrateAPIKeysToHashArgs,
+  MigrateAPIKeysToHashResult,
+} from './auth/apiKeys/migrateToHash.js'
 export { rotateSecret } from './auth/rotateSecret.js'
 export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'

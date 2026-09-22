@@ -9,18 +9,27 @@ import type {
 
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
-import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation, rotateSecret } from 'payload'
+import {
+  createLocalReq,
+  Forbidden,
+  getFieldsToSign,
+  migrateAPIKeysToHash,
+  refreshOperation,
+  rotateSecret,
+} from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { v4 as uuid } from 'uuid'
 import { expect, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-import type { ApiKey } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import {
+  apiKeyOnlySlug,
+  apiKeyProofSlug,
   apiKeysSlug,
+  apiKeysWithFieldUpdateAccessSlug,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
@@ -396,9 +405,11 @@ test.suite({ config: './config.ts' })('Auth', () => {
           },
         })
 
+        expect(user.apiKey).toStrictEqual(apiKey)
+
         const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            Authorization: `${slug} API-Key ${user?.apiKey}`,
+            Authorization: `${slug} API-Key ${apiKey}`,
           },
         })
 
@@ -406,7 +417,8 @@ test.suite({ config: './config.ts' })('Auth', () => {
 
         expect(response.status).toBe(200)
         expect(data.user.email).toBeDefined()
-        expect(data.user.apiKey).toStrictEqual(apiKey)
+        // Keys are stored as a one-way hash, so a later read only ever returns the mask.
+        expect(data.user.apiKey).toStrictEqual('')
       })
 
       test('should refresh a token and reset its expiration', async ({ restClient }) => {
@@ -462,7 +474,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
         expect(data.user.custom).toBe('Goodbye, world!')
       })
 
-      test('keeps apiKey encrypted in DB after refresh operation', async ({
+      test('keeps apiKey hashed in DB after refresh operation', async ({
         payload,
         restClient,
       }) => {
@@ -483,13 +495,12 @@ test.suite({ config: './config.ts' })('Auth', () => {
           req: { locale: 'en' } as any,
           where: { id: { equals: user.id } },
         })
-        expect(raw?.apiKey).not.toContain('-') // still ciphertext
+        expect(raw?.apiKey).toStrictEqual(
+          crypto.createHash('sha256').update(apiKey).digest('hex'),
+        )
       })
 
-      test('returns a user with decrypted apiKey after refresh', async ({
-        payload,
-        restClient,
-      }) => {
+      test('does not return the apiKey after refresh', async ({ payload, restClient }) => {
         await payload.create({
           collection: slug,
           data: {
@@ -511,7 +522,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
           })
           .then((r) => r.json())
 
-        expect(res.user.apiKey).toMatch(/[0-9a-f-]{36}/) // UUID string
+        expect(res.user.apiKey).toStrictEqual('')
       })
 
       test('should allow a user to be created', async ({ restClient }) => {
@@ -1308,11 +1319,16 @@ test.suite({ config: './config.ts' })('Auth', () => {
 
   test.describe('API Key', () => {
     test('should authenticate via the correct API key user', async ({ payload, restClient }) => {
-      const usersQuery = await payload.find({
-        collection: apiKeysSlug,
-      })
-
-      const [user1, user2] = usersQuery.docs
+      const [user1, user2] = await Promise.all([
+        payload.create({
+          collection: apiKeysSlug,
+          data: { apiKey: 'first-users-own-api-key', enableAPIKey: true },
+        }),
+        payload.create({
+          collection: apiKeysSlug,
+          data: { apiKey: 'second-users-own-api-key', enableAPIKey: true },
+        }),
+      ])
 
       const success = await restClient
         .GET(`/${apiKeysSlug}/${user2.id}`, {
@@ -1322,7 +1338,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
         })
         .then((res) => res.json())
 
-      expect(success.apiKey).toStrictEqual(user2.apiKey)
+      expect(success.id).toStrictEqual(user2.id)
 
       const fail = await restClient.GET(`/${apiKeysSlug}/${user1.id}`, {
         headers: {
@@ -1333,42 +1349,9 @@ test.suite({ config: './config.ts' })('Auth', () => {
       expect(fail.status).toStrictEqual(404)
     })
 
-    test('should allow authentication with an API key saved with sha1', async ({
-      payload,
-      restClient,
-    }) => {
-      const usersQuery = await payload.find({
-        collection: apiKeysSlug,
-      })
-
-      const [user] = usersQuery.docs as [ApiKey]
-
-      const sha1Index = crypto
-        .createHmac('sha256', payload.secret)
-        .update(user.apiKey as string)
-        .digest('hex')
-
-      await payload.db.updateOne({
-        id: user.id,
-        collection: apiKeysSlug,
-        data: {
-          apiKeyIndex: sha1Index,
-        },
-      })
-
-      const response = await restClient
-        .GET(`/${apiKeysSlug}/${user?.id}`, {
-          headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user?.apiKey}`,
-          },
-        })
-        .then((res) => res.json())
-
-      expect(response.id).toStrictEqual(user.id)
-    })
-
     test('should not remove an API key from a user when updating other fields', async ({
       payload,
+      restClient,
     }) => {
       const apiKey = uuid()
       const user = await payload.create({
@@ -1379,7 +1362,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
         },
       })
 
-      const updatedUser = await payload.update({
+      await payload.update({
         id: user.id,
         collection: apiKeysSlug,
         data: {
@@ -1387,17 +1370,15 @@ test.suite({ config: './config.ts' })('Auth', () => {
         },
       })
 
-      const userResult = await payload.find({
-        collection: apiKeysSlug,
-        where: {
-          id: {
-            equals: user.id,
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
-        },
-      })
+        })
+        .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
-      expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
+      expect(response.user.id).toStrictEqual(user.id)
     })
 
     test('should disable api key after updating apiKey: null', async ({ payload, restClient }) => {
@@ -1461,8 +1442,516 @@ test.suite({ config: './config.ts' })('Auth', () => {
         })
         .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toStrictEqual(apiKey)
+      expect(updatedUser.apiKey).toBeNull()
       expect(response.user).toBeNull()
+    })
+  })
+
+  test.describe('API Key hashing', () => {
+    const hashOf = (rawAPIKey: string) =>
+      crypto.createHash('sha256').update(rawAPIKey).digest('hex')
+
+    const readRawRow = async ({
+      id,
+      collection,
+      payload,
+    }: {
+      collection: string
+      id: number | string
+      payload: Payload
+    }) =>
+      (await payload.db.findOne<any>({
+        collection,
+        req: { locale: 'en' } as any,
+        where: { id: { equals: id } },
+      })) as null | Record<string, unknown>
+
+    /**
+     * Reads apiKeyProofSlug, which only an api-key authenticated user of apiKeyOnlySlug can
+     * reach, so a pass cannot come from ambient access - then confirms which user the key
+     * belongs to through that collection's own `/me`.
+     */
+    const expectAPIKeyWorks = async ({
+      id,
+      apiKey,
+      restClient,
+    }: {
+      apiKey: string
+      id: number | string
+      restClient: NextRESTClient
+    }) => {
+      const headers = { Authorization: `${apiKeyOnlySlug} API-Key ${apiKey}` }
+
+      const proof = await restClient.GET(`/${apiKeyProofSlug}`, { headers })
+      expect(proof.status).toStrictEqual(200)
+
+      const me = await restClient.GET(`/${apiKeyOnlySlug}/me`, { headers }).then((res) => res.json())
+      expect(me.user?.id).toStrictEqual(id)
+    }
+
+    const expectAPIKeyRejected = async ({
+      apiKey,
+      restClient,
+    }: {
+      apiKey: string
+      id?: number | string
+      restClient: NextRESTClient
+    }) => {
+      const headers = { Authorization: `${apiKeyOnlySlug} API-Key ${apiKey}` }
+
+      const proof = await restClient.GET(`/${apiKeyProofSlug}`, { headers })
+      expect(proof.status).not.toStrictEqual(200)
+
+      const me = await restClient.GET(`/${apiKeyOnlySlug}/me`, { headers }).then((res) => res.json())
+      expect(me.user).toBeNull()
+    }
+
+    test('should store a one-way hash of a supplied key', async ({ payload }) => {
+      const apiKey = 'supplied-key-stored-as-a-hash'
+
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: { apiKey, enableAPIKey: true },
+      })
+
+      const raw = await readRawRow({ id: user.id, collection: apiKeysSlug, payload })
+
+      expect(raw?.apiKey).toStrictEqual(hashOf(apiKey))
+      expect(raw?.apiKeyIndex).toBeFalsy()
+    })
+
+    test('should authenticate with a supplied key', async ({ payload, restClient }) => {
+      const apiKey = 'supplied-key-that-should-authenticate'
+
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { apiKey, enableAPIKey: true },
+      })
+
+      await expectAPIKeyWorks({ id: user.id, apiKey, restClient })
+      await expectAPIKeyRejected({ id: user.id, apiKey: 'not-the-right-key', restClient })
+    })
+
+    test('should authenticate a key stored without any secret involvement', async ({
+      payload,
+      restClient,
+    }) => {
+      const apiKey = 'key-hashed-outside-of-payload-entirely'
+
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: true },
+      })
+
+      // Written at the database layer, so nothing derived from payload.secret is involved.
+      await payload.db.updateOne({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+        data: { apiKey: hashOf(apiKey) },
+        returning: false,
+      })
+
+      await expectAPIKeyWorks({ id: user.id, apiKey, restClient })
+    })
+
+    test('should generate a key on create when none is supplied', async ({
+      payload,
+      restClient,
+    }) => {
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: true },
+      })
+
+      expect(typeof user.apiKey).toStrictEqual('string')
+      expect(Buffer.from(user.apiKey as string, 'base64url')).toHaveLength(32)
+
+      const raw = await readRawRow({ id: user.id, collection: apiKeyOnlySlug, payload })
+
+      expect(raw?.apiKey).toStrictEqual(hashOf(user.apiKey as string))
+
+      await expectAPIKeyWorks({ id: user.id, apiKey: user.apiKey as string, restClient })
+    })
+
+    test('should generate a key when enabling on an existing document with no key', async ({
+      payload,
+      restClient,
+    }) => {
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: false },
+      })
+
+      expect(user.apiKey).toBeFalsy()
+
+      const updated = await payload.update({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: true },
+      })
+
+      expect(typeof updated.apiKey).toStrictEqual('string')
+
+      await expectAPIKeyWorks({ id: user.id, apiKey: updated.apiKey as string, restClient })
+    })
+
+    test('should not generate a key when API keys are not enabled', async ({ payload }) => {
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: { enableAPIKey: false },
+      })
+
+      expect(user.apiKey).toBeFalsy()
+
+      const raw = await readRawRow({ id: user.id, collection: apiKeysSlug, payload })
+
+      expect(raw?.apiKey).toBeFalsy()
+    })
+
+    test('should only return a generated key in the response that generated it', async ({
+      payload,
+      restClient,
+    }) => {
+      const created = await payload.create({
+        collection: apiKeysSlug,
+        data: { enableAPIKey: true },
+      })
+
+      expect(created.apiKey).toBeTruthy()
+
+      // A set key reads back masked, never as the stored hash and never as the key itself.
+      const foundByID = await payload.findByID({ id: created.id, collection: apiKeysSlug })
+      expect(foundByID.apiKey).toStrictEqual('')
+
+      const found = await payload.find({
+        collection: apiKeysSlug,
+        where: { id: { equals: created.id } },
+      })
+      expect(found.docs[0]?.apiKey).toStrictEqual('')
+
+      const viaRest = await restClient
+        .GET(`/${apiKeysSlug}/${created.id}`, {
+          headers: { Authorization: `${apiKeysSlug} API-Key ${created.apiKey}` },
+        })
+        .then((res) => res.json())
+      expect(viaRest.apiKey).toStrictEqual('')
+
+      const viaMe = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: { Authorization: `${apiKeysSlug} API-Key ${created.apiKey}` },
+        })
+        .then((res) => res.json())
+      expect(viaMe.user.id).toStrictEqual(created.id)
+      expect(viaMe.user.apiKey).toStrictEqual('')
+    })
+
+    test('should keep the key when other fields are updated', async ({ payload, restClient }) => {
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: true },
+      })
+
+      const apiKey = user.apiKey as string
+
+      await payload.update({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+        data: { label: 'renamed' },
+      })
+
+      await expectAPIKeyWorks({ id: user.id, apiKey, restClient })
+    })
+
+    test('should generate a distinct key per document in a bulk update', async ({
+      payload,
+      restClient,
+    }) => {
+      const first = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: false, label: 'bulk' },
+      })
+      const second = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: false, label: 'bulk' },
+      })
+
+      const { docs } = await payload.update({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: true },
+        where: { label: { equals: 'bulk' } },
+      })
+
+      expect(docs).toHaveLength(2)
+
+      const keysByID = new Map(docs.map((doc) => [doc.id, doc.apiKey as string]))
+
+      expect(new Set(keysByID.values()).size).toStrictEqual(2)
+
+      for (const id of [first.id, second.id]) {
+        await expectAPIKeyWorks({ id, apiKey: keysByID.get(id)!, restClient })
+      }
+    })
+
+    test('should ignore a supplied key when field update access is denied', async ({ payload }) => {
+      const user = await payload.create({
+        collection: apiKeysWithFieldUpdateAccessSlug,
+        data: { apiKey: 'original-key-set-with-override-access', enableAPIKey: true },
+      })
+
+      const before = await readRawRow({
+        id: user.id,
+        collection: apiKeysWithFieldUpdateAccessSlug,
+        payload,
+      })
+
+      await payload.update({
+        id: user.id,
+        collection: apiKeysWithFieldUpdateAccessSlug,
+        data: { apiKey: 'a-key-the-caller-is-not-allowed-to-set' },
+        overrideAccess: false,
+      })
+
+      const after = await readRawRow({
+        id: user.id,
+        collection: apiKeysWithFieldUpdateAccessSlug,
+        payload,
+      })
+
+      expect(after?.apiKey).toStrictEqual(before?.apiKey)
+    })
+
+    test('should issue a new key rather than copying one when duplicating', async ({
+      payload,
+      restClient,
+    }) => {
+      const apiKey = 'the-original-users-key-that-must-not-be-copied'
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { apiKey, enableAPIKey: true },
+      })
+
+      const duplicate = await payload.duplicate({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+      })
+
+      // One credential for two users would let either act as the other, so the duplicate
+      // must hold a different key entirely.
+      const originalRow = await readRawRow({ id: user.id, collection: apiKeyOnlySlug, payload })
+      const duplicateRow = await readRawRow({
+        id: duplicate.id,
+        collection: apiKeyOnlySlug,
+        payload,
+      })
+
+      expect(duplicateRow?.apiKey).toBeTruthy()
+      expect(duplicateRow?.apiKey).not.toStrictEqual(originalRow?.apiKey)
+
+      // The original key still authenticates as its own user.
+      await expectAPIKeyWorks({ id: user.id, apiKey, restClient })
+
+      // The duplicate has API keys enabled, so it was issued its own working key.
+      expect(duplicate.enableAPIKey).toStrictEqual(true)
+      expect(duplicate.apiKey).toBeTruthy()
+      expect(duplicate.apiKey).not.toStrictEqual(apiKey)
+
+      await expectAPIKeyWorks({
+        id: duplicate.id,
+        apiKey: duplicate.apiKey as string,
+        restClient,
+      })
+    })
+
+    test('should not authenticate a key left in the pre-hash encrypted format', async ({
+      payload,
+      restClient,
+    }) => {
+      const apiKey = 'key-stored-the-old-encrypted-way'
+
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: true },
+      })
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+        data: {
+          apiKey: payload.encrypt(apiKey),
+          apiKeyIndex: crypto.createHmac('sha256', payload.secret).update(apiKey).digest('hex'),
+        },
+        returning: false,
+      })
+
+      await expectAPIKeyRejected({ id: user.id, apiKey, restClient })
+    })
+  })
+
+  test.describe('Generate API key endpoint', () => {
+    const generate = async ({
+      id,
+      collection,
+      headers,
+      restClient,
+    }: {
+      collection: string
+      headers?: Record<string, string>
+      id: number | string
+      restClient: NextRESTClient
+    }) => restClient.POST(`/${collection}/${id}/api-key`, { headers })
+
+    test('should issue a working key and invalidate the previous one', async ({
+      payload,
+      restClient,
+    }) => {
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { apiKey: 'the-key-that-is-about-to-be-replaced', enableAPIKey: true },
+      })
+
+      const response = await generate({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+        restClient,
+      })
+
+      expect(response.status).toStrictEqual(200)
+
+      const { apiKey, doc } = await response.json()
+
+      expect(typeof apiKey).toStrictEqual('string')
+      expect(apiKey).not.toStrictEqual('the-key-that-is-about-to-be-replaced')
+      expect(doc.id).toStrictEqual(user.id)
+
+      const withNewKey = await restClient.GET(`/${apiKeyOnlySlug}/${user.id}`, {
+        headers: { Authorization: `${apiKeyOnlySlug} API-Key ${apiKey}` },
+      })
+      expect(withNewKey.status).toStrictEqual(200)
+
+      const withOldKey = await restClient.GET(`/${apiKeyOnlySlug}/${user.id}`, {
+        headers: {
+          Authorization: `${apiKeyOnlySlug} API-Key the-key-that-is-about-to-be-replaced`,
+        },
+      })
+      expect(withOldKey.status).not.toStrictEqual(200)
+    })
+
+    test('should enable API keys when they were disabled', async ({ payload, restClient }) => {
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: false },
+      })
+
+      const { apiKey } = await generate({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+        restClient,
+      }).then((res) => res.json())
+
+      const updated = await payload.findByID({ id: user.id, collection: apiKeyOnlySlug })
+      expect(updated.enableAPIKey).toStrictEqual(true)
+
+      const authenticated = await restClient.GET(`/${apiKeyOnlySlug}/${user.id}`, {
+        headers: { Authorization: `${apiKeyOnlySlug} API-Key ${apiKey}` },
+      })
+      expect(authenticated.status).toStrictEqual(200)
+    })
+
+    test('should not return the key on a later read of the document', async ({
+      payload,
+      restClient,
+    }) => {
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: true },
+      })
+
+      await generate({ id: user.id, collection: apiKeyOnlySlug, restClient })
+
+      const read = await payload.findByID({ id: user.id, collection: apiKeyOnlySlug })
+
+      // Masked, so a later read reveals neither the key nor the stored hash.
+      expect(read.apiKey).toStrictEqual('')
+    })
+
+    test('should be refused without update access to the document', async ({
+      payload,
+      restClient,
+    }) => {
+      // apiKeysSlug has no `update` access rule, so the default applies and an
+      // unauthenticated request cannot update the document.
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: { enableAPIKey: true },
+      })
+
+      const response = await generate({
+        id: user.id,
+        collection: apiKeysSlug,
+        restClient,
+      })
+
+      expect(response.status).toStrictEqual(403)
+    })
+
+    test('should be refused when field update access denies apiKey', async ({
+      payload,
+      restClient,
+    }) => {
+      const user = await payload.create({
+        collection: apiKeysWithFieldUpdateAccessSlug,
+        data: { apiKey: 'a-key-that-must-not-be-replaced', enableAPIKey: true },
+      })
+
+      const response = await generate({
+        id: user.id,
+        collection: apiKeysWithFieldUpdateAccessSlug,
+        restClient,
+      })
+
+      expect(response.status).toStrictEqual(403)
+
+      const stillWorks = await restClient.GET(
+        `/${apiKeysWithFieldUpdateAccessSlug}/${user.id}`,
+        {
+          headers: {
+            Authorization: `${apiKeysWithFieldUpdateAccessSlug} API-Key a-key-that-must-not-be-replaced`,
+          },
+        },
+      )
+      expect(stillWorks.status).toStrictEqual(200)
+    })
+
+    test('should 404 for a document that does not exist', async ({ payload, restClient }) => {
+      // Create then delete, so the id is always the right shape for the adapter under test.
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: true },
+      })
+      await payload.delete({ id: user.id, collection: apiKeyOnlySlug })
+
+      const response = await generate({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+        restClient,
+      })
+
+      expect(response.status).toStrictEqual(404)
+    })
+
+    test('should not exist on a collection without useAPIKey', async ({ payload, restClient }) => {
+      const user = await payload.create({
+        collection: partialDisableLocalStrategiesSlug,
+        data: { email: 'no-api-keys@example.com', password: 'test' },
+      })
+
+      const response = await generate({
+        id: user.id,
+        collection: partialDisableLocalStrategiesSlug,
+        restClient,
+      })
+
+      expect(response.status).toStrictEqual(404)
     })
   })
 
@@ -2230,8 +2719,9 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
   })
 
-  test.describe('rotateSecret - PAYLOAD_SECRET rotation', () => {
+  test.describe('migrateAPIKeysToHash - converting pre-hash API keys', () => {
     const OLD_SECRET = rotateSecretOldSecret
+    const UNKNOWN_SECRET = 'a-secret-that-is-not-in-the-keyring'
     const createdIDs: Array<{ collection: string; id: number | string }> = []
 
     const deriveKey = (secret: string) =>
@@ -2240,25 +2730,33 @@ test.suite({ config: './config.ts' })('Auth', () => {
     const indexFor = (secret: string, rawApiKey: string) =>
       crypto.createHmac('sha256', deriveKey(secret)).update(rawApiKey).digest('hex')
 
+    const hashOf = (rawApiKey: string) =>
+      crypto.createHash('sha256').update(rawApiKey).digest('hex')
+
     // Produces a pre-v1 aes-256-ctr ciphertext (the format used before the v1
-    // envelope), to exercise the legacy read/upgrade path.
+    // envelope), which decrypts to garbage rather than throwing under a wrong key.
     const legacyCtrEncrypt = (value: string, secret: string) => {
       const iv = crypto.randomBytes(16)
       const cipher = crypto.createCipheriv('aes-256-ctr', deriveKey(secret), iv)
       return iv.toString('hex') + cipher.update(value, 'utf8', 'hex') + cipher.final('hex')
     }
 
-    // Writes a v1-envelope apiKey/apiKeyIndex encrypted under the old secret
-    // directly at the DB layer, bypassing field hooks, to simulate data left
-    // over from before a rotation (already on the v1 envelope, previous key).
-    const seedPreRotationV1User = async (
+    /**
+     * Writes an encrypted apiKey plus its HMAC index straight to the database, bypassing
+     * the field hooks, to reproduce a row written before keys were stored as hashes.
+     */
+    const seedPreHashUser = async (
       {
+        apiKey,
         collection = rotateSecretSlug,
         data = {},
+        index,
         rawApiKey,
       }: {
+        apiKey?: string
         collection?: string
         data?: Record<string, unknown>
+        index?: null | string
         rawApiKey: string
       },
       { payload }: { payload: Payload },
@@ -2273,8 +2771,8 @@ test.suite({ config: './config.ts' })('Auth', () => {
         id: user.id,
         collection,
         data: {
-          apiKey: payload.encrypt(rawApiKey, { secret: OLD_SECRET }),
-          apiKeyIndex: indexFor(OLD_SECRET, rawApiKey),
+          apiKey: apiKey ?? payload.encrypt(rawApiKey, { secret: OLD_SECRET }),
+          apiKeyIndex: index === undefined ? indexFor(OLD_SECRET, rawApiKey) : index,
         },
         returning: false,
       })
@@ -2282,30 +2780,36 @@ test.suite({ config: './config.ts' })('Auth', () => {
       return user
     }
 
-    // Seeds a row whose apiKeyIndex matches neither the old nor the current
-    // secret, forcing rotateSecret to fail-closed.
-    const seedCorruptUser = async (
-      collection = rotateSecretSlug,
-      { payload }: { payload: Payload },
-    ) => {
-      const rawApiKey = uuid()
-      const user = await payload.create({
+    const readRawRow = async ({
+      id,
+      collection,
+      payload,
+    }: {
+      collection: string
+      id: number | string
+      payload: Payload
+    }) =>
+      await payload.db.findOne<any>({
         collection,
-        data: { apiKey: rawApiKey, enableAPIKey: true },
-      })
-      createdIDs.push({ id: user.id, collection })
-
-      await payload.db.updateOne({
-        id: user.id,
-        collection,
-        data: {
-          apiKey: payload.encrypt(rawApiKey, { secret: OLD_SECRET }),
-          apiKeyIndex: 'this-index-matches-no-secret',
-        },
-        returning: false,
+        where: { id: { equals: id } },
       })
 
-      return user
+    const authenticates = async ({
+      id,
+      collection,
+      rawApiKey,
+      restClient,
+    }: {
+      collection: string
+      id: number | string
+      rawApiKey: string
+      restClient: NextRESTClient
+    }) => {
+      const response = await restClient.GET(`/${collection}/${id}`, {
+        headers: { Authorization: `${collection} API-Key ${rawApiKey}` },
+      })
+
+      return response.status === 200
     }
 
     test.afterEach(async ({ payload }) => {
@@ -2319,27 +2823,278 @@ test.suite({ config: './config.ts' })('Auth', () => {
       createdIDs.length = 0
     })
 
-    test('should re-key apiKey and apiKeyIndex from the old secret to the current secret', async ({
-      payload,
-    }) => {
+    test('should convert a row encrypted under the current secret', async ({ payload }) => {
       const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
+      const user = await seedPreHashUser(
+        {
+          apiKey: payload.encrypt(rawApiKey),
+          index: indexFor(payload.config.secret, rawApiKey),
+          rawApiKey,
+        },
+        { payload },
+      )
+
+      const result = await migrateAPIKeysToHash({
+        collections: [rotateSecretSlug],
+        payload,
+      })
+
+      expect(result).toEqual({ failed: 0, migrated: 1, skipped: 0 })
+
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+
+      expect(raw.apiKey).toBe(hashOf(rawApiKey))
+      expect(raw.apiKeyIndex).toBeFalsy()
+    })
+
+    test('should make a pre-hash key authenticate again', async ({ payload, restClient }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser({ rawApiKey }, { payload })
+
+      // Before the migration the key cannot authenticate: the auth strategy matches a
+      // one-way hash, and this row still holds ciphertext.
+      expect(
+        await authenticates({
+          id: user.id,
+          collection: rotateSecretSlug,
+          rawApiKey,
+          restClient,
+        }),
+      ).toBe(false)
+
+      await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(
+        await authenticates({
+          id: user.id,
+          collection: rotateSecretSlug,
+          rawApiKey,
+          restClient,
+        }),
+      ).toBe(true)
+    })
+
+    test('should convert a row encrypted under a previous secret', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser({ rawApiKey }, { payload })
+
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(result.migrated).toBe(1)
+
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(raw.apiKey).toBe(hashOf(rawApiKey))
+    })
+
+    test('should convert a legacy aes-256-ctr row', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser(
+        { apiKey: legacyCtrEncrypt(rawApiKey, OLD_SECRET), rawApiKey },
+        { payload },
+      )
+
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(result.migrated).toBe(1)
+
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(raw.apiKey).toBe(hashOf(rawApiKey))
+    })
+
+    test('should convert a row whose secret is passed explicitly', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser(
+        {
+          apiKey: payload.encrypt(rawApiKey, { secret: UNKNOWN_SECRET }),
+          index: indexFor(UNKNOWN_SECRET, rawApiKey),
+          rawApiKey,
+        },
+        { payload },
+      )
+
+      const withoutSecret = await migrateAPIKeysToHash({
+        collections: [rotateSecretSlug],
+        payload,
+      })
+      expect(withoutSecret).toEqual({ failed: 1, migrated: 0, skipped: 0 })
+
+      const withSecret = await migrateAPIKeysToHash({
+        collections: [rotateSecretSlug],
+        payload,
+        secrets: [UNKNOWN_SECRET],
+      })
+      expect(withSecret).toEqual({ failed: 0, migrated: 1, skipped: 0 })
+
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(raw.apiKey).toBe(hashOf(rawApiKey))
+    })
+
+    test('should leave an unverifiable row untouched and report it', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser(
+        {
+          apiKey: payload.encrypt(rawApiKey, { secret: UNKNOWN_SECRET }),
+          index: 'this-index-matches-no-secret',
+          rawApiKey,
+        },
+        { payload },
+      )
+
+      const before = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(result).toEqual({ failed: 1, migrated: 0, skipped: 0 })
+
+      const after = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(after.apiKey).toBe(before.apiKey)
+      expect(after.apiKeyIndex).toBe(before.apiKeyIndex)
+    })
+
+    test('should be safe to re-run', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser({ rawApiKey }, { payload })
+
+      await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+      const rerun = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(rerun).toEqual({ failed: 0, migrated: 0, skipped: 1 })
+
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(raw.apiKey).toBe(hashOf(rawApiKey))
+    })
+
+    test('should leave a row it has already converted alone', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await payload.create({
+        collection: rotateSecretSlug,
+        data: { apiKey: rawApiKey, enableAPIKey: true },
+      })
+      createdIDs.push({ id: user.id, collection: rotateSecretSlug })
+
+      const before = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(before.apiKey).toBe(hashOf(rawApiKey))
+
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(result).toEqual({ failed: 0, migrated: 0, skipped: 1 })
+
+      const after = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(after.apiKey).toBe(before.apiKey)
+    })
+
+    test('should not write anything during a dry run', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser({ rawApiKey }, { payload })
+
+      const result = await migrateAPIKeysToHash({
+        collections: [rotateSecretSlug],
+        dryRun: true,
+        payload,
+      })
+
+      expect(result).toEqual({ failed: 0, migrated: 1, skipped: 0 })
+
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(payload.decrypt(raw.apiKey, { secret: OLD_SECRET })).toBe(rawApiKey)
+      expect(raw.apiKeyIndex).toBe(indexFor(OLD_SECRET, rawApiKey))
+    })
+
+    test('should ignore documents without a key', async ({ payload }) => {
+      const user = await payload.create({
+        collection: rotateSecretSlug,
+        data: { enableAPIKey: false },
+      })
+      createdIDs.push({ id: user.id, collection: rotateSecretSlug })
+
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(result).toEqual({ failed: 0, migrated: 0, skipped: 0 })
+    })
+
+    test('should only process the collections it is given', async ({ payload }) => {
+      const firstKey = uuid()
+      const secondKey = uuid()
+
+      await seedPreHashUser({ rawApiKey: firstKey }, { payload })
+      const untouched = await seedPreHashUser(
+        { collection: rotateSecretSecondarySlug, rawApiKey: secondKey },
+        { payload },
+      )
+
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(result.migrated).toBe(1)
+
+      const raw = await readRawRow({
+        id: untouched.id,
+        collection: rotateSecretSecondarySlug,
+        payload,
+      })
+      expect(raw.apiKey.startsWith('v1:')).toBe(true)
+    })
+
+    test('should not return a pre-hash value on read', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser({ rawApiKey }, { payload })
+
+      const doc = await payload.findByID({ id: user.id, collection: rotateSecretSlug })
+
+      expect(doc.apiKey).toStrictEqual('')
+    })
+
+    test('should convert keys when called through rotateSecret', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const loginEmail = 'rotate-login@example.com'
+      const loginPassword = 'Password123'
+
+      const user = await seedPreHashUser(
+        {
+          collection: rotateSecretLoginSlug,
+          data: { email: loginEmail, password: loginPassword },
+          rawApiKey,
+        },
+        { payload },
+      )
 
       const result = await rotateSecret({
-        collections: [rotateSecretSlug],
+        collections: [rotateSecretLoginSlug],
         oldSecret: OLD_SECRET,
         payload,
       })
 
       expect(result).toEqual({ migrated: 1, skipped: 0 })
 
-      const raw = await payload.db.findOne<any>({
-        collection: rotateSecretSlug,
-        where: { id: { equals: user.id } },
-      })
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretLoginSlug, payload })
+      expect(raw.apiKey).toBe(hashOf(rawApiKey))
 
-      expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
-      expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
+      // Password logins are untouched by any of this - the salt and hash never
+      // involved the secret.
+      const { token } = await payload.login({
+        collection: rotateSecretLoginSlug,
+        data: { email: loginEmail, password: loginPassword },
+      })
+      expect(token).toBeDefined()
+    })
+
+    test('should throw from rotateSecret when a row cannot be verified', async ({ payload }) => {
+      const rawApiKey = uuid()
+      await seedPreHashUser(
+        {
+          apiKey: payload.encrypt(rawApiKey, { secret: UNKNOWN_SECRET }),
+          index: 'this-index-matches-no-secret',
+          rawApiKey,
+        },
+        { payload },
+      )
+
+      await expect(
+        rotateSecret({
+          collections: [rotateSecretSlug],
+          oldSecret: OLD_SECRET,
+          payload,
+        }),
+      ).rejects.toThrow(/could not be verified/)
     })
 
     test('reencrypt should re-key a value to the active secret', ({ payload }) => {
@@ -2355,248 +3110,6 @@ test.suite({ config: './config.ts' })('Auth', () => {
       const newKeyId = rekeyed.split(':')[1]
       expect(newKeyId).not.toBe(oldKeyId)
       expect(newKeyId).toBe(payload.encryptionKeyring.active.keyId)
-    })
-
-    test('should authenticate an api key indexed under a previous secret, then re-key it', async ({
-      payload,
-      restClient,
-    }) => {
-      const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
-
-      const authHeaders = { Authorization: `${rotateSecretSlug} API-Key ${rawApiKey}` }
-
-      // The old secret is in the keyring (previousSecrets), so the key already
-      // authenticates via its old-secret index - zero downtime during rotation.
-      const before = await restClient.GET(`/${rotateSecretSlug}/${user.id}`, {
-        headers: authHeaders,
-      })
-      expect(before.status).toBe(200)
-
-      await rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload })
-
-      // Still authenticates, now via the current-secret index.
-      const after = await restClient.GET(`/${rotateSecretSlug}/${user.id}`, {
-        headers: authHeaders,
-      })
-      expect(after.status).toBe(200)
-
-      const raw = await payload.db.findOne<any>({
-        collection: rotateSecretSlug,
-        where: { id: { equals: user.id } },
-      })
-      expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
-    })
-
-    test('should be idempotent and skip already-migrated rows on re-run', async ({ payload }) => {
-      const rawApiKey = uuid()
-      await seedPreRotationV1User({ rawApiKey }, { payload })
-
-      await rotateSecret({ collections: [rotateSecretSlug], oldSecret: OLD_SECRET, payload })
-      const rerun = await rotateSecret({
-        collections: [rotateSecretSlug],
-        oldSecret: OLD_SECRET,
-        payload,
-      })
-
-      expect(rerun).toEqual({ migrated: 0, skipped: 1 })
-    })
-
-    test('should keep earlier migrations after an abort and complete on a fixed re-run', async ({
-      payload,
-    }) => {
-      const rawApiKey = uuid()
-      // The migratable row and the corrupt row live in different collections, and
-      // rotateSecret drains collections in the order passed. So the first
-      // collection is fully re-keyed before the second aborts - deterministic for
-      // any primary-key type (UUID ids don't order by creation like integers do).
-      const migratable = await seedPreRotationV1User({ rawApiKey }, { payload })
-      const corrupt = await seedCorruptUser(rotateSecretSecondarySlug, { payload })
-
-      const rotateArgs = {
-        collections: [rotateSecretSlug, rotateSecretSecondarySlug],
-        oldSecret: OLD_SECRET,
-        payload,
-      }
-
-      await expect(rotateSecret(rotateArgs)).rejects.toThrow(/could not verify apiKey/)
-
-      // The collection processed before the abort stays migrated to the current secret.
-      const raw = await payload.db.findOne<any>({
-        collection: rotateSecretSlug,
-        where: { id: { equals: migratable.id } },
-      })
-      expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
-      expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
-
-      // Remove the corrupt row; the re-run completes and skips the migrated row.
-      await payload.delete({ id: corrupt.id, collection: rotateSecretSecondarySlug })
-      const rerun = await rotateSecret(rotateArgs)
-      expect(rerun).toEqual({ migrated: 0, skipped: 1 })
-    })
-
-    test('should abort without writing when the old secret is wrong', async ({ payload }) => {
-      const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
-
-      const before = await payload.db.findOne<any>({
-        collection: rotateSecretSlug,
-        where: { id: { equals: user.id } },
-      })
-
-      await expect(
-        rotateSecret({
-          collections: [rotateSecretSlug],
-          oldSecret: 'the-wrong-old-secret',
-          payload,
-        }),
-      ).rejects.toThrow(/could not verify apiKey/)
-
-      const after = await payload.db.findOne<any>({
-        collection: rotateSecretSlug,
-        where: { id: { equals: user.id } },
-      })
-
-      expect(after.apiKey).toBe(before.apiKey)
-      expect(after.apiKeyIndex).toBe(before.apiKeyIndex)
-    })
-
-    test('should not modify data during a dry run', async ({ payload }) => {
-      const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
-
-      const result = await rotateSecret({
-        collections: [rotateSecretSlug],
-        dryRun: true,
-        oldSecret: OLD_SECRET,
-        payload,
-      })
-
-      expect(result).toEqual({ migrated: 1, skipped: 0 })
-
-      const raw = await payload.db.findOne<any>({
-        collection: rotateSecretSlug,
-        where: { id: { equals: user.id } },
-      })
-
-      // Both artifacts are still under the old secret - nothing was written.
-      expect(raw.apiKeyIndex).toBe(indexFor(OLD_SECRET, rawApiKey))
-      expect(payload.decrypt(raw.apiKey, { secret: OLD_SECRET })).toBe(rawApiKey)
-    })
-
-    test('should re-key and upgrade a legacy aes-256-ctr value to the v1 envelope', async ({
-      payload,
-    }) => {
-      const rawApiKey = uuid()
-      const user = await payload.create({
-        collection: rotateSecretSlug,
-        data: { apiKey: rawApiKey, enableAPIKey: true },
-      })
-      createdIDs.push({ id: user.id, collection: rotateSecretSlug })
-
-      // Seed the pre-v1 (aes-256-ctr) format under the old secret.
-      await payload.db.updateOne({
-        id: user.id,
-        collection: rotateSecretSlug,
-        data: {
-          apiKey: legacyCtrEncrypt(rawApiKey, OLD_SECRET),
-          apiKeyIndex: indexFor(OLD_SECRET, rawApiKey),
-        },
-        returning: false,
-      })
-
-      const result = await rotateSecret({
-        collections: [rotateSecretSlug],
-        oldSecret: OLD_SECRET,
-        payload,
-      })
-      expect(result).toEqual({ migrated: 1, skipped: 0 })
-
-      const raw = await payload.db.findOne<any>({
-        collection: rotateSecretSlug,
-        where: { id: { equals: user.id } },
-      })
-      // Upgraded to the v1 envelope and readable under the current secret.
-      expect(raw.apiKey.startsWith('v1:')).toBe(true)
-      expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
-      expect(raw.apiKeyIndex).toBe(indexFor(payload.config.secret, rawApiKey))
-    })
-
-    test('should mask (not throw) an apiKey encrypted under a secret not in the keyring', async ({
-      payload,
-    }) => {
-      const rawApiKey = uuid()
-      const user = await payload.create({
-        collection: rotateSecretSlug,
-        data: { apiKey: rawApiKey, enableAPIKey: true },
-      })
-      createdIDs.push({ id: user.id, collection: rotateSecretSlug })
-
-      await payload.db.updateOne({
-        id: user.id,
-        collection: rotateSecretSlug,
-        data: { apiKey: payload.encrypt(rawApiKey, { secret: 'a-secret-not-in-the-keyring' }) },
-        returning: false,
-      })
-
-      // Reading through the Local API runs the afterRead decrypt hook, which must
-      // mask the undecryptable field rather than failing the whole document read.
-      const doc = await payload.findByID({ collection: rotateSecretSlug, id: user.id })
-      expect(doc.apiKey).toBeNull()
-    })
-
-    test('should leave password logins working on a rotated collection', async ({ payload }) => {
-      const rawApiKey = uuid()
-      const loginEmail = 'rotate-login@example.com'
-      const loginPassword = 'Password123'
-
-      await seedPreRotationV1User(
-        {
-          collection: rotateSecretLoginSlug,
-          data: { email: loginEmail, password: loginPassword },
-          rawApiKey,
-        },
-        { payload },
-      )
-
-      const result = await rotateSecret({
-        collections: [rotateSecretLoginSlug],
-        oldSecret: OLD_SECRET,
-        payload,
-      })
-      expect(result.migrated).toBe(1)
-
-      // Password login on the same collection still works after its api keys
-      // were re-keyed - the salt/hash never involved the secret.
-      const { token } = await payload.login({
-        collection: rotateSecretLoginSlug,
-        data: { email: loginEmail, password: loginPassword },
-      })
-      expect(token).toBeDefined()
-    })
-
-    test('should skip rows that have an apiKey ciphertext but no apiKeyIndex', async ({
-      payload,
-    }) => {
-      const rawApiKey = uuid()
-      const user = await seedPreRotationV1User({ rawApiKey }, { payload })
-
-      // Simulate a disabled API key: ciphertext present, index cleared.
-      await payload.db.updateOne({
-        id: user.id,
-        collection: rotateSecretSlug,
-        data: { apiKeyIndex: null },
-        returning: false,
-      })
-
-      const result = await rotateSecret({
-        collections: [rotateSecretSlug],
-        oldSecret: OLD_SECRET,
-        payload,
-      })
-
-      // Does not throw, and the index-less row is neither migrated nor skipped.
-      expect(result).toEqual({ migrated: 0, skipped: 0 })
     })
   })
 

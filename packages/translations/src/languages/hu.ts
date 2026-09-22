@@ -8,6 +8,9 @@ export const huTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Már aktiválva van',
     alreadyLoggedIn: 'Már bejelentkezett',
     apiKey: 'API-kulcs',
+    apiKeyGeneratedOnSave: 'Egy API-kulcs generálódik, amikor ment.',
+    apiKeyIsHidden:
+      'Ez az API-kulcs egyirányú hash formájában van tárolva, és nem jeleníthető meg újra. Generáljon újat, ha már nem rendelkezik vele.',
     authenticated: 'Hitelesített',
     backToLogin: 'Vissza a bejelentkezéshez',
     beginCreateFirstUser: 'Hozza létre első felhasználóját a kezdéshez.',
@@ -16,6 +19,7 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ha az e-mail cím egy fiókhoz van társítva, hamarosan kapni fog utasításokat a jelszó visszaállításához. Kérjük, ellenőrizze a spam vagy a levélszemét mappát, ha nem látja az e-mailt a bejövő üzenetek között.',
     confirmGeneration: 'Generálás megerősítése',
     confirmPassword: 'Jelszó megerősítése',
+    copyAPIKeyNow: 'Másolja le most ezt az API kulcsot. Ez később nem lesz újra megjelenítve.',
     createFirstUser: 'Első felhasználó létrehozása',
     createUser: 'Felhasználó létrehozása',
     emailNotValid: 'A megadott e-mail cím érvénytelen',

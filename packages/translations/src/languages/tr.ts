@@ -8,6 +8,9 @@ export const trTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Hesap zaten etkinleştirildi',
     alreadyLoggedIn: 'Hesaba zaten giriş yapıldı',
     apiKey: 'API Anahtarı',
+    apiKeyGeneratedOnSave: 'Kaydettiğinizde bir API anahtarı oluşturulur.',
+    apiKeyIsHidden:
+      'Bu API anahtarı tek yönlü bir hash olarak saklanır ve tekrar gösterilemez. Eğer anahtara artık sahip değilseniz, yenisini oluşturun.',
     authenticated: 'Doğrulandı',
     backToLogin: 'Giriş ekranına geri dön',
     beginCreateFirstUser: 'Başlamak için ilk kullanıcınızı oluşturun.',
@@ -16,6 +19,7 @@ export const trTranslations: DefaultTranslationsObject = {
       'E-posta adresi bir hesapla ilişkiliyse, şifrenizi sıfırlama talimatlarınızı kısa süre içerisinde alacaksınız. E-postayı gelen kutunuzda görmüyorsanız, lütfen spam veya gereksiz posta klasörünüzü kontrol edin.',
     confirmGeneration: 'Oluştumayı Onayla',
     confirmPassword: 'Parolayı Onayla',
+    copyAPIKeyNow: 'Bu API anahtarını şimdi kopyalayın. Bir daha gösterilmeyecektir.',
     createFirstUser: 'İlk kullanıcı oluştur',
     createUser: 'Kullanıcı oluştur',
     emailNotValid: 'Girilen e-posta geçersiz',

@@ -8,6 +8,9 @@ export const zhTranslations: DefaultTranslationsObject = {
     alreadyActivated: '已经激活了',
     alreadyLoggedIn: '已经登入了',
     apiKey: 'API 密钥',
+    apiKeyGeneratedOnSave: '保存时会生成一个API密钥。',
+    apiKeyIsHidden:
+      '此 API 密钥以单向哈希形式存储，无法再次显示。如果您已不再拥有该密钥，请生成一个新的密钥。',
     authenticated: '已通过身份验证的请求',
     backToLogin: '回到登录页面',
     beginCreateFirstUser: '创建您的第一个用户以开始。',
@@ -16,6 +19,7 @@ export const zhTranslations: DefaultTranslationsObject = {
       '如果此电子邮件地址已关联到一个账号，您将会很快收到重置密码的说明。如果您在收件箱中看不到此邮件，请检查您的垃圾邮件夹。',
     confirmGeneration: '确认生成',
     confirmPassword: '确认密码',
+    copyAPIKeyNow: '请立即复制此API密钥。该密钥将不会再次显示。',
     createFirstUser: '创建第一个用户',
     createUser: '创建用户',
     emailNotValid: '所提供的电子邮件是无效的',

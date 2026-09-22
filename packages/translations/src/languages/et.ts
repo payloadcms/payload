@@ -8,6 +8,9 @@ export const etTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Juba aktiveeritud',
     alreadyLoggedIn: 'Juba sisse logitud',
     apiKey: 'API võti',
+    apiKeyGeneratedOnSave: 'API võti genereeritakse salvestamisel.',
+    apiKeyIsHidden:
+      'See API võti salvestatakse ühesuunalise räšina ega saa enam kuvada. Kui see pole enam teie käes, looge uus võti.',
     authenticated: 'Autenditud',
     backToLogin: 'Tagasi sisselogimise juurde',
     beginCreateFirstUser: 'Looge alustuseks oma esimene kasutaja.',
@@ -16,6 +19,7 @@ export const etTranslations: DefaultTranslationsObject = {
       'Kui e-posti aadress on kontoga seotud, saate varsti juhised parooli lähtestamiseks. Kui te ei näe e-kirja postkastis, kontrollige rämpsposti kausta.',
     confirmGeneration: 'Kinnita genereerimine',
     confirmPassword: 'Kinnita parool',
+    copyAPIKeyNow: 'Kopeerige see API võti nüüd. Seda ei kuvata enam.',
     createFirstUser: 'Loo esimene kasutaja',
     createUser: 'Loo kasutaja',
     emailNotValid: 'Sisestatud e-post ei ole kehtiv',

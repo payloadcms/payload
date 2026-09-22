@@ -22,7 +22,7 @@ This is particularly useful as you can create a "user" that reflects an integrat
 
 Technically, both of these options will work for third-party integrations but the second option with API key is simpler, because it reduces the amount of work that your integrations need to do to be authenticated properly.
 
-To enable API keys on a collection, set the `useAPIKey` auth option to `true`. From there, a new interface will appear in the [Admin Panel](../admin/overview) for each document within the collection that allows you to generate an API key for each user in the Collection.
+To enable API keys on a collection, set the `useAPIKey` auth option to `true`. From there, a new interface will appear in the [Admin Panel](../admin/overview) for each document within the collection that allows you to generate an API key for each user in the Collection. A key is shown once, when it is generated.
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -36,17 +36,110 @@ export const ThirdPartyAccess: CollectionConfig = {
 }
 ```
 
-User API keys are encrypted within the database, meaning that if your database is compromised,
-your API keys will not be.
+### How keys are stored
+
+An API key is stored as a one-way hash, the same way a password is. Nothing about it derives from
+`PAYLOAD_SECRET`, so rotating or retiring your secret has no effect on any key. If your database is
+compromised, the stored hashes cannot be turned back into usable keys.
+
+Because the value cannot be recovered, a key is only ever visible in the response of the request that
+created it:
+
+- Creating a user with `enableAPIKey: true` and no `apiKey` generates one and returns it once.
+- Supplying your own `apiKey` on create or update stores its hash. You keep the value you supplied.
+- The [generate endpoint](#generating-a-key) issues a new key for an existing user and returns it
+  once.
+
+Every other read - Local API, REST, GraphQL, `/me`, `/refresh-token`, `login` - masks the field:
+`apiKey` comes back as an empty string when a key is set, and `null` when one is not. Sending the
+masked value back, which is what a normal save does, leaves the key alone.
+
+In the Admin Panel the key is shown once, immediately after it is issued, with a control to copy it.
+After that the field reports that a key is set without displaying it, and the only way to get a
+usable value again is to generate a new one.
 
 <Banner type="warning">
-  **Important:**
-  If you change your `PAYLOAD_SECRET`, you will need to regenerate your API keys.
-
-The secret key is used to encrypt the API keys, so if you change the secret, existing API keys will
-no longer be valid.
-
+  **Important:** copy a key when it is shown to you. It cannot be looked up later, by
+  you or by anyone else, including an administrator.
 </Banner>
+
+If you supply your own key rather than letting Payload generate one, use a high-entropy random value.
+The hash is deliberately unsalted so a key can be looked up in a single query, which means a
+guessable key is guessable from a leaked database. Keys Payload generates are 256 bits of randomness.
+
+### Generating a key
+
+`POST /api/{collectionSlug}/{id}/api-key` issues a new key for one user, stores its hash, and returns
+the raw value:
+
+```json
+{
+  "apiKey": "0Q2rNSTMLd5x_xGuXPd0zHtxHo9c2rDoDpMCwvbg9WM",
+  "doc": { "id": "..." },
+  "message": "New API Key Generated."
+}
+```
+
+The previous key stops working immediately. The route only exists on collections with `useAPIKey`,
+and it applies the same [Access Control](../access-control/overview) as a normal update: the caller
+needs `update` access to that document, plus field-level `update` access on `apiKey` and
+`enableAPIKey`. This is the endpoint the Admin Panel's "Generate new API key" button calls.
+
+<Banner type="warning">
+  A request authenticated with an API key can rotate its own key, if your `update`
+  access allows that user to update their own document. Restrict `update` access on the
+  collection if you do not want that.
+</Banner>
+
+### Revoking a key
+
+Set `enableAPIKey` to `false`, or set `apiKey` to `null`. Either clears the stored hash, and the key
+stops authenticating immediately. An empty string does not revoke - that is the masked value a read
+returns, so sending it back means "no change".
+
+### Upgrading from encrypted keys
+
+Payload used to store an API key as reversible ciphertext plus a lookup index, both derived from
+`PAYLOAD_SECRET`. Keys in that format do not authenticate against hash-based storage, so run the
+migration once after upgrading - no key has to be reissued:
+
+```bash
+payload migrate:api-keys --dry-run
+payload migrate:api-keys
+```
+
+Or from inside a migration, which is the better option if you deploy migrations:
+
+```ts
+import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
+
+import { migrateAPIKeysToHash } from 'payload'
+
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
+  const { failed, migrated, skipped } = await migrateAPIKeysToHash({ payload })
+
+  payload.logger.info(`API keys: migrated ${migrated}, skipped ${skipped}, failed ${failed}`)
+
+  if (failed > 0) {
+    throw new Error('Some API keys could not be recovered.')
+  }
+}
+```
+
+It reads and writes at the database layer, in batches, and verifies every key it recovers before
+writing anything - against the stored `apiKeyIndex` where that is still present, and otherwise by
+requiring the recovered value to be printable, since the pre-`v1` cipher returns random bytes rather
+than failing under a wrong secret. A row it cannot verify is left exactly as it was and counted in `failed`, because a
+wrong decryption would hash random bytes and destroy that key for good. Re-running is safe: a key
+already stored as a hash is counted in `skipped`.
+
+| Option        | Description                                                                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| `payload`     | The Payload instance (available as `args.payload` inside a migration).                                 |
+| `collections` | Optional array of collection slugs to limit the run to. Defaults to all `useAPIKey` collections.        |
+| `batchSize`   | Number of documents processed per batch. Defaults to `100`.                                             |
+| `dryRun`      | When `true`, reports what would change without writing. Defaults to `false`.                            |
+| `secrets`     | Extra raw `PAYLOAD_SECRET` values to try, for keys encrypted under a secret no longer in your keyring.  |
 
 ### HTTP Authentication
 

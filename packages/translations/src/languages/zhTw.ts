@@ -8,6 +8,9 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     alreadyActivated: '已啟用',
     alreadyLoggedIn: '已登入',
     apiKey: 'API 金鑰',
+    apiKeyGeneratedOnSave: '當您儲存時，會產生一組 API 金鑰。',
+    apiKeyIsHidden:
+      '此 API 金鑰以單向雜湊方式儲存，無法再次顯示。若您已不再擁有此金鑰，請產生新的金鑰。',
     authenticated: '已驗證',
     backToLogin: '返回登入',
     beginCreateFirstUser: '請建立您的第一位使用者以開始。',
@@ -16,6 +19,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
       '如果這個電子郵件地址有對應的帳戶，您將會收到重設密碼的說明。請檢查垃圾郵件或垃圾郵件匣以免錯過郵件。',
     confirmGeneration: '確認產生',
     confirmPassword: '確認密碼',
+    copyAPIKeyNow: '請立即複製此 API 金鑰。此金鑰將不會再次顯示。',
     createFirstUser: '建立第一位使用者',
     createUser: '建立使用者',
     emailNotValid: '提供的電子郵件無效',

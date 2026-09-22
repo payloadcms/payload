@@ -59,6 +59,10 @@ export function catchConsoleErrors(page: Page, options?: { ignoreCORS?: boolean 
       // the TanStack/vite-rsc adapter forwards server `console.error` to the
       // browser console, so it would otherwise fail every diff-view test.
       !msg.text().includes('no converter is provided') &&
+      // Mongoose deprecation notice for `new: true` in findOneAndUpdate, emitted once per
+      // server process by the mongo adapter. Next forwards it to the browser console, where
+      // it would fail whichever test happens to trigger the first update.
+      !msg.text().includes('[MONGOOSE] Warning') &&
       // Conditionally ignore CORS errors based on the `ignoreCORS` option
       !(
         ignoreCORS &&

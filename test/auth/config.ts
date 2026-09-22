@@ -8,7 +8,10 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
+  apiKeyOnlySlug,
+  apiKeyProofSlug,
   apiKeysSlug,
+  apiKeysWithFieldUpdateAccessSlug,
   BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
@@ -357,6 +360,90 @@ export default buildConfigWithDefaults({
             type: 'text',
           },
         ],
+        versions: false,
+      },
+      {
+        // Readable only by an api-key authenticated user of apiKeyOnlySlug. Nothing else can
+        // reach it: that collection has no password login, and this rule refuses every other
+        // strategy, including the Admin Panel's own session. Tests assert "this key works"
+        // against this collection, so ambient access cannot produce a false pass.
+        slug: apiKeyProofSlug,
+        access: {
+          read: ({ req: { user } }) =>
+            user?.collection === apiKeyOnlySlug && user?._strategy === 'api-key',
+        },
+        fields: [],
+        versions: false,
+      },
+      {
+        slug: apiKeyOnlySlug,
+        access: {
+          // The Admin Panel has to read the collection to render it, so the admin user
+          // collection is allowed here; an api-key user only ever sees its own document.
+          // Proof that a key authenticated comes from apiKeyProofSlug, not from here.
+          read: ({ req: { user } }) => {
+            if (user?.collection === slug) {
+              return true
+            }
+
+            return user?.collection === apiKeyOnlySlug && user?._strategy === 'api-key'
+              ? { id: { equals: user.id } }
+              : false
+          },
+          // Open at the document level so the generate endpoint's own access checks are
+          // what a test exercises.
+          update: () => true,
+        },
+        auth: {
+          disableLocalStrategy: true,
+          useAPIKey: true,
+        },
+        // Auth collections disable duplication by default; opted in so a test can prove a
+        // duplicate never inherits the original's key.
+        disableDuplicate: false,
+        fields: [
+          {
+            // An unrelated field, so a test can save the document without touching the key.
+            name: 'label',
+            type: 'text',
+          },
+        ],
+        labels: {
+          plural: 'API Key Only',
+          singular: 'API Key Only',
+        },
+        versions: false,
+      },
+      {
+        slug: apiKeysWithFieldUpdateAccessSlug,
+        access: {
+          // As apiKeyOnlySlug: a 200 proves the API key authenticated. The default read
+          // access would refuse it, since this collection is not the admin user collection.
+          read: ({ req: { user } }) =>
+            user?.collection === apiKeysWithFieldUpdateAccessSlug && user?._strategy === 'api-key'
+              ? { id: { equals: user.id } }
+              : false,
+          // Open at the document level, so the field-level rule below is the only gate a
+          // test is exercising.
+          update: () => true,
+        },
+        auth: {
+          disableLocalStrategy: true,
+          useAPIKey: true,
+        },
+        fields: [
+          {
+            name: 'apiKey',
+            type: 'text',
+            access: {
+              update: () => false,
+            },
+          },
+        ],
+        labels: {
+          plural: 'API Keys With Field Update Access',
+          singular: 'API Key With Field Update Access',
+        },
         versions: false,
       },
       {

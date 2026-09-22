@@ -133,9 +133,9 @@ export function decrypt(this: CryptoContext, hash: string, options?: { secret?: 
   // Legacy aes-256-ctr is unauthenticated, so it cannot verify a key and a wrong
   // key returns garbage instead of throwing. We therefore intentionally use only
   // the explicit or active key here (never trial the keyring): a legacy value
-  // written under a previous secret decrypts to garbage until rotateSecret
-  // upgrades it to the authenticated v1 envelope. API key auth is unaffected
-  // (it matches the HMAC apiKeyIndex, which is keyring-aware).
+  // written under a previous secret decrypts to garbage until it is re-encrypted
+  // under the authenticated v1 envelope. Callers that cannot tolerate garbage have
+  // to verify the result themselves, as migrateAPIKeysToHash does.
   const legacyKey = options?.secret ? deriveSecretKey(options.secret) : this.secret
   const iv = hash.slice(0, 32)
   const content = hash.slice(32)

@@ -8,6 +8,9 @@ export const esTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Ya Activado',
     alreadyLoggedIn: 'Ya has iniciado sesión',
     apiKey: 'Clave API',
+    apiKeyGeneratedOnSave: 'Se genera una clave de API cuando guarda.',
+    apiKeyIsHidden:
+      'Esta clave de API se almacena como un hash unidireccional y no se puede mostrar nuevamente. Genere una nueva si ya no la tiene.',
     authenticated: 'Autenticado',
     backToLogin: 'Regresar al inicio de sesión',
     beginCreateFirstUser: 'Cree su primer usuario para comenzar.',
@@ -16,6 +19,7 @@ export const esTranslations: DefaultTranslationsObject = {
       'Si la dirección de correo electrónico está asociada a una cuenta, recibirás instrucciones para restablecer tu contraseña en breve. Por favor, revisa tu carpeta de spam o correo no deseado si no ves el correo en tu bandeja de entrada.',
     confirmGeneration: 'Confirmar Generación',
     confirmPassword: 'Confirmar Contraseña',
+    copyAPIKeyNow: 'Copie esta clave API ahora. No se mostrará nuevamente.',
     createFirstUser: 'Crear el primer usuario',
     createUser: 'Crear usuario',
     emailNotValid: 'El correo proporcionado es inválido',

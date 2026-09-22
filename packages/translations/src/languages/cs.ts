@@ -8,6 +8,9 @@ export const csTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Již aktivováno',
     alreadyLoggedIn: 'Již přihlášen',
     apiKey: 'API klíč',
+    apiKeyGeneratedOnSave: 'API klíč je generován při uložení.',
+    apiKeyIsHidden:
+      'Tento API klíč je uložen jako jednosměrný hash a nelze jej znovu zobrazit. Pokud jej již nemáte, vygenerujte nový.',
     authenticated: 'Ověřený',
     backToLogin: 'Zpět na přihlášení',
     beginCreateFirstUser: 'Vytvořte svého prvního uživatele pro zahájení práce.',
@@ -16,6 +19,7 @@ export const csTranslations: DefaultTranslationsObject = {
       'Pokud je e-mailová adresa spojena s účtem, brzy obdržíte pokyny k resetování vašeho hesla. Pokud e-mail nenajdete ve vaší doručené poště, zkontrolujte prosím složku se spamem nebo nevyžádanou poštou.',
     confirmGeneration: 'Potvrdit generaci',
     confirmPassword: 'Potvrdit heslo',
+    copyAPIKeyNow: 'Zkopírujte nyní tento API klíč. Nebude již znovu zobrazen.',
     createFirstUser: 'Vytvořit prvního uživatele',
     createUser: 'Vytvořit uživatele',
     emailNotValid: 'Zadaný email není platný',

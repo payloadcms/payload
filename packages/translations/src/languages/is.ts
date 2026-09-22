@@ -8,6 +8,9 @@ export const isTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Þegar virkur',
     alreadyLoggedIn: 'Þegar innskráður',
     apiKey: 'API lykill',
+    apiKeyGeneratedOnSave: 'API-lykill er búinn til þegar þú vistar.',
+    apiKeyIsHidden:
+      'Þessi API-lykill er vistaður sem einstefnu hashi og er ekki hægt að birta hann aftur. Búðu til nýjan ef þú hefur hann ekki lengur.',
     authenticated: 'Auðkenndur',
     backToLogin: 'Aftur á innskráningu',
     beginCreateFirstUser: 'Búðu til þinn fyrsta notanda til að hefja.',
@@ -16,6 +19,7 @@ export const isTranslations: DefaultTranslationsObject = {
       'Ef netfangið er tengt reikningi muntu fá leiðbeiningar um að endurstilla lykilorðið þitt innan skamms. Vinsamlegast athugaðu ruslpóstmöppuna þína ef þú sérð ekki tölvupóstinn í pósthólfinu þínu.',
     confirmGeneration: 'Staðfestu sjálfvirka myndun',
     confirmPassword: 'Staðfestu lykilorð',
+    copyAPIKeyNow: 'Afritaðu þennan API-lykil núna. Hann verður ekki sýndur aftur.',
     createFirstUser: 'Skrá fyrsta notanda',
     createUser: 'Búðu til notanda',
     emailNotValid: 'Netfangið er ekki gilt',

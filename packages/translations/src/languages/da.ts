@@ -8,6 +8,9 @@ export const daTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Allerede aktiveret',
     alreadyLoggedIn: 'Allerede logget ind',
     apiKey: 'API nøgle',
+    apiKeyGeneratedOnSave: 'En API-nøgle genereres, når du gemmer.',
+    apiKeyIsHidden:
+      'Denne API-nøgle er gemt som en envejs-hash og kan ikke vises igen. Generer en ny, hvis du ikke længere har den.',
     authenticated: 'Godkendt',
     backToLogin: 'Tilbage til login',
     beginCreateFirstUser: 'Opret din første bruger for at begynde.',
@@ -16,6 +19,7 @@ export const daTranslations: DefaultTranslationsObject = {
       'Hvis e-mailadressen er forbundet med en konto, vil du kort tid modtage instruktioner til at nulstille din adgangskode. Tjek venligst din spam- eller junkmail-mappe, hvis du ikke ser e-mailen i din indbakke.',
     confirmGeneration: 'Bekræft generering',
     confirmPassword: 'Bekræft adgangskode',
+    copyAPIKeyNow: 'Kopiér denne API-nøgle nu. Den vil ikke blive vist igen.',
     createFirstUser: 'Opret bruger',
     createUser: 'Opret bruger',
     emailNotValid: 'Ugyldig email',

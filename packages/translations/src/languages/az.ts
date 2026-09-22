@@ -8,6 +8,9 @@ export const azTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Artıq Aktivləşdirilib',
     alreadyLoggedIn: 'Artıq daxil olunub',
     apiKey: 'API Açarı',
+    apiKeyGeneratedOnSave: 'Siz yadda saxladığınız zaman bir API açarı yaradılır.',
+    apiKeyIsHidden:
+      'Bu API açarı bir istiqamətli hash kimi saxlanılır və yenidən göstərilə bilməz. Əgər artıq bu açara sahib deyilsinizsə, yenisini yaradın.',
     authenticated: 'Doğrulandı',
     backToLogin: 'Girişə qayıt',
     beginCreateFirstUser: 'Başlamaq üçün ilk istifadəçinizi yaradın.',
@@ -16,6 +19,7 @@ export const azTranslations: DefaultTranslationsObject = {
       'Əgər e-poçt ünvanı bir hesabla əlaqəli olsa, tezliklə şifrənizi yenidən qurmaq üçün təlimatlari alacaqsınız. E-poçtu giriş qutunuzda görmürsəniz, zəhmət olmasa spam və ya zibil poçt qovluğunu yoxlayın.',
     confirmGeneration: 'Generasiyani təsdiqlə',
     confirmPassword: 'Şifrəni təsdiq et',
+    copyAPIKeyNow: 'Bu API açarını indi kopyalayın. O, bir daha göstərilməyəcək.',
     createFirstUser: 'İlk istifadəçini yaradın',
     createUser: 'İstifadəçi yaradın',
     emailNotValid: 'Təqdim olunan e-poçt etibarlı deyil',

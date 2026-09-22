@@ -19,7 +19,7 @@ import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.
 import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
+import { apiKeyOnlySlug, apiKeyProofSlug, apiKeysSlug, BASE_PATH, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -365,67 +365,269 @@ describe('Auth', () => {
     })
 
     describe('api-keys', () => {
-      let user
-
-      beforeAll(async () => {
-        url = new AdminUrlUtil(serverURL, apiKeysSlug)
-
-        user = await payload.create({
-          collection: apiKeysSlug,
-          data: {
-            apiKey: uuid(),
-            enableAPIKey: true,
+      /**
+       * apiKeyProofSlug can only be read by an api-key authenticated user of apiKeyOnlySlug,
+       * so a 200 from it cannot come from the browser session, auto-login, or a broad read
+       * rule. Requests are made with `fetch` from the test process, which carries no browser
+       * cookies unless a test passes them deliberately.
+       */
+      const readProofCollection = async ({
+        apiKey,
+        extraHeaders = {},
+      }: {
+        apiKey?: string
+        extraHeaders?: Record<string, string>
+      } = {}) =>
+        fetch(`${apiURL}/${apiKeyProofSlug}`, {
+          headers: {
+            ...headers,
+            ...(apiKey ? { Authorization: `${apiKeyOnlySlug} API-Key ${apiKey}` } : {}),
+            ...extraHeaders,
           },
         })
+
+      /** Which user a key belongs to, or null if it does not authenticate at all. */
+      const meWithAPIKey = async (apiKey: string) =>
+        fetch(`${apiURL}/${apiKeyOnlySlug}/me`, {
+          headers: { ...headers, Authorization: `${apiKeyOnlySlug} API-Key ${apiKey}` },
+        })
+          .then((res) => res.json())
+          .then((json) => json.user)
+
+      const expectAPIKeyWorks = async ({
+        id,
+        apiKey,
+      }: {
+        apiKey: string
+        id: number | string
+      }) => {
+        await expect(async () => {
+          expect((await readProofCollection({ apiKey })).status).toBe(200)
+          expect(String((await meWithAPIKey(apiKey))?.id)).toStrictEqual(String(id))
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      }
+
+      const expectAPIKeyRejected = async ({ apiKey }: { apiKey: string }) => {
+        await expect(async () => {
+          expect((await readProofCollection({ apiKey })).status).not.toBe(200)
+          expect(await meWithAPIKey(apiKey)).toBeNull()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      }
+
+      /** The value is only rendered while it is being revealed, never as a placeholder. */
+      const readRevealedAPIKey = async (): Promise<string> => {
+        const input = page.locator('#apiKey')
+
+        await expect(input).toBeVisible()
+        await expect(page.locator('#apiKey-reveal-note')).toBeVisible()
+
+        await expect
+          .poll(async () => (await input.inputValue()).length, { timeout: POLL_TOPASS_TIMEOUT })
+          .toBeGreaterThan(0)
+
+        return input.inputValue()
+      }
+
+      const generateAPIKeyInAdmin = async (): Promise<string> => {
+        await page.locator('#generate-api-key').click()
+        await page.locator('[id^="generate-confirmation-"][data-dialog-action="confirm"]').click()
+
+        return readRevealedAPIKey()
+      }
+
+      const documentIDFromURL = (): string => {
+        const segments = new URL(page.url()).pathname.split('/')
+
+        return segments[segments.length - 1]!
+      }
+
+      beforeAll(() => {
+        url = new AdminUrlUtil(serverURL, apiKeyOnlySlug)
       })
 
-      test('should enable api key', async () => {
+      test('should reveal a working key for a user created with api keys enabled', async () => {
         await page.goto(url.create)
 
         await page.locator('#field-enableAPIKey').click()
 
-        // assert that the value is set
-        const apiKeyLocator = page.locator('#apiKey')
-        await expect
-          .poll(async () => await apiKeyLocator.inputValue(), { timeout: POLL_TOPASS_TIMEOUT })
-          .toBeDefined()
-
-        const apiKey = await apiKeyLocator.inputValue()
+        // Nothing is shown before the first save - the key does not exist yet.
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await expect(page.locator('#apiKey-hidden-note')).toBeVisible()
 
         await saveDocAndAssert(page)
 
-        await expect(async () => {
-          const apiKeyAfterSave = await apiKeyLocator.inputValue()
-          expect(apiKey).toStrictEqual(apiKeyAfterSave)
-        }).toPass({
-          timeout: POLL_TOPASS_TIMEOUT,
-        })
+        const apiKey = await readRevealedAPIKey()
+
+        await expectAPIKeyWorks({ id: documentIDFromURL(), apiKey })
       })
 
-      test('should disable api key', async () => {
+      test('should reveal a working key when enabling on an existing user', async () => {
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { enableAPIKey: false },
+        })
+
         await page.goto(url.edit(user.id))
 
-        // click enable api key checkbox
+        await expect(page.locator('#apiKey')).toBeHidden()
+
+        await page.locator('#field-enableAPIKey').click()
+        await saveDocAndAssert(page)
+
+        const apiKey = await readRevealedAPIKey()
+
+        await expectAPIKeyWorks({ id: user.id, apiKey })
+      })
+
+      test('should replace the key when generating a new one', async () => {
+        const originalKey = 'the-original-key-before-regenerating'
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { apiKey: originalKey, enableAPIKey: true },
+        })
+
+        await page.goto(url.edit(user.id))
+
+        // An existing key is never displayed.
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await expect(page.locator('#apiKey-hidden-note')).toBeVisible()
+
+        const newKey = await generateAPIKeyInAdmin()
+
+        expect(newKey).not.toStrictEqual(originalKey)
+
+        await expectAPIKeyWorks({ id: user.id, apiKey: newKey })
+        await expectAPIKeyRejected({ apiKey: originalKey })
+
+        // Generating is already persisted, so it must not leave unsaved changes behind -
+        // the save button stays disabled while the form is unmodified.
+        await expect(page.locator('#action-save')).toBeDisabled()
+      })
+
+      test('should revoke the key when api keys are disabled', async () => {
+        const apiKey = 'the-key-that-gets-revoked-by-unchecking'
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { apiKey, enableAPIKey: true },
+        })
+
+        await page.goto(url.edit(user.id))
+
         await page.locator('#field-enableAPIKey').click()
 
-        // assert that the apiKey field is hidden
         await expect(page.locator('#apiKey')).toBeHidden()
+        await expect(page.locator('#apiKey-hidden-note')).toBeHidden()
 
         await saveDocAndAssert(page)
 
-        // use the api key in a fetch to assert that it is disabled
-        await expect(async () => {
-          const response = await fetch(`${apiURL}/${apiKeysSlug}/me`, {
-            headers: {
-              ...headers,
-              Authorization: `${apiKeysSlug} API-Key ${user.apiKey}`,
-            },
-          }).then((res) => res.json())
+        await expectAPIKeyRejected({ apiKey })
+      })
 
-          expect(response.user).toBeNull()
-        }).toPass({
-          timeout: POLL_TOPASS_TIMEOUT,
+      test('should issue a different key when re-enabling after a revoke', async () => {
+        const revokedKey = 'the-key-that-was-revoked-before-re-enabling'
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { apiKey: revokedKey, enableAPIKey: true },
         })
+
+        await page.goto(url.edit(user.id))
+        await page.locator('#field-enableAPIKey').click()
+        await saveDocAndAssert(page)
+
+        await page.locator('#field-enableAPIKey').click()
+        await saveDocAndAssert(page)
+
+        const newKey = await readRevealedAPIKey()
+
+        expect(newKey).not.toStrictEqual(revokedKey)
+
+        await expectAPIKeyWorks({ id: user.id, apiKey: newKey })
+        await expectAPIKeyRejected({ apiKey: revokedKey })
+      })
+
+      test('should keep the key when unchecking and rechecking without saving', async () => {
+        const apiKey = 'the-key-that-survives-a-round-trip'
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { apiKey, enableAPIKey: true },
+        })
+
+        await page.goto(url.edit(user.id))
+
+        await page.locator('#field-enableAPIKey').click()
+        await page.locator('#field-enableAPIKey').click()
+        await saveDocAndAssert(page)
+
+        // Nothing was submitted for the key, so it was neither rotated nor revoked.
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await expectAPIKeyWorks({ id: user.id, apiKey })
+      })
+
+      test('should keep the key when saving an unrelated field', async () => {
+        const apiKey = 'the-key-that-survives-an-unrelated-save'
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { apiKey, enableAPIKey: true },
+        })
+
+        await page.goto(url.edit(user.id))
+
+        await page.locator('#field-label').fill('renamed in the admin panel')
+        await saveDocAndAssert(page)
+
+        await expectAPIKeyWorks({ id: user.id, apiKey })
+      })
+
+      test('should not reveal the key again after a reload', async () => {
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { enableAPIKey: false },
+        })
+
+        await page.goto(url.edit(user.id))
+        await page.locator('#field-enableAPIKey').click()
+        await saveDocAndAssert(page)
+
+        const apiKey = await readRevealedAPIKey()
+
+        await page.reload()
+
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await expect(page.locator('#apiKey-hidden-note')).toBeVisible()
+
+        // The key itself is unaffected by no longer being displayed.
+        await expectAPIKeyWorks({ id: user.id, apiKey })
+      })
+
+      test('should not grant access without an api key', async () => {
+        const apiKey = 'the-key-used-for-the-negative-controls'
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { apiKey, enableAPIKey: true },
+        })
+
+        // No credentials at all.
+        expect((await readProofCollection()).status).not.toBe(200)
+
+        // A key that was never issued.
+        await expectAPIKeyRejected({ apiKey: 'a-key-that-was-never-issued' })
+
+        // The key itself does work, so the assertions above are not passing for some
+        // unrelated reason.
+        await expectAPIKeyWorks({ id: user.id, apiKey })
+
+        // The Admin Panel's own session, which must buy nothing here: this proves the
+        // passing assertions above come from the API key and nothing else.
+        const cookies = await context.cookies(serverURL)
+        const cookieHeader = cookies.map(({ name, value }) => `${name}=${value}`).join('; ')
+
+        expect(cookieHeader).toContain('payload-token')
+
+        const withSession = await readProofCollection({
+          extraHeaders: { Cookie: cookieHeader },
+        })
+
+        expect(withSession.status).not.toBe(200)
       })
     })
 

@@ -8,6 +8,9 @@ export const idTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Sudah Diaktifkan',
     alreadyLoggedIn: 'Sudah masuk',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'Sebuah kunci API akan dihasilkan ketika Anda menyimpan.',
+    apiKeyIsHidden:
+      'Kunci API ini disimpan sebagai hash satu arah dan tidak dapat ditampilkan kembali. Silakan buat kunci baru jika Anda sudah tidak memilikinya.',
     authenticated: 'Terautentikasi',
     backToLogin: 'Kembali ke halaman masuk',
     beginCreateFirstUser: 'Buat pengguna pertama Anda untuk memulai.',
@@ -16,6 +19,7 @@ export const idTranslations: DefaultTranslationsObject = {
       'Jika alamat email dikaitkan dengan sebuah akun, Anda akan segera menerima instruksi untuk mengatur ulang kata sandi Anda. Silakan periksa folder spam atau junk mail Anda jika Anda tidak melihat email di kotak masuk Anda.',
     confirmGeneration: 'Konfirmasi Pembuatan',
     confirmPassword: 'Konfirmasi Kata Sandi',
+    copyAPIKeyNow: 'Salin API key ini sekarang. Kunci ini tidak akan ditampilkan lagi.',
     createFirstUser: 'Buat pengguna pertama',
     createUser: 'Buat pengguna',
     emailNotValid: 'Email yang diberikan tidak valid',

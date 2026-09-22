@@ -8,6 +8,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Conta já ativada',
     alreadyLoggedIn: 'Login já realizado',
     apiKey: 'Chave da API',
+    apiKeyGeneratedOnSave: 'Uma chave de API é gerada ao salvar.',
+    apiKeyIsHidden:
+      'Esta chave de API é armazenada como um hash unidirecional e não poderá ser exibida novamente. Gere uma nova chave caso não a possua mais.',
     authenticated: 'Autenticado',
     backToLogin: 'Voltar para login',
     beginCreateFirstUser: 'Crie seu primeiro usuário para começar.',
@@ -16,6 +19,7 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Se o endereço de email estiver associado a uma conta, você receberá instruções para redefinir sua senha em breve. Por favor, verifique sua pasta de spam ou lixo eletrônico se você não vir o email na sua caixa de entrada.',
     confirmGeneration: 'Confirmar Geração',
     confirmPassword: 'Confirmar Senha',
+    copyAPIKeyNow: 'Copie esta chave de API agora. Ela não será exibida novamente.',
     createFirstUser: 'Criar primeiro usuário',
     createUser: 'Criar usuário',
     emailNotValid: 'O email fornecido não é válido',

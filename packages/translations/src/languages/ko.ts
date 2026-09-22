@@ -8,6 +8,9 @@ export const koTranslations: DefaultTranslationsObject = {
     alreadyActivated: '이미 활성화됨',
     alreadyLoggedIn: '이미 로그인됨',
     apiKey: 'API 키',
+    apiKeyGeneratedOnSave: '저장하면 API 키가 생성됩니다.',
+    apiKeyIsHidden:
+      '이 API 키는 단방향 해시로 저장되어 다시 표시할 수 없습니다. 더 이상 API 키를 보유하고 있지 않은 경우, 새로 생성하십시오.',
     authenticated: '인증됨',
     backToLogin: '로그인 화면으로 돌아가기',
     beginCreateFirstUser: '시작하려면 첫 번째 사용자를 생성하십시오.',
@@ -16,6 +19,7 @@ export const koTranslations: DefaultTranslationsObject = {
       '이메일 주소가 계정과 연결되어 있다면, 곧 비밀번호를 재설정하는 방법에 대한 지시를 받게 될 것입니다. 인박스에서 이메일을 찾을 수 없다면 스팸 또는 정크 메일 폴더를 확인해 주시기 바랍니다.',
     confirmGeneration: '생성 확인',
     confirmPassword: '비밀번호 확인',
+    copyAPIKeyNow: '지금 이 API 키를 복사하십시오. 이 키는 다시 표시되지 않습니다.',
     createFirstUser: '첫 번째 사용자 생성',
     createUser: '사용자 생성',
     emailNotValid: '입력한 이메일은 유효하지 않습니다.',

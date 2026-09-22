@@ -8,6 +8,9 @@ export const caTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Ja activat',
     alreadyLoggedIn: 'Ja has iniciat sessió',
     apiKey: 'Clau API',
+    apiKeyGeneratedOnSave: 'Es genera una clau API quan deseu.',
+    apiKeyIsHidden:
+      "Aquesta clau API s'emmagatzema com un hash unidireccional i no es pot tornar a mostrar. Generi'n una de nova si ja no la té.",
     authenticated: 'Autenticat',
     backToLogin: "Tornar a l'inici de sessió",
     beginCreateFirstUser: 'Creeu el vostre primer usuari per començar.',
@@ -16,6 +19,7 @@ export const caTranslations: DefaultTranslationsObject = {
       "Si l'adreça de correu electrònic està associada amb un compte, rebràs instruccions per restablir la teva contrasenya aviat. Si no trobes el correu electrònic a la safata d'entrada, revisa la carpeta de correu brossa o no desitjat.",
     confirmGeneration: 'Confirmar generació',
     confirmPassword: 'Confirma la contrasenya',
+    copyAPIKeyNow: 'Copieu aquesta clau API ara. No es mostrarà de nou.',
     createFirstUser: 'Crea el primer usuari',
     createUser: 'Crear usuari',
     emailNotValid: 'El correu electrònic proporcionat no és vàlid',

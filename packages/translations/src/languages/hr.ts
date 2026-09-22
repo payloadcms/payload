@@ -8,6 +8,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Već aktivirano',
     alreadyLoggedIn: 'Već prijavljeni',
     apiKey: 'API ključ',
+    apiKeyGeneratedOnSave: 'API ključ se generira prilikom spremanja.',
+    apiKeyIsHidden:
+      'Ovaj API ključ je pohranjen kao jednosmjerna sažimka i ne može se ponovno prikazati. Generirajte novi ako ga više nemate.',
     authenticated: 'Autenticiran',
     backToLogin: 'Natrag na prijavu',
     beginCreateFirstUser: 'Izradite svog prvog korisnika kako biste započeli.',
@@ -16,6 +19,7 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Ako je e-mail adresa povezana s računom, uskoro ćete primiti upute za resetiranje lozinke. Molimo provjerite svoju mapu za neželjenu poštu ili spam ako ne vidite e-mail u svojoj pristigloj pošti.',
     confirmGeneration: 'Potvrdi generiranje',
     confirmPassword: 'Potvrdi lozinku',
+    copyAPIKeyNow: 'Kopirajte ovaj API ključ sada. Neće biti ponovno prikazan.',
     createFirstUser: 'Izradi prvog korisnika',
     createUser: 'Kreiraj korisnika',
     emailNotValid: 'E-mail nije ispravan',

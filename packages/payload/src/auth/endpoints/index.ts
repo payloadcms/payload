@@ -3,6 +3,7 @@ import type { Endpoint } from '../../config/types.js'
 import { wrapInternalEndpoints } from '../../utilities/wrapInternalEndpoints.js'
 import { accessHandler } from './access.js'
 import { forgotPasswordHandler } from './forgotPassword.js'
+import { generateAPIKeyHandler } from './generateAPIKey.js'
 import { initHandler } from './init.js'
 import { loginHandler } from './login.js'
 import { logoutHandler } from './logout.js'
@@ -18,6 +19,15 @@ export const authRootEndpoints: Endpoint[] = wrapInternalEndpoints([
     handler: accessHandler,
     method: 'get',
     path: '/access',
+  },
+])
+
+/** Only added to collections with `auth.useAPIKey`. */
+export const apiKeyCollectionEndpoints: Endpoint[] = wrapInternalEndpoints([
+  {
+    handler: generateAPIKeyHandler,
+    method: 'post',
+    path: '/:id/api-key',
   },
 ])
 

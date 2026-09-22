@@ -1,7 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback } from 'react'
-import { toast } from 'sonner'
+import React from 'react'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -10,29 +9,25 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { Translation } from '../Translation/index.js'
 
 export type GenerateConfirmationProps = {
-  highlightField: (Boolean) => void
-  setKey: () => void
+  /**
+   * Issues the new key. Awaited by the confirmation dialog, which stays open until it
+   * settles - the value it produces can only be shown once.
+   */
+  onGenerate: () => Promise<void> | void
 }
 
-export function GenerateConfirmation(props: GenerateConfirmationProps) {
-  const { highlightField, setKey } = props
-
+export function GenerateConfirmation({ onGenerate }: GenerateConfirmationProps) {
   const { id } = useDocumentInfo()
   const { toggleModal } = useModal()
   const { t } = useTranslation()
 
   const modalSlug = `generate-confirmation-${id}`
 
-  const handleGenerate = useCallback(() => {
-    setKey()
-    toast.success(t('authentication:newAPIKeyGenerated'))
-    highlightField(true)
-  }, [highlightField, setKey, t])
-
   return (
     <React.Fragment>
       <Button
         buttonStyle="secondary"
+        id="generate-api-key"
         onClick={() => {
           toggleModal(modalSlug)
         }}
@@ -53,7 +48,7 @@ export function GenerateConfirmation(props: GenerateConfirmationProps) {
         confirmLabel={t('authentication:generate')}
         heading={t('authentication:confirmGeneration')}
         modalSlug={modalSlug}
-        onConfirm={handleGenerate}
+        onConfirm={onGenerate}
       />
     </React.Fragment>
   )

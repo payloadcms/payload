@@ -8,6 +8,9 @@ export const deTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Bereits aktiviert',
     alreadyLoggedIn: 'Bereits angemeldet',
     apiKey: 'API-Schlüssel',
+    apiKeyGeneratedOnSave: 'Ein API-Schlüssel wird beim Speichern generiert.',
+    apiKeyIsHidden:
+      'Dieser API-Schlüssel wird als Einweg-Hash gespeichert und kann nicht erneut angezeigt werden. Generieren Sie einen neuen, falls Sie ihn nicht mehr besitzen.',
     authenticated: 'Authentifiziert',
     backToLogin: 'Zurück zur Anmeldung',
     beginCreateFirstUser: 'Erstellen Sie Ihren ersten Benutzer, um zu beginnen.',
@@ -16,6 +19,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Wenn die E-Mail-Adresse mit einem Benutzerkonto verknüpft ist, erhältst du in Kürze Anweisungen zum Zurücksetzen deines Passworts. Bitte überprüfe auch deinen Spam-Ordner, falls du die E-Mail nicht im Posteingang siehst.',
     confirmGeneration: 'Generierung bestätigen',
     confirmPassword: 'Passwort bestätigen',
+    copyAPIKeyNow: 'Kopieren Sie diesen API-Schlüssel jetzt. Er wird nicht erneut angezeigt.',
     createFirstUser: 'Erstes Benutzerkonto erstellen',
     createUser: 'Benutzer erstellen',
     emailNotValid: 'Die angegebene E-Mail-Adresse ist ungültig.',

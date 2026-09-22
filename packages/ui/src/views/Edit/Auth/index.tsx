@@ -117,12 +117,21 @@ export const Auth: React.FC<Props> = (props) => {
   const apiKeyPermissions =
     docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
 
+  const apiKeyFieldPermissions =
+    docPermissions?.fields === true ? true : docPermissions?.fields?.apiKey
+
+  // Generating writes both fields through the normal update operation, so the control is
+  // only offered when the viewer can update both.
   const apiKeyReadOnly =
     readOnly ||
     (apiKeyPermissions !== true &&
       apiKeyPermissions &&
       typeof apiKeyPermissions === 'object' &&
-      !apiKeyPermissions?.update)
+      !apiKeyPermissions?.update) ||
+    (apiKeyFieldPermissions !== true &&
+      apiKeyFieldPermissions &&
+      typeof apiKeyFieldPermissions === 'object' &&
+      !apiKeyFieldPermissions?.update)
 
   const enableAPIKeyReadOnly =
     readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)

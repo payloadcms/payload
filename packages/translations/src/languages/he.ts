@@ -8,6 +8,9 @@ export const heTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'כבר הופעל',
     alreadyLoggedIn: 'כבר מחובר',
     apiKey: 'מפתח API',
+    apiKeyGeneratedOnSave: 'מפתח API נוצר כאשר אתה שומר.',
+    apiKeyIsHidden:
+      'מפתח API זה מאוחסן כהאש חד-כיווני ואינו ניתן להצגה שוב. הפק אחד חדש אם אינך מחזיק בו עוד.',
     authenticated: 'מאומת',
     backToLogin: 'חזרה להתחברות',
     beginCreateFirstUser: 'צור את המשתמש הראשון שלך כדי להתחיל.',
@@ -16,6 +19,7 @@ export const heTranslations: DefaultTranslationsObject = {
       'אם כתובת הדוא"ל מקושרת לחשבון, תקבל הוראות לאיפוס הסיסמה שלך בקרוב. אנא בדוק את תיקיית הספאם או הדואר הזבל אם אתה לא רואה את הדוא"ל בתיבת הדואר הנכנס שלך.',
     confirmGeneration: 'אישור יצירה',
     confirmPassword: 'אישור סיסמה',
+    copyAPIKeyNow: 'העתק כעת מפתח API זה. הוא לא יוצג שוב.',
     createFirstUser: 'יצירת משתמש ראשון',
     createUser: 'צור משתמש',
     emailNotValid: 'הדוא"ל שסופק אינו תקין',

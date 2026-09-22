@@ -8,6 +8,9 @@ export const plTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Już aktywowano',
     alreadyLoggedIn: 'Już zalogowano',
     apiKey: 'Klucz API',
+    apiKeyGeneratedOnSave: 'Klucz API jest generowany podczas zapisywania.',
+    apiKeyIsHidden:
+      'Ten klucz API jest przechowywany jako jednokierunkowy skrót i nie może być ponownie wyświetlony. Wygeneruj nowy klucz, jeśli już go nie posiadasz.',
     authenticated: 'Uwierzytelniony',
     backToLogin: 'Powrót do logowania',
     beginCreateFirstUser: 'Utwórz pierwszego użytkownika, aby rozpocząć.',
@@ -16,6 +19,7 @@ export const plTranslations: DefaultTranslationsObject = {
       'Jeśli adres e-mail jest powiązany z kontem, wkrótce otrzymasz instrukcje dotyczące zresetowania hasła. Sprawdź folder ze spamem lub niechcianą pocztą, jeśli nie widzisz e-maila w swojej skrzynce odbiorczej.',
     confirmGeneration: 'Potwierdź wygenerowanie',
     confirmPassword: 'Potwierdź hasło',
+    copyAPIKeyNow: 'Skopiuj ten klucz API teraz. Nie będzie wyświetlony ponownie.',
     createFirstUser: 'Utwórz pierwszego użytkownika',
     createUser: 'Utwórz użytkownika',
     emailNotValid: 'Podany email jest nieprawidłowy',

@@ -8,6 +8,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Već aktivirano',
     alreadyLoggedIn: 'Već prijavljen',
     apiKey: 'API ključ',
+    apiKeyGeneratedOnSave: 'API ključ se generiše kada sačuvate.',
+    apiKeyIsHidden:
+      'Ovaj API ključ je sačuvan kao jednosmerni heš i ne može ponovo biti prikazan. Generišite novi ukoliko ga više nemate.',
     authenticated: 'Autentifikovan',
     backToLogin: 'Nazad na prijavu',
     beginCreateFirstUser: 'Kreirajte svog prvog korisnika da biste započeli.',
@@ -16,6 +19,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ako je e-mail adresa povezana sa nekim nalozima, uskoro ćete dobiti uputstva za resetovanje lozinke. Ako ne vidite e-mail u svojoj prijemnoj pošti, proverite spam ili folder za neželjenu poštu.',
     confirmGeneration: 'Potvrdi kreiranje',
     confirmPassword: 'Potvrdi lozinku',
+    copyAPIKeyNow: 'Kopirajte ovaj API ključ sada. Neće biti prikazan ponovo.',
     createFirstUser: 'Kreiraj prvog korisnika',
     createUser: 'Kreiraj korisnika',
     emailNotValid: 'Adresa e-pošte nije validna',

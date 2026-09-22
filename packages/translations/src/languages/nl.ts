@@ -8,6 +8,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Al geactiveerd',
     alreadyLoggedIn: 'Al ingelogd',
     apiKey: 'API-sleutel',
+    apiKeyGeneratedOnSave: 'Een API-sleutel wordt gegenereerd wanneer u opslaat.',
+    apiKeyIsHidden:
+      'Deze API-sleutel wordt opgeslagen als een eenrichtings-hash en kan niet opnieuw worden getoond. Genereer een nieuwe als u deze niet meer heeft.',
     authenticated: 'Geverifieerd',
     backToLogin: 'Terug naar inloggen',
     beginCreateFirstUser: 'Maak uw eerste gebruiker aan om te beginnen.',
@@ -16,6 +19,7 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Als het e-mailadres is gekoppeld aan een account, ontvangt u binnenkort instructies om uw wachtwoord opnieuw in te stellen. Controleer uw spam- of ongewenste e-mailmap als u de e-mail niet in uw inbox ziet.',
     confirmGeneration: 'Bevestigen',
     confirmPassword: 'Wachtwoord bevestigen',
+    copyAPIKeyNow: 'Kopieer deze API-sleutel nu. Deze zal niet meer worden getoond.',
     createFirstUser: 'Eerste gebruiker aanmaken',
     createUser: 'Gebruiker aanmaken',
     emailNotValid: 'Het ingevoerde e-mailadres is niet geldig',

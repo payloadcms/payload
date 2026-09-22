@@ -8,6 +8,9 @@ export const thTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'เปิดใช้งานแล้ว',
     alreadyLoggedIn: 'ลงชื่อเข้าใช้แล้ว',
     apiKey: 'API Key',
+    apiKeyGeneratedOnSave: 'คีย์ API จะถูกสร้างขึ้นเมื่อคุณบันทึก',
+    apiKeyIsHidden:
+      'คีย์ API นี้ถูกจัดเก็บในรูปแบบแฮชทางเดียวและไม่สามารถแสดงได้อีก กรุณาสร้างคีย์ใหม่หากคุณไม่มีคีย์นี้แล้ว',
     authenticated: 'ได้รับการตรวจสอบแล้ว',
     backToLogin: 'กลับไปหน้าเข้าสู่ระบบ',
     beginCreateFirstUser: 'สร้างผู้ใช้รายแรกของคุณเพื่อเริ่มต้น',
@@ -16,6 +19,7 @@ export const thTranslations: DefaultTranslationsObject = {
       'ถ้าที่อยู่อีเมลถูกเชื่อมโยงกับบัญชีผู้ใช้งาน คุณจะได้รับคำแนะนำในการเปลี่ยนรหัสผ่านในไม่ช้า กรุณาตรวจสอบโฟลเดอร์สแปมหรือจัด mail ถ้าคุณไม่เห็นอีเมลในกล่องจดหมายขาเข้า',
     confirmGeneration: 'ยืนยันการสร้าง',
     confirmPassword: 'ยืนยันรหัสผ่าน',
+    copyAPIKeyNow: 'คัดลอก API key นี้ในขณะนี้ เนื่องจากจะไม่แสดงอีกครั้ง',
     createFirstUser: 'สร้างผู้ใช้แรก',
     createUser: 'สร้างผู้ใช้',
     emailNotValid: 'อีเมลไม่ถูกต้อง',

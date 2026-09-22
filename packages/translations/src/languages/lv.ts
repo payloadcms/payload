@@ -8,6 +8,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     alreadyActivated: 'Jau aktivizēts',
     alreadyLoggedIn: 'Jau pieslēdzies',
     apiKey: 'API atslēga',
+    apiKeyGeneratedOnSave: 'API atslēga tiek ģenerēta, kad saglabājat.',
+    apiKeyIsHidden:
+      'Šī API atslēga tiek glabāta kā vienvirziena hash vērtība un to nevarēs vēlreiz parādīt. Ja tā vairs nav pieejama, ģenerējiet jaunu.',
     authenticated: 'Autentificēts',
     backToLogin: 'Atpakaļ uz pieslēgšanos',
     beginCreateFirstUser: 'Izveidojiet savu pirmo lietotāju, lai sāktu.',
@@ -16,6 +19,7 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Ja e-pasta adrese ir saistīta ar kontu, drīz saņemsiet norādījumus paroles atiestatīšanai. Lūdzu, pārbaudiet arī surogātpasta mapi, ja e-pasts nav iesūtnē.',
     confirmGeneration: 'Apstiprināt ģenerēšanu',
     confirmPassword: 'Apstiprināt paroli',
+    copyAPIKeyNow: 'Kopējiet šo API atslēgu tagad. Tā vairs netiks rādīta.',
     createFirstUser: 'Izveidot pirmo lietotāju',
     createUser: 'Izveidot lietotāju',
     emailNotValid: 'Norādītais e-pasts nav derīgs',
