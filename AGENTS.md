@@ -1,7 +1,5 @@
 # AGENTS.md
 
-This file provides guidance to AI coding agents (Claude Code, Cursor, GitHub Copilot) when working with code in this repository.
-
 ## Project Structure
 
 Payload is a monorepo structured around Next.js, containing the core CMS platform, database adapters, plugins, and tooling.
