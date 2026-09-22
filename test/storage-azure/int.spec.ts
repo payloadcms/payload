@@ -8,7 +8,12 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithAlwaysInsertFieldsSlug,
+  mediaWithPrefixSlug,
+  prefix,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -91,6 +96,22 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
   test('returns 404 for non-existing file', async ({ restClient }) => {
     const response = await restClient.GET(`/${mediaSlug}/file/nonexistent.png`)
     expect(response.status).toBe(404)
+  })
+
+  test('has prefix field by default even when plugin is disabled', async ({ payload }) => {
+    // This collection uses an azureStorage plugin with enabled: false.
+    // The upload uses local storage, but the prefix field still exists.
+    const upload = await payload.create({
+      collection: mediaWithAlwaysInsertFieldsSlug,
+      data: {
+        prefix: 'test',
+      },
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
+    })
+
+    expect(upload.id).toBeTruthy()
+    expect(upload.prefix).toBe('test')
   })
 
   async function verifyUploads(
