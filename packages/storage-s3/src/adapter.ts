@@ -52,36 +52,31 @@ export function createS3Adapter({
         getStorageClient,
         useCompositePrefixes,
       }),
+      requiresUploadReceipt: true,
       useInAdmin: true,
     },
 
     // Helpers below dynamic-import their @aws-sdk dependencies so the SDK only
     // loads on the first request that actually needs it.
-    handleDelete: async ({ doc: { prefix: docPrefix = '' }, filename }) => {
+    handleDelete: async ({ storageFilePath }) => {
       const { deleteFile } = await import('./deleteFile.js')
       return deleteFile({
         bucket,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       })
     },
 
-    handleUpload: async ({ data, file }) => {
+    handleUpload: async ({ data, file, storageFilePath }) => {
       const { uploadFile } = await import('./uploadFile.js')
       await uploadFile({
         acl,
         bucket,
         buffer: file.buffer,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
+        storageFilePath,
         tempFilePath: file.tempFilePath,
-        useCompositePrefixes,
       })
 
       return data
@@ -89,7 +84,7 @@ export function createS3Adapter({
 
     staticHandler: async (
       req,
-      { headers, params: { filename, operation, prefix: prefixQueryParam, uploadReference } },
+      { doc, headers, params: { filename, operation, uploadReference } },
     ) => {
       const { getFile } = await import('./getFile.js')
       return getFile({
@@ -97,10 +92,10 @@ export function createS3Adapter({
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
         operation,
-        prefixQueryParam,
         req,
         signedDownloads,
         uploadReference,

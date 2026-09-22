@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_2129C05D".
+ * via the `definition` "LexicalNodes_5A8D4991".
  */
-export type LexicalNodes_2129C05D =
+export type LexicalNodes_5A8D4991 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_2129C05D>
+  | SerializedParagraphNode<LexicalNodes_5A8D4991>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_2129C05D>
+  | SerializedHeadingNode<LexicalNodes_5A8D4991>
   | SerializedUploadNode<'gif-resize'>
   | SerializedUploadNode<'filename-compound-index'>
   | SerializedUploadNode<'no-image-sizes'>
@@ -121,18 +121,20 @@ export type LexicalNodes_2129C05D =
   | SerializedUploadNode<'constructor-options'>
   | SerializedUploadNode<'bulk-uploads'>
   | SerializedUploadNode<'bulk-uploads-hook-error'>
+  | SerializedUploadNode<'client-upload-temp-file'>
   | SerializedUploadNode<'file-mime-type'>
   | SerializedUploadNode<'svg-only'>
   | SerializedUploadNode<'media-without-delete-access'>
   | SerializedUploadNode<'media-without-write-access'>
   | SerializedUploadNode<'media-with-image-size-admin-props'>
   | SerializedUploadNode<'prefix-media'>
+  | SerializedUploadNode<'file-access-media'>
   | SerializedUploadNode<'media-with-fields'>
-  | SerializedQuoteNode<LexicalNodes_2129C05D>
-  | SerializedListNode<LexicalNodes_2129C05D>
-  | SerializedListItemNode<LexicalNodes_2129C05D>
-  | SerializedAutoLinkNode<LexicalNodes_2129C05D, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_2129C05D, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_5A8D4991>
+  | SerializedListNode<LexicalNodes_5A8D4991>
+  | SerializedListItemNode<LexicalNodes_5A8D4991>
+  | SerializedAutoLinkNode<LexicalNodes_5A8D4991, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_5A8D4991, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -212,6 +214,7 @@ export interface Config {
     'constructor-options': ConstructorOption;
     'bulk-uploads': BulkUpload;
     'bulk-uploads-hook-error': BulkUploadsHookError;
+    'client-upload-temp-file': ClientUploadTempFile;
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
@@ -219,6 +222,7 @@ export interface Config {
     'media-without-write-access': MediaWithoutWriteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
     'prefix-media': PrefixMedia;
+    'file-access-media': FileAccessMedia;
     'media-with-fields': MediaWithField;
     'payload-kv': PayloadKv;
     users: User;
@@ -286,6 +290,7 @@ export interface Config {
     'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
     'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
     'bulk-uploads-hook-error': BulkUploadsHookErrorSelect<false> | BulkUploadsHookErrorSelect<true>;
+    'client-upload-temp-file': ClientUploadTempFileSelect<false> | ClientUploadTempFileSelect<true>;
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
@@ -293,6 +298,7 @@ export interface Config {
     'media-without-write-access': MediaWithoutWriteAccessSelect<false> | MediaWithoutWriteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
     'prefix-media': PrefixMediaSelect<false> | PrefixMediaSelect<true>;
+    'file-access-media': FileAccessMediaSelect<false> | FileAccessMediaSelect<true>;
     'media-with-fields': MediaWithFieldsSelect<false> | MediaWithFieldsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -562,7 +568,7 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_2129C05D> | null;
+  richText?: LexicalRichText<LexicalNodes_5A8D4991> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1889,6 +1895,26 @@ export interface BulkUploadsHookError {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-upload-temp-file".
+ */
+export interface ClientUploadTempFile {
+  id: string;
+  title?: string | null;
+  shouldFail?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "file-mime-type".
  */
 export interface FileMimeType {
@@ -2030,6 +2056,37 @@ export interface PrefixMedia {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-access-media".
+ */
+export interface FileAccessMedia {
+  id: string;
+  prefix?: string | null;
+  requestMetadata?: string | null;
+  visibility: 'public' | 'restricted';
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2298,6 +2355,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -2550,6 +2608,10 @@ export interface PayloadLockedDocument {
         value: string | BulkUploadsHookError;
       } | null)
     | ({
+        relationTo: 'client-upload-temp-file';
+        value: string | ClientUploadTempFile;
+      } | null)
+    | ({
         relationTo: 'simple-relationship';
         value: string | SimpleRelationship;
       } | null)
@@ -2576,6 +2638,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'prefix-media';
         value: string | PrefixMedia;
+      } | null)
+    | ({
+        relationTo: 'file-access-media';
+        value: string | FileAccessMedia;
       } | null)
     | ({
         relationTo: 'media-with-fields';
@@ -4239,6 +4305,25 @@ export interface BulkUploadsHookErrorSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-upload-temp-file_select".
+ */
+export interface ClientUploadTempFileSelect<T extends boolean = true> {
+  title?: T;
+  shouldFail?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "simple-relationship_select".
  */
 export interface SimpleRelationshipSelect<T extends boolean = true> {
@@ -4393,6 +4478,40 @@ export interface PrefixMediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-access-media_select".
+ */
+export interface FileAccessMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  requestMetadata?: T;
+  visibility?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4704,6 +4823,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -4822,6 +4942,7 @@ export interface CollectionQueryWidget {
       | 'constructor-options'
       | 'bulk-uploads'
       | 'bulk-uploads-hook-error'
+      | 'client-upload-temp-file'
       | 'simple-relationship'
       | 'file-mime-type'
       | 'svg-only'
@@ -4829,6 +4950,7 @@ export interface CollectionQueryWidget {
       | 'media-without-write-access'
       | 'media-with-image-size-admin-props'
       | 'prefix-media'
+      | 'file-access-media'
       | 'media-with-fields'
       | 'users';
     where?:
@@ -4912,6 +5034,7 @@ export interface ActivityWidget {
           | 'constructor-options'
           | 'bulk-uploads'
           | 'bulk-uploads-hook-error'
+          | 'client-upload-temp-file'
           | 'simple-relationship'
           | 'file-mime-type'
           | 'svg-only'
@@ -4919,6 +5042,7 @@ export interface ActivityWidget {
           | 'media-without-write-access'
           | 'media-with-image-size-admin-props'
           | 'prefix-media'
+          | 'file-access-media'
           | 'media-with-fields'
           | 'users'
         )[]

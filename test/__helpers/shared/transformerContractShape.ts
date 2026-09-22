@@ -1,9 +1,10 @@
-import type { UploadTransformer } from 'payload'
+import type { Payload, UploadTransformer } from 'payload'
 
-import { describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { validateTransformers } from '../../../packages/payload/src/uploads/transformers/validateTransformers.js'
+import { test } from '../int/vitest.js'
 
 /**
  * Generic `UploadTransformer` conformance checks, reusing core's own startup
@@ -11,19 +12,23 @@ import { validateTransformers } from '../../../packages/payload/src/uploads/tran
  * transformer package's test suite against a real instance it constructs.
  */
 export function runTransformerContractShapeTests(
-  makeTransformer: () => Promise<UploadTransformer> | UploadTransformer,
+  makeTransformer: (payload: Payload) => Promise<UploadTransformer> | UploadTransformer,
 ): void {
-  describe('transformer contract shape', () => {
-    it('should declare a non-empty slug and at least one well-formed MIME pattern', async () => {
-      const transformer = await makeTransformer()
+  test.describe('transformer contract shape', () => {
+    test('should declare a non-empty slug and at least one well-formed MIME pattern', async ({
+      payload,
+    }) => {
+      const transformer = await makeTransformer(payload)
 
       expect(() => validateTransformers({ transformers: [transformer] })).not.toThrow()
       expect(transformer.slug.trim().length).toBeGreaterThan(0)
       expect(transformer.mimeTypes.length).toBeGreaterThan(0)
     })
 
-    it('should only declare capabilities (canTransform/handleRequest/transformFile/init) as functions', async () => {
-      const transformer = await makeTransformer()
+    test('should only declare capabilities (canTransform/handleRequest/transformFile/init) as functions', async ({
+      payload,
+    }) => {
+      const transformer = await makeTransformer(payload)
 
       for (const capability of [
         'canTransform',

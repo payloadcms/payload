@@ -12,7 +12,7 @@ vi.mock('@aws-sdk/s3-request-presigner', () => ({
 }))
 
 vi.mock('@payloadcms/plugin-cloud-storage/utilities', () => ({
-  getFileKey: vi.fn(() => ({ fileKey: 'logo.png' })),
+  buildStoragePathData: vi.fn(() => ({ storageFilePath: 'logo.png' })),
   getFilePrefix: vi.fn().mockResolvedValue(''),
 }))
 

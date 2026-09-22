@@ -31,13 +31,67 @@ const cloudflare =
     : await getCloudflareContext({ async: true })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-r2',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [Media, MediaWithPrefix, MediaClient, Users],
+    storage: [
+      r2Storage({
+        bucket: cloudflare.env.R2,
+        collections: {
+          'media-with-prefix': {
+            prefix: 'test-prefix',
+          },
+          [mediaSlug]: true,
+        },
+      }),
+      r2Storage({
+        bucket: cloudflare.env.R2,
+        clientUploads: true,
+        collections: {
+          'media-client': true,
+        },
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [
+        sharpTransformer({
+          collections: {
+            'media-client': {
+              imageSizes: [
+                { height: 400, width: 400, crop: 'center', name: 'square' },
+                { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+              ],
+              resizeOptions: {
+                position: 'center',
+                width: 200,
+                height: 200,
+              },
+            },
+            [mediaSlug]: {
+              imageSizes: [
+                { height: 400, width: 400, crop: 'center', name: 'square' },
+                { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+              ],
+              resizeOptions: {
+                position: 'center',
+                width: 200,
+                height: 200,
+              },
+            },
+          },
+        }),
+      ],
     },
   },
-  collections: [Media, MediaWithPrefix, MediaClient, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -46,57 +100,6 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  storage: [
-    r2Storage({
-      bucket: cloudflare.env.R2,
-      collections: {
-        [mediaSlug]: true,
-        'media-with-prefix': {
-          prefix: 'test-prefix',
-        },
-      },
-    }),
-    r2Storage({
-      bucket: cloudflare.env.R2,
-      collections: {
-        'media-client': true,
-      },
-      clientUploads: true,
-    }),
-  ],
-  upload: {
-    transformers: [
-      sharpTransformer({
-        collections: {
-          [mediaSlug]: {
-            imageSizes: [
-              { height: 400, width: 400, crop: 'center', name: 'square' },
-              { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-            ],
-            resizeOptions: {
-              position: 'center',
-              width: 200,
-              height: 200,
-            },
-          },
-          'media-client': {
-            imageSizes: [
-              { height: 400, width: 400, crop: 'center', name: 'square' },
-              { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-            ],
-            resizeOptions: {
-              position: 'center',
-              width: 200,
-              height: 200,
-            },
-          },
-        },
-      }),
-    ],
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
 })
 
 // Adapted from https://github.com/opennextjs/opennextjs-cloudflare/blob/d00b3a13e42e65aad76fba41774815726422cc39/packages/cloudflare/src/api/cloudflare-context.ts#L328C36-L328C46
@@ -104,9 +107,9 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
   return import(/* webpackIgnore: true */ `${'__wrangler'.replaceAll('_', '')}`).then(
     ({ getPlatformProxy }) =>
       getPlatformProxy({
+        configPath: path.resolve(dirname, 'wrangler.jsonc'),
         environment: process.env.CLOUDFLARE_ENV,
         experimental: { remoteBindings: cloudflareRemoteBindings },
-        configPath: path.resolve(dirname, 'wrangler.jsonc'),
       } satisfies GetPlatformProxyOptions),
   )
 }

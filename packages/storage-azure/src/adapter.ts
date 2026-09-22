@@ -9,6 +9,7 @@ import { deleteFile } from './deleteFile.js'
 import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
+import { isClientUploadAllowed } from './isClientUploadAllowed.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateAzureAdapterArgs {
@@ -16,7 +17,7 @@ interface CreateAzureAdapterArgs {
   baseURL: string
   clientUploads?: ClientUploadsConfig
   containerName: string
-  createContainerIfNotExists: () => void
+  createContainerIfNotExists: () => Promise<void> | void
   getStorageClient: () => ContainerClient
   useCompositePrefixes?: boolean
 }
@@ -47,7 +48,7 @@ export function createAzureAdapter({
       adminHandler: {
         path: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
       },
-      enabled: Boolean(clientUploads),
+      enabled: Boolean(clientUploads) && isClientUploadAllowed(collection),
       generate: generateUploadInstructions({
         access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
         collectionPrefix: prefix,
@@ -55,45 +56,37 @@ export function createAzureAdapter({
         getStorageClient,
         useCompositePrefixes,
       }),
+      requiresUploadReceipt: true,
       useInAdmin: true,
     },
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    handleUpload: async ({ data, file }) => {
+    handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({
         buffer: file.buffer,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
+        storageFilePath,
         tempFilePath: file.tempFilePath,
-        useCompositePrefixes,
       })
 
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { filename, operation, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
       getFile({
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
         operation,
-        prefixQueryParam,
         req,
         uploadReference,
         useCompositePrefixes,

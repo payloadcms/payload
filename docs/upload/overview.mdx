@@ -110,12 +110,13 @@ Upload options are specifiable on a Collection by Collection basis, you can also
 
 | Option                   | Description                                                                                                                                                                        |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`abortOnLimit`**       | A boolean that, if `true`, returns HTTP 413 if a file exceeds the file size limit. If `false`, the file is truncated. Defaults to `false`.                                         |
+| **`abortOnLimit`**       | A boolean that, if `true`, returns HTTP 413 if a file exceeds the file size limit. If `false`, the file is truncated. Defaults to `true`.                                          |
 | **`createParentPath`**   | Set to `true` to automatically create a directory path when moving files from a temporary directory or buffer. Defaults to `false`.                                                |
 | **`debug`**              | A boolean that turns upload process logging on if `true`, or off if `false`. Useful for troubleshooting. Defaults to `false`.                                                      |
 | **`limitHandler`**       | A function which is invoked if the file is greater than configured limits.                                                                                                         |
 | **`parseNested`**        | Set to `true` to turn `req.body` and `req.files` into nested structures. By default `req.body` and `req.files` are flat objects. Defaults to `false`.                              |
 | **`preserveExtension`**  | Preserves file extensions with the `safeFileNames` option. Limits file names to 3 characters if `true` or a custom length if a `number`, trimming from the start of the extension. |
+| **`requestSizeLimit`**   | Maximum size in bytes for the complete raw multipart request, including files, fields, headers, and boundaries. Accepts a non-negative safe integer or `Infinity`. Defaults to 50 MiB. Set to `Infinity` to disable this limit. |
 | **`responseOnLimit`**    | A `string` that is sent in the Response to a client if the file size limit is exceeded when used with `abortOnLimit`.                                                              |
 | **`safeFileNames`**      | Set to `true` to strip non-alphanumeric characters except dashes and underscores. Can also be set to a regex to determine what to strip. Defaults to `false`.                      |
 | **`tempFileDir`**        | A `string` path to store temporary files used when the `useTempFiles` option is set to `true`. Defaults to `'tmp'` in the current working directory. Supports absolute paths.      |
@@ -125,7 +126,11 @@ Upload options are specifiable on a Collection by Collection basis, you can also
 
 [Click here](https://github.com/mscdex/busboy#api) for more documentation about what you can control with `Busboy`.
 
-A common example of what you might want to customize within Payload-wide Upload options would be to increase the allowed `fileSize` of uploads sent to Payload:
+Multipart requests default to `requestSizeLimit: 50 * 1024 * 1024` (50 MiB for the complete raw request), `limits.fileSize: 20 * 1024 * 1024` (20 MiB per file), `limits.files: 3`, `limits.fields: 20`, and `limits.fieldSize: 1024 * 1024` (1 MiB per field). The request-wide limit counts files, fields, headers, boundaries, and other multipart overhead before content is passed to the parser. It allows two files at the per-file maximum with room for metadata while bounding the complete request independently of the individual Busboy limits. Concurrent requests multiply memory and temporary-storage usage; choose lower limits when appropriate for your deployment.
+
+Individual `limits` overrides preserve the other defaults. A non-negative safe integer `requestSizeLimit` overrides the aggregate cap, and `requestSizeLimit: Infinity` disables it intentionally. Invalid values are rejected before the request body is read. An `undefined` override retains the 50 MiB default. Explicit Busboy limit values, including `Infinity`, are also respected. Request size, field size, file count, field count, and configured part count limits reject with HTTP 413. File size limits reject by default; `abortOnLimit: false` opts into truncated files. Failed requests cancel body consumption and remove temporary files.
+
+For example, to set a 75 MiB request-wide limit and a smaller per-file limit for uploads sent to Payload:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -144,6 +149,7 @@ export default buildConfig({
     },
   ],
   upload: {
+    requestSizeLimit: 75 * 1024 * 1024, // 75 MiB for the complete multipart request
     limits: {
       fileSize: 5000000, // 5MB, written in bytes
     },

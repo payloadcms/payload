@@ -32,21 +32,103 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-s3',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      Media,
+      MediaWithAlwaysInsertFields,
+      MediaWithDirectAccess,
+      MediaWithDynamicPrefix,
+      MediaWithPrefix,
+      MediaWithSignedDownloads,
+      Users,
+    ],
+    storage: [
+      s3Storage({
+        bucket: process.env.S3_BUCKET!,
+        collections: {
+          [mediaSlug]: true,
+          [mediaWithDirectAccessSlug]: {
+            disablePayloadAccessControl: true,
+          },
+          [mediaWithDynamicPrefixSlug]: true,
+          [mediaWithPrefixSlug]: {
+            prefix,
+          },
+          [mediaWithSignedDownloadsSlug]: {
+            signedDownloads: {
+              shouldUseSignedURL: (args) => {
+                return args.req.headers.get('X-Disable-Signed-URL') !== 'true'
+              },
+            },
+          },
+        },
+        config: {
+          credentials: {
+            accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+          },
+          endpoint: process.env.S3_ENDPOINT,
+          forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+          region: process.env.S3_REGION,
+        },
+      }),
+      // Plugin disabled: the prefix field should still be inserted by default
+      s3Storage({
+        bucket: process.env.S3_BUCKET!,
+        collections: {
+          [mediaWithAlwaysInsertFieldsSlug]: {
+            prefix: '',
+          },
+        },
+        config: {
+          credentials: {
+            accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+          },
+          endpoint: process.env.S3_ENDPOINT,
+          forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+          region: process.env.S3_REGION,
+        },
+        enabled: false,
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      limits: {
+        fileSize: 1_000_000, // 1MB
+      },
+      transformers: [
+        proveSourceHashTransformer,
+        sharpTransformer({
+          collections: {
+            [mediaSlug]: {
+              imageSizes: [
+                { height: 400, width: 400, crop: 'center', name: 'square' },
+                { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+              ],
+              resizeOptions: {
+                position: 'center',
+                width: 200,
+                height: 200,
+              },
+            },
+            [mediaWithDirectAccessSlug]: {
+              imageSizes: [{ name: 'thumbnail', width: 400, height: 300, crop: 'center' }],
+            },
+          },
+        }),
+      ],
     },
   },
-  collections: [
-    Media,
-    MediaWithAlwaysInsertFields,
-    MediaWithDirectAccess,
-    MediaWithDynamicPrefix,
-    MediaWithPrefix,
-    MediaWithSignedDownloads,
-    Users,
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -54,85 +136,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  storage: [
-    s3Storage({
-      collections: {
-        [mediaSlug]: true,
-        [mediaWithDirectAccessSlug]: {
-          disablePayloadAccessControl: true,
-        },
-        [mediaWithDynamicPrefixSlug]: true,
-        [mediaWithPrefixSlug]: {
-          prefix,
-        },
-        [mediaWithSignedDownloadsSlug]: {
-          signedDownloads: {
-            shouldUseSignedURL: (args) => {
-              return args.req.headers.get('X-Disable-Signed-URL') !== 'true'
-            },
-          },
-        },
-      },
-      bucket: process.env.S3_BUCKET!,
-      config: {
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-        },
-        endpoint: process.env.S3_ENDPOINT,
-        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-        region: process.env.S3_REGION,
-      },
-    }),
-    // Test alwaysInsertFields with enabled: false
-    s3Storage({
-      alwaysInsertFields: true,
-      collections: {
-        [mediaWithAlwaysInsertFieldsSlug]: {
-          prefix: '',
-        },
-      },
-      bucket: process.env.S3_BUCKET!,
-      config: {
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-        },
-        endpoint: process.env.S3_ENDPOINT,
-        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-        region: process.env.S3_REGION,
-      },
-      enabled: false,
-    }),
-  ],
-  upload: {
-    limits: {
-      fileSize: 1_000_000, // 1MB
-    },
-    transformers: [
-      proveSourceHashTransformer,
-      sharpTransformer({
-        collections: {
-          [mediaSlug]: {
-            imageSizes: [
-              { height: 400, width: 400, crop: 'center', name: 'square' },
-              { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-            ],
-            resizeOptions: {
-              position: 'center',
-              width: 200,
-              height: 200,
-            },
-          },
-          [mediaWithDirectAccessSlug]: {
-            imageSizes: [{ name: 'thumbnail', width: 400, height: 300, crop: 'center' }],
-          },
-        },
-      }),
-    ],
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

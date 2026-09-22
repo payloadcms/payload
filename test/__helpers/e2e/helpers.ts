@@ -138,12 +138,17 @@ export async function saveDocAndAssert(
 
 export async function closeAllToasts(page: Locator | Page): Promise<void> {
   const toastCloseSelector = '.payload-toast-container button.payload-toast-close-button'
-  let count = await page.locator(toastCloseSelector).count()
+  const closeButtons = page.locator(toastCloseSelector)
 
-  while (count > 0) {
-    await page.locator(toastCloseSelector).first().click()
-    await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
-    count--
+  while (true) {
+    const count = await closeButtons.count()
+
+    if (count === 0) {
+      break
+    }
+
+    await closeButtons.first().dispatchEvent('click')
+    await expect.poll(() => closeButtons.count()).toBeLessThan(count)
   }
 }
 

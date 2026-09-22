@@ -11,7 +11,7 @@ import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 
-const LocaleContext = createContext({} as Locale)
+const LocaleContext = createContext<Locale | null>(null)
 
 export const LocaleLoadingContext = createContext({
   localeIsLoading: false,
@@ -20,15 +20,21 @@ export const LocaleLoadingContext = createContext({
 
 const fetchPreferences = async <T extends Record<string, unknown> | string>(
   key: string,
-  baseURL: string,
+  apiRoute: string,
 ): Promise<{ id: string; value: T }> =>
-  await fetch(`${baseURL}/payload-preferences/${key}`, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
+  await fetch(
+    formatAdminURL({
+      apiRoute,
+      path: `/payload-preferences/${key}`,
+    }),
+    {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'GET',
     },
-    method: 'GET',
-  })?.then((res) => res.json() as Promise<{ id: string; value: T }>)
+  )?.then((res) => res.json() as Promise<{ id: string; value: T }>)
 
 export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Locale['code'] }> = ({
   children,
@@ -53,10 +59,9 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
   const localeFromParams = useSearchParams().get('locale')
 
-  const [locale, setLocale] = React.useState<Locale>(() => {
+  const [locale, setLocale] = React.useState<Locale | null>(() => {
     if (!localization || (localization && !localization.locales.length)) {
-      // TODO: return null V4
-      return {} as Locale
+      return null
     }
 
     return (
@@ -69,20 +74,15 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
   const [isLoading, setLocaleIsLoading] = useState(false)
 
-  const prevLocale = useRef<Locale>(locale)
+  const prevLocale = useRef<Locale | null>(locale)
 
   useEffect(() => {
     // Keep fields disabled until the new locale's document state finishes loading.
-    if (locale.code !== prevLocale.current.code && !isTransitioning) {
+    if (locale?.code !== prevLocale.current?.code && !isTransitioning) {
       setLocaleIsLoading(false)
       prevLocale.current = locale
     }
   }, [isTransitioning, locale])
-
-  const fetchURL = formatAdminURL({
-    apiRoute,
-    path: '',
-  })
 
   useEffect(() => {
     /**
@@ -94,7 +94,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
       if (localization && user?.id) {
         const localeToUse =
           localeFromParams ||
-          (await fetchPreferences<Locale['code']>('locale', fetchURL)?.then((res) => res.value))
+          (await fetchPreferences<Locale['code']>('locale', apiRoute)?.then((res) => res.value))
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
@@ -108,7 +108,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     }
 
     void resetLocale()
-  }, [defaultLocale, localization, fetchURL, localeFromParams, user?.id])
+  }, [apiRoute, defaultLocale, localization, localeFromParams, user?.id])
 
   return (
     <LocaleContext value={locale}>
@@ -121,8 +121,4 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
 export const useLocaleLoading = () => use(LocaleLoadingContext)
 
-/**
- * TODO: V4
- * The return type of the `useLocale` hook will change in v4. It will return `null | Locale` instead of `false | {} | Locale`.
- */
-export const useLocale = (): Locale => use(LocaleContext)
+export const useLocale = (): Locale | null => use(LocaleContext)

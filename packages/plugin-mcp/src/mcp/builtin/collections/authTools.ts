@@ -1,7 +1,8 @@
-import { z } from 'zod'
+import { createLocalReq, strictObject, z } from 'payload'
 
 import type { MCPToolResponse } from '../../../types.js'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 
@@ -16,16 +17,16 @@ import { getLogger } from '../../../utils/getLogger.js'
  * users collection so all auth-shaped tools live in one place.
  */
 
-const emailSchema = z.string().email().describe('The user email address')
+const emailSchema = z.email().check(z.describe('The user email address.'))
 
 const wrapError =
   (name: string) =>
-  ({ collectionSlug, message }: { collectionSlug: string; message: string }): MCPToolResponse => {
+  ({ slug, message }: { message: string; slug: string }): MCPToolResponse => {
     return {
       content: [
         {
           type: 'text',
-          text: `❌ **Error in ${name}** on ${collectionSlug}: ${message}`,
+          text: `❌ **Error in ${name}** on ${slug}: ${message}`,
         },
       ],
     }
@@ -40,20 +41,38 @@ export const authCollectionTool = defineCollectionTool({
     title: 'Check Auth Status',
   },
   description: 'Checks authentication status for the current user.',
-  input: z.object({
+  input: strictObject({
     headers: z
-      .record(z.string(), z.string())
-      .describe('Optional custom headers to send with the authentication request')
-      .optional(),
+      .optional(z.record(z.string(), z.string()))
+      .check(z.describe('Custom headers to send with the authentication request.')),
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     let authHeaders = new Headers()
     if (input.headers) {
       authHeaders = new Headers(input.headers)
     }
-    const result = await req.payload.auth({ headers: authHeaders })
+    const authReq = await createLocalReq({ req: { headers: authHeaders } }, req.payload)
+    const result = await req.payload.auth({ headers: authHeaders, req: authReq })
+
+    if (result.user) {
+      const authenticatedUser = result.user
+      // Auth strategies read users with trusted Local API access. Re-read the user with the MCP
+      // caller's access level before returning it to the client.
+      const user = await req.payload.findByID({
+        id: authenticatedUser.id,
+        collection: authenticatedUser.collection,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req: authReq,
+      })
+      result.user = {
+        ...user,
+        _sid: authenticatedUser._sid,
+        _strategy: authenticatedUser._strategy,
+        collection: authenticatedUser.collection,
+      }
+    }
     return {
       content: [
         {
@@ -65,8 +84,8 @@ export const authCollectionTool = defineCollectionTool({
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error in auth tool on ${collectionSlug}: ${errorMessage}`)
-    return wrapError('auth')({ collectionSlug, message: errorMessage })
+    logger.error(`Error in auth tool on ${slug}: ${errorMessage}`)
+    return wrapError('auth')({ slug, message: errorMessage })
   }
 })
 
@@ -79,35 +98,31 @@ export const forgotPasswordCollectionTool = defineCollectionTool({
     title: 'Forgot Password',
   },
   description: 'Sends a password reset email to a user.',
-  input: z.object({
-    disableEmail: z
-      .boolean()
-      .describe('Whether to disable sending the email (for testing)')
-      .optional()
-      .default(false),
+  input: strictObject({
     email: emailSchema,
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
-    const result = await req.payload.forgotPassword({
-      collection: collectionSlug,
+    await req.payload.forgotPassword({
+      collection: slug,
       data: { email: input.email },
-      disableEmail: input.disableEmail,
+      disableEmail: false,
+      overrideAccess: false,
+      req,
     })
     return {
       content: [
         {
           type: 'text',
-          text: `# Forgot Password Email Sent\n\n**Collection:** ${collectionSlug}\n**Email:** ${input.email}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          text: 'If an account matches that email, password reset instructions have been sent.',
         },
       ],
-      doc: { result } as Record<string, unknown>,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error in forgotPassword tool on ${collectionSlug}: ${errorMessage}`)
-    return wrapError('forgotPassword')({ collectionSlug, message: errorMessage })
+    logger.error(`Error in forgotPassword tool on ${slug}: ${errorMessage}`)
+    return wrapError('forgotPassword')({ slug, message: errorMessage })
   }
 })
 
@@ -120,45 +135,35 @@ export const loginCollectionTool = defineCollectionTool({
     title: 'User Login',
   },
   description: 'Authenticates a user with email and password.',
-  input: z.object({
+  input: strictObject({
     depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('Depth of population for relationships')
-      .optional()
-      .default(0),
+      ._default(z.int().check(z.minimum(0), z.maximum(10)), 0)
+      .check(z.describe('Depth of population for relationships.')),
     email: emailSchema,
-    password: z.string().describe('The user password'),
-    showHiddenFields: z
-      .boolean()
-      .describe('Whether to show hidden fields in the response')
-      .optional()
-      .default(false),
+    password: z.string().check(z.describe('The user password.')),
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.login({
-      collection: collectionSlug,
+      collection: slug,
       data: { email: input.email, password: input.password },
       depth: input.depth,
-      showHiddenFields: input.showHiddenFields,
+      overrideAccess: authorizedMCP.overrideAccess,
     })
     return {
       content: [
         {
           type: 'text',
-          text: `# Login Successful\n\n**User:** ${input.email}\n**Collection:** ${collectionSlug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          text: `# Login Successful\n\n**User:** ${input.email}\n**Collection:** ${slug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
       doc: result as unknown as Record<string, unknown>,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error in login tool on ${collectionSlug}: ${errorMessage}`)
-    return wrapError('login')({ collectionSlug, message: errorMessage })
+    logger.error(`Error in login tool on ${slug}: ${errorMessage}`)
+    return wrapError('login')({ slug, message: errorMessage })
   }
 })
 
@@ -171,35 +176,37 @@ export const resetPasswordCollectionTool = defineCollectionTool({
     title: 'Reset Password',
   },
   description: 'Resets a user password with a reset token.',
-  input: z.object({
-    password: z.string().describe('The new password for the user'),
-    token: z.string().describe('The password reset token sent to the user email'),
+  input: strictObject({
+    password: z.string().check(z.describe('The new password for the user.')),
+    token: z.string().check(z.describe('The password reset token sent to the user email.')),
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.resetPassword({
-      collection: collectionSlug,
+      collection: slug,
       data: { password: input.password, token: input.token },
-      overrideAccess: true,
+      overrideAccess: authorizedMCP.overrideAccess,
     })
     return {
       content: [
         {
           type: 'text',
-          text: `# Password Reset Successful\n\n**Collection:** ${collectionSlug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          text: `# Password Reset Successful\n\n**Collection:** ${slug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
       doc: result as unknown as Record<string, unknown>,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error in resetPassword tool on ${collectionSlug}: ${errorMessage}`)
-    return wrapError('resetPassword')({ collectionSlug, message: errorMessage })
+    logger.error(`Error in resetPassword tool on ${slug}: ${errorMessage}`)
+    return wrapError('resetPassword')({ slug, message: errorMessage })
   }
 })
 
 export const unlockCollectionTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.slug]?.unlock),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,
@@ -208,28 +215,29 @@ export const unlockCollectionTool = defineCollectionTool({
     title: 'Unlock Account',
   },
   description: 'Unlocks a user account that has been locked due to failed login attempts.',
-  input: z.object({ email: emailSchema }),
-}).handler(async ({ collectionSlug, input, req }) => {
+  input: strictObject({ email: emailSchema }),
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.unlock({
-      collection: collectionSlug,
+      collection: slug,
       data: { email: input.email },
-      overrideAccess: true,
+      overrideAccess: authorizedMCP.overrideAccess,
+      req,
     })
     return {
       content: [
         {
           type: 'text',
-          text: `# Account Unlocked\n\n**Collection:** ${collectionSlug}\n**Email:** ${input.email}\n**Result:** ${result ? 'Success' : 'Failed'}`,
+          text: `# Account Unlocked\n\n**Collection:** ${slug}\n**Email:** ${input.email}\n**Result:** ${result ? 'Success' : 'Failed'}`,
         },
       ],
       doc: { result } as Record<string, unknown>,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error in unlock tool on ${collectionSlug}: ${errorMessage}`)
-    return wrapError('unlock')({ collectionSlug, message: errorMessage })
+    logger.error(`Error in unlock tool on ${slug}: ${errorMessage}`)
+    return wrapError('unlock')({ slug, message: errorMessage })
   }
 })
 
@@ -242,28 +250,28 @@ export const verifyCollectionTool = defineCollectionTool({
     title: 'Email Verification',
   },
   description: 'Verifies a user email with a verification token.',
-  input: z.object({
-    token: z.string().describe('The verification token sent to the user email'),
+  input: strictObject({
+    token: z.string().check(z.describe('The verification token sent to the user email.')),
   }),
-}).handler(async ({ collectionSlug, input, req }) => {
+}).handler(async ({ slug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
     const result = await req.payload.verifyEmail({
-      collection: collectionSlug,
+      collection: slug,
       token: input.token,
     })
     return {
       content: [
         {
           type: 'text',
-          text: `# Email Verification Successful\n\n**Collection:** ${collectionSlug}\n**Result:** ${result ? 'Success' : 'Failed'}`,
+          text: `# Email Verification Successful\n\n**Collection:** ${slug}\n**Result:** ${result ? 'Success' : 'Failed'}`,
         },
       ],
       doc: { result } as Record<string, unknown>,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error in verify tool on ${collectionSlug}: ${errorMessage}`)
-    return wrapError('verify')({ collectionSlug, message: errorMessage })
+    logger.error(`Error in verify tool on ${slug}: ${errorMessage}`)
+    return wrapError('verify')({ slug, message: errorMessage })
   }
 })

@@ -6,11 +6,11 @@ import path from 'path'
 import { generatePayloadFileURL, getFileByPath } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { resizePreviewMediaSlug, transformerMediaSlug, usersSlug } from './shared.js'
 import {
   resetTransformerCallCounts,
@@ -25,26 +25,26 @@ const dirname = path.dirname(filename)
 let restClient: NextRESTClient
 let payload: Payload
 
-describe('Upload transformers', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+test.suite({
+  config: './config.ts',
+  resetBetweenTests: false,
+})('Upload transformers', () => {
+  test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
+    payload = payloadInstance
+    restClient = restClientInstance
 
     await restClient.login({ slug: usersSlug })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('File transformers', () => {
+  test.describe('File transformers', () => {
     const docIDs: (number | string)[] = []
     let originalPdfText: string
 
-    beforeAll(() => {
+    test.beforeAll(() => {
       originalPdfText = fs.readFileSync(path.resolve(dirname, './test-pdf.pdf'), 'utf-8')
     })
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       resetTransformerCallCounts()
       for (const id of docIDs) {
         try {
@@ -68,7 +68,7 @@ describe('Upload transformers', () => {
       return doc as unknown as { filename: string; id: number | string }
     }
 
-    it('should serve the original file when no recognized query parameter is present', async () => {
+    test('should serve the original file when no recognized query parameter is present', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}`)
@@ -77,7 +77,7 @@ describe('Upload transformers', () => {
       expect(await response.text()).toBe(originalPdfText)
     })
 
-    it('should run a single-stage transformer and return its transformed bytes', async () => {
+    test('should run a single-stage transformer and return its transformed bytes', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
@@ -88,7 +88,7 @@ describe('Upload transformers', () => {
       expect(await response.text()).toBe(`${originalPdfText}-suffix`)
     })
 
-    it('should run every eligible transformer in declaration order for a multi-stage pipeline', async () => {
+    test('should run every eligible transformer in declaration order for a multi-stage pipeline', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
@@ -99,7 +99,7 @@ describe('Upload transformers', () => {
       expect(await response.text()).toBe(`${originalPdfText}-suffix`.toUpperCase())
     })
 
-    it('should return a redirect from a transformer that never touches the source', async () => {
+    test('should return a redirect from a transformer that never touches the source', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
@@ -112,7 +112,7 @@ describe('Upload transformers', () => {
       expect(transformerCallCounts.redirect).toBe(1)
     })
 
-    it('should preserve the accumulator when a stage returns continue without a replacement', async () => {
+    test('should preserve the accumulator when a stage returns continue without a replacement', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}?noop=1`)
@@ -122,7 +122,7 @@ describe('Upload transformers', () => {
       expect(transformerCallCounts.noop).toBe(1)
     })
 
-    it('should abort the pipeline with 500 when a transformer throws', async () => {
+    test('should abort the pipeline with 500 when a transformer throws', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
@@ -133,7 +133,7 @@ describe('Upload transformers', () => {
       expect(transformerCallCounts.throwing).toBe(1)
     })
 
-    it('should abort the pipeline with 500 when a transformer consumes its source and then throws', async () => {
+    test('should abort the pipeline with 500 when a transformer consumes its source and then throws', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
@@ -144,7 +144,7 @@ describe('Upload transformers', () => {
       expect(transformerCallCounts.sourceConsumingError).toBe(1)
     })
 
-    it('should return 404 for a filename with no matching upload document', async () => {
+    test('should return 404 for a filename with no matching upload document', async () => {
       const response = await restClient.GET(
         `/${transformerMediaSlug}/file/does-not-exist.html?suffix=1`,
       )
@@ -152,7 +152,7 @@ describe('Upload transformers', () => {
       expect(response.status).toBe(404)
     })
 
-    it('should allow an anonymous ordinary read but deny an anonymous dynamic-transform request', async () => {
+    test('should allow an anonymous ordinary read but deny an anonymous dynamic-transform request', async () => {
       const doc = await uploadTransformerFixture()
 
       const ordinaryRead = await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}`, {
@@ -169,7 +169,7 @@ describe('Upload transformers', () => {
       expect(transformerCallCounts.appendSuffix).toBe(0)
     })
 
-    it('should return 403, not 404, for an anonymous dynamic-transform request against a non-existent filename', async () => {
+    test('should return 403, not 404, for an anonymous dynamic-transform request against a non-existent filename', async () => {
       const response = await restClient.GET(
         `/${transformerMediaSlug}/file/does-not-exist.html?suffix=1`,
         { auth: false },
@@ -178,7 +178,7 @@ describe('Upload transformers', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should allow an authenticated dynamic-transform request', async () => {
+    test('should allow an authenticated dynamic-transform request', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
@@ -189,7 +189,7 @@ describe('Upload transformers', () => {
       expect(await response.text()).toBe(`${originalPdfText}-suffix`)
     })
 
-    it('should return 403 for a dynamic-transform request with a non-matching prefix, matching the existing checkFileAccess-only path', async () => {
+    test('should return 403 for a dynamic-transform request with a non-matching prefix, matching the existing checkFileAccess-only path', async () => {
       const doc = await uploadTransformerFixture()
 
       const response = await restClient.GET(
@@ -199,7 +199,7 @@ describe('Upload transformers', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should never persist dynamic output: the document is unchanged after a transform request', async () => {
+    test('should never persist dynamic output: the document is unchanged after a transform request', async () => {
       const doc = await uploadTransformerFixture()
 
       await restClient.GET(`/${transformerMediaSlug}/file/${doc.filename}?suffix=1&uppercase=1`)
@@ -212,7 +212,7 @@ describe('Upload transformers', () => {
       expect(afterRequest.filename).toBe(doc.filename)
     })
 
-    it('should never persist dynamic output: no document-mutation hook fires for a transform request', async () => {
+    test('should never persist dynamic output: no document-mutation hook fires for a transform request', async () => {
       const doc = await uploadTransformerFixture()
       resetTransformerMediaHookCallCounts()
 
@@ -225,7 +225,7 @@ describe('Upload transformers', () => {
       })
     })
 
-    it('should build a Payload-routed URL via generatePayloadFileURL that still enforces access control, even when the caller supplies an unrelated cloud-host url', async () => {
+    test('should build a Payload-routed URL via generatePayloadFileURL that still enforces access control, even when the caller supplies an unrelated cloud-host url', async () => {
       const doc = await uploadTransformerFixture()
 
       // A caller (e.g. a plugin or export feature) building a link from just a
@@ -255,10 +255,10 @@ describe('Upload transformers', () => {
     })
   })
 
-  describe('Sharp dynamic resizing', () => {
+  test.describe('Sharp dynamic resizing', () => {
     const docIDs: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async () => {
       for (const id of docIDs) {
         try {
           await payload.delete({ id, collection: resizePreviewMediaSlug as CollectionSlug })
@@ -281,7 +281,7 @@ describe('Upload transformers', () => {
       return doc as unknown as { filename: string; id: number | string }
     }
 
-    it('should resize by width only, preserving aspect ratio', async () => {
+    test('should resize by width only, preserving aspect ratio', async () => {
       const doc = await uploadFixture('image.png') // 1600x1600
 
       const response = await restClient.GET(
@@ -294,7 +294,7 @@ describe('Upload transformers', () => {
       expect(metadata.height).toBe(200)
     })
 
-    it('should resize by height only, preserving aspect ratio', async () => {
+    test('should resize by height only, preserving aspect ratio', async () => {
       const doc = await uploadFixture('image.png')
 
       const response = await restClient.GET(
@@ -307,7 +307,7 @@ describe('Upload transformers', () => {
       expect(metadata.width).toBe(100)
     })
 
-    it('should resize by width and height together', async () => {
+    test('should resize by width and height together', async () => {
       const doc = await uploadFixture('image.png')
 
       const response = await restClient.GET(
@@ -320,7 +320,7 @@ describe('Upload transformers', () => {
       expect(metadata.height).toBe(150)
     })
 
-    it('should return 400 for an invalid resize parameter', async () => {
+    test('should return 400 for an invalid resize parameter', async () => {
       const doc = await uploadFixture('image.png')
 
       const response = await restClient.GET(
@@ -335,7 +335,7 @@ describe('Upload transformers', () => {
     // qs-based query parsing collapses duplicate keys to the last value before
     // the request is ever sent, so it cannot be exercised through this client.
 
-    it('should upscale a smaller-than-requested image by default', async () => {
+    test('should upscale a smaller-than-requested image by default', async () => {
       const doc = await uploadFixture('small.png') // 320x80
 
       const response = await restClient.GET(
@@ -347,7 +347,7 @@ describe('Upload transformers', () => {
       expect(metadata.width).toBe(640)
     })
 
-    it('should not upscale when withoutEnlargement=true is requested', async () => {
+    test('should not upscale when withoutEnlargement=true is requested', async () => {
       const doc = await uploadFixture('small.png') // 320x80
 
       const response = await restClient.GET(
@@ -359,7 +359,7 @@ describe('Upload transformers', () => {
       expect(metadata.width).toBe(320)
     })
 
-    it('should return 416 for a Range header on a recognized dynamic resize request', async () => {
+    test('should return 416 for a Range header on a recognized dynamic resize request', async () => {
       const doc = await uploadFixture('image.png')
 
       const response = await restClient.GET(
@@ -372,7 +372,7 @@ describe('Upload transformers', () => {
       expect(response.status).toBe(416)
     })
 
-    it('should ignore unrelated query keys and serve the original image unchanged', async () => {
+    test('should ignore unrelated query keys and serve the original image unchanged', async () => {
       const doc = await uploadFixture('image.png')
 
       const response = await restClient.GET(
@@ -385,7 +385,7 @@ describe('Upload transformers', () => {
       expect(metadata.height).toBe(1600)
     })
 
-    it('should never persist dynamic output: the stored file is byte-identical before and after a resize request', async () => {
+    test('should never persist dynamic output: the stored file is byte-identical before and after a resize request', async () => {
       const doc = await uploadFixture('image.png')
       const storedFilePath = path.resolve(dirname, './media', doc.filename)
       const beforeHash = createHash('sha256').update(fs.readFileSync(storedFilePath)).digest('hex')

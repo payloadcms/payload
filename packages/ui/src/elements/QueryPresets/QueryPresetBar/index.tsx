@@ -18,6 +18,7 @@ import { RefreshIcon } from '../../../icons/Refresh/index.js'
 import { TrashIcon } from '../../../icons/Trash/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/context.js'
+import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
@@ -38,9 +39,11 @@ export const QueryPresetBar: React.FC<{
   activePreset: QueryPreset
   collectionSlug?: string
   queryPresetPermissions: SanitizedCollectionPermission
-}> = ({ activePreset, collectionSlug, queryPresetPermissions }) => {
+}> = ({ activePreset: activePresetFromProps, collectionSlug, queryPresetPermissions }) => {
   const { modified, query, refineListData, setModified: setQueryModified } = useListQuery()
   const { openModal } = useModal()
+  const [activePreset, setActivePreset] = useState<QueryPreset | undefined>(activePresetFromProps)
+  const router = useRouter()
   const [presets, setPresets] = useState<QueryPreset[]>([])
 
   const { i18n, t } = useTranslation()
@@ -116,6 +119,10 @@ export const QueryPresetBar: React.FC<{
     void fetchPresets()
   }, [fetchPresets])
 
+  useEffect(() => {
+    setActivePreset(activePresetFromProps)
+  }, [activePresetFromProps])
+
   const handlePresetChange = useCallback(
     async (preset: QueryPreset) => {
       await refineListData(
@@ -127,6 +134,7 @@ export const QueryPresetBar: React.FC<{
         },
         false,
       )
+      setActivePreset(preset)
     },
     [refineListData],
   )
@@ -147,6 +155,7 @@ export const QueryPresetBar: React.FC<{
         },
         false,
       )
+      setActivePreset(undefined)
     },
     [refineListData],
   )
@@ -179,6 +188,7 @@ export const QueryPresetBar: React.FC<{
           },
           false,
         )
+        setActivePreset(undefined)
         void fetchPresets()
       }
     } catch (_error) {
@@ -435,10 +445,14 @@ export const QueryPresetBar: React.FC<{
         onDuplicate={async ({ doc }) => {
           await handlePresetChange(doc as QueryPreset)
           void fetchPresets()
+          // Re-run the List server component so the active preset title on the trigger reflects the edit
+          router.refresh()
         }}
         onSave={async ({ doc }) => {
           await handlePresetChange(doc as QueryPreset)
           void fetchPresets()
+          // Re-run the List server component so the active preset title on the trigger reflects the edit
+          router.refresh()
         }}
       />
       <ListDrawer

@@ -1,8 +1,9 @@
 import type { CollectionSlug, Payload } from 'payload'
 
 import { getFileByPath } from 'payload'
-import { describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
+import { test } from '../int/vitest.js'
 import { animatedWebpFixturePath } from './imageFixtures.js'
 
 type SizeExpectation = {
@@ -27,18 +28,17 @@ type AnimatedUploadResult = {
  */
 export function runAnimatedResizeReportsPerFrameDimensionsTest({
   collection,
-  getPayload,
   mainDimensions,
   sizes,
 }: {
   collection: CollectionSlug
-  getPayload: () => Payload
   mainDimensions: { height: number; width: number }
   sizes: SizeExpectation[]
 }): void {
-  describe('animated multi-frame resize reports per-frame dimensions', () => {
-    it('should report the main file and every configured size at their single-frame dimensions', async () => {
-      const payload = getPayload()
+  test.describe('animated multi-frame resize reports per-frame dimensions', () => {
+    test('should report the main file and every configured size at their single-frame dimensions', async ({
+      payload,
+    }) => {
       const file = await getFileByPath(animatedWebpFixturePath)
 
       const createArgs = { collection, data: {}, file } as unknown as Parameters<
@@ -53,8 +53,6 @@ export function runAnimatedResizeReportsPerFrameDimensionsTest({
         expect(result.sizes?.[size.name]?.height).toBe(size.height)
         expect(result.sizes?.[size.name]?.width).toBe(size.width)
       }
-
-      await payload.delete({ id: result.id, collection })
     })
   })
 }
@@ -68,17 +66,14 @@ export function runAnimatedResizeReportsPerFrameDimensionsTest({
 export function runAnimatedFocalPointResizeStaysValidTest({
   collection,
   focalPoint,
-  getPayload,
   size,
 }: {
   collection: CollectionSlug
   focalPoint: { x: number; y: number }
-  getPayload: () => Payload
   size: SizeExpectation
 }): void {
-  describe('animated multi-frame focal-point resize', () => {
-    it('should resize to the exact target dimensions without throwing', async () => {
-      const payload = getPayload()
+  test.describe('animated multi-frame focal-point resize', () => {
+    test('should resize to the exact target dimensions without throwing', async ({ payload }) => {
       const file = await getFileByPath(animatedWebpFixturePath)
 
       const createArgs = {
@@ -90,8 +85,6 @@ export function runAnimatedFocalPointResizeStaysValidTest({
 
       expect(result.sizes?.[size.name]?.height).toBe(size.height)
       expect(result.sizes?.[size.name]?.width).toBe(size.width)
-
-      await payload.delete({ id: result.id, collection })
     })
   })
 }

@@ -4,7 +4,9 @@ import { BlobNotFoundError } from '@vercel/blob'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@payloadcms/plugin-cloud-storage/utilities', () => ({
-  getFileKey: vi.fn((args: { filename: string }) => ({ fileKey: args.filename })),
+  buildStoragePathData: vi.fn((args: { filename: string }) => ({
+    storageFilePath: args.filename,
+  })),
   getFilePrefix: vi.fn().mockResolvedValue(''),
 }))
 

@@ -14,13 +14,22 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'upload-transformers',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [TransformerMedia, ResizePreviewMedia, KitchenSinkMedia],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [sharpTransformer(), kitchenSinkSharpTransformer, ...testTransformers],
     },
   },
-  collections: [TransformerMedia, ResizePreviewMedia, KitchenSinkMedia],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -28,11 +37,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  upload: {
-    transformers: [sharpTransformer(), kitchenSinkSharpTransformer, ...testTransformers],
   },
 })

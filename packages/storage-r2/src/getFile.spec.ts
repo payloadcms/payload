@@ -3,7 +3,7 @@ import type { CollectionConfig, PayloadRequest } from 'payload'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@payloadcms/plugin-cloud-storage/utilities', () => ({
-  getFileKey: vi.fn(() => ({ fileKey: 'logo.png' })),
+  buildStoragePathData: vi.fn(() => ({ storageFilePath: 'logo.png' })),
   getFilePrefix: vi.fn().mockResolvedValue(''),
 }))
 

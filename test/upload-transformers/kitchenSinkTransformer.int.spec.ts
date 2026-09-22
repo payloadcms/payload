@@ -4,11 +4,11 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { kitchenSinkMediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -17,18 +17,18 @@ const dirname = path.dirname(filename)
 let restClient: NextRESTClient
 let payload: Payload
 
-describe('Kitchen sink Sharp transformer', () => {
+test.suite({
+  config: './config.ts',
+  resetBetweenTests: false,
+})('Kitchen sink Sharp transformer', () => {
   const docIDs: (number | string)[] = []
 
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+  test.beforeAll(({ payloadInstance, restClientInstance }) => {
+    payload = payloadInstance
+    restClient = restClientInstance
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+  test.afterEach(async () => {
     for (const id of docIDs) {
       await payload.delete({ id, collection: kitchenSinkMediaSlug as CollectionSlug })
     }
@@ -47,7 +47,7 @@ describe('Kitchen sink Sharp transformer', () => {
     return doc as unknown as { filename: string; id: number | string }
   }
 
-  it('should serve the original image unchanged when no recognized query parameter is present', async () => {
+  test('should serve the original image unchanged when no recognized query parameter is present', async () => {
     const doc = await uploadFixture('image.png')
 
     const response = await restClient.GET(`/${kitchenSinkMediaSlug}/file/${doc.filename}`)
@@ -59,7 +59,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(outputMetadata.height).toBe(sourceMetadata.height)
   })
 
-  it('should flip the image vertically', async () => {
+  test('should flip the image vertically', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).flip().toBuffer()
 
@@ -69,7 +69,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should flop the image horizontally', async () => {
+  test('should flop the image horizontally', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).flop().toBuffer()
 
@@ -79,7 +79,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should rotate the image by an arbitrary angle, swapping dimensions for 90 degrees', async () => {
+  test('should rotate the image by an arbitrary angle, swapping dimensions for 90 degrees', async () => {
     const doc = await uploadFixture('small.png') // 320x80
 
     const response = await restClient.GET(`/${kitchenSinkMediaSlug}/file/${doc.filename}?rotate=90`)
@@ -90,7 +90,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(metadata.height).toBe(320)
   })
 
-  it('should convert the image to grayscale', async () => {
+  test('should convert the image to grayscale', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).grayscale().toBuffer()
 
@@ -100,7 +100,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should rotate the color hue', async () => {
+  test('should rotate the color hue', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png'))
       .modulate({ hue: 180 })
@@ -112,7 +112,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should adjust brightness and saturation together via modulate', async () => {
+  test('should adjust brightness and saturation together via modulate', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png'))
       .modulate({ brightness: 1.5, saturation: 0.5 })
@@ -126,7 +126,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should negate (invert) the image colors', async () => {
+  test('should negate (invert) the image colors', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).negate().toBuffer()
 
@@ -136,7 +136,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should apply a gamma correction', async () => {
+  test('should apply a gamma correction', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).gamma(2.2).toBuffer()
 
@@ -146,7 +146,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should normalize contrast', async () => {
+  test('should normalize contrast', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).normalize().toBuffer()
 
@@ -156,7 +156,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should apply a median filter', async () => {
+  test('should apply a median filter', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).median(3).toBuffer()
 
@@ -166,7 +166,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should apply a gaussian blur', async () => {
+  test('should apply a gaussian blur', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).blur(5).toBuffer()
 
@@ -176,7 +176,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should sharpen the image', async () => {
+  test('should sharpen the image', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png')).sharpen().toBuffer()
 
@@ -186,7 +186,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should threshold the image to pure black and white', async () => {
+  test('should threshold the image to pure black and white', async () => {
     const doc = await uploadFixture('image.png')
 
     const response = await restClient.GET(
@@ -203,7 +203,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(info.width).toBeGreaterThan(0)
   })
 
-  it('should tint the image toward the requested color', async () => {
+  test('should tint the image toward the requested color', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png'))
       .tint({ b: 0, g: 102, r: 255 })
@@ -217,7 +217,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should chain multiple operations together in a single request', async () => {
+  test('should chain multiple operations together in a single request', async () => {
     const doc = await uploadFixture('image.png')
     const expected = await sharp(path.resolve(dirname, './image.png'))
       .flip()
@@ -233,7 +233,7 @@ describe('Kitchen sink Sharp transformer', () => {
     expect(Buffer.from(await response.arrayBuffer())).toEqual(expected)
   })
 
-  it('should never persist dynamic output: the stored file is unaffected by a transform request', async () => {
+  test('should never persist dynamic output: the stored file is unaffected by a transform request', async () => {
     const doc = await uploadFixture('image.png')
     const sourceMetadataBefore = await sharp(path.resolve(dirname, './image.png')).metadata()
 

@@ -9,7 +9,7 @@ import type { R2Bucket } from './types.js'
 
 import { deleteFile } from './deleteFile.js'
 import { getFile } from './getFile.js'
-import { defaultR2ClientUploadsAccess, getHandleMultiPartUpload } from './handleMultiPartUpload.js'
+import { getHandleMultiPartUpload } from './handleMultiPartUpload.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateR2AdapterArgs {
@@ -25,10 +25,7 @@ export function createR2Adapter({
   collections,
   useCompositePrefixes = false,
 }: CreateR2AdapterArgs): Adapter {
-  const access =
-    typeof clientUploads === 'object' && clientUploads.access
-      ? clientUploads.access
-      : defaultR2ClientUploadsAccess
+  const access = typeof clientUploads === 'object' ? clientUploads.access : undefined
   const uploadInstructions: GeneratedAdapter['uploadInstructions'] = {
     adminHandler: {
       path: '@payloadcms/storage-r2/client#R2ClientUploadHandler',
@@ -53,6 +50,7 @@ export function createR2Adapter({
         uploadReference: {},
       },
     }),
+    requiresUploadReceipt: true,
     useInAdmin: true,
   }
 
@@ -60,38 +58,29 @@ export function createR2Adapter({
     name: 'r2',
     uploadInstructions,
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         bucket,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    handleUpload: ({ data, file }) =>
+    handleUpload: ({ file, storageFilePath }) =>
       uploadFile({
         bucket,
         buffer: file.buffer,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    staticHandler: (
-      req,
-      { headers, params: { filename, operation, prefix: prefixQueryParam, uploadReference } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, operation, uploadReference } }) =>
       getFile({
         bucket,
         collection,
+        doc,
         filename,
         incomingHeaders: headers,
         operation,
         prefix,
-        prefixQueryParam,
         req,
         uploadReference,
         useCompositePrefixes,

@@ -18,13 +18,36 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'payload-cloud',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [Documents, Media, Users],
+    plugins: [payloadCloudPlugin()],
+    serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [
+        sharpTransformer({
+          collections: {
+            media: {
+              imageSizes: [
+                { height: 400, width: 400, crop: 'center', name: 'square' },
+                { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+              ],
+            },
+          },
+        }),
+      ],
+      useTempFiles: true,
     },
   },
-  collections: [Documents, Media, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -32,25 +55,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  plugins: [payloadCloudPlugin()],
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  upload: {
-    transformers: [
-      sharpTransformer({
-        collections: {
-          media: {
-            imageSizes: [
-              { height: 400, width: 400, crop: 'center', name: 'square' },
-              { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
-            ],
-          },
-        },
-      }),
-    ],
-    useTempFiles: true,
   },
 })

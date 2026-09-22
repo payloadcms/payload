@@ -16,8 +16,10 @@ import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { checkFileAccess } from '../checkFileAccess.js'
 import { streamFile } from '../fetchAPI-stream-file/index.js'
 import { getFileTypeFallback } from '../getFileTypeFallback.js'
+import { getFileExtension, isXmlMimeType } from '../getFileTypeIdentity.js'
 import { parseRangeHeader } from '../parseRangeHeader.js'
 import { handleDynamicFileRequest } from '../transformers/handleDynamicFileRequest.js'
+import { uploadContentSecurityPolicy } from '../uploadContentSecurityPolicy.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
@@ -142,7 +144,10 @@ export async function retrieveFileResponse({
   const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
   let mimeType = fileTypeResult.mime
 
-  if (filePath.endsWith('.svg') && fileTypeResult.mime === 'application/xml') {
+  if (
+    getFileExtension(filePath).toLowerCase() === 'svg' &&
+    fileTypeResult.mime === 'application/xml'
+  ) {
     mimeType = 'image/svg+xml'
   }
 
@@ -176,8 +181,8 @@ export async function retrieveFileResponse({
   headers.set('Content-Type', mimeType)
   headers.set('Accept-Ranges', 'bytes')
 
-  if (mimeType === 'image/svg+xml') {
-    headers.set('Content-Security-Policy', "script-src 'none'")
+  if (isXmlMimeType(mimeType)) {
+    headers.set('Content-Security-Policy', uploadContentSecurityPolicy)
   }
 
   let data: ReadableStream
