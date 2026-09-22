@@ -1,7 +1,10 @@
-import type { Field, FieldWithSubFields } from './config/types.js'
+import type { Field, FieldWithSubFields, RadioField, SelectField } from './config/types.js'
 
 import { deepMergeWithReactComponents } from '../utilities/deepMerge.js'
 import { fieldAffectsData, fieldHasSubFields } from './config/types.js'
+
+const fieldHasOptions = (field: Field): field is RadioField | SelectField =>
+  (field.type === 'radio' || field.type === 'select') && Array.isArray(field.options)
 
 export const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
   const mergedFields = [...(fields || [])]
@@ -24,6 +27,10 @@ export const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] =
         mergedFields.splice(matchedIndex!, 1)
 
         const mergedField = deepMergeWithReactComponents<Field>(baseField, matchCopy)
+
+        if (fieldHasOptions(baseField) && fieldHasOptions(matchCopy)) {
+          ;(mergedField as RadioField | SelectField).options = matchCopy.options
+        }
 
         if (fieldHasSubFields(baseField) && fieldHasSubFields(matchCopy)) {
           ;(mergedField as FieldWithSubFields).fields = mergeBaseFields(
