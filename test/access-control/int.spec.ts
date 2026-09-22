@@ -1951,15 +1951,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
     })
 
     test('should use the query fallback from id-based read access for version lists', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'denied' },
+        overrideAccess: true,
       })
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -1978,19 +1984,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
 
       expect(allowedVersionsCount.totalDocs).toBe(1)
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should preserve the document id when checking inherited version permissions', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'denied' },
+        overrideAccess: true,
       })
       const deniedDoc = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2007,19 +2023,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
       expect(permissions.read?.permission).toBe(false)
       expect(permissions.readVersions?.permission).toBe(false)
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should pass the parent document id to inherited read access for findVersionByID', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: deniedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'denied' },
+        overrideAccess: true,
       })
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2048,20 +2074,30 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         }),
       ).resolves.toBeNull()
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should pass the version id to base readVersions access for findVersionByID', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedParentID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       await payload.update({
         id: allowedParentID,
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
 
       const { docs } = await payload.findVersions({
@@ -2096,15 +2132,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         }),
       ).resolves.toBeNull()
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should reuse the version lookup when inherited read access returns a boolean', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2128,15 +2173,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         findVersions.mockRestore()
       }
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should omit the parent field from findVersionByID when it is not selected', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2154,15 +2208,24 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
 
       expect(res.parent).toBeUndefined()
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should include the parent field on findVersionByID when it is selected', async () => {
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsSlug,
         data: { secret: 'allowed' },
+        overrideAccess: true,
       })
       setInheritedReadVersionsAllowedID(allowedID)
 
@@ -2180,17 +2243,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
 
       expect(res.parent).toBe(allowedID)
 
-      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should inherit global read access for version operations', async () => {
       await payload.updateGlobal({
         slug: inheritedReadVersionsGlobalSlug,
         data: { visible: false },
+        overrideAccess: true,
       })
       await payload.updateGlobal({
         slug: inheritedReadVersionsGlobalSlug,
         data: { visible: true },
+        overrideAccess: true,
       })
 
       const allVersions = await payload.findGlobalVersions({
@@ -2249,6 +2318,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         await payload.updateGlobal({
           slug: inheritedReadVersionsGlobalSlug,
           data: { visible: false },
+          overrideAccess: true,
         })
 
         const permissions = await getEntityPermissions({
@@ -2268,6 +2338,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         await payload.updateGlobal({
           slug: inheritedReadVersionsGlobalSlug,
           data: { visible: true },
+          overrideAccess: true,
         })
         await payload.db.deleteVersions({
           globalSlug: inheritedReadVersionsGlobalSlug,
@@ -2278,16 +2349,26 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
     })
 
     test('should resolve virtual-field constraints from inherited read access on findVersionByID', async () => {
-      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
-      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualSlug,
+        overrideAccess: true,
+        where: {},
+      })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: relatedID } = await payload.create({
         collection: inheritedReadVersionsVirtualRelatedSlug,
         data: { label: 'allowed' },
+        overrideAccess: true,
       })
       const parent = await payload.create({
         collection: inheritedReadVersionsVirtualSlug,
         data: { related: relatedID },
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
@@ -2304,8 +2385,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         }),
       ).resolves.toMatchObject({ parent: parent.id })
 
-      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
-      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualSlug,
+        overrideAccess: true,
+        where: {},
+      })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        overrideAccess: true,
+        where: {},
+      })
     })
 
     test('should sanitize virtual-field constraints from inherited global read access', async () => {
@@ -2316,25 +2405,33 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
         req,
         where: {},
       })
-      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+      await payload.delete({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        overrideAccess: true,
+        where: {},
+      })
 
       const { id: allowedID } = await payload.create({
         collection: inheritedReadVersionsVirtualRelatedSlug,
         data: { label: 'allowed' },
+        overrideAccess: true,
       })
       const { id: deniedID } = await payload.create({
         collection: inheritedReadVersionsVirtualRelatedSlug,
         data: { label: 'denied' },
+        overrideAccess: true,
       })
 
       try {
         await payload.updateGlobal({
           slug: inheritedReadVersionsVirtualGlobalSlug,
           data: { related: deniedID },
+          overrideAccess: true,
         })
         await payload.updateGlobal({
           slug: inheritedReadVersionsVirtualGlobalSlug,
           data: { related: allowedID },
+          overrideAccess: true,
         })
 
         const allVersions = await payload.findGlobalVersions({
@@ -2385,7 +2482,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
           req,
           where: {},
         })
-        await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+        await payload.delete({
+          collection: inheritedReadVersionsVirtualRelatedSlug,
+          overrideAccess: true,
+          where: {},
+        })
       }
     })
   })

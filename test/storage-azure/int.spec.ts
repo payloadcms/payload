@@ -107,6 +107,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
