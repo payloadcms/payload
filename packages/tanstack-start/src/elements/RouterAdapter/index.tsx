@@ -1,6 +1,5 @@
 'use client'
 
-// Important: Never import the `@payloadcms/ui` barrel here so Vite doesn't traverse the full admin UI graph on frontend routes
 import type { RouterAdapterContextValue } from '@payloadcms/ui/providers/RouterAdapter'
 import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
