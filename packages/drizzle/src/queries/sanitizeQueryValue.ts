@@ -219,15 +219,23 @@ export const sanitizeQueryValue = ({
           .filter(Boolean)
       }
       if (Array.isArray(formattedValue)) {
-        formattedValue = formattedValue.map((value) => {
-          if (idType === 'number') {
-            return Number(value)
-          }
-          if (idType === 'text') {
-            return String(value)
-          }
-          return value
-        })
+        formattedValue = [
+          // The expansion above adds every id in both of its possible id-type
+          // spellings (number and string). Dedupe after coercing to the actual
+          // id type - each value would otherwise be bound twice, halving e.g.
+          // Cloudflare D1's 100-variable limit. See #18251
+          ...new Set(
+            formattedValue.map((value) => {
+              if (idType === 'number') {
+                return Number(value)
+              }
+              if (idType === 'text') {
+                return String(value)
+              }
+              return value
+            }),
+          ),
+        ]
       } else {
         if (idType === 'number') {
           formattedValue = Number(val)
