@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Payload } from '../index.js'
 import type { ServerAdapter } from './adapters/server.js'
@@ -10,15 +10,25 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { initReq } from './initReq.js'
 
-const { findPreference, getAccessResults, getPayload, initI18n, updatePreference } = vi.hoisted(
-  () => ({
-    findPreference: vi.fn(),
-    getAccessResults: vi.fn(),
-    getPayload: vi.fn(),
-    initI18n: vi.fn(),
-    updatePreference: vi.fn(),
-  }),
-)
+const {
+  applyUserReadAccess,
+  findPreference,
+  getAccessResults,
+  getPayload,
+  initI18n,
+  updatePreference,
+} = vi.hoisted(() => ({
+  applyUserReadAccess: vi.fn(),
+  findPreference: vi.fn(),
+  getAccessResults: vi.fn(),
+  getPayload: vi.fn(),
+  initI18n: vi.fn(),
+  updatePreference: vi.fn(),
+}))
+
+vi.mock('../auth/applyUserReadAccess.js', () => ({
+  applyUserReadAccess,
+}))
 
 vi.mock('../preferences/operations/findOne.js', () => ({
   findOne: findPreference,
@@ -46,6 +56,9 @@ vi.mock('@payloadcms/translations', async (importOriginal) => {
 })
 
 const config = {
+  admin: {
+    user: 'users',
+  },
   cookiePrefix: 'payload',
   i18n: {
     fallbackLanguage: 'en',
@@ -93,6 +106,15 @@ const payload = {
       name: 'test',
     },
   ],
+  collections: {
+    users: {
+      config: {
+        auth: {
+          depth: 1,
+        },
+      },
+    },
+  },
   config,
   logger: {
     error: vi.fn(),
@@ -120,24 +142,43 @@ const createExecutingCache = (): InitReqCache => ({
 
 const createReusingCache = (): InitReqCache => {
   let partialResult: InitReqPartialResult | undefined
-  const requestResults = new Map<string, InitReqResult>()
+  const requestResults: Array<{
+    cacheArgs: unknown[]
+    key: string
+    result: InitReqResult
+  }> = []
 
   return {
     getPartial: vi.fn(async (factory) => {
       partialResult ??= await factory()
       return partialResult
     }),
-    getRequest: vi.fn(async (factory, key) => {
-      if (!requestResults.has(key)) {
-        requestResults.set(key, await factory())
+    getRequest: vi.fn(async (factory, key, ...cacheArgs) => {
+      const cached = requestResults.find(
+        (entry) =>
+          entry.key === key &&
+          entry.cacheArgs.length === cacheArgs.length &&
+          entry.cacheArgs.every((arg, index) => arg === cacheArgs[index]),
+      )
+
+      if (cached) {
+        return cached.result
       }
-      return requestResults.get(key)!
+
+      const result = await factory()
+      requestResults.push({ cacheArgs, key, result })
+
+      return result
     }),
   }
 }
 
 describe('initReq', () => {
   beforeEach(() => {
+    applyUserReadAccess.mockReset().mockImplementation(async ({ user }) => ({
+      collection: user.collection,
+      id: user.id,
+    }))
     authenticate.mockClear()
     findPreference.mockReset().mockResolvedValue(null)
     getAccessResults.mockReset().mockResolvedValue(permissions)
@@ -261,7 +302,7 @@ describe('initReq', () => {
     })
 
     expect(cache.getPartial).toHaveBeenCalledOnce()
-    expect(cache.getRequest).toHaveBeenCalledWith(expect.any(Function), 'initPage')
+    expect(cache.getRequest).toHaveBeenCalledWith(expect.any(Function), 'initPage', undefined)
   })
 
   it('should reject a cache without a request key', async () => {
@@ -323,5 +364,97 @@ describe('initReq', () => {
     expect(second.req.context).toEqual({
       source: 'cached',
     })
+  })
+
+  it('should keep the complete req.user and return the user with read access', async () => {
+    authenticate.mockResolvedValueOnce({
+      responseHeaders: new Headers(),
+      user: {
+        collection: 'users',
+        id: 'user-id',
+        role: 'admin',
+      },
+    })
+
+    const result = await initReq({ configPromise: config, importMap, serverAdapter })
+
+    expect(result.req.user).toHaveProperty('role', 'admin')
+    expect(result.user).toEqual({ collection: 'users', id: 'user-id' })
+    expect(getAccessResults).toHaveBeenCalledWith({ req: result.req })
+  })
+
+  it('should filter the user for each request cache context', async () => {
+    applyUserReadAccess.mockImplementation(async ({ req, user }) => ({
+      collection: user.collection,
+      id: user.id,
+      source: req.context.source,
+    }))
+    const cache = createReusingCache()
+    const args = {
+      cache,
+      configPromise: config,
+      importMap,
+      key: 'initPage',
+      serverAdapter,
+    }
+
+    const first = await initReq({
+      ...args,
+      overrides: { context: { source: 'first' } },
+    })
+    const second = await initReq({
+      ...args,
+      overrides: { context: { source: 'second' } },
+    })
+
+    expect(authenticate).toHaveBeenCalledOnce()
+    expect(applyUserReadAccess).toHaveBeenCalledTimes(2)
+    expect(first.user).toMatchObject({ source: 'first' })
+    expect(second.user).toMatchObject({ source: 'second' })
+  })
+
+  it('should use anonymous access when user read access fails', async () => {
+    applyUserReadAccess.mockRejectedValueOnce(new Error('read access failed'))
+
+    const result = await initReq({ configPromise: config, importMap, serverAdapter })
+
+    expect(result.req.user).toBeNull()
+    expect(result.user).toBeNull()
+    expect(getAccessResults).toHaveBeenCalledWith({ req: result.req })
+  })
+
+  it('should preserve an explicit request user override', async () => {
+    const result = await initReq({
+      configPromise: config,
+      importMap,
+      overrides: {
+        req: {
+          user: {
+            collection: 'users',
+            id: 'override-user',
+          },
+        },
+      },
+      serverAdapter,
+    })
+
+    expect(result.user).toBe(result.req.user)
+    expect(result.user).toMatchObject({ collection: 'users', id: 'override-user' })
+    expect(applyUserReadAccess).not.toHaveBeenCalled()
+  })
+
+  it('should preserve an explicit null user override', async () => {
+    const result = await initReq({
+      configPromise: config,
+      importMap,
+      overrides: {
+        user: null,
+      },
+      serverAdapter,
+    })
+
+    expect(result.req.user).toBeNull()
+    expect(result.user).toBeNull()
+    expect(applyUserReadAccess).not.toHaveBeenCalled()
   })
 })

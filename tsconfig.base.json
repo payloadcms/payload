@@ -101,5 +101,5 @@
     }
   },
   "include": ["${configDir}/src", "tools/assets.d.ts"],
-  "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
+  "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.*"]
 }

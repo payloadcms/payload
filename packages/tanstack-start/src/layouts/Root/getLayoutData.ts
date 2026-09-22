@@ -65,10 +65,8 @@ export async function getLayoutData({
     req: {
       payload: { config },
     },
-  } = await initReq({
-    configPromise,
-    importMap,
-  })
+    user,
+  } = await initReq({ configPromise, importMap })
 
   const theme = getRequestTheme({ config, cookies, headers })
   const isEmbedded = getRequestEmbed({ config, cookies })
@@ -91,7 +89,7 @@ export async function getLayoutData({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user ?? true,
+    user: user ?? true,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -112,7 +110,7 @@ export async function getLayoutData({
       permissions,
       searchParams: {},
       server: req.server!,
-      user: req.user ?? undefined,
+      user: user ?? undefined,
     }
     // Mirror the Next adapter's `NestProviders`: render each configured provider
     // via `RenderServerComponent` so the entry's own `clientProps`/`serverProps`
@@ -144,6 +142,6 @@ export async function getLayoutData({
     providers,
     theme,
     translations: req.i18n.translations,
-    user: req.user,
+    user: user ?? null,
   }
 }

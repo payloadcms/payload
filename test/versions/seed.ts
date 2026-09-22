@@ -6,18 +6,25 @@ import { fileURLToPath } from 'url'
 import type { DraftPost } from './payload-types.js'
 
 import { executePromises } from '../__helpers/shared/executePromises.js'
+import { getTestSuiteDir } from '../__helpers/shared/getTestSuiteDir.js'
 import { devUser } from '../credentials.js'
-import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
+import {
+  generateLexicalData,
+  generateRelationshipLexicalData,
+} from './collections/Diff/generateLexicalData.js'
 import {
   autosaveWithDraftValidateSlug,
   diffCollectionSlug,
   draftCollectionSlug,
   media2CollectionSlug,
   mediaCollectionSlug,
+  textCollectionSlug,
+  usersCollectionSlug,
 } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const seedDir = getTestSuiteDir({ fallbackDir: dirname, suitePath: 'versions' })
 
 export async function seed(_payload: Payload, parallel: boolean = false) {
   const blocksField: DraftPost['blocksField'] = [
@@ -28,7 +35,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
   ]
 
-  const imageFilePath = path.resolve(dirname, './image.jpg')
+  const imageFilePath = path.resolve(seedDir, './image.jpg')
   const imageFile = await getFileByPath(imageFilePath)
 
   const { id: uploadedImage } = await _payload.create({
@@ -43,7 +50,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     file: imageFile,
   })
 
-  const imageFilePath2 = path.resolve(dirname, './image.png')
+  const imageFilePath2 = path.resolve(seedDir, './image.png')
   const imageFile2 = await getFileByPath(imageFilePath2)
 
   const { id: uploadedImage2 } = await _payload.create({
@@ -63,6 +70,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     data: {
       email: devUser.email,
       password: devUser.password,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const { id: otherUserID } = await _payload.create({
+    collection: usersCollectionSlug,
+    data: {
+      email: 'editor@payloadcms.com',
+      password: 'test',
     },
     depth: 0,
     overrideAccess: true,
@@ -150,6 +167,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   const { id: doc1ID } = await _payload.create({
     collection: 'text',
     data: {
+      owner: devUserID,
       text: 'Document 1',
     },
   })
@@ -157,7 +175,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   const { id: doc2ID } = await _payload.create({
     collection: 'text',
     data: {
+      owner: devUserID,
       text: 'Document 2',
+    },
+  })
+
+  const { id: otherUserDocID } = await _payload.create({
+    collection: textCollectionSlug,
+    data: {
+      owner: otherUserID,
+      text: 'Document 3',
     },
   })
 
@@ -273,6 +300,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc1ID,
         updated: false,
       }) as any,
+      richtextWithConstrainedRelationship: generateRelationshipLexicalData(otherUserDocID),
       richtextWithCustomDiff: buildEditorState<DefaultNodeTypes>({
         text: 'richtextWithCustomDiff',
       }),
@@ -444,6 +472,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         textID: doc2ID,
         updated: true,
       }) as any,
+      richtextWithConstrainedRelationship: generateRelationshipLexicalData(doc2ID),
       richtextWithCustomDiff: buildEditorState<DefaultNodeTypes>({
         text: 'richtextWithCustomDiff2',
       }),

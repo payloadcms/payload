@@ -90,7 +90,7 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         hasSavePermission: docInfo.hasSavePermission,
         initialData: docInfo.initialData,
         initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-        locale: typeof locale === 'object' ? locale?.code : locale,
+        locale: locale?.code,
         title,
       } satisfies Omit<
         Parameters<GenerateTitle>[0],

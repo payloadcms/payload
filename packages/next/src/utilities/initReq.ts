@@ -10,7 +10,7 @@ const reqCache = selectiveCache<InitReqResult>('req')
 
 const cache: InitReqCache = {
   getPartial: (factory) => partialReqCache.get(factory, 'global'),
-  getRequest: (factory, key) => reqCache.get(factory, key),
+  getRequest: (factory, key, ...cacheArgs) => reqCache.get(factory, key, ...cacheArgs),
 }
 
 type NextInitReqArgs = {

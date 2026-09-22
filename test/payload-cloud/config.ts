@@ -17,13 +17,24 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'payload-cloud',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [Documents, Media, Users],
+    plugins: [payloadCloudPlugin()],
+    serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      useTempFiles: true,
     },
   },
-  collections: [Documents, Media, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
@@ -31,13 +42,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-  },
-  plugins: [payloadCloudPlugin()],
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
-  upload: {
-    useTempFiles: true,
   },
 })

@@ -1,9 +1,4 @@
-import type {
-  AdminViewConfig,
-  AdminViewServerProps,
-  PayloadComponent,
-  SanitizedGlobalConfig,
-} from 'payload'
+import type { AdminViewConfig, SanitizedGlobalConfig } from 'payload'
 
 import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
@@ -64,7 +59,7 @@ export const getCustomGlobalViewByRoute = ({
       const adminView = foundViewConfig as AdminViewConfig
       return {
         view: {
-          payloadComponent: adminView.Component as PayloadComponent<AdminViewServerProps>,
+          payloadComponent: adminView.Component,
         },
         viewKey,
       }

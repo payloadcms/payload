@@ -58,20 +58,49 @@ async function renderNavigation(): Promise<void> {
   await new Response(stream).arrayBuffer()
 }
 
+async function renderNavigationWithOverrides(): Promise<void> {
+  async function Navigation() {
+    await Promise.all([
+      initReq({
+        configPromise,
+        importMap,
+        key: 'initPage',
+        overrides: { context: { source: 'first' } },
+      }),
+      initReq({
+        configPromise,
+        importMap,
+        key: 'initPage',
+        overrides: { context: { source: 'second' } },
+      }),
+    ])
+
+    return null
+  }
+
+  const stream = renderToReadableStream(React.createElement(Navigation), {})
+
+  await new Response(stream).arrayBuffer()
+}
+
 describe('Next initReq RSC cache', () => {
   beforeEach(() => {
     counters.partial = 0
     counters.request = 0
-    payloadInitReq.mockReset().mockImplementation(async ({ cache, key }) => {
+    payloadInitReq.mockReset().mockImplementation(async ({ cache, key, overrides }) => {
       await cache.getPartial(async () => {
         counters.partial += 1
         return {}
       })
 
-      return cache.getRequest(async () => {
-        counters.request += 1
-        return {}
-      }, key)
+      return cache.getRequest(
+        async () => {
+          counters.request += 1
+          return {}
+        },
+        key,
+        overrides,
+      )
     })
   })
 
@@ -88,6 +117,15 @@ describe('Next initReq RSC cache', () => {
     expect(counters).toEqual({
       partial: 2,
       request: 4,
+    })
+  })
+
+  it('should isolate requests with the same key and different overrides', async () => {
+    await renderNavigationWithOverrides()
+
+    expect(counters).toEqual({
+      partial: 1,
+      request: 2,
     })
   })
 })

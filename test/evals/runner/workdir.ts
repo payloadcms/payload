@@ -14,7 +14,7 @@ import { MCP_EVAL_DATABASE_URL_ENV } from '../mcpDatabase.js'
 // Resolve the skill source relative to this file so behavior is independent of cwd.
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const FIXTURES_DIR = path.resolve(__dirname, '../fixtures')
-const SKILL_SRC = path.resolve(__dirname, '../../../tools/claude-plugin/skills/payload')
+const SKILL_SRC = path.resolve(__dirname, '../../../packages/payload/skills/payload')
 const MCP_BIN = path.resolve(__dirname, '../../../packages/plugin-mcp/bin.js')
 
 export function getAuditPath(workdir: string): string {

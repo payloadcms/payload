@@ -3,12 +3,13 @@ import type { I18n, I18nClient } from '@payloadcms/translations'
 import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 
-import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { ServerAdapter } from './adapters/server.js'
 import type { InitReqResult } from './functions/index.js'
 
+import { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getAccessResults } from '../auth/getAccessResults.js'
 import { getPayload } from '../index.js'
@@ -24,7 +25,11 @@ export type InitReqPartialResult = {
 
 export type InitReqCache = {
   getPartial: (factory: () => Promise<InitReqPartialResult>) => Promise<InitReqPartialResult>
-  getRequest: (factory: () => Promise<InitReqResult>, key: string) => Promise<InitReqResult>
+  getRequest: (
+    factory: () => Promise<InitReqResult>,
+    key: string,
+    ...cacheArgs: unknown[]
+  ) => Promise<InitReqResult>
 }
 
 export type InitReqArgs = {
@@ -98,6 +103,10 @@ export async function initReq({
   const createRequestResult = async (): Promise<InitReqResult> => {
     const { i18n, languageCode, payload, responseHeaders, user } = partialResult
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+    const hasOptionsUserOverride = Object.hasOwn(optionsOverrides, 'user')
+    const hasReqUserOverride = Object.hasOwn(reqOverrides ?? {}, 'user')
+    const hasUserOverride = hasOptionsUserOverride || hasReqUserOverride
+    const userOverride = hasOptionsUserOverride ? optionsOverrides.user : reqOverrides?.user
     const requestDefaults = getRequestDefaults({ requestURL })
 
     const req = await createLocalReq(
@@ -117,9 +126,39 @@ export async function initReq({
       payload,
     )
 
+    if (hasUserOverride && userOverride == null) {
+      req.user = null
+    }
+
     const locale = await getRequestLocale({ req })
 
     req.locale = locale?.code
+
+    let userWithReadAccess = req.user
+
+    if (!hasUserOverride && req.user) {
+      try {
+        const collectionSlug = req.user.collection ?? payload.config.admin.user
+        const collection = payload.collections[collectionSlug]?.config
+
+        if (!collection?.auth) {
+          throw new Error('Authenticated user collection not found')
+        }
+
+        userWithReadAccess = await applyUserReadAccess({
+          collection,
+          depth: collection.auth.depth,
+          overrideAccess: false,
+          req,
+          showHiddenFields: false,
+          user: req.user,
+        })
+      } catch (error) {
+        payload.logger.error({ err: error })
+        req.user = null
+        userWithReadAccess = null
+      }
+    }
 
     const permissions = await getAccessResults({ req })
 
@@ -130,11 +169,12 @@ export async function initReq({
       locale,
       permissions,
       req,
+      user: userWithReadAccess,
     }
   }
 
   const result = cache
-    ? await cache.getRequest(createRequestResult, key!)
+    ? await cache.getRequest(createRequestResult, key!, overrides)
     : await createRequestResult()
 
   return {

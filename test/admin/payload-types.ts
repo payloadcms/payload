@@ -60,6 +60,111 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_EC517269".
+ */
+export type LexicalNodes_EC517269 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_EC517269>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'users'
+      | 'hidden-collection'
+      | 'not-in-view-collection'
+      | 'collection-no-api-view'
+      | 'custom-document-controls'
+      | 'custom-views-one'
+      | 'custom-views-two'
+      | 'custom-collection-view'
+      | 'reorder-tabs'
+      | 'custom-fields'
+      | 'group-one-collection-ones'
+      | 'group-one-collection-twos'
+      | 'group-two-collection-ones'
+      | 'group-two-collection-twos'
+      | 'geo'
+      | 'array'
+      | 'disable-duplicate'
+      | 'disable-copy-to-locale'
+      | 'edit-menu-items'
+      | 'format-doc-url'
+      | 'base-list-filters'
+      | 'with300documents'
+      | 'with-list-drawer'
+      | 'placeholder'
+      | 'use-as-title-group-field'
+      | 'disable-bulk-edit'
+      | 'custom-list-drawer'
+      | 'list-view-select-api'
+      | 'virtuals'
+      | 'no-timestamps'
+      | 'localized'
+      | 'fully-featured'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_6CCD2587".
+ */
+export type LexicalNodes_6CCD2587 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_6CCD2587>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads-two'>
+  | SerializedQuoteNode<LexicalNodes_6CCD2587>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'users'
+      | 'hidden-collection'
+      | 'not-in-view-collection'
+      | 'collection-no-api-view'
+      | 'custom-document-controls'
+      | 'custom-views-one'
+      | 'custom-views-two'
+      | 'custom-collection-view'
+      | 'reorder-tabs'
+      | 'custom-fields'
+      | 'group-one-collection-ones'
+      | 'group-one-collection-twos'
+      | 'group-two-collection-ones'
+      | 'group-two-collection-twos'
+      | 'geo'
+      | 'array'
+      | 'disable-duplicate'
+      | 'disable-copy-to-locale'
+      | 'edit-menu-items'
+      | 'format-doc-url'
+      | 'base-list-filters'
+      | 'with300documents'
+      | 'with-list-drawer'
+      | 'placeholder'
+      | 'use-as-title-group-field'
+      | 'disable-bulk-edit'
+      | 'custom-list-drawer'
+      | 'list-view-select-api'
+      | 'virtuals'
+      | 'no-timestamps'
+      | 'localized'
+      | 'fully-featured'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_6CCD2587, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_6CCD2587, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_6CCD2587>
+  | SerializedListItemNode<LexicalNodes_6CCD2587>
+  | SerializedHeadingNode<LexicalNodes_6CCD2587>;
 
 export interface Config {
   auth: {
@@ -266,11 +371,7 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  richText?: LexicalRichText<LexicalNodes_EC517269> | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -439,14 +540,7 @@ export interface CustomField {
         id?: string | null;
       }[]
     | null;
-  blocksFieldWithBeforeAfterInputs?:
-    | {
-        textField?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockFields';
-      }[]
-    | null;
+  blocksFieldWithBeforeAfterInputs?: BlockFields[] | null;
   text?: string | null;
   groupFieldWithBeforeAfterInputs?: {
     textOne?: string | null;
@@ -455,6 +549,16 @@ export interface CustomField {
   radioFieldWithBeforeAfterInputs?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockFields".
+ */
+export interface BlockFields {
+  textField?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockFields';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -696,70 +800,13 @@ export interface FullyFeatured {
   id: string;
   title: string;
   slug?: string | null;
-  content?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  content?: LexicalRichText<LexicalNodes_6CCD2587> | null;
   /**
    * Short summary for list views and SEO
    */
   excerpt?: string | null;
   heroImage?: (string | null) | Upload;
-  layout?:
-    | (
-        | {
-            richText?:
-              | {
-                  [k: string]: unknown;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'richTextBlock';
-          }
-        | {
-            image: string | Upload;
-            caption?: string | null;
-            size?: ('small' | 'medium' | 'fullWidth') | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'imageBlock';
-          }
-        | {
-            heading: string;
-            description?: string | null;
-            links?:
-              | {
-                  label: string;
-                  url: string;
-                  style?: ('primary' | 'secondary' | 'outline') | null;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'ctaBlock';
-          }
-        | {
-            cards?:
-              | {
-                  title: string;
-                  description?: string | null;
-                  image?: (string | null) | Upload;
-                  link?: {
-                    label?: string | null;
-                    url?: string | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cardGridBlock';
-          }
-      )[]
-    | null;
+  layout?: (RichTextBlock | ImageBlock | CtaBlock | CardGridBlock)[] | null;
   tags?:
     | {
         tag: string;
@@ -785,6 +832,68 @@ export interface FullyFeatured {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextBlock".
+ */
+export interface RichTextBlock {
+  richText?: LexicalRichText<LexicalNodes_6CCD2587> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'richTextBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageBlock".
+ */
+export interface ImageBlock {
+  image: string | Upload;
+  caption?: string | null;
+  size?: ('small' | 'medium' | 'fullWidth') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'imageBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaBlock".
+ */
+export interface CtaBlock {
+  heading: string;
+  description?: string | null;
+  links?:
+    | {
+        label: string;
+        url: string;
+        style?: ('primary' | 'secondary' | 'outline') | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ctaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardGridBlock".
+ */
+export interface CardGridBlock {
+  cards?:
+    | {
+        title: string;
+        description?: string | null;
+        image?: (string | null) | Upload;
+        link?: {
+          label?: string | null;
+          url?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cardGridBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1897,6 +2006,140 @@ export interface ActivityWidget {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
 }
 
 

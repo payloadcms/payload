@@ -2,9 +2,14 @@ import type { PayloadHandler, UploadInstructionsAccess } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
+import {
+  assertClientUploadAccess,
+  assertClientUploadAllowed,
+  verifyClientUploadReceipt,
+} from 'payload/internal'
 
 import type { R2StorageOptions } from './index.js'
-import type { R2Bucket, R2StorageMultipartUploadHandlerParams } from './types.js'
+import type { R2Bucket, R2StorageMultipartUploadHandlerParams, R2UploadedPart } from './types.js'
 
 type Args = {
   access?: UploadInstructionsAccess
@@ -13,62 +18,53 @@ type Args = {
   useCompositePrefixes?: boolean
 }
 
-export const defaultR2ClientUploadsAccess: UploadInstructionsAccess = async ({
-  collectionSlug,
-  req,
-}) => {
-  const collection = req.payload.collections[collectionSlug]
-  if (!collection?.config) {
-    throw new APIError(`Collection ${collectionSlug} not found`)
-  }
-
-  const createAccess = collection.config.access?.create
-  return createAccess ? Boolean(await createAccess({ req })) : Boolean(req.user)
-}
-
 // Adapted from https://developers.cloudflare.com/r2/api/workers/workers-multipart-usage/
 export const getHandleMultiPartUpload =
-  ({
-    access = defaultR2ClientUploadsAccess,
-    bucket,
-    collections,
-    useCompositePrefixes = false,
-  }: Args): PayloadHandler =>
+  ({ access, bucket, collections, useCompositePrefixes = false }: Args): PayloadHandler =>
   async (req) => {
     const params = Object.fromEntries(req.searchParams) as R2StorageMultipartUploadHandlerParams
     const collectionSlug = params.collection
     const filetype = params.fileType
+
+    await assertClientUploadAccess({ collectionSlug, req })
 
     const collectionConfig = collections[collectionSlug]
     if (!collectionConfig) {
       throw new APIError(`Collection ${collectionSlug} was not found in R2 Storage options`)
     }
 
-    if (!(await access({ collectionSlug, req }))) {
+    if (access && !(await access({ collectionSlug, req }))) {
       throw new Forbidden(req.t)
     }
 
-    const collectionPrefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
-    const { fileKey, sanitizedFilename } = await resolveSignedURLKey({
-      collectionPrefix,
-      collectionSlug,
-      docPrefix: params.docPrefix ?? undefined,
+    assertClientUploadAllowed({
+      collection: req.payload.collections[collectionSlug]?.config,
       filename: params.fileName,
-      req,
-      useCompositePrefixes,
+      mimeType: filetype,
     })
 
     const multipartId = params.multipartId
     const multipartKey = params.multipartKey
     const multipartNumber = parseInt(params.multipartNumber || '')
+    const collectionPrefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
 
     if (multipartId && multipartKey) {
+      const receipt = verifyClientUploadReceipt({
+        collectionSlug,
+        req,
+        signedReceipt: params.signedReceipt,
+      })
+      // The receipt binds the full storage key (including the per-upload _objectKey segment), so
+      // compare against it directly rather than recomputing from prefix + filename.
+      if (receipt.storageFilePath !== multipartKey) {
+        throw new APIError('Invalid upload reference.', 400)
+      }
       const multipartUpload = bucket.resumeMultipartUpload(multipartKey, multipartId)
       const request = req as Request
 
       if (isNaN(multipartNumber)) {
         // Upload complete
-        const object = await multipartUpload.complete((await request.json()) as any)
+        const object = await multipartUpload.complete((await request.json()) as R2UploadedPart[])
         return new Response(object.key, { status: 200 })
       } else {
         // Upload part
@@ -79,8 +75,21 @@ export const getHandleMultiPartUpload =
         return Response.json(uploadedPart)
       }
     } else {
+      const { sanitizedFilename, storageFilePath, uploadReference } = await resolveSignedURLKey({
+        collectionPrefix,
+        collectionSlug,
+        docPrefix: params.docPrefix ?? undefined,
+        filename: params.fileName,
+        req,
+        useCompositePrefixes,
+      })
+      const existing = await bucket.head(storageFilePath)
+      if (existing) {
+        return new Response('Object already exists', { status: 412 })
+      }
+
       // Create multipart upload
-      const multipartUpload = await bucket.createMultipartUpload(fileKey, {
+      const multipartUpload = await bucket.createMultipartUpload(storageFilePath, {
         httpMetadata: {
           contentType: filetype,
         },
@@ -90,6 +99,7 @@ export const getHandleMultiPartUpload =
         filename: sanitizedFilename,
         key: multipartUpload.key,
         uploadId: multipartUpload.uploadId,
+        uploadReference,
       })
     }
   }

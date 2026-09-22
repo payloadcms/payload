@@ -3,10 +3,10 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { DashboardHelper } from './utils.js'
 
@@ -26,7 +26,6 @@ const url = new AdminUrlUtil(serverURL, 'users')
 describe('Dashboard', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
     await page.close()
@@ -34,8 +33,6 @@ describe('Dashboard', () => {
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
     await page.goto(url.admin)
   })
@@ -741,10 +738,8 @@ describe('Dashboard', () => {
   test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
     page,
   }) => {
-    test.skip(
-      process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-      'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
-    )
+    test.slow()
+
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('page query')

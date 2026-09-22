@@ -9,22 +9,19 @@ import { fileURLToPath } from 'url'
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
 import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  switchTab,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { switchTab, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe, beforeEach } = test
+const { beforeAll, beforeEach, describe } = test
 
 let url: AdminUrlUtil
 let page: Page
@@ -41,9 +38,7 @@ describe('SEO Plugin', () => {
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     const filePath = path.resolve(dirname, './image-1.jpg')
     const file = await getFileByPath(filePath)

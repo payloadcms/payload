@@ -360,7 +360,7 @@ export function payloadTanstackStartOptions(
       },
       // Ignore generated importMap files and colocated `*.functions.ts` modules
       // (they define `createServerFn`s, not routes).
-      routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$|\\.functions\\.',
+      routeFileIgnorePattern: 'importMap\\.(?:d\\.ts|js|server\\.ts)$|\\.functions\\.',
       routesDirectory,
     } as any,
     rsc: { enabled: true },
