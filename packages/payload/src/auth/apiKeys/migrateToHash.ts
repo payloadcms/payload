@@ -35,13 +35,11 @@ export type MigrateAPIKeysToHashResult = {
   failed: number
   /** Keys converted from encrypted storage to a one-way hash. */
   migrated: number
-  /** Keys already stored as a hash (a safe re-run). */
+  /** Keys already stored as a hash, or disabled keys that do not need conversion. */
   skipped: number
 }
 
 const storedHashPattern = /^[0-9a-f]{64}$/
-
-const printableASCIIPattern = /^[\x20-\x7e]+$/
 
 /**
  * Converts API keys written before they were stored as one-way hashes.
@@ -56,7 +54,8 @@ const printableASCIIPattern = /^[\x20-\x7e]+$/
  * cannot be verified is left exactly as it was and counted in `failed`: a wrong decryption
  * would hash random bytes and destroy that key for good.
  *
- * Safe to re-run - a row already holding a hash is counted in `skipped`.
+ * Safe to re-run - a row already holding a hash is counted in `skipped`. Disabled rows
+ * are also skipped, and their obsolete stored key material is cleared outside dry runs.
  */
 export const migrateAPIKeysToHash = async ({
   batchSize = 100,
@@ -94,6 +93,13 @@ export const migrateAPIKeysToHash = async ({
         const storedAPIKey = doc.apiKey as null | string | undefined
 
         if (!storedAPIKey) {
+          continue
+        }
+
+        // A disabled key is revoked. Converting its retained ciphertext into an active hash
+        // would make it usable again, so never recover or hash it.
+        if (doc.enableAPIKey !== true) {
+          result.skipped++
           continue
         }
 
@@ -142,6 +148,39 @@ export const migrateAPIKeysToHash = async ({
       hasNextPage = Boolean(nextPage)
       page++
     }
+
+    if (!dryRun) {
+      let hasDisabledKeys = true
+
+      // Clear revoked material only after the paginated conversion pass. Clearing it while
+      // paging would remove rows from the query and could make later rows move to an earlier
+      // page without being processed.
+      while (hasDisabledKeys) {
+        const { docs } = await payload.db.find({
+          collection: slug,
+          limit: batchSize,
+          pagination: false,
+          sort: 'id',
+          where: {
+            and: [{ apiKey: { exists: true } }, { enableAPIKey: { not_equals: true } }],
+          },
+        })
+
+        hasDisabledKeys = docs.length > 0
+
+        for (const doc of docs as Array<{ id: number | string }>) {
+          await payload.db.updateOne({
+            id: doc.id,
+            collection: slug,
+            data: {
+              apiKey: null,
+              apiKeyIndex: null,
+            },
+            returning: false,
+          })
+        }
+      }
+    }
   }
 
   return result
@@ -153,8 +192,9 @@ export const migrateAPIKeysToHash = async ({
  *
  * A recovered value has to be checked, because a pre-v1 `aes-256-ctr` ciphertext decrypts
  * to random bytes under the wrong secret rather than throwing. `apiKeyIndex` is the exact
- * check wherever it is still present; without it, a plaintext key is at least required to
- * be printable, which random bytes are not.
+ * check for that legacy format. A v1 envelope is authenticated and throws under the wrong
+ * secret, so it can be recovered without an index. A pre-v1 value without its index cannot
+ * be verified and is rejected.
  */
 const recoverAPIKey = ({
   candidateSecrets,
@@ -167,6 +207,12 @@ const recoverAPIKey = ({
   storedAPIKey: string
   storedIndex: null | string
 }): string | undefined => {
+  const isAuthenticatedEnvelope = storedAPIKey.startsWith('v1:')
+
+  if (!storedIndex && !isAuthenticatedEnvelope) {
+    return undefined
+  }
+
   for (const secret of candidateSecrets) {
     let rawAPIKey: string
 
@@ -180,7 +226,7 @@ const recoverAPIKey = ({
 
     const isVerified = storedIndex
       ? hmacIndexFor({ rawAPIKey, secret }) === storedIndex
-      : printableASCIIPattern.test(rawAPIKey)
+      : isAuthenticatedEnvelope
 
     if (isVerified) {
       return rawAPIKey

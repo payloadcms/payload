@@ -1,10 +1,14 @@
 'use client'
+import type { TextFieldClient } from 'payload'
+
+import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { APIKeyInput } from '../../../elements/APIKeyInput/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
+import { useFormFields } from '../../../forms/Form/context.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -35,9 +39,29 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
       routes: { api: apiRoute },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
+  const dispatchFields = useFormFields((reducer) => reducer[1])
 
   const [revealedAPIKey, setRevealedAPIKey] = useState<string | undefined>()
+
+  const maskAPIKeyInForm = useCallback(() => {
+    dispatchFields({
+      type: 'UPDATE',
+      initialValue: '',
+      path: 'apiKey',
+      value: '',
+    })
+  }, [dispatchFields])
+
+  const apiKeyField = getEntityConfig({ collectionSlug })?.fields?.find(
+    (field) => 'name' in field && field.name === 'apiKey',
+  ) as TextFieldClient | undefined
+
+  const apiKeyLabel = useMemo(
+    () => getTranslation(apiKeyField?.label ?? 'API Key', i18n),
+    [apiKeyField?.label, i18n],
+  )
 
   // A saved key reads back masked, so the value form state holds and submits means "leave
   // the key alone" - the Admin Panel never has to keep the field out of a save.
@@ -50,8 +74,18 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
   // A save that generated a key returns it once. Creating redirects to the new document, so
   // the value is handed over to the screen that lands there - the only case that needs it.
   useEffect(() => {
+    if (!enabled) {
+      setRevealedAPIKey(undefined)
+      return
+    }
+
     if (apiKeyFromSave) {
+      if (id) {
+        takeRevealedAPIKey({ id, collectionSlug })
+      }
+
       setRevealedAPIKey(apiKeyFromSave)
+      maskAPIKeyInForm()
 
       if (!id) {
         holdRevealedAPIKey({
@@ -64,17 +98,17 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
         })
       }
     }
-  }, [apiKeyFromSave, collectionSlug, id, savedDocumentData])
+  }, [apiKeyFromSave, collectionSlug, enabled, id, maskAPIKeyInForm, savedDocumentData])
 
   useEffect(() => {
-    if (!revealedAPIKey && id) {
+    if (enabled && !revealedAPIKey && id) {
       const handedOff = takeRevealedAPIKey({ id, collectionSlug })
 
       if (handedOff) {
         setRevealedAPIKey(handedOff)
       }
     }
-  }, [collectionSlug, id, revealedAPIKey])
+  }, [collectionSlug, enabled, id, revealedAPIKey])
 
   const generateAPIKey = useCallback(async () => {
     try {
@@ -96,10 +130,10 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
       }
 
       setRevealedAPIKey(apiKey)
+      maskAPIKeyInForm()
 
       // Generation happens outside the form's own save, and has already been persisted, so
-      // only the record of what is currently saved needs updating - touching form state
-      // would mark the form modified for a change that was never unsaved.
+      // update the saved record without changing whether the form has other unsaved work.
       if (doc && typeof setSavedDocumentData === 'function') {
         void setSavedDocumentData(doc)
       }
@@ -108,7 +142,16 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
     } catch (_error) {
       toast.error(t('error:unspecific'))
     }
-  }, [apiRoute, collectionSlug, i18n.language, id, serverURL, setSavedDocumentData, t])
+  }, [
+    apiRoute,
+    collectionSlug,
+    i18n.language,
+    id,
+    maskAPIKeyInForm,
+    serverURL,
+    setSavedDocumentData,
+    t,
+  ])
 
   if (!enabled) {
     return null
@@ -118,16 +161,11 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
     <React.Fragment>
       <div className={[fieldBaseClass, baseClass, 'read-only'].filter(Boolean).join(' ')}>
         <label className={`${baseClass}__label field-label`} htmlFor="apiKey">
-          <span>{t('authentication:apiKey')}</span>
+          <span>{apiKeyLabel}</span>
         </label>
         {revealedAPIKey ? (
           <React.Fragment>
-            <APIKeyInput
-              aria-label={t('authentication:apiKey')}
-              highlighted
-              id="apiKey"
-              value={revealedAPIKey}
-            />
+            <APIKeyInput aria-label={apiKeyLabel} highlighted id="apiKey" value={revealedAPIKey} />
             <p className={`${baseClass}__reveal-note`} id="apiKey-reveal-note">
               {t('authentication:copyAPIKeyNow')}
             </p>

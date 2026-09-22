@@ -403,6 +403,11 @@ export default buildConfigWithDefaults({
         disableDuplicate: false,
         fields: [
           {
+            name: 'apiKey',
+            type: 'text',
+            label: 'Service credential',
+          },
+          {
             // An unrelated field, so a test can save the document without touching the key.
             name: 'label',
             type: 'text',

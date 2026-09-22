@@ -1625,10 +1625,10 @@ export type Config = {
    */
   plugins?: Plugin[]
   /**
-   * Previous `secret` values that should still be accepted for reads (verifying
-   * JWTs, matching API keys, decrypting stored values) during a bounded key
-   * rotation. New data is always written with the current `secret`. Retire these
-   * once `rotateSecret` has re-keyed existing data.
+   * Previous `secret` values that should still be accepted for reads, such as verifying
+   * JWTs and decrypting stored values, during a bounded key rotation. API key hashes do
+   * not use the secret. New encrypted data is always written with the current `secret`.
+   * Retire old values after data that still needs decryption has been migrated.
    */
   previousSecrets?: string[]
   /**

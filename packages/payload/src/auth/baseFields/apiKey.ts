@@ -29,6 +29,7 @@ const resolveAPIKeyHash =
     const enableAPIKey = siblingData?.enableAPIKey
 
     if (includeEnableAPIKey && (enableAPIKey === false || enableAPIKey === null)) {
+      siblingData.apiKeyIndex = null
       return null
     }
 
@@ -38,17 +39,20 @@ const resolveAPIKeyHash =
     }
 
     if (typeof value === 'string') {
+      siblingData.apiKeyIndex = null
       return stashRevealedAPIKey({ rawAPIKey: value, req })
     }
 
     // `null` for a key that exists revokes it.
     if (currentHash) {
+      siblingData.apiKeyIndex = null
       return null
     }
 
     // API keys are on and there is no key, so issue one. This is what makes "enabled"
     // always mean a usable key exists, both on create and on the save that switches keys on.
     if (!includeEnableAPIKey || enableAPIKey === true) {
+      siblingData.apiKeyIndex = null
       return stashRevealedAPIKey({ rawAPIKey: generateAPIKey(), req })
     }
 

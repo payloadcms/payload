@@ -39,6 +39,7 @@ import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
+import { holdRevealedAPIKey } from './Auth/revealedAPIKeys.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.css'
@@ -165,6 +166,8 @@ export function DefaultEditView({
   const operation = collectionSlug && !id ? 'create' : 'update'
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
+  // eslint-disable-next-line react-compiler/react-compiler
+  const apiKeysEnabled = auth?.useAPIKey
   const upload = collectionConfig ? collectionConfig.upload : undefined
 
   const docConfig = collectionConfig || globalConfig
@@ -307,6 +310,19 @@ export function DefaultEditView({
 
       const updatedAt = document?.updatedAt || new Date().toISOString()
 
+      if (
+        apiKeysEnabled &&
+        collectionSlug &&
+        typeof document?.apiKey === 'string' &&
+        document.apiKey.length > 0
+      ) {
+        holdRevealedAPIKey({
+          id: document.id,
+          apiKey: document.apiKey,
+          collectionSlug,
+        })
+      }
+
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
       if (user && collectionSlug === userSlug && id === user.id) {
@@ -392,6 +408,22 @@ export function DefaultEditView({
           delete state.file
         }
 
+        // A newly issued API key is returned once so that the Admin Panel can reveal it.
+        // It must not enter form state, where a later save would submit it as a replacement
+        // key. Mask it at this boundary so delayed form-state responses are also safe.
+        if (
+          apiKeysEnabled &&
+          state?.apiKey &&
+          typeof document?.apiKey === 'string' &&
+          document.apiKey.length > 0
+        ) {
+          state.apiKey = {
+            ...state.apiKey,
+            initialValue: '',
+            value: '',
+          }
+        }
+
         // Unlock the document after save
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
@@ -430,6 +462,8 @@ export function DefaultEditView({
     },
     [
       user,
+      // eslint-disable-next-line react-compiler/react-compiler
+      apiKeysEnabled,
       collectionSlug,
       userSlug,
       id,
@@ -680,7 +714,7 @@ export function DefaultEditView({
       requirePassword={!id}
       setValidateBeforeSubmit={setValidateBeforeSubmit}
       // eslint-disable-next-line react-compiler/react-compiler
-      useAPIKey={auth.useAPIKey}
+      useAPIKey={apiKeysEnabled}
       username={data?.username}
       verify={auth.verify}
     />

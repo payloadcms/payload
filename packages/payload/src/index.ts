@@ -164,6 +164,12 @@ import { traverseFields } from './utilities/traverseFields.js'
  * Export of all base fields that could potentially be
  * useful as users wish to extend built-in fields with custom logic
  */
+export { generateAPIKey, hashAPIKey } from './auth/apiKeys/hash.js'
+export { migrateAPIKeysToHash } from './auth/apiKeys/migrateToHash.js'
+export type {
+  MigrateAPIKeysToHashArgs,
+  MigrateAPIKeysToHashResult,
+} from './auth/apiKeys/migrateToHash.js'
 export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 export { createAPIKeyFields } from './auth/baseFields/apiKey.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
@@ -306,7 +312,7 @@ export interface UntypedPayloadTypes {
     _verified?: boolean | null
     /**
      * The user's API key. Stored as a one-way hash, so it is only ever returned in the
-     * response of the request that set or generated it - every other read is `null`.
+     * response of the request that set or generated it - every other read is an empty string.
      * Only with `auth.useAPIKey`.
      */
     apiKey?: null | string
@@ -1430,12 +1436,6 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
-export { generateAPIKey, hashAPIKey } from './auth/apiKeys/hash.js'
-export { migrateAPIKeysToHash } from './auth/apiKeys/migrateToHash.js'
-export type {
-  MigrateAPIKeysToHashArgs,
-  MigrateAPIKeysToHashResult,
-} from './auth/apiKeys/migrateToHash.js'
 export { rotateSecret } from './auth/rotateSecret.js'
 export type { RotateSecretArgs, RotateSecretResult } from './auth/rotateSecret.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'

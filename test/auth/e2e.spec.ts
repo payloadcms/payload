@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Page, Request } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -11,7 +11,7 @@ import type { Config } from './payload-types.js'
 
 import { login } from '../__helpers/e2e/auth/login.js'
 import { logout } from '../__helpers/e2e/auth/logout.js'
-import { getRoutes, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
+import { closeAllToasts, getRoutes, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -394,13 +394,7 @@ describe('Auth', () => {
           .then((res) => res.json())
           .then((json) => json.user)
 
-      const expectAPIKeyWorks = async ({
-        id,
-        apiKey,
-      }: {
-        apiKey: string
-        id: number | string
-      }) => {
+      const expectAPIKeyWorks = async ({ id, apiKey }: { apiKey: string; id: number | string }) => {
         await expect(async () => {
           expect((await readProofCollection({ apiKey })).status).toBe(200)
           expect(String((await meWithAPIKey(apiKey))?.id)).toStrictEqual(String(id))
@@ -479,6 +473,17 @@ describe('Auth', () => {
         await expectAPIKeyWorks({ id: user.id, apiKey })
       })
 
+      test('should use the configured API key field label', async () => {
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { apiKey: 'key-with-a-custom-field-label', enableAPIKey: true },
+        })
+
+        await page.goto(url.edit(user.id))
+
+        await expect(page.locator('label[for="apiKey"]')).toHaveText('Service credential')
+      })
+
       test('should replace the key when generating a new one', async () => {
         const originalKey = 'the-original-key-before-regenerating'
         const user = await payload.create({
@@ -502,6 +507,102 @@ describe('Auth', () => {
         // Generating is already persisted, so it must not leave unsaved changes behind -
         // the save button stays disabled while the form is unmodified.
         await expect(page.locator('#action-save')).toBeDisabled()
+      })
+
+      test('should keep a generated key when saving an unrelated field after enabling', async () => {
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { enableAPIKey: false },
+        })
+
+        await page.goto(url.edit(user.id))
+        await page.locator('#field-enableAPIKey').click()
+        await saveDocAndAssert(page)
+
+        const firstKey = await readRevealedAPIKey()
+        const generatedKey = await generateAPIKeyInAdmin()
+
+        await page.locator('#field-label').fill('renamed after generating a key')
+        await saveDocAndAssert(page)
+
+        await expectAPIKeyWorks({ id: user.id, apiKey: generatedKey })
+        await expectAPIKeyRejected({ apiKey: firstKey })
+      })
+
+      test('should keep a generated key when a previous save finishes later', async () => {
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { enableAPIKey: false },
+        })
+        const editURL = url.edit(user.id)
+        const isFormStateRequest = (request: Request) =>
+          request.method() === 'POST' &&
+          (request.postData() ?? '').includes('form-state') &&
+          (request.url() === editURL || request.url().includes('/_serverFn/'))
+
+        await page.goto(editURL)
+
+        const enableFormStateResponse = page.waitForResponse((response) =>
+          isFormStateRequest(response.request()),
+        )
+        await page.locator('#field-enableAPIKey').click()
+        await enableFormStateResponse
+
+        let releaseDelayedFormState = () => undefined
+        let reportDelayedFormState = () => undefined
+        const delayedFormStateStarted = new Promise<void>((resolve) => {
+          reportDelayedFormState = resolve
+        })
+        const delayedFormStateRelease = new Promise<void>((resolve) => {
+          releaseDelayedFormState = resolve
+        })
+
+        await page.route(
+          (requestURL) =>
+            requestURL.href === editURL || requestURL.pathname.includes('/_serverFn/'),
+          async (route) => {
+            if (isFormStateRequest(route.request())) {
+              reportDelayedFormState()
+              await delayedFormStateRelease
+            }
+
+            await route.continue()
+          },
+        )
+
+        await page.locator('#action-save').click()
+        await delayedFormStateStarted
+
+        const firstKey = await readRevealedAPIKey()
+        const generatedKey = await generateAPIKeyInAdmin()
+
+        releaseDelayedFormState()
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await page.unrouteAll({ behavior: 'wait' })
+        await closeAllToasts(page)
+
+        await page.locator('#field-label').fill('renamed after a delayed save')
+        await saveDocAndAssert(page)
+
+        await expectAPIKeyWorks({ id: user.id, apiKey: generatedKey })
+        await expectAPIKeyRejected({ apiKey: firstKey })
+      })
+
+      test('should keep a generated key when enabling before the first save', async () => {
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { enableAPIKey: false },
+        })
+
+        await page.goto(url.edit(user.id))
+        await page.locator('#field-enableAPIKey').click()
+
+        const generatedKey = await generateAPIKeyInAdmin()
+
+        await page.locator('#field-label').fill('renamed after enabling and generating')
+        await saveDocAndAssert(page)
+
+        await expectAPIKeyWorks({ id: user.id, apiKey: generatedKey })
       })
 
       test('should revoke the key when api keys are disabled', async () => {
@@ -543,6 +644,28 @@ describe('Auth', () => {
 
         await expectAPIKeyWorks({ id: user.id, apiKey: newKey })
         await expectAPIKeyRejected({ apiKey: revokedKey })
+      })
+
+      test('should not show a revoked key when re-enabling before save', async () => {
+        const user = await payload.create({
+          collection: apiKeyOnlySlug,
+          data: { enableAPIKey: false },
+        })
+
+        await page.goto(url.edit(user.id))
+        await page.locator('#field-enableAPIKey').click()
+        await saveDocAndAssert(page)
+
+        const revokedKey = await readRevealedAPIKey()
+
+        await page.locator('#field-enableAPIKey').click()
+        await saveDocAndAssert(page)
+        await expectAPIKeyRejected({ apiKey: revokedKey })
+
+        await page.locator('#field-enableAPIKey').click()
+
+        await expect(page.locator('#apiKey')).toBeHidden()
+        await expect(page.locator('#apiKey-hidden-note')).toBeVisible()
       })
 
       test('should keep the key when unchecking and rechecking without saving', async () => {

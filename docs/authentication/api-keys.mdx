@@ -59,8 +59,8 @@ After that the field reports that a key is set without displaying it, and the on
 usable value again is to generate a new one.
 
 <Banner type="warning">
-  **Important:** copy a key when it is shown to you. It cannot be looked up later, by
-  you or by anyone else, including an administrator.
+  **Important:** copy a key when it is shown to you. It cannot be looked up
+  later, by you or by anyone else, including an administrator.
 </Banner>
 
 If you supply your own key rather than letting Payload generate one, use a high-entropy random value.
@@ -86,9 +86,9 @@ needs `update` access to that document, plus field-level `update` access on `api
 `enableAPIKey`. This is the endpoint the Admin Panel's "Generate new API key" button calls.
 
 <Banner type="warning">
-  A request authenticated with an API key can rotate its own key, if your `update`
-  access allows that user to update their own document. Restrict `update` access on the
-  collection if you do not want that.
+  A request authenticated with an API key can rotate its own key, if your
+  `update` access allows that user to update their own document. Restrict
+  `update` access on the collection if you do not want that.
 </Banner>
 
 ### Revoking a key
@@ -108,6 +108,17 @@ payload migrate:api-keys --dry-run
 payload migrate:api-keys
 ```
 
+If you use a SQL adapter, also create and run a schema migration. The `apiKey` column now has an
+index, which lets Payload find a matching hash without scanning the collection table:
+
+```bash
+pnpm payload migrate:create api-key-hash-index
+pnpm payload migrate
+```
+
+Review the generated schema migration before you run it. Run the schema migration and the API key
+data migration as part of the same upgrade.
+
 Or from inside a migration, which is the better option if you deploy migrations:
 
 ```ts
@@ -118,7 +129,9 @@ import { migrateAPIKeysToHash } from 'payload'
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
   const { failed, migrated, skipped } = await migrateAPIKeysToHash({ payload })
 
-  payload.logger.info(`API keys: migrated ${migrated}, skipped ${skipped}, failed ${failed}`)
+  payload.logger.info(
+    `API keys: migrated ${migrated}, skipped ${skipped}, failed ${failed}`,
+  )
 
   if (failed > 0) {
     throw new Error('Some API keys could not be recovered.')
@@ -127,19 +140,21 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
 ```
 
 It reads and writes at the database layer, in batches, and verifies every key it recovers before
-writing anything - against the stored `apiKeyIndex` where that is still present, and otherwise by
-requiring the recovered value to be printable, since the pre-`v1` cipher returns random bytes rather
-than failing under a wrong secret. A row it cannot verify is left exactly as it was and counted in `failed`, because a
-wrong decryption would hash random bytes and destroy that key for good. Re-running is safe: a key
-already stored as a hash is counted in `skipped`.
+writing anything. A pre-`v1` encrypted key needs its stored `apiKeyIndex` for verification because
+that cipher returns random bytes instead of failing under a wrong secret. An authenticated `v1`
+value can be verified without the index. A row that cannot be verified is left unchanged and counted
+in `failed`, because hashing a wrong decryption would destroy that key. The command returns a failure
+exit code when this count is not zero. Re-running is safe: a key already stored as a hash is counted
+in `skipped`. Disabled keys are also skipped so that the migration cannot restore a revoked key;
+outside a dry run, their obsolete encrypted values are cleared.
 
 | Option        | Description                                                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------ |
 | `payload`     | The Payload instance (available as `args.payload` inside a migration).                                 |
-| `collections` | Optional array of collection slugs to limit the run to. Defaults to all `useAPIKey` collections.        |
-| `batchSize`   | Number of documents processed per batch. Defaults to `100`.                                             |
-| `dryRun`      | When `true`, reports what would change without writing. Defaults to `false`.                            |
-| `secrets`     | Extra raw `PAYLOAD_SECRET` values to try, for keys encrypted under a secret no longer in your keyring.  |
+| `collections` | Optional array of collection slugs to limit the run to. Defaults to all `useAPIKey` collections.       |
+| `batchSize`   | Number of documents processed per batch. Defaults to `100`.                                            |
+| `dryRun`      | When `true`, reports what would change without writing. Defaults to `false`.                           |
+| `secrets`     | Extra raw `PAYLOAD_SECRET` values to try, for keys encrypted under a secret no longer in your keyring. |
 
 ### HTTP Authentication
 

@@ -15,6 +15,9 @@ const REACT_HYDRATION_ERROR_CODES = [418, 422, 423, 425]
 const isReactHydrationError = (message: string): boolean =>
   REACT_HYDRATION_ERROR_CODES.some((code) => message.includes(`Minified React error #${code}`))
 
+const MONGOOSE_NEW_OPTION_DEPRECATION_WARNING =
+  "[MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead."
+
 /**
  * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
  * in the e2e test failing.
@@ -62,7 +65,7 @@ export function catchConsoleErrors(page: Page, options?: { ignoreCORS?: boolean 
       // Mongoose deprecation notice for `new: true` in findOneAndUpdate, emitted once per
       // server process by the mongo adapter. Next forwards it to the browser console, where
       // it would fail whichever test happens to trigger the first update.
-      !msg.text().includes('[MONGOOSE] Warning') &&
+      msg.text() !== MONGOOSE_NEW_OPTION_DEPRECATION_WARNING &&
       // Conditionally ignore CORS errors based on the `ignoreCORS` option
       !(
         ignoreCORS &&

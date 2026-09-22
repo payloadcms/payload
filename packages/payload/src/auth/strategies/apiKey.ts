@@ -33,7 +33,9 @@ const warnOnceAboutLegacyAPIKeys = async ({
       overrideAccess: true,
       // Ciphertext written by any recent version carries this prefix, and a hash can never
       // contain a colon. Pre-v1 aes-256-ctr values have no prefix and are not detected.
-      where: { apiKey: { contains: 'v1:' } },
+      where: {
+        and: [{ apiKey: { contains: 'v1:' } }, { enableAPIKey: { equals: true } }],
+      },
     })
 
     if (totalDocs > 0) {
@@ -59,23 +61,28 @@ export const APIKeyAuthentication =
       const apiKeyHash = hashAPIKey(apiKey)
 
       try {
-        const where: Where = {}
-
-        if (collectionConfig.auth?.verify) {
-          where.and = [
+        const where: Where = {
+          and: [
             {
               apiKey: {
                 equals: apiKeyHash,
               },
             },
             {
-              _verified: {
-                not_equals: false,
+              enableAPIKey: {
+                equals: true,
               },
             },
-          ]
-        } else {
-          where.apiKey = { equals: apiKeyHash }
+            ...(collectionConfig.auth?.verify
+              ? [
+                  {
+                    _verified: {
+                      not_equals: false,
+                    },
+                  },
+                ]
+              : []),
+          ],
         }
 
         const userQuery = await payload.find({

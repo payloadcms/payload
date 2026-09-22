@@ -23,7 +23,7 @@ export type RotateSecretArgs = {
    * The previous raw `PAYLOAD_SECRET` that existing data was encrypted under. Only needed
    * when it is not in the keyring (`secret` or `previousSecrets`).
    */
-  oldSecret: string
+  oldSecret?: string
   payload: Payload
 }
 

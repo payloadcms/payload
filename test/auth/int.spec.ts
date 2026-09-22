@@ -317,7 +317,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
         expect(data.user._strategy).toBe('local-jwt')
       })
 
-      test('should have fields saved to JWT', () => {
+      test('should have custom fields saved to JWT', () => {
         const decoded = jwtDecode<User>(token)
         const {
           collection,
@@ -401,6 +401,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
           data: {
             apiKey,
             email: 'dev@example.com',
+            enableAPIKey: true,
             password: 'test',
           },
         })
@@ -474,10 +475,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
         expect(data.user.custom).toBe('Goodbye, world!')
       })
 
-      test('keeps apiKey hashed in DB after refresh operation', async ({
-        payload,
-        restClient,
-      }) => {
+      test('keeps apiKey hashed in DB after refresh operation', async ({ payload, restClient }) => {
         const apiKey = '987e6543-e21b-12d3-a456-426614174999'
         const user = await payload.create({
           collection: slug,
@@ -495,9 +493,7 @@ test.suite({ config: './config.ts' })('Auth', () => {
           req: { locale: 'en' } as any,
           where: { id: { equals: user.id } },
         })
-        expect(raw?.apiKey).toStrictEqual(
-          crypto.createHash('sha256').update(apiKey).digest('hex'),
-        )
+        expect(raw?.apiKey).toStrictEqual(crypto.createHash('sha256').update(apiKey).digest('hex'))
       })
 
       test('does not return the apiKey after refresh', async ({ payload, restClient }) => {
@@ -1485,7 +1481,9 @@ test.suite({ config: './config.ts' })('Auth', () => {
       const proof = await restClient.GET(`/${apiKeyProofSlug}`, { headers })
       expect(proof.status).toStrictEqual(200)
 
-      const me = await restClient.GET(`/${apiKeyOnlySlug}/me`, { headers }).then((res) => res.json())
+      const me = await restClient
+        .GET(`/${apiKeyOnlySlug}/me`, { headers })
+        .then((res) => res.json())
       expect(me.user?.id).toStrictEqual(id)
     }
 
@@ -1502,7 +1500,9 @@ test.suite({ config: './config.ts' })('Auth', () => {
       const proof = await restClient.GET(`/${apiKeyProofSlug}`, { headers })
       expect(proof.status).not.toStrictEqual(200)
 
-      const me = await restClient.GET(`/${apiKeyOnlySlug}/me`, { headers }).then((res) => res.json())
+      const me = await restClient
+        .GET(`/${apiKeyOnlySlug}/me`, { headers })
+        .then((res) => res.json())
       expect(me.user).toBeNull()
     }
 
@@ -1521,6 +1521,8 @@ test.suite({ config: './config.ts' })('Auth', () => {
     })
 
     test('should authenticate with a supplied key', async ({ payload, restClient }) => {
+      expect.hasAssertions()
+
       const apiKey = 'supplied-key-that-should-authenticate'
 
       const user = await payload.create({
@@ -1536,6 +1538,8 @@ test.suite({ config: './config.ts' })('Auth', () => {
       payload,
       restClient,
     }) => {
+      expect.hasAssertions()
+
       const apiKey = 'key-hashed-outside-of-payload-entirely'
 
       const user = await payload.create({
@@ -1552,6 +1556,28 @@ test.suite({ config: './config.ts' })('Auth', () => {
       })
 
       await expectAPIKeyWorks({ id: user.id, apiKey, restClient })
+    })
+
+    test('should reject a stored hash when API keys are disabled', async ({
+      payload,
+      restClient,
+    }) => {
+      expect.hasAssertions()
+
+      const apiKey = 'hashed-key-on-a-disabled-user'
+      const user = await payload.create({
+        collection: apiKeyOnlySlug,
+        data: { enableAPIKey: false },
+      })
+
+      await payload.db.updateOne({
+        id: user.id,
+        collection: apiKeyOnlySlug,
+        data: { apiKey: hashOf(apiKey), enableAPIKey: false },
+        returning: false,
+      })
+
+      await expectAPIKeyRejected({ apiKey, restClient })
     })
 
     test('should generate a key on create when none is supplied', async ({
@@ -1636,6 +1662,21 @@ test.suite({ config: './config.ts' })('Auth', () => {
         .then((res) => res.json())
       expect(viaRest.apiKey).toStrictEqual('')
 
+      const viaGraphQL = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+              ApiKey(id: ${JSON.stringify(created.id)}) {
+                apiKey
+              }
+            }`,
+          }),
+          headers: { Authorization: `${apiKeysSlug} API-Key ${created.apiKey}` },
+        })
+        .then((res) => res.json())
+      expect(viaGraphQL.errors).toBeUndefined()
+      expect(viaGraphQL.data.ApiKey.apiKey).toStrictEqual('')
+
       const viaMe = await restClient
         .GET(`/${apiKeysSlug}/me`, {
           headers: { Authorization: `${apiKeysSlug} API-Key ${created.apiKey}` },
@@ -1645,7 +1686,46 @@ test.suite({ config: './config.ts' })('Auth', () => {
       expect(viaMe.user.apiKey).toStrictEqual('')
     })
 
+    test('should mask a stored key when hidden fields are requested', async ({ payload }) => {
+      const created = await payload.create({
+        collection: apiKeysSlug,
+        data: { apiKey: 'key-that-must-stay-hidden', enableAPIKey: true },
+      })
+
+      const foundByID = await payload.findByID({
+        id: created.id,
+        collection: apiKeysSlug,
+        showHiddenFields: true,
+      })
+
+      expect(foundByID.apiKey).toStrictEqual('')
+    })
+
+    test('should mask a stored key in a login response', async ({ payload }) => {
+      const loginEmail = `api-key-login-${uuid()}@example.com`
+      const loginPassword = 'Password123'
+
+      await payload.create({
+        collection: slug,
+        data: {
+          apiKey: 'key-that-must-not-be-returned-by-login',
+          email: loginEmail,
+          enableAPIKey: true,
+          password: loginPassword,
+        },
+      })
+
+      const { user } = await payload.login({
+        collection: slug,
+        data: { email: loginEmail, password: loginPassword },
+      })
+
+      expect(user.apiKey).toStrictEqual('')
+    })
+
     test('should keep the key when other fields are updated', async ({ payload, restClient }) => {
+      expect.hasAssertions()
+
       const user = await payload.create({
         collection: apiKeyOnlySlug,
         data: { enableAPIKey: true },
@@ -1766,6 +1846,8 @@ test.suite({ config: './config.ts' })('Auth', () => {
       payload,
       restClient,
     }) => {
+      expect.hasAssertions()
+
       const apiKey = 'key-stored-the-old-encrypted-way'
 
       const user = await payload.create({
@@ -1911,14 +1993,11 @@ test.suite({ config: './config.ts' })('Auth', () => {
 
       expect(response.status).toStrictEqual(403)
 
-      const stillWorks = await restClient.GET(
-        `/${apiKeysWithFieldUpdateAccessSlug}/${user.id}`,
-        {
-          headers: {
-            Authorization: `${apiKeysWithFieldUpdateAccessSlug} API-Key a-key-that-must-not-be-replaced`,
-          },
+      const stillWorks = await restClient.GET(`/${apiKeysWithFieldUpdateAccessSlug}/${user.id}`, {
+        headers: {
+          Authorization: `${apiKeysWithFieldUpdateAccessSlug} API-Key a-key-that-must-not-be-replaced`,
         },
-      )
+      })
       expect(stillWorks.status).toStrictEqual(200)
     })
 
@@ -2127,24 +2206,18 @@ test.suite({ config: './config.ts' })('Auth', () => {
 
       test('should reset the login attempts after a successful login', async ({ payload }) => {
         // fail 1
-        try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
-          expect(failedLogin).toBeUndefined()
-        } catch (error) {
-          expect((error as Error).message).toBe('The email or password provided is incorrect.')
-        }
+        await expect(attemptLogin(devUser.email, 'wrong-password', { payload })).rejects.toThrow(
+          'The email or password provided is incorrect.',
+        )
 
         // successful login 1
         const successfulLogin = await attemptLogin(devUser.email, devUser.password, { payload })
         expect(successfulLogin).toBeDefined()
 
         // fail 2
-        try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
-          expect(failedLogin).toBeUndefined()
-        } catch (error) {
-          expect((error as Error).message).toBe('The email or password provided is incorrect.')
-        }
+        await expect(attemptLogin(devUser.email, 'wrong-password', { payload })).rejects.toThrow(
+          'The email or password provided is incorrect.',
+        )
 
         // successful login 2 without exceeding attempts
         const successfulLogin2 = await attemptLogin(devUser.email, devUser.password, { payload })
@@ -2164,30 +2237,19 @@ test.suite({ config: './config.ts' })('Auth', () => {
       test('should lock the user after too many failed login attempts', async ({ payload }) => {
         const now = new Date()
         // fail 1
-        try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
-          expect(failedLogin).toBeUndefined()
-        } catch (error) {
-          expect((error as Error).message).toBe('The email or password provided is incorrect.')
-        }
+        await expect(attemptLogin(devUser.email, 'wrong-password', { payload })).rejects.toThrow(
+          'The email or password provided is incorrect.',
+        )
 
         // fail 2
-        try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
-          expect(failedLogin).toBeUndefined()
-        } catch (error) {
-          expect((error as Error).message).toBe('The email or password provided is incorrect.')
-        }
+        await expect(attemptLogin(devUser.email, 'wrong-password', { payload })).rejects.toThrow(
+          'The email or password provided is incorrect.',
+        )
 
         // fail 3
-        try {
-          const failedLogin = await attemptLogin(devUser.email, 'wrong-password', { payload })
-          expect(failedLogin).toBeUndefined()
-        } catch (error) {
-          expect((error as Error).message).toBe(
-            'This user is locked due to having too many failed login attempts.',
-          )
-        }
+        await expect(attemptLogin(devUser.email, 'wrong-password', { payload })).rejects.toThrow(
+          'This user is locked due to having too many failed login attempts.',
+        )
 
         const userQuery = await payload.find({
           collection: slug,
@@ -2874,6 +2936,44 @@ test.suite({ config: './config.ts' })('Auth', () => {
       ).toBe(true)
     })
 
+    test('should not reactivate a disabled pre-hash key', async ({ payload, restClient }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser(
+        {
+          apiKey: payload.encrypt(rawApiKey, { secret: OLD_SECRET }),
+          data: { enableAPIKey: false },
+          index: null,
+          rawApiKey,
+        },
+        { payload },
+      )
+
+      expect(
+        await authenticates({
+          id: user.id,
+          collection: rotateSecretSlug,
+          rawApiKey,
+          restClient,
+        }),
+      ).toBe(false)
+
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(result).toEqual({ failed: 0, migrated: 0, skipped: 1 })
+      expect(
+        await authenticates({
+          id: user.id,
+          collection: rotateSecretSlug,
+          rawApiKey,
+          restClient,
+        }),
+      ).toBe(false)
+
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      expect(raw.apiKey).toBeFalsy()
+      expect(raw.apiKeyIndex).toBeFalsy()
+    })
+
     test('should convert a row encrypted under a previous secret', async ({ payload }) => {
       const rawApiKey = uuid()
       const user = await seedPreHashUser({ rawApiKey }, { payload })
@@ -2899,6 +2999,64 @@ test.suite({ config: './config.ts' })('Auth', () => {
 
       const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
       expect(raw.apiKey).toBe(hashOf(rawApiKey))
+    })
+
+    test('should reject a legacy aes-256-ctr row without its lookup index', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser(
+        {
+          apiKey: legacyCtrEncrypt(rawApiKey, OLD_SECRET),
+          index: null,
+          rawApiKey,
+        },
+        { payload },
+      )
+
+      const before = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+      const after = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+
+      expect(result).toEqual({ failed: 1, migrated: 0, skipped: 0 })
+      expect(after.apiKey).toBe(before.apiKey)
+      expect(after.apiKeyIndex).toBeFalsy()
+    })
+
+    test('should convert an authenticated v1 row without its lookup index', async ({ payload }) => {
+      const rawApiKey = uuid()
+      const user = await seedPreHashUser(
+        {
+          apiKey: payload.encrypt(rawApiKey, { secret: OLD_SECRET }),
+          index: null,
+          rawApiKey,
+        },
+        { payload },
+      )
+
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+
+      expect(result).toEqual({ failed: 0, migrated: 1, skipped: 0 })
+      expect(raw.apiKey).toBe(hashOf(rawApiKey))
+      expect(raw.apiKeyIndex).toBeFalsy()
+    })
+
+    test('should clear a legacy lookup index when a key is replaced', async ({ payload }) => {
+      const originalAPIKey = uuid()
+      const replacementAPIKey = uuid()
+      const user = await seedPreHashUser({ rawApiKey: originalAPIKey }, { payload })
+
+      await payload.update({
+        id: user.id,
+        collection: rotateSecretSlug,
+        data: { apiKey: replacementAPIKey },
+      })
+
+      const raw = await readRawRow({ id: user.id, collection: rotateSecretSlug, payload })
+      const result = await migrateAPIKeysToHash({ collections: [rotateSecretSlug], payload })
+
+      expect(raw.apiKey).toBe(hashOf(replacementAPIKey))
+      expect(raw.apiKeyIndex).toBeFalsy()
+      expect(result).toEqual({ failed: 0, migrated: 0, skipped: 1 })
     })
 
     test('should convert a row whose secret is passed explicitly', async ({ payload }) => {
@@ -3059,7 +3217,6 @@ test.suite({ config: './config.ts' })('Auth', () => {
 
       const result = await rotateSecret({
         collections: [rotateSecretLoginSlug],
-        oldSecret: OLD_SECRET,
         payload,
       })
 

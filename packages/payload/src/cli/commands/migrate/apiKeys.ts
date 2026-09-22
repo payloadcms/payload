@@ -30,6 +30,12 @@ export const createMigrateAPIKeysCommand = defineCLICommand({
       }
     }
 
+    if (result.failed > 0) {
+      throw new Error(
+        `${result.failed} API key(s) could not be recovered. Those documents are unchanged. Pass --secret with the PAYLOAD_SECRET they were encrypted under, or regenerate those keys.`,
+      )
+    }
+
     return { result }
   },
   helpGroup: 'Migration commands',

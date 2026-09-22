@@ -316,6 +316,27 @@ Auth enabled collections are also given the following endpoints:
       },
     },
     {
+      operation: "Generate API Key",
+      method: "POST",
+      path: "/api/{user-collection}/{id}/api-key",
+      description: "Generates and returns a new API key for one user",
+      example: {
+        slug: "generateAPIKey",
+        req: {
+          credentials: true,
+          headers: true,
+        },
+        res: {
+          apiKey: "0Q2rNSTMLd5x_xGuXPd0zHtxHo9c2rDoDpMCwvbg9WM",
+          doc: {
+            id: "644b8453cd20c7857da5a9b0",
+            enableAPIKey: true,
+          },
+          message: "New API Key Generated.",
+        },
+      },
+    },
+    {
       operation: "Unlock",
       method: "POST",
       path: "/api/{user-collection}/unlock",
