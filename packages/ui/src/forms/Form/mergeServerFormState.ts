@@ -1,6 +1,8 @@
 'use client'
 import type { FormState } from 'payload'
 
+import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
+
 /**
  * If true, will accept all values from the server, overriding any current values in local state.
  * Can also provide an options object for more granular control.
@@ -214,5 +216,5 @@ export const mergeServerFormState = ({
     delete newState[path].addedByServer
   }
 
-  return newState
+  return dequal(newState, currentState) ? currentState : newState
 }
