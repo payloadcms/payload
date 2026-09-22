@@ -1,9 +1,6 @@
 ---
 name: audit-dependencies
 description: Use when fixing dependency vulnerabilities, running pnpm audit, or when the audit-dependencies CI check fails
-user-invocable: true
-disable-model-invocation: true
-argument-hint: 'critical|high|moderate|low'
 ---
 
 # Audit Dependencies
