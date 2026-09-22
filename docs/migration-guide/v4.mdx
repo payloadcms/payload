@@ -249,6 +249,23 @@ Run `migrate-versions-default` if you want zero schema changes — it adds `vers
 
 Run `remove-versions-true` to clean up any bare `versions: true` that is now the default.
 
+### Version read access inherits collection and global read access
+
+When `readVersions` is not configured, version access now inherits the Collection or Global `read` Access Control instead of requiring an authenticated user by default.
+
+This means a public `read` function can make historical and unpublished versions publicly readable, while a query constraint returned by `read` is also applied to version documents. If you want to preserve the previous authenticated-only behavior, configure `readVersions` explicitly:
+
+```ts
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  access: {
+    read: () => true,
+    readVersions: ({ req: { user } }) => Boolean(user),
+  },
+  fields: [],
+}
+```
+
 ### List View Select API is now the default
 
 The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
@@ -406,10 +423,9 @@ If you only use `DefaultValue` to type a `defaultValue` property passed into a C
 
 `SanitizedCollectionConfig` and its auth type no longer use `DeepRequired`. This reduces TypeScript checker work and makes optionality match runtime defaults.
 
-Properties Payload does not default, such as `access.readVersions`, `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
+Properties Payload does not default, such as `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
 
 ```ts
-if (collection.access.readVersions) await collection.access.readVersions(args)
 const useAPIKey = collection.auth.useAPIKey ?? false
 ```
 
@@ -430,12 +446,11 @@ Properties filled during sanitization, including `auth.jwtOrder`, root routes, G
 
 ### Sanitized global config types now match runtime defaults
 
-`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `access.readVersions`, `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
+`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
 
 Code that consumes these properties may now need to handle `undefined`:
 
 ```ts
-if (global.access.readVersions) await global.access.readVersions(args)
 const views = global.admin.components?.views
 const interfaceName = global.typescript?.interface
 ```
