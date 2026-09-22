@@ -3,6 +3,7 @@ import type { Locale, PayloadRequest, SanitizedLocalizationConfig } from '../ind
 import { findOne as findPreference } from '../preferences/operations/findOne.js'
 import { update as updatePreference } from '../preferences/operations/update.js'
 
+/** Resolves the request locale from query params, user preferences, or the configured default, persisting an explicit user selection. */
 export async function getRequestLocale({
   req,
 }: {
