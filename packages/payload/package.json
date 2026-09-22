@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.86.0",
+  "version": "3.90.1",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -113,7 +113,7 @@
     "file-type": "21.3.4",
     "get-tsconfig": "4.8.1",
     "http-status": "2.1.0",
-    "image-size": "2.0.2",
+    "image-dimensions": "2.5.1",
     "ipaddr.js": "2.2.0",
     "jose": "5.10.0",
     "json-schema-to-typescript": "15.0.3",
@@ -125,9 +125,10 @@
     "qs-esm": "8.0.1",
     "range-parser": "1.2.1",
     "sanitize-filename": "1.6.3",
+    "sax": "1.6.1",
     "ts-essentials": "10.0.3",
     "tsx": "4.22.4",
-    "undici": "7.28.0",
+    "undici": "7.29.0",
     "uuid": "13.0.2",
     "ws": "^8.16.0"
   },
@@ -140,6 +141,7 @@
     "@types/nodemailer": "^8.0.0",
     "@types/pluralize": "0.0.33",
     "@types/range-parser": "1.2.7",
+    "@types/sax": "1.2.7",
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",

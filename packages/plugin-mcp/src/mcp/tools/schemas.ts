@@ -155,7 +155,6 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe('Optional: fallback locale code to use when requested locale is not available'),
-      filePath: z.string().optional().describe('Optional: absolute file path for file uploads'),
       locale: z
         .string()
         .optional()
@@ -167,11 +166,6 @@ export const toolSchemas = {
         .optional()
         .default(true)
         .describe('Whether to override document locks'),
-      overwriteExistingFiles: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to overwrite existing files'),
       select: z
         .string()
         .optional()
@@ -396,17 +390,7 @@ export const toolSchemas = {
         .default(0)
         .describe('Depth of population for relationships'),
       email: z.string().email().describe('The user email address'),
-      overrideAccess: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to override access controls'),
       password: z.string().describe('The user password'),
-      showHiddenFields: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to show hidden fields in the response'),
     }),
   },
 
@@ -431,11 +415,6 @@ export const toolSchemas = {
     description: 'Sends a password reset email to a user.',
     parameters: z.object({
       collection: z.string().describe('The collection containing the user (e.g., "users")'),
-      disableEmail: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to disable sending the email (for testing)'),
       email: z.string().email().describe('The user email address'),
     }),
   },

@@ -1,0 +1,36 @@
+---
+title: Link
+label: Link
+order: 140
+desc: Navigate within the Payload Admin Panel using Payload's router-aware Link component.
+keywords: ui, component, link, navigation, router
+---
+
+The `Link` component integrates Next.js navigation with Payload's route-transition state. Use it for links between Admin Panel routes.
+
+## Import
+
+```tsx
+import { Link } from '@payloadcms/ui'
+```
+
+## Basic usage
+
+<ComponentPreview component="Link" example="basic" />
+
+`Link` does not add visual styling. It inherits typography and color from the surrounding Admin Panel interface.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop             | Type                  | Default | Description                                                |
+| ---------------- | --------------------- | ------- | ---------------------------------------------------------- |
+| `href` \*        | `string \| UrlObject` | —       | Destination passed to the Next.js router.                  |
+| `replace`        | `boolean`             | `false` | Replaces the current history entry instead of adding one.  |
+| `scroll`         | `boolean`             | `true`  | Controls whether navigation scrolls to the new page.       |
+| `prefetch`       | `boolean`             | —       | Controls Next.js route prefetching.                        |
+| `preventDefault` | `boolean`             | `true`  | Lets Payload manage navigation and route-transition state. |
+| `onClick`        | `MouseEventHandler`   | —       | Runs before navigation begins.                             |
+
+_\* An asterisk denotes that a prop is required._

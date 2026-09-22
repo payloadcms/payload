@@ -1,0 +1,45 @@
+---
+title: SearchBar
+label: SearchBar
+order: 230
+desc: Add a complete, debounced search control with Payload's SearchBar component.
+keywords: ui, component, search, filter, input, debounce
+---
+
+The `SearchBar` component combines Payload's search icon, control spacing, and debounced `SearchFilter`. Use it when filtering a custom list or data view.
+
+## Import
+
+```tsx
+import { SearchBar } from '@payloadcms/ui/elements/SearchBar'
+```
+
+## Interactive usage
+
+<ComponentPreview component="SearchFilter" example="interactive" />
+
+Use `label` to provide both the visible placeholder and the input's accessible name. `onSearchChange` receives the value after the `SearchFilter` debounce.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop                | Type                       | Default     | Description                                    |
+| ------------------- | -------------------------- | ----------- | ---------------------------------------------- |
+| `onSearchChange` \* | `(search: string) => void` | —           | Receives the debounced search value.           |
+| `label`             | `string`                   | `Search...` | Sets the placeholder and accessible label.     |
+| `searchQueryParam`  | `string`                   | —           | Synchronizes the input with an external value. |
+| `Actions`           | `ReactNode[]`              | —           | Adds controls to the end of the search bar.    |
+| `className`         | `string`                   | —           | Adds a class to the search bar wrapper.        |
+
+_\* An asterisk denotes that a prop is required._
+
+## Using SearchFilter directly
+
+`SearchFilter` is the lower-level debounced input used by `SearchBar`. Its input intentionally has no padding because the surrounding control owns its spacing and icon. Use it directly only when composing your own search surface.
+
+```tsx
+import { SearchFilter } from '@payloadcms/ui'
+```
+
+The legacy `fieldName`, `initialParams`, `setValue`, and `value` props are deprecated.

@@ -94,6 +94,8 @@ export const updateGlobalTool = (
         data: parsedData,
         depth,
         draft,
+        overrideAccess: false,
+        req,
         user,
       }
 

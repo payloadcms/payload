@@ -10,6 +10,7 @@ import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './D
 import { DefaultDashboard } from './Default/index.js'
 
 export async function DashboardView(props: AdminViewServerProps) {
+  const { user: userWithReadAccess } = props
   const {
     locale,
     permissions,
@@ -17,7 +18,6 @@ export async function DashboardView(props: AdminViewServerProps) {
       i18n,
       payload: { config },
       payload,
-      user,
     },
     req,
     visibleEntities,
@@ -45,7 +45,7 @@ export async function DashboardView(props: AdminViewServerProps) {
           navGroups,
           payload,
           permissions,
-          user,
+          user: userWithReadAccess,
           visibleEntities,
         } satisfies DashboardViewServerPropsOnly,
       })}

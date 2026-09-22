@@ -54,6 +54,7 @@ export const NotFoundPage = async ({
     permissions,
     req,
     req: { payload },
+    user: userWithReadAccess,
   } = await initReq({
     configPromise: config,
     importMap,
@@ -86,7 +87,7 @@ export const NotFoundPage = async ({
       payload={payload}
       permissions={permissions}
       searchParams={searchParams}
-      user={req.user}
+      user={userWithReadAccess}
       visibleEntities={visibleEntities}
     >
       <NotFoundClient />

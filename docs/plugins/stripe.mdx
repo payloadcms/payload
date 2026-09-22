@@ -68,7 +68,7 @@ export default config
 | ------------------------------ | ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `stripeSecretKey` \*           | string             | `undefined` | Your Stripe secret key                                                                                                   |
 | `stripeWebhooksEndpointSecret` | string             | `undefined` | Your Stripe webhook endpoint secret                                                                                      |
-| `rest`                         | boolean            | `false`     | When `true`, opens the `/api/stripe/rest` endpoint                                                                       |
+| `rest`                         | `StripeRESTConfig` | `undefined` | Opens the `/api/stripe/rest` endpoint with an exact Stripe method allowlist                                              |
 | `webhooks`                     | object or function | `undefined` | Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event |
 | `sync`                         | array              | `undefined` | An array of sync configs                                                                                                 |
 | `logs`                         | boolean            | `false`     | When `true`, logs sync events to the console as they happen                                                              |
@@ -77,16 +77,28 @@ _\* An asterisk denotes that a property is required._
 
 ## Endpoints
 
-The following custom endpoints are automatically opened for you:
+The plugin provides the following custom endpoints. The Stripe REST proxy is registered only when the `rest` option enables it:
 
-| Endpoint               | Method | Description                                                                                                                                                                                                                                |
-| ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/stripe/rest`     | `POST` | Proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. See the [REST Proxy](#stripe-rest-proxy) section for more details. |
-| `/api/stripe/webhooks` | `POST` | Handles all Stripe webhook events                                                                                                                                                                                                          |
+| Endpoint               | Method | Description                                                                                                                                                                                                                                       |
+| ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/stripe/rest`     | `POST` | When enabled, proxies allowlisted [Stripe REST API](https://stripe.com/docs/api) methods behind [Payload access control](https://payloadcms.com/docs/access-control/overview). See the [REST Proxy](#stripe-rest-proxy) section for more details. |
+| `/api/stripe/webhooks` | `POST` | Handles all Stripe webhook events                                                                                                                                                                                                                 |
 
 ##### Stripe REST Proxy
 
-If `rest` is true, proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. This flag should only be used for local development, see the security note below for more information.
+Enable the REST proxy with an explicit allowlist of exact Stripe method names. Omit `rest` to disable the endpoint. Requests require an authenticated user and default to Payload admin access; provide `access` to use a custom access callback. Requests for methods outside the allowlist are rejected before reaching Stripe.
+
+```ts
+stripePlugin({
+  rest: {
+    allowedMethods: ['subscriptions.list'],
+    // access: async ({ req }) => Boolean(req.user),
+  },
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+})
+```
+
+The old boolean forms are no longer accepted. Replace `rest: true` with an explicit object configuration, or omit `rest` to disable the endpoint.
 
 ```ts
 const res = await fetch(`/api/stripe/rest`, {
@@ -97,7 +109,7 @@ const res = await fetch(`/api/stripe/rest`, {
     // Authorization: `JWT ${token}` // NOTE: do this if not in a browser (i.e. curl or Postman)
   },
   body: JSON.stringify({
-    stripeMethod: 'stripe.subscriptions.list',
+    stripeMethod: 'subscriptions.list',
     stripeArgs: [
       {
         customer: 'abc',
@@ -120,7 +132,7 @@ config.
 <Banner type="warning">
   **Warning:**
 
-Opening the REST proxy endpoint in production is a potential security risk. Authenticated users will have open access to the Stripe REST API. In production, open your own endpoint and use the [stripeProxy](#node) function to proxy the Stripe API server-side.
+Opening the REST proxy endpoint in production is a potential security risk. Keep `allowedMethods` narrowly scoped and ensure the default admin access or your custom `access` callback is appropriate for every allowed method. For server-side use, consider the [stripeProxy](#node) function instead.
 
 </Banner>
 

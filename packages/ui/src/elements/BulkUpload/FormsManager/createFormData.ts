@@ -1,7 +1,7 @@
 import type { CollectionSlug, FormState } from 'payload'
 
 import { serialize } from 'object-to-formdata'
-import { reduceFieldsToValues } from 'payload/shared'
+import { reduceFieldsToValues, uploadRequiresServerValidation } from 'payload/shared'
 
 import type { UploadHandlersContext } from '../../../providers/UploadHandlers/index.js'
 
@@ -10,6 +10,7 @@ export async function createFormData(
   overrides: Record<string, any> = {},
   collectionSlug: CollectionSlug,
   uploadHandler: ReturnType<UploadHandlersContext['getUploadHandler']>,
+  allowRestrictedFileTypes?: boolean,
 ) {
   const data = reduceFieldsToValues(formState, true)
   let file = data?.file
@@ -18,7 +19,15 @@ export async function createFormData(
     delete data.file
   }
 
-  if (file && typeof uploadHandler === 'function') {
+  if (
+    file &&
+    typeof uploadHandler === 'function' &&
+    !uploadRequiresServerValidation({
+      allowRestrictedFileTypes,
+      filename: file.name,
+      mimeType: file.type,
+    })
+  ) {
     let filename = file.name
 
     const clientUploadContext = await uploadHandler({

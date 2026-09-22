@@ -27,8 +27,9 @@ export const getUserTenantIDs = <IDType extends number | string>(
     (Array.isArray(user[tenantsArrayFieldName]) ? user[tenantsArrayFieldName] : [])?.reduce<
       IDType[]
     >((acc, row) => {
-      if (row[tenantsArrayTenantFieldName]) {
-        acc.push(extractID<IDType>(row[tenantsArrayTenantFieldName] as Tenant<IDType>))
+      const tenantRow = row[tenantsArrayTenantFieldName] as Tenant<IDType>
+      if (tenantRow !== undefined && tenantRow !== null) {
+        acc.push(extractID(tenantRow))
       }
 
       return acc

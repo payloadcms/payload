@@ -4,6 +4,7 @@ import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { unflattenData } from '../../../utilities/unflattenData.js'
 import { promise } from './promise.js'
 
 type Args<T> = {
@@ -18,9 +19,11 @@ type Args<T> = {
    * The original data (not modified by any hooks)
    */
   doc: T
+  docForHooks?: T
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
+  onFieldAccess?: (args: { accessResult: boolean; path: string }) => void
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
@@ -45,8 +48,10 @@ export const traverseFields = async <T>({
   context,
   data,
   doc,
+  docForHooks,
   fields,
   global,
+  onFieldAccess,
   operation,
   overrideAccess,
   parentIndexPath,
@@ -57,6 +62,7 @@ export const traverseFields = async <T>({
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
+  unflattenData(siblingData)
   const promises: Promise<void>[] = []
 
   fields.forEach((field, fieldIndex) => {
@@ -68,9 +74,11 @@ export const traverseFields = async <T>({
         context,
         data,
         doc,
+        docForHooks,
         field,
         fieldIndex,
         global,
+        onFieldAccess,
         operation,
         overrideAccess,
         parentIndexPath,

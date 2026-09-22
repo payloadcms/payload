@@ -7,7 +7,8 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import { omitAPIKey } from '../../auth/baseFields/apiKey/index.js'
+import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
@@ -21,7 +22,7 @@ import { miniChalk } from '../../utilities/miniChalk.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultCollectionEndpoints } from '../endpoints/index.js'
+import { defaultCollectionEndpoints, duplicateEndpoint } from '../endpoints/index.js'
 import {
   addDefaultsToAuthConfig,
   addDefaultsToCollectionConfig,
@@ -110,6 +111,11 @@ export const sanitizeCollection = async (
     validRelationships,
   })
 
+  if (sanitized.auth) {
+    // disable duplicate for auth enabled collections by default
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
+  }
+
   if (sanitized.endpoints !== false) {
     if (!sanitized.endpoints) {
       sanitized.endpoints = []
@@ -118,6 +124,14 @@ export const sanitizeCollection = async (
     if (sanitized.auth) {
       for (const endpoint of authCollectionEndpoints) {
         sanitized.endpoints.push(endpoint)
+      }
+
+      if (
+        typeof sanitized.auth === 'object' &&
+        typeof sanitized.auth.useAPIKey === 'object' &&
+        sanitized.auth.useAPIKey.reveal === true
+      ) {
+        sanitized.endpoints.push(apiKeyRevealEndpoint)
       }
     }
 
@@ -128,7 +142,9 @@ export const sanitizeCollection = async (
     }
 
     for (const endpoint of defaultCollectionEndpoints) {
-      sanitized.endpoints.push(endpoint)
+      if (endpoint !== duplicateEndpoint || sanitized.disableDuplicate !== true) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
   }
 
@@ -300,9 +316,6 @@ export const sanitizeCollection = async (
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
 
-    // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
-
     if (sanitized.auth.loginWithUsername) {
       if (sanitized.auth.loginWithUsername === true) {
         sanitized.auth.loginWithUsername = addDefaultsToLoginWithUsernameConfig({})
@@ -325,7 +338,14 @@ export const sanitizeCollection = async (
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
-    sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+    if (sanitized.auth.useAPIKey) {
+      sanitized.hooks!.beforeRead!.unshift(omitAPIKey)
+    }
+
+    sanitized.fields = mergeBaseFields(
+      sanitized.fields,
+      getBaseAuthFields(sanitized.auth, sanitized.fields),
+    )
   }
 
   if (collection?.admin?.pagination?.limits?.length) {

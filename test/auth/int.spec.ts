@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type {
   BasePayload,
   EmailFieldValidation,
@@ -10,21 +11,23 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { getFieldsToSign } from 'payload'
+import { createLocalReq, Forbidden, getFieldsToSign, traverseFields } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-import type { ApiKey } from './payload-types.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { transformForWrite } from '../../packages/drizzle/src/transform/write/index.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
+  preferencesSlug,
   publicUsersSlug,
   saveToJWTKey,
   slug,
@@ -45,6 +48,116 @@ describe('Auth', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('Preference updates', () => {
+    const key = 'display-settings'
+    const createdUserIDs: (number | string)[] = []
+    const createdPreferenceIDs: (number | string)[] = []
+    let owner: User
+    let otherUser: User
+    let ownerPreferenceID: number | string
+    let otherPreferenceID: number | string
+    let ownerToken: string
+
+    beforeAll(async () => {
+      const firstUser = await payload.create({
+        collection: slug,
+        data: { email: 'preferences-owner@example.com', password },
+      })
+      createdUserIDs.push(firstUser.id)
+      owner = { ...firstUser, collection: slug }
+
+      const secondUser = await payload.create({
+        collection: slug,
+        data: { email: 'preferences-other@example.com', password },
+      })
+      createdUserIDs.push(secondUser.id)
+      otherUser = { ...secondUser, collection: slug }
+
+      const login = await payload.login({
+        collection: slug,
+        data: { email: firstUser.email, password },
+      })
+      ownerToken = login.token!
+    })
+
+    beforeEach(async () => {
+      for (const user of [owner, otherUser]) {
+        const preference = await payload.create({
+          collection: preferencesSlug,
+          data: { key, value: { theme: 'light' } },
+          user,
+        })
+        createdPreferenceIDs.push(preference.id)
+      }
+      ;[ownerPreferenceID, otherPreferenceID] = createdPreferenceIDs
+    })
+
+    afterEach(async () => {
+      for (const id of createdPreferenceIDs) {
+        await payload.delete({ collection: preferencesSlug, id })
+      }
+      createdPreferenceIDs.length = 0
+    })
+
+    afterAll(async () => {
+      for (const id of createdUserIDs) {
+        await payload.delete({ collection: slug, id })
+      }
+    })
+
+    it('should update an owned preference by ID', async () => {
+      const response = await restClient.PATCH(`/${preferencesSlug}/${ownerPreferenceID}`, {
+        body: JSON.stringify({ value: { theme: 'dark' } }),
+        headers: { Authorization: `JWT ${ownerToken}` },
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(result.doc.id).toBe(ownerPreferenceID)
+      expect(result.doc.value).toEqual({ theme: 'dark' })
+    })
+
+    it('should not update or return another user preference by ID', async () => {
+      const response = await restClient.PATCH(`/${preferencesSlug}/${otherPreferenceID}`, {
+        body: JSON.stringify({ value: { theme: 'dark' } }),
+        headers: { Authorization: `JWT ${ownerToken}` },
+      })
+      const result = await response.json()
+      const unchanged = await payload.findByID({
+        collection: preferencesSlug,
+        depth: 0,
+        id: otherPreferenceID,
+      })
+
+      expect(response.status).toBe(403)
+      expect(result.doc).toBeUndefined()
+      expect(unchanged.value).toEqual({ theme: 'light' })
+      expect(unchanged.user).toEqual({ relationTo: slug, value: otherUser.id })
+    })
+
+    it('should only update and return owned preferences in a bulk update', async () => {
+      const response = await restClient.PATCH(`/${preferencesSlug}`, {
+        body: JSON.stringify({ value: { theme: 'dark' } }),
+        headers: { Authorization: `JWT ${ownerToken}` },
+        query: { where: { key: { equals: key } } },
+      })
+      const result = await response.json()
+      const unchanged = await payload.findByID({
+        collection: preferencesSlug,
+        depth: 0,
+        id: otherPreferenceID,
+      })
+
+      expect(response.status).toBe(200)
+      expect(result.errors).toEqual([])
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0].id).toBe(ownerPreferenceID)
+      expect(result.docs[0].value).toEqual({ theme: 'dark' })
+      expect(unchanged.value).toEqual({ theme: 'light' })
+      expect(unchanged.user).toEqual({ relationTo: slug, value: otherUser.id })
+    })
   })
 
   describe('GraphQL - admin user', () => {
@@ -90,6 +203,290 @@ describe('Auth', () => {
   })
 
   describe('REST - admin user', () => {
+    describe('password hashes', () => {
+      const createdUserIDs: Array<number | string> = []
+
+      afterEach(async () => {
+        for (const id of createdUserIDs) {
+          await payload.delete({ collection: slug, id })
+        }
+        createdUserIDs.length = 0
+      })
+
+      it('should update an existing password hash after login', async () => {
+        const testEmail = 'existing-password-hash@example.com'
+        const testPassword = 'test-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = crypto
+          .pbkdf2Sync(testPassword, existingSalt, 25000, 512, 'sha256')
+          .toString('hex')
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+          id: user.id,
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+            salt: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).not.toBe(existingHash)
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+        expect(updatedUser?.salt).not.toBe(existingSalt)
+      })
+
+      it('should preserve a password changed during login', async () => {
+        const testEmail = 'password-change-during-login@example.com'
+        const testPassword = 'test-password'
+        const changedPassword = 'changed-password'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = crypto
+          .pbkdf2Sync(testPassword, existingSalt, 25000, 512, 'sha256')
+          .toString('hex')
+        const changedSalt = crypto.randomBytes(32).toString('hex')
+        const changedHash = `pbkdf2-sha256-v1:${crypto
+          .pbkdf2Sync(changedPassword, changedSalt, 600000, 32, 'sha256')
+          .toString('hex')}`
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+          id: user.id,
+        })
+
+        const collectionConfig = payload.config.collections.find(
+          ({ slug: collectionSlug }) => collectionSlug === slug,
+        )!
+        const maxLoginAttempts = collectionConfig.auth.maxLoginAttempts
+        const originalUpdateOne = payload.db.updateOne
+        let shouldChangePassword = true
+
+        collectionConfig.auth.maxLoginAttempts = 0
+        payload.db.updateOne = async (args) => {
+          if (
+            shouldChangePassword &&
+            args.collection === slug &&
+            typeof args.data.hash === 'string' &&
+            args.data.hash.startsWith('pbkdf2-sha256-v1:')
+          ) {
+            shouldChangePassword = false
+            // Shares the login transaction so this write is not blocked by its row lock
+            await originalUpdateOne.call(payload.db, {
+              collection: slug,
+              data: {
+                hash: changedHash,
+                salt: changedSalt,
+              },
+              id: user.id,
+              req: args.req,
+            })
+          }
+
+          return originalUpdateOne.call(payload.db, args)
+        }
+
+        try {
+          await payload.login({
+            collection: slug,
+            data: {
+              email: testEmail,
+              password: testPassword,
+            },
+          })
+        } finally {
+          payload.db.updateOne = originalUpdateOne
+          collectionConfig.auth.maxLoginAttempts = maxLoginAttempts
+        }
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+            salt: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toBe(changedHash)
+        expect(updatedUser?.salt).toBe(changedSalt)
+      })
+
+      it.runIf(process.env.PAYLOAD_DATABASE === 'sqlite')(
+        'should preserve a password changed after updating an existing hash',
+        async () => {
+          const testEmail = 'password-change-after-hash-update@example.com'
+          const testPassword = 'test-password'
+          const changedPassword = 'changed-password'
+          const existingSalt = crypto.randomBytes(32).toString('hex')
+          const existingHash = crypto
+            .pbkdf2Sync(testPassword, existingSalt, 25000, 512, 'sha256')
+            .toString('hex')
+          const changedSalt = crypto.randomBytes(32).toString('hex')
+          const changedHash = `pbkdf2-sha256-v1:${crypto
+            .pbkdf2Sync(changedPassword, changedSalt, 600000, 32, 'sha256')
+            .toString('hex')}`
+          const user = await payload.create({
+            collection: slug,
+            data: {
+              email: testEmail,
+              password: testPassword,
+            },
+          })
+          createdUserIDs.push(user.id)
+
+          await payload.db.updateOne({
+            collection: slug,
+            data: {
+              hash: existingHash,
+              salt: existingSalt,
+            },
+            id: user.id,
+          })
+
+          const originalUpdateOne = payload.db.updateOne
+          let shouldChangePassword = true
+
+          payload.db.updateOne = async (args) => {
+            const updatedDoc = await originalUpdateOne.call(payload.db, args)
+
+            if (
+              shouldChangePassword &&
+              args.collection === slug &&
+              typeof args.data.hash === 'string' &&
+              args.data.hash.startsWith('pbkdf2-sha256-v1:') &&
+              'where' in args
+            ) {
+              shouldChangePassword = false
+              await originalUpdateOne.call(payload.db, {
+                collection: slug,
+                data: {
+                  hash: changedHash,
+                  salt: changedSalt,
+                },
+                id: user.id,
+              })
+            }
+
+            return updatedDoc
+          }
+
+          try {
+            await payload.login({
+              collection: slug,
+              data: {
+                email: testEmail,
+                password: testPassword,
+              },
+            })
+          } finally {
+            payload.db.updateOne = originalUpdateOne
+          }
+
+          const updatedUser = await payload.db.findOne({
+            collection: slug,
+            select: {
+              hash: true,
+              salt: true,
+            },
+            where: {
+              id: { equals: user.id },
+            },
+          })
+
+          expect(updatedUser?.hash).toBe(changedHash)
+          expect(updatedUser?.salt).toBe(changedSalt)
+        },
+      )
+
+      it('should update an existing password hash when the password is shorter than required', async () => {
+        const testEmail = 'short-existing-password@example.com'
+        const testPassword = 'a'
+        const existingSalt = crypto.randomBytes(32).toString('hex')
+        const existingHash = crypto
+          .pbkdf2Sync(testPassword, existingSalt, 25000, 512, 'sha256')
+          .toString('hex')
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: 'test-password',
+          },
+        })
+        createdUserIDs.push(user.id)
+
+        await payload.db.updateOne({
+          collection: slug,
+          data: {
+            hash: existingHash,
+            salt: existingSalt,
+          },
+          id: user.id,
+        })
+
+        await payload.login({
+          collection: slug,
+          data: {
+            email: testEmail,
+            password: testPassword,
+          },
+        })
+
+        const updatedUser = await payload.db.findOne({
+          collection: slug,
+          select: {
+            hash: true,
+            salt: true,
+          },
+          where: {
+            id: { equals: user.id },
+          },
+        })
+
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+        expect(updatedUser?.salt).not.toBe(existingSalt)
+      })
+    })
+
     it('should prevent registering a new first user', async () => {
       const response = await restClient.POST(`/${slug}/first-register`, {
         body: JSON.stringify({
@@ -100,6 +497,102 @@ describe('Auth', () => {
       })
 
       expect(response.status).toBe(403)
+    })
+
+    it('should handle constrained session updates', async () => {
+      const marker = 'constrainedSessionUpdate'
+      const inheritedMarker = 'constrainedInheritedSessionUpdate'
+      const protoMarker = 'constrainedProtoUpdate'
+      const constructorMarker = 'constrainedConstructorUpdate'
+      const prototypeMarker = 'constrainedPrototypeUpdate'
+      const inheritedTarget = Object.prototype.toString as unknown as Record<string, unknown>
+      const originalDescriptor = Object.getOwnPropertyDescriptor(Object.prototype, marker)
+      const originalInheritedDescriptor = Object.getOwnPropertyDescriptor(
+        inheritedTarget,
+        inheritedMarker,
+      )
+      const createConstrainedData = (): Record<string, unknown> =>
+        JSON.parse(`{
+          "__proto__": {},
+          "constructor": {},
+          "prototype": {},
+          "__proto__.${protoMarker}": "local",
+          "constructor.${constructorMarker}": "local",
+          "prototype.${prototypeMarker}": "local",
+          "toString.${inheritedMarker}": "local"
+        }`) as Record<string, unknown>
+      const sharedData = createConstrainedData()
+      const drizzleData = createConstrainedData()
+      const sharedProtoTarget = sharedData['__proto__'] as Record<string, unknown>
+      const sharedConstructorTarget = sharedData['constructor'] as Record<string, unknown>
+      const sharedPrototypeTarget = sharedData['prototype'] as Record<string, unknown>
+      const drizzleProtoTarget = drizzleData['__proto__'] as Record<string, unknown>
+      const drizzleConstructorTarget = drizzleData['constructor'] as Record<string, unknown>
+      const drizzlePrototypeTarget = drizzleData['prototype'] as Record<string, unknown>
+      let testError: Error | undefined
+
+      try {
+        traverseFields({ fields: [], fillEmpty: false, ref: sharedData })
+        transformForWrite({
+          adapter: payload.db as DrizzleAdapter,
+          data: drizzleData,
+          fields: [],
+          tableName: 'session_users',
+        })
+
+        const response = await restClient.POST('/session-users/first-register', {
+          body: JSON.stringify({
+            email: 'session-user@example.com',
+            password: 'test-password',
+            sessions: {
+              $push: [
+                { [`__proto__.${marker}`]: 'local' },
+                { [`__proto__.${marker}`]: 'local' },
+                { [`__proto__.${marker}`]: 'local' },
+                { [`toString.${inheritedMarker}`]: 'local' },
+              ],
+            },
+          }),
+        })
+        const { totalDocs } = await payload.count({ collection: 'session-users' })
+
+        expect(response.status).toBe(400)
+        expect(totalDocs).toBe(0)
+        expect(sharedProtoTarget).not.toHaveProperty(protoMarker)
+        expect(sharedConstructorTarget).toHaveProperty(constructorMarker, 'local')
+        expect(sharedPrototypeTarget).toHaveProperty(prototypeMarker, 'local')
+        expect(drizzleProtoTarget).not.toHaveProperty(protoMarker)
+        expect(drizzleConstructorTarget).toHaveProperty(constructorMarker, 'local')
+        expect(drizzlePrototypeTarget).toHaveProperty(prototypeMarker, 'local')
+        expect(Object.hasOwn(sharedData, 'toString')).toBe(true)
+        expect(sharedData['toString']).toHaveProperty(inheritedMarker, 'local')
+        expect(Object.hasOwn(drizzleData, 'toString')).toBe(true)
+        expect(drizzleData['toString']).toHaveProperty(inheritedMarker, 'local')
+        expect(Object.prototype).not.toHaveProperty(marker)
+        expect(inheritedTarget).not.toHaveProperty(inheritedMarker)
+      } catch (error) {
+        testError = error instanceof Error ? error : new Error(String(error))
+      } finally {
+        if (originalDescriptor) {
+          Object.defineProperty(Object.prototype, marker, originalDescriptor)
+        } else {
+          delete (Object.prototype as Record<string, unknown>)[marker]
+        }
+        if (originalInheritedDescriptor) {
+          Object.defineProperty(inheritedTarget, inheritedMarker, originalInheritedDescriptor)
+        } else {
+          delete inheritedTarget[inheritedMarker]
+        }
+      }
+
+      expect(Object.getOwnPropertyDescriptor(Object.prototype, marker)).toEqual(originalDescriptor)
+      expect(Object.getOwnPropertyDescriptor(inheritedTarget, inheritedMarker)).toEqual(
+        originalInheritedDescriptor,
+      )
+
+      if (testError) {
+        throw testError
+      }
     })
 
     it('should login a user successfully', async () => {
@@ -117,6 +610,32 @@ describe('Auth', () => {
       expect(data.user.collection).toBe(slug)
       expect(data.user._strategy).toBeDefined()
       expect(data.token).toBeDefined()
+    })
+
+    it('should return a user with read access from the login operation', async () => {
+      const testEmail = `login-field-access-${uuid()}@example.com`
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: testEmail,
+          password,
+          restrictedField: 'restricted value',
+          roles: ['editor'],
+        } as any,
+      })
+
+      try {
+        const response = await restClient.POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: testEmail, password }),
+        })
+        const authenticated = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(authenticated.user.id).toBe(user.id)
+        expect(authenticated.user).not.toHaveProperty('restrictedField')
+      } finally {
+        await payload.delete({ id: user.id, collection: slug })
+      }
     })
 
     it('should not lose data if login throws', async () => {
@@ -216,6 +735,16 @@ describe('Auth', () => {
 
         expect(result.id).toStrictEqual(loggedInUser.id)
         expect(result.password).toBeUndefined()
+
+        const reLogin = await restClient.POST(`/${slug}/login`, {
+          body: JSON.stringify({
+            email,
+            password: 'test',
+          }),
+        })
+        const reLoginData = await reLogin.json()
+        token = reLoginData.token
+        loggedInUser = reLoginData.user
       })
 
       it('should return a logged in user from /me', async () => {
@@ -318,15 +847,16 @@ describe('Auth', () => {
 
         const response = await restClient.GET(`/${slug}/me`, {
           headers: {
-            Authorization: `${slug} API-Key ${user?.apiKey}`,
+            Authorization: `${slug} API-Key ${apiKey}`,
           },
         })
 
         const data = await response.json()
 
         expect(response.status).toBe(200)
+        expect(data.user.id).toStrictEqual(user.id)
         expect(data.user.email).toBeDefined()
-        expect(data.user.apiKey).toStrictEqual(apiKey)
+        expect(data.user).not.toHaveProperty('apiKey')
       })
 
       it('should refresh a token and reset its expiration', async () => {
@@ -340,6 +870,92 @@ describe('Auth', () => {
 
         expect(response.status).toBe(200)
         expect(data.refreshedToken).toBeDefined()
+      })
+
+      describe('refresh collection identity', () => {
+        const alternateUserIDs: (number | string)[] = []
+
+        beforeAll(async () => {
+          payload.db.allowIDOnCreate = true
+          payload.config.db.allowIDOnCreate = true
+
+          const alternateUser = await payload.create({
+            collection: publicUsersSlug,
+            data: {
+              id: loggedInUser!.id,
+              email: 'refresh-collection@example.com',
+              password,
+            },
+          })
+
+          alternateUserIDs.push(alternateUser.id)
+        })
+
+        afterAll(async () => {
+          for (const id of alternateUserIDs) {
+            await payload.delete({
+              id,
+              collection: publicUsersSlug,
+            })
+          }
+
+          payload.db.allowIDOnCreate = false
+          payload.config.db.allowIDOnCreate = false
+        })
+
+        it('should create the alternate user with the same ID as the logged-in user', () => {
+          expect(alternateUserIDs[0]).toStrictEqual(loggedInUser!.id)
+        })
+
+        it('should not refresh through a different auth collection via REST', async () => {
+          const response = await restClient.POST(`/${publicUsersSlug}/refresh-token`, {
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          expect(response.status).toBe(403)
+        })
+
+        it('should not refresh through a different auth collection via GraphQL', async () => {
+          const response = await restClient.GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `mutation {
+                refreshTokenPublicUser {
+                  refreshedToken
+                }
+              }`,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          const result = await response.json()
+
+          expect(result.data.refreshTokenPublicUser).toBeNull()
+          expect(result.errors[0].extensions.statusCode).toBe(403)
+        })
+
+        it('should refresh through the authenticated collection via GraphQL', async () => {
+          const response = await restClient.GRAPHQL_POST({
+            body: JSON.stringify({
+              query: `mutation {
+                refreshTokenUser {
+                  refreshedToken
+                }
+              }`,
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+            },
+          })
+
+          const result = await response.json()
+
+          expect(result.errors).toBeUndefined()
+          expect(result.data.refreshTokenUser.refreshedToken).toBeDefined()
+        })
       })
 
       it('should refresh a token and receive an up-to-date user', async () => {
@@ -386,7 +1002,7 @@ describe('Auth', () => {
         expect(raw?.apiKey).not.toContain('-') // still ciphertext
       })
 
-      it('returns a user with decrypted apiKey after refresh', async () => {
+      it('omits apiKey after refresh', async () => {
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
@@ -398,7 +1014,7 @@ describe('Auth', () => {
           })
           .then((r) => r.json())
 
-        expect(res.user.apiKey).toMatch(/[0-9a-f-]{36}/) // UUID string
+        expect(res.user).not.toHaveProperty('apiKey')
       })
 
       it('should allow a user to be created', async () => {
@@ -647,18 +1263,18 @@ describe('Auth', () => {
             body: JSON.stringify({ value: { data: 'admin-sensitive' } }),
             headers: { Authorization: `JWT ${token}` },
           })
-          createdIDs.push(((await adminPref.json()) as any).doc.id)
+          createdIDs.push((await adminPref.json()).doc.id)
 
           // Create and verify public user
           const userRes = await restClient.POST(`/${publicUsersSlug}`, {
             body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
             headers: { Authorization: `JWT ${token}` },
           })
-          publicUserId = ((await userRes.json()) as any).doc.id
+          publicUserId = (await userRes.json()).doc.id
 
           const user = await payload.findByID({
-            collection: publicUsersSlug,
             id: publicUserId,
+            collection: publicUsersSlug,
             showHiddenFields: true,
           })
           await restClient.POST(`/${publicUsersSlug}/verify/${(user as any)._verificationToken}`)
@@ -667,24 +1283,24 @@ describe('Auth', () => {
           const login = await restClient.POST(`/${publicUsersSlug}/login`, {
             body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
           })
-          publicUserToken = ((await login.json()) as any).token
+          publicUserToken = (await login.json()).token
 
           // Public user creates preference
           const publicPref = await restClient.POST(`/payload-preferences/${publicKey}`, {
             body: JSON.stringify({ value: { data: 'public-data' } }),
             headers: { Authorization: `JWT ${publicUserToken}` },
           })
-          createdIDs.push(((await publicPref.json()) as any).doc.id)
+          createdIDs.push((await publicPref.json()).doc.id)
         })
 
         afterAll(async () => {
           await Promise.all(
             createdIDs.map((id) =>
-              payload.delete({ collection: 'payload-preferences', id }).catch(() => {}),
+              payload.delete({ id, collection: 'payload-preferences' }).catch(() => {}),
             ),
           )
           if (publicUserId) {
-            await payload.delete({ collection: publicUsersSlug, id: publicUserId }).catch(() => {})
+            await payload.delete({ id: publicUserId, collection: publicUsersSlug }).catch(() => {})
           }
         })
 
@@ -944,16 +1560,16 @@ describe('Auth', () => {
 
           const manuallyReleaseLock = new Date(Date.now() - 605 * 1000).toISOString()
           await payload.db.updateOne({
-            collection: slug,
             id: lockedUser.docs[0]!.id,
+            collection: slug,
             data: {
               lockUntil: manuallyReleaseLock,
             },
           })
 
           const userAfterUpdate = await payload.findByID({
-            collection: slug,
             id: lockedUser.docs[0]!.id,
+            collection: slug,
             showHiddenFields: true,
           })
 
@@ -1001,6 +1617,204 @@ describe('Auth', () => {
       expect(response.status).toBe(200)
     })
 
+    it('should enforce the minimum request interval when reserving an email', async () => {
+      const authConfig = payload.collections[slug].config.auth
+      const originalMinRequestInterval = authConfig.forgotPassword.minRequestInterval
+      const users = await Promise.all(
+        ['repeated', 'disabled-email', 'after-reset'].map((name) =>
+          payload.create({
+            collection: slug,
+            data: {
+              email: `forgot-password-${name}-${uuid()}@example.com`,
+              password,
+            },
+          }),
+        ),
+      )
+      const sendEmail = vitest.spyOn(payload.email, 'sendEmail').mockResolvedValue(undefined)
+      const collectionHooks = payload.collections[slug].config.hooks
+      const originalBeforeOperation = collectionHooks.beforeOperation
+      const originalBeforeChange = collectionHooks.beforeChange
+      const originalAfterChange = collectionHooks.afterChange
+      const beforeChange = vitest.fn()
+      const afterChange = vitest.fn()
+      const outerReq = { transactionID: 'outer-transaction' }
+      let shouldDisableEmail = false
+      collectionHooks.beforeOperation = [
+        ...(originalBeforeOperation ?? []),
+        ({ args }) => (shouldDisableEmail ? { ...args, disableEmail: true } : args),
+      ]
+      collectionHooks.beforeChange = [
+        ...(originalBeforeChange ?? []),
+        ({ data, req }) => {
+          beforeChange(req.transactionID === outerReq.transactionID)
+          return data
+        },
+      ]
+      collectionHooks.afterChange = [
+        ...(originalAfterChange ?? []),
+        ({ doc }) => {
+          afterChange()
+          return doc
+        },
+      ]
+      authConfig.forgotPassword.minRequestInterval = 300000
+
+      try {
+        const firstToken = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[0]!.email },
+          req: outerReq,
+        })
+        const secondToken = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[0]!.email },
+        })
+        expect(firstToken).not.toBeNull()
+        expect(beforeChange).toHaveBeenCalledWith(true)
+        expect(afterChange).toHaveBeenCalledTimes(1)
+        expect(outerReq.transactionID).toBe('outer-transaction')
+        expect(secondToken).toBeNull()
+
+        const tokenWithDisabledEmail = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[0]!.email },
+          disableEmail: true,
+        })
+        expect(tokenWithDisabledEmail).not.toBeNull()
+
+        beforeChange.mockClear()
+        shouldDisableEmail = true
+        await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[1]!.email },
+          req: outerReq,
+        })
+        expect(beforeChange).toHaveBeenCalledWith(true)
+        shouldDisableEmail = false
+        const tokenAfterDisabledEmail = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[1]!.email },
+        })
+        expect(tokenAfterDisabledEmail).not.toBeNull()
+
+        const resetToken = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[2]!.email },
+        })
+        await payload.resetPassword({
+          collection: slug,
+          data: {
+            password: `${password}-after-reset`,
+            token: resetToken,
+          },
+          overrideAccess: true,
+        })
+        const tokenAfterReset = await payload.forgotPassword({
+          collection: slug,
+          data: { email: users[2]!.email },
+        })
+        expect(tokenAfterReset).toBeNull()
+        expect(sendEmail).toHaveBeenCalledTimes(3)
+      } finally {
+        authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
+        collectionHooks.beforeOperation = originalBeforeOperation
+        collectionHooks.beforeChange = originalBeforeChange
+        collectionHooks.afterChange = originalAfterChange
+        sendEmail.mockRestore()
+        await Promise.all(users.map((user) => payload.delete({ id: user.id, collection: slug })))
+      }
+    })
+
+    it('should serialize concurrent reset email requests', async () => {
+      const authConfig = payload.collections[slug].config.auth
+      const originalMinRequestInterval = authConfig.forgotPassword.minRequestInterval
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: `forgot-password-concurrent-${uuid()}@example.com`,
+          password,
+        },
+      })
+      let releaseFirstEmail: () => void = () => undefined
+      const firstEmailPending = new Promise<void>((resolve) => {
+        releaseFirstEmail = resolve
+      })
+      const sendEmail = vitest
+        .spyOn(payload.email, 'sendEmail')
+        .mockImplementationOnce(() => firstEmailPending)
+        .mockResolvedValue(undefined)
+
+      authConfig.forgotPassword.minRequestInterval = 300000
+
+      try {
+        const firstRequest = payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+        })
+
+        await vitest.waitFor(() => expect(sendEmail).toHaveBeenCalledTimes(1))
+
+        const secondRequest = payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+        })
+
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        releaseFirstEmail()
+
+        const [firstToken, secondToken] = await Promise.all([firstRequest, secondRequest])
+
+        expect(firstToken).not.toBeNull()
+        expect(secondToken).toBeNull()
+        expect(sendEmail).toHaveBeenCalledTimes(1)
+      } finally {
+        authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
+        releaseFirstEmail()
+        sendEmail.mockRestore()
+        await payload.delete({ id: user.id, collection: slug })
+      }
+    })
+
+    it('should release the request interval after an email error', async () => {
+      const authConfig = payload.collections[slug].config.auth
+      const originalMinRequestInterval = authConfig.forgotPassword.minRequestInterval
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: `forgot-password-email-error-${uuid()}@example.com`,
+          password,
+        },
+      })
+      const sendEmail = vitest
+        .spyOn(payload.email, 'sendEmail')
+        .mockRejectedValueOnce(new Error('Email provider unavailable'))
+        .mockResolvedValue(undefined)
+
+      authConfig.forgotPassword.minRequestInterval = 300000
+
+      try {
+        await expect(
+          payload.forgotPassword({
+            collection: slug,
+            data: { email: user.email },
+          }),
+        ).rejects.toThrow('Email provider unavailable')
+
+        const retryToken = await payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+        })
+
+        expect(retryToken).not.toBeNull()
+        expect(sendEmail).toHaveBeenCalledTimes(2)
+      } finally {
+        authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
+        sendEmail.mockRestore()
+        await payload.delete({ id: user.id, collection: slug })
+      }
+    })
+
     it('should allow reset password', async () => {
       const token = await payload.forgotPassword({
         collection: 'users',
@@ -1022,6 +1836,67 @@ describe('Auth', () => {
         .catch((e) => console.error(e))
 
       expect(result).toBeTruthy()
+    })
+
+    it('should return a user with read access from the password reset operation', async () => {
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: `reset-field-access-${uuid()}@example.com`,
+          password,
+          restrictedField: 'restricted value',
+        } as any,
+      })
+
+      try {
+        const token = await payload.forgotPassword({
+          collection: slug,
+          data: { email: user.email },
+          disableEmail: true,
+        })
+        const response = await restClient.POST(`/${slug}/reset-password`, {
+          auth: false,
+          body: JSON.stringify({ password, token }),
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.user.id).toBe(user.id)
+        expect(result.user).not.toHaveProperty('restrictedField')
+      } finally {
+        await payload.delete({ id: user.id, collection: slug })
+      }
+    })
+
+    it('should return a user with read access from the first user registration operation', async () => {
+      // session-users has no seeded users, so first-register succeeds. The created
+      // user is deleted afterward to keep the collection empty for other tests.
+      const sessionUsersSlug = 'session-users'
+      const email = `first-register-field-access-${uuid()}@example.com`
+      let createdUserID: number | string | undefined
+
+      try {
+        const response = await restClient.POST(`/${sessionUsersSlug}/first-register`, {
+          body: JSON.stringify({
+            'confirm-password': password,
+            email,
+            password,
+            restrictedField: 'restricted value',
+          }),
+        })
+        const registered = await response.json()
+
+        createdUserID = registered.user?.id
+
+        expect(response.status).toBe(200)
+        expect(registered.token).toBeDefined()
+        expect(registered.user.email).toBe(email)
+        expect(registered.user).not.toHaveProperty('restrictedField')
+      } finally {
+        if (createdUserID) {
+          await payload.delete({ id: createdUserID, collection: sessionUsersSlug })
+        }
+      }
     })
 
     it('should enforce access control on the me route', async () => {
@@ -1112,6 +1987,7 @@ describe('Auth', () => {
         'resetPasswordExpiration',
         'salt',
         'hash',
+        'resetPasswordRequestedAt',
         'loginAttempts',
         'lockUntil',
         'sessions',
@@ -1166,42 +2042,48 @@ describe('Auth', () => {
 
   describe('API Key', () => {
     it('should authenticate via the correct API key user', async () => {
-      const usersQuery = await payload.find({
+      const firstAPIKey = uuid()
+      const secondAPIKey = uuid()
+      const user1 = await payload.create({
         collection: apiKeysSlug,
+        data: { apiKey: firstAPIKey, enableAPIKey: true },
       })
-
-      const [user1, user2] = usersQuery.docs
+      const user2 = await payload.create({
+        collection: apiKeysSlug,
+        data: { apiKey: secondAPIKey, enableAPIKey: true },
+      })
 
       const success = await restClient
         .GET(`/${apiKeysSlug}/${user2.id}`, {
           headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${secondAPIKey}`,
           },
         })
         .then((res) => res.json())
 
-      expect(success.apiKey).toStrictEqual(user2.apiKey)
+      expect(success.id).toStrictEqual(user2.id)
+      expect(success).not.toHaveProperty('apiKey')
 
       const fail = await restClient.GET(`/${apiKeysSlug}/${user1.id}`, {
         headers: {
-          Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
+          Authorization: `${apiKeysSlug} API-Key ${secondAPIKey}`,
         },
       })
 
       expect(fail.status).toStrictEqual(404)
+
+      await payload.delete({ id: user1.id, collection: apiKeysSlug })
+      await payload.delete({ id: user2.id, collection: apiKeysSlug })
     })
 
     it('should allow authentication with an API key saved with sha1', async () => {
-      const usersQuery = await payload.find({
+      const apiKey = uuid()
+      const user = await payload.create({
         collection: apiKeysSlug,
+        data: { apiKey, enableAPIKey: true },
       })
 
-      const [user] = usersQuery.docs as [ApiKey]
-
-      const sha1Index = crypto
-        .createHmac('sha256', payload.secret)
-        .update(user.apiKey as string)
-        .digest('hex')
+      const sha1Index = crypto.createHmac('sha1', payload.secret).update(apiKey).digest('hex')
 
       await payload.db.updateOne({
         id: user.id,
@@ -1214,12 +2096,15 @@ describe('Auth', () => {
       const response = await restClient
         .GET(`/${apiKeysSlug}/${user?.id}`, {
           headers: {
-            Authorization: `${apiKeysSlug} API-Key ${user?.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
         })
         .then((res) => res.json())
 
       expect(response.id).toStrictEqual(user.id)
+      expect(response).not.toHaveProperty('apiKey')
+
+      await payload.delete({ id: user.id, collection: apiKeysSlug })
     })
 
     it('should not remove an API key from a user when updating other fields', async () => {
@@ -1239,6 +2124,14 @@ describe('Auth', () => {
           enableAPIKey: true,
         },
       })
+      const storedUser = await payload.db.findOne({
+        collection: apiKeysSlug,
+        where: {
+          id: {
+            equals: user.id,
+          },
+        },
+      })
 
       const userResult = await payload.find({
         collection: apiKeysSlug,
@@ -1248,9 +2141,47 @@ describe('Auth', () => {
           },
         },
       })
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toStrictEqual(user.apiKey)
-      expect(userResult.docs[0].apiKey).toStrictEqual(user.apiKey)
+      expect(updatedUser).not.toHaveProperty('apiKey')
+      expect(payload.decrypt(storedUser?.apiKey as string)).toBe(apiKey)
+      expect(userResult.docs[0]).not.toHaveProperty('apiKey')
+      expect(response.user.id).toStrictEqual(user.id)
+    })
+
+    it('should preserve an API key when enableAPIKey is null', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          enableAPIKey: null,
+        },
+      })
+
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.user.id).toStrictEqual(user.id)
     })
 
     it('should disable api key after updating apiKey: null', async () => {
@@ -1280,7 +2211,37 @@ describe('Auth', () => {
         })
         .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toBeNull()
+      expect(updatedUser).not.toHaveProperty('apiKey')
+      expect(response.user).toBeNull()
+    })
+
+    it('should disable api key after updating apiKey to an empty string', async () => {
+      const apiKey = uuid()
+      const user = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          apiKey,
+          enableAPIKey: true,
+        },
+      })
+
+      const updatedUser = await payload.update({
+        id: user.id,
+        collection: apiKeysSlug,
+        data: {
+          apiKey: '',
+        },
+      })
+
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/me`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(updatedUser).not.toHaveProperty('apiKey')
       expect(response.user).toBeNull()
     })
 
@@ -1311,7 +2272,7 @@ describe('Auth', () => {
         })
         .then((res) => res.json())
 
-      expect(updatedUser.apiKey).toStrictEqual(apiKey)
+      expect(updatedUser).not.toHaveProperty('apiKey')
       expect(response.user).toBeNull()
     })
   })
@@ -1441,6 +2402,10 @@ describe('Auth', () => {
         return originalDateNow() - 6 * 60 * 1000
       })
 
+      const authConfig = payload.collections[slug].config.auth
+      const originalMinRequestInterval = authConfig.forgotPassword.minRequestInterval
+      authConfig.forgotPassword.minRequestInterval = 0
+
       let forgot
       try {
         // Call forgotPassword while the mocked Date.now() is active
@@ -1452,6 +2417,7 @@ describe('Auth', () => {
         })
       } finally {
         // Restore the original Date.now() after the forgotPassword call
+        authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
         mockDateNow.mockRestore()
       }
 
@@ -1469,6 +2435,11 @@ describe('Auth', () => {
     })
 
     describe('Login Attempts', () => {
+      const createdLoginAttemptUsers: Array<{
+        collection: typeof publicUsersSlug | typeof slug
+        id: number | string
+      }> = []
+
       async function attemptLogin(email: string, password: string) {
         return payload.login({
           collection: slug,
@@ -1479,6 +2450,72 @@ describe('Auth', () => {
           overrideAccess: false,
         })
       }
+
+      async function createLoginAttemptUser({
+        id,
+        collection = slug,
+        email,
+      }: {
+        collection?: typeof publicUsersSlug | typeof slug
+        email: string
+        id?: string
+      }) {
+        const user = await payload.create({
+          collection,
+          data: {
+            ...(id ? { id } : {}),
+            email,
+            password,
+          },
+        })
+
+        createdLoginAttemptUsers.push({ id: user.id, collection })
+
+        return user
+      }
+
+      async function getLoginAttemptUser({
+        id,
+        collection = slug,
+      }: {
+        collection?: typeof publicUsersSlug | typeof slug
+        id: number | string
+      }) {
+        return await payload.findByID({
+          id,
+          collection,
+          overrideAccess: true,
+          showHiddenFields: true,
+        })
+      }
+
+      async function setLoginAttemptLock({
+        id,
+        collection = slug,
+      }: {
+        collection?: typeof publicUsersSlug | typeof slug
+        id: number | string
+      }) {
+        await payload.db.updateOne({
+          id,
+          collection,
+          data: {
+            lockUntil: new Date(Date.now() + 600 * 1000).toISOString(),
+            loginAttempts: 2,
+          },
+        })
+      }
+
+      afterEach(async () => {
+        for (const { id, collection } of createdLoginAttemptUsers) {
+          await payload.delete({
+            id,
+            collection,
+          })
+        }
+
+        createdLoginAttemptUsers.length = 0
+      })
 
       it('should reset the login attempts after a successful login', async () => {
         // fail 1
@@ -1594,6 +2631,116 @@ describe('Auth', () => {
         const user = userQuery.docs[0]
         expect(user!.loginAttempts).toBe(0)
         expect(user!.lockUntil).toBeNull()
+      })
+
+      it('should allow admin auth users to unlock any auth collection user by default', async () => {
+        const adminUser = await createLoginAttemptUser({ email: `admin-${uuid()}@example.com` })
+        const publicUser = await createLoginAttemptUser({
+          collection: publicUsersSlug,
+          email: `public-${uuid()}@example.com`,
+        })
+
+        await setLoginAttemptLock({ id: publicUser.id, collection: publicUsersSlug })
+
+        const req = await createLocalReq({ user: adminUser }, payload)
+
+        await payload.unlock({
+          collection: publicUsersSlug,
+          data: {
+            email: publicUser.email,
+          } as any,
+          overrideAccess: false,
+          req,
+        })
+
+        const unlockedUser = await getLoginAttemptUser({
+          id: publicUser.id,
+          collection: publicUsersSlug,
+        })
+
+        expect(unlockedUser.loginAttempts).toBe(0)
+        expect(unlockedUser.lockUntil).toBeNull()
+      })
+
+      it('should deny default unlock access to non-admin auth users', async () => {
+        const currentUser = await createLoginAttemptUser({
+          collection: publicUsersSlug,
+          email: `current-${uuid()}@example.com`,
+        })
+        const selectedUser = await createLoginAttemptUser({
+          collection: publicUsersSlug,
+          email: `selected-${uuid()}@example.com`,
+        })
+
+        await setLoginAttemptLock({ id: selectedUser.id, collection: publicUsersSlug })
+
+        const req = await createLocalReq({ user: currentUser }, payload)
+
+        await expect(
+          payload.unlock({
+            collection: publicUsersSlug,
+            data: {
+              email: selectedUser.email,
+            } as any,
+            overrideAccess: false,
+            req,
+          }),
+        ).rejects.toThrow(Forbidden)
+
+        const lockedUser = await getLoginAttemptUser({
+          id: selectedUser.id,
+          collection: publicUsersSlug,
+        })
+
+        expect(lockedUser.loginAttempts).toBe(2)
+        expect(lockedUser.lockUntil).toBeDefined()
+      })
+
+      it('should always unlock after password reset', async () => {
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: `unlock-on-reset-${uuid()}@example.com`,
+            password: 'password-before-reset',
+          },
+        })
+
+        try {
+          await payload.db.updateOne({
+            id: user.id,
+            collection: slug,
+            data: {
+              lockUntil: new Date(Date.now() + 60000).toISOString(),
+              loginAttempts: 2,
+            },
+          })
+
+          const resetToken = await payload.forgotPassword({
+            collection: slug,
+            data: { email: user.email },
+            disableEmail: true,
+          })
+
+          await payload.resetPassword({
+            collection: slug,
+            data: {
+              password: 'password-after-reset',
+              token: resetToken,
+            },
+            overrideAccess: true,
+          })
+
+          const unlockedUser = await payload.findByID({
+            id: user.id,
+            collection: slug,
+            showHiddenFields: true,
+          })
+
+          expect(unlockedUser.loginAttempts).toBe(0)
+          expect(unlockedUser.lockUntil).toBeNull()
+        } finally {
+          await payload.delete({ id: user.id, collection: slug })
+        }
       })
     })
   })
@@ -2017,6 +3164,173 @@ describe('Auth', () => {
 
       // updatedAt should not have changed
       expect(userAfterRefresh?.updatedAt).toEqual(updatedAtAfterLogin)
+    })
+  })
+
+  describe('credential change sessions', () => {
+    const createdUserIDs: Array<number | string> = []
+
+    afterEach(async () => {
+      for (const id of createdUserIDs) {
+        await payload.delete({ id, collection: slug }).catch(() => null)
+      }
+      createdUserIDs.length = 0
+    })
+
+    it('should remove pre-existing sessions after a password reset', async () => {
+      const userEmail = `session-reset-${Date.now()}@example.com`
+
+      const user = await payload.create({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+      createdUserIDs.push(user.id)
+
+      const preReset = await payload.login({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+
+      const preResetSid = jwtDecode<{ sid: string }>(String(preReset.token)).sid
+
+      const resetToken = await payload.forgotPassword({
+        collection: slug,
+        data: { email: userEmail },
+        disableEmail: true,
+      })
+
+      await payload.resetPassword({
+        collection: slug,
+        data: { password: 'new-pw', token: resetToken },
+        overrideAccess: true,
+      })
+
+      const dbUser = await payload.db.find<User>({
+        collection: slug,
+        where: { email: { equals: userEmail } },
+      })
+
+      const remainingSessions = dbUser.docs[0]?.sessions ?? []
+      expect(remainingSessions.find(({ id }) => id === preResetSid)).toBeUndefined()
+
+      const meWithOldToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${preReset.token}` } })
+        .then((res) => res.json())
+      expect(meWithOldToken.user).toBeNull()
+    })
+
+    it('should remove other sessions when a user changes their own password', async () => {
+      const userEmail = `session-change-${Date.now()}@example.com`
+
+      const user = await payload.create({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+      createdUserIDs.push(user.id)
+
+      const currentSession = await restClient
+        .POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: userEmail, password: 'original-pw' }),
+        })
+        .then((res) => res.json())
+
+      const otherSession = await restClient
+        .POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: userEmail, password: 'original-pw' }),
+        })
+        .then((res) => res.json())
+
+      await restClient.PATCH(`/${slug}/${user.id}`, {
+        body: JSON.stringify({ password: 'changed-pw' }),
+        headers: { Authorization: `JWT ${currentSession.token}` },
+      })
+
+      const meWithOtherToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${otherSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithOtherToken.user).toBeNull()
+
+      const meWithCurrentToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${currentSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithCurrentToken.user?.id).toStrictEqual(user.id)
+    })
+
+    it('should remove all sessions when a password is changed without a live session', async () => {
+      const userEmail = `session-admin-change-${Date.now()}@example.com`
+
+      const user = await payload.create({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+      createdUserIDs.push(user.id)
+
+      const existingSession = await payload.login({
+        collection: slug,
+        data: { email: userEmail, password: 'original-pw' },
+      })
+
+      await payload.update({
+        id: user.id,
+        collection: slug,
+        data: { password: 'admin-changed-pw' },
+      })
+
+      const dbUser = await payload.db.find<User>({
+        collection: slug,
+        where: { email: { equals: userEmail } },
+      })
+      expect(dbUser.docs[0]?.sessions ?? []).toHaveLength(0)
+
+      const meWithOldToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${existingSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithOldToken.user).toBeNull()
+    })
+
+    it("should keep the acting user signed in when changing another user's password", async () => {
+      const actingUserEmail = `session-acting-${Date.now()}@example.com`
+      const otherUserEmail = `session-other-${Date.now()}@example.com`
+
+      const actingUser = await payload.create({
+        collection: slug,
+        data: { email: actingUserEmail, password: 'original-pw', roles: ['admin'] },
+      })
+      createdUserIDs.push(actingUser.id)
+
+      const otherUser = await payload.create({
+        collection: slug,
+        data: { email: otherUserEmail, password: 'original-pw' },
+      })
+      createdUserIDs.push(otherUser.id)
+
+      const actingSession = await restClient
+        .POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: actingUserEmail, password: 'original-pw' }),
+        })
+        .then((res) => res.json())
+
+      const otherSession = await restClient
+        .POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: otherUserEmail, password: 'original-pw' }),
+        })
+        .then((res) => res.json())
+
+      const updateResponse = await restClient.PATCH(`/${slug}/${otherUser.id}`, {
+        body: JSON.stringify({ password: 'changed-pw' }),
+        headers: { Authorization: `JWT ${actingSession.token}` },
+      })
+      expect(updateResponse.status).toBe(200)
+
+      const meWithOtherToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${otherSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithOtherToken.user).toBeNull()
+
+      const meWithActingToken = await restClient
+        .GET(`/${slug}/me`, { headers: { Authorization: `JWT ${actingSession.token}` } })
+        .then((res) => res.json())
+      expect(meWithActingToken.user?.id).toStrictEqual(actingUser.id)
     })
   })
 })

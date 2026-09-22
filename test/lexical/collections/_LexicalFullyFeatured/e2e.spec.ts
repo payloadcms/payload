@@ -73,7 +73,7 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.locator('.file-field__remote-file').fill(url)
     await lexical.drawer.getByText('Add file').click()
     await lexical.save('drawer')
-    const img = lexical.editor.locator('img').first()
+    const img = lexical.editor.locator('.LexicalEditorTheme__upload img').first()
     await img.click()
     const imgBoxBeforeCenter = await img.boundingBox()
     await expect(() => {

@@ -6419,6 +6419,48 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data.error).toContain('not found')
     })
 
+    it('rejects an invalid preview field path and keeps collection access unchanged', async () => {
+      const post = await payload.create({
+        collection: 'posts-imports-only',
+        data: {
+          title: 'Preview field validation',
+        },
+      })
+      const objectPrototypeBefore = Object.getOwnPropertyDescriptors(Object.prototype)
+
+      try {
+        const previewResponse = await restClient.POST('/exports/export-preview', {
+          auth: false,
+          body: JSON.stringify({
+            collectionSlug: 'posts-imports-only',
+            fields: ['__proto__.overrideAccess'],
+            format: 'json',
+          }),
+        })
+        const objectPrototypeAfterPreview = Object.getOwnPropertyDescriptors(Object.prototype)
+
+        const updateResponse = await restClient.PATCH(`/posts-imports-only/${post.id}`, {
+          auth: false,
+          body: JSON.stringify({ title: 'Updated preview field validation' }),
+        })
+        const unchangedPost = await payload.findByID({
+          collection: 'posts-imports-only',
+          id: post.id,
+        })
+
+        expect(previewResponse.status).toBe(400)
+        expect(objectPrototypeAfterPreview).toEqual(objectPrototypeBefore)
+        expect(updateResponse.status).toBe(403)
+        expect(unchangedPost.title).toBe('Preview field validation')
+      } finally {
+        delete (Object.prototype as Record<string, unknown>).overrideAccess
+        await payload.delete({
+          collection: 'posts-imports-only',
+          id: post.id,
+        })
+      }
+    })
+
     it('should apply toCSV customizations in export preview and remove replaced columns', async () => {
       const page = await payload.create({
         collection: 'pages',

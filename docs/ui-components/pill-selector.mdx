@@ -1,0 +1,46 @@
+---
+title: PillSelector
+label: Pill Selector
+order: 200
+desc: Let users select one or more compact options with Payload's PillSelector component.
+keywords: ui, component, pill selector, filter, selection
+---
+
+The `PillSelector` component displays a wrapping list of options that can be selected, deselected, and optionally reordered.
+
+## Import
+
+```tsx
+import { PillSelector } from '@payloadcms/ui'
+```
+
+## Interactive example
+
+<ComponentPreview component="PillSelector" example="interactive" />
+
+The component does not manage selection state. Update the `pills` array in `onClick` and pass the new array back to the component.
+
+## Pill shape
+
+Each item in `pills` accepts:
+
+| Property      | Type        | Description                                  |
+| ------------- | ----------- | -------------------------------------------- |
+| `name` \*     | `string`    | Stable value and default visible label.      |
+| `selected` \* | `boolean`   | Whether the option is currently selected.    |
+| `Label`       | `ReactNode` | Replaces the visible label.                  |
+| `key`         | `string`    | Overrides the React key used for the option. |
+
+_\* An asterisk denotes that a property is required._
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop        | Type                                                      | Default | Description                                |
+| ----------- | --------------------------------------------------------- | ------- | ------------------------------------------ |
+| `pills` \*  | `SelectablePill[]`                                        | —       | Options displayed by the selector.         |
+| `onClick`   | `({ pill }) => Promise<void> \| void`                     | —       | Called when an option is activated.        |
+| `draggable` | `{ onDragEnd: ({ moveFromIndex, moveToIndex }) => void }` | —       | Enables reordering and handles the result. |
+
+_\* An asterisk denotes that a prop is required._

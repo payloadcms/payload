@@ -197,6 +197,7 @@ export const ecommercePlugin =
         customersSlug: collectionSlugMap.customers,
         enableVariants,
         productsSlug: collectionSlugMap.products,
+        transactionsSlug: collectionSlugMap.transactions,
         variantsSlug: collectionSlugMap.variants ?? 'variants',
       })
 

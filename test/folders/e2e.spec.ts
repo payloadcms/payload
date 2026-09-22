@@ -11,6 +11,7 @@ import { createFolder } from '../__helpers/e2e/folders/createFolder.js'
 import { createFolderDoc } from '../__helpers/e2e/folders/createFolderDoc.js'
 import { createFolderFromDoc } from '../__helpers/e2e/folders/createFolderFromDoc.js'
 import { expectNoResultsAndCreateFolderButton } from '../__helpers/e2e/folders/expectNoResultsAndCreateFolderButton.js'
+import { openFolderDrawer } from '../__helpers/e2e/folders/openFolderDrawer.js'
 import { selectFolderAndConfirmMove } from '../__helpers/e2e/folders/selectFolderAndConfirmMove.js'
 import { selectFolderAndConfirmMoveFromList } from '../__helpers/e2e/folders/selectFolderAndConfirmMoveFromList.js'
 import {
@@ -24,7 +25,9 @@ import {
   getSelectInputOptions,
   getSelectInputValue,
   openSelectMenu,
+  selectInput,
 } from '../__helpers/e2e/selectInput.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -35,7 +38,10 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 test.describe('Folders', () => {
+  let autosaveURL: AdminUrlUtil
   let page: Page
+  let payload: Awaited<ReturnType<typeof initPayloadE2ENoConfig>>['payload']
+  let draftsURL: AdminUrlUtil
   let postURL: AdminUrlUtil
   let OmittedFromBrowseBy: AdminUrlUtil
   let serverURL: string
@@ -44,8 +50,11 @@ test.describe('Folders', () => {
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-    const { serverURL: serverFromInit } = await initPayloadE2ENoConfig({ dirname })
-    serverURL = serverFromInit
+    const initResult = await initPayloadE2ENoConfig({ dirname })
+    payload = initResult.payload
+    serverURL = initResult.serverURL
+    autosaveURL = new AdminUrlUtil(serverURL, 'autosave')
+    draftsURL = new AdminUrlUtil(serverURL, 'drafts')
     postURL = new AdminUrlUtil(serverURL, postSlug)
     OmittedFromBrowseBy = new AdminUrlUtil(serverURL, omittedFromBrowseBySlug)
 
@@ -80,6 +89,30 @@ test.describe('Folders', () => {
       await folderButton.click()
       await expectNoResultsAndCreateFolderButton({ page })
     })
+
+    test('should prefill current collection when creating folder from move drawer root state', async () => {
+      await page.goto(postURL.create)
+      await createPostWithNoFolder()
+
+      const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
+      await folderPill.click()
+
+      const createFolderButton = page.getByRole('button', { name: 'Create folder' })
+
+      const drawer = await openFolderDrawer({
+        openDrawer: () => createFolderButton.click(),
+        page,
+      })
+      const selectLocator = drawer.locator('#field-folderType')
+
+      await expect
+        .poll(async () => {
+          const options = await getSelectInputValue<true>({ multiSelect: true, selectLocator })
+
+          return options
+        })
+        .toEqual(['Posts'])
+    })
   })
 
   test.describe('Creating folders', () => {
@@ -108,11 +141,12 @@ test.describe('Folders', () => {
         .locator('.list-header__title-and-actions .create-new-doc-in-folder__button')
         .filter({ hasText: 'Create folder' })
       await expect(createButton).toBeVisible()
-      await createButton.click()
 
       // The folder drawer should open successfully without React serialization errors
-      const drawer = page.locator('dialog .collection-edit--payload-folders')
-      await expect(drawer).toBeVisible()
+      const drawer = await openFolderDrawer({
+        openDrawer: () => createButton.click(),
+        page,
+      })
 
       const selectLocator = drawer.locator('#field-folderType')
       await expect(selectLocator).toBeVisible()
@@ -250,8 +284,10 @@ test.describe('Folders', () => {
       await expect(postButton).toBeVisible()
       await postButton.click()
 
-      const drawer = page.locator('dialog#create-document--no-results-new-doc-in-folder-drawer')
+      const drawer = page.locator('[id^=doc-drawer_posts_]').first()
       const titleInput = drawer.locator('input[name="title"]')
+
+      await expect(drawer).toBeVisible()
       await titleInput.fill('Document Created From Folder')
       await drawer.getByRole('button', { name: 'Save', exact: true }).click()
 
@@ -262,6 +298,80 @@ test.describe('Folders', () => {
       await expect(folderCard).toBeVisible()
     })
 
+    test('should keep autosave drawer open after autosave when creating from folder view', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
+
+      const folderDrawer = await openFolderDrawer({
+        openDrawer: () =>
+          page
+            .locator(
+              '.list-header__title-and-actions .create-new-doc-in-folder__button:has-text("Create folder")',
+            )
+            .click(),
+        page,
+      })
+      await folderDrawer.locator('#field-name').fill('Autosave Folder')
+      await selectInput({
+        multiSelect: true,
+        options: ['Posts', 'Autosaves'],
+        selectLocator: folderDrawer.locator('#field-folderType'),
+      })
+      await folderDrawer.getByRole('button', { name: 'Save', exact: true }).click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await closeAllToasts(page)
+      await expect(folderDrawer).toBeHidden()
+
+      await clickFolderCard({ folderName: 'Autosave Folder', page, doubleClick: true })
+
+      const createNewDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
+        hasText: 'Create document',
+      })
+      await createNewDropdown.click()
+
+      const autosaveButton = page.locator('.popup__content .popup-button-list__button', {
+        hasText: 'Autosave',
+      })
+      await autosaveButton.click()
+
+      const drawer = page.locator('[id^=doc-drawer_autosave_]').first()
+      const documentCards = page.locator('.folder-file-card')
+      const titleInput = drawer.locator('#field-title')
+      await expect(drawer).toBeVisible()
+      await titleInput.fill('Autosave Draft From Folder')
+
+      await waitForAutoSaveToRunAndComplete(drawer)
+
+      await expect(drawer).toBeVisible()
+      await expect(titleInput).toHaveValue('Autosave Draft From Folder')
+      await drawer.locator('.doc-drawer__header-close').click()
+      await expect(drawer).toBeHidden()
+      await expect(documentCards).toHaveCount(1)
+    })
+
+    test('should keep autosave drawer open after autosave when creating from collection folder view', async () => {
+      await page.goto(autosaveURL.byFolder)
+      await createFolder({ folderName: 'Autosave Collection Folder', folderType: [], page })
+      await clickFolderCard({ doubleClick: true, folderName: 'Autosave Collection Folder', page })
+
+      const createDocumentButton = page.locator('.create-new-doc-in-folder__button', {
+        hasText: 'Create document',
+      })
+      const drawer = page.locator('[id^=doc-drawer_autosave_]').first()
+      const documentCards = page.locator('.folder-file-card')
+      const titleInput = drawer.locator('#field-title')
+
+      await createDocumentButton.click()
+      await expect(drawer).toBeVisible()
+      await titleInput.fill('Autosave Draft From Collection Folder')
+
+      await waitForAutoSaveToRunAndComplete(drawer)
+
+      await expect(drawer).toBeVisible()
+      await expect(titleInput).toHaveValue('Autosave Draft From Collection Folder')
+      await drawer.locator('.doc-drawer__header-close').click()
+      await expect(drawer).toBeHidden()
+      await expect(documentCards).toHaveCount(1)
+    })
     test('should create nested folder from folder view', async () => {
       await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Parent Folder', page })
@@ -491,6 +601,51 @@ test.describe('Folders', () => {
     test('should create folder from By Folder view', async () => {
       await page.goto(postURL.byFolder)
       await createFolder({ folderName: 'New Folder From Collection', folderType: ['Posts'], page })
+    })
+
+    test('should show the draft title instead of the published title in By Folder view', async () => {
+      const folder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Draft Titles Folder',
+          folderType: ['drafts'],
+        },
+        overrideAccess: true,
+      })
+
+      const doc = await payload.create({
+        collection: 'drafts',
+        data: {
+          folder: folder.id,
+          title: 'Published Title',
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        collection: 'drafts',
+        id: doc.id,
+        data: {
+          title: 'Draft Title',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await page.goto(draftsURL.byFolder)
+      await clickFolderCard({ folderName: 'Draft Titles Folder', page, doubleClick: true })
+
+      await expect(
+        page.locator('.folder-file-card__name', {
+          hasText: 'Draft Title',
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.folder-file-card__name', {
+          hasText: 'Published Title',
+        }),
+      ).toBeHidden()
     })
   })
 

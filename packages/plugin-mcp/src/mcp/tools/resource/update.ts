@@ -30,8 +30,6 @@ export const updateResourceTool = (
     draft: boolean = false,
     depth: number = 0,
     overrideLock: boolean = true,
-    filePath?: string,
-    overwriteExistingFiles: boolean = false,
     locale?: string,
     fallbackLocale?: string,
     select?: string,
@@ -152,8 +150,6 @@ export const updateResourceTool = (
           overrideLock,
           req,
           user,
-          ...(filePath && { filePath }),
-          ...(overwriteExistingFiles && { overwriteExistingFiles }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
           ...(selectClause && { select: selectClause }),
@@ -203,8 +199,6 @@ ${JSON.stringify(result)}
           req,
           user,
           where: whereClause,
-          ...(filePath && { filePath }),
-          ...(overwriteExistingFiles && { overwriteExistingFiles }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
           ...(selectClause && { select: selectClause }),
@@ -313,7 +307,6 @@ ${JSON.stringify(errors)}
         .string()
         .optional()
         .describe('Optional: fallback locale code to use when requested locale is not available'),
-      filePath: z.string().optional().describe('File path for file uploads'),
       locale: z
         .string()
         .optional()
@@ -325,11 +318,6 @@ ${JSON.stringify(errors)}
         .optional()
         .default(true)
         .describe('Whether to override document locks'),
-      overwriteExistingFiles: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to overwrite existing files'),
       select: z
         .string()
         .optional()
@@ -354,10 +342,8 @@ ${JSON.stringify(errors)}
           depth,
           draft,
           fallbackLocale,
-          filePath,
           locale,
           overrideLock,
-          overwriteExistingFiles,
           select,
           where,
           ...fieldData
@@ -371,8 +357,6 @@ ${JSON.stringify(errors)}
           draft as boolean,
           depth as number,
           overrideLock as boolean,
-          filePath as string | undefined,
-          overwriteExistingFiles as boolean,
           locale as string | undefined,
           fallbackLocale as string | undefined,
           select as string | undefined,

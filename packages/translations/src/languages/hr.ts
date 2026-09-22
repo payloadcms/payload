@@ -57,6 +57,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     newPassword: 'Nova lozinka',
     passed: 'Autentifikacija je prošla',
     passwordResetSuccessfully: 'Lozinka uspješno resetirana.',
+    resend: 'Pošalji ponovno',
     resetPassword: 'Resetiranje lozinke',
     resetPasswordExpiration: 'Rok trajanja resetiranja lozinke',
     resetPasswordToken: 'Resetiranje tokena lozinke',
