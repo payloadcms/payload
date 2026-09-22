@@ -54,6 +54,7 @@
       width: 100%;
     }
 
+    /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
     @media (max-width: 768px) {
       display: none;
     }
@@ -98,6 +99,7 @@
   .tooltip--position-top {
     .tooltip__caret {
       --color-border: var(--ramp-grey-700);
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- TODO: pre-existing; revisit this sub-pixel value */
       top: calc(100% - 0.5px);
     }
 
@@ -108,6 +110,7 @@
 
   .tooltip--position-bottom {
     .tooltip__caret {
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- TODO: pre-existing; revisit this sub-pixel value */
       bottom: calc(100% - 0.5px);
       transform: rotate(180deg);
     }
@@ -123,7 +126,9 @@
 
   .tooltip--position-left {
     .tooltip__caret {
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- TODO: pre-existing; revisit this sub-pixel value */
       top: calc(50% + 0.5px);
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- TODO: pre-existing; revisit this sub-pixel value */
       left: calc(100% - 0.5px);
       transform: translateY(calc(1 * var(--caret-width) / 2 + var(--tooltip-caret-y)))
         rotate(-90deg);
@@ -133,8 +138,10 @@
 
   .tooltip--position-right {
     .tooltip__caret {
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- TODO: pre-existing; revisit this sub-pixel value */
       top: calc(50% + 0.5px);
       left: unset;
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- TODO: pre-existing; revisit this sub-pixel value */
       right: calc(100% - 0.5px);
       transform: translateY(calc(1 * var(--caret-width) / 2 + var(--tooltip-caret-y))) rotate(90deg);
       transform-origin: top right;

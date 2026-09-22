@@ -88,6 +88,7 @@
     margin-top: var(--spacer-2);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .collection-list {
       margin-top: var(--spacer-2);
@@ -122,6 +123,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .collection-list {
       margin-bottom: var(--spacing-view-bottom);
