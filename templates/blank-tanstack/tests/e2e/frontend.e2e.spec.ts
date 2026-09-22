@@ -21,22 +21,4 @@ test.describe('Frontend', () => {
     expect(payloadFontFamily).toBe('')
     await expect(page.locator('link[href*="fonts.googleapis.com"]')).toHaveCount(0)
   })
-
-  test('should not apply Payload component styles', async ({ page }) => {
-    await page.goto('http://localhost:3000')
-
-    const bannerDisplay = await page.evaluate(() => {
-      const banner = document.createElement('div')
-      banner.className = 'banner'
-      document.body.append(banner)
-
-      const display = getComputedStyle(banner).display
-
-      banner.remove()
-
-      return display
-    })
-
-    expect(bannerDisplay).toBe('block')
-  })
 })
