@@ -21,6 +21,7 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .version-pill-label {
       flex-direction: row;

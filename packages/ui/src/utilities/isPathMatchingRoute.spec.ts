@@ -20,6 +20,12 @@ describe('isPathMatchingRoute', () => {
       ).toBe(true)
     })
 
+    it('should match a trailing-slash path with a normalized current route', () => {
+      expect(
+        isPathMatchingRoute({ currentRoute: '/dashboard', exact: true, path: '/dashboard/' }),
+      ).toBe(true)
+    })
+
     it('should not match when currentRoute differs from the path', () => {
       expect(
         isPathMatchingRoute({ currentRoute: '/settings', exact: true, path: '/dashboard' }),
