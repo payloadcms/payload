@@ -21,6 +21,8 @@ import { Regression2 } from './collections/Regression-2/index.js'
 import { RestrictedTrash } from './collections/RestrictedTrash/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
+  accessRelationChildSlug,
+  accessRelationParentSlug,
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   differentiatedTrashSlug,
@@ -30,6 +32,11 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  inheritedReadVersionsGlobalSlug,
+  inheritedReadVersionsSlug,
+  inheritedReadVersionsVirtualGlobalSlug,
+  inheritedReadVersionsVirtualRelatedSlug,
+  inheritedReadVersionsVirtualSlug,
   nonAdminEmail,
   postReferencesSlug,
   publicUserEmail,
@@ -43,6 +50,7 @@ import {
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
+  selfReferentialSlug,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
@@ -69,6 +77,17 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
 }
 
 export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
+let inheritedReadVersionsAllowedID: number | string | undefined
+let inheritedReadVersionsAllowedVersionID: number | string | undefined
+
+export const setInheritedReadVersionsAllowedID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedID = id
+}
+
+export const setInheritedReadVersionsAllowedVersionID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedVersionID = id
+}
+
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
@@ -97,6 +116,14 @@ export const getConfig: () => Partial<Config> = () => ({
       baseDir: path.resolve(dirname),
     },
     user: 'users',
+  },
+  baseAccess: {
+    collections: {
+      readVersions: ({ id, slug }) =>
+        slug !== inheritedReadVersionsSlug || inheritedReadVersionsAllowedVersionID === undefined
+          ? true
+          : id === inheritedReadVersionsAllowedVersionID,
+    },
   },
   blocks: [
     {
@@ -836,6 +863,55 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
       versions: { drafts: true },
     },
+    {
+      slug: inheritedReadVersionsSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? id === inheritedReadVersionsAllowedID
+            : {
+                secret: {
+                  equals: 'allowed',
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'secret',
+          type: 'text',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: inheritedReadVersionsVirtualRelatedSlug,
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: inheritedReadVersionsVirtualSlug,
+      access: {
+        read: () => ({ relatedLabel: { equals: 'allowed' } }),
+      },
+      fields: [
+        {
+          name: 'related',
+          type: 'relationship',
+          relationTo: inheritedReadVersionsVirtualRelatedSlug,
+        },
+        {
+          name: 'relatedLabel',
+          type: 'text',
+          virtual: 'related.label',
+        },
+      ],
+      versions: true,
+    },
     BlocksFieldAccess,
     Disabled,
     RichText,
@@ -1015,8 +1091,123 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
       versions: false,
     },
+    // Parent collection whose read access returns a where constraint, with a
+    // relationship to a child collection that ALSO returns a where constraint.
+    {
+      slug: accessRelationParentSlug,
+      access: {
+        ...openAccess,
+        // Unauthenticated callers only see "published" parents.
+        read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'status',
+          type: 'text',
+        },
+        {
+          name: 'child',
+          type: 'relationship',
+          relationTo: accessRelationChildSlug,
+        },
+      ],
+    },
+    {
+      slug: accessRelationChildSlug,
+      access: {
+        ...openAccess,
+        // Child also constrains read access with a where query.
+        read: ({ req: { user } }) => (user ? true : { createdAt: { exists: true } }),
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'nested',
+          type: 'group',
+          fields: [
+            {
+              name: 'isActive',
+              type: 'checkbox',
+              defaultValue: true,
+            },
+          ],
+        },
+      ],
+    },
+    // Self-referential relationship on a collection whose read access returns a where
+    // constraint. Querying through `parent` must apply that constraint to the related doc.
+    {
+      slug: selfReferentialSlug,
+      access: {
+        ...openAccess,
+        read: ({ req: { user } }) => (user ? true : { isPublic: { equals: true } }),
+      },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+        {
+          name: 'isPublic',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: selfReferentialSlug,
+        },
+      ],
+    },
   ],
   globals: [
+    {
+      slug: inheritedReadVersionsGlobalSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? false
+            : {
+                visible: {
+                  equals: true,
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'visible',
+          type: 'checkbox',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: inheritedReadVersionsVirtualGlobalSlug,
+      access: {
+        read: () => ({ relatedLabel: { equals: 'allowed' } }),
+        update: () => true,
+      },
+      fields: [
+        {
+          name: 'related',
+          type: 'relationship',
+          relationTo: inheritedReadVersionsVirtualRelatedSlug,
+        },
+        {
+          name: 'relatedLabel',
+          type: 'text',
+          virtual: 'related.label',
+        },
+      ],
+      versions: true,
+    },
     {
       slug: 'settings',
       access: {

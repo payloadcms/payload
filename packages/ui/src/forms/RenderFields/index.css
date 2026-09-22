@@ -66,6 +66,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .render-fields {
       --spacing-field: var(--spacer-2-5);
