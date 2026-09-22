@@ -17,6 +17,7 @@ export interface Args extends arg.Spec {
   '--local-example': StringConstructor
   '--local-template': StringConstructor
   '--name': StringConstructor
+  '--no-agent': BooleanConstructor
   '--no-deps': BooleanConstructor
   '--no-git': BooleanConstructor
   '--payload-version': StringConstructor

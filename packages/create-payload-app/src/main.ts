@@ -65,6 +65,9 @@ export class Main {
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
 
+        // Agent
+        '--no-agent': Boolean,
+
         // Package manager
         '--no-deps': Boolean,
         '--use-bun': Boolean,
