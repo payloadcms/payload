@@ -285,7 +285,6 @@ export default buildConfigWithDefaults({
     },
     localization: {
       defaultLocale: 'en',
-      defaultLocalePublishOption: 'active',
       locales: [
         {
           code: 'es',
