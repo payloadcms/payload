@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 test.describe('Frontend', () => {
   test('can go on homepage', async ({ page }) => {
@@ -20,5 +20,20 @@ test.describe('Frontend', () => {
 
     expect(payloadFontFamily).toBe('')
     await expect(page.locator('link[href*="fonts.googleapis.com"]')).toHaveCount(0)
+  })
+
+  test('should not load Payload component styles', async ({ page }) => {
+    await page.goto('http://localhost:3000')
+
+    const sentinel = page.locator('[data-test="payload-ui-barrel-sentinel"]')
+
+    await expect(sentinel).toBeVisible()
+    await expect
+      .poll(() =>
+        sentinel.evaluate((element) =>
+          getComputedStyle(element).getPropertyValue('--payload-ui-barrel-loaded').trim(),
+        ),
+      )
+      .toBe('')
   })
 })
