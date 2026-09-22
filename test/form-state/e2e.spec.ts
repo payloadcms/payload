@@ -509,46 +509,13 @@ test.describe('Form State', () => {
     const titleField = page.locator('#field-title')
     const computedTitleField = page.locator('#field-computedTitle')
 
+    await expect(computedTitleField).toBeDisabled()
+
     await titleField.fill('Test Title')
 
     await waitForAutoSaveToRunAndComplete(page)
 
     await expect(computedTitleField).toHaveValue('Test Title')
-  })
-
-  test('autosave - should accept server-computed values when no newer edit exists', async () => {
-    await page.goto(autosavePostsUrl.create)
-    await waitForFormReady(page)
-
-    const titleField = page.locator('#field-title')
-    const computedTitleField = page.locator('#field-computedTitle')
-
-    await titleField.fill('Test Title')
-
-    await expect(computedTitleField).toHaveValue('Test Title')
-
-    // Put cursor at end of text
-    await computedTitleField.evaluate((el: HTMLInputElement) => {
-      el.focus()
-      el.setSelectionRange(el.value.length, el.value.length)
-    })
-
-    await computedTitleField.pressSequentially(' - Edited', { delay: 100 })
-
-    await waitForAutoSaveToRunAndComplete(page)
-
-    await expect(computedTitleField).toHaveValue('Test Title')
-
-    // but then when editing another field, the computed field should update
-    const autosaveResponse = page.waitForResponse(
-      (response) =>
-        response.request().method() === 'PATCH' &&
-        response.url().includes(`/api/${autosavePostsSlug}/`) &&
-        response.ok(),
-    )
-    await titleField.fill('Test Title 2')
-    await autosaveResponse
-    await expect(computedTitleField).toHaveValue('Test Title 2')
   })
 
   describe('stale autosave responses', () => {
@@ -596,17 +563,18 @@ test.describe('Form State', () => {
       const titleField = page.locator('#field-title')
       const computedTitleField = page.locator('#field-computedTitle')
 
+      await expect(computedTitleField).toHaveValue('Initial revision')
+
       await titleField.fill('First revision')
       await firstStarted.promise
 
       await titleField.fill('Latest revision')
-      await computedTitleField.fill('Local edit after dispatch')
 
       releaseFirst.resolve()
       await secondStarted.promise
 
       await expect(titleField).toHaveValue('Latest revision')
-      await expect(computedTitleField).toHaveValue('Local edit after dispatch')
+      await expect(computedTitleField).toHaveValue('Initial revision')
 
       releaseSecond.resolve()
       await waitForAutoSaveToRunAndComplete(page)
