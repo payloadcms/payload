@@ -1,4 +1,4 @@
-import type { PaginateOptions } from 'mongoose'
+import type { PaginateOptions, Schema } from 'mongoose'
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
 import mongoose from 'mongoose'
@@ -8,6 +8,7 @@ import {
   buildVersionCompoundIndexes,
   buildVersionGlobalFields,
 } from 'payload'
+import { createSchemaBuildContext } from 'payload/internal'
 
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel, GlobalModel } from './types.js'
@@ -27,92 +28,108 @@ export const init: Init = async function init(this: MongooseAdapter) {
     await this.afterCreateConnection(this)
   }
 
-  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const schemaOptions = this.collectionsSchemaOptions?.[collection.slug]
+  const schemaBuildContext = createSchemaBuildContext<Schema>()
 
-    const schema = buildCollectionSchema(collection, this.payload, schemaOptions)
-    if (collection.versions) {
-      const versionModelName = getDBName({ config: collection, versions: true })
+  try {
+    this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+      const schemaOptions = this.collectionsSchemaOptions?.[collection.slug]
 
-      const versionCollectionFields = buildVersionCollectionFields(this.payload.config, collection)
-
-      const versionSchema = buildSchema({
-        buildSchemaOptions: {
-          disableUnique: true,
-          draftsEnabled: true,
-          indexSortableFields: this.payload.config.indexSortableFields,
-          options: {
-            minimize: false,
-            timestamps: false,
-            ...schemaOptions,
-          },
-        },
-        compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
-        configFields: versionCollectionFields,
+      const schema = buildCollectionSchema({
+        collection,
         payload: this.payload,
+        schemaBuildContext,
+        schemaOptions,
       })
+      if (collection.versions) {
+        const versionModelName = getDBName({ config: collection, versions: true })
 
-      versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
-        getBuildQueryPlugin({
-          collectionSlug: collection.slug,
-          versionsFields: buildVersionCollectionFields(this.payload.config, collection, true),
-        }),
-      )
+        const versionCollectionFields = buildVersionCollectionFields(
+          this.payload.config,
+          collection,
+        )
 
-      const versionCollectionName =
-        this.autoPluralization === true && !collection.dbName ? undefined : versionModelName
-
-      this.versions[collection.slug] = this.connection.model(
-        versionModelName,
-        versionSchema,
-        versionCollectionName,
-      ) as unknown as CollectionModel
-    }
-
-    const modelName = getDBName({ config: collection })
-    const collectionName =
-      this.autoPluralization === true && !collection.dbName ? undefined : modelName
-
-    this.collections[collection.slug] = this.connection.model<any>(
-      modelName,
-      schema,
-      collectionName,
-    ) as CollectionModel
-  })
-
-  this.globals = buildGlobalModel(this) as GlobalModel
-
-  this.payload.config.globals.forEach((global) => {
-    if (global.versions) {
-      const versionModelName = getDBName({ config: global, versions: true })
-
-      const versionGlobalFields = buildVersionGlobalFields(this.payload.config, global)
-
-      const versionSchema = buildSchema({
-        buildSchemaOptions: {
-          disableUnique: true,
-          draftsEnabled: true,
-          indexSortableFields: this.payload.config.indexSortableFields,
-          options: {
-            minimize: false,
-            timestamps: false,
+        const versionSchema = buildSchema({
+          buildSchemaOptions: {
+            disableUnique: true,
+            draftsEnabled: true,
+            indexSortableFields: this.payload.config.indexSortableFields,
+            options: {
+              minimize: false,
+              timestamps: false,
+              ...schemaOptions,
+            },
           },
-        },
-        configFields: versionGlobalFields,
-        payload: this.payload,
-      })
+          compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
+          configFields: versionCollectionFields,
+          payload: this.payload,
+          schemaBuildContext,
+        })
 
-      versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
-        getBuildQueryPlugin({
-          versionsFields: buildVersionGlobalFields(this.payload.config, global, true),
-        }),
-      )
+        versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
+          getBuildQueryPlugin({
+            collectionSlug: collection.slug,
+            versionsFields: buildVersionCollectionFields(this.payload.config, collection, true),
+          }),
+        )
 
-      this.versions[global.slug] = this.connection.model<any>(
-        versionModelName,
-        versionSchema,
-        versionModelName,
+        const versionCollectionName =
+          this.autoPluralization === true && !collection.dbName ? undefined : versionModelName
+
+        this.versions[collection.slug] = this.connection.model(
+          versionModelName,
+          versionSchema,
+          versionCollectionName,
+        ) as unknown as CollectionModel
+      }
+
+      const modelName = getDBName({ config: collection })
+      const collectionName =
+        this.autoPluralization === true && !collection.dbName ? undefined : modelName
+
+      this.collections[collection.slug] = this.connection.model<any>(
+        modelName,
+        schema,
+        collectionName,
       ) as CollectionModel
-    }
-  })
+    })
+
+    this.globals = buildGlobalModel({ adapter: this, schemaBuildContext }) as GlobalModel
+
+    this.payload.config.globals.forEach((global) => {
+      if (global.versions) {
+        const versionModelName = getDBName({ config: global, versions: true })
+
+        const versionGlobalFields = buildVersionGlobalFields(this.payload.config, global)
+
+        const versionSchema = buildSchema({
+          buildSchemaOptions: {
+            disableUnique: true,
+            draftsEnabled: true,
+            indexSortableFields: this.payload.config.indexSortableFields,
+            options: {
+              minimize: false,
+              timestamps: false,
+            },
+          },
+          configFields: versionGlobalFields,
+          payload: this.payload,
+          schemaBuildContext,
+        })
+
+        versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
+          getBuildQueryPlugin({
+            versionsFields: buildVersionGlobalFields(this.payload.config, global, true),
+          }),
+        )
+
+        this.versions[global.slug] = this.connection.model<any>(
+          versionModelName,
+          versionSchema,
+          versionModelName,
+        ) as CollectionModel
+      }
+    })
+  } finally {
+    schemaBuildContext.clear()
+  }
 }

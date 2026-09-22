@@ -1,16 +1,24 @@
-import type { PaginateOptions, Schema } from 'mongoose'
+import type { PaginateOptions, Schema, SchemaOptions } from 'mongoose'
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import paginate from 'mongoose-paginate-v2'
 
+import type { MongoSchemaBuildContext } from './schemaBuildContext.js'
+
 import { getBuildQueryPlugin } from '../queries/getBuildQueryPlugin.js'
 import { buildSchema } from './buildSchema.js'
 
-export const buildCollectionSchema = (
-  collection: SanitizedCollectionConfig,
-  payload: Payload,
+export const buildCollectionSchema = ({
+  collection,
+  payload,
+  schemaBuildContext,
   schemaOptions = {},
-): Schema => {
+}: {
+  collection: SanitizedCollectionConfig
+  payload: Payload
+  schemaBuildContext: MongoSchemaBuildContext
+  schemaOptions?: SchemaOptions
+}): Schema => {
   const schema = buildSchema({
     buildSchemaOptions: {
       draftsEnabled: Boolean(
@@ -27,6 +35,7 @@ export const buildCollectionSchema = (
     configFields: collection.fields,
     flattenedFields: collection.flattenedFields,
     payload,
+    schemaBuildContext,
   })
 
   if (Array.isArray(collection.upload.filenameCompoundIndex)) {

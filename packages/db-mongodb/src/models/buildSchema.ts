@@ -32,6 +32,7 @@ import {
   type TextField,
   type UploadField,
 } from 'payload'
+import { createSchemaBuildContext } from 'payload/internal'
 import {
   fieldAffectsData,
   fieldIsPresentationalOnly,
@@ -39,6 +40,10 @@ import {
   fieldShouldBeLocalized,
   tabHasName,
 } from 'payload/shared'
+
+import type { MongoSchemaBuildContext } from './schemaBuildContext.js'
+
+import { getBlockSchemaVariantKey } from './schemaBuildContext.js'
 
 export type BuildSchemaOptions = {
   allowIDField?: boolean
@@ -54,6 +59,7 @@ type FieldSchemaGenerator<T extends Field = Field> = (
   config: Payload,
   buildSchemaOptions: BuildSchemaOptions,
   parentIsLocalized: boolean,
+  schemaBuildContext: MongoSchemaBuildContext,
 ) => void
 
 /**
@@ -135,6 +141,7 @@ export const buildSchema = (args: {
   flattenedFields?: FlattenedField[]
   parentIsLocalized?: boolean
   payload: Payload
+  schemaBuildContext?: MongoSchemaBuildContext
 }): Schema => {
   const {
     buildSchemaOptions = {},
@@ -143,6 +150,7 @@ export const buildSchema = (args: {
     parentIsLocalized,
     payload,
   } = args
+  const schemaBuildContext = args.schemaBuildContext ?? createSchemaBuildContext<Schema>()
   const { allowIDField, options } = buildSchemaOptions
   let fields = {}
 
@@ -178,7 +186,14 @@ export const buildSchema = (args: {
       const addFieldSchema = getSchemaGenerator(field.type)
 
       if (addFieldSchema) {
-        addFieldSchema(field, schema, payload, buildSchemaOptions, parentIsLocalized ?? false)
+        addFieldSchema(
+          field,
+          schema,
+          payload,
+          buildSchemaOptions,
+          parentIsLocalized ?? false,
+          schemaBuildContext,
+        )
       }
     }
   })
@@ -212,6 +227,7 @@ const array: FieldSchemaGenerator<ArrayField> = (
   payload,
   buildSchemaOptions,
   parentIsLocalized,
+  schemaBuildContext,
 ) => {
   const baseSchema: SchemaTypeOptions<any> = {
     ...formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized }),
@@ -230,6 +246,7 @@ const array: FieldSchemaGenerator<ArrayField> = (
         configFields: field.fields,
         parentIsLocalized: parentIsLocalized || field.localized,
         payload,
+        schemaBuildContext,
       }),
     ],
   }
@@ -245,6 +262,7 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
   payload,
   buildSchemaOptions,
   parentIsLocalized,
+  schemaBuildContext,
 ): void => {
   const fieldSchema: SchemaTypeOptions<any> = {
     ...formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized }),
@@ -260,30 +278,41 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
     ),
   })
   field.blocks.forEach((blockItem) => {
-    const blockSchema = new mongoose.Schema({}, { _id: false, id: false })
-
     const block = typeof blockItem === 'string' ? payload.blocks[blockItem] : blockItem
 
     if (!block) {
       return
     }
 
-    block.fields.forEach((blockField) => {
-      if (fieldIsVirtual(blockField)) {
-        return
-      }
+    const isLocalized = Boolean(parentIsLocalized || field.localized)
+    const blockSchema = schemaBuildContext.getOrCreate({
+      build: () => {
+        const template = new mongoose.Schema({}, { _id: false, id: false })
 
-      const addFieldSchema = getSchemaGenerator(blockField.type)
+        block.fields.forEach((blockField) => {
+          if (fieldIsVirtual(blockField)) {
+            return
+          }
 
-      if (addFieldSchema) {
-        addFieldSchema(
-          blockField,
-          blockSchema,
-          payload,
-          buildSchemaOptions,
-          (parentIsLocalized || field.localized) ?? false,
-        )
-      }
+          const addFieldSchema = getSchemaGenerator(blockField.type)
+
+          if (addFieldSchema) {
+            addFieldSchema(
+              blockField,
+              template,
+              payload,
+              buildSchemaOptions,
+              isLocalized,
+              schemaBuildContext,
+            )
+          }
+        })
+
+        return template
+      },
+      definition: block,
+      label: `block:${block.slug}`,
+      variantKey: getBlockSchemaVariantKey({ buildSchemaOptions, isLocalized }),
     })
 
     if (fieldShouldBeLocalized({ field, parentIsLocalized }) && payload.config.localization) {
@@ -338,6 +367,7 @@ const collapsible: FieldSchemaGenerator<CollapsibleField> = (
   payload,
   buildSchemaOptions,
   parentIsLocalized,
+  schemaBuildContext,
 ): void => {
   field.fields.forEach((subField: Field) => {
     if (fieldIsVirtual(subField)) {
@@ -347,7 +377,14 @@ const collapsible: FieldSchemaGenerator<CollapsibleField> = (
     const addFieldSchema = getSchemaGenerator(subField.type)
 
     if (addFieldSchema) {
-      addFieldSchema(subField, schema, payload, buildSchemaOptions, parentIsLocalized)
+      addFieldSchema(
+        subField,
+        schema,
+        payload,
+        buildSchemaOptions,
+        parentIsLocalized,
+        schemaBuildContext,
+      )
     }
   })
 }
@@ -392,6 +429,7 @@ const group: FieldSchemaGenerator<GroupField> = (
   payload,
   buildSchemaOptions,
   parentIsLocalized,
+  schemaBuildContext,
 ): void => {
   if (fieldAffectsData(field)) {
     const formattedBaseSchema = formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized })
@@ -418,6 +456,7 @@ const group: FieldSchemaGenerator<GroupField> = (
         configFields: field.fields,
         parentIsLocalized: parentIsLocalized || field.localized,
         payload,
+        schemaBuildContext,
       }),
     }
 
@@ -444,6 +483,7 @@ const group: FieldSchemaGenerator<GroupField> = (
           payload,
           buildSchemaOptions,
           (parentIsLocalized || field.localized) ?? false,
+          schemaBuildContext,
         )
       }
     })
@@ -664,6 +704,7 @@ const row: FieldSchemaGenerator<RowField> = (
   payload,
   buildSchemaOptions,
   parentIsLocalized,
+  schemaBuildContext,
 ): void => {
   field.fields.forEach((subField: Field) => {
     if (fieldIsVirtual(subField)) {
@@ -673,7 +714,14 @@ const row: FieldSchemaGenerator<RowField> = (
     const addFieldSchema = getSchemaGenerator(subField.type)
 
     if (addFieldSchema) {
-      addFieldSchema(subField, schema, payload, buildSchemaOptions, parentIsLocalized)
+      addFieldSchema(
+        subField,
+        schema,
+        payload,
+        buildSchemaOptions,
+        parentIsLocalized,
+        schemaBuildContext,
+      )
     }
   })
 }
@@ -716,6 +764,7 @@ const tabs: FieldSchemaGenerator<TabsField> = (
   payload,
   buildSchemaOptions,
   parentIsLocalized,
+  schemaBuildContext,
 ): void => {
   field.tabs.forEach((tab) => {
     if (tabHasName(tab)) {
@@ -736,6 +785,7 @@ const tabs: FieldSchemaGenerator<TabsField> = (
           configFields: tab.fields,
           parentIsLocalized: parentIsLocalized || tab.localized,
           payload,
+          schemaBuildContext,
         }),
       }
 
@@ -756,6 +806,7 @@ const tabs: FieldSchemaGenerator<TabsField> = (
             payload,
             buildSchemaOptions,
             (parentIsLocalized || tab.localized) ?? false,
+            schemaBuildContext,
           )
         }
       })

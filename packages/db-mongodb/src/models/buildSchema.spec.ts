@@ -1,7 +1,6 @@
 import type { Block, BlockSlug, Field, Payload } from 'payload'
 import type { Schema } from 'mongoose'
 
-import mongoose from 'mongoose'
 import { createSchemaBuildContext } from 'payload/internal'
 import { describe, expect, test } from 'vitest'
 
@@ -160,8 +159,12 @@ describe('MongoDB schema build context', () => {
     expect(englishStores).toHaveLength(1)
     expect(multilingualStores).toHaveLength(1)
     expect(englishStores[0]).not.toBe(multilingualStores[0])
-    expect(Object.keys(englishStores[0]!.paths)).toContain('localizedText.en')
-    expect(Object.keys(multilingualStores[0]!.paths)).toContain('localizedText.de')
+    expect(describeSchema(englishStores[0]!).paths.map(({ path }) => path)).toContain(
+      'localizedText.en',
+    )
+    expect(describeSchema(multilingualStores[0]!).paths.map(({ path }) => path)).toContain(
+      'localizedText.de',
+    )
   })
 
   test('should create separate templates for localized and nonlocalized placements', () => {
@@ -244,7 +247,7 @@ describe('MongoDB schema build context', () => {
     },
   )
 
-  test('should keep parent discriminator registrations independent after template reuse', () => {
+  test('should keep cloned block registrations independent after template reuse', () => {
     const blocks = createDiamondBlockGraph()
     const schema = buildSchemaWithContext({
       buildSchemaOptions: {},
@@ -258,17 +261,10 @@ describe('MongoDB schema build context', () => {
     expect(firstRoot).not.toBe(secondRoot)
     expect(describeSchema(firstRoot)).toEqual(describeSchema(secondRoot))
 
-    getDocumentArrayPath({ path: 'branches', schema: firstRoot }).discriminator(
-      'first-parent-only',
-      new mongoose.Schema({ parentValue: String }),
-    )
+    firstRoot.add({ firstParentOnly: String })
 
-    expect(
-      getBlockDiscriminator({ path: 'branches', schema: firstRoot, slug: 'first-parent-only' }),
-    ).toBeDefined()
-    expect(
-      getBlockDiscriminator({ path: 'branches', schema: secondRoot, slug: 'first-parent-only' }),
-    ).toBeUndefined()
+    expect(firstRoot.path('firstParentOnly')).toBeDefined()
+    expect(secondRoot.path('firstParentOnly')).toBeUndefined()
   })
 
   test('should cache an inline block only when the same object identity is reused', () => {
