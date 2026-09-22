@@ -2452,6 +2452,9 @@ importers:
       '@date-fns/tz':
         specifier: 1.2.0
         version: 1.2.0
+      '@google-cloud/storage':
+        specifier: ^7.19.0
+        version: 7.19.0
       '@miniflare/d1':
         specifier: 2.14.4
         version: 2.14.4

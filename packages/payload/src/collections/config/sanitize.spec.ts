@@ -3,9 +3,26 @@ import type { CollectionConfig } from './types.js'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { canAccessAdmin } from '../../utilities/canAccessAdmin.js'
+import { isInheritedReadVersionsAccess } from '../../versions/isInheritedReadVersionsAccess.js'
 import { sanitizeCollection, warnOnInvalidCustomViews } from './sanitize.js'
 
 describe('baseAccess', () => {
+  it('should preserve inherited readVersions access through the base access wrapper', () => {
+    const config = {
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      fields: [],
+      versions: true,
+    }
+
+    const result = sanitizeCollection(config, collection)
+
+    expect(isInheritedReadVersionsAccess(result.access.readVersions)).toBe(true)
+  })
+
   it('should combine base and collection access constraints', async () => {
     const baseConstraint = {
       tenant: {
@@ -60,6 +77,43 @@ describe('baseAccess', () => {
       isReadingStaticFile: undefined,
       req,
       slug: 'posts',
+    })
+  })
+
+  it('should inherit the effective read constraint for readVersions', async () => {
+    const config = {
+      baseAccess: {
+        collections: {
+          read: () => ({
+            tenant: {
+              equals: 'tenant-1',
+            },
+          }),
+        },
+      },
+      collections: [],
+      globals: [],
+    } as any
+    const collection: CollectionConfig = {
+      slug: 'posts',
+      access: {
+        read: () => true,
+      },
+      fields: [],
+      versions: true,
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeCollection(config, collection)
+
+    await expect(result.access.readVersions({ req, slug: 'posts' })).resolves.toEqual({
+      'version.tenant': {
+        equals: 'tenant-1',
+      },
     })
   })
 

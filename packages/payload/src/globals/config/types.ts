@@ -281,7 +281,7 @@ export interface SanitizedGlobalConfig
     >,
     Required<Pick<GlobalConfig, 'admin' | 'custom' | 'label'>> {
   _sanitized: true
-  access: Pick<GlobalAccess, 'readVersions'> & Required<Pick<GlobalAccess, 'read' | 'update'>>
+  access: Required<Pick<GlobalAccess, 'read' | 'readVersions' | 'update'>>
   authorship: SanitizedAuthorship
   endpoints: Endpoint[] | false
   /**

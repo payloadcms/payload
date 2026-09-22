@@ -14,7 +14,11 @@ import { expect, vitest } from 'vitest'
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
-import { requestHeaders } from './getConfig.js'
+import {
+  requestHeaders,
+  setInheritedReadVersionsAllowedID,
+  setInheritedReadVersionsAllowedVersionID,
+} from './getConfig.js'
 import {
   accessRelationChildSlug,
   accessRelationParentSlug,
@@ -28,6 +32,11 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   hooksSlug,
+  inheritedReadVersionsGlobalSlug,
+  inheritedReadVersionsSlug,
+  inheritedReadVersionsVirtualGlobalSlug,
+  inheritedReadVersionsVirtualRelatedSlug,
+  inheritedReadVersionsVirtualSlug,
   postReferencesSlug,
   publicUserEmail,
   publicUsersSlug,
@@ -44,8 +53,17 @@ import {
 test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control', () => {
   let post1: Post
   let restricted: FullyRestricted
+  let payload!: Payload
 
-  test.beforeEach(async ({ payload }) => {
+  test.beforeAll(async ({ payloadInstance }) => {
+    payload = payloadInstance
+  })
+
+  test.beforeEach(async ({ payloadInstance }) => {
+    payload = payloadInstance
+    setInheritedReadVersionsAllowedID(undefined)
+    setInheritedReadVersionsAllowedVersionID(undefined)
+
     post1 = await payload.create({
       collection: slug,
       data: {},
@@ -1849,6 +1867,445 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control'
       })
 
       expect(res).toBeTruthy()
+    })
+
+    test('should use the query fallback from id-based read access for version lists', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'denied' },
+      })
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const allowedVersions = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersions.docs).toHaveLength(1)
+      expect(allowedVersions.docs[0].parent).toBe(allowedID)
+
+      const allowedVersionsCount = await payload.countVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersionsCount.totalDocs).toBe(1)
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should preserve the document id when checking inherited version permissions', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'denied' },
+      })
+      const deniedDoc = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const permissions = await getEntityPermissions({
+        id: deniedDoc.id,
+        blockReferencesPermissions: {},
+        entity: payload.collections[inheritedReadVersionsSlug].config,
+        entityType: 'collection',
+        fetchData: true,
+        operations: ['read', 'readVersions'],
+        req: await createLocalReq({}, payload),
+      })
+
+      expect(permissions.read?.permission).toBe(false)
+      expect(permissions.readVersions?.permission).toBe(false)
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should pass the parent document id to inherited read access for findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: deniedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'denied' },
+      })
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const versions = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+      const allowedVersion = versions.docs.find(({ parent }) => parent === allowedID)!
+      const deniedVersion = versions.docs.find(({ parent }) => parent === deniedID)!
+
+      await expect(
+        payload.findVersionByID({
+          id: allowedVersion.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ parent: allowedID })
+
+      await expect(
+        payload.findVersionByID({
+          id: deniedVersion.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should pass the version id to base readVersions access for findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedParentID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      await payload.update({
+        id: allowedParentID,
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {
+          parent: {
+            equals: allowedParentID,
+          },
+        },
+      })
+      const [allowedVersion, deniedVersion] = docs
+
+      setInheritedReadVersionsAllowedID(allowedParentID)
+      setInheritedReadVersionsAllowedVersionID(allowedVersion!.id)
+
+      await expect(
+        payload.findVersionByID({
+          id: allowedVersion!.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ id: allowedVersion!.id, parent: allowedParentID })
+
+      await expect(
+        payload.findVersionByID({
+          id: deniedVersion!.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should reuse the version lookup when inherited read access returns a boolean', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+      const findVersions = vitest.spyOn(payload.db, 'findVersions')
+
+      try {
+        await expect(
+          payload.findVersionByID({
+            id: docs[0].id,
+            collection: inheritedReadVersionsSlug,
+            overrideAccess: false,
+          }),
+        ).resolves.toMatchObject({ parent: allowedID })
+
+        expect(findVersions).toHaveBeenCalledTimes(1)
+      } finally {
+        findVersions.mockRestore()
+      }
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should omit the parent field from findVersionByID when it is not selected', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+
+      const res = await payload.findVersionByID({
+        id: docs[0].id,
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+        select: { secret: true },
+      })
+
+      expect(res.parent).toBeUndefined()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should include the parent field on findVersionByID when it is selected', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+
+      const res = await payload.findVersionByID({
+        id: docs[0].id,
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+        select: { parent: true, secret: true },
+      })
+
+      expect(res.parent).toBe(allowedID)
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should inherit global read access for version operations', async () => {
+      await payload.updateGlobal({
+        slug: inheritedReadVersionsGlobalSlug,
+        data: { visible: false },
+      })
+      await payload.updateGlobal({
+        slug: inheritedReadVersionsGlobalSlug,
+        data: { visible: true },
+      })
+
+      const allVersions = await payload.findGlobalVersions({
+        slug: inheritedReadVersionsGlobalSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
+      const allowedVersion = allVersions.docs.find(({ version }) => version.visible === true)!
+      const deniedVersion = allVersions.docs.find(({ version }) => version.visible === false)!
+
+      const allowedVersions = await payload.findGlobalVersions({
+        slug: inheritedReadVersionsGlobalSlug,
+        overrideAccess: false,
+        pagination: false,
+      })
+
+      expect(allowedVersions.docs.length).toBeGreaterThan(0)
+      expect(allowedVersions.docs.every(({ version }) => version.visible === true)).toBe(true)
+
+      const allowedVersionsCount = await payload.countGlobalVersions({
+        global: inheritedReadVersionsGlobalSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersionsCount.totalDocs).toBe(allowedVersions.totalDocs)
+
+      await expect(
+        payload.findGlobalVersionByID({
+          id: allowedVersion.id,
+          slug: inheritedReadVersionsGlobalSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ id: allowedVersion.id })
+
+      await expect(
+        payload.findGlobalVersionByID({
+          id: deniedVersion.id,
+          slug: inheritedReadVersionsGlobalSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
+    })
+
+    test('should evaluate inherited global read version permissions against versions', async () => {
+      const req = await createLocalReq({}, payload)
+
+      await payload.db.deleteVersions({
+        globalSlug: inheritedReadVersionsGlobalSlug,
+        req,
+        where: {},
+      })
+
+      try {
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsGlobalSlug,
+          data: { visible: false },
+        })
+
+        const permissions = await getEntityPermissions({
+          id: undefined,
+          blockReferencesPermissions: {},
+          entity: payload.globals.config.find(
+            ({ slug }) => slug === inheritedReadVersionsGlobalSlug,
+          )!,
+          entityType: 'global',
+          fetchData: true,
+          operations: ['readVersions'],
+          req,
+        })
+
+        expect(permissions.readVersions?.permission).toBe(false)
+      } finally {
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsGlobalSlug,
+          data: { visible: true },
+        })
+        await payload.db.deleteVersions({
+          globalSlug: inheritedReadVersionsGlobalSlug,
+          req,
+          where: {},
+        })
+      }
+    })
+
+    test('should resolve virtual-field constraints from inherited read access on findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
+      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+
+      const { id: relatedID } = await payload.create({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        data: { label: 'allowed' },
+      })
+      const parent = await payload.create({
+        collection: inheritedReadVersionsVirtualSlug,
+        data: { related: relatedID },
+      })
+
+      const versions = await payload.findVersions({
+        collection: inheritedReadVersionsVirtualSlug,
+        overrideAccess: true,
+      })
+      const version = versions.docs.find(({ parent: parentID }) => parentID === parent.id)!
+
+      await expect(
+        payload.findVersionByID({
+          id: version.id,
+          collection: inheritedReadVersionsVirtualSlug,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ parent: parent.id })
+
+      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
+      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+    })
+
+    test('should sanitize virtual-field constraints from inherited global read access', async () => {
+      const req = await createLocalReq({}, payload)
+
+      await payload.db.deleteVersions({
+        globalSlug: inheritedReadVersionsVirtualGlobalSlug,
+        req,
+        where: {},
+      })
+      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        data: { label: 'allowed' },
+      })
+      const { id: deniedID } = await payload.create({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        data: { label: 'denied' },
+      })
+
+      try {
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsVirtualGlobalSlug,
+          data: { related: deniedID },
+        })
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsVirtualGlobalSlug,
+          data: { related: allowedID },
+        })
+
+        const allVersions = await payload.findGlobalVersions({
+          slug: inheritedReadVersionsVirtualGlobalSlug,
+          overrideAccess: true,
+          pagination: false,
+        })
+
+        const allowedVersions = await payload.findGlobalVersions({
+          slug: inheritedReadVersionsVirtualGlobalSlug,
+          overrideAccess: false,
+          pagination: false,
+        })
+
+        expect(allowedVersions.docs).toHaveLength(1)
+        const allowedVersion = allowedVersions.docs[0]
+        expect(allVersions.docs).toContainEqual(allowedVersion)
+
+        const allowedVersionsCount = await payload.countGlobalVersions({
+          global: inheritedReadVersionsVirtualGlobalSlug,
+          overrideAccess: false,
+        })
+        expect(allowedVersionsCount.totalDocs).toBe(1)
+
+        const permissions = await getEntityPermissions({
+          id: undefined,
+          blockReferencesPermissions: {},
+          entity: payload.globals.config.find(
+            ({ slug }) => slug === inheritedReadVersionsVirtualGlobalSlug,
+          )!,
+          entityType: 'global',
+          fetchData: true,
+          operations: ['readVersions'],
+          req,
+        })
+        expect(permissions.readVersions?.permission).toBe(true)
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: allowedVersion.id,
+            slug: inheritedReadVersionsVirtualGlobalSlug,
+            overrideAccess: false,
+          }),
+        ).resolves.toMatchObject({ version: { related: allowedID } })
+      } finally {
+        await payload.db.deleteVersions({
+          globalSlug: inheritedReadVersionsVirtualGlobalSlug,
+          req,
+          where: {},
+        })
+        await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+      }
     })
   })
 
