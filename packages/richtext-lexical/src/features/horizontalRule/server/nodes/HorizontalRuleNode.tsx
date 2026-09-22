@@ -40,9 +40,12 @@ export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactEl
    * This also determines the behavior of lexical's internal HTML -> Lexical converter
    */
   static override importDOM(): DOMConversionMap | null {
+    const NodeClass = this
     return {
       hr: () => ({
-        conversion: $convertHorizontalRuleElement,
+        conversion: (): DOMConversionOutput => ({
+          node: $applyNodeReplacement(new NodeClass()),
+        }),
         priority: 0,
       }),
     }
@@ -99,10 +102,6 @@ export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactEl
   override updateDOM(): boolean {
     return false
   }
-}
-
-function $convertHorizontalRuleElement(): DOMConversionOutput {
-  return { node: $createHorizontalRuleServerNode() }
 }
 
 export function $createHorizontalRuleServerNode(): HorizontalRuleServerNode {
