@@ -249,6 +249,23 @@ Run `migrate-versions-default` if you want zero schema changes — it adds `vers
 
 Run `remove-versions-true` to clean up any bare `versions: true` that is now the default.
 
+### Version read access inherits collection and global read access
+
+When `readVersions` is not configured, version access now inherits the Collection or Global `read` Access Control instead of requiring an authenticated user by default.
+
+This means a public `read` function can make historical and unpublished versions publicly readable, while a query constraint returned by `read` is also applied to version documents. If you want to preserve the previous authenticated-only behavior, configure `readVersions` explicitly:
+
+```ts
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  access: {
+    read: () => true,
+    readVersions: ({ req: { user } }) => Boolean(user),
+  },
+  fields: [],
+}
+```
+
 ### List View Select API is now the default
 
 The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
@@ -406,10 +423,9 @@ If you only use `DefaultValue` to type a `defaultValue` property passed into a C
 
 `SanitizedCollectionConfig` and its auth type no longer use `DeepRequired`. This reduces TypeScript checker work and makes optionality match runtime defaults.
 
-Properties Payload does not default, such as `access.readVersions`, `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
+Properties Payload does not default, such as `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
 
 ```ts
-if (collection.access.readVersions) await collection.access.readVersions(args)
 const useAPIKey = collection.auth.useAPIKey ?? false
 ```
 
@@ -430,12 +446,11 @@ Properties filled during sanitization, including `auth.jwtOrder`, root routes, G
 
 ### Sanitized global config types now match runtime defaults
 
-`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `access.readVersions`, `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
+`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
 
 Code that consumes these properties may now need to handle `undefined`:
 
 ```ts
-if (global.access.readVersions) await global.access.readVersions(args)
 const views = global.admin.components?.views
 const interfaceName = global.typescript?.interface
 ```
@@ -1602,6 +1617,21 @@ azureStorage({
 ```
 
 Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
+
+### Storage adapters always insert the `prefix` field now — `alwaysInsertFields` removed
+
+The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` adapter: `-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`) has been removed. The behavior it used to opt into — always inserting the hidden `prefix` field into the collection schema — is now unconditional, so the schema stays consistent whether or not a collection configures a `prefix` and whether or not the plugin is `enabled`.
+
+**Who is affected:**
+
+- Anyone with an upload collection that uses a storage adapter or `cloudStoragePlugin`. Every such collection now gets a hidden `prefix` field, including collections that never configured a `prefix` and collections where the plugin is disabled (`enabled: false`).
+- Anyone who set `alwaysInsertFields` explicitly — the option no longer exists on any storage adapter or plugin option type.
+- Postgres, SQLite, and D1 users: the new field is a new database column. Running `payload migrate:create` will generate a migration that adds a `prefix` column to every affected collection's table.
+
+**How to migrate:**
+
+- Remove `alwaysInsertFields` from your storage adapter or `cloudStoragePlugin` config — it has no effect and no longer exists on the option types.
+- For Postgres, SQLite, or D1 projects, run `payload migrate:create` to generate the migration that adds the `prefix` column, then run `payload migrate` to apply it.
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

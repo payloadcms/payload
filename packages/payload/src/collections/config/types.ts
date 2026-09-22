@@ -829,9 +829,12 @@ export interface SanitizedCollectionConfig
     >,
     Required<Pick<CollectionConfig, 'admin' | 'custom' | 'indexes' | 'timestamps'>> {
   _sanitized: true
-  access: Pick<CollectionAccess, 'admin' | 'readVersions'> &
+  access: Pick<CollectionAccess, 'admin'> &
     Required<
-      Pick<CollectionAccess, 'create' | 'delete' | 'read' | 'unlock' | 'update' | 'validate'>
+      Pick<
+        CollectionAccess,
+        'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update' | 'validate'
+      >
     >
   auth: Auth
   endpoints: Endpoint[] | false

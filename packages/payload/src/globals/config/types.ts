@@ -282,8 +282,7 @@ export interface SanitizedGlobalConfig
     >,
     Required<Pick<GlobalConfig, 'admin' | 'custom' | 'label'>> {
   _sanitized: true
-  access: Pick<GlobalAccess, 'readVersions'> &
-    Required<Pick<GlobalAccess, 'read' | 'update' | 'validate'>>
+  access: Required<Pick<GlobalAccess, 'read' | 'readVersions' | 'update' | 'validate'>>
   endpoints: Endpoint[] | false
   /**
    * Fields in the database schema structure
