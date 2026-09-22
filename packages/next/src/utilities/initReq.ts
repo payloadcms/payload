@@ -1,6 +1,6 @@
 import type { InitReqArgs, InitReqCache, InitReqPartialResult, InitReqResult } from 'payload'
 
-import { initReq as payloadInitReq } from 'payload'
+import { initReq as initPayloadReq } from 'payload'
 
 import { nextServerAdapter } from '../adapters/server.js'
 import { selectiveCache } from './selectiveCache.js'
@@ -20,7 +20,7 @@ type NextInitReqArgs = {
 } & Omit<InitReqArgs, 'cache' | 'key' | 'serverAdapter'>
 
 export const initReq = (args: NextInitReqArgs) =>
-  payloadInitReq({
+  initPayloadReq({
     ...args,
     cache,
     serverAdapter: nextServerAdapter,

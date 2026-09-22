@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { getRequest, payloadInitReq, tanstackServerAdapter } = vi.hoisted(() => ({
+const { getRequest, initPayloadReq, tanstackServerAdapter } = vi.hoisted(() => ({
   getRequest: vi.fn(),
-  payloadInitReq: vi.fn(),
+  initPayloadReq: vi.fn(),
   tanstackServerAdapter: {
     getHeaders: vi.fn(),
   },
@@ -13,7 +13,7 @@ vi.mock('@tanstack/react-start/server', () => ({
 }))
 
 vi.mock('payload', () => ({
-  initReq: payloadInitReq,
+  initReq: initPayloadReq,
 }))
 
 vi.mock('./devConfigReload.server.js', () => ({}))
@@ -27,7 +27,7 @@ import { initReq } from './initReq.server.js'
 describe('initReq', () => {
   beforeEach(() => {
     getRequest.mockReset().mockReturnValue(new Request('http://localhost/admin?locale=es'))
-    payloadInitReq.mockReset().mockResolvedValue({})
+    initPayloadReq.mockReset().mockResolvedValue({})
   })
 
   it('should provide the active request URL and default server adapter', async () => {
@@ -38,7 +38,7 @@ describe('initReq', () => {
 
     await initReq(args)
 
-    expect(payloadInitReq).toHaveBeenCalledWith({
+    expect(initPayloadReq).toHaveBeenCalledWith({
       ...args,
       requestURL: 'http://localhost/admin?locale=es',
       serverAdapter: tanstackServerAdapter,
@@ -56,7 +56,7 @@ describe('initReq', () => {
       serverAdapter: serverAdapter as never,
     })
 
-    expect(payloadInitReq).toHaveBeenCalledWith(
+    expect(initPayloadReq).toHaveBeenCalledWith(
       expect.objectContaining({
         serverAdapter,
       }),

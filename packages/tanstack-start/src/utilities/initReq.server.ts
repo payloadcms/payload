@@ -1,9 +1,9 @@
 import type { InitReqArgs, ServerAdapter } from 'payload'
 
 import { getRequest } from '@tanstack/react-start/server'
-import { initReq as payloadInitReq } from 'payload'
+import { initReq as initPayloadReq } from 'payload'
 
-// Registers the dev reload strategy before `payloadInitReq` can build an instance.
+// Registers the dev reload strategy before `initPayloadReq` can build an instance.
 // Side-effect only, and a no-op outside of dev serve.
 import './devConfigReload.server.js'
 import { tanstackServerAdapter } from './serverAdapter.server.js'
@@ -13,7 +13,7 @@ type TanStackInitReqArgs = {
 } & Omit<InitReqArgs, 'cache' | 'requestURL' | 'serverAdapter'>
 
 export const initReq = ({ serverAdapter = tanstackServerAdapter, ...args }: TanStackInitReqArgs) =>
-  payloadInitReq({
+  initPayloadReq({
     ...args,
     requestURL: getRequest().url,
     serverAdapter,

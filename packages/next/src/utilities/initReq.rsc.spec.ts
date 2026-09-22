@@ -7,19 +7,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { initReq } from './initReq.js'
 
-const { counters, payloadInitReq } = vi.hoisted(() => ({
+const { counters, initPayloadReq } = vi.hoisted(() => ({
   counters: {
     locale: 0,
     partial: 0,
     request: 0,
   },
-  payloadInitReq: vi.fn(),
+  initPayloadReq: vi.fn(),
 }))
 
 vi.mock('react', () => createRequire(import.meta.url)('react'))
 
 vi.mock('payload', () => ({
-  initReq: payloadInitReq,
+  initReq: initPayloadReq,
 }))
 
 vi.mock('../adapters/server.js', () => ({
@@ -89,7 +89,7 @@ describe('Next initReq RSC cache', () => {
     counters.locale = 0
     counters.partial = 0
     counters.request = 0
-    payloadInitReq.mockReset().mockImplementation(async ({ cache, key, overrides }) => {
+    initPayloadReq.mockReset().mockImplementation(async ({ cache, key, overrides }) => {
       await cache.getPartial(async () => {
         counters.partial += 1
         return {}
