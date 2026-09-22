@@ -1,6 +1,7 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { useAuth } from '@payloadcms/ui'
 import type {
+  Access,
   ArrayField,
   AuthenticatedUser,
   BlocksField,
@@ -19,6 +20,8 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   PayloadTypesShape,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
   RowField,
   SelectType,
   TabsField,
@@ -92,6 +95,14 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  test('sanitized collection readVersions access is required', () => {
+    expect<SanitizedCollectionConfig['access']['readVersions']>().type.toBe<Access>()
+  })
+
+  test('sanitized global readVersions access is required', () => {
+    expect<SanitizedGlobalConfig['access']['readVersions']>().type.toBe<Access>()
+  })
+
   describe('field duplication configuration', () => {
     test('should only expose disableDuplicate on fields that own data', () => {
       expect<ArrayField>().type.toHaveProperty('disableDuplicate')

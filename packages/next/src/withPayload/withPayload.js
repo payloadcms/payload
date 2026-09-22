@@ -58,8 +58,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     env,
     experimental: {
       ...(nextConfig.experimental || {}),
-      // Server fast refresh breaks HMR
-      turbopackServerFastRefresh: false,
     },
     sassOptions: {
       ...(nextConfig.sassOptions || {}),
@@ -84,10 +82,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         'drizzle-kit',
         'drizzle-kit/api',
       ],
-    },
-    outputFileTracingIncludes: {
-      ...(nextConfig.outputFileTracingIncludes || {}),
-      '**/*': [...(nextConfig.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
     turbopack: {
       ...(nextConfig.turbopack || {}),
@@ -261,6 +255,10 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     process.env.NEXT_BASE_PATH = nextConfig.basePath
     baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
+
+  const trailingSlash = nextConfig.trailingSlash === true ? 'true' : 'false'
+  process.env.NEXT_TRAILING_SLASH = trailingSlash
+  baseConfig.env.NEXT_TRAILING_SLASH = trailingSlash
 
   return baseConfig
 }

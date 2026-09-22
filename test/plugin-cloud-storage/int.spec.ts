@@ -21,6 +21,7 @@ import { r2TestStorage } from './r2.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
+  mediaWithDisabledPluginSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
@@ -1219,6 +1220,25 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
         })
 
         expect(response.status).toBe(403)
+      })
+    })
+
+    test.describe('disabled plugin', () => {
+      test('inserts the prefix field by default even when the plugin is disabled', async ({
+        payload,
+      }) => {
+        const upload = await payload.create({
+          collection: mediaWithDisabledPluginSlug,
+          data: {
+            prefix: 'test',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+        expect(upload.prefix).toBe('test')
+
+        await payload.delete({ id: upload.id, collection: mediaWithDisabledPluginSlug })
       })
     })
   })
