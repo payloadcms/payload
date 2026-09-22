@@ -4,7 +4,7 @@
 
 This benchmark measures Mongoose schema construction during Payload initialization. It covers a minimal config, wide block references, nested shared block graphs, drafts, localization, multiple entities, and separate inline block objects.
 
-Each sample runs in a fresh Node.js child process with `--expose-gc`. The worker disables the database connection and type generation. It records memory before initialization, after model compilation and garbage collection, and after Payload destruction and garbage collection.
+Each sample runs in a fresh Node.js child process with `--expose-gc` and an 8 GiB old-space limit. The larger limit lets the worker record the pre-fix pathological cases without changing their schema graph. The worker disables the database connection and type generation. It records memory before initialization, after model compilation and garbage collection, and after Payload destruction and garbage collection.
 
 Run all scenarios five times:
 

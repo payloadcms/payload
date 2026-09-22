@@ -153,7 +153,15 @@ RSS is supporting evidence because allocator behavior can vary. Heap deltas, sch
 const runWorker = ({ scenario }: { scenario: BenchmarkScenarioName }): WorkerResult => {
   const result = spawnSync(
     process.execPath,
-    ['--expose-gc', '--no-deprecation', '--import', 'tsx', workerPath, scenario],
+    [
+      '--max-old-space-size=8192',
+      '--expose-gc',
+      '--no-deprecation',
+      '--import',
+      'tsx',
+      workerPath,
+      scenario,
+    ],
     {
       cwd: process.cwd(),
       encoding: 'utf8',
