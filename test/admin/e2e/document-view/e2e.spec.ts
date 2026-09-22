@@ -748,19 +748,59 @@ describe('Document View', () => {
   })
 
   describe('publish button', () => {
-    test('should show publish active locale button with defaultLocalePublishOption set to active', async () => {
+    test('should show publish active locale button by default when localized fields exist', async () => {
       await navigateToDoc(page, localizedURL)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish in English')
     })
 
-    test('should not show publish active locale button with defaultLocalePublishOption set to active but no localized fields', async () => {
+    test('should not show publish active locale button when no localized fields exist', async () => {
       await navigateToDoc(page, postsUrl)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish changes')
       await expect(publishButton).not.toContainText('Publish in')
+    })
+
+    test('should publish all locales from the secondary option', async () => {
+      const localizedDocument = await payload.create({
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'English draft',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: localizedDocument.id,
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'Spanish draft',
+        },
+        draft: true,
+        locale: 'es',
+      })
+
+      await page.goto(localizedURL.edit(localizedDocument.id))
+      await saveDocAndAssert(page, '#publish-all-locales')
+
+      const publishedDocuments = await payload.find({
+        collection: localizedCollectionSlug,
+        draft: true,
+        locale: 'all',
+        where: {
+          id: {
+            equals: localizedDocument.id,
+          },
+        },
+      })
+
+      expect(publishedDocuments.docs[0]?._status).toEqual({
+        en: 'published',
+        es: 'published',
+      })
     })
 
     test('should show published status after publishing specific locale', async () => {
