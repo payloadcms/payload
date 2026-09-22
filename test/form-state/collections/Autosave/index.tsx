@@ -36,6 +36,13 @@ export const AutosavePostsCollection: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'restrictedValue',
+      type: 'text',
+      access: {
+        create: () => false,
+      },
+    },
   ],
   versions: {
     drafts: {

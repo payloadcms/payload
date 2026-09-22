@@ -22,13 +22,26 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
+import {
+  getLocalizedUploadProperties,
+  getUploadDestination,
+  mergeUploadDataWithDocument,
+  sanitizeUploadData,
+} from '../../uploads/sanitizeUploadData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import {
+  getAllLocalesPublicationStatus,
+  normalizeAllLocalesPublicationStatus,
+  reconcileAllLocalesPublicationStatus,
+  validateAllLocalesPublicationFlags,
+} from '../../versions/allLocalesPublicationStatus.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
@@ -65,6 +78,46 @@ export const updateByIDOperation = async <
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
+    if (args.collection.config.upload && !args.overrideAccess) {
+      const { objectKey, prefix } = getUploadDestination({ data: args.data, file: args.req.file })
+      const data = sanitizeUploadData(args.data, 'update')
+
+      args = {
+        ...args,
+        data:
+          typeof data === 'object' && data !== null
+            ? {
+                ...data,
+                ...(prefix !== undefined ? { prefix } : {}),
+                ...(objectKey !== undefined ? { _objectKey: objectKey } : {}),
+              }
+            : data,
+      }
+    }
+
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: args.publishAllLocales,
+      unpublishAllLocales: args.unpublishAllLocales,
+    })
+
+    const initialCollectionConfig = args.collection.config
+    const initialAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        args.req.payload.config.localization && hasLocalizeStatusEnabled(initialCollectionConfig),
+      ),
+      publishAllLocales:
+        !args.draft &&
+        (args.publishAllLocales ??
+          (hasLocalizeStatusEnabled(initialCollectionConfig) && args.req.locale !== 'all'
+            ? false
+            : true)),
+      unpublishAllLocales: Boolean(args.unpublishAllLocales),
+    })
+
+    const initialAllLocalesPublicationIntent = normalizeAllLocalesPublicationStatus({
+      data: args.data,
+      status: initialAllLocalesPublicationStatus,
+    })
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -87,7 +140,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
-      publishAllLocales,
+      publishAllLocales: publishAllLocalesArg,
       req: {
         fallbackLocale,
         locale,
@@ -98,14 +151,42 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
-      unpublishAllLocales,
+      unpublishAllLocales: unpublishAllLocalesArg,
     } = args
 
     if (!id) {
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }
 
-    const { data } = args
+    let { data } = args
+
+    validateAllLocalesPublicationFlags({
+      publishAllLocales: publishAllLocalesArg,
+      unpublishAllLocales: unpublishAllLocalesArg,
+    })
+
+    const requestedAllLocalesPublicationStatus = getAllLocalesPublicationStatus({
+      hasLocalizedStatus: Boolean(
+        config.localization && hasLocalizeStatusEnabled(collectionConfig),
+      ),
+      publishAllLocales:
+        !draftArg &&
+        (publishAllLocalesArg ?? !(hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all')),
+      unpublishAllLocales: Boolean(unpublishAllLocalesArg),
+    })
+    const allLocalesPublicationStatus = reconcileAllLocalesPublicationStatus({
+      data,
+      intent: initialAllLocalesPublicationIntent,
+      status: requestedAllLocalesPublicationStatus,
+    })
+    const publicationIntentSurvivedBeforeOperation =
+      !requestedAllLocalesPublicationStatus || Boolean(allLocalesPublicationStatus)
+    const publishAllLocales = publicationIntentSurvivedBeforeOperation
+      ? publishAllLocalesArg
+      : false
+    const unpublishAllLocales = publicationIntentSurvivedBeforeOperation
+      ? unpublishAllLocalesArg
+      : false
 
     // /////////////////////////////////////
     // Access
@@ -177,6 +258,18 @@ export const updateByIDOperation = async <
       throw new NotFound(req.t)
     }
 
+    if (collectionConfig.upload && !overrideAccess) {
+      data = mergeUploadDataWithDocument(data, docWithLocales, {
+        locale:
+          locale === 'all' || !locale
+            ? config.localization
+              ? config.localization.defaultLocale
+              : undefined
+            : locale,
+        localizedProperties: getLocalizedUploadProperties(collectionConfig.flattenedFields),
+      })
+    }
+
     // /////////////////////////////////////
     // Generate data for all files and sizes
     // /////////////////////////////////////
@@ -186,6 +279,7 @@ export const updateByIDOperation = async <
       config,
       data,
       operation: 'update',
+      originalDoc: docWithLocales,
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
@@ -240,6 +334,8 @@ export const updateByIDOperation = async <
       collectionConfig,
       config,
       req,
+    }).catch((unlinkError) => {
+      req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
 
     // /////////////////////////////////////

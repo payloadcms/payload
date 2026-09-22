@@ -163,6 +163,8 @@ export type BuildFormStateArgs = {
   skipClientConfigAuth?: boolean
   skipValidation?: boolean
   updateLastEdited?: boolean
+  /** The authenticated user after read access for client-facing field components. */
+  user?: PayloadRequest['user']
 } & (
   | {
       collectionSlug: string

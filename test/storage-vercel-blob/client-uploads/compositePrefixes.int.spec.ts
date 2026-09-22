@@ -40,7 +40,6 @@ test.suite({ config: './config.compositePrefixes.ts' })(
     }) => {
       const docPrefix = 'document-prefix'
       const uploadedFilename = 'client-composite-image.png'
-      const pathname = `${collectionPrefix}/${docPrefix}/${uploadedFilename}`
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
       const instructionsResponse = await restClient.POST('/upload-instructions', {
@@ -58,11 +57,13 @@ test.suite({ config: './config.compositePrefixes.ts' })(
           filename: string
           mimeType: string
           size: number
-          uploadReference: { prefix: string }
+          uploadReference: { _objectKey: string; prefix: string }
         }
       }
 
-      expect(instructions.data.pathname).toBe(pathname)
+      expect(instructions.data.pathname).toBe(
+        `${collectionPrefix}/${instructions.file.uploadReference.prefix}/${instructions.file.uploadReference._objectKey}/${instructions.file.filename}`,
+      )
 
       await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
         access: 'public',
@@ -89,10 +90,10 @@ test.suite({ config: './config.compositePrefixes.ts' })(
 
       const createdDoc = await createResponse.json()
 
-      expect(createdDoc?.doc.prefix).toBe(docPrefix)
+      expect(createdDoc?.doc.prefix).toBe(instructions.file.uploadReference.prefix)
 
       const fileResponse = await restClient.GET(
-        `/${mediaWithCompositePrefixesSlug}/file/${uploadedFilename}?prefix=${encodeURIComponent(docPrefix)}`,
+        `/${mediaWithCompositePrefixesSlug}/file/${instructions.file.filename}?prefix=${encodeURIComponent(instructions.file.uploadReference.prefix)}`,
       )
 
       expect(fileResponse.status).toBe(200)

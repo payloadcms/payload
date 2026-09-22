@@ -23,7 +23,7 @@ await mkdir(destDir, { recursive: true })
 
 const entries = await readdir(srcDir)
 for (const entry of entries) {
-  if (!entry.endsWith('.mjs')) {
+  if (!entry.endsWith('.mjs') || entry.includes('.spec.')) {
     continue
   }
   await copyFile(path.join(srcDir, entry), path.join(destDir, entry))

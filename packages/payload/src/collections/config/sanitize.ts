@@ -9,7 +9,8 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import { omitAPIKey } from '../../auth/baseFields/apiKey.js'
+import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
@@ -25,8 +26,16 @@ import { formatLabels } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultCollectionEndpoints } from '../endpoints/index.js'
-import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
+import {
+  isInheritedReadVersionsAccess,
+  markInheritedReadVersionsAccess,
+} from '../../versions/isInheritedReadVersionsAccess.js'
+import { defaultCollectionEndpoints, duplicateEndpoint } from '../endpoints/index.js'
+import {
+  addDefaultsToAuthConfig,
+  addDefaultsToCollectionConfig,
+  createInheritedReadVersionsAccess,
+} from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -150,6 +159,11 @@ export const sanitizeCollection = (
     validRelationships,
   })
 
+  if (sanitized.auth) {
+    // disable duplicate for auth enabled collections by default
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
+  }
+
   if (sanitized.endpoints !== false) {
     if (!sanitized.endpoints) {
       sanitized.endpoints = []
@@ -158,6 +172,14 @@ export const sanitizeCollection = (
     if (sanitized.auth) {
       for (const endpoint of authCollectionEndpoints) {
         sanitized.endpoints.push(endpoint)
+      }
+
+      if (
+        typeof sanitized.auth === 'object' &&
+        typeof sanitized.auth.useAPIKey === 'object' &&
+        sanitized.auth.useAPIKey.reveal === true
+      ) {
+        sanitized.endpoints.push(apiKeyRevealEndpoint)
       }
     }
 
@@ -168,7 +190,9 @@ export const sanitizeCollection = (
     }
 
     for (const endpoint of defaultCollectionEndpoints) {
-      sanitized.endpoints.push(endpoint)
+      if (endpoint !== duplicateEndpoint || sanitized.disableDuplicate !== true) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
   }
 
@@ -324,14 +348,18 @@ export const sanitizeCollection = (
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
 
-    // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
-
     if (!collection?.admin?.useAsTitle) {
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
-    sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+    if (sanitized.auth.useAPIKey) {
+      sanitized.hooks!.beforeRead!.unshift(omitAPIKey)
+    }
+
+    sanitized.fields = mergeBaseFields(
+      sanitized.fields,
+      getBaseAuthFields(sanitized.auth, sanitized.fields),
+    )
   }
 
   if (collection?.admin?.pagination?.limits?.length) {
@@ -353,12 +381,20 @@ export const sanitizeCollection = (
   })
 
   if (sanitized.versions) {
-    sanitized.access!.readVersions = withBaseAccess({
+    const inheritsReadAccess = isInheritedReadVersionsAccess(sanitized.access!.readVersions)
+    const readVersions = inheritsReadAccess
+      ? createInheritedReadVersionsAccess(sanitized.access!.read!)
+      : sanitized.access!.readVersions
+    const readVersionsWithBaseAccess = withBaseAccess({
       slug: sanitized.slug,
-      access: sanitized.access?.readVersions,
+      access: readVersions,
       entityType: 'collection',
       operation: 'readVersions',
     })
+
+    sanitized.access!.readVersions = inheritsReadAccess
+      ? markInheritedReadVersionsAccess(readVersionsWithBaseAccess)
+      : readVersionsWithBaseAccess
   }
 
   validateUseAsTitle(sanitized)

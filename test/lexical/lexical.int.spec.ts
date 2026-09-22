@@ -1,5 +1,6 @@
 import type {
   SerializedEditorState,
+  SerializedLexicalNode,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
 import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs } from 'payload'
@@ -13,6 +14,8 @@ import {
   LinkFeature,
   type SerializedBlockNode,
   type SerializedLinkNode,
+  type SerializedListItemNode,
+  type SerializedListNode,
   type SerializedRelationshipNode,
   type SerializedUploadNode,
   UploadFeature,
@@ -22,7 +25,7 @@ import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
 import { expect } from 'vitest'
 
-import type { LexicalField, RichTextField } from './payload-types.js'
+import type { LexicalField, LexicalListsFeature, RichTextField } from './payload-types.js'
 
 // Sync converters
 import {
@@ -44,8 +47,12 @@ import {
   UploadHTMLConverterAsync,
 } from '@payloadcms/richtext-lexical/html-async'
 
-// Diff converter
+import { convertLexicalNodesToHTMLAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/index.js'
+import { convertLexicalNodesToHTML } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/index.js'
+
+// Diff converters
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
+import { ListItemDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/listitem/index.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
@@ -57,9 +64,14 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
+  lexicalHeadingFeatureSlug,
+  lexicalListsFeatureSlug,
+  lexicalRelationshipFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
+  uploads2Slug,
   uploadsSlug,
+  usersSlug,
 } from './slugs.js'
 
 let createdArrayDocID: number | string = null
@@ -124,6 +136,143 @@ test.suite({ config: './config.ts' })('Lexical', () => {
   })
 
   test.describe('basic', () => {
+    test('should reject heading tags that are not enabled', async ({ restClient }) => {
+      const response = await restClient.POST(`/${lexicalHeadingFeatureSlug}`, {
+        body: JSON.stringify({
+          richText: buildEditorState({
+            nodes: [
+              {
+                type: 'heading',
+                tag: 'h1',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            ],
+          }),
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(result.errors[0].data.errors).toEqual([
+        expect.objectContaining({
+          message: 'heading node failed to validate: Heading tag must be one of h2, h4.',
+          path: 'richText',
+        }),
+      ])
+    })
+
+    test('should reject list tags that are not supported', async ({ restClient }) => {
+      const response = await restClient.POST(`/${lexicalListsFeatureSlug}`, {
+        body: JSON.stringify({
+          onlyOrderedList: buildEditorState({
+            nodes: [
+              {
+                type: 'list',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                listType: 'number',
+                start: 1,
+                tag: 'style',
+                version: 1,
+              },
+            ],
+          }),
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(result.errors[0].data.errors).toEqual([
+        expect.objectContaining({
+          message: 'list node failed to validate: List tag must be one of ol, ul.',
+          path: 'onlyOrderedList',
+        }),
+      ])
+    })
+
+    test('should reject a REST update with a nonnumeric list item value', async ({
+      payload,
+      restClient,
+    }) => {
+      const listData: NonNullable<LexicalListsFeature['onlyOrderedList']> = {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'list',
+              children: [
+                {
+                  type: 'listitem',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'List item',
+                      version: 1,
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  value: 1,
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              listType: 'number',
+              start: 1,
+              tag: 'ol',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      }
+      const doc = await payload.create({
+        collection: lexicalListsFeatureSlug,
+        data: { onlyOrderedList: listData },
+      })
+      const invalidData = JSON.parse(JSON.stringify(listData))
+
+      invalidData.root.children[0].children[0].value = 'not-a-number'
+
+      const response = await restClient.PATCH(`/${lexicalListsFeatureSlug}/${doc.id}`, {
+        body: JSON.stringify({ onlyOrderedList: invalidData }),
+      })
+      const body = await response.json()
+
+      expect(response.status).toBe(400)
+      expect(body.errors[0].data.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: 'listitem node failed to validate: List item value must be a finite number.',
+            path: 'onlyOrderedList',
+          }),
+        ]),
+      )
+
+      const savedDoc = await payload.findByID({
+        id: doc.id,
+        collection: lexicalListsFeatureSlug,
+      })
+
+      expect(savedDoc.onlyOrderedList).toEqual(listData)
+    })
+
     test('should allow querying on lexical content', async ({ payload }) => {
       const richTextDoc: RichTextField = (
         await payload.find({
@@ -222,6 +371,143 @@ test.suite({ config: './config.ts' })('Lexical', () => {
 
       expect(relationshipNode.value.text).toStrictEqual(textDoc.text)
     })
+
+    test('should not populate relationships to collections outside enabledCollections', async ({
+      payload,
+      restClient,
+    }) => {
+      const relatedUser = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'related-user@example.com',
+          password: 'test-password',
+        },
+      })
+
+      const originalReadAccess = payload.collections[usersSlug].config.access.read
+      const node = {
+        type: 'relationship',
+        format: '',
+        relationTo: usersSlug,
+        value: relatedUser.id,
+        version: 2,
+      }
+      const richText = buildEditorState<SerializedLexicalNode>({ nodes: [node] })
+
+      payload.collections[usersSlug].config.access.read = () => false
+
+      try {
+        const readResponse = await restClient.GET(`/${usersSlug}/${relatedUser.id}`)
+
+        expect(readResponse.status).toBe(403)
+
+        // The referenced collection is not enabled for this field.
+        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}?depth=2`, {
+          body: JSON.stringify({ richText }),
+        })
+
+        expect(response.status).toBe(400)
+
+        const doc = await payload.create({
+          collection: lexicalRelationshipFieldsSlug,
+          data: {},
+        })
+
+        // Simulate existing content referencing a collection outside enabledCollections.
+        await payload.db.updateOne({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          data: { richText },
+        })
+
+        // Read the stored content through the Local API.
+        const rendered = await payload.findByID({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          depth: 2,
+        })
+
+        const storedNode = rendered.richText.root.children[0] as SerializedRelationshipNode
+
+        expect(storedNode.value).toBe(relatedUser.id)
+      } finally {
+        payload.collections[usersSlug].config.access.read = originalReadAccess
+      }
+    })
+
+    for (const { fieldName, relationTo, type } of [
+      { fieldName: 'richText', relationTo: textFieldsSlug, type: 'relationship' },
+      { fieldName: 'richText', relationTo: uploads2Slug, type: 'upload' },
+      { fieldName: 'richText', relationTo: usersSlug, type: 'upload' },
+      { fieldName: 'richText3', relationTo: uploadsSlug, type: 'upload' },
+    ] as const) {
+      test(`should enforce ${fieldName} collection restrictions for ${type} nodes referencing ${relationTo}`, async ({
+        payload,
+        restClient,
+      }) => {
+        const { docs: targets } = await payload.find({ collection: relationTo, depth: 0, limit: 1 })
+        const targetID = targets[0].id
+        const node = {
+          id: 'test-upload-node',
+          type,
+          fields: {},
+          format: '',
+          relationTo,
+          value: targetID,
+          version: 2,
+        }
+        const richText = buildEditorState<SerializedLexicalNode>({ nodes: [node] })
+        const response = await restClient.POST(`/${lexicalRelationshipFieldsSlug}`, {
+          body: JSON.stringify({ [fieldName]: richText }),
+        })
+
+        expect(response.status).toBe(400)
+
+        const doc = await payload.create({
+          collection: lexicalRelationshipFieldsSlug,
+          data: {},
+        })
+
+        // Simulate existing content referencing a collection not enabled for this field.
+        await payload.db.updateOne({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          data: { [fieldName]: richText },
+        })
+
+        const localDoc = await payload.findByID({
+          id: doc.id,
+          collection: lexicalRelationshipFieldsSlug,
+          depth: 2,
+        })
+
+        expect(localDoc[fieldName].root.children[0].value).toBe(targetID)
+
+        const restResponse = await restClient.GET(`/${lexicalRelationshipFieldsSlug}/${doc.id}`, {
+          query: { depth: 2 },
+        })
+        const restDoc = await restResponse.json()
+
+        expect(restResponse.status).toBe(200)
+        expect(restDoc[fieldName].root.children[0].value).toBe(targetID)
+
+        const graphQLResponse = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+              LexicalRelationshipFields(where: { id: { equals: ${JSON.stringify(doc.id)} } }) {
+                docs { ${fieldName}(depth: 2) }
+              }
+            }`,
+          }),
+        })
+        const graphQLResult = await graphQLResponse.json()
+
+        expect(graphQLResult.errors).toBeUndefined()
+        expect(
+          graphQLResult.data.LexicalRelationshipFields.docs[0][fieldName].root.children[0].value,
+        ).toBe(targetID)
+      })
+    }
 
     test('should respect GraphQL rich text depth parameter and populate upload node', async ({
       restClient,
@@ -1175,6 +1461,55 @@ test.suite({ config: './config.ts' })('Lexical', () => {
           expect(result).toContain('Cell content')
         })
       })
+    })
+  }
+
+  for (const variant of [
+    { converters: ListHTMLConverter, label: 'Sync', listTypes: ['number', 'check'] },
+    { converters: ListHTMLConverterAsync, label: 'Async', listTypes: ['number', 'check'] },
+    {
+      converters: ListItemDiffHTMLConverterAsync,
+      label: 'Admin version diff',
+      listTypes: ['number'],
+    },
+  ] as const) {
+    test.describe(`List item escaping (${variant.label})`, () => {
+      test.each(variant.listTypes)(
+        'should escape stored malformed values in %s list items',
+        async (listType) => {
+          const storedValue = 'List item " & < >'
+          const node: SerializedListItemNode = {
+            type: 'listitem',
+            children: [],
+            direction: null,
+            format: '',
+            indent: 0,
+            // Older stored content can contain strings despite the numeric type.
+            value: storedValue as unknown as number,
+            version: 1,
+          }
+          const parent: SerializedListNode = {
+            type: 'list',
+            children: [node],
+            direction: null,
+            format: '',
+            indent: 0,
+            listType,
+            start: 1,
+            tag: listType === 'number' ? 'ol' : 'ul',
+            version: 1,
+          }
+          const args = { nodes: [node], parent }
+          const result = (
+            variant.label === 'Sync'
+              ? convertLexicalNodesToHTML({ ...args, converters: variant.converters })
+              : await convertLexicalNodesToHTMLAsync({ ...args, converters: variant.converters })
+          ).join('')
+
+          expect(result).toContain('value="List item &quot; &amp; &lt; &gt;"')
+          expect(result).not.toContain(storedValue)
+        },
+      )
     })
   }
 

@@ -1,3 +1,4 @@
+import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
@@ -5,15 +6,40 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
-import { mediaSlug } from './shared.js'
+import { mediaSlug, pagesSlug, siteSettingsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const generationEndpoints = [
+  {
+    body: { title: 'Example page' },
+    endpoint: '/plugin-seo/generate-title',
+    expectedResult: 'Website.com — Example page',
+  },
+  {
+    body: { excerpt: 'Example summary' },
+    endpoint: '/plugin-seo/generate-description',
+    expectedResult: 'Example summary',
+  },
+  {
+    body: { slug: 'example-page' },
+    endpoint: '/plugin-seo/generate-url',
+    expectedResult: 'https://yoursite.com/example-page',
+  },
+  {
+    body: { title: 'Example page' },
+    endpoint: '/plugin-seo/generate-image',
+    expectedResult: 'generated-image',
+  },
+] as const
 
 test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
   let page = null
   let mediaDoc = null
   let mediaDoc2 = null
+  let readablePage = null
+  let trashedPage = null
 
   test.beforeEach(async ({ payload }) => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -42,11 +68,363 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
       depth: 0,
     })
 
+    readablePage = await payload.create({
+      collection: pagesSlug,
+      data: {
+        slug: 'readable-page',
+        meta: {
+          title: 'Readable page',
+        },
+        title: 'Readable page',
+      },
+      depth: 0,
+    })
+
+    trashedPage = await payload.create({
+      collection: pagesSlug,
+      data: {
+        deletedAt: new Date().toISOString(),
+        slug: 'trashed-page',
+        meta: {
+          title: 'Trashed page',
+        },
+        title: 'Trashed page',
+      },
+      depth: 0,
+    })
+
     mediaDoc2 = await payload.create({
       collection: mediaSlug,
       data: {},
       file,
     })
+  })
+
+  test('should require authentication for generation endpoints', async ({ restClient }) => {
+    const statuses: number[] = []
+
+    for (const { body, endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        auth: false,
+        body: JSON.stringify({
+          collectionSlug: pagesSlug,
+          doc: body,
+        }),
+      })
+
+      statuses.push(response.status)
+    }
+
+    expect(statuses).toEqual([401, 401, 401, 401])
+  })
+
+  test('should require admin access for generation endpoints', async ({ restClient }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'non-admin@example.com',
+        password: 'test',
+      },
+    })
+
+    const statuses: number[] = []
+
+    for (const { body, endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          collectionSlug: pagesSlug,
+          doc: body,
+        }),
+      })
+
+      statuses.push(response.status)
+    }
+
+    expect(statuses).toEqual([401, 401, 401, 401])
+  })
+
+  test('should generate metadata for an authenticated admin user', async ({ restClient }) => {
+    await restClient.login({ slug: 'users' })
+
+    const results: unknown[] = []
+
+    for (const { body, endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          collectionSlug: pagesSlug,
+          doc: body,
+        }),
+      })
+
+      expect(response.status).toBe(200)
+      results.push(await response.json())
+    }
+
+    expect(results).toEqual(
+      generationEndpoints.map(({ expectedResult }) => ({ result: expectedResult })),
+    )
+  })
+
+  test('should respect collection read access for generation endpoints', async ({ restClient }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const statuses: number[] = []
+
+    for (const { endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          id: page.id,
+          collectionSlug: pagesSlug,
+          doc: {
+            id: page.id,
+            title: 'Updated page',
+          },
+        }),
+      })
+
+      statuses.push(response.status)
+    }
+
+    expect(statuses).toEqual([403, 403, 403, 403])
+  })
+
+  test('should not generate stored metadata from unreadable collection documents', async ({
+    restClient,
+  }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const response = await restClient.POST('/plugin-seo/generate-title', {
+      body: JSON.stringify({
+        id: page.id,
+        collectionSlug: pagesSlug,
+        doc: {
+          id: page.id,
+          title: 'Updated page',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(403)
+  })
+
+  test('should require matching collection document IDs', async ({ restClient }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const response = await restClient.POST('/plugin-seo/generate-title', {
+      body: JSON.stringify({
+        id: readablePage.id,
+        collectionSlug: pagesSlug,
+        doc: {
+          id: page.id,
+          title: 'Updated page',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(403)
+  })
+
+  test('should respect collection read access for trashed documents', async ({ restClient }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const response = await restClient.POST('/plugin-seo/generate-title', {
+      body: JSON.stringify({
+        id: trashedPage.id,
+        collectionSlug: pagesSlug,
+        doc: {
+          id: trashedPage.id,
+          title: 'Updated trashed page',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(403)
+  })
+
+  test('should generate metadata for readable collection documents', async ({ restClient }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const statuses: number[] = []
+
+    for (const { endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          id: readablePage.id,
+          collectionSlug: pagesSlug,
+          doc: {
+            id: readablePage.id,
+            title: 'Updated readable page',
+          },
+        }),
+      })
+
+      statuses.push(response.status)
+    }
+
+    expect(statuses).toEqual([200, 200, 200, 200])
+  })
+
+  test('should generate stored metadata from readable collection documents', async ({
+    restClient,
+  }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const response = await restClient.POST('/plugin-seo/generate-title', {
+      body: JSON.stringify({
+        id: readablePage.id,
+        collectionSlug: pagesSlug,
+        doc: {
+          id: readablePage.id,
+          title: 'Updated readable page',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toEqual({ result: 'Website.com — Readable page' })
+  })
+
+  test('should generate metadata for unsaved collection documents', async ({ restClient }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const statuses: number[] = []
+
+    for (const { endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          collectionSlug: pagesSlug,
+          doc: {
+            title: 'Unsaved page',
+          },
+        }),
+      })
+
+      statuses.push(response.status)
+    }
+
+    expect(statuses).toEqual([200, 200, 200, 200])
+  })
+
+  test('should generate metadata for unsaved collection documents with assigned IDs', async ({
+    restClient,
+  }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const id =
+      typeof readablePage.id === 'number'
+        ? 987654321
+        : /^[0-9a-f]{24}$/i.test(readablePage.id)
+          ? randomBytes(12).toString('hex')
+          : randomUUID()
+
+    const response = await restClient.POST('/plugin-seo/generate-description', {
+      body: JSON.stringify({
+        id,
+        collectionSlug: pagesSlug,
+        doc: {
+          id,
+          title: 'Unsaved page',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(200)
+  })
+
+  test('should respect global read access for generation endpoints', async ({ restClient }) => {
+    await restClient.login({
+      slug: 'users',
+      credentials: {
+        email: 'editor@example.com',
+        password: 'test',
+      },
+    })
+
+    const statuses: number[] = []
+
+    for (const { endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          doc: {
+            title: 'Updated site settings',
+          },
+          globalSlug: siteSettingsSlug,
+        }),
+      })
+
+      statuses.push(response.status)
+    }
+
+    expect(statuses).toEqual([403, 403, 403, 403])
+  })
+
+  test('should generate metadata for readable globals', async ({ restClient }) => {
+    await restClient.login({ slug: 'users' })
+
+    const statuses: number[] = []
+
+    for (const { endpoint } of generationEndpoints) {
+      const response = await restClient.POST(endpoint, {
+        body: JSON.stringify({
+          doc: {
+            title: 'Updated site settings',
+          },
+          globalSlug: siteSettingsSlug,
+        }),
+      })
+
+      statuses.push(response.status)
+    }
+
+    expect(statuses).toEqual([200, 200, 200, 200])
   })
 
   test('should return different previousValue and value in afterChange hooks when relationship changes', async ({

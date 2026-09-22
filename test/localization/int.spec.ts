@@ -37,6 +37,16 @@ import {
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  publicationAccessGlobalSlug,
+  publicationAccessSlug,
+  publicationAsyncFieldHookSlug,
+  publicationBeforeOperationGlobalSlug,
+  publicationBeforeOperationSanitizeGlobalSlug,
+  publicationBeforeOperationSlug,
+  publicationFieldAccessGlobalSlug,
+  publicationFieldAccessSlug,
+  publicationHookGlobalSlug,
+  publicationHookSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -4054,6 +4064,703 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
   })
 
   test.describe('localize status', () => {
+    test.describe('publication authorization', () => {
+      const createdDocuments: Array<{ collection: string; id: number | string }> = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const { id, collection } of createdDocuments) {
+          await payload.delete({ id, collection: collection as any })
+        }
+        createdDocuments.length = 0
+      })
+
+      test('should authorize publishAllLocales during collection create', async ({ payload }) => {
+        await expect(
+          payload.create({
+            collection: publicationAccessSlug as any,
+            data: { title: 'unauthorized publication' },
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should expose publishAllLocales intent to collection create beforeOperation hooks', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.create({
+            collection: publicationBeforeOperationSlug as any,
+            data: { title: 'unauthorized publication' },
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication is not allowed in beforeOperation')
+      })
+
+      test('should authorize publishAllLocales during collection update by ID', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should authorize unpublishAllLocales during collection update by ID', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          locale: defaultLocale,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            unpublishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should expose publishAllLocales intent to collection update beforeOperation hooks', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationBeforeOperationSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationBeforeOperationSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationBeforeOperationSlug as any,
+            data: {},
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication is not allowed in beforeOperation')
+      })
+
+      test('should pass publication data to collection bulk update access', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'bulk draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            collection: publicationAccessSlug as any,
+            data: { _status: 'published' },
+            overrideAccess: false,
+            where: { id: { equals: doc.id } },
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should authorize publishAllLocales during collection bulk update', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'bulk draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            collection: publicationAccessSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+            where: { id: { equals: doc.id } },
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should expose publishAllLocales intent to collection bulk beforeOperation hooks', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationBeforeOperationSlug as any,
+          data: { _status: 'draft', title: 'bulk draft' },
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationBeforeOperationSlug })
+
+        await expect(
+          payload.update({
+            collection: publicationBeforeOperationSlug as any,
+            data: {},
+            publishAllLocales: true,
+            where: { id: { equals: doc.id } },
+          }),
+        ).rejects.toThrow('Publication is not allowed in beforeOperation')
+      })
+
+      test('should authorize publishAllLocales during global update', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: publicationAccessGlobalSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationAccessGlobalSlug as any,
+            data: {},
+            locale: defaultLocale,
+            overrideAccess: false,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+
+      test('should expose publishAllLocales intent to global beforeOperation hooks', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: publicationBeforeOperationGlobalSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          publishAllLocales: false,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationBeforeOperationGlobalSlug as any,
+            data: {},
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication is not allowed in beforeOperation')
+      })
+
+      test('should preserve global beforeOperation sanitization of publishAllLocales', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: publicationBeforeOperationSanitizeGlobalSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationBeforeOperationSanitizeGlobalSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await payload.updateGlobal({
+          slug: publicationBeforeOperationSanitizeGlobalSlug as any,
+          context: { sanitizePublicationIntent: true },
+          data: {},
+          locale: defaultLocale,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findGlobal({
+          slug: publicationBeforeOperationSanitizeGlobalSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should preserve async sibling field hook removal of publishAllLocales intent', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAsyncFieldHookSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAsyncFieldHookSlug })
+        await payload.update({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          context: { removePublicationIntent: true },
+          data: {},
+          locale: defaultLocale,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should remove synthesized status when beforeOperation changes the update to a draft', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAsyncFieldHookSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAsyncFieldHookSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          context: { saveAsDraft: true },
+          data: {},
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('draft')
+        expect(unchanged._status[spanishLocale]).not.toBe('published')
+      })
+
+      test('should restore an explicit status when beforeOperation neutralizes the publish flag', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAsyncFieldHookSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAsyncFieldHookSlug })
+
+        // The caller sends an explicit `_status: 'draft'` alongside `publishAllLocales: true`.
+        // The synthesized 'published' overwrites it before beforeOperation, then the saveAsDraft
+        // hook clears the publish flag. The explicit 'draft' must be restored (hadStatus branch),
+        // and the neutralized publish intent must not leak to the other locale.
+        await payload.update({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          context: { saveAsDraft: true },
+          data: { _status: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationAsyncFieldHookSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('draft')
+        expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      test('should respect _status field access when unpublishing all locales', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          locale: defaultLocale,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          unpublishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: false,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      test('should not infer field access from an already-published active locale', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          context: { comparePublicationStatus: true },
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should not infer field access from an already-draft active locale', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: defaultLocale,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          unpublishAllLocales: true,
+        })
+
+        const unchanged = await payload.findByID({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('draft')
+        expect(unchanged._status[spanishLocale]).toBe('published')
+      })
+
+      test('should expose differing locale status to field beforeValidate hooks', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationFieldAccessSlug })
+        await payload.update({
+          id: doc.id,
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationFieldAccessSlug as any,
+            context: { validatePublicationStatus: true },
+            data: {},
+            locale: defaultLocale,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status validation is not allowed')
+      })
+
+      test('should not infer create field access from duplicated publication status', async ({
+        payload,
+      }) => {
+        const original = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: original.id, collection: publicationFieldAccessSlug })
+
+        const duplicate = await payload.create({
+          collection: publicationFieldAccessSlug as any,
+          data: { title: 'duplicate' },
+          duplicateFromID: original.id,
+          locale: defaultLocale,
+          overrideAccess: false,
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: duplicate.id, collection: publicationFieldAccessSlug })
+
+        const unchanged = await payload.findByID({
+          id: duplicate.id,
+          collection: publicationFieldAccessSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('draft')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should not infer global field access from an already-published active locale', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          context: { comparePublicationStatus: true },
+          data: {},
+          locale: defaultLocale,
+          overrideAccess: false,
+          publishAllLocales: true,
+        })
+
+        const unchanged = await payload.findGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          draft: true,
+          locale: 'all',
+        })
+        expect(unchanged._status[defaultLocale]).toBe('published')
+        expect(unchanged._status[spanishLocale]).toBe('draft')
+      })
+
+      test('should expose differing global status to field beforeValidate hooks', async ({
+        payload,
+      }) => {
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationFieldAccessGlobalSlug as any,
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationFieldAccessGlobalSlug as any,
+            context: { validatePublicationStatus: true },
+            data: {},
+            locale: defaultLocale,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status validation is not allowed')
+      })
+
+      test('should publish accessible collection locales when locale is all', async ({
+        payload,
+      }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await payload.update({
+          id: doc.id,
+          collection: publicationAccessSlug as any,
+          data: {},
+          locale: 'all',
+          publishAllLocales: true,
+        })
+
+        const published = await payload.findByID({
+          id: doc.id,
+          collection: publicationAccessSlug as any,
+          draft: false,
+          locale: 'all',
+        })
+        expect(published._status[defaultLocale]).toBe('published')
+        expect(published._status[spanishLocale]).toBe('published')
+        expect(published._status.xx).not.toBe('published')
+      })
+
+      test('should publish accessible global locales when locale is all', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: globalWithDraftsSlug,
+          data: { _status: 'draft', text: 'draft' },
+          publishAllLocales: false,
+        })
+
+        await payload.updateGlobal({
+          slug: globalWithDraftsSlug,
+          data: {},
+          locale: 'all',
+          publishAllLocales: true,
+        })
+
+        const published = await payload.findGlobal({
+          slug: globalWithDraftsSlug,
+          draft: false,
+          locale: 'all',
+        })
+        expect(published._status[defaultLocale]).toBe('published')
+        expect(published._status[spanishLocale]).toBe('published')
+        expect(published._status.xx).not.toBe('published')
+      })
+
+      test('should expose publishAllLocales intent to collection hooks', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: publicationHookSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationHookSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationHookSlug as any,
+            data: {},
+            locale: defaultLocale,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status changes are not allowed')
+      })
+
+      test('should expose differing locale status to collection hooks', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: publicationHookSlug as any,
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationHookSlug })
+        await payload.update({
+          id: doc.id,
+          collection: publicationHookSlug as any,
+          context: { seedPublicationStatus: true },
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationHookSlug as any,
+            data: {},
+            locale: defaultLocale,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status changes are not allowed')
+      })
+
+      test('should expose differing locale status to global hooks', async ({ payload }) => {
+        await payload.updateGlobal({
+          slug: publicationHookGlobalSlug as any,
+          context: { seedPublicationStatus: true },
+          data: { _status: 'published', title: 'published' },
+          publishAllLocales: true,
+        })
+        await payload.updateGlobal({
+          slug: publicationHookGlobalSlug as any,
+          context: { seedPublicationStatus: true },
+          data: { _status: 'draft' },
+          draft: true,
+          locale: spanishLocale,
+        })
+
+        await expect(
+          payload.updateGlobal({
+            slug: publicationHookGlobalSlug as any,
+            data: {},
+            locale: defaultLocale,
+            publishAllLocales: true,
+          }),
+        ).rejects.toThrow('Publication status changes are not allowed')
+      })
+
+      test('should reject contradictory all-locale publication flags', async ({ payload }) => {
+        const doc = await payload.create({
+          collection: publicationAccessSlug as any,
+          data: { _status: 'draft', title: 'draft' },
+          locale: defaultLocale,
+          publishAllLocales: false,
+        })
+        createdDocuments.push({ id: doc.id, collection: publicationAccessSlug })
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            collection: publicationAccessSlug as any,
+            data: {},
+            publishAllLocales: true,
+            unpublishAllLocales: true,
+          }),
+        ).rejects.toThrow()
+      })
+    })
+
     test.describe('collections', () => {
       test.describe('on create', () => {
         test('should set other locales to draft upon creation', async ({ payload }) => {
@@ -4097,8 +4804,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', 
             id: doc.id,
             collection: allFieldsLocalizedSlug,
           })
+          const allLocalesDoc = await payload.findByID({
+            locale: 'all',
+            id: doc.id,
+            collection: allFieldsLocalizedSlug,
+          })
 
           expect(esDoc._status).toContain('published')
+          expect(allLocalesDoc._status.xx).not.toBe('published')
         })
       })
 

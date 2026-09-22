@@ -39,9 +39,10 @@ export const QueryPresetBar: React.FC<{
   activePreset: QueryPreset
   collectionSlug?: string
   queryPresetPermissions: SanitizedCollectionPermission
-}> = ({ activePreset, collectionSlug, queryPresetPermissions }) => {
+}> = ({ activePreset: activePresetFromProps, collectionSlug, queryPresetPermissions }) => {
   const { modified, query, refineListData, setModified: setQueryModified } = useListQuery()
   const { openModal } = useModal()
+  const [activePreset, setActivePreset] = useState<QueryPreset | undefined>(activePresetFromProps)
   const router = useRouter()
   const [presets, setPresets] = useState<QueryPreset[]>([])
 
@@ -118,6 +119,10 @@ export const QueryPresetBar: React.FC<{
     void fetchPresets()
   }, [fetchPresets])
 
+  useEffect(() => {
+    setActivePreset(activePresetFromProps)
+  }, [activePresetFromProps])
+
   const handlePresetChange = useCallback(
     async (preset: QueryPreset) => {
       await refineListData(
@@ -129,6 +134,7 @@ export const QueryPresetBar: React.FC<{
         },
         false,
       )
+      setActivePreset(preset)
     },
     [refineListData],
   )
@@ -149,6 +155,7 @@ export const QueryPresetBar: React.FC<{
         },
         false,
       )
+      setActivePreset(undefined)
     },
     [refineListData],
   )
@@ -181,6 +188,7 @@ export const QueryPresetBar: React.FC<{
           },
           false,
         )
+        setActivePreset(undefined)
         void fetchPresets()
       }
     } catch (_error) {
