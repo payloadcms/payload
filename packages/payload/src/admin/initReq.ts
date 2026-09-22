@@ -23,12 +23,16 @@ export type InitReqPartialResult = {
 } & Pick<InitReqResult, 'languageCode'> &
   Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
 
+/** Framework-provided request-scoped caching hooks used to deduplicate request initialization. */
 export type InitReqCache = {
+  /** Reuses locale preference resolution across request results. */
   getLocale?: (
     factory: () => Promise<Pick<InitReqResult, 'locale'>>,
     ...cacheArgs: unknown[]
   ) => Promise<Pick<InitReqResult, 'locale'>>
+  /** Reuses Payload, i18n, and authentication state within the current request. */
   getPartial: (factory: () => Promise<InitReqPartialResult>) => Promise<InitReqPartialResult>
+  /** Reuses a complete initialized request for the supplied key and cache arguments. */
   getRequest: (
     factory: () => Promise<InitReqResult>,
     key: string,
@@ -37,10 +41,15 @@ export type InitReqCache = {
 }
 
 export type InitReqArgs = {
+  /**
+   * Optional framework-owned request-scoped cache.
+   * Framework adapters control its lifetime to prevent request state from leaking between requests.
+   */
   cache?: InitReqCache
   canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
+  /** Identifies the complete request result within `cache`; required when a cache is supplied. */
   key?: string
   overrides?: Parameters<typeof createLocalReq>[0]
   requestURL?: string
