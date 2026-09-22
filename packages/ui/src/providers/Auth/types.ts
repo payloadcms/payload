@@ -1,4 +1,4 @@
-import type { ClientUser, SanitizedPermissions } from 'payload'
+import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
 
 export type AuthSession = {
   /** Whether qualifying activity has been recorded for the current token. */
@@ -20,7 +20,7 @@ export type UserWithToken<T = ClientUser> = {
 export type AuthContext<T = ClientUser> = {
   /** Lifecycle state for the current auth session. */
   authSession?: AuthSession
-  fetchFullUser: () => Promise<null | T>
+  fetchFullUser: () => Promise<null | TypedUser>
   logOut: () => Promise<boolean>
   /**
    * These are the permissions for the current user from a global scope.
@@ -58,7 +58,7 @@ export type AuthContext<T = ClientUser> = {
    */
   permissions?: SanitizedPermissions
   refreshCookie: (forceRefresh?: boolean) => void
-  refreshCookieAsync: () => Promise<null | T>
+  refreshCookieAsync: () => Promise<ClientUser>
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: SanitizedPermissions) => void
   setUser: (user: null | UserWithToken<T>) => void

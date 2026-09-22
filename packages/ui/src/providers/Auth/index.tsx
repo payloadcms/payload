@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, SanitizedPermissions } from 'payload'
+import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
@@ -181,6 +181,11 @@ export function AuthProvider({
         const nextSessionTiming =
           expirationMs !== undefined ? sessionTimers.setExpiration(expirationMs) : undefined
 
+        if (expirationMs === undefined) {
+          sessionTimers.clear()
+          setAuthSession(undefined)
+        }
+
         userRef.current = session.user
         setUserInMemory(session.user)
         setTokenInMemory(session.token ?? session.refreshedToken)
@@ -324,10 +329,9 @@ export function AuthProvider({
     ],
   )
 
-  const refreshCookieAsync = useCallback(
-    (): Promise<ClientUser | null> => refreshSession({ isActivityRefresh: false }),
-    [refreshSession],
-  )
+  const refreshCookieAsync = useCallback(async (): Promise<ClientUser> => {
+    return await refreshSession({ isActivityRefresh: false })
+  }, [refreshSession])
 
   const logOutSession = useCallback(
     ({ collection }: { collection?: string }): Promise<void> => {
@@ -471,10 +475,10 @@ export function AuthProvider({
     [apiRoute, authRequests, i18n.language, sessionTimers, setLocalSession, userSlug],
   )
 
-  const fetchFullUser = React.useCallback(async (): Promise<ClientUser | null> => {
+  const fetchFullUser = React.useCallback(async (): Promise<null | TypedUser> => {
     const result = await fetchFullUserResult()
 
-    return result.status === 'authenticated' ? result.user : null
+    return result.status === 'authenticated' ? (result.user as TypedUser) : null
   }, [fetchFullUserResult])
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
