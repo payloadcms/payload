@@ -6,9 +6,15 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaWithAlwaysInsertFields } from './collections/MediaWithAlwaysInsertFields.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithAlwaysInsertFieldsSlug,
+  mediaWithPrefixSlug,
+  prefix,
+} from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -27,7 +33,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [Media, MediaWithPrefix, Users],
+    collections: [Media, MediaWithAlwaysInsertFields, MediaWithPrefix, Users],
     storage: [
       gcsStorage({
         bucket: process.env.GCS_BUCKET,
@@ -37,6 +43,20 @@ export default buildConfigWithDefaults({
             prefix,
           },
         },
+        options: {
+          apiEndpoint: process.env.GCS_ENDPOINT,
+          projectId: process.env.GCS_PROJECT_ID,
+        },
+      }),
+      // Plugin disabled: the prefix field should still be inserted by default
+      gcsStorage({
+        bucket: process.env.GCS_BUCKET,
+        collections: {
+          [mediaWithAlwaysInsertFieldsSlug]: {
+            prefix: '',
+          },
+        },
+        enabled: false,
         options: {
           apiEndpoint: process.env.GCS_ENDPOINT,
           projectId: process.env.GCS_PROJECT_ID,
