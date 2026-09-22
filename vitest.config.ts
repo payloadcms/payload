@@ -68,7 +68,12 @@ export default defineConfig({
     projects: [
       {
         test: {
-          include: ['packages/**/*.spec.ts', 'tools/**/*.spec.ts', '.github/scripts/**/*.spec.mjs'],
+          include: [
+            'packages/**/*.spec.ts',
+            'tools/**/*.spec.ts',
+            'test/benchmark-blocks/**/*.unit.spec.ts',
+            '.github/scripts/**/*.spec.mjs',
+          ],
           name: 'unit',
           environment: 'node',
         },

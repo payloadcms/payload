@@ -8,6 +8,7 @@
     "test/*"
   ],
   "scripts": {
+    "bench:mongodb-schema-build": "pnpm runts ./test/benchmark-blocks/measureSchemas.ts",
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
     "build:admin-bar": "turbo build --filter \"@payloadcms/admin-bar\"",
