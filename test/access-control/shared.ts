@@ -22,6 +22,11 @@ export const docLevelAccessSlug = 'doc-level-access'
 export const hiddenFieldsSlug = 'hidden-fields'
 export const hiddenAccessSlug = 'hidden-access'
 export const hiddenAccessCountSlug = 'hidden-access-count'
+export const inheritedReadVersionsSlug = 'inherited-read-versions'
+export const inheritedReadVersionsGlobalSlug = 'inherited-read-versions-global'
+export const inheritedReadVersionsVirtualGlobalSlug = 'inherited-read-versions-virtual-global'
+export const inheritedReadVersionsVirtualSlug = 'inherited-read-versions-virtual'
+export const inheritedReadVersionsVirtualRelatedSlug = 'inherited-read-versions-virtual-related'
 export const disabledSlug = 'disabled'
 
 export const nonAdminEmail = 'no-admin-access@payloadcms.com'
@@ -34,6 +39,10 @@ export const usersSlug = 'users'
 export const whereCacheSameSlug = 'where-cache-same'
 export const whereCacheUniqueSlug = 'where-cache-unique'
 export const asyncParentSlug = 'async-parent'
+
+export const accessRelationParentSlug = 'access-relation-parent'
+export const accessRelationChildSlug = 'access-relation-child'
+export const selfReferentialSlug = 'self-referential'
 
 // Trash access control slugs
 export const differentiatedTrashSlug = 'differentiated-trash'

@@ -80,9 +80,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
     )
   })
 
-  test('has prefix field with alwaysInsertFields even when plugin is disabled', async ({
-    payload,
-  }) => {
+  test('has prefix field by default even when plugin is disabled', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithAlwaysInsertFieldsSlug,
       data: {
@@ -253,10 +251,10 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
 
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image-1.png')
-      // @ts-expect-error prefix should never be set
-      expect(upload1.prefix).toBeUndefined()
-      // @ts-expect-error prefix should never be set
-      expect(upload2.prefix).toBeUndefined()
+      // The prefix field is always inserted by default, defaulting to an empty string
+      // for collections that don't configure a prefix.
+      expect(upload1.prefix).toBe('')
+      expect(upload2.prefix).toBe('')
     })
 
     test('allows same filename under different prefixes', async ({ payload }) => {

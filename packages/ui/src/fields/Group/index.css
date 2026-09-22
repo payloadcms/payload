@@ -123,6 +123,7 @@
     padding-top: 0;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .group-field--top-level {
       &::before {

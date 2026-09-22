@@ -23,6 +23,7 @@
     padding-inline: var(--spacer-2-5);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .field-diff-container .field-diff-content {
       grid-template-columns: 1fr;

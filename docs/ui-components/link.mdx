@@ -1,0 +1,47 @@
+---
+title: Link
+label: Link
+order: 140
+desc: Navigate within the Payload Admin Panel using Payload's router-aware Link component.
+keywords: ui, component, link, navigation, router
+---
+
+The `Link` component uses Payload's router adapter and route-transition state. Use it for links between Admin Panel routes.
+
+## Import
+
+Inside a Payload Admin Panel Custom Component:
+
+```tsx
+import { Link } from '@payloadcms/ui'
+```
+
+You can also import the component directly:
+
+```tsx
+import { Link } from '@payloadcms/ui/elements/Link'
+```
+
+## Basic usage
+
+<ComponentPreview component="Link" example="basic" />
+
+`Link` supplies navigation behavior but does not add visual styling. Pass a `className` when the link needs its own visual treatment.
+
+The Admin Panel supplies the router and route-transition contexts used by the component.
+
+## Common props
+
+These are the props most commonly used with this component. See its exported types in `@payloadcms/ui` for the complete list.
+
+| Prop             | Type                | Default | Description                                                |
+| ---------------- | ------------------- | ------- | ---------------------------------------------------------- |
+| `href` \*        | `string`            | —       | Destination passed to Payload's router adapter.            |
+| `replace`        | `boolean`           | `false` | Replaces the current history entry instead of adding one.  |
+| `scroll`         | `boolean`           | `true`  | Controls whether navigation scrolls to the new page.       |
+| `prefetch`       | `boolean`           | —       | Controls route prefetching when the adapter supports it.   |
+| `preventDefault` | `boolean`           | `true`  | Lets Payload manage navigation and route-transition state. |
+| `forceReload`    | `boolean`           | `false` | Uses a hard browser navigation instead of client routing.  |
+| `onClick`        | `MouseEventHandler` | —       | Runs before navigation begins.                             |
+
+_\* An asterisk denotes that a prop is required._
