@@ -9,6 +9,7 @@ import { initReq } from './initReq.js'
 
 const { counters, payloadInitReq } = vi.hoisted(() => ({
   counters: {
+    locale: 0,
     partial: 0,
     request: 0,
   },
@@ -85,6 +86,7 @@ async function renderNavigationWithOverrides(): Promise<void> {
 
 describe('Next initReq RSC cache', () => {
   beforeEach(() => {
+    counters.locale = 0
     counters.partial = 0
     counters.request = 0
     payloadInitReq.mockReset().mockImplementation(async ({ cache, key, overrides }) => {
@@ -96,6 +98,20 @@ describe('Next initReq RSC cache', () => {
       return cache.getRequest(
         async () => {
           counters.request += 1
+
+          if (cache.getLocale) {
+            await cache.getLocale(
+              async () => {
+                counters.locale += 1
+                return { locale: undefined }
+              },
+              'payload',
+              'users',
+              'user-id',
+              undefined,
+            )
+          }
+
           return {}
         },
         key,
@@ -108,6 +124,7 @@ describe('Next initReq RSC cache', () => {
     await renderNavigation()
 
     expect(counters).toEqual({
+      locale: 1,
       partial: 1,
       request: 2,
     })
@@ -115,6 +132,7 @@ describe('Next initReq RSC cache', () => {
     await renderNavigation()
 
     expect(counters).toEqual({
+      locale: 2,
       partial: 2,
       request: 4,
     })
@@ -124,6 +142,7 @@ describe('Next initReq RSC cache', () => {
     await renderNavigationWithOverrides()
 
     expect(counters).toEqual({
+      locale: 1,
       partial: 1,
       request: 2,
     })

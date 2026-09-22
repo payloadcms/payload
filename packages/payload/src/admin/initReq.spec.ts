@@ -141,6 +141,10 @@ const createExecutingCache = (): InitReqCache => ({
 })
 
 const createReusingCache = (): InitReqCache => {
+  const localeResults: Array<{
+    cacheArgs: unknown[]
+    result: Pick<InitReqResult, 'locale'>
+  }> = []
   let partialResult: InitReqPartialResult | undefined
   const requestResults: Array<{
     cacheArgs: unknown[]
@@ -149,6 +153,22 @@ const createReusingCache = (): InitReqCache => {
   }> = []
 
   return {
+    getLocale: vi.fn(async (factory, ...cacheArgs) => {
+      const cached = localeResults.find(
+        (entry) =>
+          entry.cacheArgs.length === cacheArgs.length &&
+          entry.cacheArgs.every((arg, index) => arg === cacheArgs[index]),
+      )
+
+      if (cached) {
+        return cached.result
+      }
+
+      const result = await factory()
+      localeResults.push({ cacheArgs, result })
+
+      return result
+    }),
     getPartial: vi.fn(async (factory) => {
       partialResult ??= await factory()
       return partialResult
@@ -411,6 +431,25 @@ describe('initReq', () => {
     expect(applyUserReadAccess).toHaveBeenCalledTimes(2)
     expect(first.user).toMatchObject({ source: 'first' })
     expect(second.user).toMatchObject({ source: 'second' })
+  })
+
+  it('should reuse locale preference resolution across request cache keys', async () => {
+    getPayload.mockResolvedValue({ ...payload, config: localizedConfig })
+    findPreference.mockResolvedValue({ value: 'es' })
+    const cache = createReusingCache()
+    const args = {
+      cache,
+      configPromise: localizedConfig,
+      importMap,
+      serverAdapter,
+    }
+
+    const rootLayoutResult = await initReq({ ...args, key: 'RootLayout' })
+    const pageResult = await initReq({ ...args, key: 'initPage' })
+
+    expect(rootLayoutResult.locale).toMatchObject({ code: 'es' })
+    expect(pageResult.locale).toMatchObject({ code: 'es' })
+    expect(findPreference).toHaveBeenCalledOnce()
   })
 
   it('should use anonymous access when user read access fails', async () => {

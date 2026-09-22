@@ -24,6 +24,10 @@ export type InitReqPartialResult = {
   Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
 
 export type InitReqCache = {
+  getLocale?: (
+    factory: () => Promise<Pick<InitReqResult, 'locale'>>,
+    ...cacheArgs: unknown[]
+  ) => Promise<Pick<InitReqResult, 'locale'>>
   getPartial: (factory: () => Promise<InitReqPartialResult>) => Promise<InitReqPartialResult>
   getRequest: (
     factory: () => Promise<InitReqResult>,
@@ -130,7 +134,18 @@ export async function initReq({
       req.user = null
     }
 
-    const locale = await getRequestLocale({ req })
+    const resolveLocale = async (): Promise<Pick<InitReqResult, 'locale'>> => ({
+      locale: await getRequestLocale({ req }),
+    })
+    const { locale } = cache?.getLocale
+      ? await cache.getLocale(
+          resolveLocale,
+          payload,
+          req.user?.collection,
+          req.user?.id,
+          req.query.locale,
+        )
+      : await resolveLocale()
 
     req.locale = locale?.code
 
