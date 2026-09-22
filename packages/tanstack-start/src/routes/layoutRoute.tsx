@@ -1,8 +1,10 @@
 'use client'
 
+// Important: Never import the `@payloadcms/ui` barrel here so Vite doesn't traverse the full admin UI graph on frontend routes
 import type { ComponentProps } from 'react'
 
-import { ProgressBar, RootProvider } from '@payloadcms/ui'
+import { RootProvider } from '@payloadcms/ui/providers/Root'
+import { ProgressBar } from '@payloadcms/ui/providers/RouteTransition/ProgressBar'
 import { Outlet, useLoaderData } from '@tanstack/react-router'
 
 import type { LoadLayoutDataResult } from '../utilities/loadLayoutData.js'
