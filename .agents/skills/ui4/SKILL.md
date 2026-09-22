@@ -1,6 +1,6 @@
 ---
 name: ui4
-description: Manually invoked skill for reskinning Payload UI components. Requires Figma URL. Usage: /ui4
+description: 'Manually invoked skill for reskinning Payload UI components. Requires Figma URL. Usage: /ui4'
 ---
 
 # Payload UI Reskin (ui4)
@@ -366,7 +366,7 @@ grep -r "variable-name" packages/ui/src/css/
    - Standard focus outline: `outline: 1px solid var(--accessibility-focus-color)`
    - For parent containers: use `:has(:focus-visible)` to detect child focus
 
-4. **Use canonical shorthands** — see the shorthand table in `.claude/skills/ui4-review/SKILL.md`.
+4. **Use canonical shorthands** — see the shorthand table in `.agents/skills/ui4-review/SKILL.md`.
 
 5. **Color rules — NEVER GUESS:**
 
