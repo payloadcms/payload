@@ -6,9 +6,9 @@ desc: Learn how to implement and enforce access control in Payload's Local API o
 keywords: server functions, local API, Payload, CMS, access control, permissions, user context, server-side logic, custom workflows, data management, headless CMS, TypeScript, Node.js, backend
 ---
 
-Every Local API operation accepts an `overrideAccess` option. As of Payload 4, it defaults to `false` — Local API operations **respect Access Control by default**.
+Local API operations that support `overrideAccess` now default it to `false` — they **respect Access Control by default**. A few operations do not expose this option, and `resetPassword` requires it explicitly.
 
-- `overrideAccess: false` (default) — respect Access Control. Pass the `user` alongside it.
+- `overrideAccess: false` (default where optional) — respect Access Control. Pass the authenticated `user` when the operation acts on their behalf; without one, Payload evaluates access as an anonymous request.
 - `overrideAccess: true` — skip Access Control. The operation runs with full permissions.
 
 <Banner type="warning">
@@ -37,7 +37,9 @@ This creates the document only if `user` has permission to do so. Without the `u
 
 ### Skipping Access Control
 
-Use `overrideAccess: true` for trusted server-side work with no user behind it — seed scripts, migrations, cron jobs, and webhook handlers.
+Use `overrideAccess: true` for trusted server-side work with no user behind it — seed scripts, migrations, cron jobs, and independently authenticated system integrations that are intended to run with full permissions.
+
+Treat webhooks according to the authority they represent. A webhook acting for a Payload user should pass that `user` with `overrideAccess: false`. After independently authenticating and authorizing a system webhook, use `overrideAccess: true` only when it is intentionally allowed to bypass Payload Access Control.
 
 ```ts
 const seeded = await payload.create({
@@ -54,4 +56,4 @@ const seeded = await payload.create({
 
 Ask who the operation is for. If a person triggered it, pass their `user` — you can set `overrideAccess: false` explicitly, or simply omit the property, since that's now the default. If your server triggered it on its own schedule, set `overrideAccess: true` explicitly.
 
-When you are unsure, leave the default in place: the operation returns less than you expected rather than more.
+When you are unsure, leave the default in place so that Payload enforces the configured Access Control instead of bypassing it.

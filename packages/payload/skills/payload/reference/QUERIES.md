@@ -156,7 +156,7 @@ This is critical for MongoDB replica sets and Postgres. See [ADAPTERS.md#threadi
 
 ### Access Control in Local API
 
-**Important**: `overrideAccess` defaults to `false` — Local API respects access control unless told otherwise. Set it to `true` to bypass access control.
+**Important**: Where `overrideAccess` is optional, it defaults to `false` — Local API respects access control unless told otherwise. Set it to `true` to bypass access control.
 
 ```ts
 // ❌ WRONG: User is passed but access control is bypassed anyway

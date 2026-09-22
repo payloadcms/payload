@@ -119,7 +119,8 @@ export const POST = async (req: PayloadRequest) => {
       month: new Date().getMonth(),
       year: new Date().getFullYear(),
     },
-    overrideAccess: true,
+    overrideAccess: false,
+    req,
   })
 
   return Response.json({
@@ -136,16 +137,25 @@ Queue jobs from Next.js server actions:
 ```ts
 'use server'
 
-import { getPayload } from 'payload'
+import { headers } from 'next/headers'
+import { createLocalReq, getPayload, UnauthorizedError } from 'payload'
 import config from '@payload-config'
 
-export async function scheduleEmail(userId: string) {
+export async function scheduleEmail() {
   const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: await headers() })
+
+  if (!user) {
+    throw new UnauthorizedError()
+  }
+
+  const req = await createLocalReq({ user }, payload)
 
   await payload.jobs.queue({
     task: 'sendEmail',
-    input: { userId },
-    overrideAccess: true,
+    input: { userId: user.id },
+    overrideAccess: false,
+    req,
   })
 }
 ```

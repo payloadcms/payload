@@ -87,7 +87,7 @@ handler: async () => {
 <Pill text="Queue Jobs" />
 
 ```ts
-// Option A: Manual Queuing—Used for user-triggered actions
+// Option A: Manual Queuing—Used from trusted server code
 payload.jobs.queue({
   task: 'sendEmail',
   input: { to: 'user@example.com' },

@@ -339,14 +339,15 @@ const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true 
 const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
 ```
 
-**Building server functions, views, or endpoints:** Always use `overrideAccess: false` and pass the `user` to payload operations. Without these, the operation runs with access control disabled, which is a security vulnerability.
+**Building server functions, views, or endpoints:** Keep `overrideAccess` set to `false` (the default) and pass the authenticated `user` to payload operations. Setting `overrideAccess: true` bypasses access control and is a security vulnerability when an operation acts on behalf of a user.
 
 Incorrect:
 
 ```typescript
-// INSECURE - runs with full access, bypassing all access control
+// INSECURE - explicitly bypasses all access control
 const docs = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
 })
 ```
 

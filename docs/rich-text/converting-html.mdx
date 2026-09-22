@@ -268,8 +268,8 @@ const payload = await getPayload({ config })
 
 // Step 1: Upload the image to Payload
 const uploadedMedia = await payload.create({
-  collection: 'media',
-  overrideAccess: true, // Your upload collection slug
+  collection: 'media', // Your upload collection slug
+  overrideAccess: true,
   data: {
     alt: 'My image description',
   },

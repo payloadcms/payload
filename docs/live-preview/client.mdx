@@ -277,10 +277,15 @@ If you are using relationships or uploads in your front-end application, and you
 It is possible that either you are setting an improper [`depth`](../queries/depth) in your initial request and/or your `useLivePreview` hook, or they're mismatched. Ensure that the `depth` parameter is set to the correct value, and that it matches exactly in both places. For example:
 
 ```tsx
+import { headers } from 'next/headers'
+
 // Your initial request
+const { user } = await payload.auth({ headers: await headers() })
+
 const { docs } = await payload.find({
   collection: 'pages',
-  overrideAccess: true,
+  overrideAccess: false,
+  user,
   depth: 1, // Ensure this is set to the proper depth for your application
   where: {
     slug: {

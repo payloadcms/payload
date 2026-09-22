@@ -75,7 +75,7 @@ See [Token Data](../authentication/token-data) for the full token data shape.
 
 ### `overrideAccess` now defaults to `false` on Local API operations
 
-Local API operations previously defaulted `overrideAccess` to `true`, so omitting it skipped Access Control. It now defaults to `false`, so an omitted value respects Access Control instead.
+Local API operations whose optional `overrideAccess` value previously defaulted to `true` now default it to `false`, so omitting it respects Access Control instead. Operations that do not expose `overrideAccess`, and operations such as `resetPassword` where it was already required or did not default to `true`, are unaffected by this change.
 
 ```diff
 const posts = await payload.find({
@@ -87,7 +87,7 @@ const posts = await payload.find({
 - `overrideAccess: false` (the new default) — respect Access Control. Use this whenever the operation acts on behalf of a user, and pass `user` alongside it.
 - `overrideAccess: true` — bypass Access Control. Use this for trusted server-side work such as cron jobs, seeding, and migrations.
 
-The property stays optional, and there is no compile error for either TypeScript or JavaScript projects — a call that omitted `overrideAccess` before still compiles after upgrading, it just behaves differently: it now enforces Access Control instead of skipping it. Run the codemod to find every affected call site and restore the previous behavior explicitly:
+The property stays optional on the affected operations, and there is no compile error for either TypeScript or JavaScript projects — a call that omitted `overrideAccess` before still compiles after upgrading, it just behaves differently: it now enforces Access Control instead of skipping it. Run the codemod to find every affected call site and restore the previous behavior explicitly:
 
 ```bash
 npx @payloadcms/codemod

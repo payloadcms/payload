@@ -232,6 +232,7 @@ Here is an example:
 
 ```tsx
 import React from 'react'
+import { headers } from 'next/headers'
 import type { Payload } from 'payload'
 
 async function MyServerComponent({
@@ -239,9 +240,11 @@ async function MyServerComponent({
 }: {
   payload: Payload
 }) {
+  const { user } = await payload.auth({ headers: await headers() })
   const page = await payload.findByID({
     collection: 'pages',
-    overrideAccess: true,
+    overrideAccess: false,
+    user,
     id: '123',
   })
 
@@ -462,11 +465,14 @@ All Server Components automatically receive the `locale` object as a prop by def
 
 ```tsx
 import React from 'react'
+import { headers } from 'next/headers'
 
 export default async function MyServerComponent({ payload, locale }) {
+  const { user } = await payload.auth({ headers: await headers() })
   const localizedPage = await payload.findByID({
     collection: 'pages',
-    overrideAccess: true,
+    overrideAccess: false,
+    user,
     id: '123',
     locale,
   })

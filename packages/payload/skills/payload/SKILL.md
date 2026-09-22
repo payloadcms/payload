@@ -320,10 +320,10 @@ await payload.find({
 })
 ```
 
-`overrideAccess` defaults to `false` — Local API operations respect Access Control unless told otherwise.
+On Local API operations where `overrideAccess` is optional, it defaults to `false` — Access Control is respected unless explicitly bypassed.
 
-- Omit it, or set `overrideAccess: false` - operating on behalf of a user (API routes, webhooks, server functions). Pass `user` alongside it.
-- `overrideAccess: true` - server-side work you trust (cron jobs, seeds, migrations, system tasks)
+- Omit it, or set `overrideAccess: false` - operating on behalf of a user (API routes, user-facing server functions, and webhooks acting as a user). Pass `user` alongside it.
+- `overrideAccess: true` - trusted system work (cron jobs, seeds, migrations, system tasks, and independently authenticated webhooks intentionally granted full permissions)
 
 Never set `overrideAccess: true` out of habit or by copying a nearby call — pick the value this call means.
 
@@ -457,7 +457,7 @@ import type { Post, User } from '@/payload-types'
 
 ## Common Gotchas
 
-1. **Local API respects access control by default** — set `overrideAccess: true` only for trusted server-side work
+1. **Local API operations with optional `overrideAccess` respect access control by default** — set it to `true` only for trusted server-side work
 2. **Missing `req` in nested operations** breaks transaction atomicity
 3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
 4. **Field-level access** returns boolean only, no query constraints
