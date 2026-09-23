@@ -2,13 +2,13 @@ import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 
 import type { SanitizedConfig } from '../config/types.js'
-import type { TypedFallbackLocale } from '../index.js'
-import type { CustomPayloadRequestProperties, PayloadRequest } from '../types/index.js'
+import type { TypedFallbackLocale, TypedLocale } from '../index.js'
+import type { PayloadRequest } from '../types/index.js'
 
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
-import { getDataLoader } from '../collections/dataloader.js'
 import { getPayload } from '../index.js'
 import { sanitizeLocales } from './addLocalesToRequest.js'
+import { createPayloadReq } from './createPayloadReq.js'
 import { formatAdminURL } from './formatAdminURL.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
@@ -23,7 +23,7 @@ type Args = {
   request: Request
 }
 
-export const createPayloadRequest = async ({
+export const createPayloadReqFromWebRequest = async ({
   canSetHeaders,
   config: configPromise,
   params,
@@ -93,19 +93,14 @@ export const createPayloadRequest = async ({
     locale = locales.locale!
   }
 
-  const customRequest: CustomPayloadRequestProperties = {
-    context: {},
-    fallbackLocale: fallbackLocale!,
+  Object.assign(request, {
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
     i18n,
-    locale,
     origin: urlProperties.origin,
     pathname: urlProperties.pathname,
-    payload,
     payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
-    payloadDataLoader: undefined!,
     payloadUploadSizes: {},
     port: urlProperties.port,
     protocol: urlProperties.protocol,
@@ -113,14 +108,15 @@ export const createPayloadRequest = async ({
     routeParams: params || {},
     search: urlProperties.search,
     searchParams: urlProperties.searchParams,
-    t: i18n.t,
     transactionID: undefined,
-    user: null,
-  }
+  })
 
-  const req: PayloadRequest = Object.assign(request, customRequest)
-
-  req.payloadDataLoader = getDataLoader(req)
+  const req = await createPayloadReq({
+    fallbackLocale: fallbackLocale as false | TypedLocale | undefined,
+    locale: locale ?? undefined,
+    payload,
+    req: request,
+  })
 
   const { responseHeaders, user } = await executeAuthStrategies({
     canSetHeaders,

@@ -6,7 +6,7 @@ import fs from 'fs'
 import { createServer } from 'http'
 import os from 'os'
 import path from 'path'
-import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
+import { _internal_safeFetchGlobal, createPayloadReqFromWebRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { expect, vitest } from 'vitest'
@@ -2184,7 +2184,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const configuredOrigin = `http://localhost:${configuredPort}`
         const alternateOrigin = `http://localhost:${alternatePort}`
 
-        const req = await createPayloadRequest({
+        const req = await createPayloadReqFromWebRequest({
           config: payload.config,
           request: new Request(configuredOrigin, {
             headers: new Headers({
@@ -2229,7 +2229,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         const port = (server.address() as AddressInfo).port
         const requestOrigin = `http://localhost:${port}`
-        const req = await createPayloadRequest({
+        const req = await createPayloadReqFromWebRequest({
           config: payload.config,
           request: new Request(requestOrigin, {
             headers: new Headers({
@@ -2306,7 +2306,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const configuredPort = (configuredServer.address() as AddressInfo).port
         const configuredOrigin = `http://localhost:${configuredPort}`
 
-        const req = await createPayloadRequest({
+        const req = await createPayloadReqFromWebRequest({
           config: payload.config,
           request: new Request(configuredOrigin, {
             headers: new Headers({ cookie: testCookies, origin: configuredOrigin }),
@@ -2367,7 +2367,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
               status: 200,
             }),
           )
-          const req = await createPayloadRequest({
+          const req = await createPayloadReqFromWebRequest({
             config: payload.config,
             request: new Request('https://app.example.com', {
               headers: new Headers({ cookie: 'payload-token=123; other-cookie=456' }),
@@ -2398,7 +2398,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       test.for(['http://[', 'ftp://files.example.com/image.png', 'data:text/plain,image'])(
         'should reject unsupported file URL %s',
         async (url, { payload }) => {
-          const req = await createPayloadRequest({
+          const req = await createPayloadReqFromWebRequest({
             config: payload.config,
             request: new Request('https://app.example.com'),
           })
@@ -2465,7 +2465,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         })
         await new Promise((res) => configuredServer.listen(0, undefined, undefined, res))
         const configuredOrigin = `http://localhost:${(configuredServer.address() as AddressInfo).port}`
-        const req = await createPayloadRequest({
+        const req = await createPayloadReqFromWebRequest({
           config: payload.config,
           request: new Request(configuredOrigin, {
             headers: new Headers({ cookie: 'payload-token=123; other-cookie=456' }),

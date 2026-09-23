@@ -2021,7 +2021,7 @@ export {
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createPayloadReq, type CreatePayloadReqArgs } from './utilities/createPayloadReq.js'
-export { createPayloadRequest } from './utilities/createPayloadRequest.js'
+export { createPayloadReqFromWebRequest } from './utilities/createPayloadReqFromWebRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,

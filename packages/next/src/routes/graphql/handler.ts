@@ -7,7 +7,7 @@ import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
-  createPayloadRequest,
+  createPayloadReqFromWebRequest,
   headersWithCors,
   logError,
   mergeHeaders,
@@ -98,7 +98,7 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
-    const req = await createPayloadRequest({
+    const req = await createPayloadReqFromWebRequest({
       canSetHeaders: true,
       config,
       request,

@@ -3,7 +3,7 @@ import type { Payload, PayloadRequest, SanitizedConfig } from 'payload'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
-  createPayloadRequest,
+  createPayloadReqFromWebRequest,
   headersWithCors,
   logError,
   mergeHeaders,
@@ -102,7 +102,7 @@ export const handleGraphQL = async ({
 }): Promise<Response> => {
   const originalRequest = request.clone()
 
-  const req = await createPayloadRequest({
+  const req = await createPayloadReqFromWebRequest({
     canSetHeaders: true,
     config,
     request,
