@@ -20,10 +20,21 @@ type Args = {
 }
 
 const currentPasswordHashPrefix = 'pbkdf2-sha256-v1:'
-const currentPasswordHashIterations = 600000
+const defaultPasswordHashIterations = 600000
 const currentPasswordHashKeyLength = 32
 const legacyPasswordHashIterations = 25000
 const legacyPasswordHashKeyLength = 512
+
+// Cloudflare Workers rejects PBKDF2 iteration counts above 100,000, so cap
+// iterations when running in the Workers runtime. Everywhere else keeps the
+// stronger default.
+const cloudflareWorkersMaxPBKDF2Iterations = 100000
+const isCloudflareWorkersRuntime =
+  typeof navigator !== 'undefined' && navigator.userAgent === 'Cloudflare-Workers'
+
+const currentPasswordHashIterations = isCloudflareWorkersRuntime
+  ? Math.min(defaultPasswordHashIterations, cloudflareWorkersMaxPBKDF2Iterations)
+  : defaultPasswordHashIterations
 
 export const generatePasswordSaltHash = async ({
   collection,
