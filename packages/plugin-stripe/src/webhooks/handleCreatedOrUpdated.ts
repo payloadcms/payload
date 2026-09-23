@@ -55,6 +55,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
     const payloadQuery = await payload.find({
       collection: collectionSlug,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
       where: {
         stripeID: {
@@ -94,6 +95,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
             const authQuery = await payload.find({
               collection: collectionSlug,
               limit: 1,
+              overrideAccess: true,
               pagination: false,
               where: {
                 email: {
@@ -117,6 +119,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
                   id: authDoc.id,
                   collection: collectionSlug,
                   data: syncedData,
+                  overrideAccess: true,
                 })
 
                 if (logs) {
@@ -167,6 +170,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
               passwordConfirm: password,
             },
             disableVerificationEmail: isAuthCollection ? true : undefined,
+            overrideAccess: true,
           })
 
           if (logs) {
@@ -193,6 +197,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
           id: foundDoc.id,
           collection: collectionSlug,
           data: syncedData,
+          overrideAccess: true,
         })
 
         if (logs) {
