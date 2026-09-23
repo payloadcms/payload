@@ -33,8 +33,10 @@ type CacheEntryCounts = {
 }
 
 export const createSchemaBuildContext = <TSchema>({
+  isCacheEnabled = true,
   onEvent,
 }: {
+  isCacheEnabled?: boolean
   onEvent?: (event: SchemaBuildCacheEvent<TSchema>) => void
 } = {}): SchemaBuildContext<TSchema> => {
   let schemasByDefinition = new WeakMap<object, Map<string, TSchema>>()
@@ -52,6 +54,14 @@ export const createSchemaBuildContext = <TSchema>({
     getOrCreate: ({ build, definition, label, variantKey }) => {
       const schemasByVariant = schemasByDefinition.get(definition)
       const counts = getCacheEntryCounts({ countsByLabel, label, variantKey })
+
+      if (!isCacheEnabled) {
+        counts.misses += 1
+        misses += 1
+        onEvent?.({ action: 'miss', label, variantKey })
+
+        return build()
+      }
 
       if (schemasByVariant?.has(variantKey)) {
         const schema = schemasByVariant.get(variantKey)!

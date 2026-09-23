@@ -154,7 +154,7 @@ The wide constructor check uses the documented exception: non-clone constructor 
 
 ## Constructor allocation categories
 
-The discriminator-clone counter overlaps the constructor stack categories. It identifies how many constructor calls came from Mongoose clone operations rather than adding another constructor count.
+The discriminator-clone counter overlaps the constructor stack categories. It identifies how many constructor calls came from Mongoose clone operations rather than adding another constructor count. Block-template constructors are included in ${markdownCode}blocks-base${markdownCode}, and version constructors are included in ${markdownCode}top-level${markdownCode}, because the benchmark does not distinguish those phases.
 
 | Scenario | Category | Before | After |
 | --- | --- | ---: | ---: |

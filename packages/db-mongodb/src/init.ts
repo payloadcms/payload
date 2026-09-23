@@ -1,4 +1,4 @@
-import type { PaginateOptions, Schema } from 'mongoose'
+import type { PaginateOptions } from 'mongoose'
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
 import mongoose from 'mongoose'
@@ -8,7 +8,6 @@ import {
   buildVersionCompoundIndexes,
   buildVersionGlobalFields,
 } from 'payload'
-import { createSchemaBuildContext } from 'payload/internal'
 
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel, GlobalModel } from './types.js'
@@ -16,6 +15,7 @@ import type { CollectionModel, GlobalModel } from './types.js'
 import { buildCollectionSchema } from './models/buildCollectionSchema.js'
 import { buildGlobalModel } from './models/buildGlobalModel.js'
 import { buildSchema } from './models/buildSchema.js'
+import { createMongoSchemaBuildContext } from './models/schemaBuildContext.js'
 import { getBuildQueryPlugin } from './queries/getBuildQueryPlugin.js'
 import { getDBName } from './utilities/getDBName.js'
 
@@ -28,7 +28,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
     await this.afterCreateConnection(this)
   }
 
-  const schemaBuildContext = createSchemaBuildContext<Schema>()
+  const schemaBuildContext = createMongoSchemaBuildContext({ connection: this.connection })
 
   try {
     this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {

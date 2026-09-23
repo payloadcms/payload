@@ -86,56 +86,42 @@ The wide constructor check uses the documented exception: non-clone constructor 
 
 ## Constructor allocation categories
 
-The discriminator-clone counter overlaps the constructor stack categories. It identifies how many constructor calls came from Mongoose clone operations rather than adding another constructor count.
+The discriminator-clone counter overlaps the constructor stack categories. It identifies how many constructor calls came from Mongoose clone operations rather than adding another constructor count. Block-template constructors are included in `blocks-base`, and version constructors are included in `top-level`, because the stored benchmark runs did not distinguish those phases.
 
 | Scenario                 | Category            |                    Before |                  After |
 | ------------------------ | ------------------- | ------------------------: | ---------------------: |
 | minimal                  | top-level           |                   7 (7–7) |                7 (7–7) |
-| minimal                  | version             |                   0 (0–0) |                0 (0–0) |
 | minimal                  | blocks-base         |                   0 (0–0) |                0 (0–0) |
-| minimal                  | block-template      |                   0 (0–0) |                0 (0–0) |
 | minimal                  | discriminator-clone |                   0 (0–0) |                0 (0–0) |
 | minimal                  | array-group-tab     |                   2 (2–2) |                2 (2–2) |
 | minimal                  | mongoose-internal   |                   0 (0–0) |                0 (0–0) |
 | wide-references          | top-level           |                   7 (7–7) |                7 (7–7) |
-| wide-references          | version             |                   0 (0–0) |                0 (0–0) |
 | wide-references          | blocks-base         |    72,600 (72,600–72,600) | 48,640 (48,640–48,640) |
-| wide-references          | block-template      |                   0 (0–0) |                0 (0–0) |
 | wide-references          | discriminator-clone |    48,000 (48,000–48,000) | 48,000 (48,000–48,000) |
 | wide-references          | array-group-tab     |    24,602 (24,602–24,602) |          642 (642–642) |
 | wide-references          | mongoose-internal   |                   0 (0–0) |                0 (0–0) |
 | nested-diamond           | top-level           |                   7 (7–7) |                7 (7–7) |
-| nested-diamond           | version             |                   0 (0–0) |                0 (0–0) |
 | nested-diamond           | blocks-base         | 491,300 (491,300–491,300) |          424 (424–424) |
-| nested-diamond           | block-template      |                   0 (0–0) |                0 (0–0) |
 | nested-diamond           | discriminator-clone | 218,400 (218,400–218,400) |          320 (320–320) |
 | nested-diamond           | array-group-tab     |             102 (102–102) |             26 (26–26) |
 | nested-diamond           | mongoose-internal   |                   0 (0–0) |                0 (0–0) |
 | nested-diamond-drafts    | top-level           |                   7 (7–7) |                7 (7–7) |
-| nested-diamond-drafts    | version             |                   0 (0–0) |                0 (0–0) |
 | nested-diamond-drafts    | blocks-base         | 491,300 (491,300–491,300) |          424 (424–424) |
-| nested-diamond-drafts    | block-template      |                   0 (0–0) |                0 (0–0) |
 | nested-diamond-drafts    | discriminator-clone | 218,400 (218,400–218,400) |          320 (320–320) |
 | nested-diamond-drafts    | array-group-tab     |             102 (102–102) |             26 (26–26) |
 | nested-diamond-drafts    | mongoose-internal   |                   0 (0–0) |                0 (0–0) |
 | nested-diamond-localized | top-level           |                   7 (7–7) |                7 (7–7) |
-| nested-diamond-localized | version             |                   0 (0–0) |                0 (0–0) |
 | nested-diamond-localized | blocks-base         | 491,380 (491,380–491,380) |          748 (748–748) |
-| nested-diamond-localized | block-template      |                   0 (0–0) |                0 (0–0) |
 | nested-diamond-localized | discriminator-clone | 218,480 (218,480–218,480) |          560 (560–560) |
 | nested-diamond-localized | array-group-tab     |             102 (102–102) |             30 (30–30) |
 | nested-diamond-localized | mongoose-internal   |                   0 (0–0) |                0 (0–0) |
 | multiple-entities        | top-level           |                17 (17–17) |             17 (17–17) |
-| multiple-entities        | version             |                   0 (0–0) |                0 (0–0) |
 | multiple-entities        | blocks-base         | 147,390 (147,390–147,390) |          422 (422–422) |
-| multiple-entities        | block-template      |                   0 (0–0) |                0 (0–0) |
 | multiple-entities        | discriminator-clone |    65,522 (65,522–65,522) |          290 (290–290) |
 | multiple-entities        | array-group-tab     |                37 (37–37) |             17 (17–17) |
 | multiple-entities        | mongoose-internal   |                   3 (3–3) |                3 (3–3) |
 | inline-control           | top-level           |                   7 (7–7) |                7 (7–7) |
-| inline-control           | version             |                   0 (0–0) |                0 (0–0) |
 | inline-control           | blocks-base         |       6,100 (6,100–6,100) |    6,100 (6,100–6,100) |
-| inline-control           | block-template      |                   0 (0–0) |                0 (0–0) |
 | inline-control           | discriminator-clone |       4,000 (4,000–4,000) |    4,000 (4,000–4,000) |
 | inline-control           | array-group-tab     |       2,102 (2,102–2,102) |    2,102 (2,102–2,102) |
 | inline-control           | mongoose-internal   |                   0 (0–0) |                0 (0–0) |

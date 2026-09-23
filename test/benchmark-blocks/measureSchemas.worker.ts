@@ -9,6 +9,7 @@ import os from 'node:os'
 import { performance } from 'node:perf_hooks'
 import process from 'node:process'
 
+import type { SchemaAllocationCategory } from './schemaAllocationCategory.js'
 import type { BenchmarkScenarioName } from './schemaScenarios.js'
 
 import {
@@ -16,20 +17,15 @@ import {
   describeMongooseSchema,
   type MongooseSchemaDescriptor,
 } from './describeMongooseSchema.js'
-
-type AllocationCategory =
-  | 'array-group-tab'
-  | 'block-template'
-  | 'blocks-base'
-  | 'discriminator-clone'
-  | 'mongoose-internal'
-  | 'top-level'
-  | 'version'
+import {
+  classifySchemaAllocation,
+  createSchemaAllocationCounts,
+} from './schemaAllocationCategory.js'
 
 export type WorkerResult = {
   afterDestroy: NodeJS.MemoryUsage
   afterInit: NodeJS.MemoryUsage
-  attribution: Record<AllocationCategory, number>
+  attribution: Record<SchemaAllocationCategory, number>
   beforeInit: NodeJS.MemoryUsage
   environment: {
     architecture: string
@@ -52,16 +48,6 @@ export type AttributionWorkerResult = {
   environment: WorkerResult['environment']
   scenario: BenchmarkScenarioName
 }
-
-const allocationCategories: AllocationCategory[] = [
-  'top-level',
-  'version',
-  'blocks-base',
-  'block-template',
-  'discriminator-clone',
-  'array-group-tab',
-  'mongoose-internal',
-]
 
 const run = async (): Promise<void> => {
   process.env.NODE_ENV = 'production'
@@ -87,9 +73,7 @@ const run = async (): Promise<void> => {
     return
   }
 
-  const attribution = Object.fromEntries(
-    allocationCategories.map((category) => [category, 0]),
-  ) as Record<AllocationCategory, number>
+  const attribution = createSchemaAllocationCounts()
   const originalSchema = mongoose.Schema
   const originalClone = Reflect.get(originalSchema.prototype, 'clone')
   let schemaClones = 0
@@ -104,7 +88,7 @@ const run = async (): Promise<void> => {
   const instrumentedSchema = new Proxy(originalSchema, {
     construct(target, args, newTarget) {
       schemaConstructors += 1
-      attribution[classifyAllocation({ stack: new Error().stack })] += 1
+      attribution[classifySchemaAllocation({ stack: new Error().stack })] += 1
       return Reflect.construct(target, args, newTarget)
     },
   })
@@ -274,30 +258,6 @@ const getEnvironment = (): WorkerResult['environment'] => {
     operatingSystem: `${os.platform()} ${os.release()}`,
     payloadVersion: payloadPackage.version,
   }
-}
-
-const classifyAllocation = ({ stack }: { stack?: string }): AllocationCategory => {
-  if (!stack) {
-    return 'mongoose-internal'
-  }
-
-  if (/\bat (?:array|group|tabs)\b/.test(stack)) {
-    return 'array-group-tab'
-  }
-
-  if (/\bat blocks\b/.test(stack)) {
-    return 'blocks-base'
-  }
-
-  if (stack.includes('/models/buildSchema.')) {
-    return 'top-level'
-  }
-
-  if (stack.includes('/mongoose/')) {
-    return 'mongoose-internal'
-  }
-
-  return 'mongoose-internal'
 }
 
 const collectGarbage = (): void => {

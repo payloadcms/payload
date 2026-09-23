@@ -55,6 +55,33 @@ describe('createSchemaBuildContext', () => {
     expect(context.snapshot().misses).toBe(2)
   })
 
+  test('should build a fresh artifact when caching is disabled', () => {
+    const context = createSchemaBuildContext<object>({ isCacheEnabled: false })
+    const definition = {}
+    const build = vi.fn(() => ({}))
+
+    const first = context.getOrCreate({
+      build,
+      definition,
+      label: 'block:hero',
+      variantKey: 'live',
+    })
+    const second = context.getOrCreate({
+      build,
+      definition,
+      label: 'block:hero',
+      variantKey: 'live',
+    })
+
+    expect(first).not.toBe(second)
+    expect(build).toHaveBeenCalledTimes(2)
+    expect(context.snapshot()).toEqual({
+      entries: [{ hits: 0, label: 'block:hero', misses: 2, variantKey: 'live' }],
+      hits: 0,
+      misses: 2,
+    })
+  })
+
   test('should not merge equal definitions with different object identities', () => {
     const context = createSchemaBuildContext<object>()
     const first = context.getOrCreate({
