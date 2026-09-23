@@ -5,6 +5,7 @@ import type {
   RequestContext,
 } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 import type { LoginResult } from '../login.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -18,11 +19,10 @@ export type Options<TSlug extends AuthCollectionSlug> = {
   depth?: number
   fallbackLocale?: string
   locale?: string
-  overrideAccess?: boolean
   req?: Partial<PayloadRequest>
   showHiddenFields?: boolean
   trash?: boolean
-}
+} & OverrideAccessOption
 
 export async function loginLocal<TSlug extends AuthCollectionSlug>(
   payload: Payload,

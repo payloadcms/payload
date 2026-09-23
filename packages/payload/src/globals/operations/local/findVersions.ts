@@ -8,6 +8,7 @@ import type {
   User,
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
@@ -42,13 +43,6 @@ export type Options<TSlug extends GlobalSlug> = {
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
   locale?: 'all' | TypedLocale
-  /**
-   * Skip access control.
-   * Set to `true` if you want to bypass Access Control for the operation, for example for
-   * trusted server-side work such as cron jobs, seeding, and migrations.
-   * @default false
-   */
-  overrideAccess?: boolean
   /**
    * Get a specific page number
    * @default 1
@@ -91,7 +85,8 @@ export type Options<TSlug extends GlobalSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & Pick<FindOptions<string, SelectType>, 'select'>
+} & OverrideAccessOption &
+  Pick<FindOptions<string, SelectType>, 'select'>
 
 export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,

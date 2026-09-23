@@ -15,6 +15,7 @@ import type {
   PopulateType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
@@ -79,13 +80,6 @@ type BaseFindByIDOptions<
    */
   locale?: 'all' | TypedLocale
   /**
-   * Skip access control.
-   * Set to `true` if you want to bypass Access Control for the operation, for example for
-   * trusted server-side work such as cron jobs, seeding, and migrations.
-   * @default false
-   */
-  overrideAccess?: boolean
-  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -112,7 +106,8 @@ type BaseFindByIDOptions<
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindByIDArgs, 'flattenLocales'> &
+} & OverrideAccessOption &
+  Pick<FindByIDArgs, 'flattenLocales'> &
   Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type Options<

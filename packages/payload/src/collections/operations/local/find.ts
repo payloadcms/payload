@@ -18,6 +18,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
@@ -73,13 +74,6 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
   locale?: 'all' | TypedLocale
-  /**
-   * Skip access control.
-   * Set to `true` if you want to bypass Access Control for the operation, for example for
-   * trusted server-side work such as cron jobs, seeding, and migrations.
-   * @default false
-   */
-  overrideAccess?: boolean
   /**
    * Get a specific page number
    * @default 1
@@ -174,7 +168,7 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & OverrideAccessOption
 
 export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseFindOptions<
   TSlug,
