@@ -306,7 +306,14 @@ export default buildConfig({
 
 ## Working with data from the CLI
 
-Payload includes local commands for inspecting the config and working with collections and globals. They use the Local API, load the current Payload config on every invocation, and bypass access control by default. Run them only from a trusted environment with access to the project.
+Payload includes local commands for inspecting the config and working with collections and globals. They use the Local API and load the current Payload config on every invocation.
+
+<Banner type="warning">
+  Data commands bypass access control by default. Run them only from a trusted
+  environment with access to the project. Pass `--override-access false` to
+  enforce access control as an anonymous request because the CLI does not have a
+  logged-in user.
+</Banner>
 
 Start by discovering the available slugs and inspecting the input schema for a collection:
 
@@ -320,17 +327,15 @@ You can then query and update data without starting the development server:
 ```sh
 pnpm payload findDocuments \
   --slug posts \
-  --override-access true \
   --where '{"status":{"equals":"published"}}'
 
 pnpm payload updateDocument \
   --slug posts \
   --id 1 \
-  --override-access true \
   --data '{"title":"Updated title"}'
 ```
 
-Pass `--override-access false` to run a data command through Payload's access control. Local CLI commands do not have a logged-in user, so access is checked as an anonymous request:
+To explicitly enforce access control:
 
 ```sh
 pnpm payload findDocuments --slug posts --override-access false
@@ -347,7 +352,6 @@ pnpm payload findDocuments --input '{"slug":"posts","overrideAccess":false}'
 ```sh
 pnpm payload createDocuments \
   --slug media \
-  --override-access true \
   --documents '[{"data":{"alt":"Company logo"},"file":"./images/logo.png"}]'
 ```
 
@@ -358,7 +362,6 @@ The trusted local CLI does not require an explicit allow-list. If one is configu
 ```sh
 pnpm payload createDocuments \
   --slug media \
-  --override-access true \
   --documents '[{"data":{"alt":"Company logo"},"file":{"source":"externalURL","url":"https://example.com/logo.png"}}]'
 ```
 
@@ -368,7 +371,6 @@ For `updateDocument`, pass the same object through `--file`:
 pnpm payload updateDocument \
   --slug media \
   --id 1 \
-  --override-access true \
   --data '{"alt":"Updated logo"}' \
   --file '{"source":"externalURL","url":"https://example.com/logo.png"}'
 ```
@@ -380,7 +382,7 @@ For longer input, put the array in a file:
 ```
 
 ```sh
-pnpm payload createDocuments --slug posts --override-access true --documents @documents.json
+pnpm payload createDocuments --slug posts --documents @documents.json
 ```
 
 You can instead pass the command input through `--input`. Explicit arguments and options override values from the JSON input:
@@ -396,7 +398,7 @@ You can instead pass the command input through `--input`. Explicit arguments and
 ```
 
 ```sh
-pnpm payload createDocuments --input @create-posts.json --override-access true
+pnpm payload createDocuments --input @create-posts.json
 ```
 
 `createDocuments` and `updateDocument` return affected document IDs by default.
@@ -406,7 +408,6 @@ Pass `--returning` when you need the complete documents:
 pnpm payload updateDocument \
   --slug posts \
   --id 1 \
-  --override-access true \
   --data '{"title":"Updated title"}' \
   --returning
 ```
@@ -417,7 +418,6 @@ Use `--select` with `--returning` to choose which fields come back:
 pnpm payload updateDocument \
   --slug posts \
   --id 1 \
-  --override-access true \
   --data '{"title":"Updated title"}' \
   --returning \
   --select '{"title":true}'
