@@ -22,10 +22,10 @@ export const preventLockout: Validate = async (
   // Use context to ensure an infinite loop doesn't occur
   if (!incomingReq.context._preventLockout && !overrideAccess) {
     const req = await createPayloadReq({
-      payload: incomingReq.payload,
       context: {
         _preventLockout: true,
       },
+      payload: incomingReq.payload,
       req: {
         user: incomingReq.user,
       },
