@@ -19,9 +19,16 @@ type Args = {
   req: PayloadRequest
 }
 
-const currentPasswordHashPrefix = 'pbkdf2-sha256-v1:'
 const defaultPasswordHashIterations = 600000
 const currentPasswordHashKeyLength = 32
+
+// Hashes created before the parameters were embedded in the hash itself. They
+// were always generated with these parameters, so verification keeps using
+// them.
+const legacyV1PasswordHashPrefix = 'pbkdf2-sha256-v1:'
+const legacyV1PasswordHashIterations = 600000
+const legacyV1PasswordHashKeyLength = 32
+
 const legacyPasswordHashIterations = 25000
 const legacyPasswordHashKeyLength = 512
 
@@ -35,6 +42,11 @@ const isCloudflareWorkersRuntime =
 const currentPasswordHashIterations = isCloudflareWorkersRuntime
   ? Math.min(defaultPasswordHashIterations, cloudflareWorkersMaxPBKDF2Iterations)
   : defaultPasswordHashIterations
+
+// The parameters a hash was created with are embedded in the hash itself so
+// verification does not depend on which runtime created it:
+// pbkdf2-sha256-v2-i<iterations>-l<keyLength>:<hex>
+const currentPasswordHashRegex = /^pbkdf2-sha256-v2-i(\d+)-l(\d+):([0-9a-f]+)$/
 
 export const generatePasswordSaltHash = async ({
   collection,
@@ -73,17 +85,27 @@ export const generatePasswordSaltHash = async ({
     password: passwordToSet,
     salt,
   })
-  const hash = `${currentPasswordHashPrefix}${hashRaw.toString('hex')}`
+  const hash = `pbkdf2-sha256-v2-i${currentPasswordHashIterations}-l${currentPasswordHashKeyLength}:${hashRaw.toString('hex')}`
 
   return { hash, salt }
 }
 
 export const getPasswordHashParameters = (hash: string): PasswordHashParameters => {
-  if (isCurrentPasswordHash(hash)) {
+  const [, iterations, keyLength, storedHash] = currentPasswordHashRegex.exec(hash) ?? []
+
+  if (iterations && keyLength && storedHash) {
     return {
-      hash: hash.slice(currentPasswordHashPrefix.length),
-      iterations: currentPasswordHashIterations,
-      keyLength: currentPasswordHashKeyLength,
+      hash: storedHash,
+      iterations: Number(iterations),
+      keyLength: Number(keyLength),
+    }
+  }
+
+  if (hash.startsWith(legacyV1PasswordHashPrefix)) {
+    return {
+      hash: hash.slice(legacyV1PasswordHashPrefix.length),
+      iterations: legacyV1PasswordHashIterations,
+      keyLength: legacyV1PasswordHashKeyLength,
     }
   }
 
@@ -95,7 +117,7 @@ export const getPasswordHashParameters = (hash: string): PasswordHashParameters 
 }
 
 export const isCurrentPasswordHash = (hash: unknown): hash is string =>
-  typeof hash === 'string' && hash.startsWith(currentPasswordHashPrefix)
+  typeof hash === 'string' && currentPasswordHashRegex.test(hash)
 
 function randomBytes(): Promise<Buffer> {
   return new Promise((resolve, reject) =>

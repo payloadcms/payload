@@ -345,7 +345,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
         })
 
         expect(updatedUser?.hash).not.toBe(existingHash)
-        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v2-i600000-l32:[a-f0-9]{64}$/)
         expect(updatedUser?.salt).not.toBe(existingSalt)
       })
 
@@ -392,7 +392,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
             shouldChangePassword &&
             args.collection === slug &&
             typeof args.data.hash === 'string' &&
-            args.data.hash.startsWith('pbkdf2-sha256-v1:')
+            args.data.hash.startsWith('pbkdf2-sha256-v2-')
           ) {
             shouldChangePassword = false
             // Shares the login transaction so this write is not blocked by its row lock
@@ -480,7 +480,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
               shouldChangePassword &&
               args.collection === slug &&
               typeof args.data.hash === 'string' &&
-              args.data.hash.startsWith('pbkdf2-sha256-v1:') &&
+              args.data.hash.startsWith('pbkdf2-sha256-v2-') &&
               'where' in args
             ) {
               shouldChangePassword = false
@@ -571,7 +571,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
           },
         })
 
-        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v1:[a-f0-9]{64}$/)
+        expect(updatedUser?.hash).toMatch(/^pbkdf2-sha256-v2-i600000-l32:[a-f0-9]{64}$/)
         expect(updatedUser?.salt).not.toBe(existingSalt)
       })
     })
