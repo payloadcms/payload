@@ -1,7 +1,5 @@
 'use client'
 
-import type { SanitizedFieldPermissions } from 'payload'
-
 import { formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -50,31 +48,21 @@ export const Auth: React.FC<Props> = (props) => {
     },
   } = useConfig()
 
-  let showPasswordFields: SanitizedFieldPermissions = docPermissions.fields === true
+  let showPasswordFields: boolean = docPermissions.fields === true
   let showUnlock = true
   const hasLoginFieldOverride =
     typeof docPermissions.fields === 'object' &&
     ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
   if (docPermissions.fields !== null && typeof docPermissions.fields === 'object') {
-    const { permissions: passwordPermissions } = getFieldPermissions({
+    const { operation: passwordPermission } = getFieldPermissions({
       field: { name: 'password', type: 'text' },
       operation,
       parentName: '',
       permissions: docPermissions?.fields,
     })
 
-    if (operation === 'create') {
-      showPasswordFields =
-        passwordPermissions === true ||
-        ((typeof passwordPermissions === 'object' &&
-          passwordPermissions.create) as SanitizedFieldPermissions)
-    } else {
-      showPasswordFields =
-        passwordPermissions === true ||
-        ((typeof passwordPermissions === 'object' &&
-          passwordPermissions.update) as SanitizedFieldPermissions)
-    }
+    showPasswordFields = passwordPermission
   }
 
   if (hasLoginFieldOverride) {
