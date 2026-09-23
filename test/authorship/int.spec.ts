@@ -41,7 +41,7 @@ const createPost = async ({ data, user }: { data: Partial<Post>; user?: TestUser
   return doc
 }
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Authorship', () => {
+test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
     payload = payloadInstance
     restClient = restClientInstance
