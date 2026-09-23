@@ -13,7 +13,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
-import type { OverrideAccessOption } from '../../../types/operations.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { BulkOperationResult, SelectFromCollectionSlug } from '../../config/types.js'
 
@@ -82,8 +82,8 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & OverrideAccessOption &
-  Pick<FindOptions<TSlug, TSelect>, 'select'>
+} & Pick<FindOptions<TSlug, TSelect>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,

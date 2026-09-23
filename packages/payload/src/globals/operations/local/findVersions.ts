@@ -8,7 +8,7 @@ import type {
   User,
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../../types/index.js'
-import type { OverrideAccessOption } from '../../../types/operations.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
@@ -85,8 +85,8 @@ export type Options<TSlug extends GlobalSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & OverrideAccessOption &
-  Pick<FindOptions<string, SelectType>, 'select'>
+} & Pick<FindOptions<string, SelectType>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,

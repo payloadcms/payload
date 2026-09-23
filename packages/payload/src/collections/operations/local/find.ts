@@ -18,7 +18,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
-import type { OverrideAccessOption } from '../../../types/operations.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
@@ -168,7 +168,7 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & OverrideAccessOption
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseFindOptions<
   TSlug,

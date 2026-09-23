@@ -1,4 +1,4 @@
-import type { OverrideAccessOption } from '../types/operations.js'
+import type { SharedLocalAPIOptions } from '../types/operations.js'
 import type { JobFromTask } from './config/types/workflowTypes.js'
 
 import {
@@ -88,7 +88,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
             : never
         }
     ) &
-      OverrideAccessOption,
+      Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<
     TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? Job<TTaskOrWorkflowSlug>
@@ -247,7 +247,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
        */
       silent?: RunJobsSilent
       where?: Where
-    } & OverrideAccessOption,
+    } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
@@ -277,7 +277,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
        * @default false
        */
       silent?: RunJobsSilent
-    } & OverrideAccessOption,
+    } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
@@ -294,7 +294,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       queue?: string
       req?: PayloadRequest
       where: Where
-    } & OverrideAccessOption,
+    } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<void> => {
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
@@ -352,7 +352,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     args: {
       id: number | string
       req?: PayloadRequest
-    } & OverrideAccessOption,
+    } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<void> => {
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
