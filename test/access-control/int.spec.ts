@@ -324,7 +324,7 @@ describe('Access Control', () => {
           req,
         })
 
-        expect(permissions.fields?.password?.update?.permission).toBe(true)
+        expect(permissions.fields?.password).toBe(true)
       })
 
       it('should preserve credentials when password update access is denied', async () => {
