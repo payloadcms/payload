@@ -10,7 +10,7 @@ import {
   restrictedRelationshipsSlug,
 } from './shared.js'
 
-test.suite({ config: './config.ts' })('API key authentication', () => {
+test.suite('API key authentication', { config: './config.ts' }, () => {
   test('should return a user with read access from API key authentication', async ({
     payload,
     restClient,

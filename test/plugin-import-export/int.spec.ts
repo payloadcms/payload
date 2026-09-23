@@ -20,10 +20,12 @@ let restrictedUser: any
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({
+const suiteOptions = {
   config: './config.ts',
   resetBetweenTests: false,
-})('@payloadcms/plugin-import-export', () => {
+}
+
+test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
   test.beforeAll(async ({ payloadInstance: payload }) => {
     const loginResult = await payload.login({
       collection: 'users',

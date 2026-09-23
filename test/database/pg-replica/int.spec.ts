@@ -11,8 +11,9 @@ import { test } from '../../__helpers/int/vitest.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ db: (adapter) => adapter === 'postgres-read-replicas' })(
+test.suite(
   'postgres read replicas',
+  { db: (adapter) => adapter === 'postgres-read-replicas' },
   () => {
     let payload: Payload
     let adapter: DrizzleAdapter

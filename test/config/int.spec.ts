@@ -12,7 +12,7 @@ import { testFilePath } from './testFilePath.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('Config', () => {
+test.suite('Config', { config: './config.ts' }, () => {
   test.describe('payload config', () => {
     test('allows a custom field at the config root', ({ payload }) => {
       const { config } = payload

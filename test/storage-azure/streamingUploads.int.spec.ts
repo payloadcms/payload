@@ -13,7 +13,7 @@ import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-azure streamingUploads', () => {
+test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts' }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 

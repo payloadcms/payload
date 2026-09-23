@@ -24,7 +24,7 @@ import { devUser } from '../credentials.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Select', () => {
+test.suite('Select', { config: './config.ts', resetBetweenTests: false }, () => {
   test.describe('Local API - Base', () => {
     let post: Post
     let postId: number | string
