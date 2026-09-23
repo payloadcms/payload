@@ -229,6 +229,7 @@ describe('Lexical Performance Benchmarks', () => {
     const docs = await payload.find({
       collection: lexicalBenchmarkSlug,
       limit: 1,
+      overrideAccess: true,
     })
 
     const docId = docs.docs[0]?.id

@@ -92,6 +92,7 @@ test.suite('Collections - Live Preview', suiteOptions, () => {
           ...initialData,
           slug: 'testPage',
         } as Page,
+        overrideAccess: true,
       })
     }
 
@@ -101,6 +102,7 @@ test.suite('Collections - Live Preview', suiteOptions, () => {
         title: 'Tenant 1',
         clientURL: `http://localhost:${process.env.PORT || 3000}`,
       },
+      overrideAccess: true,
     })
 
     // Create image
@@ -114,6 +116,7 @@ test.suite('Collections - Live Preview', suiteOptions, () => {
         alt: 'Image 1',
       },
       file,
+      overrideAccess: true,
     })
 
     testPost = await payload.create({
@@ -128,6 +131,7 @@ test.suite('Collections - Live Preview', suiteOptions, () => {
           media: media.id,
         },
       },
+      overrideAccess: true,
     })
   })
 
@@ -772,6 +776,7 @@ test.suite('Collections - Live Preview', suiteOptions, () => {
       data: {
         title: 'Test Post (Recently Updated)',
       },
+      overrideAccess: true,
     })
 
     const merge2 = await mergeData({
@@ -813,6 +818,7 @@ test.suite('Collections - Live Preview', suiteOptions, () => {
         localizedTitle: 'Test Post Spanish',
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -822,6 +828,7 @@ test.suite('Collections - Live Preview', suiteOptions, () => {
       data: {
         localizedTitle: 'Test Post English',
       },
+      overrideAccess: true,
     })
 
     const page = await payload.create({
@@ -832,6 +839,7 @@ test.suite('Collections - Live Preview', suiteOptions, () => {
         slug: 'testpage',
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     const initialData = await createPageWithInitialData({

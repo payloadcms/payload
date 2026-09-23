@@ -29,12 +29,14 @@ test.suite(
       await payload.delete({
         collection: mediaSlug,
         where: { id: { exists: true } },
+        overrideAccess: true,
       })
       // Only delete from search if the collection exists
       if (payload.collections['search']) {
         await payload.delete({
           collection: 'search',
           where: { id: { exists: true } },
+          overrideAccess: true,
         })
       }
       await clearTestBucket()
@@ -57,6 +59,7 @@ test.suite(
         collection: mediaSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -74,6 +77,7 @@ test.suite(
         collection: mediaSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       const { docs: searchDocs } = await payload.find({
@@ -82,6 +86,7 @@ test.suite(
           'doc.value': { equals: upload.id },
           'doc.relationTo': { equals: mediaSlug },
         },
+        overrideAccess: true,
       })
 
       expect(searchDocs.length).toBe(1)

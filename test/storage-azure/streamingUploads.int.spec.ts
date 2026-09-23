@@ -52,6 +52,7 @@ test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts'
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -64,6 +65,7 @@ test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts'
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -106,6 +108,7 @@ test.suite('@payloadcms/storage-azure streamingUploads', { config: './config.ts'
     const uploadData = (await payload.findByID({
       collection: collectionSlug,
       id: uploadId,
+      overrideAccess: true,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {

@@ -71,6 +71,7 @@ test.suite('@payloadcms/payload--cloud', { config: './config.ts' }, () => {
         await payload.delete({
           collection: 'documents',
           id: doc.id,
+          overrideAccess: true,
         })
       },
     )

@@ -360,6 +360,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -387,6 +388,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -416,6 +418,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -442,6 +445,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -470,6 +474,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -522,6 +527,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -545,6 +551,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -611,6 +618,7 @@ describe('Date', () => {
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
@@ -700,6 +708,7 @@ describe('Date', () => {
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -774,6 +783,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -885,6 +895,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
@@ -925,6 +936,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
@@ -965,6 +977,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
@@ -1016,6 +1029,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
@@ -1068,6 +1082,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             equals: docID,
           },
         },
+        overrideAccess: true,
       })
 
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
@@ -1085,6 +1100,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -1114,6 +1130,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         docs: [updatedDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       expect(updatedDoc?.dayAndTimeWithTimezoneFixed).toEqual(expectedUpdatedUTCValue)
@@ -1128,6 +1145,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         docs: [existingDoc],
       } = await payload.find({
         collection: dateFieldsSlug,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(existingDoc!.id))
@@ -1201,6 +1219,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
               equals: docID,
             },
           },
+          overrideAccess: true,
         })
 
         // The UTC value should be identical regardless of browser timezone context
@@ -1259,6 +1278,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
               equals: docID,
             },
           },
+          overrideAccess: true,
         })
 
         expect(existingDoc?.dateWithOffsetTimezone).toEqual(expectedUTCValue)
@@ -1320,6 +1340,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
               equals: docID,
             },
           },
+          overrideAccess: true,
         })
 
         // Should have saved with the offset timezone
@@ -1338,6 +1359,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
             dateWithOffsetTimezone: '2025-01-01T12:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',
           },
+          overrideAccess: true,
         })
 
         await page.goto(url.edit(doc.id))

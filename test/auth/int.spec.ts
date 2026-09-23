@@ -59,6 +59,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const firstUser = await payload.create({
         collection: slug,
         data: { email: 'preferences-owner@example.com', password },
+        overrideAccess: true,
       })
       createdUserIDs.push(firstUser.id)
       owner = { ...firstUser, collection: slug }
@@ -66,6 +67,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const secondUser = await payload.create({
         collection: slug,
         data: { email: 'preferences-other@example.com', password },
+        overrideAccess: true,
       })
       createdUserIDs.push(secondUser.id)
       otherUser = { ...secondUser, collection: slug }
@@ -73,6 +75,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const login = await payload.login({
         collection: slug,
         data: { email: firstUser.email, password },
+        overrideAccess: true,
       })
       ownerToken = login.token!
     })
@@ -82,6 +85,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const preference = await payload.create({
           collection: preferencesSlug,
           data: { key, value: { theme: 'light' } },
+          overrideAccess: true,
           user,
         })
         createdPreferenceIDs.push(preference.id)
@@ -91,14 +95,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
     test.afterEach(async ({ payloadInstance: payload }) => {
       for (const id of createdPreferenceIDs) {
-        await payload.delete({ id, collection: preferencesSlug })
+        await payload.delete({ id, collection: preferencesSlug, overrideAccess: true })
       }
       createdPreferenceIDs.length = 0
     })
 
     test.afterAll(async ({ payloadInstance: payload }) => {
       for (const id of createdUserIDs) {
-        await payload.delete({ id, collection: slug })
+        await payload.delete({ id, collection: slug, overrideAccess: true })
       }
     })
 
@@ -127,6 +131,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         id: otherPreferenceID,
         collection: preferencesSlug,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(response.status).toBe(403)
@@ -149,6 +154,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         id: otherPreferenceID,
         collection: preferencesSlug,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(response.status).toBe(200)
@@ -295,7 +301,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
       test.afterEach(async ({ payload }) => {
         for (const id of createdUserIDs) {
-          await payload.delete({ collection: slug, id })
+          await payload.delete({ id, collection: slug, overrideAccess: true })
         }
         createdUserIDs.length = 0
       })
@@ -313,16 +319,17 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             email: testEmail,
             password: testPassword,
           },
+          overrideAccess: true,
         })
         createdUserIDs.push(user.id)
 
         await payload.db.updateOne({
+          id: user.id,
           collection: slug,
           data: {
             hash: existingHash,
             salt: existingSalt,
           },
-          id: user.id,
         })
 
         await payload.login({
@@ -331,6 +338,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             email: testEmail,
             password: testPassword,
           },
+          overrideAccess: true,
         })
 
         const updatedUser = await payload.db.findOne({
@@ -367,16 +375,17 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             email: testEmail,
             password: testPassword,
           },
+          overrideAccess: true,
         })
         createdUserIDs.push(user.id)
 
         await payload.db.updateOne({
+          id: user.id,
           collection: slug,
           data: {
             hash: existingHash,
             salt: existingSalt,
           },
-          id: user.id,
         })
 
         const collectionConfig = payload.config.collections.find(
@@ -397,12 +406,12 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             shouldChangePassword = false
             // Shares the login transaction so this write is not blocked by its row lock
             await originalUpdateOne.call(payload.db, {
+              id: user.id,
               collection: slug,
               data: {
                 hash: changedHash,
                 salt: changedSalt,
               },
-              id: user.id,
               req: args.req,
             })
           }
@@ -417,6 +426,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
               email: testEmail,
               password: testPassword,
             },
+            overrideAccess: true,
           })
         } finally {
           payload.db.updateOne = originalUpdateOne
@@ -458,16 +468,17 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
               email: testEmail,
               password: testPassword,
             },
+            overrideAccess: true,
           })
           createdUserIDs.push(user.id)
 
           await payload.db.updateOne({
+            id: user.id,
             collection: slug,
             data: {
               hash: existingHash,
               salt: existingSalt,
             },
-            id: user.id,
           })
 
           const originalUpdateOne = payload.db.updateOne
@@ -485,12 +496,12 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             ) {
               shouldChangePassword = false
               await originalUpdateOne.call(payload.db, {
+                id: user.id,
                 collection: slug,
                 data: {
                   hash: changedHash,
                   salt: changedSalt,
                 },
-                id: user.id,
               })
             }
 
@@ -504,6 +515,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
                 email: testEmail,
                 password: testPassword,
               },
+              overrideAccess: true,
             })
           } finally {
             payload.db.updateOne = originalUpdateOne
@@ -540,16 +552,17 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             email: testEmail,
             password: 'test-password',
           },
+          overrideAccess: true,
         })
         createdUserIDs.push(user.id)
 
         await payload.db.updateOne({
+          id: user.id,
           collection: slug,
           data: {
             hash: existingHash,
             salt: existingSalt,
           },
-          id: user.id,
         })
 
         await payload.login({
@@ -558,6 +571,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             email: testEmail,
             password: testPassword,
           },
+          overrideAccess: true,
         })
 
         const updatedUser = await payload.db.findOne({
@@ -679,6 +693,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           restrictedField: 'restricted value',
           roles: ['editor'],
         } as any,
+        overrideAccess: true,
       })
 
       try {
@@ -691,7 +706,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         expect(authenticated.user.id).toBe(user.id)
         expect(authenticated.user).not.toHaveProperty('restrictedField')
       } finally {
-        await payload.delete({ id: user.id, collection: slug })
+        await payload.delete({ id: user.id, collection: slug, overrideAccess: true })
       }
     })
 
@@ -708,11 +723,13 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           password: testPassword,
           roles: ['user'],
         },
+        overrideAccess: true,
       })
 
       const userBefore: any = await payload.findByID({
         id: testUser.id,
         collection: slug,
+        overrideAccess: true,
       })
       const sessionCountBefore = userBefore.sessions?.length || 0
 
@@ -749,6 +766,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const userAfter: any = await payload.findByID({
         id: testUser.id,
         collection: slug,
+        overrideAccess: true,
       })
 
       expect(userAfter.loginMetadata).toHaveLength(2)
@@ -761,6 +779,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       await payload.delete({
         id: testUser.id,
         collection: slug,
+        overrideAccess: true,
       })
     })
 
@@ -791,6 +810,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           data: {
             password: 'test',
           },
+          overrideAccess: true,
         })
 
         expect(result.id).toStrictEqual(loggedInUser.id)
@@ -909,6 +929,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             email: 'dev@example.com',
             password: 'test',
           },
+          overrideAccess: true,
         })
 
         const response = await restClient.GET(`/${slug}/me`, {
@@ -964,6 +985,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           data: {
             custom: 'Goodbye, world!',
           },
+          overrideAccess: true,
         })
 
         const response = await restClient.POST(`/${slug}/refresh-token`, {
@@ -986,10 +1008,12 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const user = await payload.create({
           collection: slug,
           data: { apiKey, email: 'user@example.com', password: 'Password123' },
+          overrideAccess: true,
         })
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
+          overrideAccess: true,
         })
         await restClient.POST('/users/refresh-token', {
           headers: { Authorization: `JWT ${token}` },
@@ -1006,6 +1030,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const { token } = await payload.login({
           collection: 'users',
           data: { email: 'user@example.com', password: 'Password123' },
+          overrideAccess: true,
         })
 
         const res = await restClient
@@ -1060,6 +1085,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const userResult = await payload.find({
           collection: publicUsersSlug,
           limit: 1,
+          overrideAccess: true,
           showHiddenFields: true,
           where: {
             email: {
@@ -1082,6 +1108,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const afterVerifyResult = await payload.find({
           collection: publicUsersSlug,
           limit: 1,
+          overrideAccess: true,
           showHiddenFields: true,
           where: {
             email: {
@@ -1110,6 +1137,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             id: loggedInUser!.id,
             collection: publicUsersSlug,
             disableErrors: true,
+            overrideAccess: true,
           })
 
           if (existingAlternateUser) {
@@ -1122,6 +1150,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
                 email: 'refresh-collection@example.com',
                 password,
               },
+              overrideAccess: true,
             })
 
             alternateUserID = alternateUser.id
@@ -1132,7 +1161,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         test.afterAll(async ({ payloadInstance }) => {
           if (createdAlternateUser && alternateUserID !== undefined) {
             await payloadInstance
-              .delete({ id: alternateUserID, collection: publicUsersSlug })
+              .delete({ id: alternateUserID, collection: publicUsersSlug, overrideAccess: true })
               .catch(() => {})
           }
 
@@ -1249,6 +1278,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const result = await payload.find({
             collection: 'payload-preferences',
             depth: 0,
+            overrideAccess: true,
             where: {
               and: [
                 {
@@ -1299,6 +1329,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const result = await payload.find({
             collection: 'payload-preferences',
             depth: 0,
+            overrideAccess: true,
             where: {
               and: [
                 {
@@ -1335,6 +1366,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const result = await payload.find({
             collection: 'payload-preferences',
             depth: 0,
+            overrideAccess: true,
             where: {
               and: [
                 {
@@ -1383,6 +1415,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const user = await payload.findByID({
             id: publicUserId,
             collection: publicUsersSlug,
+            overrideAccess: true,
             showHiddenFields: true,
           })
           await restClient.POST(`/${publicUsersSlug}/verify/${(user as any)._verificationToken}`)
@@ -1404,12 +1437,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         test.afterAll(async ({ payloadInstance }) => {
           await Promise.all(
             createdIDs.map((id) =>
-              payloadInstance.delete({ id, collection: 'payload-preferences' }).catch(() => {}),
+              payloadInstance
+                .delete({ id, collection: 'payload-preferences', overrideAccess: true })
+                .catch(() => {}),
             ),
           )
           if (publicUserId) {
             await payloadInstance
-              .delete({ id: publicUserId, collection: publicUsersSlug })
+              .delete({ id: publicUserId, collection: publicUsersSlug, overrideAccess: true })
               .catch(() => {})
           }
         })
@@ -1431,6 +1466,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         }) => {
           const before = await payload.find({
             collection: 'payload-preferences',
+            overrideAccess: true,
             where: { 'user.relationTo': { equals: 'users' } },
           })
           expect(before.docs).toHaveLength(1)
@@ -1441,6 +1477,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
           const after = await payload.find({
             collection: 'payload-preferences',
+            overrideAccess: true,
             where: { 'user.relationTo': { equals: 'users' } },
           })
           expect(after.docs).toHaveLength(1)
@@ -1450,12 +1487,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         test('should isolate preferences by user ID and collection', async ({ payload }) => {
           const publicPrefs = await payload.find({
             collection: 'payload-preferences',
+            overrideAccess: true,
             where: { 'user.relationTo': { equals: publicUsersSlug } },
           })
           expect(publicPrefs.docs).toHaveLength(1)
 
           const adminPrefs = await payload.find({
             collection: 'payload-preferences',
+            overrideAccess: true,
             where: { 'user.relationTo': { equals: 'users' } },
           })
           expect(adminPrefs.docs).toHaveLength(1)
@@ -1538,6 +1577,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const userResult = await payload.find({
             collection: slug,
             limit: 1,
+            overrideAccess: true,
             showHiddenFields: true,
             where: {
               email: {
@@ -1582,6 +1622,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const userResult = await payload.find({
             collection: slug,
             limit: 1,
+            overrideAccess: true,
             showHiddenFields: true,
             where: {
               email: {
@@ -1673,6 +1714,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
           const lockedUser = await payload.find({
             collection: slug,
+            overrideAccess: true,
             showHiddenFields: true,
             where: {
               email: {
@@ -1696,6 +1738,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const userAfterUpdate = await payload.findByID({
             id: lockedUser.docs[0]!.id,
             collection: slug,
+            overrideAccess: true,
             showHiddenFields: true,
           })
 
@@ -1715,6 +1758,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const userResult = await payload.find({
             collection: slug,
             limit: 1,
+            overrideAccess: true,
             showHiddenFields: true,
             where: {
               email: {
@@ -1756,6 +1800,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
               email: `forgot-password-${name}-${uuid()}@example.com`,
               password,
             },
+            overrideAccess: true,
           }),
         ),
       )
@@ -1792,11 +1837,13 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const firstToken = await payload.forgotPassword({
           collection: slug,
           data: { email: users[0]!.email },
+          overrideAccess: true,
           req: outerReq,
         })
         const secondToken = await payload.forgotPassword({
           collection: slug,
           data: { email: users[0]!.email },
+          overrideAccess: true,
         })
         expect(firstToken).not.toBeNull()
         expect(beforeChange).toHaveBeenCalledWith(true)
@@ -1808,6 +1855,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           collection: slug,
           data: { email: users[0]!.email },
           disableEmail: true,
+          overrideAccess: true,
         })
         expect(tokenWithDisabledEmail).not.toBeNull()
 
@@ -1816,6 +1864,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         await payload.forgotPassword({
           collection: slug,
           data: { email: users[1]!.email },
+          overrideAccess: true,
           req: outerReq,
         })
         expect(beforeChange).toHaveBeenCalledWith(true)
@@ -1823,12 +1872,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const tokenAfterDisabledEmail = await payload.forgotPassword({
           collection: slug,
           data: { email: users[1]!.email },
+          overrideAccess: true,
         })
         expect(tokenAfterDisabledEmail).not.toBeNull()
 
         const resetToken = await payload.forgotPassword({
           collection: slug,
           data: { email: users[2]!.email },
+          overrideAccess: true,
         })
         await payload.resetPassword({
           collection: slug,
@@ -1841,6 +1892,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const tokenAfterReset = await payload.forgotPassword({
           collection: slug,
           data: { email: users[2]!.email },
+          overrideAccess: true,
         })
         expect(tokenAfterReset).toBeNull()
         expect(sendEmail).toHaveBeenCalledTimes(3)
@@ -1850,7 +1902,11 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         collectionHooks.beforeChange = originalBeforeChange
         collectionHooks.afterChange = originalAfterChange
         sendEmail.mockRestore()
-        await Promise.all(users.map((user) => payload.delete({ id: user.id, collection: slug })))
+        await Promise.all(
+          users.map((user) =>
+            payload.delete({ id: user.id, collection: slug, overrideAccess: true }),
+          ),
+        )
       }
     })
 
@@ -1863,6 +1919,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: `forgot-password-concurrent-${uuid()}@example.com`,
           password,
         },
+        overrideAccess: true,
       })
       let releaseFirstEmail: () => void = () => undefined
       const firstEmailPending = new Promise<void>((resolve) => {
@@ -1879,6 +1936,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const firstRequest = payload.forgotPassword({
           collection: slug,
           data: { email: user.email },
+          overrideAccess: true,
         })
 
         await vitest.waitFor(() => expect(sendEmail).toHaveBeenCalledTimes(1))
@@ -1886,6 +1944,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         const secondRequest = payload.forgotPassword({
           collection: slug,
           data: { email: user.email },
+          overrideAccess: true,
         })
 
         await new Promise((resolve) => setTimeout(resolve, 100))
@@ -1900,7 +1959,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
         releaseFirstEmail()
         sendEmail.mockRestore()
-        await payload.delete({ id: user.id, collection: slug })
+        await payload.delete({ id: user.id, collection: slug, overrideAccess: true })
       }
     })
 
@@ -1913,6 +1972,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: `forgot-password-email-error-${uuid()}@example.com`,
           password,
         },
+        overrideAccess: true,
       })
       const sendEmail = vitest
         .spyOn(payload.email, 'sendEmail')
@@ -1926,12 +1986,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           payload.forgotPassword({
             collection: slug,
             data: { email: user.email },
+            overrideAccess: true,
           }),
         ).rejects.toThrow('Email provider unavailable')
 
         const retryToken = await payload.forgotPassword({
           collection: slug,
           data: { email: user.email },
+          overrideAccess: true,
         })
 
         expect(retryToken).not.toBeNull()
@@ -1939,7 +2001,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       } finally {
         authConfig.forgotPassword.minRequestInterval = originalMinRequestInterval
         sendEmail.mockRestore()
-        await payload.delete({ id: user.id, collection: slug })
+        await payload.delete({ id: user.id, collection: slug, overrideAccess: true })
       }
     })
 
@@ -1950,6 +2012,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
         },
         disableEmail: true,
+        overrideAccess: true,
       })
 
       const result = await payload
@@ -1977,6 +2040,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           password,
           restrictedField: 'restricted value',
         },
+        overrideAccess: true,
       })
 
       try {
@@ -1984,6 +2048,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           collection: slug,
           data: { email: user.email },
           disableEmail: true,
+          overrideAccess: true,
         })
         const response = await restClient.POST(`/${slug}/reset-password`, {
           auth: false,
@@ -1995,7 +2060,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         expect(result.user.id).toBe(user.id)
         expect(result.user).not.toHaveProperty('restrictedField')
       } finally {
-        await payload.delete({ id: user.id, collection: slug })
+        await payload.delete({ id: user.id, collection: slug, overrideAccess: true })
       }
     })
 
@@ -2008,6 +2073,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           password: 'test',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const response = await restClient.POST(`/${slug}/login`, {
@@ -2034,6 +2100,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         data: {
           roles: ['editor'],
         },
+        overrideAccess: true,
       })
 
       const editorMe = await restClient
@@ -2075,6 +2142,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email,
           // password is not required
         },
+        overrideAccess: true,
       })
       expect(user.email).toStrictEqual(email)
     })
@@ -2109,6 +2177,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -2118,6 +2187,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             email: devUser.email,
             password: devUser.password,
           },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('You are not allowed to perform this action.')
     })
@@ -2137,12 +2207,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const doc = await payload.create({
         collection: 'disable-local-strategy-password',
         data: { password: '123' },
+        overrideAccess: true,
       })
       expect(doc.password).toBe('123')
       const updated = await payload.update({
         id: doc.id,
         collection: 'disable-local-strategy-password',
         data: { password: '1234' },
+        overrideAccess: true,
       })
       expect(updated.password).toBe('1234')
     })
@@ -2155,10 +2227,12 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user1 = await payload.create({
         collection: apiKeysSlug,
         data: { apiKey: firstAPIKey },
+        overrideAccess: true,
       })
       const user2 = await payload.create({
         collection: apiKeysSlug,
         data: { apiKey: secondAPIKey },
+        overrideAccess: true,
       })
 
       const success = await restClient
@@ -2180,8 +2254,8 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
       expect(fail.status).toStrictEqual(404)
 
-      await payload.delete({ id: user1.id, collection: apiKeysSlug })
-      await payload.delete({ id: user2.id, collection: apiKeysSlug })
+      await payload.delete({ id: user1.id, collection: apiKeysSlug, overrideAccess: true })
+      await payload.delete({ id: user2.id, collection: apiKeysSlug, overrideAccess: true })
     })
 
     test('should allow authentication with an API key saved with sha1', async ({
@@ -2192,6 +2266,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user = await payload.create({
         collection: apiKeysSlug,
         data: { apiKey },
+        overrideAccess: true,
       })
 
       const sha1Index = crypto.createHmac('sha256', payload.secret).update(apiKey).digest('hex')
@@ -2214,7 +2289,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
       expect(response.id).toStrictEqual(user.id)
 
-      await payload.delete({ id: user.id, collection: apiKeysSlug })
+      await payload.delete({ id: user.id, collection: apiKeysSlug, overrideAccess: true })
     })
 
     test('should not remove an API key from a user when updating other fields', async ({
@@ -2227,16 +2302,19 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         data: {
           apiKey,
         },
+        overrideAccess: true,
       })
 
       const updatedUser = await payload.update({
         id: user.id,
         collection: apiKeysSlug,
         data: {},
+        overrideAccess: true,
       })
 
       const userResult = await payload.find({
         collection: apiKeysSlug,
+        overrideAccess: true,
         where: {
           id: {
             equals: user.id,
@@ -2264,6 +2342,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         data: {
           apiKey,
         },
+        overrideAccess: true,
       })
 
       const updatedUser = await payload.update({
@@ -2272,6 +2351,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         data: {
           apiKey: null,
         },
+        overrideAccess: true,
       })
 
       // use the api key in a fetch to assert that it is disabled
@@ -2296,6 +2376,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       expect(authenticated.token).toBeTruthy()
@@ -2311,6 +2392,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           password: 'test',
           roles: ['user'],
         },
+        overrideAccess: true,
       })
 
       expect(createdUser.collection).toBe(slug)
@@ -2318,12 +2400,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const foundUser = await payload.findByID({
         id: createdUser.id,
         collection: slug,
+        overrideAccess: true,
       })
 
       expect(foundUser.collection).toBe(slug)
 
       const foundUsers = await payload.find({
         collection: slug,
+        overrideAccess: true,
         where: { id: { equals: createdUser.id } },
       })
 
@@ -2333,6 +2417,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         id: createdUser.id,
         collection: slug,
         data: { roles: ['admin'] },
+        overrideAccess: true,
       })
 
       expect(updatedUser.collection).toBe(slug)
@@ -2340,6 +2425,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const deletedUser = await payload.delete({
         id: createdUser.id,
         collection: slug,
+        overrideAccess: true,
       })
 
       expect(deletedUser.collection).toBe(slug)
@@ -2349,6 +2435,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const createdApiKey = await payload.create({
         collection: apiKeysSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(createdApiKey.collection).toBe(apiKeysSlug)
@@ -2356,12 +2443,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const foundApiKey = await payload.findByID({
         id: createdApiKey.id,
         collection: apiKeysSlug,
+        overrideAccess: true,
       })
 
       expect(foundApiKey.collection).toBe(apiKeysSlug)
 
       const foundApiKeys = await payload.find({
         collection: apiKeysSlug,
+        overrideAccess: true,
         where: { id: { equals: createdApiKey.id } },
       })
 
@@ -2371,6 +2460,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         id: createdApiKey.id,
         collection: apiKeysSlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(updatedApiKey.collection).toBe(apiKeysSlug)
@@ -2378,6 +2468,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const deletedApiKey = await payload.delete({
         id: createdApiKey.id,
         collection: apiKeysSlug,
+        overrideAccess: true,
       })
 
       expect(deletedApiKey.collection).toBe(apiKeysSlug)
@@ -2389,6 +2480,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         data: {
           email: 'dev@payloadcms.com',
         },
+        overrideAccess: true,
       })
 
       const reset = await payload.resetPassword({
@@ -2424,6 +2516,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           data: {
             email: 'dev@payloadcms.com',
           },
+          overrideAccess: true,
         })
       } finally {
         // Restore the original Date.now() after the forgotPassword call
@@ -2466,9 +2559,9 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       }
 
       async function createLoginAttemptUser({
+        id,
         collection = slug,
         email,
-        id,
         payload,
       }: {
         collection?: typeof publicUsersSlug | typeof slug
@@ -2483,16 +2576,17 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             ...(id ? { id } : {}),
             password,
           },
+          overrideAccess: true,
         })
 
-        createdLoginAttemptUsers.push({ collection, id: user.id })
+        createdLoginAttemptUsers.push({ id: user.id, collection })
 
         return user
       }
 
       async function getLoginAttemptUser({
-        collection = slug,
         id,
+        collection = slug,
         payload,
       }: {
         collection?: typeof publicUsersSlug | typeof slug
@@ -2500,16 +2594,16 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         payload: Payload
       }) {
         return await payload.findByID({
-          collection,
           id,
+          collection,
           overrideAccess: true,
           showHiddenFields: true,
         })
       }
 
       async function setLoginAttemptLock({
-        collection = slug,
         id,
+        collection = slug,
         payload,
       }: {
         collection?: typeof publicUsersSlug | typeof slug
@@ -2517,20 +2611,21 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         payload: Payload
       }) {
         await payload.db.updateOne({
+          id,
           collection,
           data: {
             lockUntil: new Date(Date.now() + 600 * 1000).toISOString(),
             loginAttempts: 2,
           },
-          id,
         })
       }
 
       test.afterEach(async ({ payload }) => {
-        for (const { collection, id } of createdLoginAttemptUsers) {
+        for (const { id, collection } of createdLoginAttemptUsers) {
           await payload.delete({
-            collection,
             id,
+            collection,
+            overrideAccess: true,
           })
         }
 
@@ -2660,6 +2755,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             email: `unlock-on-reset-${uuid()}@example.com`,
             password: 'password-before-reset',
           },
+          overrideAccess: true,
         })
 
         try {
@@ -2676,6 +2772,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             collection: slug,
             data: { email: user.email },
             disableEmail: true,
+            overrideAccess: true,
           })
 
           await payload.resetPassword({
@@ -2690,6 +2787,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           const unlockedUser = await payload.findByID({
             id: user.id,
             collection: slug,
+            overrideAccess: true,
             showHiddenFields: true,
           })
 
@@ -2697,7 +2795,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           expect(unlockedUser.lockUntil).toBeNull()
         } finally {
           delete legacyAuthConfig.unlockOnPasswordReset
-          await payload.delete({ id: user.id, collection: slug })
+          await payload.delete({ id: user.id, collection: slug, overrideAccess: true })
         }
       })
 
@@ -2714,7 +2812,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           payload,
         })
 
-        await setLoginAttemptLock({ collection: publicUsersSlug, id: publicUser.id, payload })
+        await setLoginAttemptLock({ id: publicUser.id, collection: publicUsersSlug, payload })
 
         const req = await createLocalReq({ user: adminUser }, payload)
 
@@ -2728,8 +2826,8 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         })
 
         const unlockedUser = await getLoginAttemptUser({
-          collection: publicUsersSlug,
           id: publicUser.id,
+          collection: publicUsersSlug,
           payload,
         })
 
@@ -2749,7 +2847,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           payload,
         })
 
-        await setLoginAttemptLock({ collection: publicUsersSlug, id: selectedUser.id, payload })
+        await setLoginAttemptLock({ id: selectedUser.id, collection: publicUsersSlug, payload })
 
         const req = await createLocalReq({ user: currentUser }, payload)
 
@@ -2765,8 +2863,8 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         ).rejects.toThrow(Forbidden)
 
         const lockedUser = await getLoginAttemptUser({
-          collection: publicUsersSlug,
           id: selectedUser.id,
+          collection: publicUsersSlug,
           payload,
         })
 
@@ -2846,6 +2944,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       expect(authenticated.token).toBeTruthy()
@@ -2882,6 +2981,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       const authenticated2 = await payload.login({
@@ -2890,6 +2990,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await restClient.POST(`/${slug}/logout`, {
@@ -2929,6 +3030,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
@@ -2984,6 +3086,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       const { sid } = jwtDecode<{ sid: string }>(String(authenticated.token))
 
@@ -3021,6 +3124,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await restClient.POST(`/${slug}/logout?allSessions=true`, {
@@ -3067,6 +3171,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
             },
           ],
         },
+        overrideAccess: true,
       })
 
       expect(userWithExpiredSession.sessions).toHaveLength(1)
@@ -3077,6 +3182,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       const user2 = await payload.db.find<User>({
@@ -3100,6 +3206,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           password: 'test123',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const originalUpdatedAt = testUser.updatedAt
@@ -3114,6 +3221,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: testUser.email,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       // Fetch the user to check updatedAt
@@ -3141,6 +3249,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           password: 'test123',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const authenticated = await payload.login({
@@ -3149,6 +3258,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: testUser.email,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       const userAfterLogin = await payload.db.findOne<User>({
@@ -3198,6 +3308,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           password: 'test123',
           roles: ['admin'],
         },
+        overrideAccess: true,
       })
 
       const authenticated = await payload.login({
@@ -3206,6 +3317,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           email: testUser.email,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       const userAfterLogin = await payload.db.findOne<User>({
@@ -3280,6 +3392,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user = await payload.create({
         collection,
         data: { apiKey: rawApiKey, ...data },
+        overrideAccess: true,
       })
       createdIDs.push({ id: user.id, collection })
 
@@ -3306,6 +3419,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user = await payload.create({
         collection,
         data: { apiKey: rawApiKey },
+        overrideAccess: true,
       })
       createdIDs.push({ id: user.id, collection })
 
@@ -3328,7 +3442,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         idsByCollection.set(collection, [...(idsByCollection.get(collection) ?? []), id])
       }
       for (const [collection, ids] of idsByCollection) {
-        await payload.delete({ collection, where: { id: { in: ids } } })
+        await payload.delete({ collection, overrideAccess: true, where: { id: { in: ids } } })
       }
       createdIDs.length = 0
     })
@@ -3444,7 +3558,11 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(payload.decrypt(raw.apiKey)).toBe(rawApiKey)
 
       // Remove the corrupt row; the re-run completes and skips the migrated row.
-      await payload.delete({ id: corrupt.id, collection: rotateSecretSecondarySlug })
+      await payload.delete({
+        id: corrupt.id,
+        collection: rotateSecretSecondarySlug,
+        overrideAccess: true,
+      })
       const rerun = await rotateSecret(rotateArgs)
       expect(rerun).toEqual({ migrated: 0, skipped: 1 })
     })
@@ -3505,6 +3623,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user = await payload.create({
         collection: rotateSecretSlug,
         data: { apiKey: rawApiKey },
+        overrideAccess: true,
       })
       createdIDs.push({ id: user.id, collection: rotateSecretSlug })
 
@@ -3543,6 +3662,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user = await payload.create({
         collection: rotateSecretSlug,
         data: { apiKey: rawApiKey },
+        overrideAccess: true,
       })
       createdIDs.push({ id: user.id, collection: rotateSecretSlug })
 
@@ -3555,7 +3675,11 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
       // Reading through the Local API runs the afterRead decrypt hook, which must
       // mask the undecryptable field rather than failing the whole document read.
-      const doc = await payload.findByID({ id: user.id, collection: rotateSecretSlug })
+      const doc = await payload.findByID({
+        id: user.id,
+        collection: rotateSecretSlug,
+        overrideAccess: true,
+      })
       expect(doc).not.toHaveProperty('apiKey')
     })
 
@@ -3585,6 +3709,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const { token } = await payload.login({
         collection: rotateSecretLoginSlug,
         data: { email: loginEmail, password: loginPassword },
+        overrideAccess: true,
       })
       expect(token).toBeDefined()
     })
@@ -3673,7 +3798,11 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       payload,
       restClient,
     }) => {
-      const { token, user } = await payload.login({ collection: slug, data: { email, password } })
+      const { token, user } = await payload.login({
+        collection: slug,
+        data: { email, password },
+        overrideAccess: true,
+      })
 
       const { exp: _exp, iat: _iat, ...tokenData } = jwtDecode<Record<string, unknown>>(token)
       const nowInSeconds = Math.floor(Date.now() / 1000)
@@ -3704,7 +3833,11 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       payload,
       restClient,
     }) => {
-      const { token } = await payload.login({ collection: slug, data: { email, password } })
+      const { token } = await payload.login({
+        collection: slug,
+        data: { email, password },
+        overrideAccess: true,
+      })
       const { exp: _exp, iat: _iat, ...tokenData } = jwtDecode<Record<string, unknown>>(token)
       const nowInSeconds = Math.floor(Date.now() / 1000)
 
@@ -3734,7 +3867,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdUserIDs) {
-        await payload.delete({ id, collection: slug }).catch(() => null)
+        await payload.delete({ id, collection: slug, overrideAccess: true }).catch(() => null)
       }
       createdUserIDs.length = 0
     })
@@ -3748,12 +3881,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user = await payload.create({
         collection: slug,
         data: { email: userEmail, password: 'original-pw' },
+        overrideAccess: true,
       })
       createdUserIDs.push(user.id)
 
       const preReset = await payload.login({
         collection: slug,
         data: { email: userEmail, password: 'original-pw' },
+        overrideAccess: true,
       })
 
       const preResetSid = jwtDecode<{ sid: string }>(String(preReset.token)).sid
@@ -3762,6 +3897,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         collection: slug,
         data: { email: userEmail },
         disableEmail: true,
+        overrideAccess: true,
       })
 
       await payload.resetPassword({
@@ -3793,6 +3929,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user = await payload.create({
         collection: slug,
         data: { email: userEmail, password: 'original-pw' },
+        overrideAccess: true,
       })
       createdUserIDs.push(user.id)
 
@@ -3833,18 +3970,21 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const user = await payload.create({
         collection: slug,
         data: { email: userEmail, password: 'original-pw' },
+        overrideAccess: true,
       })
       createdUserIDs.push(user.id)
 
       const existingSession = await payload.login({
         collection: slug,
         data: { email: userEmail, password: 'original-pw' },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: user.id,
         collection: slug,
         data: { password: 'admin-changed-pw' },
+        overrideAccess: true,
       })
 
       const dbUser = await payload.db.find<User>({
@@ -3869,12 +4009,14 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
       const actingUser = await payload.create({
         collection: slug,
         data: { email: actingUserEmail, password: 'original-pw', roles: ['admin'] },
+        overrideAccess: true,
       })
       createdUserIDs.push(actingUser.id)
 
       const otherUser = await payload.create({
         collection: slug,
         data: { email: otherUserEmail, password: 'original-pw' },
+        overrideAccess: true,
       })
       createdUserIDs.push(otherUser.id)
 

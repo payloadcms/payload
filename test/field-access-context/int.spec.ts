@@ -11,12 +11,12 @@ const parentIDs: (number | string)[] = []
 test.suite('field access collection context', { config: './config.ts' }, () => {
   test.afterEach(async ({ payload }) => {
     for (const id of parentIDs) {
-      await payload.delete({ id, collection: parentsSlug })
+      await payload.delete({ id, collection: parentsSlug, overrideAccess: true })
     }
     parentIDs.length = 0
 
     for (const id of childIDs) {
-      await payload.delete({ id, collection: childrenSlug })
+      await payload.delete({ id, collection: childrenSlug, overrideAccess: true })
     }
     childIDs.length = 0
 
@@ -72,6 +72,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
         accessReadProbe: 'local read',
         title: 'local read parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(doc.id)
     resetAccessLog()
@@ -101,6 +102,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
         accessReadProbe: 'rest read',
         title: 'rest read parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(doc.id)
     resetAccessLog()
@@ -127,6 +129,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
         accessReadProbe: 'graphql read',
         title: 'graphql read parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(doc.id)
     resetAccessLog()
@@ -163,6 +166,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
         childReadProbe: 'relationship child read',
         title: 'relationship child',
       },
+      overrideAccess: true,
     })
     childIDs.push(child.id)
 
@@ -172,6 +176,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
         child: child.id,
         title: 'relationship parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(parent.id)
     resetAccessLog()
@@ -199,6 +204,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
       data: {
         title: 'update parent',
       },
+      overrideAccess: true,
     })
     parentIDs.push(doc.id)
     resetAccessLog()
@@ -228,6 +234,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
         distinctProbe: 'one',
         title: 'distinct one',
       },
+      overrideAccess: true,
     })
     parentIDs.push(firstDoc.id)
 
@@ -237,6 +244,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
         distinctProbe: 'two',
         title: 'distinct two',
       },
+      overrideAccess: true,
     })
     parentIDs.push(secondDoc.id)
     resetAccessLog()
@@ -285,6 +293,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
       data: {
         globalReadProbe: 'global read',
       },
+      overrideAccess: true,
     })
     resetAccessLog()
 
@@ -320,6 +329,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
         childReadProbe: 'global relationship child',
         title: 'global relationship child',
       },
+      overrideAccess: true,
     })
     childIDs.push(child.id)
 
@@ -328,6 +338,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
       data: {
         globalChild: child.id,
       },
+      overrideAccess: true,
     })
     resetAccessLog()
 
