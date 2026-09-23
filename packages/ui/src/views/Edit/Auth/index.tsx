@@ -50,7 +50,7 @@ export const Auth: React.FC<Props> = (props) => {
     },
   } = useConfig()
 
-  let showPasswordFields: SanitizedFieldPermissions = true
+  let showPasswordFields: SanitizedFieldPermissions = docPermissions.fields === true
   let showUnlock = true
   const hasLoginFieldOverride =
     typeof docPermissions.fields === 'object' &&
