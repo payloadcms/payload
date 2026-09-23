@@ -96,8 +96,14 @@ export type WithPayloadOptions = {
   vite?: UserConfig
 }
 
+/** The `nitro()` options Payload's server build requires. Typed structurally — `nitro` is the host's dependency, not Payload's. */
+export type PayloadNitroOptions = {
+  traceDeps: string[]
+}
+
 /** The options Payload's admin requires for each third-party plugin. */
 export type PayloadPluginOptions = {
+  nitro: PayloadNitroOptions
   react: NonNullable<Parameters<typeof viteReact>[0]>
   rsc: NonNullable<Parameters<typeof rsc>[0]>
   tanstackStart: NonNullable<Parameters<typeof tanstackStart>[0]>
@@ -137,6 +143,7 @@ export type WithPayloadBuilder = (context: WithPayloadBuilderContext) => UserCon
  *       rsc(pluginOptions.rsc),
  *       tanstackStart(pluginOptions.tanstackStart),
  *       viteReact(pluginOptions.react),
+ *       nitro(pluginOptions.nitro), // only if the app deploys through Nitro
  *     ],
  *     // ...other config options
  *   }),
@@ -239,6 +246,7 @@ export function withPayload(
     }
 
     const pluginOptions: PayloadPluginOptions = {
+      nitro: payloadNitroOptions(),
       react: payloadReactOptions(),
       rsc: payloadRscOptions(),
       tanstackStart: payloadTanstackStartOptions({
@@ -273,6 +281,16 @@ export function withPayload(
 /** `@vitejs/plugin-rsc` options for Payload: `serverHandler: false` (TanStack owns the handler). */
 export function payloadRscOptions(): NonNullable<Parameters<typeof rsc>[0]> {
   return { serverHandler: false }
+}
+
+/**
+ * `nitro/vite` options for Payload's server build. `tslib*` full-traces `tslib`
+ * so an externalized dep's `tslib/modules/index.js` import (its `import.node`
+ * export condition) ships — otherwise the build is green and the server 500s
+ * with `ERR_MODULE_NOT_FOUND` on the first request.
+ */
+export function payloadNitroOptions(): PayloadNitroOptions {
+  return { traceDeps: ['tslib*'] }
 }
 
 /** `@vitejs/plugin-react` options for Payload: transform every `.[jt]sx?` file. */
@@ -342,7 +360,7 @@ export function payloadTanstackStartOptions(
       },
       // Ignore generated importMap files and colocated `*.functions.ts` modules
       // (they define `createServerFn`s, not routes).
-      routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$|\\.functions\\.',
+      routeFileIgnorePattern: 'importMap\\.(?:d\\.ts|js|server\\.ts)$|\\.functions\\.',
       routesDirectory,
     } as any,
     rsc: { enabled: true },

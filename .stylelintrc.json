@@ -6,6 +6,7 @@
     "./.stylelint/no-important.js",
     "./.stylelint/no-subpixel-values.js"
   ],
+  "reportNeedlessDisables": true,
   "rules": {
     "plugin/no-max-width-media-query": true,
     "plugin/no-non-standard-breakpoints": true,

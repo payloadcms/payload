@@ -1,0 +1,16 @@
+.dashboard-status {
+  align-items: center;
+  display: flex;
+  gap: var(--spacer-2);
+  margin-block: var(--spacer-3);
+  margin-inline: 0;
+}
+
+.dashboard-status__badge {
+  background-color: var(--color-bg-success);
+  border-radius: var(--radius-full);
+  color: var(--color-text-onsuccess);
+  font-weight: 600;
+  padding-block: var(--spacer-1);
+  padding-inline: var(--spacer-2);
+}

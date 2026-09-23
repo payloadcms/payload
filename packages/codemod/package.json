@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/codemod",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.36",
   "description": "Codemods for migrating Payload projects across versions.",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -44,8 +44,8 @@
     "@swc/core": "1.15.3",
     "@types/node": "24.12.3",
     "rimraf": "6.0.1",
-    "typescript": "6.0.3",
-    "vitest": "4.1.6"
+    "typescript": "catalog:",
+    "vitest": "5.0.0"
   },
   "engines": {
     "node": ">=24.15.0"

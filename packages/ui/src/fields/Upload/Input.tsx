@@ -17,6 +17,7 @@ import { useModal } from '@faceless-ui/modal'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
+import { toast } from 'sonner'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReloadDoc, ValueAsDataWithRelation } from './types.js'
@@ -34,6 +35,8 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { getFilesFromClipboard } from '../../utilities/getFilesFromClipboard.js'
 import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
@@ -129,7 +132,8 @@ export function UploadInput(props: UploadInputProps) {
     setSelectableCollections,
   } = useBulkUpload()
   const { permissions } = useAuth()
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { i18n, t } = useTranslation()
 
   // This will be used by the bulk upload to allow you to select only collections you have create permissions for
@@ -209,13 +213,6 @@ export function UploadInput(props: UploadInputProps) {
     collectionSlug: activeRelationTo,
   })
 
-  /**
-   * Track the last loaded value to prevent unnecessary reloads
-   */
-  const loadedValueRef = React.useRef<
-    (number | string)[] | null | number | string | ValueWithRelation | ValueWithRelation[]
-  >(null)
-
   const canCreate = useMemo(() => {
     if (!allowCreate) {
       return false
@@ -240,7 +237,12 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   const populateDocs = React.useCallback(
-    async (items: ValueWithRelation[]): Promise<ValueAsDataWithRelation[]> => {
+    async (
+      items: ValueWithRelation[],
+      options?: {
+        signal?: AbortSignal
+      },
+    ): Promise<ValueAsDataWithRelation[]> => {
       if (!items?.length) {
         return []
       }
@@ -292,6 +294,7 @@ export function UploadInput(props: UploadInputProps) {
               'X-Payload-HTTP-Method-Override': 'GET',
             },
             method: 'POST',
+            signal: options?.signal,
           },
         )
         let docs: any[] = []
@@ -410,6 +413,19 @@ export function UploadInput(props: UploadInputProps) {
       setMaxFiles,
     ],
   )
+
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const files = await getFilesFromClipboard()
+      if (!files) {
+        toast.error(t('error:noFileFoundInClipboard'))
+        return
+      }
+      onLocalFileSelection(files)
+    } catch (_err) {
+      toast.error(t('error:unableToReadClipboard'))
+    }
+  }, [onLocalFileSelection, t])
 
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
@@ -559,6 +575,8 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   useEffect(() => {
+    const abortController = new AbortController()
+
     async function loadInitialDocs() {
       if (value) {
         let itemsToLoad: ValueWithRelation[] = []
@@ -615,24 +633,28 @@ export function UploadInput(props: UploadInputProps) {
         }
 
         if (itemsToLoad.length > 0) {
-          const loadedDocs = await populateDocs(itemsToLoad)
+          try {
+            const loadedDocs = await populateDocs(itemsToLoad, {
+              signal: abortController.signal,
+            })
 
-          if (loadedDocs) {
-            setPopulatedDocs(loadedDocs)
-            loadedValueRef.current = value
+            if (loadedDocs && !abortController.signal.aborted) {
+              setPopulatedDocs(loadedDocs)
+            }
+          } catch (_err) {
+            // Ignore aborted requests from superseded values / unmount
           }
         }
       } else {
         // Clear populated docs when value is cleared
         setPopulatedDocs([])
-        loadedValueRef.current = null
       }
     }
 
-    // Only load if value has changed from what we last loaded
-    const valueChanged = loadedValueRef.current !== value
-    if (valueChanged) {
-      void loadInitialDocs()
+    void loadInitialDocs()
+
+    return () => {
+      abortAndIgnore(abortController)
     }
   }, [populateDocs, value, relationTo])
 
@@ -757,6 +779,21 @@ export function UploadInput(props: UploadInputProps) {
                   >
                     {t('fields:chooseFromExisting')}
                   </Button>
+                  {canCreate && !readOnly && (
+                    <>
+                      <span className={`${baseClass}__dropzoneContent__orText`}>
+                        {t('general:or')}
+                      </span>
+                      <Button
+                        buttonStyle="secondary"
+                        className={`${baseClass}__pasteFromClipboard`}
+                        icon="clipboard"
+                        onClick={handlePasteFromClipboard}
+                        size="medium"
+                        tooltip={t('upload:pasteFromClipboard')}
+                      />
+                    </>
+                  )}
                   <CreateDocDrawer onSave={onDocCreate} />
                   <ListDrawer
                     allowCreate={canCreate}

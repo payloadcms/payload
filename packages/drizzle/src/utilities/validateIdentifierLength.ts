@@ -4,6 +4,12 @@ import { APIError } from 'payload'
 export const maxIdentifierLength = 63
 
 /**
+ * Cap for builder-generated identifiers (`buildIndexName`/`buildForeignKeyName`). Sits
+ * below `maxIdentifierLength` to leave headroom for the appended `_idx`/`_fk`/`_N` suffixes.
+ */
+export const maxGeneratedIdentifierLength = maxIdentifierLength - 3
+
+/**
  * Throws if a table or enum identifier exceeds the Postgres 63-char limit.
  */
 export const validateIdentifierLength = (name: string): string => {

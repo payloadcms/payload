@@ -9,9 +9,10 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../__helpers/shared/sdk/index.js'
 
-import { ensureCompilationIsDone, saveDocAndAssert } from '../../__helpers/e2e/helpers.js'
+import { gotoAndWaitForForm, saveDocAndAssert } from '../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
 import { mediaWithDocPrefixSlug } from './collections/MediaWithDocPrefix.js'
 
@@ -65,12 +66,10 @@ test.describe('storage-azure client uploads E2E', () => {
 
   /**
    * Drives the actual admin form through a clientUploads submit and asserts
-   * that the user-defined `prefix.defaultValue` ends up on the saved doc — i.e.
-   * the plugin no longer clobbers the user's callback (see getFields.ts).
+   * that the saved document prefix identifies the contained upload destination.
    */
-  test('respects user-defined prefix.defaultValue when creating a doc via clientUploads', async () => {
-    test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
-    await page.goto(mediaWithDocPrefixURL.create)
+  test('should contain prefix.defaultValue beneath the collection prefix via clientUploads', async () => {
+    await gotoAndWaitForForm(page, mediaWithDocPrefixURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
     await saveDocAndAssert(page)
 
@@ -89,9 +88,11 @@ test.describe('storage-azure client uploads E2E', () => {
     }
 
     expect(blobNames).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^doc-[a-z0-9]{1,8}\/image\.png$/)]),
+      expect.arrayContaining([
+        expect.stringMatching(/^docprefix-collection\/doc-[a-z0-9]{1,8}\/[0-9a-f-]+\/image\.png$/),
+      ]),
     )
 
-    expect(doc?.prefix).toMatch(/^doc-[a-z0-9]{1,8}$/)
+    expect(doc?.prefix).toMatch(/^docprefix-collection\/doc-[a-z0-9]{1,8}$/)
   })
 })

@@ -1,3 +1,37 @@
+@property --fixed-toolbar-fade-start {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fixed-toolbar-fade-end {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/*
+ * Drives the fade widths off the toolbar's own scroll position: fully opaque at rest,
+ * fading in on whichever edge still has scrolled-off content once it overflows.
+ * Unsupported browsers (no animation-timeline) simply keep the initial 0px fade, i.e. no fade at all.
+ */
+@keyframes fixed-toolbar-scroll-fade {
+  0% {
+    --fixed-toolbar-fade-start: 0px;
+  }
+  10%,
+  100% {
+    --fixed-toolbar-fade-start: var(--spacer-5);
+  }
+  0%,
+  90% {
+    --fixed-toolbar-fade-end: var(--spacer-5);
+  }
+  100% {
+    --fixed-toolbar-fade-end: 0px;
+  }
+}
+
 @layer payload-default {
   .fixed-toolbar.fixed-toolbar--hide {
     visibility: hidden;
@@ -7,10 +41,8 @@
 
   .fixed-toolbar {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     padding: 0 var(--spacer-2);
-    gap: var(--spacer-2);
     vertical-align: middle;
     position: sticky;
     z-index: 2;
@@ -55,13 +87,55 @@
     }
   }
 
+  .fixed-toolbar__scroll {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--spacer-2);
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+    z-index: 1;
+    animation: fixed-toolbar-scroll-fade linear;
+    animation-timeline: scroll(self inline);
+    mask: linear-gradient(
+      to right,
+      transparent,
+      black var(--fixed-toolbar-fade-start),
+      black calc(100% - var(--fixed-toolbar-fade-end)),
+      transparent
+    );
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  [dir='rtl'] .fixed-toolbar__scroll {
+    mask: linear-gradient(
+      to left,
+      transparent,
+      black var(--fixed-toolbar-fade-start),
+      black calc(100% - var(--fixed-toolbar-fade-end)),
+      transparent
+    );
+  }
+
   .fixed-toolbar__group {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: var(--spacer-2);
     align-self: stretch;
     z-index: 1;
+    flex-shrink: 0;
+
+    > * {
+      flex-shrink: 0;
+    }
 
     .divider {
       width: var(--stroke-width-small);

@@ -83,9 +83,10 @@ const Header: GlobalConfig = {
 
 The following arguments are provided to the `read` function:
 
-| Option    | Description                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`slug`** | The slug of the Global being accessed.                                                                                        |
 
 ### Update
 
@@ -114,10 +115,13 @@ The following arguments are provided to the `update` function:
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 | **`data`** | The data passed to update the global with.                                                                                    |
+| **`slug`** | The slug of the Global being accessed.                                                                                        |
 
 ### Read Versions
 
 If the Global has [Versions](../versions/overview) enabled, the `readVersions` Access Control function determines whether or not the currently logged in user can access the version history of a Document.
+
+If `readVersions` is not configured, Payload uses the Global's `read` Access Control. Boolean results are preserved, and query constraints are automatically adjusted to target fields within the stored version document.
 
 To add Read Versions Access Control to a Global, use the `readVersions` property in the [Global Config](../configuration/globals):
 
@@ -137,13 +141,14 @@ export const GlobalWithVersionsAccess: GlobalConfig = {
 ```
 
 <Banner type="warning">
-  **Note:** Returning a [Query](../queries/overview) will apply the constraint
-  to the [`versions` collection](../versions/overview#database-impact), not the
-  original Global.
+  **Note:** When you explicitly configure `readVersions`, returning a
+  [Query](../queries/overview) will apply the constraint to the [`versions`
+  collection](../versions/overview#database-impact), not the original Global.
 </Banner>
 
 The following arguments are provided to the `readVersions` function:
 
-| Option    | Description                                                                                                                   |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
+| **`slug`** | The slug of the Global being accessed.                                                                                        |

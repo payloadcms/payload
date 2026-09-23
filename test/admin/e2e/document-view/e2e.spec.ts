@@ -8,14 +8,14 @@ import type { Config, Post } from '../../payload-types.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
-  ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -87,8 +87,6 @@ describe('Document View', () => {
     const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -103,16 +101,12 @@ describe('Document View', () => {
     localizedURL = new AdminUrlUtil(serverURL, localizedCollectionSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
   })
 
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
@@ -754,19 +748,59 @@ describe('Document View', () => {
   })
 
   describe('publish button', () => {
-    test('should show publish active locale button with defaultLocalePublishOption set to active', async () => {
+    test('should show publish active locale button by default when localized fields exist', async () => {
       await navigateToDoc(page, localizedURL)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish in English')
     })
 
-    test('should not show publish active locale button with defaultLocalePublishOption set to active but no localized fields', async () => {
+    test('should not show publish active locale button when no localized fields exist', async () => {
       await navigateToDoc(page, postsUrl)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish changes')
       await expect(publishButton).not.toContainText('Publish in')
+    })
+
+    test('should publish all locales from the secondary option', async () => {
+      const localizedDocument = await payload.create({
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'English draft',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: localizedDocument.id,
+        collection: localizedCollectionSlug,
+        data: {
+          title: 'Spanish draft',
+        },
+        draft: true,
+        locale: 'es',
+      })
+
+      await page.goto(localizedURL.edit(localizedDocument.id))
+      await saveDocAndAssert(page, '#publish-all-locales')
+
+      const publishedDocuments = await payload.find({
+        collection: localizedCollectionSlug,
+        draft: true,
+        locale: 'all',
+        where: {
+          id: {
+            equals: localizedDocument.id,
+          },
+        },
+      })
+
+      expect(publishedDocuments.docs[0]?._status).toEqual({
+        en: 'published',
+        es: 'published',
+      })
     })
 
     test('should show published status after publishing specific locale', async () => {
@@ -923,10 +957,10 @@ describe('Document View', () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title').fill('heros')
       await selectInput({
-        page,
+        filter: 'sean',
         multiSelect: false,
         option: 'sean',
-        filter: 'sean',
+        page,
         selectLocator: page.locator('#field-relationship'),
         selectType: 'relationship',
       })

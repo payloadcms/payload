@@ -123,12 +123,13 @@ export function DashboardBreadcrumbDropdown(props: {
           </PopupList.Button>
         </PopupList.ButtonGroup>
       )}
-      renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+      renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
         <Button
           aria-label={t('general:dashboard')}
           buttonStyle="ghost"
           extraButtonProps={{ onKeyDown }}
           onClick={onClick}
+          selected={active}
           {...ariaProps}
         >
           <span className="dashboard-breadcrumb-dropdown__label">
@@ -137,7 +138,7 @@ export function DashboardBreadcrumbDropdown(props: {
           </span>
         </Button>
       )}
-      size="large"
+      size="fit-content"
     />
   )
 }

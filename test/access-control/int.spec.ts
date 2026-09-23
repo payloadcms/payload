@@ -7,48 +7,63 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import path from 'path'
-import { createLocalReq, Forbidden } from 'payload'
+import { AuthenticationError, createLocalReq, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import { expect, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { requestHeaders } from './getConfig.js'
+import { test } from '../__helpers/int/vitest.js'
 import {
+  requestHeaders,
+  setInheritedReadVersionsAllowedID,
+  setInheritedReadVersionsAllowedVersionID,
+} from './getConfig.js'
+import {
+  accessRelationChildSlug,
+  accessRelationParentSlug,
   asyncParentSlug,
+  authSlug,
+  createNotUpdateCollectionSlug,
+  docLevelAccessSlug,
   firstArrayText,
   fullyRestrictedSlug,
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
   hooksSlug,
+  inheritedReadVersionsGlobalSlug,
+  inheritedReadVersionsSlug,
+  inheritedReadVersionsVirtualGlobalSlug,
+  inheritedReadVersionsVirtualRelatedSlug,
+  inheritedReadVersionsVirtualSlug,
+  postReferencesSlug,
   publicUserEmail,
   publicUsersSlug,
   relyOnRequestHeadersSlug,
   restrictedVersionsSlug,
   secondArrayText,
+  selfReferentialSlug,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
+  userRestrictedCollectionSlug,
+  usersSlug,
 } from './shared.js'
-
-let payload: Payload
-let restClient: NextRESTClient
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-describe('Access Control', () => {
+test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control', () => {
   let post1: Post
   let restricted: FullyRestricted
+  let payload!: Payload
 
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+  test.beforeAll(async ({ payloadInstance }) => {
+    payload = payloadInstance
   })
 
-  beforeEach(async () => {
+  test.beforeEach(async ({ payloadInstance }) => {
+    payload = payloadInstance
+    setInheritedReadVersionsAllowedID(undefined)
+    setInheritedReadVersionsAllowedVersionID(undefined)
+
     post1 = await payload.create({
       collection: slug,
       data: {},
@@ -60,12 +75,8 @@ describe('Access Control', () => {
     })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('Fields', () => {
-    it('should not affect hidden fields when patching data', async () => {
+  test.describe('Fields', () => {
+    test('should not affect hidden fields when patching data', async ({ payload }) => {
       const doc = await payload.create({
         collection: hiddenFieldsSlug,
         data: {
@@ -100,7 +111,9 @@ describe('Access Control', () => {
       expect(updatedDoc.partiallyHiddenArray[0].value).toStrictEqual('private_value')
     })
 
-    it('should not affect hidden fields when patching data - update many', async () => {
+    test('should not affect hidden fields when patching data - update many', async ({
+      payload,
+    }) => {
       const docsMany = await payload.create({
         collection: hiddenFieldsSlug,
         data: {
@@ -137,7 +150,7 @@ describe('Access Control', () => {
       expect(updatedMany.partiallyHiddenArray[0].value).toStrictEqual('private_value')
     })
 
-    it('should be able to restrict access based upon siblingData', async () => {
+    test('should be able to restrict access based upon siblingData', async ({ payload }) => {
       const { id } = await payload.create({
         collection: siblingDataSlug,
         data: {
@@ -174,7 +187,9 @@ describe('Access Control', () => {
       expect(docOverride.array?.[1].text).toBe(secondArrayText)
     })
 
-    it('should use fallback value when trying to update a field without permission', async () => {
+    test('should use fallback value when trying to update a field without permission', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
@@ -195,7 +210,7 @@ describe('Access Control', () => {
       expect(updatedDoc.cannotMutateRequired).toBe('original')
     })
 
-    it('should use fallback value when required data is missing', async () => {
+    test('should use fallback value when required data is missing', async ({ payload }) => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
@@ -216,7 +231,9 @@ describe('Access Control', () => {
       expect(updatedDoc.cannotMutateRequired).toBe('original')
     })
 
-    it('should pass fallback value through to beforeChange hook when access returns false', async () => {
+    test('should pass fallback value through to beforeChange hook when access returns false', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
@@ -239,7 +256,99 @@ describe('Access Control', () => {
       expect(updatedDoc.cannotMutateNotRequired).toBe('cannotMutateNotRequired')
     })
 
-    it('should not return default values for hidden fields with values', async () => {
+    test.describe('Password update access', () => {
+      const createdAdminUserIDs: string[] = []
+      const createdAuthIDs: string[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdAdminUserIDs) {
+          await payload.delete({ id, collection: usersSlug })
+        }
+        for (const id of createdAuthIDs) {
+          await payload.delete({ id, collection: authSlug })
+        }
+        createdAdminUserIDs.length = 0
+        createdAuthIDs.length = 0
+      })
+
+      test('should preserve credentials when password update access is denied', async ({
+        payload,
+      }) => {
+        const originalPassword = 'OriginalPassword123!'
+        const replacementPassword = 'ReplacementPassword123!'
+
+        const caller = await payload.create({
+          collection: usersSlug,
+          data: {
+            email: 'credential-editor@example.com',
+            password: 'CallerPassword123!',
+            roles: ['user'],
+          },
+        })
+
+        createdAdminUserIDs.push(caller.id)
+
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'credential-owner@example.com',
+            password: originalPassword,
+            roles: ['user'],
+          },
+        })
+
+        createdAuthIDs.push(account.id)
+
+        const credentialsBefore = await payload.findByID({
+          id: account.id,
+          collection: authSlug,
+          showHiddenFields: true,
+        })
+
+        await payload.update({
+          id: account.id,
+          collection: authSlug,
+          data: {
+            password: replacementPassword,
+          },
+          overrideAccess: false,
+          user: { ...caller, collection: usersSlug },
+        })
+
+        const credentialsAfter = await payload.findByID({
+          id: account.id,
+          collection: authSlug,
+          showHiddenFields: true,
+        })
+
+        expect({ hash: credentialsAfter.hash, salt: credentialsAfter.salt }).toStrictEqual({
+          hash: credentialsBefore.hash,
+          salt: credentialsBefore.salt,
+        })
+
+        const authenticated = await payload.login({
+          collection: authSlug,
+          data: {
+            email: account.email,
+            password: originalPassword,
+          },
+        })
+
+        expect(authenticated.user.id).toBe(account.id)
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: replacementPassword,
+            },
+          }),
+        ).rejects.toThrow(AuthenticationError)
+      })
+    })
+
+    test('should not return default values for hidden fields with values', async ({ payload }) => {
       const doc = await payload.create({
         collection: hiddenFieldsSlug,
         data: {
@@ -259,42 +368,755 @@ describe('Access Control', () => {
       expect(findDoc2.hiddenWithDefault).toBeUndefined()
     })
   })
-  describe('Collections', () => {
-    describe('restricted collection', () => {
-      it('field without read access should not show', async () => {
-        const { id } = await createDoc({ restrictedField: 'restricted' })
+
+  test.describe('Duplication', () => {
+    const createdAuthCollectionIDs: string[] = []
+    const createdPublicUserIDs: string[] = []
+
+    test.afterEach(async ({ payload }) => {
+      for (const id of createdAuthCollectionIDs) {
+        await payload.delete({ id, collection: authSlug })
+      }
+      createdAuthCollectionIDs.length = 0
+
+      for (const id of createdPublicUserIDs) {
+        await payload.delete({ id, collection: publicUsersSlug })
+      }
+      createdPublicUserIDs.length = 0
+    })
+
+    test('should reject REST duplication when disableDuplicate is true', async ({
+      payload,
+      restClient,
+    }) => {
+      const hasDuplicateEndpoint = payload.collections[publicUsersSlug].config.endpoints.some(
+        ({ method, path }) => method === 'post' && path === '/:id/duplicate',
+      )
+
+      expect.soft(hasDuplicateEndpoint).toBe(false)
+
+      const sourceResult = await payload.find({
+        collection: publicUsersSlug,
+        limit: 1,
+        where: {
+          email: {
+            equals: publicUserEmail,
+          },
+        },
+      })
+      const duplicateEmail = 'duplicate-disabled@payloadcms.com'
+
+      const response = await restClient.POST(
+        `/${publicUsersSlug}/${sourceResult.docs[0]!.id}/duplicate`,
+        {
+          auth: false,
+          body: JSON.stringify({
+            email: duplicateEmail,
+            password: 'test-password',
+          }),
+        },
+      )
+      const duplicateResult = await payload.find({
+        collection: publicUsersSlug,
+        where: {
+          email: {
+            equals: duplicateEmail,
+          },
+        },
+      })
+
+      createdPublicUserIDs.push(...duplicateResult.docs.map(({ id }) => id))
+
+      expect.soft(response.status).toBeGreaterThanOrEqual(400)
+      expect(duplicateResult.totalDocs).toBe(0)
+    })
+
+    test('should reject create with duplicateFromID when disableDuplicate is true', async ({
+      payload,
+    }) => {
+      const sourceResult = await payload.find({
+        collection: publicUsersSlug,
+        limit: 1,
+        where: {
+          email: {
+            equals: publicUserEmail,
+          },
+        },
+      })
+      const duplicateEmail = 'duplicate-direct-disabled@payloadcms.com'
+
+      await expect(
+        payload.create({
+          collection: publicUsersSlug,
+          data: {
+            email: duplicateEmail,
+            password: 'test-password',
+          },
+          duplicateFromID: sourceResult.docs[0]!.id,
+          overrideAccess: false,
+        }),
+      ).rejects.toThrow(`The collection with slug ${publicUsersSlug} cannot be duplicated.`)
+
+      const duplicateResult = await payload.find({
+        collection: publicUsersSlug,
+        where: {
+          email: {
+            equals: duplicateEmail,
+          },
+        },
+      })
+
+      createdPublicUserIDs.push(...duplicateResult.docs.map(({ id }) => id))
+
+      expect(duplicateResult.totalDocs).toBe(0)
+    })
+
+    test('should not copy fields denied by create access when duplicating', async ({
+      payload,
+      restClient,
+    }) => {
+      const source = await payload.create({
+        collection: authSlug,
+        data: {
+          _verified: true,
+          email: 'duplicate-source@payloadcms.com',
+          password: 'test-password',
+          roles: ['admin'],
+        },
+      })
+      const duplicateEmail = 'duplicate-request@payloadcms.com'
+
+      createdAuthCollectionIDs.push(source.id)
+
+      const sourceResponse = await restClient.GET(`/${authSlug}/${source.id}`, {
+        auth: false,
+      })
+      const publicSource = (await sourceResponse.json()) as { roles?: string[] }
+
+      expect.soft(sourceResponse.status).toBe(200)
+      expect.soft(publicSource.roles).toBeUndefined()
+
+      const response = await restClient.POST(`/${authSlug}/${source.id}/duplicate`, {
+        auth: false,
+        body: JSON.stringify({
+          email: duplicateEmail,
+          password: 'test-password',
+        }),
+      })
+      const { doc } = (await response.json()) as { doc: { id: string } }
+
+      createdAuthCollectionIDs.push(doc.id)
+
+      const duplicated = await payload.findByID({
+        id: doc.id,
+        collection: authSlug,
+        showHiddenFields: true,
+      })
+
+      expect.soft(response.status).toBe(200)
+      expect.soft(duplicated.roles).toEqual(['user'])
+      expect.soft(duplicated._verified).toBe(false)
+
+      const loginResponse = await restClient.POST(`/${authSlug}/login`, {
+        auth: false,
+        body: JSON.stringify({
+          email: duplicateEmail,
+          password: 'test-password',
+        }),
+      })
+
+      expect(loginResponse.status).not.toBe(200)
+    })
+  })
+
+  test.describe('Collections', () => {
+    test.describe('document-level delete access', () => {
+      const createdDocumentIDs: Array<number | string> = []
+
+      test.afterEach(async ({ payload }) => {
+        await payload.delete({
+          collection: docLevelAccessSlug,
+          where: {
+            id: {
+              in: createdDocumentIDs,
+            },
+          },
+        })
+        createdDocumentIDs.length = 0
+      })
+
+      test('should not run beforeDelete hooks for documents outside delete access', async ({
+        payload,
+      }) => {
+        const beforeDeleteCalls: Array<number | string> = []
+        const doc = await payload.create({
+          collection: docLevelAccessSlug,
+          data: {
+            approvedForRemoval: false,
+          },
+        })
+
+        createdDocumentIDs.push(doc.id)
+
+        await expect(
+          payload.delete({
+            id: doc.id,
+            collection: docLevelAccessSlug,
+            context: { beforeDeleteCalls },
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow(Forbidden)
+        expect(beforeDeleteCalls).toHaveLength(0)
+      })
+
+      test('should run beforeDelete hooks for documents within delete access', async ({
+        payload,
+      }) => {
+        const beforeDeleteCalls: Array<number | string> = []
+        const doc = await payload.create({
+          collection: docLevelAccessSlug,
+          data: {
+            approvedForRemoval: true,
+          },
+        })
+
+        createdDocumentIDs.push(doc.id)
+
+        const deletedDoc = await payload.delete({
+          id: doc.id,
+          collection: docLevelAccessSlug,
+          context: { beforeDeleteCalls },
+          overrideAccess: false,
+        })
+
+        expect(deletedDoc.id).toBe(doc.id)
+        expect(beforeDeleteCalls).toEqual([doc.id])
+      })
+    })
+
+    test.describe('relationship queries', () => {
+      const createdPostIDs: (number | string)[] = []
+      const createdPostReferenceIDs: (number | string)[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdPostReferenceIDs) {
+          await payload.delete({ collection: postReferencesSlug, id })
+        }
+        createdPostReferenceIDs.length = 0
+
+        for (const id of createdPostIDs) {
+          await payload.delete({ collection: slug, id })
+        }
+        createdPostIDs.length = 0
+      })
+
+      test('should apply related collection access constraints to relationship queries', async ({
+        payload,
+        restClient,
+      }) => {
+        const postWithHiddenField = await payload.create({
+          collection: slug,
+          data: {
+            title: 'archived',
+          },
+        })
+
+        const postWithVisibleField = await payload.create({
+          collection: slug,
+          data: {
+            title: 'public',
+          },
+        })
+
+        createdPostIDs.push(postWithHiddenField.id, postWithVisibleField.id)
+
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {
+            post: [postWithHiddenField.id, postWithVisibleField.id],
+          },
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const response = await restClient.GET(`/${postReferencesSlug}`, {
+          query: {
+            where: {
+              'post.title': {
+                equals: 'archived',
+              },
+            },
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.docs).toHaveLength(0)
+      })
+
+      test('should apply related collection access constraints when querying another related field', async ({
+        payload,
+        restClient,
+      }) => {
+        const postWithHiddenField = await payload.create({
+          collection: slug,
+          data: {
+            title: 'archived',
+            title2: 'archived test',
+          },
+        })
+
+        const postWithVisibleField = await payload.create({
+          collection: slug,
+          data: {
+            title: 'public',
+            title2: 'public test',
+          },
+        })
+
+        createdPostIDs.push(postWithHiddenField.id, postWithVisibleField.id)
+
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {
+            post: [postWithHiddenField.id, postWithVisibleField.id],
+          },
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const response = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'post.title2': {
+                equals: 'archived test',
+              },
+            },
+          },
+        })
+        const result = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(result.docs).toHaveLength(0)
+      })
+
+      test('should apply related collection access constraints to non-hasMany relationship queries', async ({
+        payload,
+        restClient,
+      }) => {
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            title: 'archived',
+          },
+        })
+
+        const publicPost = await payload.create({
+          collection: slug,
+          data: {
+            title: 'public',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const archivedReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {
+            singlePost: archivedPost.id,
+          },
+        })
+
+        const publicReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {
+            singlePost: publicPost.id,
+          },
+        })
+
+        createdPostReferenceIDs.push(archivedReference.id, publicReference.id)
+
+        const hiddenResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'singlePost.title': {
+                equals: 'archived',
+              },
+            },
+          },
+        })
+        const hiddenResult = await hiddenResponse.json()
+
+        expect(hiddenResponse.status).toBe(200)
+        expect(hiddenResult.docs).toHaveLength(0)
+
+        const visibleResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'singlePost.title': {
+                equals: 'public',
+              },
+            },
+          },
+        })
+        const visibleResult = await visibleResponse.json()
+
+        expect(visibleResponse.status).toBe(200)
+        expect(visibleResult.docs).toHaveLength(1)
+        expect(visibleResult.docs[0].id).toBe(publicReference.id)
+      })
+
+      test('should apply related collection access constraints to join field queries', async ({
+        payload,
+        restClient,
+      }) => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            reference: postReference.id,
+            title: 'archived',
+          },
+        })
+
+        const publicPost = await payload.create({
+          collection: slug,
+          data: {
+            reference: postReference.id,
+            title: 'public',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const hiddenResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'joinedPosts.title': {
+                equals: 'archived',
+              },
+            },
+          },
+        })
+        const hiddenResult = await hiddenResponse.json()
+
+        expect(hiddenResponse.status).toBe(200)
+        expect(hiddenResult.docs).toHaveLength(0)
+
+        const visibleResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'joinedPosts.title': {
+                equals: 'public',
+              },
+            },
+          },
+        })
+        const visibleResult = await visibleResponse.json()
+
+        expect(visibleResponse.status).toBe(200)
+        expect(visibleResult.docs).toHaveLength(1)
+        expect(visibleResult.docs[0].id).toBe(postReference.id)
+      })
+
+      test('should apply related collection access constraints to hasMany join field queries', async ({
+        payload,
+        restClient,
+      }) => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            references: [postReference.id],
+            title: 'archived',
+          },
+        })
+
+        const publicPost = await payload.create({
+          collection: slug,
+          data: {
+            references: [postReference.id],
+            title: 'public',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id, publicPost.id)
+
+        const hiddenResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'joinedPostsMany.title': {
+                equals: 'archived',
+              },
+            },
+          },
+        })
+        const hiddenResult = await hiddenResponse.json()
+
+        expect(hiddenResponse.status).toBe(200)
+        expect(hiddenResult.docs).toHaveLength(0)
+
+        const visibleResponse = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              'joinedPostsMany.title': {
+                equals: 'public',
+              },
+            },
+          },
+        })
+        const visibleResult = await visibleResponse.json()
+
+        expect(visibleResponse.status).toBe(200)
+        expect(visibleResult.docs).toHaveLength(1)
+        expect(visibleResult.docs[0].id).toBe(postReference.id)
+      })
+
+      test('should apply related collection access constraints to a user-supplied join contains query', async ({
+        payload,
+        restClient,
+      }) => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            reference: postReference.id,
+            title: 'archived',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id)
+
+        const response = await restClient.GET(`/${postReferencesSlug}`, {
+          auth: false,
+          query: {
+            where: {
+              joinedPosts: {
+                contains: {
+                  title: {
+                    equals: 'archived',
+                  },
+                },
+              },
+            },
+          },
+        })
+        const result = await response.json()
+
+        expect(result.docs ?? []).toHaveLength(0)
+      })
+
+      test('should reject nested queries against a polymorphic join field', async ({ payload }) => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            reference: postReference.id,
+            title: 'archived',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id)
+
+        await expect(
+          payload.find({
+            collection: postReferencesSlug,
+            overrideAccess: false,
+            where: {
+              'polymorphicJoinedPosts.title': {
+                equals: 'archived',
+              },
+            },
+          }),
+        ).rejects.toThrow('Not supported')
+      })
+
+      test('should reject nested queries against a join with a polymorphic on relationship', async ({
+        payload,
+      }) => {
+        const postReference = await payload.create({
+          collection: postReferencesSlug,
+          data: {},
+        })
+
+        createdPostReferenceIDs.push(postReference.id)
+
+        const archivedPost = await payload.create({
+          collection: slug,
+          data: {
+            polymorphicReference: { relationTo: postReferencesSlug, value: postReference.id },
+            title: 'archived',
+          },
+        })
+
+        createdPostIDs.push(archivedPost.id)
+
+        const where = {
+          'joinedPostsPolymorphicOn.title': {
+            equals: 'archived',
+          },
+        }
+
+        await expect(
+          payload.find({ collection: postReferencesSlug, overrideAccess: false, where }),
+        ).rejects.toThrow('Not supported')
+
+        await expect(
+          payload.find({ collection: postReferencesSlug, overrideAccess: true, where }),
+        ).rejects.toThrow('Not supported')
+      })
+
+      test('should not apply parent query constraints to a related collections nested query', async ({
+        payload,
+      }) => {
+        const child = await payload.create({
+          collection: accessRelationChildSlug,
+          data: { name: 'child', nested: { isActive: true } },
+        })
+
+        const parent = await payload.create({
+          collection: accessRelationParentSlug,
+          data: { title: 'parent', status: 'published', child: child.id },
+        })
+
+        const result = await payload.find({
+          collection: accessRelationParentSlug,
+          overrideAccess: false,
+          where: {
+            'child.nested.isActive': { equals: true },
+          },
+        })
+
+        await payload.delete({ collection: accessRelationParentSlug, id: parent.id })
+        await payload.delete({ collection: accessRelationChildSlug, id: child.id })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]!.id).toBe(parent.id)
+      })
+
+      test('should apply the related collection constraint through a self-referential relationship', async ({
+        payload,
+      }) => {
+        const parentA = await payload.create({
+          collection: selfReferentialSlug,
+          data: { label: 'target', isPublic: false },
+        })
+        const parentB = await payload.create({
+          collection: selfReferentialSlug,
+          data: { label: 'target', isPublic: true },
+        })
+        const childA = await payload.create({
+          collection: selfReferentialSlug,
+          data: { label: 'child-a', isPublic: true, parent: parentA.id },
+        })
+        const childB = await payload.create({
+          collection: selfReferentialSlug,
+          data: { label: 'child-b', isPublic: true, parent: parentB.id },
+        })
+
+        // `parent` points back to the same collection, whose access control returns a where
+        // constraint that must also apply to the related document.
+        const result = await payload.find({
+          collection: selfReferentialSlug,
+          overrideAccess: false,
+          where: {
+            'parent.label': { equals: 'target' },
+          },
+        })
+
+        const ids = [parentA.id, parentB.id, childA.id, childB.id]
+        for (const id of ids) {
+          await payload.delete({ collection: selfReferentialSlug, id })
+        }
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]!.id).toBe(childB.id)
+      })
+    })
+
+    test.describe('restricted collection', () => {
+      test('field without read access should not show', async ({ payload }) => {
+        const { id } = await createDoc({ payload }, { restrictedField: 'restricted' })
 
         const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: false })
 
         expect(retrievedDoc.restrictedField).toBeUndefined()
       })
 
-      it('should error when querying field without read access', async () => {
-        const { id } = await createDoc({ restrictedField: 'restricted' })
+      test.for(['AND', 'OR', 'AnD', 'oR'])(
+        'validates field read access inside case-insensitive %s conditions',
+        async (logicalOperator, { payload }) => {
+          const { id } = await createDoc({ payload }, { restrictedField: 'example' })
 
+          await expect(
+            payload.find({
+              collection: slug,
+              overrideAccess: false,
+              where: {
+                [logicalOperator]: [
+                  {
+                    id: { equals: id },
+                  },
+                  {
+                    restrictedField: {
+                      equals: 'example',
+                    },
+                  },
+                ],
+              },
+            }),
+          ).rejects.toThrow('The following path cannot be queried: restrictedField')
+        },
+      )
+
+      test('rejects array-valued field conditions', async ({ payload }) => {
         await expect(
           payload.find({
             collection: slug,
             overrideAccess: false,
             where: {
-              and: [
-                {
-                  id: { equals: id },
-                },
-                {
-                  restrictedField: {
-                    equals: 'restricted',
-                  },
-                },
-              ],
-            },
+              restrictedField: [{ equals: 'example' }],
+            } as any,
           }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
-      it('should respect access control for join request where queries of relationship properties', async () => {
-        const post = await createDoc({})
-        await createDoc({ post: post.id, name: 'test' }, 'relation-restricted')
+      test('should respect access control for join request where queries of relationship properties', async ({
+        payload,
+      }) => {
+        const post = await createDoc({ payload }, {})
+        await createDoc({ payload }, { post: post.id, name: 'test' }, 'relation-restricted')
         await expect(
           payload.find({
             collection: 'relation-restricted',
@@ -308,31 +1130,112 @@ describe('Access Control', () => {
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
-      it('field without read access should not show when overrideAccess: true', async () => {
-        const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
+      test('should reject constrained sort paths', async ({ payload }) => {
+        const requests = [
+          payload.find({
+            collection: slug,
+            overrideAccess: false,
+            sort: 'restrictedField',
+          }),
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            sort: 'post.restrictedField',
+          }),
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            sort: 'postLabel',
+          }),
+          payload.find({
+            collection: 'sort-default-restricted',
+            overrideAccess: false,
+          }),
+          payload.find({
+            collection: slug,
+            joins: {
+              relatedItems: {
+                sort: 'rank',
+              },
+            },
+            overrideAccess: false,
+          }),
+          payload.findDistinct({
+            collection: 'relation-restricted',
+            field: 'name',
+            overrideAccess: false,
+            sort: 'rank',
+          }),
+          payload.update({
+            collection: 'relation-restricted',
+            data: {
+              name: 'updated',
+            },
+            limit: 1,
+            overrideAccess: false,
+            sort: 'rank',
+            where: {},
+          }),
+          payload.find({
+            collection: 'fields-and-top-access',
+            draft: true,
+            overrideAccess: false,
+            sort: 'secret',
+          }),
+          payload.findVersions({
+            collection: 'fields-and-top-access',
+            overrideAccess: false,
+            sort: 'version.secret',
+          }),
+          payload.findGlobalVersions({
+            slug: 'settings',
+            overrideAccess: false,
+            sort: 'version.secret',
+          }),
+        ]
+
+        await Promise.all(
+          requests.map((request) =>
+            expect(request).rejects.toThrow('The following path cannot be queried'),
+          ),
+        )
+      })
+
+      test('field without read access should not show when overrideAccess: true', async ({
+        payload,
+      }) => {
+        const { id, restrictedField } = await createDoc(
+          { payload },
+          { restrictedField: 'restricted' },
+        )
 
         const retrievedDoc = await payload.findByID({ id, collection: slug, overrideAccess: true })
 
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
 
-      it('field without read access should not show when overrideAccess default', async () => {
-        const { id, restrictedField } = await createDoc({ restrictedField: 'restricted' })
+      test('field without read access should not show when overrideAccess default', async ({
+        payload,
+      }) => {
+        const { id, restrictedField } = await createDoc(
+          { payload },
+          { restrictedField: 'restricted' },
+        )
 
         const retrievedDoc = await payload.findByID({ id, collection: slug })
 
         expect(retrievedDoc.restrictedField).toStrictEqual(restrictedField)
       })
     })
-    describe('non-enumerated request properties passed to access control', () => {
-      it('access control ok when passing request headers', async () => {
+    test.describe('non-enumerated request properties passed to access control', () => {
+      test('access control ok when passing request headers', async ({ payload }) => {
         const req = {
           headers: requestHeaders,
         } as PayloadRequest
         const name = 'name'
         const overrideAccess = false
 
-        const { id } = await createDoc({ name }, relyOnRequestHeadersSlug, {
+        const { id } = await createDoc({ payload }, { name }, relyOnRequestHeadersSlug, {
           overrideAccess,
           req,
         })
@@ -357,16 +1260,16 @@ describe('Access Control', () => {
         expect(docsByName.length).toBeGreaterThan(0)
       })
 
-      it('access control fails when omitting request headers', async () => {
+      test('access control fails when omitting request headers', async ({ payload }) => {
         const name = 'name'
         const overrideAccess = false
 
         await expect(() =>
-          createDoc({ name }, relyOnRequestHeadersSlug, {
+          createDoc({ payload }, { name }, relyOnRequestHeadersSlug, {
             overrideAccess,
           }),
         ).rejects.toThrow(Forbidden)
-        const { id } = await createDoc({ name }, relyOnRequestHeadersSlug)
+        const { id } = await createDoc({ payload }, { name }, relyOnRequestHeadersSlug)
 
         await expect(() =>
           payload.findByID({ id, collection: relyOnRequestHeadersSlug, overrideAccess }),
@@ -387,9 +1290,9 @@ describe('Access Control', () => {
     })
   })
 
-  describe('Override Access', () => {
-    describe('Fields', () => {
-      it('should allow overrideAccess: false', async () => {
+  test.describe('Override Access', () => {
+    test.describe('Fields', () => {
+      test('should allow overrideAccess: false', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             id: post1.id,
@@ -401,7 +1304,7 @@ describe('Access Control', () => {
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      it('should allow overrideAccess: true', async () => {
+      test('should allow overrideAccess: true', async ({ payload }) => {
         const doc = await payload.update({
           id: post1.id,
           collection: slug,
@@ -412,7 +1315,7 @@ describe('Access Control', () => {
         expect(doc).toMatchObject({ id: post1.id })
       })
 
-      it('should allow overrideAccess by default', async () => {
+      test('should allow overrideAccess by default', async ({ payload }) => {
         const doc = await payload.update({
           id: post1.id,
           collection: slug,
@@ -422,7 +1325,7 @@ describe('Access Control', () => {
         expect(doc).toMatchObject({ id: post1.id })
       })
 
-      it('should allow overrideAccess: false - update many', async () => {
+      test('should allow overrideAccess: false - update many', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             collection: slug,
@@ -436,7 +1339,7 @@ describe('Access Control', () => {
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      it('should allow overrideAccess: true - update many', async () => {
+      test('should allow overrideAccess: true - update many', async ({ payload }) => {
         const doc = await payload.update({
           collection: slug,
           data: { restrictedField: restricted.id },
@@ -449,7 +1352,7 @@ describe('Access Control', () => {
         expect(doc.docs[0]).toMatchObject({ id: post1.id })
       })
 
-      it('should allow overrideAccess by default - update many', async () => {
+      test('should allow overrideAccess by default - update many', async ({ payload }) => {
         const doc = await payload.update({
           collection: slug,
           data: { restrictedField: restricted.id },
@@ -462,10 +1365,10 @@ describe('Access Control', () => {
       })
     })
 
-    describe('Collections', () => {
+    test.describe('Collections', () => {
       const updatedName = 'updated'
 
-      it('should allow overrideAccess: false', async () => {
+      test('should allow overrideAccess: false', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             id: restricted.id,
@@ -477,7 +1380,7 @@ describe('Access Control', () => {
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      it('should allow overrideAccess: true', async () => {
+      test('should allow overrideAccess: true', async ({ payload }) => {
         const doc = await payload.update({
           id: restricted.id,
           collection: fullyRestrictedSlug,
@@ -488,7 +1391,7 @@ describe('Access Control', () => {
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
       })
 
-      it('should allow overrideAccess by default', async () => {
+      test('should allow overrideAccess by default', async ({ payload }) => {
         const doc = await payload.update({
           id: restricted.id,
           collection: fullyRestrictedSlug,
@@ -498,7 +1401,7 @@ describe('Access Control', () => {
         expect(doc).toMatchObject({ id: restricted.id, name: updatedName })
       })
 
-      it('should allow overrideAccess: false - update many', async () => {
+      test('should allow overrideAccess: false - update many', async ({ payload }) => {
         const req = async () =>
           await payload.update({
             collection: fullyRestrictedSlug,
@@ -512,7 +1415,7 @@ describe('Access Control', () => {
         await expect(req).rejects.toThrow(Forbidden)
       })
 
-      it('should allow overrideAccess: true - update many', async () => {
+      test('should allow overrideAccess: true - update many', async ({ payload }) => {
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
@@ -525,7 +1428,7 @@ describe('Access Control', () => {
         expect(doc.docs[0]).toMatchObject({ id: restricted.id, name: updatedName })
       })
 
-      it('should allow overrideAccess by default - update many', async () => {
+      test('should allow overrideAccess by default - update many', async ({ payload }) => {
         const doc = await payload.update({
           collection: fullyRestrictedSlug,
           data: { name: updatedName },
@@ -539,8 +1442,275 @@ describe('Access Control', () => {
     })
   })
 
-  describe('Querying', () => {
-    it('should respect query constraint using hidden field', async () => {
+  test.describe('Querying', () => {
+    test.describe('findDistinct', () => {
+      const createNotUpdateDocumentIDs: (number | string)[] = []
+      const parentDocumentIDs: (number | string)[] = []
+      const userRestrictedDocumentIDs: (number | string)[] = []
+
+      test.afterEach(async ({ payload }) => {
+        await Promise.all(
+          parentDocumentIDs.map((id) => payload.delete({ id, collection: unrestrictedSlug })),
+        )
+        await Promise.all(
+          createNotUpdateDocumentIDs.map((id) =>
+            payload.delete({ id, collection: createNotUpdateCollectionSlug }),
+          ),
+        )
+        await Promise.all(
+          userRestrictedDocumentIDs.map((id) =>
+            payload.delete({ id, collection: userRestrictedCollectionSlug }),
+          ),
+        )
+
+        createNotUpdateDocumentIDs.length = 0
+        parentDocumentIDs.length = 0
+        userRestrictedDocumentIDs.length = 0
+      })
+
+      test('should constrain distinct paths by related collection read access', async ({
+        payload,
+      }) => {
+        const availableDocument = await payload.create({
+          collection: userRestrictedCollectionSlug,
+          data: { name: 'available' },
+        })
+        const archivedDocument = await payload.create({
+          collection: userRestrictedCollectionSlug,
+          data: { name: 'archived' },
+        })
+        userRestrictedDocumentIDs.push(availableDocument.id, archivedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { userRestrictedDocs: [availableDocument.id, archivedDocument.id] },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'userRestrictedDocs.name' as any,
+          limit: 1,
+          overrideAccess: false,
+        })
+
+        expect(result).toMatchObject({
+          totalDocs: 1,
+          values: [{ 'userRestrictedDocs.name': 'available' }],
+        })
+      })
+
+      test('should reject distinct paths through collections with denied read access', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'fullyRestrictedDocs.name' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow('The following path cannot be queried: fullyRestrictedDocs.name')
+      })
+
+      test('should return no distinct values for denied related access when errors are disabled', async ({
+        payload,
+      }) => {
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          disableErrors: true,
+          field: 'fullyRestrictedDocs.name' as any,
+          overrideAccess: false,
+        })
+
+        expect(result).toMatchObject({ totalDocs: 0, values: [] })
+      })
+
+      test('should validate related access for terminal IDs reached through joins', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'restrictedRelatedItems.id' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow(
+          'Field restrictedRelatedItems.id was not found in the collection unrestricted',
+        )
+      })
+
+      test('should reject distinct paths through unreadable relationship fields', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'restrictedUserDocs.name' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toThrow('The following path cannot be queried')
+      })
+
+      test('should find distinct values through readable relationships', async ({ payload }) => {
+        const relatedDocument = await payload.create({
+          collection: createNotUpdateCollectionSlug,
+          data: { name: 'available' },
+        })
+        createNotUpdateDocumentIDs.push(relatedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { createNotUpdateDocs: [relatedDocument.id] },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'createNotUpdateDocs.name' as any,
+          overrideAccess: false,
+        })
+
+        expect(result.values).toStrictEqual([{ 'createNotUpdateDocs.name': 'available' }])
+      })
+
+      test('should find distinct relationship IDs without reading the related collection', async ({
+        payload,
+      }) => {
+        const relatedDocument = await payload.create({
+          collection: userRestrictedCollectionSlug,
+          data: { name: 'archived' },
+        })
+        userRestrictedDocumentIDs.push(relatedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { userRestrictedDoc: relatedDocument.id },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'userRestrictedDoc.id' as any,
+          overrideAccess: false,
+        })
+
+        expect(result.values).toStrictEqual([{ 'userRestrictedDoc.id': relatedDocument.id }])
+      })
+
+      test('should allow distinct paths through constrained relationships when overriding access', async ({
+        payload,
+      }) => {
+        const relatedDocument = await payload.create({
+          collection: userRestrictedCollectionSlug,
+          data: { name: 'archived' },
+        })
+        userRestrictedDocumentIDs.push(relatedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { userRestrictedDocs: [relatedDocument.id] },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'userRestrictedDocs.name' as any,
+          overrideAccess: true,
+        })
+
+        expect(result.values).toStrictEqual([{ 'userRestrictedDocs.name': 'archived' }])
+      })
+
+      test('should find distinct hidden values when hidden fields are explicitly shown', async ({
+        payload,
+      }) => {
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { hiddenName: 'visible by request' } as any,
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'hiddenName' as any,
+          overrideAccess: false,
+          showHiddenFields: true,
+        })
+
+        expect(result.values).toStrictEqual([{ hiddenName: 'visible by request' }])
+      })
+
+      test('should find distinct nested hidden values when hidden fields are explicitly shown', async ({
+        payload,
+      }) => {
+        const relatedDocument = await payload.create({
+          collection: createNotUpdateCollectionSlug,
+          data: { hiddenName: 'visible by request', name: 'available' } as any,
+        })
+        createNotUpdateDocumentIDs.push(relatedDocument.id)
+        const parentDocument = await payload.create({
+          collection: unrestrictedSlug,
+          data: { createNotUpdateDocs: [relatedDocument.id] },
+        })
+        parentDocumentIDs.push(parentDocument.id)
+
+        const result = await payload.findDistinct({
+          collection: unrestrictedSlug,
+          field: 'createNotUpdateDocs.hiddenName' as any,
+          overrideAccess: false,
+          showHiddenFields: true,
+        })
+
+        expect(result.values).toStrictEqual([
+          { 'createNotUpdateDocs.hiddenName': 'visible by request' },
+        ])
+      })
+
+      test('should preserve forbidden errors for hidden distinct fields', async ({ payload }) => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'hiddenName' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+
+      test('should preserve forbidden errors for unreadable distinct fields', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'restrictedName' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+
+      test('should preserve forbidden errors for nested hidden distinct fields', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            field: 'fullyRestrictedDocs.hiddenName' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+
+      test('should preserve forbidden errors for nested unreadable fields when errors are disabled', async ({
+        payload,
+      }) => {
+        await expect(
+          payload.findDistinct({
+            collection: unrestrictedSlug,
+            disableErrors: true,
+            field: 'fullyRestrictedDocs.restrictedName' as any,
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({ status: 403 })
+      })
+    })
+
+    test('should respect query constraint using hidden field', async ({ payload }) => {
       await payload.create({
         collection: hiddenAccessSlug,
         data: {
@@ -564,7 +1734,7 @@ describe('Access Control', () => {
       expect(docs).toHaveLength(1)
     })
 
-    it('should respect query constraint using hidden field on count', async () => {
+    test('should respect query constraint using hidden field on count', async ({ payload }) => {
       await payload.create({
         collection: hiddenAccessCountSlug,
         data: {
@@ -588,7 +1758,7 @@ describe('Access Control', () => {
       expect(totalDocs).toBe(1)
     })
 
-    it('should respect query constraint using hidden field on versions', async () => {
+    test('should respect query constraint using hidden field on versions', async ({ payload }) => {
       await payload.create({
         collection: restrictedVersionsSlug,
         data: {
@@ -616,7 +1786,9 @@ describe('Access Control', () => {
       expect(docs).toHaveLength(1)
     })
 
-    it('should ignore false access on query constraint added by top collection level access control', async () => {
+    test('should ignore false access on query constraint added by top collection level access control', async ({
+      payload,
+    }) => {
       await payload.create({
         collection: 'fields-and-top-access',
         data: { secret: 'will-fail-access-read' },
@@ -658,7 +1830,9 @@ describe('Access Control', () => {
       expect(res).toBeTruthy()
     })
 
-    it('should ignore false access in versions on query constraint added by top collection level access control', async () => {
+    test('should ignore false access in versions on query constraint added by top collection level access control', async ({
+      payload,
+    }) => {
       // clean up
       await payload.delete({ collection: 'fields-and-top-access', where: {} })
 
@@ -694,10 +1868,451 @@ describe('Access Control', () => {
 
       expect(res).toBeTruthy()
     })
+
+    test('should use the query fallback from id-based read access for version lists', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'denied' },
+      })
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const allowedVersions = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersions.docs).toHaveLength(1)
+      expect(allowedVersions.docs[0].parent).toBe(allowedID)
+
+      const allowedVersionsCount = await payload.countVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersionsCount.totalDocs).toBe(1)
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should preserve the document id when checking inherited version permissions', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'denied' },
+      })
+      const deniedDoc = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const permissions = await getEntityPermissions({
+        id: deniedDoc.id,
+        blockReferencesPermissions: {},
+        entity: payload.collections[inheritedReadVersionsSlug].config,
+        entityType: 'collection',
+        fetchData: true,
+        operations: ['read', 'readVersions'],
+        req: await createLocalReq({}, payload),
+      })
+
+      expect(permissions.read?.permission).toBe(false)
+      expect(permissions.readVersions?.permission).toBe(false)
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should pass the parent document id to inherited read access for findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: deniedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'denied' },
+      })
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const versions = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+      const allowedVersion = versions.docs.find(({ parent }) => parent === allowedID)!
+      const deniedVersion = versions.docs.find(({ parent }) => parent === deniedID)!
+
+      await expect(
+        payload.findVersionByID({
+          id: allowedVersion.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ parent: allowedID })
+
+      await expect(
+        payload.findVersionByID({
+          id: deniedVersion.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should pass the version id to base readVersions access for findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedParentID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      await payload.update({
+        id: allowedParentID,
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+        where: {
+          parent: {
+            equals: allowedParentID,
+          },
+        },
+      })
+      const [allowedVersion, deniedVersion] = docs
+
+      setInheritedReadVersionsAllowedID(allowedParentID)
+      setInheritedReadVersionsAllowedVersionID(allowedVersion!.id)
+
+      await expect(
+        payload.findVersionByID({
+          id: allowedVersion!.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ id: allowedVersion!.id, parent: allowedParentID })
+
+      await expect(
+        payload.findVersionByID({
+          id: deniedVersion!.id,
+          collection: inheritedReadVersionsSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should reuse the version lookup when inherited read access returns a boolean', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+      const findVersions = vitest.spyOn(payload.db, 'findVersions')
+
+      try {
+        await expect(
+          payload.findVersionByID({
+            id: docs[0].id,
+            collection: inheritedReadVersionsSlug,
+            overrideAccess: false,
+          }),
+        ).resolves.toMatchObject({ parent: allowedID })
+
+        expect(findVersions).toHaveBeenCalledTimes(1)
+      } finally {
+        findVersions.mockRestore()
+      }
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should omit the parent field from findVersionByID when it is not selected', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+
+      const res = await payload.findVersionByID({
+        id: docs[0].id,
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+        select: { secret: true },
+      })
+
+      expect(res.parent).toBeUndefined()
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should include the parent field on findVersionByID when it is selected', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+      setInheritedReadVersionsAllowedID(allowedID)
+
+      const { docs } = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: true,
+      })
+
+      const res = await payload.findVersionByID({
+        id: docs[0].id,
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+        select: { parent: true, secret: true },
+      })
+
+      expect(res.parent).toBe(allowedID)
+
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+    })
+
+    test('should inherit global read access for version operations', async () => {
+      await payload.updateGlobal({
+        slug: inheritedReadVersionsGlobalSlug,
+        data: { visible: false },
+      })
+      await payload.updateGlobal({
+        slug: inheritedReadVersionsGlobalSlug,
+        data: { visible: true },
+      })
+
+      const allVersions = await payload.findGlobalVersions({
+        slug: inheritedReadVersionsGlobalSlug,
+        overrideAccess: true,
+        pagination: false,
+      })
+      const allowedVersion = allVersions.docs.find(({ version }) => version.visible === true)!
+      const deniedVersion = allVersions.docs.find(({ version }) => version.visible === false)!
+
+      const allowedVersions = await payload.findGlobalVersions({
+        slug: inheritedReadVersionsGlobalSlug,
+        overrideAccess: false,
+        pagination: false,
+      })
+
+      expect(allowedVersions.docs.length).toBeGreaterThan(0)
+      expect(allowedVersions.docs.every(({ version }) => version.visible === true)).toBe(true)
+
+      const allowedVersionsCount = await payload.countGlobalVersions({
+        global: inheritedReadVersionsGlobalSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersionsCount.totalDocs).toBe(allowedVersions.totalDocs)
+
+      await expect(
+        payload.findGlobalVersionByID({
+          id: allowedVersion.id,
+          slug: inheritedReadVersionsGlobalSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ id: allowedVersion.id })
+
+      await expect(
+        payload.findGlobalVersionByID({
+          id: deniedVersion.id,
+          slug: inheritedReadVersionsGlobalSlug,
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
+    })
+
+    test('should evaluate inherited global read version permissions against versions', async () => {
+      const req = await createLocalReq({}, payload)
+
+      await payload.db.deleteVersions({
+        globalSlug: inheritedReadVersionsGlobalSlug,
+        req,
+        where: {},
+      })
+
+      try {
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsGlobalSlug,
+          data: { visible: false },
+        })
+
+        const permissions = await getEntityPermissions({
+          id: undefined,
+          blockReferencesPermissions: {},
+          entity: payload.globals.config.find(
+            ({ slug }) => slug === inheritedReadVersionsGlobalSlug,
+          )!,
+          entityType: 'global',
+          fetchData: true,
+          operations: ['readVersions'],
+          req,
+        })
+
+        expect(permissions.readVersions?.permission).toBe(false)
+      } finally {
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsGlobalSlug,
+          data: { visible: true },
+        })
+        await payload.db.deleteVersions({
+          globalSlug: inheritedReadVersionsGlobalSlug,
+          req,
+          where: {},
+        })
+      }
+    })
+
+    test('should resolve virtual-field constraints from inherited read access on findVersionByID', async () => {
+      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
+      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+
+      const { id: relatedID } = await payload.create({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        data: { label: 'allowed' },
+      })
+      const parent = await payload.create({
+        collection: inheritedReadVersionsVirtualSlug,
+        data: { related: relatedID },
+      })
+
+      const versions = await payload.findVersions({
+        collection: inheritedReadVersionsVirtualSlug,
+        overrideAccess: true,
+      })
+      const version = versions.docs.find(({ parent: parentID }) => parentID === parent.id)!
+
+      await expect(
+        payload.findVersionByID({
+          id: version.id,
+          collection: inheritedReadVersionsVirtualSlug,
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({ parent: parent.id })
+
+      await payload.delete({ collection: inheritedReadVersionsVirtualSlug, where: {} })
+      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+    })
+
+    test('should sanitize virtual-field constraints from inherited global read access', async () => {
+      const req = await createLocalReq({}, payload)
+
+      await payload.db.deleteVersions({
+        globalSlug: inheritedReadVersionsVirtualGlobalSlug,
+        req,
+        where: {},
+      })
+      await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        data: { label: 'allowed' },
+      })
+      const { id: deniedID } = await payload.create({
+        collection: inheritedReadVersionsVirtualRelatedSlug,
+        data: { label: 'denied' },
+      })
+
+      try {
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsVirtualGlobalSlug,
+          data: { related: deniedID },
+        })
+        await payload.updateGlobal({
+          slug: inheritedReadVersionsVirtualGlobalSlug,
+          data: { related: allowedID },
+        })
+
+        const allVersions = await payload.findGlobalVersions({
+          slug: inheritedReadVersionsVirtualGlobalSlug,
+          overrideAccess: true,
+          pagination: false,
+        })
+
+        const allowedVersions = await payload.findGlobalVersions({
+          slug: inheritedReadVersionsVirtualGlobalSlug,
+          overrideAccess: false,
+          pagination: false,
+        })
+
+        expect(allowedVersions.docs).toHaveLength(1)
+        const allowedVersion = allowedVersions.docs[0]
+        expect(allVersions.docs).toContainEqual(allowedVersion)
+
+        const allowedVersionsCount = await payload.countGlobalVersions({
+          global: inheritedReadVersionsVirtualGlobalSlug,
+          overrideAccess: false,
+        })
+        expect(allowedVersionsCount.totalDocs).toBe(1)
+
+        const permissions = await getEntityPermissions({
+          id: undefined,
+          blockReferencesPermissions: {},
+          entity: payload.globals.config.find(
+            ({ slug }) => slug === inheritedReadVersionsVirtualGlobalSlug,
+          )!,
+          entityType: 'global',
+          fetchData: true,
+          operations: ['readVersions'],
+          req,
+        })
+        expect(permissions.readVersions?.permission).toBe(true)
+
+        await expect(
+          payload.restoreGlobalVersion({
+            id: allowedVersion.id,
+            slug: inheritedReadVersionsVirtualGlobalSlug,
+            overrideAccess: false,
+          }),
+        ).resolves.toMatchObject({ version: { related: allowedID } })
+      } finally {
+        await payload.db.deleteVersions({
+          globalSlug: inheritedReadVersionsVirtualGlobalSlug,
+          req,
+          where: {},
+        })
+        await payload.delete({ collection: inheritedReadVersionsVirtualRelatedSlug, where: {} })
+      }
+    })
   })
 
-  describe('Auth - Local API', () => {
-    it('should not allow reset password if forgotPassword expiration token is expired', async () => {
+  test.describe('Auth - Local API', () => {
+    test('should not allow reset password if forgotPassword expiration token is expired', async ({
+      payload,
+    }) => {
       // Mock Date.now() to simulate the forgotPassword call happening 1 hour ago (default is 1 hour)
       const originalDateNow = Date.now
       const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
@@ -733,8 +2348,10 @@ describe('Access Control', () => {
     })
   })
 
-  describe('async parent permission inheritance', () => {
-    it('should inherit async parent field permissions to nested children', async () => {
+  test.describe('async parent permission inheritance', () => {
+    test('should inherit async parent field permissions to nested children', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: asyncParentSlug,
         data: {
@@ -800,7 +2417,9 @@ describe('Access Control', () => {
       } satisfies CollectionPermission)
     })
 
-    it('should correctly deny access when async parent denies (non-admin user)', async () => {
+    test('should correctly deny access when async parent denies (non-admin user)', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: asyncParentSlug,
         data: {
@@ -867,11 +2486,11 @@ describe('Access Control', () => {
     })
   })
 
-  describe('Default access - admin auth collection scoping', () => {
+  test.describe('Default access - admin auth collection scoping', () => {
     let adminUser: Record<string, unknown>
     let publicUser: Record<string, unknown>
 
-    beforeAll(async () => {
+    test.beforeAll(async ({ payloadInstance: payload }) => {
       const { docs: adminDocs } = await payload.find({
         collection: 'users',
         limit: 1,
@@ -887,7 +2506,9 @@ describe('Access Control', () => {
       publicUser = { ...publicDocs[0], collection: publicUsersSlug }
     })
 
-    it('should grant default access to a user from the admin auth collection', async () => {
+    test('should grant default access to a user from the admin auth collection', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: unrestrictedSlug,
         data: { name: 'created by admin user' },
@@ -898,7 +2519,9 @@ describe('Access Control', () => {
       expect(doc.id).toBeDefined()
     })
 
-    it('should deny default access to a user from a non-admin auth collection', async () => {
+    test('should deny default access to a user from a non-admin auth collection', async ({
+      payload,
+    }) => {
       await expect(
         payload.create({
           collection: unrestrictedSlug,
@@ -912,6 +2535,7 @@ describe('Access Control', () => {
 })
 
 async function createDoc<TSlug extends CollectionSlug = 'posts'>(
+  { payload }: { payload: Payload },
   data: RequiredDataFromCollectionSlug<TSlug>,
   overrideSlug?: TSlug,
   options?: Partial<Parameters<Payload['create']>[0]>,

@@ -1,5 +1,4 @@
-/* eslint-disable vitest/expect-expect */
-import { describe, expectTypeOf, it } from 'vitest'
+import { expectTypeOf } from 'vitest'
 
 import type {
   CollectionsWidget,
@@ -12,8 +11,10 @@ import type {
   Ticket,
 } from './payload-types.js'
 
-describe('Dashboard Widget Types', () => {
-  it('should add all widgets to Config', () => {
+import { test } from '../__helpers/int/vitest.js'
+
+test.suite({})('Dashboard Widget Types', () => {
+  test('should add all widgets to Config', () => {
     expectTypeOf<Config['widgets']>().toEqualTypeOf<{
       collections: CollectionsWidget
       configurable: ConfigurableWidget
@@ -24,14 +25,14 @@ describe('Dashboard Widget Types', () => {
     }>()
   })
 
-  it('should contain width and data on widget types', () => {
+  test('should contain width and data on widget types', () => {
     expectTypeOf<CountWidget>().toHaveProperty('data')
     expectTypeOf<CountWidget>().toHaveProperty('width')
     expectTypeOf<CountWidget['width']>().toEqualTypeOf<'medium' | 'small' | 'x-small'>()
     expectTypeOf<CollectionsWidget['width']>().toEqualTypeOf<'full'>()
   })
 
-  it('should mark widget data fields as required or optional', () => {
+  test('should mark widget data fields as required or optional', () => {
     type CountData = NonNullable<CountWidget['data']>
     type ConfigData = NonNullable<ConfigurableWidget['data']>
 

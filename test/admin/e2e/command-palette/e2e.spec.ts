@@ -6,13 +6,11 @@ import { fileURLToPath } from 'url'
 
 import type { Config } from '../../payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-  initPageConsoleErrorCatch,
-} from '../../../__helpers/e2e/helpers.js'
+import { getRoutes } from '../../../__helpers/e2e/helpers.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import { globalSlug, postsCollectionSlug } from '../../slugs.js'
@@ -46,18 +44,13 @@ test.describe('Command Palette', () => {
     const prebuild = false
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
     }))
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
 
     const adminRoutes = getRoutes({ customAdminRoutes })
     adminRoute = adminRoutes.routes.admin
@@ -69,7 +62,6 @@ test.describe('Command Palette', () => {
     // the "create first user" screen, so the nav (and the palette trigger) never render.
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests',
     })
 
     await page.goto(`${serverURL}${adminRoute}`)
