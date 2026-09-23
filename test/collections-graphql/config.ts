@@ -389,6 +389,11 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
         },
+        {
+          name: 'link',
+          type: 'relationship',
+          relationTo: relationSlug,
+        },
       ],
       upload: true,
     },
@@ -409,13 +414,11 @@ export default buildConfigWithDefaults({
       slug: nestedRelationsSlug,
       access: openAccess,
       fields: [
-        // Top-level relationship, queried through an alias in the tests
         {
           name: 'topLevelRelation',
           type: 'relationship',
           relationTo: relationSlug,
         },
-        // Relationship nested inside an array
         {
           name: 'array',
           type: 'array',
@@ -427,7 +430,6 @@ export default buildConfigWithDefaults({
             },
           ],
         },
-        // Relationship nested inside a block
         {
           name: 'blocks',
           type: 'blocks',
@@ -443,6 +445,11 @@ export default buildConfigWithDefaults({
               ],
             },
           ],
+        },
+        {
+          name: 'upload',
+          type: 'upload',
+          relationTo: 'media',
         },
       ],
     },

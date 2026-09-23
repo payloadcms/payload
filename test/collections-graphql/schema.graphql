@@ -3843,6 +3843,7 @@ type CyclicalRelationship {
 type Media {
   id: Int!
   title: String
+  link(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
   updatedAt: DateTime
   createdAt: DateTime
   url: String
@@ -4417,6 +4418,7 @@ type allMedia {
 
 input Media_where {
   title: Media_title_operator
+  link: Media_link_operator
   updatedAt: Media_updatedAt_operator
   createdAt: Media_createdAt_operator
   url: Media_url_operator
@@ -4441,6 +4443,15 @@ input Media_title_operator {
   in: [String]
   not_in: [String]
   all: [String]
+  exists: Boolean
+}
+
+input Media_link_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
   exists: Boolean
 }
 
@@ -4572,6 +4583,7 @@ input Media_id_operator {
 
 input Media_where_and {
   title: Media_title_operator
+  link: Media_link_operator
   updatedAt: Media_updatedAt_operator
   createdAt: Media_createdAt_operator
   url: Media_url_operator
@@ -4590,6 +4602,7 @@ input Media_where_and {
 
 input Media_where_or {
   title: Media_title_operator
+  link: Media_link_operator
   updatedAt: Media_updatedAt_operator
   createdAt: Media_createdAt_operator
   url: Media_url_operator
@@ -4620,6 +4633,7 @@ type mediaDocAccess {
 
 type MediaDocAccessFields {
   title: MediaDocAccessFields_title
+  link: MediaDocAccessFields_link
   updatedAt: MediaDocAccessFields_updatedAt
   createdAt: MediaDocAccessFields_createdAt
   url: MediaDocAccessFields_url
@@ -4653,6 +4667,29 @@ type MediaDocAccessFields_title_Update {
 }
 
 type MediaDocAccessFields_title_Delete {
+  permission: Boolean!
+}
+
+type MediaDocAccessFields_link {
+  create: MediaDocAccessFields_link_Create
+  read: MediaDocAccessFields_link_Read
+  update: MediaDocAccessFields_link_Update
+  delete: MediaDocAccessFields_link_Delete
+}
+
+type MediaDocAccessFields_link_Create {
+  permission: Boolean!
+}
+
+type MediaDocAccessFields_link_Read {
+  permission: Boolean!
+}
+
+type MediaDocAccessFields_link_Update {
+  permission: Boolean!
+}
+
+type MediaDocAccessFields_link_Delete {
   permission: Boolean!
 }
 
@@ -5170,6 +5207,7 @@ type NestedRelation {
   topLevelRelation(draft: Boolean, locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Relation
   array: [NestedRelation_Array!]
   blocks: [NestedRelation_Blocks!]
+  upload(locale: LocaleInputType, fallbackLocale: FallbackLocaleInputType): Media
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -5206,6 +5244,7 @@ input NestedRelation_where {
   topLevelRelation: NestedRelation_topLevelRelation_operator
   array__link: NestedRelation_array__link_operator
   array__id: NestedRelation_array__id_operator
+  upload: NestedRelation_upload_operator
   updatedAt: NestedRelation_updatedAt_operator
   createdAt: NestedRelation_createdAt_operator
   id: NestedRelation_id_operator
@@ -5239,6 +5278,15 @@ input NestedRelation_array__id_operator {
   in: [String]
   not_in: [String]
   all: [String]
+  exists: Boolean
+}
+
+input NestedRelation_upload_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
   exists: Boolean
 }
 
@@ -5278,6 +5326,7 @@ input NestedRelation_where_and {
   topLevelRelation: NestedRelation_topLevelRelation_operator
   array__link: NestedRelation_array__link_operator
   array__id: NestedRelation_array__id_operator
+  upload: NestedRelation_upload_operator
   updatedAt: NestedRelation_updatedAt_operator
   createdAt: NestedRelation_createdAt_operator
   id: NestedRelation_id_operator
@@ -5289,6 +5338,7 @@ input NestedRelation_where_or {
   topLevelRelation: NestedRelation_topLevelRelation_operator
   array__link: NestedRelation_array__link_operator
   array__id: NestedRelation_array__id_operator
+  upload: NestedRelation_upload_operator
   updatedAt: NestedRelation_updatedAt_operator
   createdAt: NestedRelation_createdAt_operator
   id: NestedRelation_id_operator
@@ -5312,6 +5362,7 @@ type NestedRelationsDocAccessFields {
   topLevelRelation: NestedRelationsDocAccessFields_topLevelRelation
   array: NestedRelationsDocAccessFields_array
   blocks: NestedRelationsDocAccessFields_blocks
+  upload: NestedRelationsDocAccessFields_upload
   updatedAt: NestedRelationsDocAccessFields_updatedAt
   createdAt: NestedRelationsDocAccessFields_createdAt
 }
@@ -5434,6 +5485,29 @@ type NestedRelationsDocAccessFields_blocks_Update {
 }
 
 type NestedRelationsDocAccessFields_blocks_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_upload {
+  create: NestedRelationsDocAccessFields_upload_Create
+  read: NestedRelationsDocAccessFields_upload_Read
+  update: NestedRelationsDocAccessFields_upload_Update
+  delete: NestedRelationsDocAccessFields_upload_Delete
+}
+
+type NestedRelationsDocAccessFields_upload_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_upload_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_upload_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsDocAccessFields_upload_Delete {
   permission: Boolean!
 }
 
@@ -8227,6 +8301,7 @@ type mediaAccess {
 
 type MediaFields {
   title: MediaFields_title
+  link: MediaFields_link
   updatedAt: MediaFields_updatedAt
   createdAt: MediaFields_createdAt
   url: MediaFields_url
@@ -8260,6 +8335,29 @@ type MediaFields_title_Update {
 }
 
 type MediaFields_title_Delete {
+  permission: Boolean!
+}
+
+type MediaFields_link {
+  create: MediaFields_link_Create
+  read: MediaFields_link_Read
+  update: MediaFields_link_Update
+  delete: MediaFields_link_Delete
+}
+
+type MediaFields_link_Create {
+  permission: Boolean!
+}
+
+type MediaFields_link_Read {
+  permission: Boolean!
+}
+
+type MediaFields_link_Update {
+  permission: Boolean!
+}
+
+type MediaFields_link_Delete {
   permission: Boolean!
 }
 
@@ -8675,6 +8773,7 @@ type NestedRelationsFields {
   topLevelRelation: NestedRelationsFields_topLevelRelation
   array: NestedRelationsFields_array
   blocks: NestedRelationsFields_blocks
+  upload: NestedRelationsFields_upload
   updatedAt: NestedRelationsFields_updatedAt
   createdAt: NestedRelationsFields_createdAt
 }
@@ -8797,6 +8896,29 @@ type NestedRelationsFields_blocks_Update {
 }
 
 type NestedRelationsFields_blocks_Delete {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_upload {
+  create: NestedRelationsFields_upload_Create
+  read: NestedRelationsFields_upload_Read
+  update: NestedRelationsFields_upload_Update
+  delete: NestedRelationsFields_upload_Delete
+}
+
+type NestedRelationsFields_upload_Create {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_upload_Read {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_upload_Update {
+  permission: Boolean!
+}
+
+type NestedRelationsFields_upload_Delete {
   permission: Boolean!
 }
 
@@ -9683,6 +9805,7 @@ enum CyclicalRelationshipUpdate__status_MutationInput {
 
 input mutationMediaInput {
   title: String
+  link: Int
   updatedAt: String
   createdAt: String
   url: String
@@ -9698,6 +9821,7 @@ input mutationMediaInput {
 
 input mutationMediaUpdateInput {
   title: String
+  link: Int
   updatedAt: String
   createdAt: String
   url: String
@@ -9729,6 +9853,7 @@ input mutationNestedRelationInput {
   topLevelRelation: Int
   array: [mutationNestedRelation_ArrayInput]
   blocks: JSON
+  upload: Int
   updatedAt: String
   createdAt: String
 }
@@ -9742,6 +9867,7 @@ input mutationNestedRelationUpdateInput {
   topLevelRelation: Int
   array: [mutationNestedRelationUpdate_ArrayInput]
   blocks: JSON
+  upload: Int
   updatedAt: String
   createdAt: String
 }

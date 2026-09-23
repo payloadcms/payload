@@ -62,12 +62,6 @@ function formattedNameResolver({
   Context,
   any
 > {
-  // Always attach `extensions.field` so that `resolveSelect`'s path traversal
-  // can recognize this GraphQL field and map its response key back to the
-  // underlying data field. Without it, sub-fields whose GraphQL name already
-  // matches their data name (e.g. fields inside arrays/blocks/uploads) are
-  // skipped during select resolution, and any relationship reached through them
-  // loses its projection and falls back to a full, unprojected fetch.
   const config: GraphQLFieldConfig<any, Context, any> = {
     ...rest,
     extensions: { ...rest.extensions, field },

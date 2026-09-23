@@ -18,14 +18,6 @@ export function resolveSelect(info: GraphQLResolveInfo, select: SelectType): Sel
       const pathType = info.schema.getType(path.typename) as GraphQLObjectType
 
       if (pathType) {
-        // `path.key` is the response key, i.e. the alias when the field is aliased
-        // in the query, whereas the schema field map is keyed by the real field
-        // name. For the field currently being resolved (the leaf of `info.path`,
-        // which is always the relationship `resolveSelect` runs for) recover the
-        // real name from `info.fieldName` — graphql-js never puts the alias there.
-        // Without this, aliased relationship fields fall back to an id-only fetch
-        // instead of projecting their sub-selection. No-op when the field is not
-        // aliased (`info.fieldName === pathKey`).
         const lookupKey = path === info.path ? info.fieldName : pathKey
         const field = pathType?.getFields()?.[lookupKey]?.extensions?.field as
           | JoinField
@@ -43,10 +35,6 @@ export function resolveSelect(info: GraphQLResolveInfo, select: SelectType): Sel
           traversePath.unshift(field.name)
         }
 
-        // Block types nested in a blocks union have their sub-selection nested
-        // under the block slug in the select tree built by `buildSelectTree`.
-        // Mirror that here so the traversal path lines up with the built tree,
-        // keeping the projection for relationships reached through a block.
         const blockSlug = pathType.extensions?.blockSlug as string | undefined
         if (blockSlug) {
           traversePath.unshift(blockSlug)
@@ -121,7 +109,10 @@ function buildSelectTree(
           fragment && (info.schema.getType(fragment.typeCondition.name.value) as GraphQLObjectType)
 
         if (fragmentType) {
-          Object.assign(fieldTree, buildSelectTree(info, fragment.selectionSet, fragmentType))
+          Object.assign(
+            fieldTree,
+            buildFragmentSelectTree(info, fragment.selectionSet, fragmentType, type),
+          )
         }
         break
       }
@@ -132,14 +123,10 @@ function buildSelectTree(
           : type
 
         if (fragmentType) {
-          // Block types in unions need selections nested under their slug
-          const blockSlug = fragmentType.extensions?.blockSlug as string | undefined
-
-          if (blockSlug && isUnionType(type)) {
-            fieldTree[blockSlug] = buildSelectTree(info, selection.selectionSet, fragmentType)
-          } else {
-            Object.assign(fieldTree, buildSelectTree(info, selection.selectionSet, fragmentType))
-          }
+          Object.assign(
+            fieldTree,
+            buildFragmentSelectTree(info, selection.selectionSet, fragmentType, type),
+          )
         }
         break
       }
@@ -147,6 +134,25 @@ function buildSelectTree(
   }
 
   return fieldTree
+}
+
+function buildFragmentSelectTree(
+  info: GraphQLResolveInfo,
+  selectionSet: SelectionSetNode,
+  fragmentType: GraphQLObjectType,
+  parentType: GraphQLObjectType,
+): SelectType {
+  const fragmentSelectTree = buildSelectTree(info, selectionSet, fragmentType)
+  const blockSlug = fragmentType.extensions?.blockSlug as string | undefined
+
+  if (blockSlug && isUnionType(parentType)) {
+    const blockSelectTree: SelectType = {}
+
+    blockSelectTree[blockSlug] = fragmentSelectTree
+    return blockSelectTree
+  }
+
+  return fragmentSelectTree
 }
 
 type SelectType = TypedCollectionSelect['any']

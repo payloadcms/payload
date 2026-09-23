@@ -330,6 +330,7 @@ export interface CyclicalRelationship {
 export interface Media {
   id: string;
   title?: string | null;
+  link?: (string | null) | Relation;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -374,6 +375,7 @@ export interface NestedRelation {
         blockType: 'content';
       }[]
     | null;
+  upload?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -666,6 +668,7 @@ export interface CyclicalRelationshipSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   title?: T;
+  link?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -711,6 +714,7 @@ export interface NestedRelationsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  upload?: T;
   updatedAt?: T;
   createdAt?: T;
 }
