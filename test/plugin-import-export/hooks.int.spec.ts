@@ -1,19 +1,15 @@
-import type { AuthenticatedUser, Payload } from 'payload'
+import type { AuthenticatedUser } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { readCSV, readJSON } from './helpers.js'
 import { hookCalls, resetHookSpies } from './hookSpies.js'
 import { postsWithColumnMapSlug, postsWithHooksSlug } from './shared.js'
 
-let payload: Payload
-let restClient: NextRESTClient
 let user: AuthenticatedUser
 
 const filename = fileURLToPath(import.meta.url)
@@ -21,26 +17,22 @@ const dirname = path.dirname(filename)
 
 const createdHookPostIDs: (number | string)[] = []
 
-describe('@payloadcms/plugin-import-export — hooks', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+test.suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts' }, () => {
+  test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
+      overrideAccess: true,
     })
 
     user = loginResult.user!
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+  test.afterEach(async ({ payload }) => {
     resetHookSpies()
     for (const id of createdHookPostIDs) {
       await payload
-        .delete({ collection: postsWithHooksSlug, id })
+        .delete({ collection: postsWithHooksSlug, id, overrideAccess: true })
         .catch((err) => payload.logger.warn({ err, id, msg: 'hooks.int.spec cleanup failed' }))
     }
     createdHookPostIDs.length = 0
@@ -50,11 +42,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
   // Export hooks
   // ─────────────────────────────────────────────
 
-  describe('export hooks', () => {
-    it('should call export.hooks.before with correct args and apply its return value to CSV output', async () => {
+  test.describe('export hooks', () => {
+    test('should call export.hooks.before with correct args and apply its return value to CSV output', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: postsWithHooksSlug,
         data: { title: 'Hook Test', secret: 'top-secret', count: 1 },
+        overrideAccess: true,
       })
       createdHookPostIDs.push(post.id)
 
@@ -66,11 +61,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           format: 'csv',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         collection: 'posts-with-hooks-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -94,10 +91,11 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(rows[0]!.title).toBe('Hook Test')
     })
 
-    it('should call export.hooks.after with correct args after write', async () => {
+    test('should call export.hooks.after with correct args after write', async ({ payload }) => {
       const post = await payload.create({
         collection: postsWithHooksSlug,
         data: { title: 'After Hook Test', secret: 'hidden', count: 2 },
+        overrideAccess: true,
       })
       createdHookPostIDs.push(post.id)
 
@@ -109,11 +107,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           format: 'csv',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         collection: 'posts-with-hooks-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       expect(hookCalls.exportAfter).toHaveLength(1)
@@ -127,10 +127,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(afterArgs.originalData).toBeDefined()
     })
 
-    it('should call export.hooks.before for JSON exports with nested docs', async () => {
+    test('should call export.hooks.before for JSON exports with nested docs', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: postsWithHooksSlug,
         data: { title: 'JSON Hook Test', secret: 'json-secret', count: 3 },
+        overrideAccess: true,
       })
       createdHookPostIDs.push(post.id)
 
@@ -142,11 +145,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           format: 'json',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         collection: 'posts-with-hooks-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -160,12 +165,15 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(jsonDocs[0]!.title).toBe('JSON Hook Test')
     })
 
-    it('should call export.hooks.before once per batch when multiple batches occur', async () => {
+    test('should call export.hooks.before once per batch when multiple batches occur', async ({
+      payload,
+    }) => {
       const posts = await Promise.all(
         Array.from({ length: 5 }, (_, i) =>
           payload.create({
             collection: postsWithHooksSlug,
             data: { title: `Batch Post ${i}`, count: i },
+            overrideAccess: true,
           }),
         ),
       )
@@ -179,11 +187,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           collectionSlug: postsWithHooksSlug,
           format: 'csv',
         },
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         collection: 'posts-with-hooks-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       // Should have been called once per batch
@@ -194,10 +204,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(batchNumbers[1]).toBe(2)
     })
 
-    it('should call export.hooks.before via streaming download', async () => {
+    test('should call export.hooks.before via streaming download', async ({
+      payload,
+      restClient,
+    }) => {
       const post = await payload.create({
         collection: postsWithHooksSlug,
         data: { title: 'Download Hook Test', secret: 'streamed-secret', count: 4 },
+        overrideAccess: true,
       })
       createdHookPostIDs.push(post.id)
 
@@ -224,8 +238,10 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
   // Import hooks
   // ─────────────────────────────────────────────
 
-  describe('import hooks', () => {
-    it('should call import.hooks.before with correct args and apply its return value to DB write', async () => {
+  test.describe('import hooks', () => {
+    test('should call import.hooks.before with correct args and apply its return value to DB write', async ({
+      payload,
+    }) => {
       const csvContent = `title,secret,count\n"Original Title","secret-val","10"`
       const file = {
         data: Buffer.from(csvContent),
@@ -239,11 +255,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
         file,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -264,12 +282,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       const importedDocs = await payload.find({
         collection: postsWithHooksSlug,
         where: { title: { equals: 'Original Title_imported' } },
+        overrideAccess: true,
       })
       expect(importedDocs.docs).toHaveLength(1)
       importedDocs.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
-    it('should call import.hooks.after with per-batch ImportResult', async () => {
+    test('should call import.hooks.after with per-batch ImportResult', async ({ payload }) => {
       const csvContent = `title,count\n"After Hook Post","99"`
       const file = {
         data: Buffer.from(csvContent),
@@ -283,11 +302,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
         file,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -303,11 +324,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       const imported = await payload.find({
         collection: postsWithHooksSlug,
         where: { title: { equals: 'After Hook Post_imported' } },
+        overrideAccess: true,
       })
       imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
-    it('should pass originalData (raw pre-transform rows) to import.hooks.after', async () => {
+    test('should pass originalData (raw pre-transform rows) to import.hooks.after', async ({
+      payload,
+    }) => {
       const csvContent = `title,count\n"OriginalData Post","42"`
       const file = {
         data: Buffer.from(csvContent),
@@ -321,11 +345,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
         file,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -339,11 +365,12 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       const imported = await payload.find({
         collection: postsWithHooksSlug,
         where: { title: { equals: 'OriginalData Post_imported' } },
+        overrideAccess: true,
       })
       imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
-    it('should call import.hooks.before for JSON imports', async () => {
+    test('should call import.hooks.before for JSON imports', async ({ payload }) => {
       const jsonContent = JSON.stringify([{ title: 'JSON Import Hook', count: 5 }])
       const file = {
         data: Buffer.from(jsonContent),
@@ -357,11 +384,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create', format: 'json' },
         file,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -371,12 +400,15 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       const imported = await payload.find({
         collection: postsWithHooksSlug,
         where: { title: { equals: 'JSON Import Hook_imported' } },
+        overrideAccess: true,
       })
       expect(imported.docs).toHaveLength(1)
       imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
-    it('should pass originalData as raw parsed JSON (before field hooks) to import hooks', async () => {
+    test('should pass originalData as raw parsed JSON (before field hooks) to import hooks', async ({
+      payload,
+    }) => {
       // The posts-with-hooks collection has an `email` field with a beforeImport field hook
       // that lowercases the value. This test verifies that originalData in both the before
       // and after collection hooks contains the raw parsed JSON value ('TEST@EXAMPLE.COM'),
@@ -397,11 +429,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         user,
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create', format: 'json' },
         file,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -423,11 +457,12 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       const imported = await payload.find({
         collection: postsWithHooksSlug,
         where: { title: { equals: 'JSON Original Data Test_imported' } },
+        overrideAccess: true,
       })
       imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
-    it('should call import.hooks.before once per batch', async () => {
+    test('should call import.hooks.before once per batch', async ({ payload }) => {
       const rows = Array.from({ length: 4 }, (_, i) => `"Batch Import ${i}","${i}"`).join('\n')
       const csvContent = `title,count\n${rows}`
       const file = {
@@ -446,11 +481,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           importMode: 'create',
         },
         file,
+        overrideAccess: true,
       })
 
       importDoc = await payload.findByID({
         collection: 'posts-with-hooks-import',
         id: importDoc.id,
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -463,25 +500,29 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         collection: postsWithHooksSlug,
         where: { title: { contains: 'Batch Import' } },
         limit: 10,
+        overrideAccess: true,
       })
       imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
   })
 
-  describe('column mapping — export', () => {
+  test.describe('column mapping — export', () => {
     const createdIDs: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: postsWithColumnMapSlug, id })
+        await payload.delete({ collection: postsWithColumnMapSlug, id, overrideAccess: true })
       }
       createdIDs.length = 0
     })
 
-    it('should rename CSV columns via collection-level export.hooks.before', async () => {
+    test('should rename CSV columns via collection-level export.hooks.before', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { title: 'Rename Me', excerpt: 'Original excerpt', count: 42 },
+        overrideAccess: true,
       })
       createdIDs.push(post.id)
 
@@ -493,11 +534,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           format: 'csv',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         collection: 'posts-with-column-map-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -512,10 +555,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(rows[0]!.count).toBeUndefined()
     })
 
-    it('should rename a single CSV column via field-level beforeExport mutation', async () => {
+    test('should rename a single CSV column via field-level beforeExport mutation', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { title: 'Field Rename', excerpt: 'x', count: 1, sharedName: 'shared value' },
+        overrideAccess: true,
       })
       createdIDs.push(post.id)
 
@@ -527,11 +573,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           format: 'csv',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         collection: 'posts-with-column-map-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -541,10 +589,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(rows[0]!.sharedName).toBeUndefined()
     })
 
-    it('should reflect collection-level export.hooks.before in CSV export preview', async () => {
+    test('should reflect collection-level export.hooks.before in CSV export preview', async ({
+      payload,
+      restClient,
+    }) => {
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { title: 'Preview Rename', excerpt: 'preview excerpt', count: 11 },
+        overrideAccess: true,
       })
       createdIDs.push(post.id)
 
@@ -578,10 +630,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(body.columns).not.toContain('count')
     })
 
-    it('should reflect collection-level export.hooks.before in JSON export preview', async () => {
+    test('should reflect collection-level export.hooks.before in JSON export preview', async ({
+      payload,
+      restClient,
+    }) => {
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { title: 'JSON Preview Rename', excerpt: 'json preview', count: 22 },
+        overrideAccess: true,
       })
       createdIDs.push(post.id)
 
@@ -606,10 +662,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(body.docs[0]!.title).toBeUndefined()
     })
 
-    it('should rename JSON keys via collection-level export.hooks.before', async () => {
+    test('should rename JSON keys via collection-level export.hooks.before', async ({
+      payload,
+    }) => {
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { title: 'JSON Rename', excerpt: 'json excerpt', count: 7 },
+        overrideAccess: true,
       })
       createdIDs.push(post.id)
 
@@ -621,11 +680,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           format: 'json',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
       })
 
       exportDoc = await payload.findByID({
         collection: 'posts-with-column-map-export',
         id: exportDoc.id,
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -639,19 +700,21 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
     })
   })
 
-  describe('column mapping — import', () => {
+  test.describe('column mapping — import', () => {
     const createdIDs: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
         await payload
-          .delete({ collection: postsWithColumnMapSlug, id })
+          .delete({ collection: postsWithColumnMapSlug, id, overrideAccess: true })
           .catch((err) => payload.logger.warn({ err, id, msg: 'column-map cleanup failed' }))
       }
       createdIDs.length = 0
     })
 
-    it('should import a CSV with foreign column names via collection-level import.hooks.before', async () => {
+    test('should import a CSV with foreign column names via collection-level import.hooks.before', async ({
+      payload,
+    }) => {
       const csv =
         '"Post Title","Summary","View Count","Ignored Column"\n' +
         '"Imported A","summary a","10","noise"\n' +
@@ -671,6 +734,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           importMode: 'create',
         },
         file,
+        overrideAccess: true,
       })
 
       expect(importDoc.id).toBeDefined()
@@ -679,6 +743,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         collection: postsWithColumnMapSlug,
         sort: 'title',
         where: { title: { in: ['Imported A', 'Imported B'] } },
+        overrideAccess: true,
       })
 
       imported.docs.forEach((doc) => createdIDs.push(doc.id))
@@ -691,7 +756,9 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(imported.docs[1]!.count).toBe(20)
     })
 
-    it('should import a JSON file with foreign keys via collection-level import.hooks.before', async () => {
+    test('should import a JSON file with foreign keys via collection-level import.hooks.before', async ({
+      payload,
+    }) => {
       const content = JSON.stringify([
         {
           'Post Title': 'JSON A',
@@ -721,12 +788,14 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           importMode: 'create',
         },
         file,
+        overrideAccess: true,
       })
 
       const imported = await payload.find({
         collection: postsWithColumnMapSlug,
         sort: 'title',
         where: { title: { in: ['JSON A', 'JSON B'] } },
+        overrideAccess: true,
       })
 
       imported.docs.forEach((doc) => createdIDs.push(doc.id))
@@ -738,7 +807,9 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(imported.docs[1]!.count).toBe(6)
     })
 
-    it('should reflect collection-level import.hooks.before in CSV import preview', async () => {
+    test('should reflect collection-level import.hooks.before in CSV import preview', async ({
+      restClient,
+    }) => {
       const csv =
         '"Post Title","Summary","View Count","Ignored Column"\n' +
         '"Preview Imported","preview summary","30","noise"\n'
@@ -768,7 +839,9 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(body.docs[0]!['Ignored Column']).toBeUndefined()
     })
 
-    it('should reflect collection-level import.hooks.before in JSON import preview', async () => {
+    test('should reflect collection-level import.hooks.before in JSON import preview', async ({
+      restClient,
+    }) => {
       const content = JSON.stringify([
         {
           'Post Title': 'JSON Preview Imported',
@@ -801,7 +874,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(body.docs[0]!['Post Title']).toBeUndefined()
     })
 
-    it('should drop foreign columns not present in the rename map', async () => {
+    test('should drop foreign columns not present in the rename map', async ({ payload }) => {
       const csv = '"Post Title","Ignored Column"\n' + '"Dropped Test","this should not survive"\n'
       const file = {
         data: Buffer.from(csv),
@@ -818,11 +891,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           importMode: 'create',
         },
         file,
+        overrideAccess: true,
       })
 
       const imported = await payload.find({
         collection: postsWithColumnMapSlug,
         where: { title: { equals: 'Dropped Test' } },
+        overrideAccess: true,
       })
 
       imported.docs.forEach((doc) => createdIDs.push(doc.id))

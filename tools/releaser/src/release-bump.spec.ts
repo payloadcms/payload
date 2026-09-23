@@ -4,6 +4,7 @@ import { runReleaseBump } from './release-bump.js'
 
 const baseDeps = () => ({
   env: { GITHUB_TOKEN: 'token' } as NodeJS.ProcessEnv,
+  isPublished: vi.fn(async () => false),
   log: vi.fn(),
   readBranch: () => 'main',
   run: vi.fn(),
@@ -59,6 +60,42 @@ describe('runReleaseBump', () => {
 
     expect(next).toBe('4.0.0-beta.0')
     expect(deps.workspace.bumpVersion).toHaveBeenCalledWith('prerelease', { preid: 'beta' })
+  })
+
+  it('should abort before any git write when the computed version is already published', async () => {
+    const deps = makeDeps({ isPublished: vi.fn(async () => true) })
+
+    await expect(
+      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'canary' }),
+    ).rejects.toThrow(/already published/)
+
+    expect(deps.isPublished).toHaveBeenCalledWith({
+      name: 'payload',
+      version: '4.0.0-canary.10',
+    })
+    expect(deps.run).not.toHaveBeenCalled()
+  })
+
+  it('should abort when the registry check fails rather than assuming unpublished', async () => {
+    const deps = makeDeps({
+      isPublished: vi.fn(async () => {
+        throw new Error('503 Service Unavailable')
+      }),
+    })
+
+    await expect(
+      runReleaseBump({ bump: 'prerelease', deps, dryRun: false, preid: 'canary' }),
+    ).rejects.toThrow(/503/)
+
+    expect(deps.run).not.toHaveBeenCalled()
+  })
+
+  it('should run the already-published guard in dry-run too', async () => {
+    const deps = makeDeps({ isPublished: vi.fn(async () => true) })
+
+    await expect(
+      runReleaseBump({ bump: 'prerelease', deps, dryRun: true, preid: 'canary' }),
+    ).rejects.toThrow(/already published/)
   })
 
   it('should log the push and never execute it in dry-run', async () => {

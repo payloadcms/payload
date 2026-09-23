@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.36",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -79,8 +79,8 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
     "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "copyfiles:debug": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles:debug": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -116,7 +116,7 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "16.2.7",
+    "@next/eslint-plugin-next": "16.3.3",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.2.14",

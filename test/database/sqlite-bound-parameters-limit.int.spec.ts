@@ -1,30 +1,14 @@
-import type { Payload } from 'payload'
+import { expect } from 'vitest'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, expect, it } from 'vitest'
+import { test } from '../__helpers/int/vitest.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { describe } from '../__helpers/int/vitest.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-let payload: Payload
-
-describe(
+test.suite(
   'database - sqlite bound parameters limit',
-  { db: (type) => type.startsWith('sqlite') },
+  { config: './config.ts', db: (adapter) => adapter.startsWith('sqlite') },
   () => {
-    beforeAll(async () => {
-      ;({ payload } = await initPayloadInt(dirname))
-    })
-
-    afterAll(async () => {
-      await payload.destroy()
-    })
-
-    it('should not use bound parameters for where querying on ID with IN if limitedBoundParameters: true', async () => {
+    test('should not use bound parameters for where querying on ID with IN if limitedBoundParameters: true', async ({
+      payload,
+    }) => {
       const defaultExecute = payload.db.drizzle.$client.execute.bind(payload.db.drizzle.$client)
 
       // Limit bounds parameters length
@@ -48,6 +32,7 @@ describe(
           collection: 'simple',
           pagination: false,
           where: { id: { in: IN } },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
 
@@ -57,6 +42,7 @@ describe(
           collection: 'simple',
           pagination: false,
           where: { id: { not_in: IN } },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
 
@@ -68,6 +54,7 @@ describe(
           collection: 'simple',
           pagination: false,
           where: { id: { in: IN } },
+          overrideAccess: true,
         }),
       ).resolves.toBeTruthy()
 
@@ -77,19 +64,21 @@ describe(
           collection: 'simple',
           pagination: false,
           where: { id: { not_in: IN } },
+          overrideAccess: true,
         }),
       ).resolves.toBeTruthy()
 
       // Verify that "in" still works properly
 
       const docs = await Promise.all(
-        Array.from({ length: 300 }, () => payload.create({ collection: 'simple', data: {} })),
+        Array.from({ length: 300 }, () => payload.create({ collection: 'simple', data: {}, overrideAccess: true })),
       )
 
       const res = await payload.find({
         collection: 'simple',
         pagination: false,
         where: { id: { in: docs.map((e) => e.id) } },
+        overrideAccess: true,
       })
 
       expect(res.totalDocs).toBe(300)
@@ -98,7 +87,9 @@ describe(
       }
     })
 
-    it('should avoid ambiguous column name errors when limitedBoundParameters: true and multiple joins are present', async () => {
+    test('should avoid ambiguous column name errors when limitedBoundParameters: true and multiple joins are present', async ({
+      payload,
+    }) => {
       payload.db.limitedBoundParameters = true
 
       const simpleLocalizedDoc = await payload.create({
@@ -107,6 +98,7 @@ describe(
           text: 'Test',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const res = await payload.find({
@@ -121,6 +113,7 @@ describe(
           },
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(res.totalDocs).toBe(1)

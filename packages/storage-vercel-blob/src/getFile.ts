@@ -1,8 +1,8 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import { getFilePrefix as getDocPrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
-import { getRangeRequestInfo } from 'payload/internal'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 import { generateURL } from './generateURL.js'
 
@@ -11,9 +11,9 @@ interface GetFileArgs {
   cacheControlMaxAge: number
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   token: string
   uploadReference?: unknown
@@ -25,9 +25,9 @@ export async function getFile({
   cacheControlMaxAge,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   token,
   uploadReference,
@@ -36,10 +36,12 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
+      collectionPrefix,
+      doc,
       filename,
-      prefixQueryParam,
       req,
       uploadReference,
+      useCompositePrefixes,
     })
 
     const fileUrl = generateURL({
@@ -79,9 +81,9 @@ export async function getFile({
     headers.append('Content-Type', contentType)
     headers.append('ETag', ETag)
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Apply a restrictive policy to XML-family responses served through Payload.
+    if (isXmlMimeType(contentType)) {
+      headers.append('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     if (

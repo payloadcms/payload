@@ -6,9 +6,7 @@ import { formatAdminURL, wait } from 'payload/shared'
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
   openLocaleSelector,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -17,6 +15,8 @@ import {
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -88,8 +88,6 @@ describe('General', () => {
     const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -104,10 +102,7 @@ describe('General', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
 
     adminRoutes = getRoutes({ customAdminRoutes })
     adminRoute = adminRoutes.routes.admin
@@ -122,7 +117,6 @@ describe('General', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
@@ -144,7 +138,7 @@ describe('General', () => {
         }),
       )
 
-      await expect(page).toHaveURL(new RegExp(`${redirectTo}$`))
+      await expect(page).toHaveURL(new RegExp(`${redirectTo}(?:\\?.*)?$`))
       await expect(page.locator('.collection-list')).toBeVisible()
       await expect(page.locator('.loading-overlay')).toBeHidden()
       await expect(page).not.toHaveURL(/custom-inactivity/)
@@ -874,7 +868,9 @@ describe('General', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('should render protected nested custom view', { framework: 'next' }, async () => {
+    test('should render protected nested custom view', async () => {
+      test.slow()
+
       await page.goto(
         formatAdminURL({
           adminRoute,
@@ -1262,6 +1258,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title,
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -1272,5 +1269,6 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       point: [4, -4],
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Geo>
 }

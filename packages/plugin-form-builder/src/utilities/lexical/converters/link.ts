@@ -31,5 +31,5 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
 
     return `<a href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
   },
-  nodeTypes: ['link'],
+  nodeTypes: ['autolink', 'link'],
 }

@@ -69,9 +69,9 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     }
   }
 
-  const userCollection = sanitizedConfig.collections!.find(
-    ({ slug }) => slug === sanitizedConfig.admin!.user,
-  )
+  const authCollections = sanitizedConfig.collections!.filter(({ auth }) => Boolean(auth))
+
+  const userCollection = authCollections.find(({ slug }) => slug === sanitizedConfig.admin!.user)
 
   if (!userCollection || !userCollection.auth) {
     throw new InvalidConfiguration(
@@ -241,6 +241,10 @@ const addDefaultDashboardWidgets = ({
       widgetSlug: 'collections',
       width: 'full',
     } satisfies WidgetInstance,
+    {
+      widgetSlug: 'activity',
+      width: 'small',
+    } satisfies WidgetInstance,
   ]
 }
 
@@ -267,7 +271,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     config.endpoints.push(endpoint)
   }
 
-  if (config.localization && config.localization.locales?.length > 0) {
+  if (config.localization) {
     // clone localization config so to not break everything
     const firstLocale = config.localization.locales[0]
     if (typeof firstLocale === 'string') {
@@ -493,7 +497,9 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   if (schedulePublishCollections.length || schedulePublishGlobals.length) {
     ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
       getSchedulePublishTask({
-        adminUserSlug: config.admin!.user,
+        authCollectionSlugs: config
+          .collections!.filter(({ auth }) => Boolean(auth))
+          .map(({ slug }) => slug),
         collections: schedulePublishCollections,
         globals: schedulePublishGlobals,
       }),

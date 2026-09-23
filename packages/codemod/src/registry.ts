@@ -19,10 +19,13 @@ import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exp
 import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
+import { removeDefaultLocalePublishOption } from './transforms/remove-default-locale-publish-option/index.js'
 import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
 import { removeLocalizeStatusConfig } from './transforms/remove-localize-status-config/index.js'
 import { removePublishSpecificLocale } from './transforms/remove-publish-specific-locale/index.js'
+import { removeStorageAlwaysInsertFields } from './transforms/remove-storage-always-insert-fields/index.js'
 import { removeVersionsTrue } from './transforms/remove-versions-true/index.js'
+import { renameExperimentalTableFeature } from './transforms/rename-experimental-table-feature/index.js'
 import { renameStorageAdaptersToStorage } from './transforms/rename-storage-adapters-to-storage/index.js'
 import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescript-schema-to-json-schema/index.js'
 
@@ -47,9 +50,12 @@ export const transforms: Transform[] = [
   migrateNextSubpathExports,
   migrateSlugField,
   migrateVersionsDefault,
+  removeDefaultLocalePublishOption,
   removeGroupByTrue,
   removeLocalizeStatusConfig,
   removeVersionsTrue,
   removePublishSpecificLocale,
+  removeStorageAlwaysInsertFields,
   renameTypescriptSchemaToJsonSchema,
+  renameExperimentalTableFeature,
 ]

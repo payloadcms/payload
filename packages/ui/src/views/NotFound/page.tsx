@@ -47,6 +47,7 @@ export const renderNotFoundPage = async ({
     permissions,
     req,
     req: { payload },
+    user,
   } = await initReq({
     configPromise: config,
     importMap,
@@ -75,7 +76,7 @@ export const renderNotFoundPage = async ({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user,
+    user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -90,7 +91,7 @@ export const renderNotFoundPage = async ({
         permissions={permissions}
         req={req}
         searchParams={searchParams}
-        user={req.user}
+        user={user}
         visibleEntities={visibleEntities}
       >
         <NotFoundClient />

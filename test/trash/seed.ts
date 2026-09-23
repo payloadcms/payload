@@ -13,6 +13,7 @@ export const seed = async (payload: Payload) => {
       name: 'Admin',
       roles: ['is_admin', 'is_user'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -25,6 +26,7 @@ export const seed = async (payload: Payload) => {
       name: 'Dev',
       roles: ['is_user'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -34,25 +36,6 @@ export const seed = async (payload: Payload) => {
     data: {
       title: 'Page',
     },
-  })
-
-  await payload.create({
-    collection: 'posts',
-    depth: 0,
-    select: {},
-    data: {
-      title: 'Post 1',
-      _status: 'published',
-    },
-  })
-
-  await payload.create({
-    collection: 'posts',
-    depth: 0,
-    select: {},
-    data: {
-      title: 'Post 2',
-      _status: 'published',
-    },
+    overrideAccess: true,
   })
 }

@@ -7,10 +7,10 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Tag } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { tagsSlug } from './config.js'
 
@@ -68,7 +68,11 @@ test.describe('Tags', () => {
         data[`_h_${tagsSlug}`] = parentId
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- hierarchy `_h_*` field is not in the generated type
-      const doc = await payload.create({ collection: tagsSlug, data: data as any })
+      const doc = await payload.create({
+        collection: tagsSlug,
+        data: data as any,
+        overrideAccess: true,
+      })
       created.push(doc)
       createdTagIds.push(doc.id)
       parentId = doc.id
@@ -94,6 +98,7 @@ test.describe('Tags', () => {
     const { docs } = await payload.find({
       collection: tagsSlug,
       where: { name: { equals: name } },
+      overrideAccess: true,
     })
     const createdTag = docs[0] as Tag
     createdTagIds.push(createdTag.id)
@@ -111,14 +116,12 @@ test.describe('Tags', () => {
     tagsURL = new AdminUrlUtil(serverURL, tagsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.afterAll(async () => {
     for (const id of createdTagIds) {
-      await payload.delete({ id, collection: tagsSlug })
+      await payload.delete({ id, collection: tagsSlug, overrideAccess: true })
     }
   })
 

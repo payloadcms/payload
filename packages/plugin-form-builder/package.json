@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.36",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",
@@ -81,8 +81,8 @@
     "@types/escape-html": "^1.0.4",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "copyfiles": "^2.4.1",
-    "cross-env": "10.1.0",
+    "copyfiles": "catalog:",
+    "cross-env": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {
