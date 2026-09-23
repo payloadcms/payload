@@ -6,14 +6,19 @@ import { initReq as initPayloadReq } from 'payload/internal'
 import { nextServerAdapter } from '../adapters/server.js'
 import { selectiveCache } from './selectiveCache.js'
 
-const partialReqCache = selectiveCache<InitReqPartialResult>('partialReq')
+const partialResultCache = selectiveCache<InitReqPartialResult>('partialResult')
 const localeCache = selectiveCache<Pick<InitReqResult, 'locale'>>('locale')
-const reqCache = selectiveCache<InitReqResult>('req')
+const requestResultCache = selectiveCache<InitReqResult>('requestResult')
 
 const cache: InitReqCache = {
-  getLocale: (factory, ...cacheArgs) => localeCache.get(factory, ...cacheArgs),
-  getPartial: (factory) => partialReqCache.get(factory, 'global'),
-  getRequest: (factory, key, ...cacheArgs) => reqCache.get(factory, key, ...cacheArgs),
+  getLocale: (resolveLocale, ...key) => localeCache.get({ create: resolveLocale, key }),
+  getPartial: (createPartialResult) =>
+    partialResultCache.get({ create: createPartialResult, key: ['global'] }),
+  getRequest: (createRequestResult, key, ...cacheArgs) =>
+    requestResultCache.get({
+      create: createRequestResult,
+      key: [key, ...cacheArgs],
+    }),
 }
 
 type NextInitReqArgs = {

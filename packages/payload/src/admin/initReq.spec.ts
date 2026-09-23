@@ -136,8 +136,10 @@ const serverAdapter = {
 } as unknown as ServerAdapter
 
 const createExecutingCache = (): InitReqCache => ({
-  getPartial: vi.fn((factory: () => Promise<InitReqPartialResult>) => factory()),
-  getRequest: vi.fn((factory: () => Promise<InitReqResult>) => factory()),
+  getPartial: vi.fn((createPartialResult: () => Promise<InitReqPartialResult>) =>
+    createPartialResult(),
+  ),
+  getRequest: vi.fn((createRequestResult: () => Promise<InitReqResult>) => createRequestResult()),
 })
 
 const createReusingCache = (): InitReqCache => {
@@ -153,7 +155,7 @@ const createReusingCache = (): InitReqCache => {
   }> = []
 
   return {
-    getLocale: vi.fn(async (factory, ...cacheArgs) => {
+    getLocale: vi.fn(async (resolveLocale, ...cacheArgs) => {
       const cached = localeResults.find(
         (entry) =>
           entry.cacheArgs.length === cacheArgs.length &&
@@ -164,16 +166,16 @@ const createReusingCache = (): InitReqCache => {
         return cached.result
       }
 
-      const result = await factory()
+      const result = await resolveLocale()
       localeResults.push({ cacheArgs, result })
 
       return result
     }),
-    getPartial: vi.fn(async (factory) => {
-      partialResult ??= await factory()
+    getPartial: vi.fn(async (createPartialResult) => {
+      partialResult ??= await createPartialResult()
       return partialResult
     }),
-    getRequest: vi.fn(async (factory, key, ...cacheArgs) => {
+    getRequest: vi.fn(async (createRequestResult, key, ...cacheArgs) => {
       const cached = requestResults.find(
         (entry) =>
           entry.key === key &&
@@ -185,7 +187,7 @@ const createReusingCache = (): InitReqCache => {
         return cached.result
       }
 
-      const result = await factory()
+      const result = await createRequestResult()
       requestResults.push({ cacheArgs, key, result })
 
       return result

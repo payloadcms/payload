@@ -27,14 +27,16 @@ export type InitReqPartialResult = {
 export type InitReqCache = {
   /** Reuses locale preference resolution across request results. */
   getLocale?: (
-    factory: () => Promise<Pick<InitReqResult, 'locale'>>,
+    resolveLocale: () => Promise<Pick<InitReqResult, 'locale'>>,
     ...cacheArgs: unknown[]
   ) => Promise<Pick<InitReqResult, 'locale'>>
   /** Reuses Payload, i18n, and authentication state within the current request. */
-  getPartial: (factory: () => Promise<InitReqPartialResult>) => Promise<InitReqPartialResult>
+  getPartial: (
+    createPartialResult: () => Promise<InitReqPartialResult>,
+  ) => Promise<InitReqPartialResult>
   /** Reuses a complete initialized request for the supplied key and cache arguments. */
   getRequest: (
-    factory: () => Promise<InitReqResult>,
+    createRequestResult: () => Promise<InitReqResult>,
     key: string,
     ...cacheArgs: unknown[]
   ) => Promise<InitReqResult>
@@ -58,9 +60,6 @@ export type InitReqArgs = {
 
 /**
  * Initializes the request state used by framework adapters to render the admin panel.
- *
- * @internal This integration point is intended for official Payload framework adapters.
- * It may change without notice.
  */
 export async function initReq({
   cache,
