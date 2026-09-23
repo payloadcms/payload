@@ -5,6 +5,7 @@ import type {
   RequestContext,
 } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -14,9 +15,8 @@ export type Options<TSlug extends AuthCollectionSlug> = {
   collection: TSlug
   context?: RequestContext
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
-  overrideAccess?: boolean
   req?: Partial<PayloadRequest>
-}
+} & OverrideAccessOption
 
 export async function unlockLocal<TSlug extends AuthCollectionSlug>(
   payload: Payload,

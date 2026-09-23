@@ -1,5 +1,6 @@
 import type { CollectionSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -27,13 +28,6 @@ export type CountVersionsOptions<TSlug extends CollectionSlug> = {
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `true` if you want to bypass Access Control for the operation, for example for
-   * trusted server-side work such as cron jobs, seeding, and migrations.
-   * @default false
-   */
-  overrideAccess?: boolean
-  /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
@@ -46,7 +40,7 @@ export type CountVersionsOptions<TSlug extends CollectionSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & OverrideAccessOption
 
 export async function countVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,

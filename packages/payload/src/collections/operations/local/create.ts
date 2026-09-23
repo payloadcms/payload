@@ -4,6 +4,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
@@ -76,13 +77,6 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `true` if you want to bypass Access Control for the operation, for example for
-   * trusted server-side work such as cron jobs, seeding, and migrations.
-   * @default false
-   */
-  overrideAccess?: boolean
-  /**
    * If you are uploading a file and would like to replace
    * the existing file instead of generating a new filename,
    * you can set the following property to `true`
@@ -110,7 +104,8 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+} & OverrideAccessOption &
+  Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type Options<
   TSlug extends CollectionSlug,

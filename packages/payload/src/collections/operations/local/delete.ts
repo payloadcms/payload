@@ -13,6 +13,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { BulkOperationResult, SelectFromCollectionSlug } from '../../config/types.js'
 
@@ -51,13 +52,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   locale?: TypedLocale
   /**
-   * Skip access control.
-   * Set to `true` if you want to bypass Access Control for the operation, for example for
-   * trusted server-side work such as cron jobs, seeding, and migrations.
-   * @default false
-   */
-  overrideAccess?: boolean
-  /**
    * By default, document locks are ignored (`true`). Set to `false` to enforce locks and prevent operations when a document is locked by another user. [More details](https://payloadcms.com/docs/admin/locked-documents).
    * @default true
    */
@@ -88,7 +82,8 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+} & OverrideAccessOption &
+  Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,

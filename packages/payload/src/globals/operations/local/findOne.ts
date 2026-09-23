@@ -13,6 +13,7 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
+import type { OverrideAccessOption } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DraftFlagFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
@@ -58,13 +59,6 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    */
   locale?: 'all' | TypedLocale
   /**
-   * Skip access control.
-   * Set to `true` if you want to bypass Access Control for the operation, for example for
-   * trusted server-side work such as cron jobs, seeding, and migrations.
-   * @default false
-   */
-  overrideAccess?: boolean
-  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -86,7 +80,8 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & Pick<FindOptions<string, SelectType>, 'select'> &
+} & OverrideAccessOption &
+  Pick<FindOptions<string, SelectType>, 'select'> &
   Pick<GlobalFindOneArgs, 'flattenLocales'>
 
 export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseFindOneOptions<
