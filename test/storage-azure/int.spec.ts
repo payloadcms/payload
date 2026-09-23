@@ -63,6 +63,7 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -75,6 +76,7 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -126,6 +128,7 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
     const uploadData = (await payload.findByID({
       collection: collectionSlug,
       id: uploadId,
+      overrideAccess: true,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>

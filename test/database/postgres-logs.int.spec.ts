@@ -22,6 +22,7 @@ test.suite(
           text: 'Some title',
           number: 5,
         },
+        overrideAccess: true,
       })
 
       // Count every console log
@@ -52,6 +53,7 @@ test.suite(
           title: 'Some title',
           number: 5,
         },
+        overrideAccess: true,
       })
 
       // Count every console log
@@ -80,6 +82,7 @@ test.suite(
           title: 'Some title',
           number: 5,
         },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'posts',
@@ -87,6 +90,7 @@ test.suite(
           title: 'Some title 2',
           number: 5,
         },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'posts',
@@ -94,6 +98,7 @@ test.suite(
           title: 'Some title 2',
           number: 5,
         },
+        overrideAccess: true,
       })
       // Count every console log
       const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -108,6 +113,7 @@ test.suite(
 
       const allPosts = await payload.find({
         collection: 'posts',
+        overrideAccess: true,
       })
 
       expect(allPosts.docs).toHaveLength(0)
@@ -122,6 +128,7 @@ test.suite(
           title: 'Some title',
           number: 5,
         },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'posts',
@@ -129,6 +136,7 @@ test.suite(
           title: 'Some title 2',
           number: 5,
         },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'posts',
@@ -136,6 +144,7 @@ test.suite(
           title: 'Some title 2',
           number: 5,
         },
+        overrideAccess: true,
       })
       // Count every console log
       const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -152,6 +161,7 @@ test.suite(
 
       const allPosts = await payload.find({
         collection: 'posts',
+        overrideAccess: true,
       })
 
       expect(allPosts.docs).toHaveLength(1)
@@ -169,6 +179,7 @@ test.suite(
               text: 'bulk-delete',
               number: i,
             },
+            overrideAccess: true,
           })
         }
 
@@ -180,6 +191,7 @@ test.suite(
           where: {
             text: { equals: 'bulk-delete' },
           },
+          overrideAccess: true,
         })
 
         const queryCount = consoleCount.mock.calls.length
@@ -207,6 +219,7 @@ test.suite(
           ],
           title: 'post',
         },
+        overrideAccess: true,
       })
       const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 

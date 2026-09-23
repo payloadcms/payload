@@ -31,6 +31,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
     await Promise.all([
       payload.delete({
@@ -41,6 +42,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
             exists: true,
           },
         },
+        overrideAccess: true,
       }),
       payload.delete({
         collection: pagesSlug,
@@ -50,6 +52,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
             exists: true,
           },
         },
+        overrideAccess: true,
       }),
     ])
   })
@@ -59,6 +62,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       collection: 'search',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
     })
 
     expect(search).toBeTruthy()
@@ -80,6 +84,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         excerpt: 'This is a test page',
         title: 'Hello, world!',
       },
+      overrideAccess: true,
     })
 
     const { docs: results } = await payload.find({
@@ -90,6 +95,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: pageToSync.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(1)
@@ -106,6 +112,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         excerpt: 'This is a test page',
         title: 'Hello, world!',
       },
+      overrideAccess: true,
     })
 
     // wait for the search document to be potentially created
@@ -120,6 +127,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: draftPage.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(0)
@@ -134,6 +142,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         _status: 'published',
         title: 'Published title!',
       },
+      overrideAccess: true,
     })
 
     // wait for the search document to be potentially created
@@ -148,6 +157,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: publishedPage.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(1)
@@ -161,6 +171,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         _status: 'draft',
         title: 'Draft title!',
       },
+      overrideAccess: true,
     })
 
     // This should remain with the published content
@@ -172,6 +183,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: publishedPage.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(updatedResults).toHaveLength(1)
@@ -183,6 +195,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         _status: 'draft',
         title: 'Drafted again',
       },
+      overrideAccess: true,
     })
 
     // Should now be deleted given we've unpublished the page
@@ -194,6 +207,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: publishedPage.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(deletedResults).toHaveLength(0)
@@ -207,6 +221,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         excerpt: 'This is a test page',
         title: 'Hello, world!',
       },
+      overrideAccess: true,
     })
 
     const { docs: results } = await payload.find({
@@ -217,6 +232,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: pageToReceiveUpdates.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(1)
@@ -231,6 +247,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         excerpt: 'This is a test page (updated)',
         title: 'Hello, world! (updated)',
       },
+      overrideAccess: true,
     })
 
     // wait for the search document to be potentially updated
@@ -246,6 +263,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: pageToReceiveUpdates.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(updatedResults).toHaveLength(1)
@@ -264,6 +282,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         excerpt: 'This is a test page',
         title: 'Hello, world!',
       },
+      overrideAccess: true,
     })
 
     // wait for the search document to be created
@@ -278,6 +297,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: page.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(results).toHaveLength(1)
@@ -286,6 +306,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     await payload.delete({
       id: page.id,
       collection: 'pages',
+      overrideAccess: true,
     })
 
     // wait for the search document to be potentially deleted
@@ -300,6 +321,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: results[0].id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(deletedResults).toHaveLength(0)
@@ -311,11 +333,13 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     const custom_id_1 = await payload.create({
       collection: 'custom-ids-1',
       data: { id: 'custom_id' },
+      overrideAccess: true,
     })
 
     await payload.create({
       collection: 'custom-ids-2',
       data: { id: 'custom_id' },
+      overrideAccess: true,
     })
 
     await wait(200)
@@ -327,11 +351,12 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       where: { 'doc.value': { equals: 'custom_id' } },
       limit: 1,
       sort: 'createdAt',
+      overrideAccess: true,
     })
 
     expect(docBefore.doc.relationTo).toBe('custom-ids-1')
 
-    await payload.delete({ collection: 'custom-ids-1', id: custom_id_1.id })
+    await payload.delete({ collection: 'custom-ids-1', id: custom_id_1.id, overrideAccess: true })
 
     await wait(200)
 
@@ -342,6 +367,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       where: { 'doc.value': { equals: 'custom_id' } },
       limit: 1,
       sort: 'createdAt',
+      overrideAccess: true,
     })
 
     expect(docAfter.doc.relationTo).toBe('custom-ids-2')
@@ -356,6 +382,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         slug: 'es',
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -367,6 +394,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         slug: 'en',
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     const syncedSearchData = await payload.find({
@@ -381,6 +409,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     expect(syncedSearchData.docs[0].slug).toEqual('es')
@@ -398,6 +427,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     await payload.create({
       collection: 'users',
       data: testCreds,
+      overrideAccess: true,
     })
 
     const testUserRes = await restClient.POST(`/users/login`, {
@@ -461,6 +491,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         title: 'post_1',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
     await wait(200)
@@ -471,9 +502,10 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         title: 'post_2',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
-    const { docs } = await payload.find({ collection: 'search' })
+    const { docs } = await payload.find({ collection: 'search', overrideAccess: true })
 
     await wait(200)
 
@@ -495,6 +527,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           in: docs.map((doc) => doc.id),
         },
       },
+      overrideAccess: true,
     })
 
     // Should have no docs with these ID
@@ -510,6 +543,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           title: 'Test page title',
           _status: 'published',
         },
+        overrideAccess: true,
       }),
       payload.create({
         collection: postsSlug,
@@ -517,6 +551,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           title: 'Test page title',
           _status: 'published',
         },
+        overrideAccess: true,
       }),
     ])
 
@@ -524,6 +559,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
 
     const { totalDocs: totalBeforeReindex } = await payload.count({
       collection: 'search',
+      overrideAccess: true,
     })
 
     const endpointRes = await restClient.POST(`/search/reindex`, {
@@ -539,6 +575,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
 
     const { totalDocs: totalAfterReindex } = await payload.count({
       collection: 'search',
+      overrideAccess: true,
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
@@ -552,14 +589,17 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       payload.create({
         collection: postsSlug,
         data: { title: 'Post one', _status: 'published' },
+        overrideAccess: true,
       }),
       payload.create({
         collection: postsSlug,
         data: { title: 'Post two', _status: 'published' },
+        overrideAccess: true,
       }),
       payload.create({
         collection: pagesSlug,
         data: { title: 'Page one', _status: 'published' },
+        overrideAccess: true,
       }),
     ])
 
@@ -587,6 +627,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       collection: postsSlug,
       data: { title: 'Locale test post', _status: 'published', slug: 'post-slug-en' },
       locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -594,18 +635,21 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       id: postId,
       data: { slug: 'post-slug-es' },
       locale: 'es',
+      overrideAccess: true,
     })
     await payload.update({
       collection: postsSlug,
       id: postId,
       data: { slug: 'post-slug-de' },
       locale: 'de',
+      overrideAccess: true,
     })
 
     // Create a page so both collections are reindexed together, exercising the multi-collection path
     await payload.create({
       collection: pagesSlug,
       data: { title: 'Locale test page', _status: 'published' },
+      overrideAccess: true,
     })
 
     const endpointRes = await restClient.POST(`/search/reindex`, {
@@ -621,6 +665,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       where: {
         and: [{ 'doc.relationTo': { equals: postsSlug } }, { 'doc.value': { equals: postId } }],
       },
+      overrideAccess: true,
     })
 
     expect(searchDocs).toHaveLength(1)
@@ -628,9 +673,24 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
     const searchDocId = searchDocs[0]!.id
 
     const [enDoc, esDoc, deDoc] = await Promise.all([
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'en' }),
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'es' }),
-      payload.findByID({ collection: 'search', id: searchDocId, locale: 'de' }),
+      payload.findByID({
+        collection: 'search',
+        id: searchDocId,
+        locale: 'en',
+        overrideAccess: true,
+      }),
+      payload.findByID({
+        collection: 'search',
+        id: searchDocId,
+        locale: 'es',
+        overrideAccess: true,
+      }),
+      payload.findByID({
+        collection: 'search',
+        id: searchDocId,
+        locale: 'de',
+        overrideAccess: true,
+      }),
     ])
 
     // With localization fallback: true, a missing locale update would silently fall back to 'en'
@@ -648,6 +708,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           title: 'Test page published',
           _status: 'published',
         },
+        overrideAccess: true,
       }),
       payload.create({
         collection: pagesSlug,
@@ -655,6 +716,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           title: 'Test page draft',
           _status: 'draft',
         },
+        overrideAccess: true,
       }),
     ])
 
@@ -662,6 +724,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
 
     const { totalDocs: totalBeforeReindex } = await payload.count({
       collection: 'search',
+      overrideAccess: true,
     })
 
     expect(totalBeforeReindex).toBe(1)
@@ -679,6 +742,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
 
     const { totalDocs: totalAfterReindex } = await payload.count({
       collection: 'search',
+      overrideAccess: true,
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
@@ -701,6 +765,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         _status: 'published',
         slug: 'test-en',
       },
+      overrideAccess: true,
     })
     await payload.update({
       collection: postsSlug,
@@ -710,6 +775,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         _status: 'published',
         slug: 'test-es',
       },
+      overrideAccess: true,
     })
     await payload.update({
       collection: postsSlug,
@@ -719,6 +785,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         _status: 'published',
         slug: 'test-de',
       },
+      overrideAccess: true,
     })
 
     const {
@@ -737,6 +804,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       pagination: false,
       limit: 1,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(postBeforeReindex?.slug).not.toBeFalsy()
@@ -768,6 +836,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       pagination: false,
       limit: 1,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(postAfterReindex?.slug).not.toBeFalsy()
@@ -783,6 +852,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
         excerpt: 'This post will be soft deleted',
         _status: 'published',
       },
+      overrideAccess: true,
     })
 
     // Wait for the search document to be created
@@ -797,6 +867,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: publishedPost.id,
         },
       },
+      overrideAccess: true,
     })
 
     expect(initialSearchResults).toHaveLength(1)
@@ -809,6 +880,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       data: {
         deletedAt: new Date().toISOString(),
       },
+      overrideAccess: true,
     })
 
     // Wait for the search plugin to sync the trashed document
@@ -824,6 +896,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           equals: publishedPost.id,
         },
       },
+      overrideAccess: true,
     })
 
     // The search document should still exist
@@ -834,6 +907,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       collection: postsSlug,
       id: publishedPost.id,
       trash: true, // permanently delete
+      overrideAccess: true,
     })
   })
 
@@ -850,6 +924,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           syncEnglishOnly: true,
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Query for ALL search docs with locale: 'all' to see total count
@@ -861,6 +936,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
             equals: enDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       // Should only have 1 search doc total (English only)
@@ -876,6 +952,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
             equals: enDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(docs).toHaveLength(1)
@@ -891,6 +968,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       await payload.delete({
         collection: 'filtered-locales',
         id: enDoc.id,
+        overrideAccess: true,
       })
     })
 
@@ -906,6 +984,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           title: 'Test Post for All Locales',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Update the post in Spanish locale
@@ -917,6 +996,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           _status: 'published',
           title: 'Test Post para Todos los Locales',
         },
+        overrideAccess: true,
       })
 
       // Update the post in German locale
@@ -928,6 +1008,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           _status: 'published',
           title: 'Testbeitrag für alle Sprachen',
         },
+        overrideAccess: true,
       })
 
       // Query for search doc with locale: 'all'
@@ -939,6 +1020,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
             equals: post.id,
           },
         },
+        overrideAccess: true,
       })
 
       // Should have 1 search doc with all locales embedded
@@ -953,6 +1035,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       await payload.delete({
         collection: postsSlug,
         id: post.id,
+        overrideAccess: true,
       })
     })
 
@@ -967,6 +1050,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
           syncEnglishOnly: false,
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Verify search doc exists for English
@@ -978,6 +1062,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
       expect(enSearchDocs).toHaveLength(1)
 
@@ -990,6 +1075,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
       expect(esSearchDocs).toHaveLength(1)
 
@@ -1002,6 +1088,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
             equals: doc.id,
           },
         },
+        overrideAccess: true,
       })
       expect(deSearchDocs).toHaveLength(1)
 
@@ -1009,6 +1096,7 @@ test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
       await payload.delete({
         collection: 'filtered-locales',
         id: doc.id,
+        overrideAccess: true,
       })
     })
   })

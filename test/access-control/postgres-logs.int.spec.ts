@@ -40,6 +40,7 @@ test.suite(
               title: 'Test Document',
               userRole: 'admin',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -84,6 +85,7 @@ test.suite(
               title: 'Test Document',
               userRole: 'noAccess',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -133,6 +135,7 @@ test.suite(
               updateRole: 'noAccess',
               deleteRole: 'admin',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -180,6 +183,7 @@ test.suite(
               updateRole: 'noAccess',
               deleteRole: 'admin',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
@@ -226,6 +230,7 @@ test.suite(
               updateRole: 'admin',
               deleteRole: 'noAccess',
             },
+            overrideAccess: true,
           })
 
           const permissions = await getEntityPermissions({
@@ -264,6 +269,7 @@ test.suite(
               updateRole: 'noAccess',
               deleteRole: 'admin',
             },
+            overrideAccess: true,
           })
 
           const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})

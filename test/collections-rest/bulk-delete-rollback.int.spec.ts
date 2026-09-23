@@ -12,10 +12,12 @@ test.suite('Collections REST - bulk delete rollback', { config: './config.ts' },
     await payload.create({
       collection: postsSlug,
       data: { title },
+      overrideAccess: true,
     })
     await payload.create({
       collection: postsSlug,
       data: { title },
+      overrideAccess: true,
     })
 
     const originalDeleteMany = payload.db.deleteMany.bind(payload.db)
@@ -33,6 +35,7 @@ test.suite('Collections REST - bulk delete rollback', { config: './config.ts' },
     const result = await payload.delete({
       collection: postsSlug,
       where: { title: { equals: title } },
+      overrideAccess: true,
     })
 
     const deletedCollections = deleteManySpy.mock.calls.map(([args]) => args.collection)
@@ -57,6 +60,7 @@ test.suite('Collections REST - bulk delete rollback', { config: './config.ts' },
     const remainingDocs = await payload.find({
       collection: postsSlug,
       where: { title: { equals: title } },
+      overrideAccess: true,
     })
 
     expect(remainingDocs.docs).toHaveLength(2)

@@ -36,6 +36,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -54,6 +55,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -78,6 +80,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -89,6 +92,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/image.png`)
@@ -106,6 +110,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/small.png'),
+      overrideAccess: true,
     })
 
     const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/small.png`, {
@@ -128,6 +133,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/temp.png'),
+      overrideAccess: true,
     })
 
     const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/temp.png`, {
@@ -161,6 +167,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -203,6 +210,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -226,7 +234,11 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       expect(dbDoc.sizes.thumbnail.url).toContain(getTestBucketName())
       expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
 
-      await payload.delete({ collection: mediaWithDirectAccessSlug, id: upload.id })
+      await payload.delete({
+        collection: mediaWithDirectAccessSlug,
+        id: upload.id,
+        overrideAccess: true,
+      })
     })
 
     test('should return direct S3 URL without encoding issues for normal filenames', async ({
@@ -236,6 +248,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -282,14 +295,17 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       await payload.delete({
         collection: mediaWithPrefixSlug,
         where: {},
+        overrideAccess: true,
       })
       await payload.delete({
         collection: mediaSlug,
         where: {},
+        overrideAccess: true,
       })
       await payload.delete({
         collection: mediaWithAlwaysInsertFieldsSlug,
         where: {},
+        overrideAccess: true,
       })
     })
 
@@ -301,12 +317,14 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -323,12 +341,14 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -347,6 +367,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       // Upload with different prefix
@@ -356,6 +377,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
           prefix: 'different-prefix',
         },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -379,6 +401,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'a' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       // Tenant B uploads logo.png
@@ -386,6 +409,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'b' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       // Both should keep original filename

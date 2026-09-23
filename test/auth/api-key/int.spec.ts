@@ -21,6 +21,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         privateField: 'private value',
         publicField: 'public value',
       },
+      overrideAccess: true,
     })
 
     const apiKey = uuid()
@@ -31,6 +32,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         restrictedField: 'restricted value',
         restrictedRelationship: restrictedRelationship.id,
       } as any,
+      overrideAccess: true,
     })
 
     const authenticated = await restClient
@@ -73,6 +75,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         isPublic: true,
         publicField: 'public relationship',
       },
+      overrideAccess: true,
     })
 
     const apiKey = uuid()
@@ -83,6 +86,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         restrictedField: 'restricted value',
         restrictedRelationship: restrictedRelationship.id,
       } as any,
+      overrideAccess: true,
     })
 
     const req = await createPayloadRequest({
@@ -164,11 +168,13 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     const user = await payload.create({
       collection: apiKeysSlug,
       data: { apiKey } as any,
+      overrideAccess: true,
     })
 
     const result = await payload.findByID({
       id: user.id,
       collection: apiKeysSlug,
+      overrideAccess: true,
       showHiddenFields: true,
     })
 
@@ -183,7 +189,11 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
 
   test('should ignore direct last-four and index updates', async ({ payload }) => {
     const apiKey = uuid()
-    const user = await payload.create({ collection: apiKeysSlug, data: { apiKey } as any })
+    const user = await payload.create({
+      collection: apiKeysSlug,
+      data: { apiKey } as any,
+      overrideAccess: true,
+    })
     const findStoredUser = () =>
       payload.db.findOne({
         collection: apiKeysSlug,
@@ -196,6 +206,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
       id: user.id,
       collection: apiKeysSlug,
       data: { apiKeyIndex: 'replacement-index', apiKeyLast4: 'fake' } as any,
+      overrideAccess: true,
     })
 
     const updated = await findStoredUser()
@@ -207,12 +218,14 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     const user = await payload.create({
       collection: apiKeysSlug,
       data: { apiKey: uuid() } as any,
+      overrideAccess: true,
     })
 
     await payload.update({
       id: user.id,
       collection: apiKeysSlug,
       data: { apiKey: null } as any,
+      overrideAccess: true,
     })
 
     const stored = await payload.db.findOne({
@@ -227,6 +240,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     const result = await payload.findByID({
       id: user.id,
       collection: apiKeysSlug,
+      overrideAccess: true,
     })
     expect(result.apiKeyLast4).toBeNull()
   })
@@ -242,15 +256,18 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         email: 'manager@example.com',
         password: 'password',
       },
+      overrideAccess: true,
     })
     const target = await payload.create({
       collection: adminUsersSlug as any,
       data: { email: 'target@example.com', password: 'password' },
+      overrideAccess: true,
     })
     const token = (
       await payload.login({
         collection: adminUsersSlug as any,
         data: { email: 'manager@example.com', password: 'password' },
+        overrideAccess: true,
       })
     ).token!
     const req = await createPayloadRequest({
@@ -288,12 +305,18 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         email: 'restricted-manager@example.com',
         password: 'password',
       },
+      overrideAccess: true,
     })
-    const target = await payload.create({ collection: restrictedAPIKeysSlug as any, data: {} })
+    const target = await payload.create({
+      collection: restrictedAPIKeysSlug as any,
+      data: {},
+      overrideAccess: true,
+    })
     const token = (
       await payload.login({
         collection: adminUsersSlug as any,
         data: { email: admin.email, password: 'password' },
+        overrideAccess: true,
       })
     ).token!
 
@@ -321,22 +344,29 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     const user = await payload.create({
       collection: apiKeysSlug,
       data: { apiKey: originalAPIKey, restrictedField: 'original' } as any,
+      overrideAccess: true,
     })
 
     await payload.update({
       id: user.id,
       collection: apiKeysSlug,
       data: { apiKey: currentAPIKey, restrictedField: 'current' } as any,
+      overrideAccess: true,
     })
     const versions = await payload.findVersions({
       collection: apiKeysSlug,
+      overrideAccess: true,
       where: { parent: { equals: user.id } },
     })
     const originalVersion = versions.docs.find(
       (version) => version.version.restrictedField === 'original',
     )!
 
-    await payload.restoreVersion({ id: originalVersion.id, collection: apiKeysSlug })
+    await payload.restoreVersion({
+      id: originalVersion.id,
+      collection: apiKeysSlug,
+      overrideAccess: true,
+    })
 
     const restored = await payload.db.findOne({
       collection: apiKeysSlug,
@@ -369,6 +399,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     const user = await payload.create({
       collection: apiKeysSlug,
       data: { apiKey } as any,
+      overrideAccess: true,
     })
 
     await payload.db.updateOne({
@@ -381,6 +412,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     const legacyResult = await payload.findByID({
       id: user.id,
       collection: apiKeysSlug,
+      overrideAccess: true,
     })
 
     expect(legacyResult.apiKeyLast4).toBe('••••')
@@ -402,6 +434,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     const user = await payload.create({
       collection: apiKeysSlug,
       data: { apiKey: uuid() } as any,
+      overrideAccess: true,
     })
 
     const response = await restClient.POST(`/${apiKeysSlug}/${user.id}/api-key/reveal`)

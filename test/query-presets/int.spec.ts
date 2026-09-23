@@ -19,6 +19,7 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
           email: devUser.email,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
 
@@ -29,6 +30,7 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
           email: regularUser.email,
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
 
@@ -39,6 +41,7 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
           email: 'public@email.com',
           password: regularUser.password,
         },
+        overrideAccess: true,
       })
       ?.then((result) => result.user)
   })
@@ -74,6 +77,7 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
           title: 'Only Logged In Users',
           relatedCollection: 'pages',
         },
+        overrideAccess: true,
       })
 
       // read
@@ -105,6 +109,7 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
         collection: queryPresetsCollectionSlug,
         depth: 0,
         id,
+        overrideAccess: true,
       })
 
       expect(preset.title).toBe('Only Logged In Users')
@@ -124,6 +129,7 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
         collection: queryPresetsCollectionSlug,
         depth: 0,
         id,
+        overrideAccess: true,
       })
 
       expect(presetAfterDelete.title).toBe('Only Logged In Users')
@@ -663,6 +669,7 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
             },
           },
         },
+        overrideAccess: true,
       })
 
       await expect(

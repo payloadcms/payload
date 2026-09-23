@@ -32,6 +32,7 @@ test.suite(
           collection: 'simple',
           pagination: false,
           where: { id: { in: IN } },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
 
@@ -41,6 +42,7 @@ test.suite(
           collection: 'simple',
           pagination: false,
           where: { id: { not_in: IN } },
+          overrideAccess: true,
         }),
       ).rejects.toBeTruthy()
 
@@ -52,6 +54,7 @@ test.suite(
           collection: 'simple',
           pagination: false,
           where: { id: { in: IN } },
+          overrideAccess: true,
         }),
       ).resolves.toBeTruthy()
 
@@ -61,19 +64,21 @@ test.suite(
           collection: 'simple',
           pagination: false,
           where: { id: { not_in: IN } },
+          overrideAccess: true,
         }),
       ).resolves.toBeTruthy()
 
       // Verify that "in" still works properly
 
       const docs = await Promise.all(
-        Array.from({ length: 300 }, () => payload.create({ collection: 'simple', data: {} })),
+        Array.from({ length: 300 }, () => payload.create({ collection: 'simple', data: {}, overrideAccess: true })),
       )
 
       const res = await payload.find({
         collection: 'simple',
         pagination: false,
         where: { id: { in: docs.map((e) => e.id) } },
+        overrideAccess: true,
       })
 
       expect(res.totalDocs).toBe(300)
@@ -93,6 +98,7 @@ test.suite(
           text: 'Test',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const res = await payload.find({
@@ -107,6 +113,7 @@ test.suite(
           },
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(res.totalDocs).toBe(1)

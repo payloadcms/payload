@@ -25,6 +25,7 @@ test.suite(
         await payload.delete({
           id,
           collection: mediaWithCompositePrefixesSlug,
+          overrideAccess: true,
         })
       }
 

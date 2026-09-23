@@ -167,6 +167,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
 
       const unchangedJob = await payload.findByID({
         collection: 'payload-jobs',
+        overrideAccess: true,
         id: job.id,
       })
 
@@ -193,6 +194,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
 
       const unchangedJob = await payload.findByID({
         collection: 'payload-jobs',
+        overrideAccess: true,
         id: job.id,
       })
 
@@ -332,6 +334,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const jobAfterCancel = await payload.findByID({
         collection: 'payload-jobs',
         id: job.id,
+        overrideAccess: true,
       })
 
       expect(jobAfterCancel.hasError).toBe(false)
@@ -368,6 +371,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const jobAfterCancel = await payload.findByID({
         collection: 'payload-jobs',
         id: job.id,
+        overrideAccess: true,
       })
 
       expect(jobAfterCancel.hasError).toBe(true)
@@ -399,6 +403,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const jobAfterCancel = await payload.findByID({
         collection: 'payload-jobs',
         id: job.id,
+        overrideAccess: true,
       })
 
       expect(jobAfterCancel.hasError).toBe(false)
@@ -431,6 +436,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const jobAfterCancel = await payload.findByID({
         collection: 'payload-jobs',
         id: job.id,
+        overrideAccess: true,
       })
 
       expect(jobAfterCancel.hasError).toBe(true)
@@ -451,6 +457,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           message: '1',
         },
       },
+      overrideAccess: true,
     })
     // @ts-expect-error
     expect(job.input.message).toBe('1')
@@ -463,6 +470,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           message: '2',
         },
       },
+      overrideAccess: true,
     })
     // @ts-expect-error
     expect(updatedJob.input.message).toBe('2')
@@ -474,11 +482,13 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       data: {
         title: 'my post',
       },
+      overrideAccess: true,
     })
 
     const retrievedPost = await payload.findByID({
       collection: 'posts',
       id: newPost.id,
+      overrideAccess: true,
     })
 
     expect(retrievedPost.jobStep1Ran).toBeFalsy()
@@ -489,6 +499,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const postAfterJobs = await payload.findByID({
       collection: 'posts',
       id: newPost.id,
+      overrideAccess: true,
     })
 
     expect(postAfterJobs.jobStep1Ran).toBe('hello')
@@ -504,11 +515,13 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       context: {
         useJSONWorkflow: true,
       },
+      overrideAccess: true,
     })
 
     const retrievedPost = await payload.findByID({
       collection: 'posts',
       id: newPost.id,
+      overrideAccess: true,
     })
 
     expect(retrievedPost.jobStep1Ran).toBeFalsy()
@@ -519,6 +532,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const postAfterJobs = await payload.findByID({
       collection: 'posts',
       id: newPost.id,
+      overrideAccess: true,
     })
 
     expect(postAfterJobs.jobStep1Ran).toBe('hello')
@@ -548,6 +562,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -555,6 +570,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -583,6 +599,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -590,6 +607,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -618,6 +636,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -625,6 +644,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -655,6 +675,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -662,6 +683,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -692,6 +714,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -699,6 +722,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -729,6 +753,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -736,6 +761,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -766,6 +792,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -773,6 +800,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -801,6 +829,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1) // Failure happens after task creates a simple document, but still within the task => any document creation should be rolled back
@@ -808,6 +837,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error amountRetried is new arbitrary data and not in the type
@@ -854,6 +884,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -861,6 +892,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
     expect(jobAfterRun.totalTried).toBe(5)
     expect((jobAfterRun.taskStatus as JobTaskStatus).inline?.['1']?.totalTried).toBe(5)
@@ -933,6 +965,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           equals: message,
         },
       },
+      overrideAccess: true,
     })
     expect(createdDocuments.totalDocs).toBe(1)
 
@@ -971,6 +1004,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           equals: message,
         },
       },
+      overrideAccess: true,
     })
     expect(createdDocuments.totalDocs).toBe(1)
 
@@ -1004,6 +1038,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       collection: 'simple',
       limit: 100,
       sort: 'createdAt',
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(2)
@@ -1038,6 +1073,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       collection: 'simple',
       limit: 100,
       sort: 'createdAt',
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(2)
@@ -1076,6 +1112,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       collection: 'simple',
       limit: 100,
       sort: 'createdAt',
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(2)
@@ -1096,6 +1133,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -1110,12 +1148,22 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       },
     })
 
-    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    const before = await payload.findByID({
+      collection: 'payload-jobs',
+      id,
+      disableErrors: true,
+      overrideAccess: true,
+    })
     expect(before?.id).toBe(id)
 
     await payload.jobs.run({ silent: true })
 
-    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    const after = await payload.findByID({
+      collection: 'payload-jobs',
+      id,
+      disableErrors: true,
+      overrideAccess: true,
+    })
     expect(after).toBeNull()
   })
 
@@ -1125,12 +1173,22 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       input: {},
     })
 
-    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    const before = await payload.findByID({
+      collection: 'payload-jobs',
+      id,
+      disableErrors: true,
+      overrideAccess: true,
+    })
     expect(before?.id).toBe(id)
 
     await payload.jobs.run({ silent: true })
 
-    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    const after = await payload.findByID({
+      collection: 'payload-jobs',
+      id,
+      disableErrors: true,
+      overrideAccess: true,
+    })
     expect(after?.id).toBe(id)
     expect(after?.processingUntil).toBeFalsy()
     expect(after?.processingToken).toBeFalsy()
@@ -1145,12 +1203,22 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       },
     })
 
-    const before = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    const before = await payload.findByID({
+      collection: 'payload-jobs',
+      id,
+      disableErrors: true,
+      overrideAccess: true,
+    })
     expect(before?.id).toBe(id)
 
     await payload.jobs.run({ silent: true })
 
-    const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
+    const after = await payload.findByID({
+      collection: 'payload-jobs',
+      id,
+      disableErrors: true,
+      overrideAccess: true,
+    })
     expect(after?.id).toBe(id)
     expect(after?.processingUntil).toBeFalsy()
     expect(after?.processingToken).toBeFalsy()
@@ -1169,6 +1237,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -1206,6 +1275,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const jobAfterRun = await payload.findByID({
         collection: 'payload-jobs',
         id: job.id,
+        overrideAccess: true,
       })
 
       expect(jobAfterRun.hasError).toBe(true)
@@ -1232,6 +1302,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const jobAfterRun = await payload.findByID({
         collection: 'payload-jobs',
         id: job.id,
+        overrideAccess: true,
       })
 
       expect(jobAfterRun.hasError).toBe(true)
@@ -1255,6 +1326,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     expect(jobAfterRun.hasError).toBe(true)
@@ -1283,6 +1355,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // Initial attempt + 1 retry = 2. Once hasError is true the queue stops picking it up,
@@ -1357,6 +1430,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
               const currentJob = await payload.findByID({
                 id: job.id,
                 collection: 'payload-jobs',
+                overrideAccess: true,
               })
 
               processingUntil = currentJob.processingUntil
@@ -1388,10 +1462,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           const completedJob = await payload.findByID({
             id: job.id,
             collection: 'payload-jobs',
+            overrideAccess: true,
           })
           const createdPosts = await payload.find({
             collection: 'posts',
             where: { title: { equals: postTitle } },
+            overrideAccess: true,
           })
 
           expect(replacementWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
@@ -1436,6 +1512,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
               await payload.findByID({
                 id: job.id,
                 collection: 'payload-jobs',
+                overrideAccess: true,
               })
             ).processingToken,
         )
@@ -1458,10 +1535,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const completedJob = await payload.findByID({
         id: job.id,
         collection: 'payload-jobs',
+        overrideAccess: true,
       })
       const createdPosts = await payload.find({
         collection: 'posts',
         where: { title: { equals: postTitle } },
+        overrideAccess: true,
       })
       const workersThatRecoveredTheJob = replacementWorkers.filter(
         (result) => result.jobStatus?.[job.id],
@@ -1500,6 +1579,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
               await payload.findByID({
                 id: job.id,
                 collection: 'payload-jobs',
+                overrideAccess: true,
               })
             ).processingToken,
         )
@@ -1512,10 +1592,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const completedJob = await payload.findByID({
         id: job.id,
         collection: 'payload-jobs',
+        overrideAccess: true,
       })
       const createdPosts = await payload.find({
         collection: 'posts',
         where: { title: { equals: postTitle } },
+        overrideAccess: true,
       })
       Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
 
@@ -1546,10 +1628,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const completedJob = await payload.findByID({
         id: job.id,
         collection: 'payload-jobs',
+        overrideAccess: true,
       })
       const createdPosts = await payload.find({
         collection: 'posts',
         where: { title: { equals: postTitle } },
+        overrideAccess: true,
       })
 
       expect(unresponsiveWorkerResult.jobStatus?.[job.id]).toBeUndefined()
@@ -1582,6 +1666,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
               await payload.findByID({
                 id: job.id,
                 collection: 'payload-jobs',
+                overrideAccess: true,
               })
             ).processingToken,
         )
@@ -1595,10 +1680,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const completedJob = await payload.findByID({
         id: job.id,
         collection: 'payload-jobs',
+        overrideAccess: true,
       })
       const createdPosts = await payload.find({
         collection: 'posts',
         where: { title: { equals: postTitle } },
+        overrideAccess: true,
       })
 
       expect(timedOutWorkerResult.jobStatus?.[job.id]).toBeUndefined()
@@ -1633,6 +1720,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -1652,6 +1740,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           },
           taskSlug: 'CreateSimple',
         },
+        overrideAccess: true,
       })
 
       const _req = await createLocalReq({}, payload)
@@ -1671,6 +1760,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
+        overrideAccess: true,
       })
 
       /**
@@ -1693,6 +1783,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -1701,6 +1792,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         data: {
           title: 'from single task',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -1714,6 +1806,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
+        overrideAccess: true,
       })
 
       await commitTransaction(t2Req)
@@ -1733,6 +1826,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
+        overrideAccess: true,
       })
       await commitTransaction(t1Req)
     }
@@ -1746,6 +1840,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(30)
@@ -1766,6 +1861,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(8)
@@ -1799,6 +1895,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: numberOfTasks,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(numberOfTasks) // Default limit: 10
@@ -1821,6 +1918,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 1000,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(10) // Default limit: 10
@@ -1846,6 +1944,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 1000,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(42) // Default limit: 10
@@ -1881,6 +1980,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(9)
@@ -1913,6 +2013,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -1932,6 +2033,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -1963,6 +2065,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -1976,6 +2079,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
 
     expect(allCompletedJobs.totalDocs).toBe(1)
@@ -2013,6 +2117,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -2026,6 +2131,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
 
     expect(allCompletedJobs.totalDocs).toBe(1)
@@ -2058,6 +2164,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -2071,6 +2178,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           exists: true,
         },
       },
+      overrideAccess: true,
     })
 
     expect(allCompletedJobs.totalDocs).toBe(1)
@@ -2091,6 +2199,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(2)
@@ -2100,6 +2209,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     expect(jobAfterRun?.log?.[0]?.taskID).toBe('create doc 1')
@@ -2140,6 +2250,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -2148,6 +2259,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // @ts-expect-error
@@ -2171,6 +2283,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       collection: 'payload-jobs',
       id: job.id,
       depth: 0,
+      overrideAccess: true,
     })
     expect(jobAfterRunProcessing.processingUntil).toBeTruthy()
     expect(jobAfterRunProcessing.processingToken).toBeTruthy()
@@ -2190,6 +2303,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       collection: 'payload-jobs',
       id: job.id,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(Boolean(jobAfterRun.completedAt)).toBe(false)
@@ -2234,6 +2348,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       collection: 'payload-jobs',
       id: job.id,
       depth: 0,
+      overrideAccess: true,
     })
 
     expect(Boolean(jobAfterRun.completedAt)).toBe(false)
@@ -2267,6 +2382,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         collection: 'payload-jobs',
         id: job.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       // @ts-expect-error error is not typed
@@ -2282,6 +2398,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         collection: 'payload-jobs',
         id: job.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(jobAfterRun2.totalTried).toBe(2)
@@ -2319,6 +2436,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         collection: 'payload-jobs',
         id: job.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(Boolean(jobAfterRun.completedAt)).toBe(false)
@@ -2336,6 +2454,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         collection: 'payload-jobs',
         id: job.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(jobAfterRun2.totalTried).toBe(jobAfterRun.totalTried)
@@ -2366,6 +2485,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         collection: 'payload-jobs',
         id: job.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(jobAfterRun.log?.length).toBe(1)
@@ -2381,6 +2501,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         collection: 'payload-jobs',
         id: job.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(jobAfterRun2.totalTried).toBe(2)
@@ -2420,6 +2541,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         collection: 'payload-jobs',
         id: job.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(Boolean(jobAfterRun.completedAt)).toBe(false)
@@ -2437,6 +2559,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         collection: 'payload-jobs',
         id: job.id,
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(jobAfterRun2.totalTried).toBe(jobAfterRun.totalTried)
@@ -2457,6 +2580,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     expect(jobAfterRun.hasError).toBe(true)
@@ -2485,6 +2609,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
@@ -2496,6 +2621,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       collection: 'simple',
       limit: amount,
       depth: 0,
+      overrideAccess: true,
     })
     expect(simpleDocs.docs).toHaveLength(amount)
 
@@ -2527,6 +2653,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const jobAfterRun = await payload.findByID({
       collection: 'payload-jobs',
       id: job.id,
+      overrideAccess: true,
     })
 
     // error can be defined while hasError is true, as hasError: true is only set if the job cannot retry anymore.
@@ -2552,6 +2679,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)
@@ -2616,10 +2744,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const job1After = await payload.findByID({
         collection: 'payload-jobs',
         id: job1.id,
+        overrideAccess: true,
       })
       const job2After = await payload.findByID({
         collection: 'payload-jobs',
         id: job2.id,
+        overrideAccess: true,
       })
 
       expect(job1After.completedAt).toBeDefined()
@@ -2659,10 +2789,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const job1After = await payload.findByID({
         collection: 'payload-jobs',
         id: job1.id,
+        overrideAccess: true,
       })
       const job2After = await payload.findByID({
         collection: 'payload-jobs',
         id: job2.id,
+        overrideAccess: true,
       })
 
       // First job should be completed
@@ -2677,6 +2809,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const job2Final = await payload.findByID({
         collection: 'payload-jobs',
         id: job2.id,
+        overrideAccess: true,
       })
 
       expect(job2Final.completedAt).toBeDefined()
@@ -2710,6 +2843,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           payload.findByID({
             collection: 'payload-jobs',
             id: job.id,
+            overrideAccess: true,
           }),
         ),
       )
@@ -2725,6 +2859,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           payload.findByID({
             collection: 'payload-jobs',
             id: job.id,
+            overrideAccess: true,
           }),
         ),
       )
@@ -2740,6 +2875,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           payload.findByID({
             collection: 'payload-jobs',
             id: job.id,
+            overrideAccess: true,
           }),
         ),
       )
@@ -2781,10 +2917,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const job1After = await payload.findByID({
         collection: 'payload-jobs',
         id: job1.id,
+        overrideAccess: true,
       })
       const job2After = await payload.findByID({
         collection: 'payload-jobs',
         id: job2.id,
+        overrideAccess: true,
       })
 
       expect(job1After.completedAt).toBeDefined()
@@ -2821,10 +2959,26 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       await payload.jobs.run({ silent: true, limit: 10 })
 
       const results = await Promise.all([
-        payload.findByID({ collection: 'payload-jobs', id: concurrentJob1.id }),
-        payload.findByID({ collection: 'payload-jobs', id: concurrentJob2.id }),
-        payload.findByID({ collection: 'payload-jobs', id: differentKeyJob.id }),
-        payload.findByID({ collection: 'payload-jobs', id: noConcurrencyJob.id }),
+        payload.findByID({
+          collection: 'payload-jobs',
+          id: concurrentJob1.id,
+          overrideAccess: true,
+        }),
+        payload.findByID({
+          collection: 'payload-jobs',
+          id: concurrentJob2.id,
+          overrideAccess: true,
+        }),
+        payload.findByID({
+          collection: 'payload-jobs',
+          id: differentKeyJob.id,
+          overrideAccess: true,
+        }),
+        payload.findByID({
+          collection: 'payload-jobs',
+          id: noConcurrencyJob.id,
+          overrideAccess: true,
+        }),
       ])
 
       // concurrentJob1 should complete (first with shared-key)
@@ -2842,6 +2996,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const concurrentJob2After = await payload.findByID({
         collection: 'payload-jobs',
         id: concurrentJob2.id,
+        overrideAccess: true,
       })
       expect(concurrentJob2After.completedAt).toBeDefined()
     })
@@ -2871,9 +3026,9 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       await payload.jobs.run({ silent: true, limit: 10 })
 
       let results = await Promise.all([
-        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id, overrideAccess: true }),
       ])
 
       expect(results[0].completedAt).toBeDefined() // A completed
@@ -2884,9 +3039,9 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       await payload.jobs.run({ silent: true, limit: 10 })
 
       results = await Promise.all([
-        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id, overrideAccess: true }),
       ])
 
       expect(results[0].completedAt).toBeDefined() // A completed
@@ -2897,9 +3052,9 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       await payload.jobs.run({ silent: true, limit: 10 })
 
       results = await Promise.all([
-        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id, overrideAccess: true }),
       ])
 
       expect(results[0].completedAt).toBeDefined() // A completed
@@ -2937,9 +3092,9 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
 
       let results = await Promise.all([
-        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id, overrideAccess: true }),
       ])
 
       expect(results[0].completedAt).toBeFalsy() // A waiting
@@ -2950,9 +3105,9 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
 
       results = await Promise.all([
-        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id, overrideAccess: true }),
       ])
 
       expect(results[0].completedAt).toBeFalsy() // A still waiting
@@ -2963,9 +3118,9 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       await payload.jobs.run({ silent: true, limit: 10, queue: 'lifo' })
 
       results = await Promise.all([
-        payload.findByID({ collection: 'payload-jobs', id: jobA.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobB.id }),
-        payload.findByID({ collection: 'payload-jobs', id: jobC.id }),
+        payload.findByID({ collection: 'payload-jobs', id: jobA.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobB.id, overrideAccess: true }),
+        payload.findByID({ collection: 'payload-jobs', id: jobC.id, overrideAccess: true }),
       ])
 
       expect(results[0].completedAt).toBeDefined() // A completed
@@ -3003,6 +3158,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const pendingJobStatus = await payload.findByID({
         collection: 'payload-jobs',
         id: pendingJob.id,
+        overrideAccess: true,
       })
 
       expect(pendingJobStatus.completedAt).toBeFalsy()
@@ -3017,6 +3173,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const pendingJobFinal = await payload.findByID({
         collection: 'payload-jobs',
         id: pendingJob.id,
+        overrideAccess: true,
       })
 
       expect(pendingJobFinal.completedAt).toBeDefined()
@@ -3052,8 +3209,12 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       ])
 
       const results = await Promise.all([
-        payload.findByID({ collection: 'payload-jobs', id: defaultQueueJob.id }),
-        payload.findByID({ collection: 'payload-jobs', id: lifoQueueJob.id }),
+        payload.findByID({
+          collection: 'payload-jobs',
+          id: defaultQueueJob.id,
+          overrideAccess: true,
+        }),
+        payload.findByID({ collection: 'payload-jobs', id: lifoQueueJob.id, overrideAccess: true }),
       ])
 
       // Both should complete because they have different concurrency keys
@@ -3086,6 +3247,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           .findByID({
             collection: 'payload-jobs',
             id: jobA.id,
+            overrideAccess: true,
           })
           .catch(() => null)
 
@@ -3093,12 +3255,14 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           .findByID({
             collection: 'payload-jobs',
             id: jobB.id,
+            overrideAccess: true,
           })
           .catch(() => null)
 
         const jobCAfter = await payload.findByID({
           collection: 'payload-jobs',
           id: jobC.id,
+          overrideAccess: true,
         })
 
         // A and B should be deleted
@@ -3134,6 +3298,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         const runningJobAfter = await payload.findByID({
           collection: 'payload-jobs',
           id: runningJob.id,
+          overrideAccess: true,
         })
 
         expect(runningJobAfter).not.toBeNull()
@@ -3143,6 +3308,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         const newJobAfter = await payload.findByID({
           collection: 'payload-jobs',
           id: newJob.id,
+          overrideAccess: true,
         })
 
         expect(newJobAfter).not.toBeNull()
@@ -3154,8 +3320,8 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         await payload.jobs.run({ silent: true, limit: 10 })
 
         const finalResults = await Promise.all([
-          payload.findByID({ collection: 'payload-jobs', id: runningJob.id }),
-          payload.findByID({ collection: 'payload-jobs', id: newJob.id }),
+          payload.findByID({ collection: 'payload-jobs', id: runningJob.id, overrideAccess: true }),
+          payload.findByID({ collection: 'payload-jobs', id: newJob.id, overrideAccess: true }),
         ])
 
         // Both should have completed
@@ -3202,6 +3368,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
             .findByID({
               collection: 'payload-jobs',
               id: job.id,
+              overrideAccess: true,
             })
             .catch(() => null)
 
@@ -3222,6 +3389,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         const finalJob = await payload.findByID({
           collection: 'payload-jobs',
           id: lastExistingJob.id,
+          overrideAccess: true,
         })
 
         expect(finalJob.completedAt).toBeDefined()
@@ -3260,18 +3428,21 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         const runningJobCheck = await payload.findByID({
           collection: 'payload-jobs',
           id: runningJob.id,
+          overrideAccess: true,
         })
 
         const middleJobCheck = await payload
           .findByID({
             collection: 'payload-jobs',
             id: middleJob.id,
+            overrideAccess: true,
           })
           .catch(() => null)
 
         const latestJobCheck = await payload.findByID({
           collection: 'payload-jobs',
           id: latestJob.id,
+          overrideAccess: true,
         })
 
         // Running job should still exist and be processing
@@ -3289,8 +3460,8 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
         await payload.jobs.run({ silent: true, limit: 10 })
 
         const finalResults = await Promise.all([
-          payload.findByID({ collection: 'payload-jobs', id: runningJob.id }),
-          payload.findByID({ collection: 'payload-jobs', id: latestJob.id }),
+          payload.findByID({ collection: 'payload-jobs', id: runningJob.id, overrideAccess: true }),
+          payload.findByID({ collection: 'payload-jobs', id: latestJob.id, overrideAccess: true }),
         ])
 
         // Both running and latest jobs should complete
@@ -3302,6 +3473,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
           .findByID({
             collection: 'payload-jobs',
             id: middleJob.id,
+            overrideAccess: true,
           })
           .catch(() => null)
 
@@ -3328,6 +3500,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const baselineDocs = await payload.find({
         collection: 'simple',
         where: { title: { equals: 'baseline-job' } },
+        overrideAccess: true,
       })
       expect(baselineDocs.totalDocs).toBe(1)
 
@@ -3374,6 +3547,7 @@ test.suite('Queues - Payload', { config: './config.ts' }, () => {
       const afterRecoveryDocs = await payload.find({
         collection: 'simple',
         where: { title: { equals: 'after-recovery' } },
+        overrideAccess: true,
       })
       expect(afterRecoveryDocs.totalDocs).toBe(1)
 

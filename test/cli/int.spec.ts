@@ -349,6 +349,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
     const pages = await payload.count({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'not created' } },
     })
 
@@ -410,6 +411,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     })
     const seededPages = await payload.count({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'Seeded page' } },
     })
 
@@ -499,6 +501,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
       )
       const pages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         pagination: false,
         sort: 'title',
         where: { title: { in: ['one', 'two'] } },
@@ -539,6 +542,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const output = await cli(`createDocuments --slug pages --documents @${documentsFile} --json`)
     const pages = await payload.find({
       collection: 'pages',
+      overrideAccess: true,
       pagination: false,
       where: { title: { in: ['file one', 'file two'] } },
     })
@@ -571,6 +575,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const response = JSON.parse(output.stdout)
     const pages = await payload.find({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'Merged input' } },
     })
 
@@ -607,6 +612,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const createdMedia = await payload.findByID({
       id: response.result.docs[0].id,
       collection: 'media',
+      overrideAccess: true,
     })
 
     expect(response).toMatchObject({
@@ -653,6 +659,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const response = JSON.parse(output.stdout)
     const created = await payload.find({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'created' } },
     })
 
@@ -691,6 +698,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const response = JSON.parse(output.stdout)
     const pages = await payload.find({
       collection: 'pages',
+      overrideAccess: true,
       where: { title: { equals: 'Seeded page' } },
     })
 
@@ -725,12 +733,17 @@ test.suite('CLI', { config: './config.ts' }, () => {
         requireMetadata: true,
         title: 'Nested update',
       },
+      overrideAccess: true,
     })
     const output = await cli({
       command: `updateDocument --slug pages --id ${page.id} --data '{"metadata":{"title":"Updated"}}' --returning --json`,
       reject: false,
     })
-    const updatedPage = await payload.findByID({ collection: 'pages', id: page.id })
+    const updatedPage = await payload.findByID({
+      id: page.id,
+      collection: 'pages',
+      overrideAccess: true,
+    })
 
     expect(output.exitCode).toBe(0)
     expect(updatedPage.metadata).toEqual({
@@ -746,11 +759,16 @@ test.suite('CLI', { config: './config.ts' }, () => {
       const page = await payload.create({
         collection: 'pages',
         data: { title: 'Numeric ID' },
+        overrideAccess: true,
       })
       const output = await cli(
         `updateDocument --slug pages --id ${page.id} --data '{"title":"Updated"}' --override-access false --json`,
       )
-      const updatedPage = await payload.findByID({ id: page.id, collection: 'pages' })
+      const updatedPage = await payload.findByID({
+        id: page.id,
+        collection: 'pages',
+        overrideAccess: true,
+      })
 
       expect(output.exitCode).toBe(0)
       expect(updatedPage.title).toBe('Updated')
@@ -764,17 +782,27 @@ test.suite('CLI', { config: './config.ts' }, () => {
     await payload.create({
       collection: 'custom-ids',
       data: { id: '1e5', title: 'Target' },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'custom-ids',
       data: { id: '100000', title: 'Other' },
+      overrideAccess: true,
     })
 
     const output = await cli(
       `updateDocument --slug custom-ids --id 1e5 --data '{"title":"Updated"}' --json`,
     )
-    const target = await payload.findByID({ id: '1e5', collection: 'custom-ids' })
-    const other = await payload.findByID({ id: '100000', collection: 'custom-ids' })
+    const target = await payload.findByID({
+      id: '1e5',
+      collection: 'custom-ids',
+      overrideAccess: true,
+    })
+    const other = await payload.findByID({
+      id: '100000',
+      collection: 'custom-ids',
+      overrideAccess: true,
+    })
 
     expect(output.exitCode).toBe(0)
     expect(target.title).toBe('Updated')
@@ -788,12 +816,17 @@ test.suite('CLI', { config: './config.ts' }, () => {
     await payload.create({
       collection: 'custom-ids',
       data: { id: '123', title: 'Target' },
+      overrideAccess: true,
     })
 
     const output = await cli(
       `updateDocument --input '{"slug":"custom-ids","id":123,"data":{"title":"Updated"},"overrideAccess":false}' --json`,
     )
-    const target = await payload.findByID({ id: '123', collection: 'custom-ids' })
+    const target = await payload.findByID({
+      id: '123',
+      collection: 'custom-ids',
+      overrideAccess: true,
+    })
 
     expect(output.exitCode).toBe(0)
     expect(target.title).toBe('Updated')
@@ -806,10 +839,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
     await payload.create({
       collection: 'custom-ids',
       data: { id: '12345678901234567890', title: 'Target' },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'custom-ids',
       data: { id: '12345678901234567000', title: 'Rounded ID' },
+      overrideAccess: true,
     })
 
     const output = await cli('deleteDocuments --slug custom-ids --id 12345678901234567890 --json')
@@ -817,10 +852,12 @@ test.suite('CLI', { config: './config.ts' }, () => {
       id: '12345678901234567890',
       collection: 'custom-ids',
       disableErrors: true,
+      overrideAccess: true,
     })
     const roundedIDDocument = await payload.findByID({
       id: '12345678901234567000',
       collection: 'custom-ids',
+      overrideAccess: true,
     })
 
     expect(output.exitCode).toBe(0)
@@ -835,6 +872,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const seededPage = await payload.find({
       collection: 'pages',
       limit: 1,
+      overrideAccess: true,
       where: { title: { equals: 'Seeded page' } },
     })
     const output = await cli({
@@ -842,7 +880,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
       reject: false,
     })
     const response = JSON.parse(output.stdout)
-    const pages = await payload.count({ collection: 'pages' })
+    const pages = await payload.count({ collection: 'pages', overrideAccess: true })
 
     expect(output.exitCode).toBe(1)
     expect(pages.totalDocs).toBe(1)
@@ -867,7 +905,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
       reject: false,
     })
     const response = JSON.parse(output.stdout)
-    const settings = await payload.findGlobal({ slug: 'settings' })
+    const settings = await payload.findGlobal({ slug: 'settings', overrideAccess: true })
 
     expect(output.exitCode).toBe(1)
     expect(settings.title).toBe('Seeded settings')
@@ -894,6 +932,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
       )
       const updated = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: { title: { equals: 'Updated page' } },
       })
 
@@ -915,6 +954,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const seededMedia = await payload.find({
       collection: 'media',
       limit: 1,
+      overrideAccess: true,
       where: { title: { equals: 'Seeded media' } },
     })
     const output = await cli(
@@ -923,6 +963,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const updatedMedia = await payload.findByID({
       id: seededMedia.docs[0]!.id,
       collection: 'media',
+      overrideAccess: true,
     })
 
     expect(output.stdout).toContain('"title": "Updated media"')
@@ -940,6 +981,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const seededMedia = await payload.find({
       collection: 'media',
       limit: 1,
+      overrideAccess: true,
       where: { title: { equals: 'Seeded media' } },
     })
     const file = JSON.stringify({
@@ -955,6 +997,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const updatedMedia = await payload.findByID({
       id: seededMedia.docs[0]!.id,
       collection: 'media',
+      overrideAccess: true,
     })
 
     expect(updatedMedia).toMatchObject({
@@ -998,6 +1041,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
       const jobsBefore = (await payload.find({
         collection: 'payload-jobs',
         limit: 100,
+        overrideAccess: true,
       } as never)) as { docs: unknown[] }
 
       expect(jobsBefore.docs).toHaveLength(0)
@@ -1006,6 +1050,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
       const jobsAfter = (await payload.find({
         collection: 'payload-jobs',
         limit: 100,
+        overrideAccess: true,
       } as never)) as {
         docs: Array<{ meta?: { scheduled?: boolean }; taskSlug?: string }>
       }
@@ -1029,6 +1074,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const jobsBefore = (await payload.find({
       collection: 'payload-jobs',
       limit: 100,
+      overrideAccess: true,
     } as never)) as { docs: unknown[] }
 
     expect(jobsBefore.docs).toHaveLength(0)
@@ -1037,6 +1083,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const jobsAfter = (await payload.find({
       collection: 'payload-jobs',
       limit: 100,
+      overrideAccess: true,
     } as never)) as { docs: unknown[] }
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload jobs:handle-schedules')
@@ -1051,8 +1098,13 @@ test.suite('CLI', { config: './config.ts' }, () => {
       const jobsBefore = (await payload.find({
         collection: 'payload-jobs',
         limit: 100,
+        overrideAccess: true,
       } as never)) as { docs: unknown[] }
-      const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+      const pagesBefore = (await payload.find({
+        collection: 'pages',
+        limit: 100,
+        overrideAccess: true,
+      } as never)) as {
         docs: Array<{ title: string }>
       }
 
@@ -1060,7 +1112,11 @@ test.suite('CLI', { config: './config.ts' }, () => {
       expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
 
       const output = await cli('jobs:run --all-queues --limit 1 --json')
-      const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+      const pagesAfter = (await payload.find({
+        collection: 'pages',
+        limit: 100,
+        overrideAccess: true,
+      } as never)) as {
         docs: Array<{ title: string }>
       }
 
@@ -1076,14 +1132,22 @@ test.suite('CLI', { config: './config.ts' }, () => {
 
   test.options('jobs:run --help', { db: 'mongo' }, async ({ cli, payload }) => {
     await payload.jobs.queue({ input: {}, task: 'noop' } as never)
-    const pagesBefore = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+    const pagesBefore = (await payload.find({
+      collection: 'pages',
+      limit: 100,
+      overrideAccess: true,
+    } as never)) as {
       docs: Array<{ title: string }>
     }
 
     expect(pagesBefore.docs.map(({ title }) => title)).not.toContain('CLI job ran')
 
     const output = await cli('jobs:run --help')
-    const pagesAfter = (await payload.find({ collection: 'pages', limit: 100 } as never)) as {
+    const pagesAfter = (await payload.find({
+      collection: 'pages',
+      limit: 100,
+      overrideAccess: true,
+    } as never)) as {
       docs: Array<{ title: string }>
     }
 
@@ -1096,12 +1160,20 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
     const output = await cli('migrate --json')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toMatchObject({
       batch: 1,
@@ -1122,12 +1194,20 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_pending.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
     const output = await cli('migrate --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate')
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
@@ -1175,12 +1255,20 @@ test.suite('CLI', { config: './config.ts' }, () => {
       .find((file) => file.endsWith('_down.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeDefined()
 
     const output = await cli('migrate:down --json')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
@@ -1202,7 +1290,11 @@ test.suite('CLI', { config: './config.ts' }, () => {
     await cli('migrate --json')
 
     const output = await cli('migrate:down --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:down')
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeDefined()
@@ -1216,12 +1308,20 @@ test.suite('CLI', { config: './config.ts' }, () => {
       const migrationName = (await readdir(migrationsDirectory))
         .find((file) => file.endsWith('_fresh.ts'))!
         .replace('.ts', '')
-      const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      const migrationsBefore = await payload.find({
+        collection: 'payload-migrations',
+        limit: 100,
+        overrideAccess: true,
+      })
 
       expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
       const output = await cli('migrate:fresh --force-accept-warning --json')
-      const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+      const migrationsAfter = await payload.find({
+        collection: 'payload-migrations',
+        limit: 100,
+        overrideAccess: true,
+      })
 
       expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toMatchObject({
         batch: 1,
@@ -1244,12 +1344,20 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_fresh.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
     const output = await cli('migrate:fresh --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:fresh')
     expect(migrationsAfter.docs.find(({ name }) => name === migrationName)).toBeUndefined()
@@ -1261,13 +1369,21 @@ test.suite('CLI', { config: './config.ts' }, () => {
       .find((file) => file.endsWith('_refresh.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
     const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
     expect(migrationBefore).toBeDefined()
 
     const output = await cli('migrate:refresh --json')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
     const migrationAfter = migrationsAfter.docs.find(({ name }) => name === migrationName)
 
     expect(migrationAfter).toBeDefined()
@@ -1292,6 +1408,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const migrationsBefore = await payload.find({
       collection: 'payload-migrations',
       limit: 100,
+      overrideAccess: true,
     })
     const migrationBefore = migrationsBefore.docs.find(({ name }) => name === migrationName)
 
@@ -1299,6 +1416,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const migrationsAfter = await payload.find({
       collection: 'payload-migrations',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:refresh')
@@ -1313,12 +1431,20 @@ test.suite('CLI', { config: './config.ts' }, () => {
       .find((file) => file.endsWith('_reset.ts'))!
       .replace('.ts', '')
     await cli('migrate --json')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeDefined()
 
     const output = await cli('migrate:reset --json')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsAfter.docs).toHaveLength(0)
 
@@ -1343,6 +1469,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const migrationsAfter = await payload.find({
       collection: 'payload-migrations',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:reset')
@@ -1354,7 +1481,11 @@ test.suite('CLI', { config: './config.ts' }, () => {
     const migrationName = (await readdir(migrationsDirectory))
       .find((file) => file.endsWith('_status.ts'))!
       .replace('.ts', '')
-    const migrationsBefore = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsBefore = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(migrationsBefore.docs.find(({ name }) => name === migrationName)).toBeUndefined()
 
@@ -1382,7 +1513,11 @@ test.suite('CLI', { config: './config.ts' }, () => {
       .replace('.ts', '')
 
     const output = await cli('migrate:status --help')
-    const migrationsAfter = await payload.find({ collection: 'payload-migrations', limit: 100 })
+    const migrationsAfter = await payload.find({
+      collection: 'payload-migrations',
+      limit: 100,
+      overrideAccess: true,
+    })
 
     expect(`${output.stdout}\n${output.stderr}`).toContain('Usage: payload migrate:status')
     expect(`${output.stdout}\n${output.stderr}`).not.toContain(migrationName)
