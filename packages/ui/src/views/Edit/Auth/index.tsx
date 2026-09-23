@@ -56,7 +56,7 @@ export const Auth: React.FC<Props> = (props) => {
     typeof docPermissions.fields === 'object' &&
     ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
-  if (typeof docPermissions.fields === 'object') {
+  if (docPermissions.fields !== null && typeof docPermissions.fields === 'object') {
     const { permissions: passwordPermissions } = getFieldPermissions({
       field: { name: 'password', type: 'text' },
       operation,
