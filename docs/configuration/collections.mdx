@@ -164,9 +164,8 @@ export const Posts: CollectionConfig = {
 
 How the values are set:
 
-- On create, both `createdBy` and `updatedBy` are set from the authenticated user on the request (`req.user`).
-- On update, `updatedBy` is set from `req.user`. `createdBy` is immutable once set.
-- Passing `createdBy` / `updatedBy` in your `data` overrides the system-derived user. Passing `null` clears the field.
+- On create, both `createdBy` and `updatedBy` are set from the authenticated user on the request (`req.user`). Passing either field in your `data` overrides the system-derived value.
+- On update, `updatedBy` is set from `req.user`; passing `updatedBy` in your `data` overrides it, and passing `null` clears it. `createdBy` is immutable once set, so passing it on update has no effect.
 - When there is no user on the request (e.g. a Local API call without `req.user`), the existing value is left unchanged.
 
 <Banner type="warning">
