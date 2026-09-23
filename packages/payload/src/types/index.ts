@@ -331,7 +331,7 @@ export type TransformGlobalWithSelect<
 
 export type PopulateType = Partial<TypedCollectionSelect>
 
-export type { OverrideAccessOption } from './operations.js'
+export type { SharedLocalAPIOptions } from './operations.js'
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
 

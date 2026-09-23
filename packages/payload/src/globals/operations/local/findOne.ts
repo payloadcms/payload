@@ -13,7 +13,7 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
-import type { OverrideAccessOption } from '../../../types/operations.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DraftFlagFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
@@ -80,9 +80,9 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & OverrideAccessOption &
-  Pick<FindOptions<string, SelectType>, 'select'> &
-  Pick<GlobalFindOneArgs, 'flattenLocales'>
+} & Pick<FindOptions<string, SelectType>, 'select'> &
+  Pick<GlobalFindOneArgs, 'flattenLocales'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseFindOneOptions<
   TSlug,

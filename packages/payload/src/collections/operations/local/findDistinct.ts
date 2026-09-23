@@ -11,7 +11,7 @@ import type {
   User,
   Where,
 } from '../../../index.js'
-import type { OverrideAccessOption } from '../../../types/operations.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 
 import { APIError, createLocalReq } from '../../../index.js'
@@ -95,7 +95,7 @@ export type Options<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & OverrideAccessOption
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function findDistinct<
   TSlug extends CollectionSlug,

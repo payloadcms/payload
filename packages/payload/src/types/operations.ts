@@ -1,4 +1,4 @@
-export type OverrideAccessOption = {
+export type SharedLocalAPIOptions = {
   /**
    * Set to `true` to skip access control for this operation.
    *

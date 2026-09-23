@@ -7,7 +7,7 @@ import type {
   User,
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
-import type { OverrideAccessOption } from '../../../types/operations.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
@@ -68,8 +68,8 @@ export type Options<TSlug extends GlobalSlug> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: null | User
-} & OverrideAccessOption &
-  Pick<FindOptions<string, SelectType>, 'select'>
+} & Pick<FindOptions<string, SelectType>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
   payload: Payload,

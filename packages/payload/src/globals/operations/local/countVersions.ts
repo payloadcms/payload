@@ -1,6 +1,6 @@
 import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
-import type { OverrideAccessOption } from '../../../types/operations.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -40,7 +40,7 @@ export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & OverrideAccessOption
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function countGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,

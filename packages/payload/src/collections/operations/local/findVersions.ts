@@ -8,7 +8,7 @@ import type {
   User,
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../../types/index.js'
-import type { OverrideAccessOption } from '../../../types/operations.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
@@ -94,8 +94,8 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & OverrideAccessOption &
-  Pick<FindOptions<TSlug, SelectType>, 'select'>
+} & Pick<FindOptions<TSlug, SelectType>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
   DraftFlagFromCollectionSlug<TSlug>
