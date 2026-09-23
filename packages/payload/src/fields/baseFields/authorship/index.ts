@@ -68,14 +68,25 @@ const setUpdatedBy: FieldHook = ({ context, data, overrideAccess, previousValue,
     return (data as Record<string, unknown> | undefined)?.updatedBy as RelationValue
   }
 
-  // No usable user (e.g. Local API without `req.user`): leave unchanged.
   return userToRelation(req) ?? previousValue
 }
 
-const setCreatedBy: FieldHook = ({ context, data, overrideAccess, previousValue, req }) => {
-  // Immutable once set. Keying off previousValue (not the operation) means globals —
-  // created via `update` — still get stamped on first write.
-  if (previousValue) {
+const setCreatedBy: FieldHook = ({
+  collection,
+  context,
+  data,
+  operation,
+  originalDoc,
+  overrideAccess,
+  previousValue,
+  req,
+}) => {
+  // Globals always write via `update`, so their first write is detected by a still-empty original doc.
+  const isFirstWrite = collection
+    ? operation === 'create'
+    : !originalDoc || Object.keys(originalDoc).length === 0
+
+  if (!isFirstWrite) {
     return previousValue
   }
 
@@ -86,8 +97,7 @@ const setCreatedBy: FieldHook = ({ context, data, overrideAccess, previousValue,
   return userToRelation(req) ?? previousValue
 }
 
-// On duplicate, drop the copied value so the new document is re-attributed to the
-// duplicating user by the beforeChange hook rather than inheriting the original author.
+// Drop the copied value so beforeChange re-attributes the duplicate to the duplicating user.
 const clearCreatedByOnDuplicate: FieldHook = ({ siblingData }) => {
   delete siblingData.createdBy
 }
@@ -123,7 +133,7 @@ export const createCreatedByField = ({
     ...overrides,
     name: 'createdBy',
     type: 'relationship',
-    // Block client writes so authorship can't be spoofed; the hook sets the value.
+    // Not writable under enforced access; only overrideAccess (trusted) callers can supply a value.
     access: { create: () => false, update: () => false, ...overrides?.access },
     admin: { disabled: { bulkEdit: true }, hidden: true, ...overrides?.admin },
     hooks: {
@@ -151,7 +161,7 @@ export const createUpdatedByField = ({
     ...overrides,
     name: 'updatedBy',
     type: 'relationship',
-    // Block client writes so authorship can't be spoofed; the hook sets the value.
+    // Not writable under enforced access; only overrideAccess (trusted) callers can supply a value.
     access: { create: () => false, update: () => false, ...overrides?.access },
     admin: { disabled: { bulkEdit: true }, hidden: true, ...overrides?.admin },
     hooks: {

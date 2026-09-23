@@ -152,6 +152,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Authorship', ()
     expect(updated.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
+  test('should not derive createdBy on a later write when the stored value is null (migrated/anonymous doc)', async () => {
+    // A migrated or anonymously created doc has createdBy stored as null.
+    const post = await createPost({ data: { createdBy: null, title: 'anonymous' }, user })
+    expect(post.createdBy).toBeFalsy()
+
+    // Editing it later must not backfill the editor as the creator.
+    const updated = await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { title: 'edited' },
+      depth: 0,
+      user: admin,
+    })
+
+    expect(updated.createdBy).toBeFalsy()
+  })
+
   test('should honor an explicit updatedBy on update via Local API', async () => {
     const post = await createPost({ data: { title: 'created' }, user })
 
