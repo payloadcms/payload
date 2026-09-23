@@ -15,8 +15,25 @@ export const AutosavePostsCollection: CollectionConfig = {
     {
       name: 'computedTitle',
       type: 'text',
+      admin: {
+        description: 'Edits are replaced by a server-computed value after autosave.',
+        readOnly: true,
+      },
       hooks: {
         beforeChange: [({ data }) => data?.title],
+      },
+    },
+    {
+      name: 'programmaticValue',
+      type: 'text',
+    },
+    {
+      name: 'nonDirtyFieldUpdater',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './collections/Autosave/NonDirtyFieldUpdater.js#NonDirtyFieldUpdater',
+        },
       },
     },
     {

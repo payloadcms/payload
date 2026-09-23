@@ -192,7 +192,11 @@ export interface Number {
 export interface AutosavePost {
   id: string;
   title?: string | null;
+  /**
+   * Edits are replaced by a server-computed value after autosave.
+   */
   computedTitle?: string | null;
+  programmaticValue?: string | null;
   restrictedValue?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -379,6 +383,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
+  programmaticValue?: T;
   restrictedValue?: T;
   updatedAt?: T;
   createdAt?: T;
