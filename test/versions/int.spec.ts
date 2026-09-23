@@ -6,7 +6,7 @@ import {
 } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import fs from 'fs'
 import path from 'path'
-import { createLocalReq, Forbidden, getFileByPath, saveVersion, ValidationError } from 'payload'
+import { createPayloadReq, Forbidden, getFileByPath, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -4725,7 +4725,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         overrideAccess: true,
       })
 
-      const req = await createLocalReq({ user: secondaryAdminUser }, payload)
+      const req = await createPayloadReq({ payload, user: secondaryAdminUser })
       const currentDate = new Date()
 
       await schedulePublishHandler({
@@ -4786,7 +4786,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         overrideAccess: true,
       })
 
-      const req = await createLocalReq({ user: secondaryAdminUser }, payload)
+      const req = await createPayloadReq({ payload, user: secondaryAdminUser })
       const currentDate = new Date()
 
       await schedulePublishHandler({
@@ -5186,7 +5186,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       // Create a request without a user (simulating unauthenticated request)
       // Access control on draftGlobalSlug requires published status when no user
-      const req = await createLocalReq({}, payload)
+      const req = await createPayloadReq({ payload })
       req.user = null
 
       const result = await payload.findGlobal({
@@ -5227,7 +5227,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should create using schedule-publish', async ({ payload }) => {
         const currentDate = new Date()
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadReq({ payload, user })
 
         // use server action to create the event
         await schedulePublishHandler({
@@ -5260,7 +5260,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should get upcoming scheduled publish events without reading the jobs collection', async ({
         payload,
       }) => {
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadReq({ payload, user })
 
         await schedulePublishHandler({
           type: 'publish',
@@ -5293,7 +5293,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should not get scheduled publish events without publish permission', async ({
         payload,
       }) => {
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadReq({ payload, user })
 
         await payload.update({
           id: draftDoc.id,
@@ -5316,7 +5316,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should delete using schedule-publish', async ({ payload }) => {
         const currentDate = new Date()
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadReq({ payload, user })
 
         // use server action to create the event
         await schedulePublishHandler({
@@ -5373,7 +5373,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       })
 
       test('should not delete a job that is not a scheduled publish', async ({ payload }) => {
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadReq({ payload, user })
         const unrelatedJob = await payload.db.create({
           collection: 'payload-jobs',
           data: {

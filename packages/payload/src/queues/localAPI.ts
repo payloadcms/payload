@@ -2,7 +2,7 @@ import type { SharedLocalAPIOptions } from '../types/operations.js'
 import type { JobFromTask } from './config/types/workflowTypes.js'
 
 import {
-  createLocalReq,
+  createPayloadReq,
   Forbidden,
   type Job,
   type Payload,
@@ -42,7 +42,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     queue?: string
     req?: PayloadRequest
   }): Promise<HandleSchedulesResult> => {
-    const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
+    const newReq: PayloadRequest = args?.req ?? (await createPayloadReq({ payload }))
 
     return await handleSchedules({
       allQueues: args?.allQueues,
@@ -95,7 +95,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       : JobFromTask<TTaskOrWorkflowSlug>
   > => {
     const overrideAccess = args.overrideAccess ?? false
-    const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+    const req: PayloadRequest = args.req ?? (await createPayloadReq({ payload }))
 
     if (!overrideAccess) {
       /**
@@ -249,7 +249,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       where?: Where
     } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<ReturnType<typeof runJobs>> => {
-    const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
+    const newReq: PayloadRequest = args?.req ?? (await createPayloadReq({ payload }))
 
     return await runJobs({
       allQueues: args?.allQueues,
@@ -279,7 +279,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       silent?: RunJobsSilent
     } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<ReturnType<typeof runJobs>> => {
-    const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+    const newReq: PayloadRequest = args.req ?? (await createPayloadReq({ payload }))
 
     return await runJobs({
       id: args.id,
@@ -296,7 +296,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       where: Where
     } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<void> => {
-    const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+    const req: PayloadRequest = args.req ?? (await createPayloadReq({ payload }))
 
     const overrideAccess = args.overrideAccess ?? false
     if (!overrideAccess) {
@@ -354,7 +354,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       req?: PayloadRequest
     } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<void> => {
-    const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
+    const req: PayloadRequest = args.req ?? (await createPayloadReq({ payload }))
 
     const overrideAccess = args.overrideAccess ?? false
     if (!overrideAccess) {

@@ -122,7 +122,7 @@ describe('isolateObjectProperty', () => {
       const request = new MockRequest()
       const proxy = isolateObjectProperty(request, 'nonExistentKey' as keyof typeof request)
 
-      // This simulates what happens in createLocalReq when checking req.headers
+      // This simulates what happens in createPayloadReq when checking req.headers
       expect(proxy.headers).toBeInstanceOf(Headers)
       expect(proxy.headers.get('content-type')).toBe('application/json')
     })

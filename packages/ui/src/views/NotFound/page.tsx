@@ -1,6 +1,6 @@
 'use server'
 
-import type { createLocalReq, ImportMap, InitReqResult, SanitizedConfig } from 'payload'
+import type { createPayloadReq, ImportMap, InitReqResult, SanitizedConfig } from 'payload'
 
 import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -18,7 +18,7 @@ type InitReqFn = (args: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
-  overrides?: Parameters<typeof createLocalReq>[0]
+  overrides?: Omit<Parameters<typeof createPayloadReq>[0], 'payload'>
 }) => Promise<InitReqResult>
 
 export type RenderNotFoundPageArgs = {

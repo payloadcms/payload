@@ -25,7 +25,7 @@ import { toStandardSchema } from '../utils/toStandardSchema.js'
  *
  * `req` is the request context handlers see. For HTTP it's the live
  * `PayloadRequest` derived from the incoming HTTP request; for stdio it's a
- * synthesized one built via `createLocalReq`.
+ * synthesized one built via `createPayloadReq`.
  */
 export const buildMcpServer = ({
   authorizedMCP,

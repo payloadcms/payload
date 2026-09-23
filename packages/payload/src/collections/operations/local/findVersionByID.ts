@@ -8,12 +8,12 @@ import type {
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
 import { findVersionByIDOperation } from '../findVersionByID.js'
 
 type BaseOptions<TSlug extends CollectionSlug> = {
@@ -115,7 +115,7 @@ export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
     disableErrors,
     overrideAccess,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload }),
     select,
     showHiddenFields,
     trash,

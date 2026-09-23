@@ -1,5 +1,5 @@
 import { duplicateDocumentLocalInputSchema } from '../../../collections/operations/inputSchemas.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
 import { parseDocumentID } from '../../../utilities/parseDocumentID.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import {
@@ -33,7 +33,7 @@ export const createDuplicateDocumentCommand = defineCLICommand({
     const inputData = args.data
       ? stripCollectionVirtualFields({ collection, data: args.data, payload })
       : undefined
-    const req = await createLocalReq({}, payload)
+    const req = await createPayloadReq({ payload })
     let result
 
     try {

@@ -11,7 +11,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import {
-  createLocalReq,
+  createPayloadReq,
   Forbidden,
   getFieldsToSign,
   refreshOperation,
@@ -2814,7 +2814,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
         await setLoginAttemptLock({ id: publicUser.id, collection: publicUsersSlug, payload })
 
-        const req = await createLocalReq({ user: adminUser }, payload)
+        const req = await createPayloadReq({ payload, user: adminUser })
 
         await payload.unlock({
           collection: publicUsersSlug,
@@ -2849,7 +2849,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
         await setLoginAttemptLock({ id: selectedUser.id, collection: publicUsersSlug, payload })
 
-        const req = await createLocalReq({ user: currentUser }, payload)
+        const req = await createPayloadReq({ payload, user: currentUser })
 
         await expect(
           payload.unlock({
@@ -3095,15 +3095,13 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           Authorization: `JWT ${authenticated.token}`,
         },
       })
-      const req = await createLocalReq(
-        {
-          user: {
-            ...authenticated.user,
-            _sid: sid,
-          },
-        },
+      const req = await createPayloadReq({
         payload,
-      )
+        user: {
+          ...authenticated.user,
+          _sid: sid,
+        },
+      })
 
       expect(logoutResponse.status).toBe(200)
       await expect(

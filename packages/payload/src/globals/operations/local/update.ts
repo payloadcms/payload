@@ -7,7 +7,7 @@ import type {
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
 import type {
   DataFromGlobalSlug,
   DraftFlagFromGlobalSlug,
@@ -24,7 +24,7 @@ import {
   type TypedLocale,
   type User,
 } from '../../../index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
 import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
@@ -137,7 +137,7 @@ export async function updateGlobalLocal<
     overrideLock,
     populate,
     publishAllLocales,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload }),
     select,
     showHiddenFields,
     unpublishAllLocales,

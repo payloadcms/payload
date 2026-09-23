@@ -1,4 +1,4 @@
-import { createLocalReq, type Payload, type PayloadRequest, type TypedLocale } from 'payload'
+import { createPayloadReq, type Payload, type PayloadRequest, type TypedLocale } from 'payload'
 
 import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
 
@@ -48,7 +48,7 @@ export const getPayloadPopulateFn: (
 }) => {
   let reqToUse: PayloadRequest | undefined = req
   if (req === undefined && payload) {
-    reqToUse = await createLocalReq({}, payload)
+    reqToUse = await createPayloadReq({ payload })
   }
 
   if (!reqToUse) {

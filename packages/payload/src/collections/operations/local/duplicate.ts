@@ -9,7 +9,7 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
 import type {
   DraftFlagFromCollectionSlug,
   RequiredDataFromCollectionSlug,
@@ -17,7 +17,7 @@ import type {
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
 import { duplicateOperation } from '../duplicate.js'
 
 type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
@@ -125,7 +125,7 @@ export async function duplicateLocal<
     )
   }
 
-  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+  const req = await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload })
 
   return duplicateOperation<TSlug, TSelect>({
     id,

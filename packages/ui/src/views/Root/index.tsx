@@ -5,7 +5,7 @@ import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
-  createLocalReq,
+  createPayloadReq,
   ImportMap,
   InitReqResult,
   SanitizedCollectionConfig,
@@ -36,7 +36,7 @@ type InitReqFn = (args: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
-  overrides?: Parameters<typeof createLocalReq>[0]
+  overrides?: Omit<Parameters<typeof createPayloadReq>[0], 'payload'>
 }) => Promise<InitReqResult>
 
 export type RenderRootArgs = {

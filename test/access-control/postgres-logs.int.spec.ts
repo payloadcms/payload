@@ -1,6 +1,6 @@
 import type { CollectionPermission, PayloadRequest } from 'payload'
 
-import { createLocalReq } from 'payload'
+import { createPayloadReq } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
@@ -14,19 +14,17 @@ test.suite(
   { config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') },
   () => {
     test.beforeEach(async ({ payload }) => {
-      req = await createLocalReq(
-        {
-          user: {
-            id: 123 as any,
-            collection: 'users',
-            roles: ['admin'],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            email: 'test@test.com',
-          },
-        },
+      req = await createPayloadReq({
         payload,
-      )
+        user: {
+          id: 123 as any,
+          collection: 'users',
+          roles: ['admin'],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          email: 'test@test.com',
+        },
+      })
     })
 
     test.describe('Tests', () => {

@@ -1,10 +1,10 @@
 import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
 import { countGlobalVersionsOperation } from '../countGlobalVersions.js'
 
 export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
@@ -60,7 +60,7 @@ export async function countGlobalVersionsLocal<TSlug extends GlobalSlug>(
     disableErrors,
     global,
     overrideAccess,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload }),
     where,
   })
 }

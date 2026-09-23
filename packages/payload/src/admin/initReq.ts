@@ -13,7 +13,7 @@ import { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getAccessResults } from '../auth/getAccessResults.js'
 import { getPayload } from '../index.js'
-import { createLocalReq } from '../utilities/createLocalReq.js'
+import { createPayloadReq } from '../utilities/createPayloadReq.js'
 import { getRequestLanguage } from '../utilities/getRequestLanguage.js'
 import { parseCookies } from '../utilities/parseCookies.js'
 import { getRequestLocale } from './getRequestLocale.js'
@@ -53,7 +53,7 @@ export type InitReqArgs = {
   importMap: ImportMap
   /** Identifies the complete request result within `cache`; required when a cache is supplied. */
   key?: string
-  overrides?: Parameters<typeof createLocalReq>[0]
+  overrides?: Omit<Parameters<typeof createPayloadReq>[0], 'payload'>
   requestURL?: string
   serverAdapter: ServerAdapter
 }
@@ -121,22 +121,20 @@ export async function initReq({
     const userOverride = hasOptionsUserOverride ? optionsOverrides.user : reqOverrides?.user
     const requestDefaults = getRequestDefaults({ requestURL })
 
-    const req = await createLocalReq(
-      {
-        req: {
-          headers,
-          host: headers.get('host') ?? undefined,
-          i18n: i18n as I18n,
-          responseHeaders,
-          server: serverAdapter,
-          user,
-          ...requestDefaults,
-          ...(reqOverrides || {}),
-        },
-        ...(optionsOverrides || {}),
+    const req = await createPayloadReq({
+      req: {
+        headers,
+        host: headers.get('host') ?? undefined,
+        i18n: i18n as I18n,
+        responseHeaders,
+        server: serverAdapter,
+        user,
+        ...requestDefaults,
+        ...(reqOverrides || {}),
       },
+      ...(optionsOverrides || {}),
       payload,
-    )
+    })
 
     if (hasUserOverride && userOverride == null) {
       req.user = null

@@ -4,7 +4,7 @@ import type { CollectionSlug } from '../../index.js'
 import type { MaybePromise } from '../../types/index.js'
 
 import { getPayload } from '../../index.js'
-import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { createPayloadReq } from '../../utilities/createPayloadReq.js'
 import { refreshOperation } from '../operations/refresh.js'
 import { getExistingAuthToken, setAuthCookie } from './cookies.js'
 
@@ -46,7 +46,7 @@ export async function refresh({
     throw new Error(`No auth config found for collection: ${collection}`)
   }
 
-  const req = await createLocalReq({ user: result.user }, payload)
+  const req = await createPayloadReq({ payload, user: result.user })
 
   const refreshResult = await refreshOperation({
     collection: collectionConfig,

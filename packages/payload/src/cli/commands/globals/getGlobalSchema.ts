@@ -1,5 +1,5 @@
 import { getGlobalSchemaInputSchema } from '../../../globals/operations/inputSchemas.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
 import { getGlobalInputSchema } from '../../../utilities/entityInputSchema/getEntityInputSchema.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import { printJSON } from '../data/utilities.js'
@@ -9,7 +9,7 @@ export const createGetGlobalSchemaCommand = defineCLICommand({
   handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const slug = args.slug
-    const req = await createLocalReq({}, payload)
+    const req = await createPayloadReq({ payload })
     const schema = getGlobalInputSchema({ globalSlug: slug, req })
 
     if (!schema) {

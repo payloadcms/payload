@@ -1,4 +1,4 @@
-import { createLocalReq, Forbidden, getAccessResults } from 'payload'
+import { createPayloadReq, Forbidden, getAccessResults } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -9,16 +9,14 @@ const createRequest = async ({
   payload,
 }: {
   headers: Record<string, string>
-  payload: Parameters<typeof createLocalReq>[1]
+  payload: Parameters<typeof createPayloadReq>[0]['payload']
 }) =>
-  createLocalReq(
-    {
-      req: {
-        headers: new Headers(headers),
-      },
-    },
+  createPayloadReq({
     payload,
-  )
+    req: {
+      headers: new Headers(headers),
+    },
+  })
 
 test.suite('baseAccess', { config: './config.ts' }, () => {
   test('should combine base and collection query constraints', async ({ payload }) => {
