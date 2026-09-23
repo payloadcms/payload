@@ -179,6 +179,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
     expect(variants).toBeTruthy()
   })
 
+  test('should not inject authorship fields into ecommerce collections', ({ payload }) => {
+    const ecommerceSlugs = [
+      'products',
+      'variants',
+      'variantTypes',
+      'variantOptions',
+      'carts',
+      'orders',
+      'transactions',
+      'addresses',
+    ]
+
+    const presentSlugs = ecommerceSlugs.filter((slug) => Boolean(payload.collections[slug]))
+    expect(presentSlugs.length).toBeGreaterThan(0)
+
+    for (const slug of presentSlugs) {
+      const fields = payload.collections[slug].config.fields
+      const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
+      expect(names).not.toContain('createdBy')
+      expect(names).not.toContain('updatedBy')
+    }
+  })
+
   test('should only merge plugin translations for supportedLanguages', ({ payload }) => {
     // The shared test buildConfig defaults supportedLanguages to { de, en, es }.
     const supportedLangKeys = Object.keys(payload.config.i18n.supportedLanguages).sort()
