@@ -103,16 +103,10 @@ describe('getCachedFormStateIfDataMatches', () => {
         cachedFormState,
         formData: { rows: [{ id: 'row-1', settings: { keep: true } }] },
       }),
-    ).toEqual({
-      ...cachedFormState,
-      'rows.0.settings': {
-        initialValue: { keep: true },
-        value: { keep: true },
-      },
-    })
+    ).toBe(false)
   })
 
-  it('should reuse cached field metadata with current scalar values', () => {
+  it('should rebuild form state when a scalar value changed', () => {
     const validate = () => true
     const cachedFormState: FormState = {
       title: {
@@ -124,24 +118,15 @@ describe('getCachedFormStateIfDataMatches', () => {
       },
     }
 
-    const result = getCachedFormStateIfDataMatches({
-      cachedFormState,
-      formData: { title: 'After save' },
-    })
-
-    expect(result).toEqual({
-      title: {
-        initialValue: 'After save',
-        passesCondition: true,
-        valid: true,
-        validate,
-        value: 'After save',
-      },
-    })
-    expect(cachedFormState.title.value).toBe('Before save')
+    expect(
+      getCachedFormStateIfDataMatches({
+        cachedFormState,
+        formData: { title: 'After save' },
+      }),
+    ).toBe(false)
   })
 
-  it('should reuse cached row metadata when only values inside existing rows changed', () => {
+  it('should rebuild form state when values inside existing rows changed', () => {
     const cachedFormState: FormState = {
       items: {
         customComponents: { RowLabel: 'row-label' as never },
@@ -163,14 +148,45 @@ describe('getCachedFormStateIfDataMatches', () => {
         cachedFormState,
         formData: { items: [{ id: 'row-1', label: 'After save' }] },
       }),
-    ).toEqual({
-      ...cachedFormState,
-      'items.0.label': {
-        passesCondition: true,
-        initialValue: 'After save',
-        value: 'After save',
+    ).toBe(false)
+  })
+
+  it('should rebuild form state when a top-level field is no longer present', () => {
+    const cachedFormState: FormState = {
+      images: {
+        disableFormData: true,
+        initialValue: 1,
+        rows: [{ id: 'row-1' }],
+        value: 1,
       },
-    })
+      'images.0.id': { initialValue: 'row-1', value: 'row-1' },
+      'images.0.image': { initialValue: 'image-1', value: 'image-1' },
+    }
+
+    expect(
+      getCachedFormStateIfDataMatches({
+        cachedFormState,
+        formData: {},
+      }),
+    ).toBe(false)
+  })
+
+  it('should rebuild form state when current relationship data needs schema normalization', () => {
+    const cachedFormState: FormState = {
+      image: { initialValue: 'image-1', value: 'image-1' },
+    }
+
+    expect(
+      getCachedFormStateIfDataMatches({
+        cachedFormState,
+        formData: {
+          image: {
+            filename: 'example.jpg',
+            id: 'image-1',
+          },
+        },
+      }),
+    ).toBe(false)
   })
 
   it.each([
