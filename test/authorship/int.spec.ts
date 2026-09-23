@@ -167,6 +167,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Authorship', ()
     expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
+  test('should honor an explicit updatedBy that matches the stored value (presence, not equality)', async () => {
+    // createdBy/updatedBy are stamped to `user`.
+    const post = await createPost({ data: { title: 'created' }, user })
+
+    // `admin` edits but re-supplies the current `user` value; presence, not value equality,
+    // decides, so it's honored rather than treated as omitted and re-stamped to `admin`.
+    const updated = await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { title: 'updated', updatedBy: { relationTo: usersSlug, value: user.id } },
+      depth: 0,
+      user: admin,
+    })
+
+    expect(updated.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
+  })
+
   test('should let an explicit value in data override the system user', async () => {
     const post = await createPost({
       data: {
@@ -181,6 +198,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Authorship', ()
 
   test('should clear updatedBy when null is explicitly passed even with a user present', async () => {
     const post = await createPost({ data: { title: 'created' }, user })
+
+    const updated = await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { title: 'updated', updatedBy: null },
+      depth: 0,
+      user,
+    })
+
+    expect(updated.updatedBy).toBeFalsy()
+  })
+
+  test('should honor an explicit null updatedBy even when the stored value is already empty', async () => {
+    // updatedBy starts cleared, so an explicit `null` matches it; presence, not equality, must
+    // decide, so it stays cleared instead of being re-stamped to the acting user.
+    const post = await createPost({ data: { title: 'created', updatedBy: null }, user })
+    expect(post.updatedBy).toBeFalsy()
 
     const updated = await payload.update({
       id: post.id,

@@ -1,4 +1,4 @@
-import type { CollectionSlug } from '../../../index.js'
+import type { CollectionSlug, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { FieldHook, PolymorphicRelationshipField } from '../../config/types.js'
 import type { Authorship, SanitizedAuthorship } from './types.js'
@@ -28,22 +28,30 @@ export const sanitizeAuthorship = (
 
 type RelationValue = { relationTo: string; value: unknown } | null | undefined
 
-const relationsEqual = (a: RelationValue, b: RelationValue): boolean => {
-  if (a === b) {
-    return true
+type AuthorshipFieldName = 'createdBy' | 'updatedBy'
+
+// `beforeChange` sees data already backfilled from the stored doc, so it can't tell an omitted
+// field from one re-sent with its current value. `beforeValidate` runs before that backfill and
+// records on the request context whether the caller actually supplied the field.
+const SUBMITTED_AUTHORSHIP_CONTEXT_KEY = '_submittedAuthorshipFields'
+
+type SubmittedAuthorshipFields = Partial<Record<AuthorshipFieldName, boolean>>
+
+const getSubmittedAuthorship = (context: RequestContext): SubmittedAuthorshipFields | undefined =>
+  context[SUBMITTED_AUTHORSHIP_CONTEXT_KEY] as SubmittedAuthorshipFields | undefined
+
+const recordSubmittedAuthorship =
+  (fieldName: AuthorshipFieldName): FieldHook =>
+  ({ context, siblingData }) => {
+    const submitted = getSubmittedAuthorship(context) ?? {}
+    // `null` is a submitted value (an explicit clear); only an absent key means "not supplied".
+    submitted[fieldName] = (siblingData as Record<string, unknown>)[fieldName] !== undefined
+    context[SUBMITTED_AUTHORSHIP_CONTEXT_KEY] = submitted
+    return undefined
   }
 
-  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') {
-    return false
-  }
-
-  return a.relationTo === b.relationTo && a.value === b.value
-}
-
-// Update data is merged with the stored doc, so an untouched field equals its previous value.
-// Only treat it as explicit when defined and changed (lets `null` clear it or a caller override).
-const isExplicitlyProvided = (incoming: RelationValue, previousValue: RelationValue): boolean =>
-  incoming !== undefined && !relationsEqual(incoming, previousValue)
+const wasAuthorshipSubmitted = (fieldName: AuthorshipFieldName, context: RequestContext): boolean =>
+  getSubmittedAuthorship(context)?.[fieldName] === true
 
 const userToRelation = (req: PayloadRequest): RelationValue => {
   if (req.user?.collection && req.user.id !== undefined && req.user.id !== null) {
@@ -53,28 +61,26 @@ const userToRelation = (req: PayloadRequest): RelationValue => {
   return undefined
 }
 
-const setUpdatedBy: FieldHook = ({ data, previousValue, req }) => {
-  const incoming = data?.updatedBy as RelationValue
-
-  if (isExplicitlyProvided(incoming, previousValue as RelationValue)) {
-    return incoming
+// Honor a caller-supplied value only when access is bypassed (`overrideAccess`); otherwise the
+// field denies client writes, so the acting user is always stamped.
+const setUpdatedBy: FieldHook = ({ context, data, overrideAccess, previousValue, req }) => {
+  if (overrideAccess && wasAuthorshipSubmitted('updatedBy', context)) {
+    return (data as Record<string, unknown> | undefined)?.updatedBy as RelationValue
   }
 
   // No usable user (e.g. Local API without `req.user`): leave unchanged.
   return userToRelation(req) ?? previousValue
 }
 
-const setCreatedBy: FieldHook = ({ data, previousValue, req }) => {
+const setCreatedBy: FieldHook = ({ context, data, overrideAccess, previousValue, req }) => {
   // Immutable once set. Keying off previousValue (not the operation) means globals —
   // created via `update` — still get stamped on first write.
   if (previousValue) {
     return previousValue
   }
 
-  const incoming = data?.createdBy as RelationValue
-
-  if (isExplicitlyProvided(incoming, previousValue as RelationValue)) {
-    return incoming
+  if (overrideAccess && wasAuthorshipSubmitted('createdBy', context)) {
+    return (data as Record<string, unknown> | undefined)?.createdBy as RelationValue
   }
 
   return userToRelation(req) ?? previousValue
@@ -124,6 +130,10 @@ export const createCreatedByField = ({
       ...overrides?.hooks,
       beforeChange: [setCreatedBy, ...(overrides?.hooks?.beforeChange ?? [])],
       beforeDuplicate: [clearCreatedByOnDuplicate, ...(overrides?.hooks?.beforeDuplicate ?? [])],
+      beforeValidate: [
+        recordSubmittedAuthorship('createdBy'),
+        ...(overrides?.hooks?.beforeValidate ?? []),
+      ],
     },
   }) as PolymorphicRelationshipField
 
@@ -148,5 +158,9 @@ export const createUpdatedByField = ({
       ...overrides?.hooks,
       beforeChange: [setUpdatedBy, ...(overrides?.hooks?.beforeChange ?? [])],
       beforeDuplicate: [clearUpdatedByOnDuplicate, ...(overrides?.hooks?.beforeDuplicate ?? [])],
+      beforeValidate: [
+        recordSubmittedAuthorship('updatedBy'),
+        ...(overrides?.hooks?.beforeValidate ?? []),
+      ],
     },
   }) as PolymorphicRelationshipField
