@@ -26,31 +26,30 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 Payload request creation now uses `createPayloadReq` for local contexts and `createPayloadReqFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `getAdminContext`.
 
-| Old name                | New name                         |
-| ----------------------- | -------------------------------- |
-| `createLocalReq`        | `createPayloadReq`               |
-| `CreateLocalReqOptions` | `CreatePayloadReqArgs`           |
-| `createPayloadRequest`  | `createPayloadReqFromWebRequest` |
-| `initReq`               | `getAdminContext`                |
-| `InitReqArgs`           | `GetAdminContextArgs`            |
-| `InitReqResult`         | `GetAdminContextResult`          |
-| `InitReqCache`          | `AdminContextCache`              |
-| `InitReqPartialResult`  | `PartialAdminContext`            |
+| Old name                                | New name                                |
+| --------------------------------------- | --------------------------------------- |
+| `createLocalReq`                        | `createPayloadReq`                      |
+| `CreateLocalReqOptions` (internal type) | `Omit<CreatePayloadReqArgs, 'payload'>` |
+| `createPayloadRequest`                  | `createPayloadReqFromWebRequest`        |
+| `initReq`                               | `getAdminContext`                       |
+| `InitReqArgs`                           | `GetAdminContextArgs`                   |
+| `InitReqResult`                         | `GetAdminContextResult`                 |
+| `InitReqCache`                          | `AdminContextCache`                     |
+| `InitReqPartialResult`                  | `PartialAdminContext`                   |
 
 `getAdminContext` and its cache types are primarily contracts for framework adapters. Custom Root layout adapters must rename their injected `initReq` callback to `getAdminContext`.
 
-Local request creation now takes a single object argument containing `payload`:
+Local request creation now takes a single object argument containing `payload`. For a request without options:
 
 ```diff
 -import { createLocalReq } from 'payload'
 +import { createPayloadReq } from 'payload'
 
--const req = await createLocalReq(options, payload)
-+const req = await createPayloadReq({
-+  ...options,
-+  payload,
-+})
+-const req = await createLocalReq({}, payload)
++const req = await createPayloadReq({ payload })
 ```
+
+`CreatePayloadReqArgs` is exported from `payload` and requires `payload`. Options-only values should use `Omit<CreatePayloadReqArgs, 'payload'>`. The old `CreateLocalReqOptions` type was declared in the internal request utility, not exported from the package root; relative/private imports of that type require manual migration. The codemod handles an existing named import of that type only when its source is `payload`.
 
 Web request conversion uses its new role-specific name:
 
@@ -69,6 +68,8 @@ To migrate automatically, there's a codemod for this change available by running
 ```bash
 npx @payloadcms/codemod --transform migrate-payload-request-creation
 ```
+
+Automatic call migration requires a plain identifier payload argument and either `{}` or an initialized local `const` options identifier. The options type must expose all seven old option properties, or be `any`. For that identifier form, the generated argument captures payload first and uses forwarding getters for `context`, `depth`, `fallbackLocale`, `locale`, `req`, `urlSuffix`, and `user`. This preserves inherited getters, their read order, and rejected promises from throwing getters without reading unrelated properties. Complex expressions, mutable/unresolved options bindings, narrow option types, collisions, and unsupported type usages are left unchanged with notes for manual migration.
 
 ### JWT authentication is versioned without moving token data
 

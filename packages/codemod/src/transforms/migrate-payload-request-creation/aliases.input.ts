@@ -2,6 +2,7 @@ import type { CreateLocalReqOptions as Options, InitReqResult as Result } from '
 
 import { createLocalReq as local, createPayloadRequest as web } from 'payload'
 
-const req = local(options as Options, payload)
+const options: Options = { user }
+const req = local(options, payload)
 const request = web(input, config)
 type Context = Result

@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runInNewContext } from 'node:vm'
-import { Project, SyntaxKind } from 'ts-morph'
+import { Project, SyntaxKind, ts } from 'ts-morph'
 import { describe, expect, it } from 'vitest'
 
 import { transforms } from '../../registry.js'
@@ -57,6 +57,168 @@ describe('migrate-payload-request-creation', () => {
 
   it('should register the transform', () => {
     expect(transforms).toContain(migratePayloadRequestCreation)
+  })
+
+  it('should preserve payload capture, inherited getters, getter order, and unrelated getters', async () => {
+    const source = await fixture('getters.input.ts')
+    const output = await runTransform({ source, transform: migratePayloadRequestCreation })
+    const evaluate = (code: string) => {
+      const context = {
+        createLocalReq: (
+          { context, depth, fallbackLocale, locale, req, urlSuffix, user }: Record<string, unknown>,
+          payload: unknown,
+        ) => ({ context, depth, fallbackLocale, locale, req, urlSuffix, user, payload }),
+        createPayloadReq: ({
+          context,
+          depth,
+          fallbackLocale,
+          locale,
+          payload,
+          req,
+          urlSuffix,
+          user,
+        }: Record<string, unknown>) => ({
+          context,
+          depth,
+          fallbackLocale,
+          locale,
+          req,
+          urlSuffix,
+          user,
+          payload,
+        }),
+        observed: undefined,
+      }
+      const executable = new Project({ useInMemoryFileSystem: true }).createSourceFile(
+        'input.ts',
+        code,
+      )
+
+      executable.getImportDeclarations().forEach((declaration) => declaration.remove())
+      runInNewContext(executable.getFullText(), context)
+
+      return context.observed
+    }
+
+    expect(output).toContain('createPayloadReq(')
+    expect(output).not.toContain('...options')
+    expect(evaluate(output)).toEqual(evaluate(source))
+    expect(evaluate(output)).toEqual({
+      request: {
+        payload: { id: 'original' },
+        context: 'context',
+        depth: 1,
+        fallbackLocale: 'en',
+        locale: 'fr',
+        req: {},
+        urlSuffix: '/path',
+        user: 'inherited',
+      },
+      events: ['context', 'depth', 'fallbackLocale', 'locale', 'req', 'urlSuffix', 'user'],
+    })
+  })
+
+  it('should keep throwing option getters inside the rejected-Promise boundary', async () => {
+    const source = `import { createLocalReq } from 'payload'
+const options = Object.create(null, { context: { get() { throw new Error('getter') } } })
+const payload = {}
+try {
+  globalThis.observed = createLocalReq(options, payload).then(() => 'resolved', error => 'rejected:' + error.message)
+} catch (error) {
+  globalThis.observed = Promise.resolve('threw:' + error.message)
+}`
+    const output = await runTransform({ source, transform: migratePayloadRequestCreation })
+    const evaluate = async (code: string) => {
+      const context = {
+        createLocalReq: async ({ context }: Record<string, unknown>) => context,
+        createPayloadReq: async ({ context }: Record<string, unknown>) => context,
+        observed: undefined,
+      }
+      const executable = new Project({ useInMemoryFileSystem: true }).createSourceFile(
+        'input.ts',
+        code,
+      )
+
+      executable.getImportDeclarations().forEach((declaration) => declaration.remove())
+      runInNewContext(executable.getFullText(), context)
+
+      return await context.observed
+    }
+
+    expect(output).toContain('createPayloadReq(')
+    expect(await evaluate(source)).toBe('rejected:getter')
+    expect(await evaluate(output)).toBe('rejected:getter')
+  })
+
+  it.each(['CreateLocalReqOptions', 'CreateLocalReqOptions as Options'])(
+    'should typecheck options-only annotations from %s without requiring payload',
+    async (imported) => {
+      const local = imported.includes(' as ') ? 'Options' : imported
+      const source = `import type { ${imported} } from 'payload'\nimport { createLocalReq } from 'payload'\nconst options: ${local} = { user: 'user' }\ntype Extra = ${local} & { extra?: boolean }\nconst payload = { id: 'payload' }\nconst request = createLocalReq(options, payload)`
+      const output = await runTransform({ source, transform: migratePayloadRequestCreation })
+      const project = new Project({
+        compilerOptions: { strict: true, noEmit: true },
+        useInMemoryFileSystem: true,
+      })
+      const actualHelper = ts.createSourceFile(
+        'createPayloadReq.ts',
+        await readFile(join(here, '../../../../payload/src/utilities/createPayloadReq.ts'), 'utf8'),
+        ts.ScriptTarget.Latest,
+        true,
+      )
+      const args = actualHelper.statements.find(
+        (node) => ts.isTypeAliasDeclaration(node) && node.name.text === 'CreatePayloadReqArgs',
+      )!
+
+      project.createSourceFile(
+        '/node_modules/payload/index.d.ts',
+        `type Payload = { id: string }; type RequestContext = Record<string, unknown>; type TypedLocale = string; type PayloadRequest = Record<string, unknown>; type User = string;\n${args.getText(actualHelper)}\nexport declare function createPayloadReq(args: CreatePayloadReqArgs): unknown`,
+      )
+      const file = project.createSourceFile('/output.ts', output)
+
+      expect(
+        project.getPreEmitDiagnostics().map((diagnostic) => diagnostic.getMessageText()),
+      ).toEqual([])
+      expect(
+        file.getVariableDeclarationOrThrow('options').getType().getProperty('payload'),
+      ).toBeUndefined()
+      expect(output).toContain(
+        `Omit<${local === 'Options' ? 'Options' : 'CreatePayloadReqArgs'}, 'payload'>`,
+      )
+    },
+  )
+
+  it.each([
+    `const options = getOptions(); createLocalReq(getOptions(), payload)`,
+    `const options = {}; createLocalReq({ user }, payload)`,
+    `let options = {}; createLocalReq(options, payload)`,
+    `createLocalReq(options, payload)`,
+    `function build(options) { return createLocalReq(options, payload) }`,
+    `const options = { user: 'user' }; createLocalReq(options, payload)`,
+  ])('should skip unsafe options shapes and bindings: %s', async (body) => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const source = `import { createLocalReq } from 'payload'\n${body}`
+    const file = project.createSourceFile('/unsafe.ts', source)
+    const result = await migratePayloadRequestCreation.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('options')
+  })
+
+  it.each([
+    `import type { CreateLocalReqOptions } from 'payload'\nexport { CreateLocalReqOptions }`,
+    `import type { CreateLocalReqOptions } from 'payload'\ntype Omit<T, K> = T\nconst options: CreateLocalReqOptions = { user }`,
+    `import type { CreateLocalReqOptions } from '../utilities/createLocalReq.js'\nconst options: CreateLocalReqOptions = { user }`,
+    `import type { CreateLocalReqOptions } from 'payload/dist/utilities/createLocalReq.js'\nconst options: CreateLocalReqOptions = { user }`,
+  ])('should skip unsupported options-type usage or import source', async (source) => {
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/types.ts', source)
+    const result = await migratePayloadRequestCreation.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('CreateLocalReqOptions')
   })
 
   it('should complete the request rename after migrate-aliased-exports', async () => {

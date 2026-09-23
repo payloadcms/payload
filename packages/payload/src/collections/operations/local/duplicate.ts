@@ -125,7 +125,10 @@ export async function duplicateLocal<
     )
   }
 
-  const req = await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload })
+  const req = await createPayloadReq({
+    ...(options as Omit<CreatePayloadReqArgs, 'payload'>),
+    payload,
+  })
 
   return duplicateOperation<TSlug, TSelect>({
     id,

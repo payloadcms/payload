@@ -1,7 +1,8 @@
 import { createLocalReq } from 'payload'
 
+const options: any = { user }
 const req = createLocalReq(
-  /* options */ { user } /* after options */,
+  /* options */ options /* after options */,
   // payload instance
   payload /* after payload */,
 )
