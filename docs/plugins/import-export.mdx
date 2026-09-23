@@ -23,6 +23,8 @@ This plugin adds features that give admin users the ability to download or creat
 - Import collection data
 - Preview data before exporting or importing
 
+The generated import and export collections track [authorship](../configuration/collections#authorship) by default (`createdBy` / `updatedBy`); return `authorship: false` from `overrideExportCollection` / `overrideImportCollection` to disable it.
+
 ## Installation
 
 Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
