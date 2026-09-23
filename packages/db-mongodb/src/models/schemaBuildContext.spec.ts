@@ -50,4 +50,29 @@ describe('createMongoSchemaBuildContext', () => {
     expect(first).not.toBe(second)
     expect(build).toHaveBeenCalledTimes(2)
   })
+
+  test('should build independent schemas when the Mongoose instance has a custom plugin', () => {
+    const mongooseWithCustomPlugin = new mongoose.Mongoose({ createInitialConnection: false })
+    mongooseWithCustomPlugin.plugin(() => undefined)
+    const connection = mongooseWithCustomPlugin.createConnection()
+    const context = createMongoSchemaBuildContext({ connection })
+    const definition = {}
+    const build = vi.fn(() => new mongoose.Schema())
+
+    const first = context.getOrCreate({
+      build,
+      definition,
+      label: 'block:shared',
+      variantKey: 'live',
+    })
+    const second = context.getOrCreate({
+      build,
+      definition,
+      label: 'block:shared',
+      variantKey: 'live',
+    })
+
+    expect(first).not.toBe(second)
+    expect(build).toHaveBeenCalledTimes(2)
+  })
 })
