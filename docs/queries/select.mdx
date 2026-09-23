@@ -124,9 +124,9 @@ For this reason, we recommend to use the extremely helpful and ubiquitous [`qs-e
 
 ```ts
 import { stringify } from 'qs-esm'
-import type { Where } from 'payload'
+import type { SelectType } from 'payload'
 
-const select: Where = {
+const select: SelectType = {
   text: true,
   group: {
     number: true,
@@ -165,7 +165,7 @@ Unlike the Local and REST APIs, you do not pass a field map. The fields you requ
 query {
   # highlight-start
   Posts(select: true) {
-  # highlight-end
+    # highlight-end
     docs {
       id
       text
