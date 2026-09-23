@@ -8,7 +8,7 @@ import { childrenSlug, globalSlug, parentsSlug, readAccessLog, resetAccessLog } 
 const childIDs: (number | string)[] = []
 const parentIDs: (number | string)[] = []
 
-test.suite({ config: './config.ts' })('field access collection context', () => {
+test.suite('field access collection context', { config: './config.ts' }, () => {
   test.afterEach(async ({ payload }) => {
     for (const id of parentIDs) {
       await payload.delete({ id, collection: parentsSlug, overrideAccess: true })

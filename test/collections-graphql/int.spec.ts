@@ -19,7 +19,7 @@ const title = 'title'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('collections-graphql', () => {
+test.suite('collections-graphql', { config: './config.ts' }, () => {
   test.describe('CRUD', () => {
     let existingDoc: Post
     let existingDocGraphQLID

@@ -15,7 +15,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const configPath = './config.ts'
 
-test.suite({ config: configPath })('@payloadcms/plugin-import-export — field-level hooks', () => {
+test.suite('@payloadcms/plugin-import-export — field-level hooks', { config: configPath }, () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',

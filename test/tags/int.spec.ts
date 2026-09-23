@@ -10,7 +10,7 @@ import { test } from '../__helpers/int/vitest.js'
 const tagsSlug = 'tags'
 const postsSlug = 'posts'
 
-test.suite({ config: './config.ts' })('Tags Helpers', () => {
+test.suite('Tags Helpers', { config: './config.ts' }, () => {
   test.describe('createTagsCollection', () => {
     test('should create a collection with hierarchy enabled', ({ payload }) => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === tagsSlug)

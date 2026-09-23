@@ -19,8 +19,9 @@ const primaryDb = (payload: BasePayload): PostgresDB => {
   return adapter.primaryDrizzle ?? adapter.drizzle
 }
 
-test.suite({ db: (adapter) => adapter.startsWith('postgres') })(
+test.suite(
   'postgres vector custom column',
+  { db: (adapter) => adapter.startsWith('postgres') },
   () => {
     const vectorColumnQueryTest = async (vectorType: string) => {
       const {
