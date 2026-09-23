@@ -187,6 +187,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -230,6 +231,7 @@ export interface Admin {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -421,24 +423,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-  createdBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'admins';
-        value: string | Admin;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'admins';
-        value: string | Admin;
-      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -549,6 +533,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -573,6 +558,7 @@ export interface AdminsSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -666,8 +652,6 @@ export interface RawAuthorshipSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
-  createdBy?: T;
-  updatedBy?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
