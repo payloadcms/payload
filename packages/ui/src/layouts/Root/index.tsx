@@ -1,11 +1,11 @@
 import type {
   ImportMap,
-  InitReqArgs,
   InitReqResult,
   LanguageOptions,
   SanitizedConfig,
   ServerFunctionClient,
 } from 'payload'
+import type { InitReqArgs } from 'payload/internal'
 
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'

@@ -1,6 +1,7 @@
-import type { InitReqArgs, InitReqCache, InitReqPartialResult, InitReqResult } from 'payload'
+import type { InitReqResult } from 'payload'
+import type { InitReqArgs, InitReqCache, InitReqPartialResult } from 'payload/internal'
 
-import { initReq as initPayloadReq } from 'payload'
+import { initReq as initPayloadReq } from 'payload/internal'
 
 import { nextServerAdapter } from '../adapters/server.js'
 import { selectiveCache } from './selectiveCache.js'

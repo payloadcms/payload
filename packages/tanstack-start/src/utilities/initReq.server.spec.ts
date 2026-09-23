@@ -12,7 +12,7 @@ vi.mock('@tanstack/react-start/server', () => ({
   getRequest,
 }))
 
-vi.mock('payload', () => ({
+vi.mock('payload/internal', () => ({
   initReq: initPayloadReq,
 }))
 

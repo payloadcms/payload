@@ -1,7 +1,8 @@
-import type { InitReqArgs, ServerAdapter } from 'payload'
+import type { ServerAdapter } from 'payload'
+import type { InitReqArgs } from 'payload/internal'
 
 import { getRequest } from '@tanstack/react-start/server'
-import { initReq as initPayloadReq } from 'payload'
+import { initReq as initPayloadReq } from 'payload/internal'
 
 // Registers the dev reload strategy before `initPayloadReq` can build an instance.
 // Side-effect only, and a no-op outside of dev serve.

@@ -18,7 +18,7 @@ const { counters, initPayloadReq } = vi.hoisted(() => ({
 
 vi.mock('react', () => createRequire(import.meta.url)('react'))
 
-vi.mock('payload', () => ({
+vi.mock('payload/internal', () => ({
   initReq: initPayloadReq,
 }))
 
