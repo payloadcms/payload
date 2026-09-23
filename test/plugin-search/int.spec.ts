@@ -64,6 +64,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-search', () => {
     expect(search).toBeTruthy()
   })
 
+  test('should not inject authorship fields into the internal search collection', ({ payload }) => {
+    const fields = payload.collections['search'].config.fields
+    const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
+
+    expect(names).not.toContain('createdBy')
+    expect(names).not.toContain('updatedBy')
+  })
+
   test('should sync published pages to the search collection', async ({ payload }) => {
     const pageToSync = await payload.create({
       collection: 'pages',
