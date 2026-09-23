@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { runInNewContext } from 'node:vm'
 import { Project, SyntaxKind } from 'ts-morph'
 import { describe, expect, it } from 'vitest'
 
@@ -12,18 +13,24 @@ const here = dirname(fileURLToPath(import.meta.url))
 const fixture = (name: string) => readFile(join(here, name), 'utf8')
 
 describe('migrate-payload-request-creation', () => {
-  it.each(['empty', 'populated', 'expression', 'aliases', 'internal', 'comments', 'shadowed'])(
-    'should migrate %s imports and calls',
-    async (name) => {
-      const source = await fixture(`${name}.input.ts`)
-      const output = await fixture(`${name}.output.ts`)
+  it.each([
+    'empty',
+    'populated',
+    'expression',
+    'aliases',
+    'internal',
+    'comments',
+    'shadowed',
+    'shorthand',
+  ])('should migrate %s imports and calls', async (name) => {
+    const source = await fixture(`${name}.input.ts`)
+    const output = await fixture(`${name}.output.ts`)
 
-      expect(await runTransform({ source, transform: migratePayloadRequestCreation })).toBe(output)
-      expect(await runTransform({ source: output, transform: migratePayloadRequestCreation })).toBe(
-        output,
-      )
-    },
-  )
+    expect(await runTransform({ source, transform: migratePayloadRequestCreation })).toBe(output)
+    expect(await runTransform({ source: output, transform: migratePayloadRequestCreation })).toBe(
+      output,
+    )
+  })
 
   it.each(['collision', 'unsupported', 'non-matching'])(
     'should preserve %s source byte for byte and report manual work',
@@ -50,6 +57,54 @@ describe('migrate-payload-request-creation', () => {
   it('should register the transform', () => {
     expect(transforms).toContain(migratePayloadRequestCreation)
   })
+
+  it('should preserve behavior when evaluating payload mutates the options', async () => {
+    const source = await fixture('evaluation-order.input.ts')
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/evaluation-order.ts', source)
+    const result = await migratePayloadRequestCreation.apply({ packageJsons: [], project })
+    const output = file.getFullText()
+    const evaluate = (code: string) => {
+      const context = {
+        createLocalReq: (options: { user: string }) => ({ ...options }),
+        createPayloadReq: (options: { user: string }) => options,
+        observed: undefined,
+      }
+      const executable = new Project({ useInMemoryFileSystem: true }).createSourceFile(
+        'input.ts',
+        code,
+      )
+
+      executable.getImportDeclarations().forEach((declaration) => declaration.remove())
+      runInNewContext(executable.getFullText(), context)
+
+      return context.observed
+    }
+
+    expect(evaluate(source)).toBe('new')
+    expect(evaluate(output)).toBe(evaluate(source))
+    expect(output).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.[0]).toContain('/evaluation-order.ts:')
+    expect(result.notes?.[0]).toContain('payload argument `(options.user = newUser, payload)`')
+    expect(result.notes?.[0]).toContain('evaluation order')
+  })
+
+  it.each(['getPayload()', 'holder.payload', 'await getPayload()', '(payload)', 'payload!'])(
+    'should skip the entire binding for payload expression %s',
+    async (expression) => {
+      const project = new Project({ useInMemoryFileSystem: true })
+      const source = `import { createLocalReq } from 'payload'\nconst safe = createLocalReq({}, payload)\nconst req = createLocalReq(options, ${expression})`
+      const file = project.createSourceFile('/evaluation-order.ts', source)
+
+      const result = await migratePayloadRequestCreation.apply({ packageJsons: [], project })
+
+      expect(file.getFullText()).toBe(source)
+      expect(result.filesChanged).toEqual([])
+      expect(result.notes?.[0]).toContain(`payload argument \`${expression}\``)
+      expect(result.notes?.[0]).toContain('evaluation order')
+    },
+  )
 
   it('should isolate local bindings when dependency exports resolve', async () => {
     const project = new Project({ useInMemoryFileSystem: true })

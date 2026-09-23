@@ -84,7 +84,16 @@ export const migratePayloadRequestCreation: Transform = {
                 parent.getArguments().length === 2 &&
                 !parent.getArguments().some(Node.isSpreadElement)
               ) {
-                calls.push(parent)
+                const payloadArgument = parent.getArguments()[1]!
+
+                if (Node.isIdentifier(payloadArgument)) {
+                  calls.push(parent)
+                } else {
+                  hasUnsupportedUse = true
+                  notes.push(
+                    `${reference.getSourceFile().getFilePath()}:${reference.getStartLineNumber()}: Unsupported payload argument \`${payloadArgument.getText()}\` in \`${parent.getText()}\`: spreading options first could change evaluation order. Left the import and all its uses unchanged; migrate manually.`,
+                  )
+                }
               } else {
                 hasUnsupportedUse = true
                 notes.push(
@@ -134,7 +143,7 @@ function renameImport({
   if (hadAlias) {
     spec.setName(newName)
   } else {
-    spec.renameAlias(newName)
+    spec.getAliasNode()!.rename(newName, { usePrefixAndSuffixText: true })
     spec.setName(newName)
     spec.removeAlias()
   }
