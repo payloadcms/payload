@@ -52,13 +52,11 @@ export const Auth: React.FC<Props> = (props) => {
 
   let showPasswordFields: SanitizedFieldPermissions = true
   let showUnlock = true
-  const hasPasswordFieldOverride =
-    typeof docPermissions.fields === 'object' && 'password' in docPermissions.fields
   const hasLoginFieldOverride =
     typeof docPermissions.fields === 'object' &&
     ('username' in docPermissions.fields || 'email' in docPermissions.fields)
 
-  if (hasPasswordFieldOverride) {
+  if (typeof docPermissions.fields === 'object') {
     const { permissions: passwordPermissions } = getFieldPermissions({
       field: { name: 'password', type: 'text' },
       operation,
