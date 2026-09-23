@@ -91,9 +91,7 @@ const run = async (): Promise<void> => {
     allocationCategories.map((category) => [category, 0]),
   ) as Record<AllocationCategory, number>
   const originalSchema = mongoose.Schema
-  // The wrapper applies this method with the original schema receiver below.
-
-  const originalClone = originalSchema.prototype.clone
+  const originalClone = Reflect.get(originalSchema.prototype, 'clone')
   let schemaClones = 0
   let schemaConstructors = 0
 
