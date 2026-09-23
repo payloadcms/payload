@@ -1705,6 +1705,16 @@ importers:
         specifier: '>=8.0.0'
         version: 8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
+  packages/transformer-cloudinary:
+    dependencies:
+      cloudinary:
+        specifier: ^2.11.0
+        version: 2.11.0
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/transformer-sharp:
     dependencies:
       file-type:
@@ -2518,7 +2528,7 @@ importers:
         version: link:../packages/eslint-plugin
       '@payloadcms/figma':
         specifier: latest
-        version: 0.1.0-alpha.7(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)
+        version: 0.1.0-alpha.8(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -2597,6 +2607,9 @@ importers:
       '@payloadcms/tanstack-start':
         specifier: workspace:*
         version: link:../packages/tanstack-start
+      '@payloadcms/transformer-cloudinary':
+        specifier: workspace:*
+        version: link:../packages/transformer-cloudinary
       '@payloadcms/transformer-sharp':
         specifier: workspace:*
         version: link:../packages/transformer-sharp
@@ -6732,8 +6745,8 @@ packages:
     resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
 
-  '@payloadcms/figma@0.1.0-alpha.7':
-    resolution: {integrity: sha512-7TCd0cAY9KGItVuyOAqra+8UdemyGRbR+xiN+g7lXMT8nwEbUR1U0LbhsjWJqWpa0OIv/dR+3vBpkXJ920xNzQ==}
+  '@payloadcms/figma@0.1.0-alpha.8':
+    resolution: {integrity: sha512-2drOK1HNoJDAKdLPYULYOh77/5kUS0Uzysj1FhuHkmiVHS8Us5l/HqbMt7ked+YhBtVvaHIrnrZgfBVRdeYtpA==}
     hasBin: true
     peerDependencies:
       '@payloadcms/plugin-cloud-storage': '>=4.0.0-canary.28 <4.0.0-internal'
@@ -10096,6 +10109,10 @@ packages:
 
   cloudflare@4.5.0:
     resolution: {integrity: sha512-fPcbPKx4zF45jBvQ0z7PCdgejVAPBBCZxwqk1k7krQNfpM07Cfj97/Q6wBzvYqlWXx/zt1S9+m8vnfCe06umbQ==}
+
+  cloudinary@2.11.0:
+    resolution: {integrity: sha512-o2pAkDDqrzPFE/mn9GCfFjBIGQmPs++Ts6rtkFl4vY528DNHiMovKWjH16HBjeGa9iwI7eAad24aWN2emT0aww==}
+    engines: {node: '>=9'}
 
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
@@ -20289,7 +20306,7 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.5.6
     optional: true
 
-  '@payloadcms/figma@0.1.0-alpha.7(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)':
+  '@payloadcms/figma@0.1.0-alpha.8(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(@payloadcms/translations@packages+translations)(@payloadcms/ui@packages+ui)(payload@packages+payload)(react@19.2.6)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@cloudflare/workers-types': 5.20260716.1
@@ -24439,6 +24456,10 @@ snapshots:
       node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
+
+  cloudinary@2.11.0:
+    dependencies:
+      lodash: 4.18.1
 
   clsx@2.1.1: {}
 

@@ -3,7 +3,7 @@ title: File Transformers
 label: File Transformers
 order: 30
 desc: Payload's file-transformer boundary lets you process uploaded files and serve dynamically-transformed variants of them, without changing where or how files are stored.
-keywords: uploads, images, media, transformers, sharp, resize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+keywords: uploads, images, media, transformers, sharp, cloudinary, resize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 A file transformer is a small, ordered stage in Payload's upload pipeline. Transformers can:
@@ -300,6 +300,144 @@ sharpTransformer({
 ```
 
 As with every transformer, dynamic-resize output is never written back to storage — it is generated for that one response and discarded.
+
+## `@payloadcms/transformer-cloudinary`
+
+`@payloadcms/transformer-cloudinary` is a Cloudinary-backed transformer. Reach for it instead of (or alongside) `@payloadcms/transformer-sharp` when you want Cloudinary's content-aware features — `g_auto` smart cropping, `f_auto` format negotiation, `q_auto` quality — rather than local Sharp processing.
+
+```sh
+pnpm add @payloadcms/transformer-cloudinary
+```
+
+```ts
+import { buildConfig } from 'payload'
+import { cloudinaryTransformer } from '@payloadcms/transformer-cloudinary'
+
+export default buildConfig({
+  serverURL: 'https://example.com',
+  upload: {
+    transformers: [cloudinaryTransformer()],
+  },
+})
+```
+
+Credentials are read from the `CLOUDINARY_URL` environment variable (`cloudinary://<api_key>:<api_secret>@<cloud_name>`) by default. Pass `url` or `config` to override. They are resolved eagerly, so a misconfigured cloud fails at startup rather than on the first upload.
+
+### How the source reaches Cloudinary#cloudinary-fetch
+
+This transformer uses Cloudinary's [fetch delivery](https://cloudinary.com/documentation/fetch_remote_images): it builds an `image/fetch/` URL over the stored file's own URL and lets Cloudinary pull the source itself. It never calls `getSourceFile`, so the stored bytes never pass through Payload — and the single-use source handle stays available to any later transformer in the pipeline.
+
+The source URL therefore **must be reachable from the public internet**, and its host must be allow-listed in your Cloudinary fetch settings.
+
+By default the source URL is the requested file's own `url`, resolved against your config's `serverURL`. Override it when that isn't publicly reachable — a `localhost` dev server, for example, or a collection whose files are only served through Payload's access-controlled route:
+
+```ts
+cloudinaryTransformer({
+  sourceURL: ({ filename }) => `https://cdn.example.com/media/${filename}`,
+})
+```
+
+### Delivery mode#cloudinary-delivery
+
+```ts
+cloudinaryTransformer({ delivery: 'proxy' })
+```
+
+- `'proxy'` (default): Payload streams the bytes back from Cloudinary. Neither the Cloudinary URL nor the underlying source URL is exposed, and the response stays behind the collection's access control.
+- `'redirect'`: Payload answers `302` with the Cloudinary URL. Cheapest — no bytes pass through Payload — but the transformed variant becomes publicly reachable and the source URL is disclosed to the client.
+
+<Banner type="warning">
+  **Note:** With `delivery: 'redirect'`, the transformed variant is served
+  straight from Cloudinary's CDN, bypassing Payload's access control for every
+  request after the redirect — the same caveat that applies to any direct
+  storage/CDN URL.
+</Banner>
+
+### Dynamic (request-time) transformation#cloudinary-dynamic
+
+This transformer recognizes the same `width`, `height`, and `withoutEnlargement` parameters as `@payloadcms/transformer-sharp`. Both share one file endpoint, so a URL should not mean different things depending on which transformer is installed. Cloudinary-specific settings are configured on the transformer rather than per request.
+
+```
+GET /api/media/file/photo.png?width=400
+GET /api/media/file/photo.png?width=400&height=300
+GET /api/media/file/photo.png?width=400&withoutEnlargement=true
+```
+
+Sharp's resize semantics map onto Cloudinary crop modes like this:
+
+| Request                              | Cloudinary crop mode |
+| ------------------------------------ | -------------------- |
+| `width` + `height`                   | `c_fill`             |
+| `width` or `height`                  | `c_scale`            |
+| `width` + `height` + no enlargement  | `c_lfill`            |
+| `width` or `height` + no enlargement | `c_limit`            |
+
+Configure defaults for every dynamic request on this transformer instance:
+
+```ts
+cloudinaryTransformer({
+  dynamic: {
+    crop: 'fill', // default, used when both width and height are given
+    gravity: 'center', // default — 'auto' enables content-aware cropping
+    quality: 'auto', // default
+    format: undefined, // default (keep the source format); 'auto' negotiates per browser
+    maxWidth: 4096, // default
+    maxHeight: 4096, // default
+    maxPixels: 16_777_216, // default
+    withoutEnlargement: false, // default
+  },
+})
+```
+
+### Upload-time image processing#cloudinary-uploads
+
+Per-collection settings are authored through `cloudinaryTransformer({ collections })`, not on the collection's own `upload` config:
+
+```ts
+cloudinaryTransformer({
+  collections: {
+    media: {
+      crop: true,
+      focalPoint: true,
+      imageSizes: [
+        { name: 'thumbnail', width: 400, height: 300 },
+        // Cloudinary's content-aware crop — no local equivalent in Sharp
+        { name: 'card', width: 768, height: 1024, gravity: 'auto' },
+      ],
+      resizeOptions: { width: 2048 },
+      formatOptions: { format: 'webp', quality: 'auto' },
+    },
+  },
+})
+```
+
+As with `sharpTransformer`, this writes a provider-agnostic projection of `imageSizes`, `crop`, and `focalPoint` back onto the collection's sanitized `upload` config at startup, so the Admin Panel, generated types, and the rest of core keep seeing `collection.upload.imageSizes` exactly as before. The `sizes` shape on your documents is unchanged, including the behavior where a size larger than the source in both dimensions is recorded with null metadata.
+
+An Admin-selected crop becomes a `c_crop` step; a focal point becomes `g_xy_center` with the focus translated into source pixels.
+
+<Banner type="info">
+  **Note on cost and latency.** Cloudinary has no stateless "transform these
+  bytes" API — every transformation is addressed against a stored asset.
+  Upload-time processing therefore stages the original as a short-lived
+  Cloudinary asset, generates all derived sizes in one call, pulls them back,
+  and deletes the staged original before returning. If you only need local
+  resizing, `@payloadcms/transformer-sharp` does it without the round trip.
+</Banner>
+
+Staged originals are written to `payload-transformer-tmp/`, configurable via `uploadFolder`. They are removed once the upload completes; a hard process crash mid-upload can leave one behind, so consider an auto-delete rule on that folder.
+
+### Configuration Options#cloudinary-configuration
+
+| Option         | Description                                                 | Default                      |
+| -------------- | ----------------------------------------------------------- | ---------------------------- |
+| `collections`  | Per-collection upload-time image processing settings        |                              |
+| `config`       | Cloudinary client configuration                             |                              |
+| `delivery`     | `'proxy'` or `'redirect'`                                   | `'proxy'`                    |
+| `dynamic`      | Defaults for request-time transformation                    |                              |
+| `slug`         | Transformer slug, unique across `upload.transformers`       | `'cloudinary'`               |
+| `sourceURL`    | Overrides how the publicly reachable source URL is resolved | the requested file's `url`   |
+| `uploadFolder` | Folder for short-lived upload-time originals                | `'payload-transformer-tmp'`  |
+| `url`          | `cloudinary://<api_key>:<api_secret>@<cloud_name>`          | `process.env.CLOUDINARY_URL` |
 
 ## Non-goals
 
