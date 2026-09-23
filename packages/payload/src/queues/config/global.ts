@@ -38,6 +38,7 @@ export const getJobStatsGlobal: () => GlobalConfig = () => {
       group: 'System',
       hidden: true,
     },
+    authorship: false,
     fields: [
       {
         name: 'stats',
