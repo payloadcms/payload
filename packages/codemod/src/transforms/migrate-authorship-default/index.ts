@@ -2,12 +2,9 @@ import { Node } from 'ts-morph'
 
 import type { Transform } from '../../types.js'
 
-const AUTHORSHIP_CONFIG_TYPE_NAMES = new Set([
-  'CollectionConfig',
-  'GlobalConfig',
-  'SanitizedCollectionConfig',
-  'SanitizedGlobalConfig',
-])
+// Only user-authored config types. The `Sanitized*` variants are internal runtime types
+// whose `authorship` property is required, so injecting `false` would break their types.
+const AUTHORSHIP_CONFIG_TYPE_NAMES = new Set(['CollectionConfig', 'GlobalConfig'])
 
 const isAuthorshipConfigTypeName = (typeText: string): boolean => {
   const baseName = typeText.replace(/<.*>$/, '').trim()
