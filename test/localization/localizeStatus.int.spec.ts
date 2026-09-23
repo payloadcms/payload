@@ -12,7 +12,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration', () => {
+test.suite('localizeStatus migration', { config: './localizeStatus.config.ts' }, () => {
   test.beforeEach(async () => {
     if (process.env.PAYLOAD_DATABASE === 'mongodb' || !process.env.PAYLOAD_DATABASE) {
       // Wait for MongoDB to finish building indexes to avoid
@@ -21,7 +21,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     }
   })
 
-  test.options({ db: (adapter) => adapter === 'postgres' }).describe('PostgreSQL', () => {
+  test.options.describe('PostgreSQL', { db: (adapter) => adapter === 'postgres' }, () => {
     // Reset both test collections to their pre-migration database shape before every
     // scenario so each test is self-contained and order-independent. Real users' databases
     // will be in this pre-migration state; the runtime schema (localizeStatus auto-inferred)
@@ -572,7 +572,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     })
   })
 
-  test.options({ db: (adapter) => adapter === 'sqlite' }).describe('SQLite', () => {
+  test.options.describe('SQLite', { db: (adapter) => adapter === 'sqlite' }, () => {
     // Mirror the PostgreSQL suite: revert the runtime (post-migration) schema back to its
     // pre-migration shape before every scenario so each test is self-contained. SQLite has no
     // `ADD COLUMN IF NOT EXISTS` / `DROP COLUMN IF EXISTS`, so we guard with pragma_table_info.
@@ -936,7 +936,7 @@ test.suite({ config: './localizeStatus.config.ts' })('localizeStatus migration',
     }
   })
 
-  test.options({ db: (adapter) => adapter === 'mongodb' }).describe('MongoDB', () => {
+  test.options.describe('MongoDB', { db: (adapter) => adapter === 'mongodb' }, () => {
     // Force collection and index creation to finish before the timed writes below.
     // With autoIndex enabled on a fresh database, the first write to a versions
     // collection kicks off async index builds; a subsequent write can then race

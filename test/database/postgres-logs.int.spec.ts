@@ -5,8 +5,9 @@ import type { Post } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') })(
+test.suite(
   'database - postgres logs',
+  { config: './config.postgreslogs.ts', db: (adapter) => adapter.startsWith('postgres') },
   () => {
     test('ensure simple update uses optimized upsertRow with returning()', async ({ payload }) => {
       const doc = await payload.create({

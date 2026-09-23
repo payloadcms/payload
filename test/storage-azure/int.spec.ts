@@ -18,7 +18,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/storage-azure', () => {
+test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTests: false }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 

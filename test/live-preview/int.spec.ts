@@ -19,10 +19,12 @@ import type { CollectionPopulationRequestHandler } from '../../packages/live-pre
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({
+const suiteOptions = {
   config: './config.ts',
   resetBetweenTests: false,
-})('Collections - Live Preview', () => {
+}
+
+test.suite('Collections - Live Preview', suiteOptions, () => {
   const serverURL: string = `http://localhost:${process.env.PORT || 3000}`
 
   let testPost: Post

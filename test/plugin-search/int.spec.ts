@@ -8,7 +8,7 @@ import { pagesSlug, postsSlug } from './shared.js'
 
 let token: string
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-search', () => {
+test.suite('@payloadcms/plugin-search', { config: './config.ts' }, () => {
   test.beforeEach(async ({ restClient }) => {
     const data = await restClient
       .POST('/users/login', {

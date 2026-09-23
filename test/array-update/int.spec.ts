@@ -4,7 +4,7 @@ import { expect } from 'vitest'
 import { test } from '../__helpers/int/vitest.js'
 import { arraySlug, complexSlug } from './shared.js'
 
-test.suite({ config: './config.ts' })('array-update', () => {
+test.suite('array-update', { config: './config.ts' }, () => {
   test('should persist existing array-based data while updating and passing row ID', async ({
     payload,
   }) => {

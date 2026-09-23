@@ -14,7 +14,7 @@ import { pagesSlug, postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Locked documents', () => {
+test.suite('Locked documents', { config: './config.ts', resetBetweenTests: false }, () => {
   let post: Post
   let user: any
   let user2: any

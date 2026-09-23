@@ -14,8 +14,9 @@ const { email, password } = devUser
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: './config.schedules.ts' })(
+test.suite(
   'Queues - scheduling, without automatic scheduling handling',
+  { config: './config.schedules.ts' },
   () => {
     test.afterAll(async () => {
       // Ensure no new crons are scheduled

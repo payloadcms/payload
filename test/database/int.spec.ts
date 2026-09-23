@@ -55,7 +55,7 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('database', () => {
+test.suite('database', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance: payload, restClientInstance: restClient }) => {
     payload.db.migrationDir = path.join(dirname, './migrations')
 
@@ -77,11 +77,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     token = loginResult.token
   })
 
-  test
-    .options({
+  test.options.describe(
+    'connection pool',
+    {
       db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
-    })
-    .describe('connection pool', () => {
+    },
+    () => {
       test('should not leave a client checked out after connecting', async ({ payload }) => {
         const { pool } = payload.db as unknown as PostgresAdapter
 
@@ -96,7 +97,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         // the process, so `pool.end()` never drains after `payload.destroy()`.
         expect(pool.totalCount - pool.idleCount).toBe(0)
       })
-    })
+    },
+  )
 
   test.describe('id type', () => {
     test('should sanitize incoming IDs if ID type is number', async ({ restClient }) => {
@@ -262,9 +264,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       expect(resFind.categoriesCustomID[0]).toBe(9999)
     })
 
-    test
-      .options({ db: (adapter) => adapter === 'postgres-uuidv7' || adapter === 'sqlite-uuidv7' })
-      .describe('uuidv7', () => {
+    test.options.describe(
+      'uuidv7',
+      { db: (adapter) => adapter === 'postgres-uuidv7' || adapter === 'sqlite-uuidv7' },
+      () => {
         const createdRows: { collection: string; id: number | string }[] = []
 
         const track = (collection: string, id: number | string) => {
@@ -419,7 +422,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         test('defaultIDType should be text for uuidv7', ({ payload }) => {
           expect(payload.db.defaultIDType).toBe('text')
         })
-      })
+      },
+    )
   })
 
   test.describe('timestamps', () => {
@@ -605,7 +609,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       })
     })
 
-    test.options({ db: 'drizzle' }).describe('conditional updateOne', () => {
+    test.options.describe('conditional updateOne', { db: 'drizzle' }, () => {
       test('should allow exactly one concurrent compare-and-set winner', async ({ payload }) => {
         const post = await payload.create({
           collection: postsSlug,
@@ -853,8 +857,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       await noTimestampsTestDB(payload)
     })
 
-    test.options({ db: 'mongo' })(
+    test.options(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async ({ payload }) => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -863,8 +868,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
       },
     )
 
-    test.options({ db: 'mongo' })(
+    test.options(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
+      { db: 'mongo' },
       async ({ payload }) => {
         const originalAllowAdditionalKeys = payload.db.allowAdditionalKeys
         payload.db.allowAdditionalKeys = true
@@ -2254,7 +2260,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    test.options({ db: 'mongo' })('should run migrate:down', async ({ payload }) => {
+    test.options('should run migrate:down', { db: 'mongo' }, async ({ payload }) => {
       // migrate existing if there any
       await payload.db.migrate()
 
@@ -2292,7 +2298,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
 
     // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-    test.options({ db: 'mongo' })('should run migrate:refresh', async ({ payload }) => {
+    test.options('should run migrate:refresh', { db: 'mongo' }, async ({ payload }) => {
       let error
       try {
         await payload.db.migrateRefresh()
@@ -2311,7 +2317,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
   })
 
   // known drizzle issue: https://github.com/payloadcms/payload/issues/4597
-  test.options({ db: 'mongo' })('should run migrate:reset', async ({ payload }) => {
+  test.options('should run migrate:reset', { db: 'mongo' }, async ({ payload }) => {
     let error
     try {
       await payload.db.migrateReset()
@@ -2860,10 +2866,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         })
       }
 
-      test.options({
-        db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
-      })(
+      test.options(
         'should throw error when beginTransaction fails to connect (drizzle)',
+        {
+          db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase',
+        },
         async ({ payload }) => {
           const db = payload.db as unknown as Record<string, unknown>
           const originalDrizzle = db.drizzle
@@ -2879,11 +2886,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
         },
       )
 
-      test.options({
-        db: (adapter) =>
-          adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
-      })(
+      test.options(
         'should throw error when beginTransaction fails to connect (mongo)',
+        {
+          db: (adapter) =>
+            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+        },
         async ({ payload }) => {
           const db = payload.db as unknown as Record<string, unknown>
           const originalConnection = db.connection
@@ -3751,7 +3759,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     })
   })
 
-  test.options({ db: 'drizzle' }).describe('Schema generation', () => {
+  test.options.describe('Schema generation', { db: 'drizzle' }, () => {
     test('should generate Drizzle Postgres schema', async ({ payload }) => {
       const generatedAdapterName = process.env.PAYLOAD_DATABASE
       if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
@@ -6807,8 +6815,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     await payload.db.connect()
   })
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'ensure mongodb query sanitization does not duplicate IDs',
+    { db: 'mongo' },
     ({ payload }) => {
       const res: any = sanitizeQueryValue({
         field: {
@@ -6829,8 +6838,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     },
   )
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'ensure mongodb respects collation when using collection in the config',
+    { db: 'mongo' },
     async ({ payload }) => {
       // Clear any existing documents
       await payload.delete({ collection: 'simple', overrideAccess: true, where: {} })
@@ -6885,8 +6895,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('database', () =
     },
   )
 
-  test.options({ db: 'mongo' })(
+  test.options(
     'ensure mongodb collation works with draft pagination without sort',
+    { db: 'mongo' },
     async ({ payload }) => {
       // Clear any existing documents
       await payload.delete({ collection: 'categories', overrideAccess: true, where: {} })

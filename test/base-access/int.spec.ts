@@ -20,7 +20,7 @@ const createRequest = async ({
     payload,
   )
 
-test.suite({ config: './config.ts' })('baseAccess', () => {
+test.suite('baseAccess', { config: './config.ts' }, () => {
   test('should combine base and collection query constraints', async ({ payload }) => {
     for (const data of [
       {

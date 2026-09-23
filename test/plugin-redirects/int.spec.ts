@@ -8,7 +8,7 @@ import { pagesSlug } from './shared.js'
 
 let page: Page
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-redirects', () => {
+test.suite('@payloadcms/plugin-redirects', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload }) => {
     page = await payload.create({
       collection: 'pages',

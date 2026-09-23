@@ -21,7 +21,7 @@ const testUserCredentials = {
   password: '123456',
 }
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sdk', () => {
+test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance: payload }) => {
     post = await payload.create({
       collection: 'posts',

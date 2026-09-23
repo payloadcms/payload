@@ -30,7 +30,7 @@ const createdInputBoundaryRecords: Array<{
   id: number | string
 }> = []
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('collections-rest', () => {
+test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeEach(async ({ payload }) => {
     await clearDocs({ payload })
   })
