@@ -5,7 +5,11 @@ import { describe, expect, test } from 'vitest'
 
 import type { BenchmarkRun, BenchmarkSample } from './benchmarkReport.js'
 
-import { compareBenchmarks, summarizeBenchmark } from './benchmarkReport.js'
+import {
+  compareBenchmarks,
+  evaluateBenchmarkAcceptance,
+  summarizeBenchmark,
+} from './benchmarkReport.js'
 import { countUniqueReachableSchemas, describeMongooseSchema } from './describeMongooseSchema.js'
 
 const createSample = (overrides: Partial<BenchmarkSample>): BenchmarkSample => ({
@@ -98,5 +102,123 @@ describe('MongoDB schema benchmark helpers', () => {
     const second = new mongoose.Schema({ child: sharedChild })
 
     expect(countUniqueReachableSchemas({ schemas: [first, second] })).toBe(3)
+  })
+
+  test('should evaluate the benchmark acceptance thresholds from medians', () => {
+    const before: BenchmarkRun = {
+      scenarios: {
+        'inline-control': [
+          createSample({
+            heapUsedDelta: 300,
+            initializationMs: 200,
+            reachableSchemas: 100,
+            schemaConstructors: 100,
+          }),
+        ],
+        minimal: [
+          createSample({ heapUsedDelta: 100, initializationMs: 100, reachableSchemas: 10 }),
+        ],
+        'nested-diamond': [
+          createSample({
+            heapUsedDelta: 1_100,
+            initializationMs: 1_000,
+            reachableSchemas: 1_000,
+            schemaConstructors: 10_000,
+          }),
+        ],
+      },
+    }
+    const after: BenchmarkRun = {
+      scenarios: {
+        'inline-control': [
+          createSample({
+            heapUsedDelta: 310,
+            initializationMs: 205,
+            reachableSchemas: 100,
+            schemaConstructors: 100,
+          }),
+        ],
+        minimal: [
+          createSample({ heapUsedDelta: 110, initializationMs: 100, reachableSchemas: 10 }),
+        ],
+        'nested-diamond': [
+          createSample({
+            heapUsedDelta: 210,
+            initializationMs: 100,
+            reachableSchemas: 100,
+            schemaConstructors: 400,
+          }),
+        ],
+      },
+    }
+
+    const checks = evaluateBenchmarkAcceptance({ after, before })
+
+    expect(checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'nested-diamond constructors', passed: true }),
+        expect.objectContaining({ name: 'nested-diamond incremental heap', passed: true }),
+        expect.objectContaining({ name: 'inline-control incremental heap', passed: true }),
+        expect.objectContaining({ name: 'inline-control initialization time', passed: true }),
+        expect.objectContaining({ name: 'nested-diamond reachable schemas', passed: true }),
+      ]),
+    )
+  })
+
+  test('should fail an inline control regression greater than five percent', () => {
+    const before: BenchmarkRun = {
+      scenarios: {
+        'inline-control': [createSample({ heapUsedDelta: 200, initializationMs: 200 })],
+        minimal: [createSample({ heapUsedDelta: 100, initializationMs: 100 })],
+      },
+    }
+    const after: BenchmarkRun = {
+      scenarios: {
+        'inline-control': [createSample({ heapUsedDelta: 120, initializationMs: 220 })],
+        minimal: [createSample({ heapUsedDelta: 100, initializationMs: 100 })],
+      },
+    }
+
+    const checks = evaluateBenchmarkAcceptance({ after, before })
+
+    expect(checks.find(({ name }) => name === 'inline-control initialization time')?.passed).toBe(
+      false,
+    )
+  })
+
+  test('should accept remaining constructor calls when they are discriminator clones', () => {
+    const before: BenchmarkRun = {
+      scenarios: {
+        minimal: [createSample({ heapUsedDelta: 100 })],
+        'wide-references': [
+          createSample({
+            heapUsedDelta: 1_000,
+            reachableSchemas: 5_000,
+            schemaClones: 4_800,
+            schemaConstructors: 10_000,
+          }),
+        ],
+      },
+    }
+    const after: BenchmarkRun = {
+      scenarios: {
+        minimal: [createSample({ heapUsedDelta: 100 })],
+        'wide-references': [
+          createSample({
+            heapUsedDelta: 500,
+            reachableSchemas: 5_000,
+            schemaClones: 4_800,
+            schemaConstructors: 5_000,
+          }),
+        ],
+      },
+    }
+
+    const constructorCheck = evaluateBenchmarkAcceptance({ after, before }).find(
+      ({ name }) => name === 'wide-references constructors',
+    )
+
+    expect(constructorCheck).toMatchObject({ passed: true })
+    expect(constructorCheck?.details).toContain('discriminator attachments')
   })
 })

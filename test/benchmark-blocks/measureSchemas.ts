@@ -3,18 +3,13 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import type { BenchmarkRun, BenchmarkSample } from './benchmarkReport.js'
-import type { WorkerResult } from './measureSchemas.worker.js'
+import type { BenchmarkSample } from './benchmarkReport.js'
+import type { AttributionWorkerResult, WorkerResult } from './measureSchemas.worker.js'
+import type { StoredAttributionRun, StoredBenchmarkRun } from './renderBenchmarkReport.js'
 import type { BenchmarkScenarioName } from './schemaScenarios.js'
 
-import { compareBenchmarks, summarizeBenchmark } from './benchmarkReport.js'
+import { getFileDigest, renderBenchmarkReport } from './renderBenchmarkReport.js'
 import { benchmarkScenarioNames, isBenchmarkScenarioName } from './schemaScenarios.js'
-
-type StoredBenchmarkRun = {
-  environment: WorkerResult['environment']
-  iterations: number
-  rawResults: Record<string, WorkerResult[]>
-} & BenchmarkRun
 
 const workerPath = fileURLToPath(new URL('./measureSchemas.worker.ts', import.meta.url))
 
@@ -25,15 +20,30 @@ const run = (): void => {
   if (compareIndex !== -1) {
     const beforePath = arguments_[compareIndex + 1]
     const afterPath = arguments_[compareIndex + 2]
+    const attributionPath = getOption({ name: '--attribution-file', arguments_ })
     const markdownPath = getOption({ name: '--markdown', arguments_ })
 
-    if (!beforePath || !afterPath || !markdownPath) {
-      throw new Error('--compare requires before and after files plus --markdown.')
+    if (!beforePath || !afterPath || !attributionPath || !markdownPath) {
+      throw new Error(
+        '--compare requires before and after files, --attribution-file, and --markdown.',
+      )
     }
 
     const before = readRun({ path: beforePath })
     const after = readRun({ path: afterPath })
-    writeFileSync(markdownPath, renderComparison({ after, before }), 'utf8')
+    const attribution = readAttributionRun({ path: attributionPath })
+    writeFileSync(
+      markdownPath,
+      renderBenchmarkReport({
+        after,
+        afterDigest: getFileDigest({ path: afterPath }),
+        attribution,
+        attributionDigest: getFileDigest({ path: attributionPath }),
+        before,
+        beforeDigest: getFileDigest({ path: beforePath }),
+      }),
+      'utf8',
+    )
     process.stderr.write(`Wrote ${markdownPath}\n`)
     return
   }
@@ -41,6 +51,7 @@ const run = (): void => {
   const outputPath = getOption({ name: '--output', arguments_ })
   const requestedScenario = getOption({ name: '--scenario', arguments_ })
   const iterations = Number(getOption({ name: '--iterations', arguments_ }) ?? '1')
+  const isAttribution = arguments_.includes('--attribution')
 
   if (!outputPath) {
     throw new Error('The benchmark requires --output.')
@@ -55,6 +66,31 @@ const run = (): void => {
   }
 
   const scenarios = requestedScenario ? [requestedScenario] : benchmarkScenarioNames
+
+  if (isAttribution) {
+    const attributionResults = Object.fromEntries(
+      scenarios.map((scenario) => {
+        process.stderr.write(`[${scenario}] attribution\n`)
+
+        return [scenario, runAttributionWorker({ scenario })]
+      }),
+    )
+    const firstResult = attributionResults[scenarios[0]]
+
+    if (!firstResult) {
+      throw new Error('The attribution run did not produce a result.')
+    }
+
+    const output: StoredAttributionRun = {
+      environment: firstResult.environment,
+      scenarios: attributionResults,
+    }
+
+    writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8')
+    process.stderr.write(`Wrote ${outputPath}\n`)
+    return
+  }
+
   const rawResults: Record<string, WorkerResult[]> = {}
   const samples: Record<string, BenchmarkSample[]> = {}
 
@@ -88,11 +124,6 @@ const run = (): void => {
   process.stderr.write(`Wrote ${outputPath}\n`)
 }
 
-const formatBytes = (value: number): string => `${(value / 1024 / 1024).toFixed(1)} MiB`
-
-const formatNumber = (value: number): string =>
-  new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)
-
 const getOption = ({
   name,
   arguments_,
@@ -108,49 +139,27 @@ const getOption = ({
 const readRun = ({ path }: { path: string }): StoredBenchmarkRun =>
   JSON.parse(readFileSync(path, 'utf8')) as StoredBenchmarkRun
 
-const renderComparison = ({
-  after,
-  before,
-}: {
-  after: StoredBenchmarkRun
-  before: StoredBenchmarkRun
-}): string => {
-  const comparison = compareBenchmarks({ after, before })
-  const rows = benchmarkScenarioNames
-    .filter((scenario) => before.scenarios[scenario] && after.scenarios[scenario])
-    .map((scenario) => {
-      const beforeSummary = summarizeBenchmark({ samples: before.scenarios[scenario]! })
-      const afterSummary = summarizeBenchmark({ samples: after.scenarios[scenario]! })
-      const incrementalHeap = comparison.scenarios[scenario]!.incrementalHeap
-
-      return `| ${scenario} | ${formatBytes(beforeSummary.rssDelta.median)} | ${formatBytes(afterSummary.rssDelta.median)} | ${formatBytes(beforeSummary.heapUsedDelta.median)} | ${formatBytes(afterSummary.heapUsedDelta.median)} | ${formatNumber(beforeSummary.initializationMs.median)} ms | ${formatNumber(afterSummary.initializationMs.median)} ms | ${formatNumber(beforeSummary.schemaConstructors.median)} | ${formatNumber(afterSummary.schemaConstructors.median)} | ${formatNumber(beforeSummary.schemaClones.median)} | ${formatNumber(afterSummary.schemaClones.median)} | ${formatNumber(beforeSummary.reachableSchemas.median)} | ${formatNumber(afterSummary.reachableSchemas.median)} | ${formatNumber(incrementalHeap.reductionPercent)}% |`
-    })
-
-  return `# MongoDB Schema Build Cache Benchmarks
-
-**Written with AI**
-
-## Environment
-
-- Before revision: \`${before.environment.gitRevision}\`
-- After revision: \`${after.environment.gitRevision}\`
-- Node.js: ${after.environment.nodeVersion}
-- Mongoose: ${after.environment.mongooseVersion}
-- Payload: ${after.environment.payloadVersion}
-- Platform: ${after.environment.operatingSystem} (${after.environment.architecture})
-- Repetitions: ${after.iterations}
-
-## Results
-
-| Scenario | RSS before | RSS after | Heap before | Heap after | Init before | Init after | Constructors before | Constructors after | Clones before | Clones after | Reachable before | Reachable after | Incremental heap reduction |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-${rows.join('\n')}
-
-RSS is supporting evidence because allocator behavior can vary. Heap deltas, schema construction counts, and compiled reachable-schema counts provide the primary comparison.
-`
-}
+const readAttributionRun = ({ path }: { path: string }): StoredAttributionRun =>
+  JSON.parse(readFileSync(path, 'utf8')) as StoredAttributionRun
 
 const runWorker = ({ scenario }: { scenario: BenchmarkScenarioName }): WorkerResult => {
+  return runWorkerProcess<WorkerResult>({ scenario })
+}
+
+const runAttributionWorker = ({
+  scenario,
+}: {
+  scenario: BenchmarkScenarioName
+}): AttributionWorkerResult =>
+  runWorkerProcess<AttributionWorkerResult>({ isAttribution: true, scenario })
+
+const runWorkerProcess = <TResult>({
+  isAttribution = false,
+  scenario,
+}: {
+  isAttribution?: boolean
+  scenario: BenchmarkScenarioName
+}): TResult => {
   const result = spawnSync(
     process.execPath,
     [
@@ -161,6 +170,7 @@ const runWorker = ({ scenario }: { scenario: BenchmarkScenarioName }): WorkerRes
       'tsx',
       workerPath,
       scenario,
+      ...(isAttribution ? ['--attribution'] : []),
     ],
     {
       cwd: process.cwd(),
@@ -180,7 +190,7 @@ const runWorker = ({ scenario }: { scenario: BenchmarkScenarioName }): WorkerRes
   }
 
   try {
-    return JSON.parse(result.stdout.trim()) as WorkerResult
+    return JSON.parse(result.stdout.trim()) as TResult
   } catch (error) {
     throw new Error(`Benchmark worker returned invalid JSON for ${scenario}: ${result.stdout}`, {
       cause: error,

@@ -1,5 +1,6 @@
 import type { Schema } from 'mongoose'
-import type { Payload } from 'payload'
+import type { Payload, SanitizedCollectionConfig, SanitizedConfig } from 'payload'
+import type { SchemaBuildContextSnapshot } from 'payload/internal'
 
 import mongoose from 'mongoose'
 import { execFileSync } from 'node:child_process'
@@ -10,7 +11,11 @@ import process from 'node:process'
 
 import type { BenchmarkScenarioName } from './schemaScenarios.js'
 
-import { countUniqueReachableSchemas } from './describeMongooseSchema.js'
+import {
+  countUniqueReachableSchemas,
+  describeMongooseSchema,
+  type MongooseSchemaDescriptor,
+} from './describeMongooseSchema.js'
 
 type AllocationCategory =
   | 'array-group-tab'
@@ -41,6 +46,13 @@ export type WorkerResult = {
   schemaConstructors: number
 }
 
+export type AttributionWorkerResult = {
+  cache: SchemaBuildContextSnapshot
+  descriptors: MongooseSchemaDescriptor[]
+  environment: WorkerResult['environment']
+  scenario: BenchmarkScenarioName
+}
+
 const allocationCategories: AllocationCategory[] = [
   'top-level',
   'version',
@@ -66,6 +78,15 @@ const run = async (): Promise<void> => {
   }
 
   const scenario = scenarioArgument
+  const config = await createBenchmarkConfig({ scenario })
+
+  if (process.argv.includes('--attribution')) {
+    const result = await runAttribution({ config, scenario })
+
+    process.stdout.write(`${JSON.stringify(result)}\n`)
+    return
+  }
+
   const attribution = Object.fromEntries(
     allocationCategories.map((category) => [category, 0]),
   ) as Record<AllocationCategory, number>
@@ -92,8 +113,6 @@ const run = async (): Promise<void> => {
 
   ;(mongoose as unknown as { Schema: typeof mongoose.Schema }).Schema = instrumentedSchema
 
-  const config = await createBenchmarkConfig({ scenario })
-
   collectGarbage()
   const beforeInit = process.memoryUsage()
   const startTime = performance.now()
@@ -109,22 +128,12 @@ const run = async (): Promise<void> => {
   collectGarbage()
   const afterDestroy = process.memoryUsage()
 
-  const require = createRequire(import.meta.url)
-  const mongoosePackage = require('mongoose/package.json') as { version: string }
-  const payloadPackage = require('../../packages/payload/package.json') as { version: string }
   const result: WorkerResult = {
     afterDestroy,
     afterInit,
     attribution,
     beforeInit,
-    environment: {
-      architecture: process.arch,
-      gitRevision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
-      mongooseVersion: mongoosePackage.version,
-      nodeVersion: process.version,
-      operatingSystem: `${os.platform()} ${os.release()}`,
-      payloadVersion: payloadPackage.version,
-    },
+    environment: getEnvironment(),
     initializationMs,
     reachableSchemas,
     scenario,
@@ -133,6 +142,140 @@ const run = async (): Promise<void> => {
   }
 
   process.stdout.write(`${JSON.stringify(result)}\n`)
+}
+
+const runAttribution = async ({
+  config,
+  scenario,
+}: {
+  config: SanitizedConfig
+  scenario: BenchmarkScenarioName
+}): Promise<AttributionWorkerResult> => {
+  const { buildVersionCollectionFields, buildVersionCompoundIndexes, buildVersionGlobalFields } =
+    await import('payload')
+  const { createSchemaBuildContext } = await import('payload/internal')
+  const { buildCollectionSchema } = await import(
+    '../../packages/db-mongodb/src/models/buildCollectionSchema.js'
+  )
+  const { buildSchema } = await import('../../packages/db-mongodb/src/models/buildSchema.js')
+  const descriptors: MongooseSchemaDescriptor[] = []
+  const schemaBuildContext = createSchemaBuildContext<Schema>({
+    onEvent: (event) => {
+      if (event.action === 'store' && event.schema) {
+        descriptors.push(
+          describeMongooseSchema({
+            label: event.label,
+            schema: event.schema,
+            variantKey: event.variantKey,
+          }),
+        )
+      }
+    },
+  })
+  const payload = createPayloadFixture({ config })
+
+  try {
+    for (const collection of config.collections) {
+      buildCollectionSchema({ collection, payload, schemaBuildContext })
+
+      if (collection.versions) {
+        buildSchema({
+          buildSchemaOptions: {
+            disableUnique: true,
+            draftsEnabled: true,
+            indexSortableFields: config.indexSortableFields,
+            options: {
+              minimize: false,
+              timestamps: false,
+            },
+          },
+          compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
+          configFields: buildVersionCollectionFields(config, collection),
+          payload,
+          schemaBuildContext,
+        })
+      }
+    }
+
+    for (const global of config.globals) {
+      buildSchema({
+        buildSchemaOptions: {
+          options: {
+            minimize: false,
+          },
+        },
+        configFields: global.fields,
+        payload,
+        schemaBuildContext,
+      })
+
+      if (global.versions) {
+        buildSchema({
+          buildSchemaOptions: {
+            disableUnique: true,
+            draftsEnabled: true,
+            indexSortableFields: config.indexSortableFields,
+            options: {
+              minimize: false,
+              timestamps: false,
+            },
+          },
+          configFields: buildVersionGlobalFields(config, global),
+          payload,
+          schemaBuildContext,
+        })
+      }
+    }
+
+    return {
+      cache: schemaBuildContext.snapshot(),
+      descriptors,
+      environment: getEnvironment(),
+      scenario,
+    }
+  } finally {
+    schemaBuildContext.clear()
+  }
+}
+
+const createPayloadFixture = ({ config }: { config: SanitizedConfig }): Payload =>
+  ({
+    blocks: Object.fromEntries(config.blocks.map((block) => [block.slug, block])),
+    collections: Object.fromEntries(
+      config.collections.map((collection) => [
+        collection.slug,
+        { customIDType: getCustomIDType({ collection }) },
+      ]),
+    ),
+    config,
+    db: {
+      useBigIntForNumberIDs: false,
+    },
+  }) as unknown as Payload
+
+const getCustomIDType = ({
+  collection,
+}: {
+  collection: SanitizedCollectionConfig
+}): 'number' | 'text' | undefined => {
+  const idField = collection.flattenedFields.find((field) => 'name' in field && field.name === 'id')
+
+  return idField?.type === 'number' ? 'number' : idField ? 'text' : undefined
+}
+
+const getEnvironment = (): WorkerResult['environment'] => {
+  const require = createRequire(import.meta.url)
+  const mongoosePackage = require('mongoose/package.json') as { version: string }
+  const payloadPackage = require('../../packages/payload/package.json') as { version: string }
+
+  return {
+    architecture: process.arch,
+    gitRevision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+    mongooseVersion: mongoosePackage.version,
+    nodeVersion: process.version,
+    operatingSystem: `${os.platform()} ${os.release()}`,
+    payloadVersion: payloadPackage.version,
+  }
 }
 
 const classifyAllocation = ({ stack }: { stack?: string }): AllocationCategory => {
