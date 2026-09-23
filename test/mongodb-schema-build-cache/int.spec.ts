@@ -2,8 +2,8 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions, Schema } from 'mongoose'
 import type { FlattenedField, Payload, SanitizedConfig } from 'payload'
 
+import assert from 'node:assert/strict'
 import { reload } from 'payload'
-import { expect } from 'vitest'
 
 import type { SchemaCachePage } from './payload-types.js'
 
@@ -39,9 +39,9 @@ test.suite({ config: './config.ts', db: 'mongo' })('MongoDB schema build cache',
     })
     const leaf = getFirstLeaf(result.layout)
 
-    expect(leaf.value).toBe('initial value')
-    expect(leaf.localizedText).toBe('English leaf')
-    expect(leaf.location).toEqual([10, 20])
+    assert.equal(leaf.value, 'initial value')
+    assert.equal(leaf.localizedText, 'English leaf')
+    assert.deepEqual(leaf.location, [10, 20])
   })
 
   test('should update a value inside a nested referenced block', async ({ payload }) => {
@@ -66,7 +66,7 @@ test.suite({ config: './config.ts', db: 'mongo' })('MongoDB schema build cache',
       locale: 'en',
     })
 
-    expect(getFirstLeaf(result.layout).value).toBe('after update')
+    assert.equal(getFirstLeaf(result.layout).value, 'after update')
   })
 
   test('should keep localized nested blocks independent in en and de', async ({ payload }) => {
@@ -108,8 +108,8 @@ test.suite({ config: './config.ts', db: 'mongo' })('MongoDB schema build cache',
       en: NestedLayout
     }
 
-    expect(getFirstLeaf(localizedLayout.en).localizedText).toBe('English localized leaf')
-    expect(getFirstLeaf(localizedLayout.de).localizedText).toBe('German localized leaf')
+    assert.equal(getFirstLeaf(localizedLayout.en).localizedText, 'English localized leaf')
+    assert.equal(getFirstLeaf(localizedLayout.de).localizedText, 'German localized leaf')
   })
 
   test('should create and read a version with nested referenced blocks', async ({ payload }) => {
@@ -136,8 +136,8 @@ test.suite({ config: './config.ts', db: 'mongo' })('MongoDB schema build cache',
       },
     })
 
-    expect(versions.docs.length).toBeGreaterThan(0)
-    expect(getFirstLeaf(versions.docs[0]!.version.layout).value).toBe('version value')
+    assert.ok(versions.docs.length > 0)
+    assert.equal(getFirstLeaf(versions.docs[0]!.version.layout).value, 'version value')
   })
 
   test('should preserve numeric relationship values inside cached blocks', async ({ payload }) => {
@@ -152,9 +152,9 @@ test.suite({ config: './config.ts', db: 'mongo' })('MongoDB schema build cache',
       locale: 'en',
     })
 
-    expect(target.id).toBeTypeOf('number')
-    expect(getFirstLeaf(page.layout).target).toBe(target.id)
-    expect(getFirstLeaf(page.layout).target).toBeTypeOf('number')
+    assert.equal(typeof target.id, 'number')
+    assert.equal(getFirstLeaf(page.layout).target, target.id)
+    assert.equal(typeof getFirstLeaf(page.layout).target, 'number')
   })
 
   test('should preserve unique and geospatial index definitions', ({ payload }) => {
@@ -164,13 +164,10 @@ test.suite({ config: './config.ts', db: 'mongo' })('MongoDB schema build cache',
       indexes.map(([definition, options]) => [Object.keys(definition)[0], { definition, options }]),
     )
 
-    expect(indexesByPath.uniqueText).toMatchObject({
-      definition: { uniqueText: 1 },
-      options: { sparse: true, unique: true },
-    })
-    expect(indexesByPath.location).toMatchObject({
-      definition: { location: '2dsphere' },
-    })
+    assert.deepEqual(indexesByPath.uniqueText?.definition, { uniqueText: 1 })
+    assert.equal(indexesByPath.uniqueText?.options.sparse, true)
+    assert.equal(indexesByPath.uniqueText?.options.unique, true)
+    assert.deepEqual(indexesByPath.location?.definition, { location: '2dsphere' })
   })
 
   test('should rebuild block templates after a configuration reload', async ({
@@ -197,7 +194,7 @@ test.suite({ config: './config.ts', db: 'mongo' })('MongoDB schema build cache',
         disableDBConnect: true,
       })
 
-      expect(getCompiledLeafSchema({ payload }).path('secondConfigValue')).toBeDefined()
+      assert.ok(getCompiledLeafSchema({ payload }).path('secondConfigValue'))
     } finally {
       await reload(config, payload, true, { config, disableDBConnect: true })
     }
