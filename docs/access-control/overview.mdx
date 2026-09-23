@@ -44,12 +44,10 @@ const defaultPayloadAccess = ({ req: { payload, user } }) => {
 ```
 
 <Banner type="warning">
-  **Important:** [Local API](../local-api/overview) operations with an optional
-  `overrideAccess` value respect Access Control by default because it defaults
-  to `false`. When an operation acts on behalf of an authenticated user, pass
-  that `user` with the request. Set `overrideAccess: true` only when the
-  operation should bypass Access Control. See [Local API Access
-  Control](../local-api/access-control).
+  **Important:** By default, all [Local API](../local-api/overview) operations
+  respect Access Control based on the passed `user`. Set
+  `overrideAccess: true` only when the operation should entirely bypass
+  Access Control. See [Local API Access Control](../local-api/access-control).
 </Banner>
 
 ## Base Access Control
