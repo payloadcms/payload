@@ -24,7 +24,7 @@ export const getPreferences = cache(
     payload: Payload,
     userID: DefaultDocumentIDType,
     userSlug: string,
-  ): Promise<PreferenceDoc<T>> => {
+  ): Promise<PreferenceDoc<T> | undefined> => {
     const result = (await payload
       .find({
         collection: 'payload-preferences',
@@ -51,7 +51,7 @@ export const getPreferences = cache(
           ],
         },
       })
-      .then((res) => res.docs?.[0])) as { id: DefaultDocumentIDType; value: T }
+      .then((res) => res.docs?.[0])) as PreferenceDoc<T> | undefined
 
     return result
   },
@@ -76,9 +76,9 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
   req: PayloadRequest
   value: T
 }): Promise<T> => {
-  const existingPrefs: PreferenceDoc<T> = req.user
+  const existingPrefs: PreferenceDoc<T> | undefined = req.user
     ? await getPreferences<T>(key, req.payload, req.user.id, req.user.collection)
-    : ({} as PreferenceDoc<T>)
+    : undefined
 
   let newPrefs = existingPrefs?.value
 
