@@ -23,12 +23,20 @@ export const getCachedFormStateIfDataMatches = ({
 
 export const reduceFormStateToBlockData = (formState: FormState): Data => {
   const formStateWithoutRowCounts = Object.fromEntries(
-    Object.entries(formState).map(([path, fieldState]) => [
-      path,
-      fieldState && Array.isArray(fieldState.rows) && fieldState.value !== null
-        ? { ...fieldState, disableFormData: true }
-        : fieldState,
-    ]),
+    Object.entries(formState).map(([path, fieldState]) => {
+      if (!fieldState || !Array.isArray(fieldState.rows)) {
+        return [path, fieldState]
+      }
+
+      if (fieldState.value === undefined) {
+        return [path, { ...fieldState, value: null }]
+      }
+
+      return [
+        path,
+        fieldState.value === null ? fieldState : { ...fieldState, disableFormData: true },
+      ]
+    }),
   ) as FormState
 
   return normalizeData({
@@ -40,7 +48,12 @@ export const reduceFormStateToBlockData = (formState: FormState): Data => {
 const getRowFieldPaths = (formState: FormState): Set<string> =>
   new Set(
     Object.entries(formState)
-      .filter(([, fieldState]) => Array.isArray(fieldState?.rows) && fieldState.value !== null)
+      .filter(
+        ([, fieldState]) =>
+          Array.isArray(fieldState?.rows) &&
+          fieldState.value !== null &&
+          fieldState.value !== undefined,
+      )
       .map(([path]) => path),
   )
 

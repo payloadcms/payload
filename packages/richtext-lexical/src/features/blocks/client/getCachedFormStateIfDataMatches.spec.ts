@@ -247,6 +247,16 @@ describe('getCachedFormStateIfDataMatches', () => {
     })
   })
 
+  it('should preserve a null array when converting form state to block data', () => {
+    expect(
+      reduceFormStateToBlockData({
+        items: {
+          rows: [],
+        },
+      }),
+    ).toEqual({ items: null })
+  })
+
   it.each([
     {
       cachedRow: { id: 'row-1' },
@@ -282,7 +292,7 @@ describe('getCachedFormStateIfDataMatches', () => {
 
   it.each([
     {
-      cachedArrayState: { initialValue: null, rows: [], value: null },
+      cachedArrayState: { rows: [] },
       currentValue: [],
       name: 'null to empty',
     },
