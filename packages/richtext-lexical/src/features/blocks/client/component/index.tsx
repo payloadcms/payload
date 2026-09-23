@@ -34,7 +34,7 @@ import {
   type CollapsedPreferences,
   type FormState,
 } from 'payload'
-import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -49,14 +49,16 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
+import {
+  getCachedFormStateIfDataMatches,
+  reduceFormStateToBlockData,
+} from '../getCachedFormStateIfDataMatches.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
   type BlockCollapsibleWithErrorProps,
   BlockContent,
   useBlockComponentContext,
 } from './BlockContent.js'
-import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 export type BlockComponentProps<TFormData extends Record<string, unknown> = BlockFields> = {
   /**
@@ -263,9 +265,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           value: formData.blockName,
         }
 
-        const newFormStateData: BlockFields = reduceFieldsToValues(
+        const newFormStateData = reduceFormStateToBlockData(
           deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
         ) as BlockFields
 
         // Things like default values may come back from the server => update the node with the new data
@@ -372,11 +373,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         newFormState.blockName = prevFormState.blockName
       }
 
-      const newFormStateData: BlockFields = reduceFieldsToValues(
-        removeEmptyArrayValues({
-          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
-        }),
-        true,
+      const newFormStateData = reduceFormStateToBlockData(
+        deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
       ) as BlockFields
 
       setTimeout(() => {

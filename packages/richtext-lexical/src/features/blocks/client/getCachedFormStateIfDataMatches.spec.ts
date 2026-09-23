@@ -2,7 +2,10 @@ import type { Data, FormState } from 'payload'
 
 import { describe, expect, it } from 'vitest'
 
-import { getCachedFormStateIfDataMatches } from './getCachedFormStateIfDataMatches.js'
+import {
+  getCachedFormStateIfDataMatches,
+  reduceFormStateToBlockData,
+} from './getCachedFormStateIfDataMatches.js'
 
 describe('getCachedFormStateIfDataMatches', () => {
   it('should reuse cached form state when its values match the current block data', () => {
@@ -187,6 +190,61 @@ describe('getCachedFormStateIfDataMatches', () => {
         },
       }),
     ).toBe(false)
+  })
+
+  it.each([
+    {
+      formData: {},
+      name: 'omitted',
+    },
+    {
+      formData: { items: [] },
+      name: 'an empty array',
+    },
+  ])('should reuse cached form state when an empty row field is $name', ({ formData }) => {
+    const cachedFormState: FormState = {
+      items: {
+        initialValue: 0,
+        rows: [],
+        value: 0,
+      },
+    }
+
+    expect(getCachedFormStateIfDataMatches({ cachedFormState, formData })).toBe(cachedFormState)
+  })
+
+  it('should reuse cached form state when an unset optional field is omitted', () => {
+    const cachedFormState: FormState = {
+      title: { initialValue: undefined, value: undefined },
+    }
+
+    expect(getCachedFormStateIfDataMatches({ cachedFormState, formData: {} })).toBe(cachedFormState)
+  })
+
+  it('should omit empty row counts and unset values when converting form state to block data', () => {
+    expect(
+      reduceFormStateToBlockData({
+        items: {
+          initialValue: 0,
+          rows: [],
+          value: 0,
+        },
+        sections: {
+          initialValue: 1,
+          rows: [{ id: 'section-1' }],
+          value: 1,
+        },
+        'sections.0.id': { initialValue: 'section-1', value: 'section-1' },
+        'sections.0.items': {
+          initialValue: 0,
+          rows: [],
+          value: 0,
+        },
+        title: { initialValue: undefined, value: undefined },
+      }),
+    ).toEqual({
+      sections: [{ id: 'section-1' }],
+    })
   })
 
   it.each([

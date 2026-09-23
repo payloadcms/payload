@@ -26,7 +26,7 @@ import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import './index.css'
 import '../../../../utilities/fieldsDrawer/index.css'
 
-import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -40,7 +40,10 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { getCachedFormStateIfDataMatches } from '../getCachedFormStateIfDataMatches.js'
+import {
+  getCachedFormStateIfDataMatches,
+  reduceFormStateToBlockData,
+} from '../getCachedFormStateIfDataMatches.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 export type InlineBlockComponentProps<
@@ -248,9 +251,8 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       })
 
       if (state) {
-        const newFormStateData: InlineBlockFields = reduceFieldsToValues(
+        const newFormStateData = reduceFormStateToBlockData(
           deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
         ) as InlineBlockFields
 
         // Things like default values may come back from the server => update the node with the new data
