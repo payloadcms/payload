@@ -3,11 +3,11 @@
  */
 
 export {
-  initReq,
-  type InitReqArgs,
-  type InitReqCache,
-  type InitReqPartialResult,
-} from '../admin/initReq.js'
+  type AdminContextCache,
+  getAdminContext,
+  type GetAdminContextArgs,
+  type PartialAdminContext,
+} from '../admin/getAdminContext.js'
 export { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'

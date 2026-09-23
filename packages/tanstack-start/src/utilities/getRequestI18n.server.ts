@@ -7,7 +7,7 @@ import { getRequestLanguage, parseCookies } from 'payload'
 
 /**
  * Resolves the client `I18n` for the current TanStack Start request without a
- * full `initReq` (no `getPayload`/auth/access). Mirrors the Next.js adapter's
+ * full `getAdminContext` (no `getPayload`/auth/access). Mirrors the Next.js adapter's
  * `getNextRequestI18n` and feeds the shared `generatePageMetadata`, which only
  * needs `config` + `i18n` to translate admin-page titles.
  */

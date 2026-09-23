@@ -1,16 +1,12 @@
-import type {
-  ImportMap,
-  InitReqResult,
-  LanguageOptions,
-  SanitizedConfig,
-  ServerFunctionClient,
-} from 'payload'
-import type { InitReqArgs } from 'payload/internal'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
+import type { GetAdminContextFn } from '../../views/Root/index.js'
+
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ProgressBar, RootProvider } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
@@ -49,6 +45,7 @@ type RootLayoutProps = {
    * Framework-specific font loaders (e.g. `next/font`) are supplied by the caller.
    */
   readonly fonts?: Font[]
+  readonly getAdminContext: GetAdminContextFn
   /**
    * Custom content to render inside the admin panel's `<head>` element.
    *
@@ -68,7 +65,6 @@ type RootLayoutProps = {
   readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
-  readonly initReq: (args: Omit<InitReqArgs, 'cache' | 'serverAdapter'>) => Promise<InitReqResult>
   /**
    * Client router adapter. Caller supplies a framework-specific provider
    * (for Next.js use the `NextRouterAdapter` exported from `@payloadcms/next`).
@@ -93,10 +89,10 @@ const RootLayoutContent = async ({
   children,
   config: configPromise,
   fonts = [],
+  getAdminContext,
   head: headFromProps,
   htmlProps = {},
   importMap,
-  initReq,
   RouterAdapter,
   serverFunction,
 }: RootLayoutProps) => {
@@ -110,7 +106,7 @@ const RootLayoutContent = async ({
       payload: { config },
     },
     user,
-  } = await initReq({ configPromise, importMap, key: 'RootLayout' })
+  } = await getAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
   const theme = getRequestTheme({
     config,

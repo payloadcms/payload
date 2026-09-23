@@ -6,8 +6,9 @@ import * as qs from 'qs-esm'
 import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { CreatePayloadReqArgs } from '../utilities/createPayloadReq.js'
 import type { ServerAdapter } from './adapters/server.js'
-import type { InitReqResult } from './functions/index.js'
+import type { GetAdminContextResult } from './functions/index.js'
 
 import { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
@@ -18,50 +19,50 @@ import { getRequestLanguage } from '../utilities/getRequestLanguage.js'
 import { parseCookies } from '../utilities/parseCookies.js'
 import { getRequestLocale } from './getRequestLocale.js'
 
-export type InitReqPartialResult = {
+export type PartialAdminContext = {
   i18n: I18nClient
-} & Pick<InitReqResult, 'languageCode'> &
+} & Pick<GetAdminContextResult, 'languageCode'> &
   Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
 
-/** Framework-provided request-scoped caching hooks used to deduplicate request initialization. */
-export type InitReqCache = {
-  /** Reuses locale preference resolution across request results. */
+/** Framework-provided request-scoped caching hooks used to deduplicate admin context creation. */
+export type AdminContextCache = {
+  /** Reuses locale preference resolution across admin contexts. */
   getLocale?: (
-    resolveLocale: () => Promise<Pick<InitReqResult, 'locale'>>,
+    resolveLocale: () => Promise<Pick<GetAdminContextResult, 'locale'>>,
     ...cacheArgs: unknown[]
-  ) => Promise<Pick<InitReqResult, 'locale'>>
+  ) => Promise<Pick<GetAdminContextResult, 'locale'>>
   /** Reuses Payload, i18n, and authentication state within the current request. */
   getPartial: (
-    createPartialResult: () => Promise<InitReqPartialResult>,
-  ) => Promise<InitReqPartialResult>
-  /** Reuses a complete initialized request for the supplied key and cache arguments. */
+    createPartialContext: () => Promise<PartialAdminContext>,
+  ) => Promise<PartialAdminContext>
+  /** Reuses a complete admin context for the supplied key and cache arguments. */
   getRequest: (
-    createRequestResult: () => Promise<InitReqResult>,
+    createContext: () => Promise<GetAdminContextResult>,
     key: string,
     ...cacheArgs: unknown[]
-  ) => Promise<InitReqResult>
+  ) => Promise<GetAdminContextResult>
 }
 
-export type InitReqArgs = {
+export type GetAdminContextArgs = {
   /**
    * Optional framework-owned request-scoped cache.
    * Framework adapters control its lifetime to prevent request state from leaking between requests.
    */
-  cache?: InitReqCache
+  cache?: AdminContextCache
   canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
-  /** Identifies the complete request result within `cache`; required when a cache is supplied. */
+  /** Identifies the complete admin context within `cache`; required when a cache is supplied. */
   key?: string
-  overrides?: Omit<Parameters<typeof createPayloadReq>[0], 'payload'>
+  overrides?: Omit<CreatePayloadReqArgs, 'payload'>
   requestURL?: string
   serverAdapter: ServerAdapter
 }
 
 /**
- * Initializes the request state used by framework adapters to render the admin panel.
+ * Gets the request context used by framework adapters to render the admin panel.
  */
-export async function initReq({
+export async function getAdminContext({
   cache,
   canSetHeaders,
   configPromise,
@@ -70,15 +71,15 @@ export async function initReq({
   overrides,
   requestURL,
   serverAdapter,
-}: InitReqArgs): Promise<InitReqResult> {
+}: GetAdminContextArgs): Promise<GetAdminContextResult> {
   if (cache && !key) {
-    throw new Error('initReq requires a key when cache is provided')
+    throw new Error('getAdminContext requires a key when cache is provided')
   }
 
   const headers = await serverAdapter.getHeaders()
   const cookies = parseCookies(headers)
 
-  const createPartialResult = async (): Promise<InitReqPartialResult> => {
+  const createPartialContext = async (): Promise<PartialAdminContext> => {
     const config = await configPromise
     const payload = await getPayload({ config, cron: true, importMap })
     const languageCode = getRequestLanguage({
@@ -108,12 +109,12 @@ export async function initReq({
     }
   }
 
-  const partialResult = cache
-    ? await cache.getPartial(createPartialResult)
-    : await createPartialResult()
+  const partialContext = cache
+    ? await cache.getPartial(createPartialContext)
+    : await createPartialContext()
 
-  const createRequestResult = async (): Promise<InitReqResult> => {
-    const { i18n, languageCode, payload, responseHeaders, user } = partialResult
+  const createContext = async (): Promise<GetAdminContextResult> => {
+    const { i18n, languageCode, payload, responseHeaders, user } = partialContext
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
     const hasOptionsUserOverride = Object.hasOwn(optionsOverrides, 'user')
     const hasReqUserOverride = Object.hasOwn(reqOverrides ?? {}, 'user')
@@ -140,7 +141,7 @@ export async function initReq({
       req.user = null
     }
 
-    const resolveLocale = async (): Promise<Pick<InitReqResult, 'locale'>> => ({
+    const resolveLocale = async (): Promise<Pick<GetAdminContextResult, 'locale'>> => ({
       locale: await getRequestLocale({ req }),
     })
     const { locale } = cache?.getLocale
@@ -195,8 +196,8 @@ export async function initReq({
   }
 
   const result = cache
-    ? await cache.getRequest(createRequestResult, key!, overrides)
-    : await createRequestResult()
+    ? await cache.getRequest(createContext, key!, overrides)
+    : await createContext()
 
   return {
     ...result,

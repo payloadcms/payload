@@ -1,38 +1,33 @@
 'use server'
 
-import type { createPayloadReq, ImportMap, InitReqResult, SanitizedConfig } from 'payload'
+import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
+import type { GetAdminContextFn } from '../Root/index.js'
+
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import { NotFoundClient, PageConfigProvider } from '../../exports/client/index.js'
+
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 
-type InitReqFn = (args: {
-  canSetHeaders?: boolean
-  configPromise: Promise<SanitizedConfig> | SanitizedConfig
-  importMap: ImportMap
-  key: string
-  overrides?: Omit<Parameters<typeof createPayloadReq>[0], 'payload'>
-}) => Promise<InitReqResult>
-
 export type RenderNotFoundPageArgs = {
   config: Promise<SanitizedConfig>
+  getAdminContext: GetAdminContextFn
   importMap: ImportMap
-  initReq: InitReqFn
   params: Promise<{ segments: string[] }>
   searchParams: Promise<{ [key: string]: string | string[] }>
 }
 
 export const renderNotFoundPage = async ({
   config: configPromise,
+  getAdminContext,
   importMap,
-  initReq,
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: RenderNotFoundPageArgs) => {
@@ -48,7 +43,7 @@ export const renderNotFoundPage = async ({
     req,
     req: { payload },
     user,
-  } = await initReq({
+  } = await getAdminContext({
     configPromise: config,
     importMap,
     key: 'RootLayout',
