@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 
 import { transforms } from '../../registry.js'
 import { runTransform } from '../../utils/test-helpers.js'
+import { migrateAliasedExports } from '../migrate-aliased-exports/index.js'
 import { migratePayloadRequestCreation } from './index.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -56,6 +57,32 @@ describe('migrate-payload-request-creation', () => {
 
   it('should register the transform', () => {
     expect(transforms).toContain(migratePayloadRequestCreation)
+  })
+
+  it('should complete the request rename after migrate-aliased-exports', async () => {
+    const source = `import { createPayloadRequest } from '@payloadcms/next/utilities'\nconst req = createPayloadRequest(args)`
+    const intermediate = await runTransform({ source, transform: migrateAliasedExports })
+
+    expect(intermediate).toBe(
+      `import { createPayloadReqFromWebRequest as createPayloadRequest } from 'payload'\nconst req = createPayloadRequest(args)`,
+    )
+
+    const output = await runTransform({
+      source: intermediate,
+      transform: migratePayloadRequestCreation,
+    })
+    const expected = `import { createPayloadReqFromWebRequest } from 'payload'\nconst req = createPayloadReqFromWebRequest(args)`
+
+    expect(output).toBe(expected)
+    expect(await runTransform({ source: output, transform: migratePayloadRequestCreation })).toBe(
+      expected,
+    )
+  })
+
+  it('should preserve user-authored aliases of createPayloadReqFromWebRequest', async () => {
+    const source = `import { createPayloadReqFromWebRequest as webRequest } from 'payload'\nconst req = webRequest(args)`
+
+    expect(await runTransform({ source, transform: migratePayloadRequestCreation })).toBe(source)
   })
 
   it('should preserve behavior when evaluating payload mutates the options', async () => {

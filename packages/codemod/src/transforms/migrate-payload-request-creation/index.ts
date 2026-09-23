@@ -35,7 +35,13 @@ export const migratePayloadRequestCreation: Transform = {
         const renames: Record<string, string> = RENAMES[source as keyof typeof RENAMES]
 
         for (const spec of declaration.getNamedImports()) {
-          const originalName = spec.getName()
+          const importedName = spec.getName()
+          const aliasName = spec.getAliasNode()?.getText()
+          const isAliasedExportMigrationArtifact =
+            source === 'payload' &&
+            importedName === 'createPayloadReqFromWebRequest' &&
+            aliasName === 'createPayloadRequest'
+          const originalName = isAliasedExportMigrationArtifact ? aliasName : importedName
 
           if (!Object.hasOwn(renames, originalName)) {
             continue
@@ -53,7 +59,7 @@ export const migratePayloadRequestCreation: Transform = {
           const binding = spec.getAliasNode()!
           const references = binding.findReferencesAsNodes().filter((node) => node !== binding)
           const hasCollision =
-            !hadAlias &&
+            (!hadAlias || isAliasedExportMigrationArtifact) &&
             [binding, ...references].some((node) =>
               node
                 .getSymbolsInScope(SymbolFlags.Value | SymbolFlags.Type | SymbolFlags.Alias)
@@ -110,7 +116,7 @@ export const migratePayloadRequestCreation: Transform = {
             continue
           }
 
-          renameImport({ hadAlias, newName, spec })
+          renameImport({ hadAlias, isAliasedExportMigrationArtifact, newName, spec })
 
           // Inner calls must be rewritten before replacing an enclosing call's text.
           for (const call of calls.sort((a, b) => b.getStart() - a.getStart())) {
@@ -133,14 +139,19 @@ export const migratePayloadRequestCreation: Transform = {
 
 function renameImport({
   hadAlias,
+  isAliasedExportMigrationArtifact,
   newName,
   spec,
 }: {
   hadAlias: boolean
+  isAliasedExportMigrationArtifact: boolean
   newName: string
   spec: ImportSpecifier
 }): void {
-  if (hadAlias) {
+  if (isAliasedExportMigrationArtifact) {
+    spec.getAliasNode()!.rename(newName, { usePrefixAndSuffixText: true })
+    spec.removeAlias()
+  } else if (hadAlias) {
     spec.setName(newName)
   } else {
     spec.getAliasNode()!.rename(newName, { usePrefixAndSuffixText: true })
