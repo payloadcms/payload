@@ -118,6 +118,11 @@ export const createPayloadReqFromWebRequest = async ({
     req: request,
   })
 
+  Object.assign(req, {
+    fallbackLocale,
+    locale,
+  })
+
   const { responseHeaders, user } = await executeAuthStrategies({
     canSetHeaders,
     headers: req.headers,

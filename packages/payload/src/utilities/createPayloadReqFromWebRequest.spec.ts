@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getPayload } from '../index.js'
+import { addLocalesToRequestFromData } from './addLocalesToRequest.js'
 import { createPayloadReq } from './createPayloadReq.js'
 import { createPayloadReqFromWebRequest } from './createPayloadReqFromWebRequest.js'
 
@@ -70,6 +71,13 @@ const payload = {
   config,
 } as unknown as Payload
 
+const useRealCreatePayloadReq = async () => {
+  const actual =
+    await vi.importActual<typeof import('./createPayloadReq.js')>('./createPayloadReq.js')
+
+  vi.mocked(createPayloadReq).mockImplementation(actual.createPayloadReq)
+}
+
 describe('createPayloadReqFromWebRequest', () => {
   beforeEach(() => {
     vi.mocked(getPayload).mockReset().mockResolvedValue(payload)
@@ -97,9 +105,7 @@ describe('createPayloadReqFromWebRequest', () => {
     )
     expect((request as PayloadRequest).i18n).toBe(i18n)
     expect((request as PayloadRequest).query).toEqual({ depth: '2', locale: 'en' })
-    expect(executeAuthStrategies).toHaveBeenCalledWith(
-      expect.objectContaining({ req: request }),
-    )
+    expect(executeAuthStrategies).toHaveBeenCalledWith(expect.objectContaining({ req: request }))
     expect(vi.mocked(createPayloadReq).mock.invocationCallOrder[0]).toBeLessThan(
       vi.mocked(executeAuthStrategies).mock.invocationCallOrder[0],
     )
@@ -149,9 +155,7 @@ describe('createPayloadReqFromWebRequest', () => {
   })
 
   it('passes sanitized fallback locale state to common request initialization', async () => {
-    const request = new Request(
-      'http://localhost/api/posts?locale=de&fallbackLocale=unsupported',
-    )
+    const request = new Request('http://localhost/api/posts?locale=de&fallbackLocale=unsupported')
 
     await createPayloadReqFromWebRequest({ config, request })
 
@@ -161,5 +165,67 @@ describe('createPayloadReqFromWebRequest', () => {
         locale: 'de',
       }),
     )
+  })
+
+  it('preserves parsed locale fields when localization is disabled', async () => {
+    const unlocalizedConfig = {
+      ...config,
+      localization: false,
+    } as SanitizedConfig
+    const unlocalizedPayload = {
+      config: unlocalizedConfig,
+    } as unknown as Payload
+
+    vi.mocked(getPayload).mockResolvedValue(unlocalizedPayload)
+    await useRealCreatePayloadReq()
+
+    const result = await createPayloadReqFromWebRequest({
+      config: unlocalizedConfig,
+      request: new Request('http://localhost/api/posts?locale=de&fallbackLocale=en'),
+    })
+
+    expect(result.locale).toBe('de')
+    expect(result.fallbackLocale).toBe('en')
+  })
+
+  it('allows a body locale when URL locale is absent and fallback is disabled', async () => {
+    const noFallbackConfig = {
+      ...config,
+      localization: {
+        ...config.localization,
+        fallback: false,
+      },
+    } as SanitizedConfig
+    const noFallbackPayload = {
+      config: noFallbackConfig,
+    } as unknown as Payload
+
+    vi.mocked(getPayload).mockResolvedValue(noFallbackPayload)
+    await useRealCreatePayloadReq()
+
+    const result = await createPayloadReqFromWebRequest({
+      config: noFallbackConfig,
+      request: new Request('http://localhost/api/posts'),
+    })
+
+    expect(result.locale).toBeNull()
+
+    result.data = { locale: 'de' }
+    addLocalesToRequestFromData(result)
+
+    expect(result.locale).toBe('de')
+  })
+
+  it('preserves fallback locale arrays through common request initialization', async () => {
+    await useRealCreatePayloadReq()
+
+    const result = await createPayloadReqFromWebRequest({
+      config,
+      request: new Request(
+        'http://localhost/api/posts?locale=de&fallbackLocale[]=en&fallbackLocale[]=de',
+      ),
+    })
+
+    expect(result.fallbackLocale).toEqual(['en', 'de'])
   })
 })
