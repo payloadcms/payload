@@ -266,14 +266,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -408,8 +400,6 @@ export interface MediaSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
-  createdBy?: T;
-  updatedBy?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
