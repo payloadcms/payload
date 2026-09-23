@@ -40,9 +40,9 @@ export const Auth: CollectionConfig = {
       name: 'password',
       type: 'text',
       access: {
-        update: ({ data, req: { user } }) => {
+        update: ({ req: { user }, id }) => {
           const isUserOrSelf =
-            (user && 'roles' in user && user?.roles?.includes('admin')) || user?.id === data?.id
+            (user && 'roles' in user && user?.roles?.includes('admin')) || user?.id === id
           return isUserOrSelf
         },
       },
