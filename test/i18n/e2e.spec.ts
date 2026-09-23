@@ -239,5 +239,17 @@ describe('i18n', () => {
       ).toBeVisible()
       await expect(page.locator('#nav-global-global')).toContainText('ES Global')
     })
+
+    test('should show translated collection label in the create new card button', async () => {
+      // set language to Spanish
+      await setUserLanguage('es')
+
+      await page.goto(serverURL + '/admin')
+
+      const createNewLink = page.locator('#card-collection1 .card__actions a')
+
+      await expect(createNewLink).toHaveAttribute('aria-label', 'Crear ES Collection 1s')
+      await expect(createNewLink).toHaveAttribute('title', 'Crear ES Collection 1s')
+    })
   })
 })
