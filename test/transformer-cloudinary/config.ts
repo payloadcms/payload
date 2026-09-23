@@ -26,9 +26,9 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
+    collections: [Media, MediaWithFocalPoint, Users],
     // Cloudinary fetches the source itself, so dynamic requests only resolve when this
     // points somewhere reachable from the public internet - a tunnel, not plain localhost.
-    collections: [Media, MediaWithFocalPoint, Users],
     serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL ?? 'http://localhost:3000',
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -48,6 +48,7 @@ export default buildConfigWithDefaults({
               resizeOptions: { width: 1200 },
             },
             [mediaWithFocalPointSlug]: {
+              crop: true,
               focalPoint: true,
               imageSizes: [{ name: 'portrait', height: 600, width: 300 }],
             },
