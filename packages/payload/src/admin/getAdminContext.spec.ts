@@ -389,6 +389,7 @@ describe('getAdminContext', () => {
   })
 
   it('should produce distinct full results for distinct cache keys', async () => {
+    getAccessResults.mockImplementation(async () => ({ ...permissions }))
     const cache = createReusingCache()
     const args = {
       cache,
@@ -398,9 +399,19 @@ describe('getAdminContext', () => {
     }
 
     const rootLayoutResult = await getAdminContext({ ...args, key: 'RootLayout' })
-    const pageResult = await getAdminContext({ ...args, key: 'initPage' })
+    await getAdminContext({ ...args, key: 'initPage' })
 
-    expect(rootLayoutResult).not.toBe(pageResult)
+    expect(authenticate).toHaveBeenCalledOnce()
+    expect(applyUserReadAccess).toHaveBeenCalledTimes(2)
+    expect(getAccessResults).toHaveBeenCalledTimes(2)
+
+    const repeatedRootLayoutResult = await getAdminContext({ ...args, key: 'RootLayout' })
+
+    expect(authenticate).toHaveBeenCalledOnce()
+    expect(applyUserReadAccess).toHaveBeenCalledTimes(2)
+    expect(getAccessResults).toHaveBeenCalledTimes(2)
+    expect(repeatedRootLayoutResult.permissions).toBe(rootLayoutResult.permissions)
+    expect(repeatedRootLayoutResult.user).toBe(rootLayoutResult.user)
   })
 
   it('should keep the complete req.user and return the user with read access', async () => {
