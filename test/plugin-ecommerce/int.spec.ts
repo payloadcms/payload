@@ -156,7 +156,7 @@ async function createGuestCartWithItems(
   return { cartId, cartSecret }
 }
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () => {
+test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeEach(() => {
     stripeMock.reset()
   })

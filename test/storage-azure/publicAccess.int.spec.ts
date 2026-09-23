@@ -31,7 +31,7 @@ const uploadImage = async (restClient: NextRESTClient, slug: string) => {
   return doc
 }
 
-test.suite({ config: './publicAccess.config.ts' })('storage-azure container access', () => {
+test.suite('storage-azure container access', { config: './publicAccess.config.ts' }, () => {
   test.afterAll(async () => {
     const blobServiceClient = BlobServiceClient.fromConnectionString(azureConnectionString)
 

@@ -12,7 +12,7 @@ import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Sort', () => {
+test.suite('Sort', { config: './config.ts', resetBetweenTests: false }, () => {
   test.describe('Local API', () => {
     test.beforeAll(async ({ payloadInstance: payload }) => {
       await createData(payload, 'posts', [

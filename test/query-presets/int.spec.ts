@@ -10,7 +10,7 @@ let adminUser: User
 let editorUser: User
 let publicUser: User
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Query Presets', () => {
+test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance: payload }) => {
     adminUser = await payload
       .login({

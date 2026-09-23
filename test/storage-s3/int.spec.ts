@@ -22,7 +22,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-s3', () => {
+test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()

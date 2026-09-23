@@ -21,7 +21,7 @@ const dirname = path.dirname(filename)
 let containerClient: ContainerClient
 let TEST_CONTAINER: string
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-azure clientUploads', () => {
+test.suite('@payloadcms/storage-azure clientUploads', { config: './config.ts' }, () => {
   const clearContainer = async () => {
     for await (const blob of containerClient.listBlobsFlat()) {
       await containerClient.deleteBlob(blob.name)

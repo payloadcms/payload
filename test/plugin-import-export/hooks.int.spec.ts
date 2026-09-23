@@ -17,7 +17,7 @@ const dirname = path.dirname(filename)
 
 const createdHookPostIDs: (number | string)[] = []
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hooks', () => {
+test.suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',

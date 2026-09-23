@@ -52,7 +52,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - Uploads', () => {
+test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ restClientInstance: restClient }) => {
     await restClient.login({ slug: usersSlug })
   })

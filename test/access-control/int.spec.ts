@@ -50,7 +50,7 @@ import {
   userRestrictedCollectionSlug,
   usersSlug,
 } from './shared.js'
-test.suite({ config: './config.ts', resetBetweenTests: false })('Access Control', () => {
+test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }, () => {
   let post1: Post
   let restricted: FullyRestricted
   let payload!: Payload

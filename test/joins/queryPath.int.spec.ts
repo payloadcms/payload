@@ -5,8 +5,9 @@ import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' })(
+test.suite(
   'mongodb read path selection',
+  { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
   () => {
     const createdIDs: (number | string)[] = []
 

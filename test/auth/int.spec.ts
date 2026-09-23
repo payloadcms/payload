@@ -44,7 +44,7 @@ import {
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Auth', () => {
+test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
   test.describe('Preference updates', () => {
     const key = 'display-settings'
     const createdUserIDs: (number | string)[] = []

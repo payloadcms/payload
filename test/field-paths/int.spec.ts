@@ -8,7 +8,7 @@ import { test } from '../__helpers/int/vitest.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'
 
-test.suite({ config: './config.ts' })('Field Paths', () => {
+test.suite('Field Paths', { config: './config.ts' }, () => {
   test.describe('hooks', () => {
     test('should pass correct field paths through field hooks', async ({ payload }) => {
       const formatExpectedFieldPaths = (

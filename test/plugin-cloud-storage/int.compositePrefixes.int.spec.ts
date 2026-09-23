@@ -32,7 +32,7 @@ function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
 
 const configPath = './config.compositePrefixes.ts'
 
-test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
+test.suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: configPath }, () => {
   let TEST_BUCKET: string
 
   test.beforeEach(async () => {

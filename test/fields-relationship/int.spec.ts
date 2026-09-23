@@ -16,7 +16,7 @@ const { email, password } = devUser
 const constrainedFilterValue = 'constrained-read'
 const constrainedRelationName = 'Constrained relation'
 
-test.suite({ config: './config.ts' })('Relationship Fields', () => {
+test.suite('Relationship Fields', { config: './config.ts' }, () => {
   test.beforeEach(async ({ restClient }) => {
     await restClient.login({
       slug: 'users',

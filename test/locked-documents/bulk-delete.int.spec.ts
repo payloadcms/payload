@@ -6,7 +6,7 @@ import { postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
-test.suite({ config: './config.ts' })('Locked documents - bulk delete', () => {
+test.suite('Locked documents - bulk delete', { config: './config.ts' }, () => {
   // Bulk delete resolves the lock state of the whole batch in a single query, rather than one
   // query per document like deleting a single document does
   test('should skip locked documents but delete the unlocked ones', async ({ payload }) => {

@@ -34,7 +34,7 @@ const generationEndpoints = [
   },
 ] as const
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-seo', () => {
+test.suite('@payloadcms/plugin-seo', { config: './config.ts' }, () => {
   let page = null
   let mediaDoc = null
   let mediaDoc2 = null

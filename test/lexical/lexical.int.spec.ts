@@ -79,7 +79,7 @@ let createdJPGDocID: number | string = null
 let createdTextDocID: number | string = null
 let createdRichTextDocID: number | string = null
 
-test.suite({ config: './config.ts' })('Lexical', () => {
+test.suite('Lexical', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload, restClient }) => {
     await restClient.login({
       slug: 'users',

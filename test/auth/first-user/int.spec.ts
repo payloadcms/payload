@@ -10,7 +10,7 @@ import { firstUsersSlug } from './shared.js'
 let payload: Payload
 let restClient: NextRESTClient
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('First user registration', () => {
+test.suite('First user registration', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(({ payloadInstance, restClientInstance }) => {
     payload = payloadInstance
     restClient = restClientInstance
