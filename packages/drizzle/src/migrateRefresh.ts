@@ -62,6 +62,7 @@ export async function migrateRefresh(this: DrizzleAdapter): Promise<MigrationRes
       if (tableExists) {
         await payload.delete({
           collection: 'payload-migrations',
+          overrideAccess: true,
           req,
           where: {
             name: {
@@ -95,6 +96,7 @@ export async function migrateRefresh(this: DrizzleAdapter): Promise<MigrationRes
           name: migration.name,
           executed: true,
         },
+        overrideAccess: true,
         req,
       })
       await commitTransaction(req)

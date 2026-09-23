@@ -39,10 +39,13 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   async onInit(payload) {
-    const { totalDocs: postsCount } = await payload.count({ collection: 'posts' })
+    const { totalDocs: postsCount } = await payload.count({
+      collection: 'posts',
+      overrideAccess: true,
+    })
 
     if (!postsCount) {
-      await payload.create({ collection: 'posts', data: { title: 'Post 1' } })
+      await payload.create({ collection: 'posts', data: { title: 'Post 1' }, overrideAccess: true })
     }
   },
   db: mongooseAdapter({
