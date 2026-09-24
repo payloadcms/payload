@@ -120,6 +120,7 @@ test.suite(
           created = await payload.create({
             collection: 'draft-with-array',
             data: { items },
+            overrideAccess: true,
           })
         })(),
       ).resolves.toBeUndefined()
@@ -130,14 +131,22 @@ test.suite(
       expect(created!.items[0].text1).toBe('only-first')
       expect(created!.items[19].text8).toBe('r19-7')
 
-      await payload.delete({ id: created!.id, collection: 'draft-with-array' })
+      await payload.delete({
+        id: created!.id,
+        collection: 'draft-with-array',
+        overrideAccess: true,
+      })
     })
 
     test('should count omitted columns with defaults toward the bound parameters limit when batch inserting', async ({
       payload,
     }) => {
       // Drizzle binds a default for every omitted column that has one, so sizing batches by row keys undercounts
-      const parent = await payload.create({ collection: 'draft-with-array', data: {} })
+      const parent = await payload.create({
+        collection: 'draft-with-array',
+        data: {},
+        overrideAccess: true,
+      })
 
       const originalExecute = payload.db.drizzle.$client.execute.bind(payload.db.drizzle.$client)
 
@@ -174,7 +183,7 @@ test.suite(
       expect(inserted).toHaveLength(30)
       expect(inserted?.[29]?.text8).toBe('default8')
 
-      await payload.delete({ id: parent.id, collection: 'draft-with-array' })
+      await payload.delete({ id: parent.id, collection: 'draft-with-array', overrideAccess: true })
     })
 
     test('should avoid ambiguous column name errors when limitedBoundParameters: true and multiple joins are present', async ({
