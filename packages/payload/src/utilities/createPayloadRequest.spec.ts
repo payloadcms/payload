@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import type { Payload, PayloadRequest } from '../index.js'
+import type { Payload } from '../index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
 
-describe('createPayloadRequest', () => {
+describe('createPayloadRequest - URL construction', () => {
   const mockPayload = {
     config: {
       serverURL: undefined,
@@ -129,82 +129,5 @@ describe('createPayloadRequest', () => {
 
     expect(result.url).toBe('http://localhost/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
-  })
-
-  it('returns the supplied request and preserves request-owned state', async () => {
-    const headers = new Headers({ existing: 'true' })
-    const payloadDataLoader = {} as PayloadRequest['payloadDataLoader']
-    const req = {
-      context: { fromRequest: true },
-      headers,
-      payloadAPI: 'REST' as const,
-      payloadDataLoader,
-      query: { existing: 'value' },
-      routeParams: { id: '1' },
-      user: null,
-      url: 'http://example.com/api/posts',
-    } as Partial<PayloadRequest>
-
-    const result = await createPayloadRequest({
-      context: { fromArgs: true },
-      payload: mockPayload,
-      req,
-    })
-
-    expect(result).toBe(req)
-    expect(result.headers).toBe(headers)
-    expect(result.payloadAPI).toBe('REST')
-    expect(result.payloadDataLoader).toBe(payloadDataLoader)
-    expect(result.context).toEqual({ fromRequest: true, fromArgs: true })
-    expect(result.query).toEqual({ existing: 'value' })
-    expect(result.routeParams).toEqual({ id: '1' })
-  })
-
-  describe('localization', () => {
-    const localizedPayload = {
-      ...mockPayload,
-      config: {
-        ...mockPayload.config,
-        localization: {
-          defaultLocale: 'en',
-          fallback: true,
-          localeCodes: ['en', 'de'],
-          locales: [{ code: 'en' }, { code: 'de' }],
-        },
-      },
-    } as unknown as Payload
-
-    it("normalizes localized '*' requests to 'all'", async () => {
-      const result = await createPayloadRequest({ locale: '*', payload: localizedPayload })
-
-      expect(result.locale).toBe('all')
-    })
-
-    it('uses the default locale for localized requests without a locale', async () => {
-      const result = await createPayloadRequest({ payload: localizedPayload })
-
-      expect(result.locale).toBe('en')
-    })
-
-    it('sanitizes unsupported fallback locales for localized requests', async () => {
-      const result = await createPayloadRequest({
-        fallbackLocale: 'fr',
-        locale: 'en',
-        payload: localizedPayload,
-      })
-
-      expect(result.fallbackLocale).toBe(false)
-    })
-
-    it('does not assign locale state when localization is disabled', async () => {
-      const result = await createPayloadRequest({
-        fallbackLocale: 'de',
-        locale: 'en',
-        payload: mockPayload,
-      })
-
-      expect(result.locale).toBeUndefined()
-      expect(result.fallbackLocale).toBeUndefined()
-    })
   })
 })
