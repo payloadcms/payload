@@ -123,3 +123,66 @@ describe('createLocalReq - URL construction', () => {
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
   })
 })
+
+describe('createLocalReq - locale isolation', () => {
+  const localizedPayload = {
+    config: {
+      admin: { user: 'users' },
+      serverURL: undefined,
+      i18n: {
+        fallbackLanguage: 'en',
+        supportedLanguages: { en: {} },
+        translations: {},
+      },
+      localization: {
+        defaultLocale: 'en',
+        fallback: true,
+        localeCodes: ['en', 'es'],
+        locales: [{ code: 'en' }, { code: 'es' }],
+      },
+    },
+    logger: {
+      error: vi.fn(),
+    },
+  } as unknown as Payload
+
+  it('should not rewrite the caller req locale when the nested call passes a different locale', async () => {
+    const req = {
+      i18n: { t: (str: string) => str },
+      locale: 'es',
+      payloadDataLoader: {},
+    }
+
+    const result = await createLocalReq({ locale: 'en', req }, localizedPayload)
+
+    expect(result.locale).toBe('en')
+    expect(req.locale).toBe('es')
+  })
+
+  it('should not rewrite the caller req fallbackLocale when the nested call passes a locale', async () => {
+    const req = {
+      fallbackLocale: false,
+      i18n: { t: (str: string) => str },
+      locale: 'es',
+      payloadDataLoader: {},
+    }
+
+    const result = await createLocalReq({ locale: 'en', req }, localizedPayload)
+
+    expect(result.fallbackLocale).toBe('en')
+    expect(req.fallbackLocale).toBe(false)
+  })
+
+  it('should fall back to the caller req locale when the nested call passes no locale', async () => {
+    const req = {
+      i18n: { t: (str: string) => str },
+      locale: 'es',
+      payloadDataLoader: {},
+    }
+
+    const result = await createLocalReq({ req }, localizedPayload)
+
+    expect(result.locale).toBe('es')
+    expect(req.locale).toBe('es')
+  })
+})

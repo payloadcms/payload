@@ -3,7 +3,8 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { getDataLoader } from '../collections/dataloader.js'
 import { getLocalI18n } from '../translations/getLocalI18n.js'
-import { sanitizeFallbackLocale } from '../utilities/sanitizeFallbackLocale.js'
+import { isolateObjectProperty } from './isolateObjectProperty.js'
+import { sanitizeFallbackLocale } from './sanitizeFallbackLocale.js'
 
 function getRequestContext(
   req: Partial<PayloadRequest> = { context: null } as unknown as PayloadRequest,
@@ -109,55 +110,63 @@ export const createLocalReq: CreateLocalReq = async (
   },
   payload,
 ): Promise<PayloadRequest> => {
+  // A nested Local API call with an explicit `locale` must not rewrite the
+  // caller's req: `beforeChange` merges submitted data into per-locale fields
+  // based on `req.locale` after hooks/validation have awaited, so a mutated
+  // `req.locale` corrupts the parent operation's data (see #18246). Isolate
+  // both locale properties; the nested operation still sees its own locale
+  // through the returned request.
+  const localReq = isolateObjectProperty(req, ['locale', 'fallbackLocale'])
+
   const localization = payload.config?.localization
 
   if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
     const defaultLocale = localization.defaultLocale
-    const localeCandidate = locale || req?.locale || req?.query?.locale
+    const localeCandidate = locale || localReq?.locale || localReq?.query?.locale
 
-    req.locale =
+    localReq.locale =
       localeCandidate && typeof localeCandidate === 'string' ? localeCandidate : defaultLocale
 
     const sanitizedFallback = sanitizeFallbackLocale({
       fallbackLocale: fallbackLocale!,
-      locale: req.locale,
+      locale: localReq.locale,
       localization,
     })
 
-    req.fallbackLocale = sanitizedFallback!
+    localReq.fallbackLocale = sanitizedFallback!
   }
 
   const i18n =
-    req?.i18n ||
+    localReq?.i18n ||
     (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
-  if (!req.headers) {
-    req.headers = new Headers()
+  if (!localReq.headers) {
+    localReq.headers = new Headers()
   }
 
-  req.context = getRequestContext(req, context)
-  req.payloadAPI = req?.payloadAPI || 'local'
-  req.payload = payload
-  req.i18n = i18n
-  req.t = i18n.t
-  req.user = user || req?.user || null
+  localReq.context = getRequestContext(localReq, context)
+  localReq.payloadAPI = localReq?.payloadAPI || 'local'
+  localReq.payload = payload
+  localReq.i18n = i18n
+  localReq.t = i18n.t
+  localReq.user = user || localReq?.user || null
 
   // Ensure user.collection is set for auth-related access control
   // TODO (4.0): Instead of silently falling back, throw an error if user.collection is missing
-  if (req.user && !req.user.collection) {
-    req.user = { ...req.user, collection: payload.config.admin.user }
+  if (localReq.user && !localReq.user.collection) {
+    localReq.user = { ...localReq.user, collection: payload.config.admin.user }
   }
 
-  req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req as PayloadRequest)
-  req.routeParams = req?.routeParams || {}
-  req.query = req?.query || {}
+  localReq.payloadDataLoader = localReq?.payloadDataLoader || getDataLoader(localReq as PayloadRequest)
+  localReq.routeParams = localReq?.routeParams || {}
+  localReq.query = localReq?.query || {}
 
   if (typeof depth !== 'undefined') {
-    req.query.depth = depth
+    localReq.query.depth = depth
   }
 
-  attachFakeURLProperties(req, urlSuffix)
+  attachFakeURLProperties(localReq, urlSuffix)
 
-  return req as PayloadRequest
+  return localReq as PayloadRequest
 }
