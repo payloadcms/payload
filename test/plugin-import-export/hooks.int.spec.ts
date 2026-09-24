@@ -1016,7 +1016,7 @@ test.suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts'
           targetCollection: postsWithHooksJobsSlug,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         expect(hookCalls.importBefore).toHaveLength(1)
 
@@ -1038,7 +1038,7 @@ test.suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts'
           targetCollection: postsWithHooksJobsSlug,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         expect(hookCalls.importAfter).toHaveLength(1)
 
@@ -1114,7 +1114,7 @@ test.suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts'
           where: { id: { equals: post.id } },
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         expect(hookCalls.exportBefore).toHaveLength(1)
 
@@ -1141,7 +1141,7 @@ test.suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts'
           where: { id: { equals: post.id } },
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         expect(hookCalls.exportAfter).toHaveLength(1)
 
