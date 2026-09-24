@@ -9,12 +9,13 @@ import { createLazySourceGetter } from './createLazySourceGetter.js'
 import { finalizeFileResponse } from './finalizeFileResponse.js'
 import { getSourceFileResponse } from './getSourceFileResponse.js'
 import { planTransformerPipeline } from './planTransformerPipeline.js'
-import { resolveUploadDocument } from './resolveUploadDocument.js'
+import { getRequestedFile, resolveUploadDocument } from './resolveUploadDocument.js'
 import { withFileTransformAccessContext } from './withFileTransformAccessContext.js'
 
 /**
  * Orchestrates a dynamic file request end to end: resolve the document, plan the
- * request-capable transformer pipeline from its authoritative MIME type, enforce
+ * request-capable transformer pipeline from the requested file's authoritative
+ * MIME type (the primary file or the matched image size), enforce
  * transform-aware read access, then run every eligible transformer in declaration
  * order against a lazily-fetched source. Called from `getFileHandler` only when at
  * least one transformer is configured — the zero-transformer path never reaches
@@ -45,11 +46,13 @@ export async function handleDynamicFileRequest({
     throw new NotFound(req.t)
   }
 
+  const requestedFile = getRequestedFile({ document, filename })
+
   const pipeline = await planTransformerPipeline({
     args: {
       collectionSlug: collection.config.slug,
       documentID: document.id,
-      mimeType: document.mimeType,
+      mimeType: requestedFile.mimeType,
       operation: 'request',
       req,
     },
@@ -78,9 +81,9 @@ export async function handleDynamicFileRequest({
       const result = await transformer.handleRequest!({
         collectionSlug: collection.config.slug,
         documentID: document.id,
-        filename: document.filename,
+        filename: requestedFile.filename,
         getSourceFile: stageSource.get,
-        mimeType: document.mimeType,
+        mimeType: requestedFile.mimeType,
         req,
       })
 

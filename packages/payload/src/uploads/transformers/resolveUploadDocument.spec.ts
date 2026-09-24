@@ -9,7 +9,7 @@ vi.mock('../../auth/executeAccess.js', () => ({
 
 import { executeAccess } from '../../auth/executeAccess.js'
 
-import { resolveUploadDocument } from './resolveUploadDocument.js'
+import { getRequestedFile, resolveUploadDocument } from './resolveUploadDocument.js'
 
 const makeFindOne = (result: unknown = { id: '1', filename: 'logo.png', mimeType: 'image/png' }) =>
   vi.fn().mockResolvedValue(result)
@@ -122,5 +122,38 @@ describe('resolveUploadDocument', () => {
     await resolveUploadDocument({ collection, filename: 'logo.png', req })
 
     expect(executeAccess).not.toHaveBeenCalled()
+  })
+})
+
+describe('getRequestedFile', () => {
+  const document = {
+    id: '1',
+    filename: 'logo.png',
+    mimeType: 'image/png',
+    sizes: {
+      card: { filename: 'logo-640x480.webp', mimeType: 'image/webp' },
+      skipped: { filename: null, mimeType: null },
+    },
+  }
+
+  it('should return the primary file when the primary filename is requested', () => {
+    expect(getRequestedFile({ document, filename: 'logo.png' })).toEqual({
+      filename: 'logo.png',
+      mimeType: 'image/png',
+    })
+  })
+
+  it('should return the matched image size filename and mimeType', () => {
+    expect(getRequestedFile({ document, filename: 'logo-640x480.webp' })).toEqual({
+      filename: 'logo-640x480.webp',
+      mimeType: 'image/webp',
+    })
+  })
+
+  it('should fall back to the primary file when no image size matches', () => {
+    expect(getRequestedFile({ document, filename: 'unknown.png' })).toEqual({
+      filename: 'logo.png',
+      mimeType: 'image/png',
+    })
   })
 })

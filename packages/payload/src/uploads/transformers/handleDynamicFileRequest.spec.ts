@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('./resolveUploadDocument.js', () => ({
+vi.mock('./resolveUploadDocument.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./resolveUploadDocument.js')>()),
   resolveUploadDocument: vi.fn(),
 }))
 
@@ -127,6 +128,28 @@ describe('handleDynamicFileRequest', () => {
 
     expect(getSourceFileResponse).not.toHaveBeenCalled()
     expect(finalizeFileResponse).not.toHaveBeenCalled()
+  })
+
+  it('should plan and run the pipeline with the requested image size filename and mimeType', async () => {
+    const transformer = makeTransformer()
+    vi.mocked(resolveUploadDocument).mockResolvedValue({
+      ...document,
+      sizes: { card: { filename: 'logo-640x480.webp', mimeType: 'image/webp' } },
+    })
+    vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+
+    await handleDynamicFileRequest({
+      collection: makeCollection(),
+      filename: 'logo-640x480.webp',
+      req: makeReq(),
+    })
+
+    expect(planTransformerPipeline).toHaveBeenCalledWith(
+      expect.objectContaining({ args: expect.objectContaining({ mimeType: 'image/webp' }) }),
+    )
+    expect(transformer.handleRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ filename: 'logo-640x480.webp', mimeType: 'image/webp' }),
+    )
   })
 
   it('should call withFileTransformAccessContext with isTransform=true only when the pipeline is non-empty', async () => {
