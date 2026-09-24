@@ -184,6 +184,7 @@ export const getExportCollection = ({
 
     await req.payload.jobs.queue({
       input,
+      overrideAccess: true,
       task: 'createCollectionExport',
     })
   })

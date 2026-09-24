@@ -106,7 +106,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -141,7 +141,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -174,7 +174,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -207,7 +207,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -245,7 +245,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -299,7 +299,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -325,7 +325,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -356,7 +356,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -408,7 +408,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -441,7 +441,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -473,7 +473,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -505,7 +505,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -541,7 +541,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -577,7 +577,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -608,7 +608,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -641,7 +641,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -675,7 +675,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -706,7 +706,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -747,7 +747,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -785,7 +785,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -841,7 +841,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -899,7 +899,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       expect(input.userID).toBeDefined()
       expect(input.userCollection).toBeDefined()
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -926,7 +926,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -1024,7 +1024,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -1062,7 +1062,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -1101,7 +1101,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -1165,7 +1165,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
         id: doc.id,
@@ -1199,7 +1199,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({
           id: doc.id,
@@ -1237,7 +1237,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({
           id: doc.id,
@@ -1270,7 +1270,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({
           id: doc.id,
@@ -1304,7 +1304,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({
           id: doc.id,
@@ -1350,7 +1350,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1402,7 +1402,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1456,7 +1456,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1513,7 +1513,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1581,7 +1581,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1645,7 +1645,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1675,7 +1675,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1712,7 +1712,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1751,7 +1751,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -1850,7 +1850,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
           id: exportDoc.id,
@@ -1945,7 +1945,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
           id: exportDoc.id,
@@ -1977,7 +1977,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -2053,7 +2053,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
           id: exportDoc.id,
@@ -2078,7 +2078,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -2156,7 +2156,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
           id: exportDoc.id,
@@ -2203,7 +2203,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -2283,7 +2283,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -2351,7 +2351,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -2427,7 +2427,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -2495,7 +2495,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         let updatedPage = await payload.findByID({
           id: page.id,
@@ -2527,7 +2527,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         updatedPage = await payload.findByID({
           id: page.id,
@@ -2568,7 +2568,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -2607,7 +2607,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -2653,7 +2653,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
@@ -2745,7 +2745,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
 
@@ -2846,7 +2846,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -2872,7 +2872,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -2896,7 +2896,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -2919,7 +2919,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -2943,7 +2943,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -2966,7 +2966,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -2990,7 +2990,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -3012,7 +3012,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -3034,7 +3034,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -3056,7 +3056,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
@@ -3122,7 +3122,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
           id: exportDoc.id,
@@ -3180,7 +3180,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
           id: exportDoc.id,
@@ -3255,7 +3255,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -3289,7 +3289,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3357,7 +3357,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3442,7 +3442,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3514,7 +3514,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const importDoc = await payload.findByID({
         id: initialImportDoc.id,
@@ -3582,7 +3582,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3640,7 +3640,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3707,7 +3707,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3798,7 +3798,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3850,7 +3850,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3911,7 +3911,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -3995,7 +3995,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4074,7 +4074,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4141,7 +4141,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4202,7 +4202,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4253,7 +4253,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4317,7 +4317,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4363,7 +4363,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc1 = await payload.findByID({
         id: importDoc1.id,
@@ -4394,7 +4394,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc2 = await payload.findByID({
         id: importDoc2.id,
@@ -4426,7 +4426,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc3 = await payload.findByID({
         id: importDoc3.id,
@@ -4466,7 +4466,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4549,7 +4549,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4601,7 +4601,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4661,7 +4661,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4742,7 +4742,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
       expect(input.importCollection).toStrictEqual('imports')
       expect(input.userCollection).toBeDefined()
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const importDoc = await payload.findByID({
         id: doc.id,
@@ -4819,7 +4819,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -4857,7 +4857,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -4961,7 +4961,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -4993,7 +4993,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -5067,7 +5067,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5125,7 +5125,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5178,7 +5178,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5229,7 +5229,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5298,7 +5298,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5356,7 +5356,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5415,7 +5415,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5473,7 +5473,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5538,7 +5538,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5600,7 +5600,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5661,7 +5661,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5715,7 +5715,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5769,7 +5769,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5818,7 +5818,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5869,7 +5869,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5929,7 +5929,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -5990,7 +5990,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -6062,7 +6062,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -6141,7 +6141,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
           id: importDoc.id,
@@ -6188,7 +6188,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
           id: importDoc.id,
@@ -6242,7 +6242,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
           id: importDoc.id,
@@ -6304,7 +6304,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
           id: importDoc.id,
@@ -6359,7 +6359,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
           id: importDoc.id,
@@ -6403,7 +6403,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
           id: importDoc.id,
@@ -6486,7 +6486,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const exportDoc = await payload.findByID({
           id: doc.id,
@@ -6527,7 +6527,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
 
         expect(latestJob).toBeDefined()
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const exportDoc = await payload.findByID({
           id: doc.id,
@@ -6565,7 +6565,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -6618,7 +6618,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user: restrictedUser,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -6664,7 +6664,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
           id: importDoc.id,
@@ -6739,7 +6739,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
         id: doc.id,
@@ -6774,7 +6774,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const updatedImportDoc = await payload.findByID({
         id: importDoc.id,
@@ -7655,7 +7655,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -7694,7 +7694,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -7756,7 +7756,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -7790,7 +7790,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -7851,7 +7851,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -7908,7 +7908,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -7949,7 +7949,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -7986,7 +7986,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8034,7 +8034,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8072,7 +8072,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -8131,7 +8131,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8194,7 +8194,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -8267,7 +8267,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8307,7 +8307,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
@@ -8370,7 +8370,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8416,7 +8416,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8465,7 +8465,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8519,7 +8519,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8556,7 +8556,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
         id: exportDoc.id,
@@ -8607,7 +8607,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const [finalImport1, finalImport2] = await Promise.all([
         payload.findByID({ id: import1.id, collection: 'imports', overrideAccess: true }),
@@ -8681,7 +8681,7 @@ test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
         user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const [finalImport, finalExport] = await Promise.all([
         payload.findByID({ id: importDoc.id, collection: 'imports', overrideAccess: true }),

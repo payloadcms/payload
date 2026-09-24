@@ -18,6 +18,7 @@ export const createJobsRunCommand = defineCLICommand({
     await payload.jobs.run({
       allQueues: args.allQueues,
       limit: args.limit,
+      overrideAccess: true,
       queue: args.queue,
     })
   },

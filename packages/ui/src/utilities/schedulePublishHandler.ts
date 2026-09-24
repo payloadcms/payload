@@ -118,6 +118,7 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
               }
             : undefined,
       },
+      overrideAccess: true,
       task: 'schedulePublish',
       waitUntil: date,
     })

@@ -355,6 +355,7 @@ export const getImportCollection = ({
 
       await req.payload.jobs.queue({
         input,
+        overrideAccess: true,
         task: 'createCollectionImport',
       })
     } catch (err) {
