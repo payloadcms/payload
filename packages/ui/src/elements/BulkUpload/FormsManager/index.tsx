@@ -31,6 +31,7 @@ import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
 import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
 import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
+import { getBulkUploadResults, markBulkUploadFormAsFailed } from './getBulkUploadResults.js'
 import { formsManagementReducer } from './reducer.js'
 
 type FormsManagerContext = {
@@ -522,7 +523,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             }
           }
         } catch (_) {
-          // swallow
+          // An interrupted upload (rejected fetch, aborted request, DNS blip)
+          // must not be dropped from the retry queue and counted as a success:
+          // mark the form as failed so it is retried.
+          currentForms[i] = markBulkUploadFormAsFailed(currentForms[i])
         }
       }
 
@@ -530,16 +534,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       setLoadingText('')
       setIsUploading(false)
 
-      const remainingForms = []
-
-      currentForms.forEach(({ errorCount }, i) => {
-        if (errorCount) {
-          remainingForms.push(currentForms[i])
-        }
-      })
-
-      const successCount = Math.max(0, currentForms.length - remainingForms.length)
-      const errorCount = currentForms.length - successCount
+      const { errorCount, remainingForms, successCount } = getBulkUploadResults(currentForms)
 
       if (successCount) {
         toast.success(`Successfully saved ${successCount} files`)
