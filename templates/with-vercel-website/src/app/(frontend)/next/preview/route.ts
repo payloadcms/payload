@@ -1,5 +1,6 @@
 import type { PayloadRequest } from 'payload'
 import { getPayload } from 'payload'
+import { getSafeRedirect } from 'payload/shared'
 
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
@@ -28,17 +29,20 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response('Insufficient search params', { status: 404 })
   }
 
-  if (!path.startsWith('/')) {
+  const safePath = getSafeRedirect({ fallbackTo: '', redirectTo: path })
+
+  if (!safePath) {
     return new Response('This endpoint can only be used for relative previews', { status: 500 })
   }
 
   let user
 
   try {
-    user = await payload.auth({
+    const authResult = await payload.auth({
       req: req as unknown as PayloadRequest,
       headers: req.headers,
     })
+    user = authResult.user
   } catch (error) {
     payload.logger.error({ err: error }, 'Error verifying token for live preview')
     return new Response('You are not allowed to preview this page', { status: 403 })
@@ -55,5 +59,5 @@ export async function GET(req: NextRequest): Promise<Response> {
 
   draft.enable()
 
-  redirect(path)
+  redirect(safePath)
 }

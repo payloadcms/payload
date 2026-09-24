@@ -41,6 +41,7 @@ export function createUploadthingAdapter({
     name: 'uploadthing',
     clientUploads,
     fields,
+    requiresClientUploadReceipt: true,
 
     generateURL,
 

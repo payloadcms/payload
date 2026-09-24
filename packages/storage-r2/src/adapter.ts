@@ -24,39 +24,31 @@ export function createR2Adapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'r2',
     clientUploads,
+    requiresClientUploadReceipt: true,
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         bucket,
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    handleUpload: ({ data, file }) =>
+    handleUpload: ({ file, storageFilePath }) =>
       uploadFile({
         bucket,
         buffer: file.buffer,
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    staticHandler: (
-      req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { clientUploadContext, filename } }) =>
       getFile({
         bucket,
         clientUploadContext,
         collection,
+        doc,
         filename,
         incomingHeaders: headers,
         prefix,
-        prefixQueryParam,
         req,
         useCompositePrefixes,
       }),

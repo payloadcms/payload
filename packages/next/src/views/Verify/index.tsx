@@ -9,7 +9,12 @@ import './index.scss'
 
 export const verifyBaseClass = 'verify'
 
-export async function Verify({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function Verify({
+  initPageResult,
+  params,
+  searchParams,
+  user: userWithReadAccess,
+}: AdminViewServerProps) {
   // /:collectionSlug/verify/:token
 
   const [collectionSlug, verify, token] = params.segments
@@ -19,7 +24,6 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
     i18n,
     payload: { config },
     payload,
-    user,
   } = req
 
   const {
@@ -61,7 +65,7 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
           payload={payload}
           permissions={permissions}
           searchParams={searchParams}
-          user={user}
+          user={userWithReadAccess}
         />
       </div>
       <h2>{textToRender}</h2>

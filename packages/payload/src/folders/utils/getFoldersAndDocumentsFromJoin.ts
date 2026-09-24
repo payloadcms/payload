@@ -40,6 +40,7 @@ export async function queryDocumentsAndFoldersFromJoin({
   const subfolderDoc = (await payload.find({
     collection: payload.config.folders.slug,
     depth: 1,
+    draft: true,
     joins: {
       documentsAndFolders: {
         limit: 100_000_000,

@@ -56,6 +56,7 @@ export const esTranslations: DefaultTranslationsObject = {
     newPassword: 'Nueva Contraseña',
     passed: 'Autenticación Exitosa',
     passwordResetSuccessfully: 'Contraseña restablecida con éxito.',
+    resend: 'Reenviar',
     resetPassword: 'Restablecer Contraseña',
     resetPasswordExpiration: 'Restablecer Caducidad de la Contraseña',
     resetPasswordToken: 'Restablecer Token de la Contraseña',

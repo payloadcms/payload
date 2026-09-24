@@ -2,11 +2,11 @@ import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
-import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
+import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
@@ -16,16 +16,20 @@ import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
+import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
 import { createImageSizes } from './image-resizing/createImageSizes.js'
+import { isAnimatedImage } from './isAnimatedImage.js'
 import { isImage } from './isImage.js'
+import { isProcessableImage } from './isProcessableImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
   draft?: boolean
+  externalUploadSource?: ExternalUploadSource
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
@@ -40,10 +44,10 @@ type Result<T> = Promise<{
 }>
 
 const shouldReupload = (
-  uploadEdits: UploadEdits,
+  uploadEdits: undefined | UploadEdits,
   fileData: Record<string, unknown> | undefined,
 ) => {
-  if (!fileData) {
+  if (!fileData || !uploadEdits) {
     return false
   }
 
@@ -66,10 +70,19 @@ const shouldReupload = (
   return false
 }
 
+/**
+ * Builds the document's file metadata and the list of files to write to disk.
+ *
+ * A file uploaded with `useTempFiles` enabled arrives as a temp file path instead of an
+ * in-memory buffer, and that temp file can be far larger than server memory allows. To avoid
+ * loading it into memory unnecessarily, this skips reading the temp file entirely when local
+ * storage is disabled, and copies it straight to its destination when local storage is enabled.
+ */
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
   draft,
+  externalUploadSource,
   isDuplicating,
   operation,
   originalDoc,
@@ -92,7 +105,9 @@ export const generateFileData = async <T>({
     data,
     isDuplicating,
     operation,
-    originalDoc,
+    // Only a duplication source informs edit parsing. Updates now also pass `originalDoc` so the
+    // stored file can be reprocessed, and that must not change which edits are applied.
+    originalDoc: isDuplicating ? originalDoc : undefined,
     req,
   })
 
@@ -111,13 +126,18 @@ export const generateFileData = async <T>({
   const staticPath = staticDir
 
   const incomingFileData: Document = isDuplicating ? originalDoc : data
+  const fileSourceData =
+    externalUploadSource ?? (operation === 'update' ? originalDoc : incomingFileData)
   let isLocalFile = false
 
   if (
     !file &&
-    (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+    fileSourceData &&
+    (externalUploadSource ||
+      isDuplicating ||
+      shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
   ) {
-    const { filename, url } = incomingFileData as unknown as FileData
+    const { filename, url } = fileSourceData as unknown as FileData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
     }
@@ -127,7 +147,7 @@ export const generateFileData = async <T>({
     }
 
     try {
-      if (!disableLocalStorage && isLocalFile) {
+      if (!externalUploadSource && !disableLocalStorage && isLocalFile) {
         // File is stored locally
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
@@ -136,11 +156,11 @@ export const generateFileData = async <T>({
       } else if (filename && url) {
         // File is remote
         file = await getExternalFile({
-          data: incomingFileData as unknown as FileData,
+          data: fileSourceData as unknown as FileData,
           req,
           uploadConfig: collectionConfig.upload,
         })
-        overwriteExistingFiles = true
+        overwriteExistingFiles = !externalUploadSource
       }
     } catch (err: unknown) {
       throw new FileRetrievalError(req.t, err instanceof Error ? err.message : undefined)
@@ -162,11 +182,19 @@ export const generateFileData = async <T>({
     }
   }
 
-  await checkFileRestrictions({
+  const detectedFileType = await checkFileRestrictions({
     collection: collectionConfig,
     file,
     req,
   })
+
+  const shouldUseDetectedFileType =
+    detectedFileType &&
+    (isProcessableImage(file.mimetype) || isProcessableImage(detectedFileType.mime))
+
+  if (shouldUseDetectedFileType && detectedFileType.mime !== file.mimetype) {
+    file = { ...file, mimetype: detectedFileType.mime }
+  }
 
   if (!disableLocalStorage) {
     await fs.mkdir(staticPath!, { recursive: true })
@@ -175,7 +203,7 @@ export const generateFileData = async <T>({
   let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
-  const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
+  const fileIsAnimatedType = isAnimatedImage(file.mimetype)
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
@@ -187,11 +215,11 @@ export const generateFileData = async <T>({
     let fileBuffer!: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
+    // Depends only on configured resize/format/trim options, not on whether the bytes are on
+    // disk or in memory.
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(
-        resizeOptions || formatOptions || trimOptions || constructorOptions || file.tempFilePath,
-      )
+      Boolean(resizeOptions || formatOptions || trimOptions || constructorOptions)
 
     const sharpOptions: SharpOptions = { ...constructorOptions }
 
@@ -220,7 +248,7 @@ export const generateFileData = async <T>({
     }
 
     if (fileSupportsResize || isImage(file.mimetype)) {
-      dimensions = await getImageSize(file)
+      dimensions = await getImageSize({ file, sharp: fileSupportsResize ? sharp : undefined })
       fileData.width = dimensions.width
       fileData.height = dimensions.height
     }
@@ -233,6 +261,7 @@ export const generateFileData = async <T>({
         withMetadata: withMetadata!,
       })
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
+      delete file.clientUploadContext
       ;({ ext, mime } = (await fileTypeFromBuffer(fileBuffer.data))!) // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width
       fileData.height = fileBuffer.info.height
@@ -248,7 +277,7 @@ export const generateFileData = async <T>({
       fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop()?.split('?')[0]
+        ext = getFileExtension(getSanitizedUploadFilename(file.name))
       } else {
         ext = ''
       }
@@ -260,8 +289,7 @@ export const generateFileData = async <T>({
     }
     fileData.mimeType = mime
 
-    const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
-    fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
+    fsSafeName = getSanitizedUploadFilename(file.name, ext)
 
     if (!overwriteExistingFiles) {
       // Extract prefix if present (added by plugin-cloud-storage)
@@ -279,7 +307,7 @@ export const generateFileData = async <T>({
 
     let fileForResize = file
 
-    if (cropData && sharp) {
+    if (cropData && fileSupportsResize && sharp) {
       const { data: croppedImage, info } = await cropImage({
         cropData,
         dimensions: dimensions!,
@@ -344,6 +372,8 @@ export const generateFileData = async <T>({
         fileData.filesize = info.size
       }
 
+      delete file.clientUploadContext
+      delete fileForResize.clientUploadContext
       if (file.tempFilePath) {
         await fs.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
       } else {
@@ -351,31 +381,55 @@ export const generateFileData = async <T>({
       }
     } else {
       // For non-image files with useTempFiles, read the buffer from the temp file
-      // since file.data is empty when using temp files
-      let bufferToSave: Buffer
-      if (fileBuffer?.data) {
-        bufferToSave = fileBuffer.data
-      } else if (file.tempFilePath) {
-        bufferToSave = await fs.readFile(file.tempFilePath)
+      // since file.data is empty when using temp files.
+      //
+      // When local storage is disabled, filesToSave is never written to disk (create/update
+      // skip uploadFiles for it), and an unmodified temp file's bytes on disk are already
+      // correct, so there's nothing to read into memory or write back out. Skipping this avoids
+      // buffering the entire file just to discard or rewrite it unchanged - a tempFilePath can
+      // point at a file far larger than server memory allows.
+      const skipTempFileBuffer =
+        disableLocalStorage && Boolean(file.tempFilePath) && !fileBuffer?.data
+
+      // When local storage is enabled and the temp file itself is unmodified, copy it straight
+      // to its destination instead of reading it into memory first - a tempFilePath can point at
+      // a file far larger than server memory allows.
+      const shouldCopyFromTempFile =
+        !fileBuffer?.data && Boolean(file.tempFilePath) && !disableLocalStorage
+
+      if (shouldCopyFromTempFile) {
+        filesToSave.push({
+          path: `${staticPath}/${fsSafeName}`,
+          sourcePath: file.tempFilePath!,
+        })
       } else {
-        bufferToSave = file.data
-      }
-
-      filesToSave.push({
-        buffer: bufferToSave,
-        path: `${staticPath}/${fsSafeName}`,
-      })
-
-      // If using temp files and the image is being resized, write the file to the temp path
-      if (fileBuffer?.data || bufferToSave.length > 0) {
-        if (file.tempFilePath) {
-          await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
+        let bufferToSave: Buffer
+        if (fileBuffer?.data) {
+          bufferToSave = fileBuffer.data
+        } else if (file.tempFilePath) {
+          bufferToSave = skipTempFileBuffer ? Buffer.alloc(0) : await fs.readFile(file.tempFilePath)
         } else {
-          // Assign the _possibly modified_ file to the request object
-          req.file = {
-            ...file,
-            data: fileBuffer?.data || bufferToSave,
-            size: fileBuffer?.info.size,
+          bufferToSave = file.data
+        }
+
+        if (!skipTempFileBuffer) {
+          filesToSave.push({
+            buffer: bufferToSave,
+            path: `${staticPath}/${fsSafeName}`,
+          })
+
+          // If using temp files and the image is being resized, write the file to the temp path
+          if (fileBuffer?.data || bufferToSave.length > 0) {
+            if (file.tempFilePath) {
+              await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
+            } else {
+              // Assign the _possibly modified_ file to the request object
+              req.file = {
+                ...file,
+                data: fileBuffer?.data || bufferToSave,
+                size: fileBuffer?.info.size,
+              }
+            }
           }
         }
       }
@@ -461,7 +515,7 @@ function parseUploadEditsFromReqOrIncomingData(args: {
   if (origDoc && 'focalX' in origDoc && 'focalY' in origDoc) {
     // If no change in focal point, return undefined.
     // This prevents a refocal operation triggered from admin, because it always sends the focal point.
-    if (incomingData.focalX === origDoc.focalX && incomingData.focalY === origDoc.focalY) {
+    if (incomingData?.focalX === origDoc.focalX && incomingData?.focalY === origDoc.focalY) {
       return undefined!
     }
 

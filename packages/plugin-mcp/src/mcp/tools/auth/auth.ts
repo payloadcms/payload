@@ -1,6 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest } from 'payload'
 
+import { createLocalReq } from 'payload'
+
 import { toolSchemas } from '../schemas.js'
 
 export const authTool = (server: McpServer, req: PayloadRequest, verboseLogs: boolean) => {
@@ -27,9 +29,25 @@ export const authTool = (server: McpServer, req: PayloadRequest, verboseLogs: bo
         }
       }
 
-      const result = await payload.auth({
-        headers: authHeaders,
-      })
+      const authReq = await createLocalReq({ req: { headers: authHeaders } }, payload)
+      const result = await payload.auth({ headers: authHeaders, req: authReq })
+
+      if (result.user) {
+        const authenticatedUser = result.user
+        const user = await payload.findByID({
+          id: authenticatedUser.id,
+          collection: authenticatedUser.collection,
+          overrideAccess: false,
+          req: authReq,
+        })
+
+        result.user = {
+          ...user,
+          _sid: authenticatedUser._sid,
+          _strategy: authenticatedUser._strategy,
+          collection: authenticatedUser.collection,
+        }
+      }
 
       if (verboseLogs) {
         payload.logger.info('[payload-mcp] Authentication check completed successfully')

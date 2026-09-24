@@ -57,6 +57,7 @@ export const skTranslations: DefaultTranslationsObject = {
     newPassword: 'Nové heslo',
     passed: 'Overenie prešlo',
     passwordResetSuccessfully: 'Úspešne zmenené heslo.',
+    resend: 'Odoslať znova',
     resetPassword: 'Obnoviť heslo',
     resetPasswordExpiration: 'Vypršanie platnosti obnovenia hesla',
     resetPasswordToken: 'Token na resetovanie hesla',

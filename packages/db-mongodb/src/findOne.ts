@@ -51,7 +51,7 @@ export const findOne: FindOne = async function findOne(
   }
 
   let doc
-  if (aggregate) {
+  if (aggregate.length > 0) {
     const { docs } = await aggregatePaginate({
       adapter: this,
       joinAggregation: aggregate,

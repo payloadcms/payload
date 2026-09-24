@@ -4,14 +4,7 @@ import type { PayloadRequest } from 'payload'
 import { toolSchemas } from '../schemas.js'
 
 export const loginTool = (server: McpServer, req: PayloadRequest, verboseLogs: boolean) => {
-  const tool = async (
-    collection: string,
-    email: string,
-    password: string,
-    depth: number = 0,
-    overrideAccess: boolean = false,
-    showHiddenFields: boolean = false,
-  ) => {
+  const tool = async (collection: string, email: string, password: string, depth: number = 0) => {
     const payload = req.payload
 
     if (verboseLogs) {
@@ -28,8 +21,7 @@ export const loginTool = (server: McpServer, req: PayloadRequest, verboseLogs: b
           password,
         },
         depth,
-        overrideAccess,
-        showHiddenFields,
+        overrideAccess: false,
       })
 
       if (verboseLogs) {
@@ -65,8 +57,8 @@ export const loginTool = (server: McpServer, req: PayloadRequest, verboseLogs: b
       description: toolSchemas.login.description,
       inputSchema: toolSchemas.login.parameters.shape,
     },
-    async ({ collection, depth, email, overrideAccess, password, showHiddenFields }) => {
-      return await tool(collection, email, password, depth, overrideAccess, showHiddenFields)
+    async ({ collection, depth, email, password }) => {
+      return await tool(collection, email, password, depth)
     },
   )
 }

@@ -43,6 +43,7 @@ import {
   collectionLevelConfigSlug,
   customLivePreviewSlug,
   desktopBreakpoint,
+  forbiddenURLSlug,
   mobileBreakpoint,
   openByDefaultSlug,
   pagesSlug,
@@ -296,6 +297,38 @@ describe('Live Preview', () => {
     // Toggler is present but still not iframe
     await expect(toggler).toBeVisible()
     await expect(iframe).toBeHidden()
+  })
+
+  describe('URL validation', () => {
+    const documentIDs: (number | string)[] = []
+
+    test.afterEach(async () => {
+      for (const id of documentIDs) {
+        await payload.delete({ id, collection: forbiddenURLSlug })
+      }
+      documentIDs.length = 0
+    })
+
+    test('should omit preview controls for unsupported URLs', async () => {
+      const urlUtil = new AdminUrlUtil(serverURL, forbiddenURLSlug)
+      const doc = await payload.create({
+        collection: forbiddenURLSlug,
+        data: {},
+      })
+
+      documentIDs.push(doc.id)
+
+      await page.goto(urlUtil.edit(doc.id))
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      const { iframe } = await getLivePreviewIframe(page)
+      const toggler = page.locator('#live-preview-toggler')
+      const previewButton = page.locator('#preview-button')
+
+      await expect(toggler).toBeHidden()
+      await expect(iframe).toBeHidden()
+      await expect(previewButton).toBeHidden()
+    })
   })
 
   test('collection — does not render preview button when url is null', async () => {

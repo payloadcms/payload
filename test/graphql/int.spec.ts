@@ -25,6 +25,30 @@ describe('graphql', () => {
   })
 
   describe('graphql', () => {
+    it('should return 404 when GraphQL is disabled', async () => {
+      const originalDisable = payload.config.graphQL?.disable
+
+      payload.config.graphQL.disable = true
+
+      try {
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({
+            query: `query {
+          Posts {
+            docs {
+              id
+            }
+          }
+        }`,
+          }),
+        })
+
+        expect(response.status).toBe(404)
+      } finally {
+        payload.config.graphQL.disable = originalDisable
+      }
+    })
+
     it('should not be able to query introspection', async () => {
       const query = `query {
         __schema {

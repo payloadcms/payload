@@ -104,6 +104,10 @@ Cloudflare Workers runs in an [isolated environment that cannot access private I
 
 ## Known issues
 
+### Image resizing
+
+Workers do not support `sharp`, so image resizing features are not available. The Media collection has `crop` and `focalPoint` disabled for this reason, and options like `imageSizes` will not work.
+
 ### GraphQL
 
 We are currently waiting on some issues with GraphQL to be [fixed upstream in Workers](https://github.com/cloudflare/workerd/issues/5175) so full support for GraphQL is not currently guaranteed when deployed.

@@ -98,7 +98,14 @@ export { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 export { EditMany } from '../../elements/EditMany/index.js'
 export { ErrorPill } from '../../elements/ErrorPill/index.js'
 export { FullscreenModal } from '../../elements/FullscreenModal/index.js'
-export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.js'
+export {
+  APIKeyGenerationModal,
+  APIKeyGenerationModal as GenerateConfirmation,
+} from '../../views/Edit/Auth/APIKeyGenerationModal.js'
+export type {
+  APIKeyGenerationModalProps,
+  GenerateConfirmationProps,
+} from '../../views/Edit/Auth/APIKeyGenerationModal.js'
 export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
@@ -122,6 +129,8 @@ export { GroupByPageControls } from '../../elements/PageControls/GroupByPageCont
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
+export { Spinner } from '../../elements/Spinner/index.js'
+export type { SpinnerProps } from '../../elements/Spinner/index.js'
 export { Logout } from '../../elements/Logout/index.js'
 export { Modal, useModal } from '../../elements/Modal/index.js'
 export { NavToggler } from '../../elements/Nav/NavToggler/index.js'
@@ -317,8 +326,9 @@ export {
   useServerFunctions,
 } from '../../providers/ServerFunctions/index.js'
 export { ActionsProvider, useActions } from '../../providers/Actions/index.js'
+export { AuthSessionDebug } from '../../providers/Auth/AuthSessionDebug/index.js'
 export { AuthProvider, useAuth } from '../../providers/Auth/index.js'
-export type { UserWithToken } from '../../providers/Auth/index.js'
+export type { AuthSession, UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 

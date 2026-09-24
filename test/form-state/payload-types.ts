@@ -185,6 +185,7 @@ export interface AutosavePost {
   id: string;
   title?: string | null;
   computedTitle?: string | null;
+  restrictedValue?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -197,6 +198,8 @@ export interface Condition {
   id: string;
   showField?: boolean | null;
   conditionalCustomField?: string | null;
+  conditionalRowField?: string | null;
+  conditionalCollapsibleField?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -367,6 +370,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface AutosavePostsSelect<T extends boolean = true> {
   title?: T;
   computedTitle?: T;
+  restrictedValue?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -378,6 +382,8 @@ export interface AutosavePostsSelect<T extends boolean = true> {
 export interface ConditionsSelect<T extends boolean = true> {
   showField?: T;
   conditionalCustomField?: T;
+  conditionalRowField?: T;
+  conditionalCollapsibleField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

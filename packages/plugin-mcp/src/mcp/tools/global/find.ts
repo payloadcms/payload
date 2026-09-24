@@ -37,6 +37,8 @@ export const findGlobalTool = (
       const findOptions: Parameters<typeof payload.findGlobal>[0] = {
         slug: globalSlug,
         depth,
+        overrideAccess: false,
+        req,
         user,
       }
 

@@ -146,6 +146,7 @@ import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
 import { formatAdminURL } from './utilities/formatAdminURL.js'
+import { getNextJsHMRURL } from './utilities/getNextJsHMRURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -156,7 +157,7 @@ import { traverseFields } from './utilities/traverseFields.js'
  * useful as users wish to extend built-in fields with custom logic
  */
 export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
-export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey.js'
+export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey/index.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
@@ -744,7 +745,6 @@ export class BasePayload {
                 const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
                 if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
                   return
                 }
               }
@@ -972,7 +972,7 @@ export class BasePayload {
         }
 
         // 2. if api key enabled, push api key strategy into the array
-        if (collection.auth?.useAPIKey) {
+        if (collection.auth?.useAPIKey && collection.slug !== 'payload-mcp-api-keys') {
           authStrategies.push({
             name: `${collection.slug}-api-key`,
             authenticate: APIKeyAuthentication(collection),
@@ -1232,18 +1232,7 @@ export const getPayload = async (
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
       try {
-        const port = process.env.PORT || '3000'
-        const hasHTTPS =
-          process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
-        const protocol = hasHTTPS ? 'wss' : 'ws'
-
-        const path = '/_next/webpack-hmr'
-        // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
-        const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
-
-        cached.ws = new WebSocket(
-          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${path}`,
-        )
+        cached.ws = new WebSocket(getNextJsHMRURL())
 
         cached.ws.onmessage = (event) => {
           if (cached.reload instanceof Promise) {
@@ -1298,6 +1287,8 @@ interface RequestContext {
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export { jwtSign } from './auth/jwt.js'
+export { JWT_AUTH_VERSION } from './auth/jwtAuth.js'
+export type { JWTAuthVersion } from './auth/jwtAuth.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
@@ -1809,6 +1800,7 @@ export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 
 export type * from './uploads/types.js'
+export { unlinkClientUploadTempFile } from './uploads/unlinkClientUploadTempFile.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
@@ -1869,10 +1861,14 @@ export type { PayloadLogger } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'
+export { parseParams } from './utilities/parseParams/index.js'
+export type { ParsedParams, RawParams } from './utilities/parseParams/index.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
+export type { JoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
+export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'

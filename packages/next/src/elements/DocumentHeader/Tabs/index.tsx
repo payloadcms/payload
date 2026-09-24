@@ -5,6 +5,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
+  TypedUser,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -22,7 +23,8 @@ export const DocumentTabs: React.FC<{
   globalConfig: SanitizedGlobalConfig
   permissions: SanitizedPermissions
   req: PayloadRequest
-}> = ({ collectionConfig, globalConfig, permissions, req }) => {
+  user?: TypedUser
+}> = ({ collectionConfig, globalConfig, permissions, req, user }) => {
   const { config } = req.payload
 
   const tabs = getTabs({
@@ -61,7 +63,7 @@ export const DocumentTabs: React.FC<{
                     payload: req.payload,
                     permissions,
                     req,
-                    user: req.user,
+                    user,
                   } satisfies DocumentTabServerPropsOnly,
                 })
               }
@@ -75,6 +77,7 @@ export const DocumentTabs: React.FC<{
                   permissions={permissions}
                   req={req}
                   tabConfig={tabConfig}
+                  user={user}
                 />
               )
             })}

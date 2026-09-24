@@ -3,6 +3,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { PostsCollection } from './collections/Posts/index.js'
+import { RestrictedTabsCollection } from './collections/RestrictedTabs/index.js'
 import { TabsCollection } from './collections/Tabs/index.js'
 import { seed } from './seed.js'
 
@@ -10,7 +11,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [PostsCollection, TabsCollection],
+  collections: [PostsCollection, TabsCollection, RestrictedTabsCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

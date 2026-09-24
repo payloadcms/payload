@@ -55,6 +55,7 @@ export const faTranslations: DefaultTranslationsObject = {
     newPassword: 'رمز عبور جدید',
     passed: 'تأیید شد',
     passwordResetSuccessfully: 'رمز عبور با موفقیت تغییر کرد.',
+    resend: 'ارسال مجدد',
     resetPassword: 'بازنشانی رمز عبور',
     resetPasswordExpiration: 'انقضای توکن بازنشانی',
     resetPasswordToken: 'توکن بازنشانی رمز عبور',

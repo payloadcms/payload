@@ -12,8 +12,8 @@ export const Component: JSONFieldClientComponent = () => {
     <div>
       Fully-Featured Component:
       <RenderLexical
-        field={{ name: 'json' }}
         initialValue={buildEditorState<DefaultNodeTypes>({ text: 'defaultValue' })}
+        name="json"
         schemaPath={`collection.${lexicalFullyFeaturedSlug}.richText`}
       />
     </div>
