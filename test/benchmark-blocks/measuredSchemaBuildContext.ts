@@ -40,6 +40,8 @@ export const createMeasuredSchemaBuildContext = <TSchema>({
     },
     getOrCreate: (args) => {
       let isBuilt = false
+      const [label, ...settings] = args.cacheKey.split('|')
+      const variantKey = settings.join('|') || 'default'
       const schema = cacheContext.getOrCreate({
         ...args,
         build: () => {
@@ -49,14 +51,14 @@ export const createMeasuredSchemaBuildContext = <TSchema>({
       })
       const counts = getCacheEntryCounts({
         countsByLabel,
-        label: args.label,
-        variantKey: args.variantKey,
+        label,
+        variantKey,
       })
 
       if (isBuilt) {
         counts.misses += 1
         misses += 1
-        onStore?.({ label: args.label, schema, variantKey: args.variantKey })
+        onStore?.({ label, schema, variantKey })
       } else {
         counts.hits += 1
         hits += 1

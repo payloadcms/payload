@@ -18,14 +18,12 @@ describe('createSchemaBuildContext', () => {
     const first = context.getOrCreate({
       build,
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
     const second = context.getOrCreate({
       build,
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
 
     expect(first).toBe(artifact)
@@ -40,14 +38,12 @@ describe('createSchemaBuildContext', () => {
     const live = context.getOrCreate({
       build: () => ({ variant: 'live' }),
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
     const version = context.getOrCreate({
       build: () => ({ variant: 'version' }),
       definition,
-      label: 'block:hero',
-      variantKey: 'version',
+      cacheKey: 'block:hero-version',
     })
 
     expect(live).not.toBe(version)
@@ -61,14 +57,12 @@ describe('createSchemaBuildContext', () => {
     const first = context.getOrCreate({
       build,
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
     const second = context.getOrCreate({
       build,
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
 
     expect(first).not.toBe(second)
@@ -80,14 +74,12 @@ describe('createSchemaBuildContext', () => {
     const first = context.getOrCreate({
       build: () => ({ source: 'first' }),
       definition: { slug: 'hero' },
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
     const second = context.getOrCreate({
       build: () => ({ source: 'second' }),
       definition: { slug: 'hero' },
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
 
     expect(first).not.toBe(second)
@@ -100,14 +92,12 @@ describe('createSchemaBuildContext', () => {
     const first = firstContext.getOrCreate({
       build: () => ({ context: 'first' }),
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
     const second = secondContext.getOrCreate({
       build: () => ({ context: 'second' }),
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
 
     expect(first).not.toBe(second)
@@ -123,12 +113,10 @@ describe('createSchemaBuildContext', () => {
     })
     build.mockReturnValueOnce(artifact)
 
-    expect(() =>
-      context.getOrCreate({ build, definition, label: 'block:hero', variantKey: 'live' }),
-    ).toThrow('build failed')
-    expect(
-      context.getOrCreate({ build, definition, label: 'block:hero', variantKey: 'live' }),
-    ).toBe(artifact)
+    expect(() => context.getOrCreate({ build, cacheKey: 'block:hero', definition })).toThrow(
+      'build failed',
+    )
+    expect(context.getOrCreate({ build, cacheKey: 'block:hero', definition })).toBe(artifact)
     expect(build).toHaveBeenCalledTimes(2)
   })
 
@@ -138,8 +126,7 @@ describe('createSchemaBuildContext', () => {
     const first = context.getOrCreate({
       build: () => ({ build: 1 }),
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
 
     context.clear()
@@ -147,8 +134,7 @@ describe('createSchemaBuildContext', () => {
     const second = context.getOrCreate({
       build: () => ({ build: 2 }),
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
+      cacheKey: 'block:hero',
     })
 
     expect(second).not.toBe(first)

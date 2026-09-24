@@ -1,11 +1,6 @@
 export type SchemaBuildContext<TSchema> = {
   clear: () => void
-  getOrCreate: (args: {
-    build: () => TSchema
-    definition: object
-    label: string
-    variantKey: string
-  }) => TSchema
+  getOrCreate: (args: { build: () => TSchema; cacheKey: string; definition: object }) => TSchema
 }
 
 export const createSchemaBuildContext = <TSchema>({
@@ -19,22 +14,22 @@ export const createSchemaBuildContext = <TSchema>({
     clear: () => {
       schemasByDefinition = new WeakMap<object, Map<string, TSchema>>()
     },
-    getOrCreate: ({ build, definition, variantKey }) => {
-      const schemasByVariant = schemasByDefinition.get(definition)
+    getOrCreate: ({ build, cacheKey, definition }) => {
+      const schemasByKey = schemasByDefinition.get(definition)
 
       if (!isCacheEnabled) {
         return build()
       }
 
-      if (schemasByVariant?.has(variantKey)) {
-        return schemasByVariant.get(variantKey)!
+      if (schemasByKey?.has(cacheKey)) {
+        return schemasByKey.get(cacheKey)!
       }
 
       const schema = build()
-      const storedSchemasByVariant = schemasByVariant ?? new Map<string, TSchema>()
+      const storedSchemasByKey = schemasByKey ?? new Map<string, TSchema>()
 
-      storedSchemasByVariant.set(variantKey, schema)
-      schemasByDefinition.set(definition, storedSchemasByVariant)
+      storedSchemasByKey.set(cacheKey, schema)
+      schemasByDefinition.set(definition, storedSchemasByKey)
 
       return schema
     },

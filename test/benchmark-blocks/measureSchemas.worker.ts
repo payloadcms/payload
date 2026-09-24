@@ -171,8 +171,10 @@ const runAttribution = async ({
           },
           compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
           configFields: buildVersionCollectionFields(config, collection),
+          isVersion: true,
           payload,
           schemaBuildContext,
+          schemaPath: `collection:${collection.slug}`,
         })
       }
     }
@@ -187,6 +189,7 @@ const runAttribution = async ({
         configFields: global.fields,
         payload,
         schemaBuildContext,
+        schemaPath: `global:${global.slug}`,
       })
 
       if (global.versions) {
@@ -201,8 +204,10 @@ const runAttribution = async ({
             },
           },
           configFields: buildVersionGlobalFields(config, global),
+          isVersion: true,
           payload,
           schemaBuildContext,
+          schemaPath: `global:${global.slug}`,
         })
       }
     }

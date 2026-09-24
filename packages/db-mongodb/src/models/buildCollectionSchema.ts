@@ -36,6 +36,7 @@ export const buildCollectionSchema = ({
     flattenedFields: collection.flattenedFields,
     payload,
     schemaBuildContext,
+    schemaPath: `collection:${collection.slug}`,
   })
 
   if (Array.isArray(collection.upload.filenameCompoundIndex)) {

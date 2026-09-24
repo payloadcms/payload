@@ -21,7 +21,7 @@ pnpm bench:mongodb-schema-build -- --iterations 1 --scenario minimal --output /p
 Compare two result files:
 
 ```sh
-pnpm bench:mongodb-schema-build -- --compare /private/tmp/before.json /private/tmp/after.json --attribution-file /private/tmp/attribution.json --markdown docs/superpowers/reports/2026-09-22-mongodb-schema-build-caching-benchmarks.md
+pnpm bench:mongodb-schema-build -- --compare /private/tmp/before.json /private/tmp/after.json --attribution-file /private/tmp/attribution.json --markdown /private/tmp/mongodb-schema-build-report.md
 ```
 
 Record cache hits, misses, and compact descriptors without measuring process memory:

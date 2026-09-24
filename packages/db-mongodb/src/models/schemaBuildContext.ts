@@ -42,16 +42,27 @@ export const createMongoSchemaBuildContext = ({
   })
 }
 
-export const getBlockSchemaVariantKey = ({
+export const getBlockSchemaCacheKey = ({
+  blockSlug,
   buildSchemaOptions,
+  fieldPath,
   isLocalized,
+  isReference,
+  isVersion,
 }: {
+  blockSlug: string
   buildSchemaOptions: BuildSchemaOptions
+  fieldPath: string
   isLocalized: boolean
+  isReference: boolean
+  isVersion: boolean
 }): string =>
   [
-    `disableUnique:${buildSchemaOptions.disableUnique === true}`,
-    `draftsEnabled:${buildSchemaOptions.draftsEnabled === true}`,
-    `indexSortableFields:${buildSchemaOptions.indexSortableFields === true}`,
-    `isLocalized:${isLocalized}`,
-  ].join('|')
+    `${isReference ? `block:${blockSlug}` : `inline:${fieldPath}/block:${blockSlug}`}${isVersion ? '-version' : ''}`,
+    buildSchemaOptions.disableUnique && 'disableUnique:true',
+    buildSchemaOptions.draftsEnabled && 'draftsEnabled:true',
+    buildSchemaOptions.indexSortableFields && 'indexSortableFields:true',
+    isLocalized && 'isLocalized:true',
+  ]
+    .filter(Boolean)
+    .join('|')

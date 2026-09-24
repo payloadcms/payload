@@ -18,7 +18,7 @@ import {
 
 type NestedLayout = NonNullable<SchemaCachePage['layout']>
 
-test.suite({ config: './config.ts', db: 'mongo' })('MongoDB schema build cache', () => {
+test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' }, () => {
   test('should create and read nested referenced blocks', async ({ payload }) => {
     const target = await createTarget({ payload })
     const page = await payload.create({

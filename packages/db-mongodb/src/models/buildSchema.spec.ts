@@ -8,7 +8,7 @@ import type { BuildSchemaOptions } from './buildSchema.js'
 import type { MongoSchemaBuildContext } from './schemaBuildContext.js'
 
 import { buildSchema } from './buildSchema.js'
-import { getBlockSchemaVariantKey } from './schemaBuildContext.js'
+import { getBlockSchemaCacheKey } from './schemaBuildContext.js'
 
 type BlockVariant = {
   disableUnique: boolean
@@ -36,15 +36,116 @@ const buildSchemaWithContext = buildSchema as (
 ) => Schema
 
 describe('MongoDB schema build context', () => {
+  test('should name referenced blocks by slug and version before schema settings', () => {
+    expect(
+      getBlockSchemaCacheKey({
+        blockSlug: 'hero',
+        buildSchemaOptions: {},
+        fieldPath: 'collection:posts/field:layout',
+        isLocalized: false,
+        isReference: true,
+        isVersion: false,
+      }),
+    ).toBe('block:hero')
+
+    expect(
+      getBlockSchemaCacheKey({
+        blockSlug: 'hero',
+        buildSchemaOptions: { disableUnique: true, draftsEnabled: true },
+        fieldPath: 'collection:posts/field:layout',
+        isLocalized: false,
+        isReference: true,
+        isVersion: true,
+      }),
+    ).toBe('block:hero-version|disableUnique:true|draftsEnabled:true')
+  })
+
+  test('should identify inline blocks by owner and full nested field path', () => {
+    expect(
+      getBlockSchemaCacheKey({
+        blockSlug: 'card',
+        buildSchemaOptions: {},
+        fieldPath: 'collection:posts/field:sections/block:hero/field:cards',
+        isLocalized: false,
+        isReference: false,
+        isVersion: false,
+      }),
+    ).toBe('inline:collection:posts/field:sections/block:hero/field:cards/block:card')
+  })
+
+  test('should reuse a referenced block next to inline blocks in different fields', () => {
+    const shared: Block = { slug: 'shared', fields: [{ name: 'text', type: 'text' }] }
+    const inline: Block = { slug: 'inline', fields: [{ name: 'text', type: 'text' }] }
+    const { builds, context } = createRecordedSchemaBuildContext()
+
+    buildSchemaWithContext({
+      buildSchemaOptions: {},
+      configFields: [
+        { name: 'first', type: 'blocks', blocks: [inline, 'shared' as BlockSlug] },
+        { name: 'second', type: 'blocks', blocks: ['shared' as BlockSlug] },
+      ],
+      payload: createPayloadFixture({ blocks: [shared] }),
+      schemaBuildContext: context,
+      schemaPath: 'collection:posts',
+    })
+
+    expect(builds.filter(({ label }) => label === 'block:shared')).toHaveLength(1)
+    expect(builds.map(({ label }) => label)).toContain(
+      'inline:collection:posts/field:first/block:inline',
+    )
+  })
+
+  test('should include nested group and array names in inline block keys', () => {
+    const inline: Block = { slug: 'card', fields: [{ name: 'text', type: 'text' }] }
+    const { builds, context } = createRecordedSchemaBuildContext()
+
+    buildSchemaWithContext({
+      buildSchemaOptions: {},
+      configFields: [
+        {
+          name: 'content',
+          type: 'group',
+          fields: [
+            {
+              name: 'items',
+              type: 'array',
+              fields: [{ name: 'layout', type: 'blocks', blocks: [inline] }],
+            },
+          ],
+        },
+      ],
+      payload: createPayloadFixture({ blocks: [] }),
+      schemaBuildContext: context,
+      schemaPath: 'collection:posts',
+    })
+
+    expect(builds.map(({ label }) => label)).toContain(
+      'inline:collection:posts/field:content/field:items/field:layout/block:card',
+    )
+  })
+
   test('should normalize false and undefined in block variant keys', () => {
-    expect(getBlockSchemaVariantKey({ buildSchemaOptions: {}, isLocalized: false })).toBe(
-      getBlockSchemaVariantKey({
+    expect(
+      getBlockSchemaCacheKey({
+        blockSlug: 'hero',
+        buildSchemaOptions: {},
+        fieldPath: 'collection:posts/field:layout',
+        isLocalized: false,
+        isReference: true,
+        isVersion: false,
+      }),
+    ).toBe(
+      getBlockSchemaCacheKey({
+        blockSlug: 'hero',
         buildSchemaOptions: {
           disableUnique: false,
           draftsEnabled: false,
           indexSortableFields: false,
         },
+        fieldPath: 'collection:posts/field:layout',
         isLocalized: false,
+        isReference: true,
+        isVersion: false,
       }),
     )
   })
@@ -55,9 +156,24 @@ describe('MongoDB schema build context', () => {
     { buildSchemaOptions: { indexSortableFields: true }, isLocalized: false },
     { buildSchemaOptions: {}, isLocalized: true },
   ])('should include every schema input in the block variant key', (changedVariant) => {
-    const baseKey = getBlockSchemaVariantKey({ buildSchemaOptions: {}, isLocalized: false })
+    const baseKey = getBlockSchemaCacheKey({
+      blockSlug: 'hero',
+      buildSchemaOptions: {},
+      fieldPath: 'collection:posts/field:layout',
+      isLocalized: false,
+      isReference: true,
+      isVersion: false,
+    })
 
-    expect(getBlockSchemaVariantKey(changedVariant)).not.toBe(baseKey)
+    expect(
+      getBlockSchemaCacheKey({
+        blockSlug: 'hero',
+        fieldPath: 'collection:posts/field:layout',
+        isReference: true,
+        isVersion: false,
+        ...changedVariant,
+      }),
+    ).not.toBe(baseKey)
   })
 
   test('should build a diamond graph once per block and variant', () => {
@@ -163,12 +279,10 @@ describe('MongoDB schema build context', () => {
       schemaBuildContext: context,
     })
 
-    expect(builds.map(({ variantKey }) => variantKey)).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining('isLocalized:false'),
-        expect.stringContaining('isLocalized:true'),
-      ]),
-    )
+    expect(builds.map(({ variantKey }) => variantKey)).toEqual([
+      'block:shared',
+      'block:shared|isLocalized:true',
+    ])
   })
 
   test('should create separate templates for live and version schemas', () => {
@@ -181,15 +295,14 @@ describe('MongoDB schema build context', () => {
       block,
       buildSchemaOptions: { disableUnique: true, draftsEnabled: true },
       context,
+      isVersion: true,
       payload,
     })
 
-    expect(builds.map(({ variantKey }) => variantKey)).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining('draftsEnabled:false'),
-        expect.stringContaining('draftsEnabled:true'),
-      ]),
-    )
+    expect(builds.map(({ variantKey }) => variantKey)).toEqual([
+      'block:shared',
+      'block:shared-version|disableUnique:true|draftsEnabled:true',
+    ])
   })
 
   test.each([
@@ -242,7 +355,7 @@ describe('MongoDB schema build context', () => {
     expect(secondRoot.path('firstParentOnly')).toBeUndefined()
   })
 
-  test('should cache an inline block only when the same object identity is reused', () => {
+  test('should separate inline blocks by field path and object identity', () => {
     const sharedInlineBlock: Block = { slug: 'inline', fields: [{ name: 'text', type: 'text' }] }
     const separateInlineBlock: Block = { slug: 'inline', fields: [{ name: 'text', type: 'text' }] }
     const { builds, context } = createRecordedSchemaBuildContext()
@@ -258,7 +371,7 @@ describe('MongoDB schema build context', () => {
       schemaBuildContext: context,
     })
 
-    expect(builds.filter(({ label }) => label === 'block:inline')).toHaveLength(2)
+    expect(builds.filter(({ label }) => label.startsWith('inline:'))).toHaveLength(3)
   })
 
   test('should leave compiled model schemas usable after context.clear()', () => {
@@ -296,7 +409,11 @@ const createRecordedSchemaBuildContext = (): {
           build: () => {
             const schema = args.build()
 
-            builds.push({ label: args.label, schema, variantKey: args.variantKey })
+            builds.push({
+              label: args.cacheKey.split('|')[0]!,
+              schema,
+              variantKey: args.cacheKey,
+            })
 
             return schema
           },
@@ -309,16 +426,19 @@ const buildDirectBlockSchema = ({
   block,
   buildSchemaOptions = {},
   context,
+  isVersion = false,
   payload,
 }: {
   block: Block
   buildSchemaOptions?: BuildSchemaOptions
   context: MongoSchemaBuildContext
+  isVersion?: boolean
   payload: Payload
 }): Schema =>
   buildSchemaWithContext({
     buildSchemaOptions,
     configFields: [{ name: 'layout', type: 'blocks', blocks: [block.slug as BlockSlug] }],
+    isVersion,
     payload,
     schemaBuildContext: context,
   })

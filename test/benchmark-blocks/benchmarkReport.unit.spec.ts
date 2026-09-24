@@ -45,15 +45,13 @@ describe('MongoDB schema benchmark helpers', () => {
 
     context.getOrCreate({
       build: () => ({}),
+      cacheKey: 'block:hero|live',
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
     })
     context.getOrCreate({
       build: () => ({}),
+      cacheKey: 'block:hero|live',
       definition,
-      label: 'block:hero',
-      variantKey: 'live',
     })
 
     expect(context).not.toHaveProperty('snapshot')

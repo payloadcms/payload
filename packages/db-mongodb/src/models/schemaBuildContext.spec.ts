@@ -13,14 +13,12 @@ describe('createMongoSchemaBuildContext', () => {
     const first = context.getOrCreate({
       build,
       definition,
-      label: 'block:shared',
-      variantKey: 'live',
+      cacheKey: 'block:shared',
     })
     const second = context.getOrCreate({
       build,
       definition,
-      label: 'block:shared',
-      variantKey: 'live',
+      cacheKey: 'block:shared',
     })
 
     expect(first).toBe(second)
@@ -37,14 +35,12 @@ describe('createMongoSchemaBuildContext', () => {
     const first = context.getOrCreate({
       build,
       definition,
-      label: 'block:shared',
-      variantKey: 'live',
+      cacheKey: 'block:shared',
     })
     const second = context.getOrCreate({
       build,
       definition,
-      label: 'block:shared',
-      variantKey: 'live',
+      cacheKey: 'block:shared',
     })
 
     expect(first).not.toBe(second)
@@ -62,14 +58,12 @@ describe('createMongoSchemaBuildContext', () => {
     const first = context.getOrCreate({
       build,
       definition,
-      label: 'block:shared',
-      variantKey: 'live',
+      cacheKey: 'block:shared',
     })
     const second = context.getOrCreate({
       build,
       definition,
-      label: 'block:shared',
-      variantKey: 'live',
+      cacheKey: 'block:shared',
     })
 
     expect(first).not.toBe(second)

@@ -38,6 +38,7 @@ export const buildGlobalModel = ({
         configFields: globalConfig.fields,
         payload: adapter.payload,
         schemaBuildContext,
+        schemaPath: `global:${globalConfig.slug}`,
       })
       Globals.discriminator(globalConfig.slug, globalSchema)
     })

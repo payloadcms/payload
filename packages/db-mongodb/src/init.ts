@@ -61,8 +61,10 @@ export const init: Init = async function init(this: MongooseAdapter) {
           },
           compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
           configFields: versionCollectionFields,
+          isVersion: true,
           payload: this.payload,
           schemaBuildContext,
+          schemaPath: `collection:${collection.slug}`,
         })
 
         versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
@@ -112,8 +114,10 @@ export const init: Init = async function init(this: MongooseAdapter) {
             },
           },
           configFields: versionGlobalFields,
+          isVersion: true,
           payload: this.payload,
           schemaBuildContext,
+          schemaPath: `global:${global.slug}`,
         })
 
         versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
