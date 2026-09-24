@@ -35,11 +35,19 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
   const { i18n, t } = useTranslation()
 
   const [relationToMap] = React.useState(() => {
-    const map: Record<string, { plural: string; singular: string }> = {}
+    const map: Record<
+      string,
+      {
+        plural: string
+        singular: string
+        upload: (typeof config.collections)[number]['upload']
+      }
+    > = {}
     config.collections.forEach((collection) => {
       map[collection.slug] = {
         plural: getTranslation(collection.labels?.plural, i18n),
         singular: getTranslation(collection.labels?.singular, i18n),
+        upload: collection.upload,
       }
     })
     return map
@@ -160,6 +168,7 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
         ...documents.map((document, unadjustedIndex) => {
           const { itemKey, relationTo, value } = document
           const documentID = extractID(value)
+          const relatedCollection = relationToMap[relationTo]
           const rowIndex = unadjustedIndex + subfolders.length
 
           return (
@@ -185,11 +194,17 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
                 if (index === 0) {
                   return (
                     <span className={`${baseClass}__cell-with-icon`} key={`${itemKey}-${name}`}>
-                      {value.url ? (
+                      {value.url &&
+                      relatedCollection?.upload &&
+                      relatedCollection.upload.displayPreview !== false ? (
                         <Thumbnail
                           className={`${baseClass}__thumbnail`}
                           doc={value}
                           fileSrc={value.url}
+                          imageCacheTag={
+                            relatedCollection.upload.cacheTags ? value.updatedAt : undefined
+                          }
+                          loading="lazy"
                           size="none"
                         />
                       ) : (
