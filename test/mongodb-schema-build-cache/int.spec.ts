@@ -29,6 +29,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       },
       depth: 0,
       locale: 'en',
+      overrideAccess: true,
     })
 
     const result = await payload.findByID({
@@ -36,6 +37,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       collection: pagesSlug,
       depth: 0,
       locale: 'en',
+      overrideAccess: true,
     })
     const leaf = getFirstLeaf(result.layout)
 
@@ -54,6 +56,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       },
       depth: 0,
       locale: 'en',
+      overrideAccess: true,
     })
 
     const result = await payload.update({
@@ -64,6 +67,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       },
       depth: 0,
       locale: 'en',
+      overrideAccess: true,
     })
 
     assert.equal(getFirstLeaf(result.layout).value, 'after update')
@@ -82,6 +86,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
         title: 'Localized nested blocks',
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -95,6 +100,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
         }),
       },
       locale: 'de',
+      overrideAccess: true,
     })
 
     const result = await payload.findByID({
@@ -102,6 +108,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       collection: pagesSlug,
       depth: 0,
       locale: 'all',
+      overrideAccess: true,
     })
     const localizedLayout = result.localizedLayout as unknown as {
       de: NestedLayout
@@ -123,12 +130,14 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       depth: 0,
       draft: true,
       locale: 'en',
+      overrideAccess: true,
     })
 
     const versions = await payload.findVersions({
       collection: pagesSlug,
       depth: 0,
       locale: 'en',
+      overrideAccess: true,
       where: {
         parent: {
           equals: page.id,
@@ -150,6 +159,7 @@ test.suite('MongoDB schema build cache', { config: './config.ts', db: 'mongo' },
       },
       depth: 0,
       locale: 'en',
+      overrideAccess: true,
     })
 
     assert.equal(typeof target.id, 'number')
@@ -241,6 +251,7 @@ const createTarget = async ({
       id: 100,
       title: 'Numeric target',
     },
+    overrideAccess: true,
   })
 
 const getFirstLeaf = (layout: NestedLayout | null | undefined) => {

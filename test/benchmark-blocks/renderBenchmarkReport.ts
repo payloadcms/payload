@@ -96,6 +96,12 @@ export const renderBenchmarkReport = ({
   )
   const representativeDescriptor = getRepresentativeDescriptor({ attribution })
   const allChecksPass = acceptanceChecks.every(({ passed }) => passed)
+  const inlineControlChecks = acceptanceChecks.filter(({ name }) =>
+    name.startsWith('inline-control '),
+  )
+  const wideConstructorCheck = acceptanceChecks.find(
+    ({ name }) => name === 'wide-references constructors',
+  )
   const markdownCode = String.fromCharCode(96)
 
   return `# MongoDB Schema Build Cache Benchmarks
@@ -121,8 +127,6 @@ ${allChecksPass ? 'All measured acceptance checks pass.' : 'One or more measured
 - Attribution data SHA-256: ${markdownCode}${attributionDigest}${markdownCode}
 
 Each memory sample ran in a fresh Node.js process with ${markdownCode}--expose-gc${markdownCode} and an 8 GiB old-space limit. Values below are median with minimum–maximum in parentheses. RSS is supporting evidence because allocator behavior varies. Heap, constructor counts, and reachable compiled schemas are the primary evidence.
-
-The draft scenario timing ranges each contain one extreme elapsed-time outlier. The raw values remain in the report. The decision uses the median and deterministic constructor counts, so those outliers do not affect the result.
 
 ## Results
 
@@ -150,7 +154,11 @@ ${incrementalRows.join('\n')}
 | --- | --- | --- |
 ${acceptanceRows.join('\n')}
 
-The wide constructor check uses the documented exception: non-clone constructor calls fall by more than 95%, while 48,000 remaining calls are Mongoose's required discriminator attachments. The inline control stays within the 5% guardrail for incremental heap and initialization time. Descriptor unit tests and the MongoDB integration suite cover schema structure, nested writes, localization, versions, number relationships, indexes, and reload isolation.
+${wideConstructorCheck ? `The wide constructor check reports ${wideConstructorCheck.details}.` : 'The benchmark input does not include a wide constructor check.'} ${
+    inlineControlChecks.length === 0
+      ? 'The benchmark input does not include inline-control guardrail checks.'
+      : `The inline control ${inlineControlChecks.every(({ passed }) => passed) ? 'stays within' : 'exceeds'} the 5% guardrail.`
+  }
 
 ## Constructor allocation categories
 
