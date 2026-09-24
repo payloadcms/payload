@@ -2953,6 +2953,45 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
   })
 
   test.describe('Image Manipulation', () => {
+    test('should generate image sizes from the cropped image', async ({ payload, restClient }) => {
+      const sourceFile = await getFileByPath(path.resolve(dirname, './image.png'))
+      sourceFile.name = `crop-sizes-${randomUUID()}.png`
+
+      const sourceDoc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: sourceFile,
+        overrideAccess: true,
+      })
+
+      try {
+        const response = await restClient.PATCH(`/${mediaSlug}/${sourceDoc.id}`, {
+          body: JSON.stringify({}),
+          query: {
+            uploadEdits: {
+              crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+              heightInPixels: 800,
+              widthInPixels: 800,
+            },
+          },
+        })
+        const { doc } = (await response.json()) as { doc: Media }
+
+        expect(response.status).toBe(200)
+        expect(doc).toMatchObject({ height: 800, width: 800 })
+        expect(doc.sizes?.maintainedImageSize).toMatchObject({ height: 800, width: 800 })
+
+        const sizePath = path.join(dirname, './media', doc.sizes!.maintainedImageSize!.filename!)
+
+        await expect(sharp(sizePath).metadata()).resolves.toMatchObject({
+          height: 800,
+          width: 800,
+        })
+      } finally {
+        await payload.delete({ id: sourceDoc.id, collection: mediaSlug, overrideAccess: true })
+      }
+    })
+
     test('should enlarge images if resize options `withoutEnlargement` is set to false', async ({
       payload,
     }) => {
