@@ -9,12 +9,12 @@ import type {
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { findVersionsOperation } from '../findVersions.js'
 
 export type Options<TSlug extends GlobalSlug> = {
@@ -120,7 +120,10 @@ export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
     page,
     pagination,
     populate,
-    req: await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload }),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     sort,

@@ -1,4 +1,4 @@
-import { createPayloadReq } from 'payload'
+import { createPayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -269,7 +269,7 @@ test.suite('field access collection context', { config: './config.ts' }, () => {
   }) => {
     // payload.auth() calls getEntityPermissions for all registered collections,
     // which calls populateFieldPermissions → field.access[operation] for each field.
-    const req = await createPayloadReq({ payload })
+    const req = await createPayloadRequest({ payload })
 
     await payload.auth({
       headers: new Headers(),

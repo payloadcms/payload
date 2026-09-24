@@ -16,7 +16,7 @@ import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 import type { ComponentRenderer } from '../adapters/render.js'
 
-export type GetAdminContextResult = {
+export type CreateAdminContextResult = {
   cookies: Map<string, string>
   // TODO: Remove in 4.0. Duplicative, already available in req.headers
   headers: Headers
@@ -32,7 +32,7 @@ export type GetAdminContextResult = {
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
   renderComponent?: ComponentRenderer
-} & Pick<GetAdminContextResult, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>
+} & Pick<CreateAdminContextResult, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>

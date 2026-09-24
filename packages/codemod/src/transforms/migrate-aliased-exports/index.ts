@@ -11,7 +11,7 @@ const SOURCE_MAP: Record<string, Record<string, Migration>> = {
   '@payloadcms/next/utilities': {
     addDataAndFileToRequest: { to: 'payload' },
     addLocalesToRequestFromData: { to: 'payload' },
-    createPayloadRequest: { rename: 'createPayloadReqFromWebRequest', to: 'payload' },
+    createPayloadRequest: { rename: 'createPayloadRequestFromWebRequest', to: 'payload' },
     headersWithCors: { to: 'payload' },
     mergeHeaders: { to: 'payload' },
     sanitizeLocales: { to: 'payload' },
@@ -125,7 +125,7 @@ export const migrateAliasedExports: Transform = {
     }
   },
   description:
-    'Move imports of aliased re-exports from @payloadcms/ui and @payloadcms/next/utilities to their canonical sources in `payload` / `payload/shared`. Renamed names (`createPayloadRequest` → `createPayloadReqFromWebRequest`, `ListPreferences` → `CollectionPreferences`, `ListComponentClientProps` → `ListViewClientProps`, `ListComponentServerProps` → `ListViewServerProps`) are imported using an `as` alias so existing usages keep compiling.',
+    'Move imports of aliased re-exports from @payloadcms/ui and @payloadcms/next/utilities to their canonical sources in `payload` / `payload/shared`. Renamed names (`createPayloadRequest` → `createPayloadRequestFromWebRequest`, `ListPreferences` → `CollectionPreferences`, `ListComponentClientProps` → `ListViewClientProps`, `ListComponentServerProps` → `ListViewServerProps`) are imported using an `as` alias so existing usages keep compiling.',
 }
 
 type ApplyRenameArgs = {

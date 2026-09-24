@@ -3,7 +3,7 @@ import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import React from 'react'
 
-import { getAdminContext } from '../utilities/getAdminContext.js'
+import { createAdminContext } from '../utilities/createAdminContext.js'
 import { NextRouterAdapter } from './router.js'
 // CSS import lives here (not in `@payloadcms/ui`) so the esbuild bundle that produces
 // `@payloadcms/next/css` (`dist/prod/styles.css`) can follow the CSS chain. esbuild
@@ -34,7 +34,7 @@ export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  'additionalDependencyChecks' | 'fonts' | 'getAdminContext' | 'RouterAdapter'
+  'additionalDependencyChecks' | 'fonts' | 'createAdminContext' | 'RouterAdapter'
 >
 
 export const RootLayout = (props: Props) => (
@@ -45,7 +45,7 @@ export const RootLayout = (props: Props) => (
       { className: inter.className, variable: inter.variable },
       { className: robotoMono.className, variable: robotoMono.variable },
     ]}
-    getAdminContext={getAdminContext}
+    createAdminContext={createAdminContext}
     RouterAdapter={NextRouterAdapter}
   />
 )

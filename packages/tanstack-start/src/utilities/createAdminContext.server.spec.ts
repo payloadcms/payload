@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { getRequest, getPayloadAdminContext, tanstackServerAdapter } = vi.hoisted(() => ({
+const { getRequest, createPayloadAdminContext, tanstackServerAdapter } = vi.hoisted(() => ({
   getRequest: vi.fn(),
-  getPayloadAdminContext: vi.fn(),
+  createPayloadAdminContext: vi.fn(),
   tanstackServerAdapter: {
     getHeaders: vi.fn(),
   },
@@ -13,7 +13,7 @@ vi.mock('@tanstack/react-start/server', () => ({
 }))
 
 vi.mock('payload/internal', () => ({
-  getAdminContext: getPayloadAdminContext,
+  createAdminContext: createPayloadAdminContext,
 }))
 
 vi.mock('./devConfigReload.server.js', () => ({}))
@@ -22,12 +22,12 @@ vi.mock('./serverAdapter.server.js', () => ({
   tanstackServerAdapter,
 }))
 
-import { getAdminContext } from './getAdminContext.server.js'
+import { createAdminContext } from './createAdminContext.server.js'
 
-describe('getAdminContext', () => {
+describe('createAdminContext', () => {
   beforeEach(() => {
     getRequest.mockReset().mockReturnValue(new Request('http://localhost/admin?locale=es'))
-    getPayloadAdminContext.mockReset().mockResolvedValue({})
+    createPayloadAdminContext.mockReset().mockResolvedValue({})
   })
 
   it('should provide the active request URL and default server adapter', async () => {
@@ -36,9 +36,9 @@ describe('getAdminContext', () => {
       importMap: {},
     }
 
-    await getAdminContext(args)
+    await createAdminContext(args)
 
-    expect(getPayloadAdminContext).toHaveBeenCalledWith({
+    expect(createPayloadAdminContext).toHaveBeenCalledWith({
       ...args,
       requestURL: 'http://localhost/admin?locale=es',
       serverAdapter: tanstackServerAdapter,
@@ -50,13 +50,13 @@ describe('getAdminContext', () => {
       getHeaders: vi.fn(),
     }
 
-    await getAdminContext({
+    await createAdminContext({
       configPromise: Promise.resolve({} as never),
       importMap: {},
       serverAdapter: serverAdapter as never,
     })
 
-    expect(getPayloadAdminContext).toHaveBeenCalledWith(
+    expect(createPayloadAdminContext).toHaveBeenCalledWith(
       expect.objectContaining({
         serverAdapter,
       }),

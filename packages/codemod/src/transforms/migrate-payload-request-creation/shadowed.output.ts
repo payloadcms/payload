@@ -1,6 +1,6 @@
-import { createPayloadReq } from 'payload'
+import { createPayloadRequest } from 'payload'
 
-const req = createPayloadReq({ payload: payload })
+const req = createPayloadRequest({ payload: payload })
 function unrelated(createLocalReq: Function) {
   return createLocalReq({}, payload)
 }

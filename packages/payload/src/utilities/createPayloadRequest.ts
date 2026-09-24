@@ -85,7 +85,7 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
   }
 }
 
-export type CreatePayloadReqArgs = {
+export type CreatePayloadRequestArgs = {
   context?: RequestContext
   depth?: number
   fallbackLocale?: false | TypedLocale
@@ -96,9 +96,9 @@ export type CreatePayloadReqArgs = {
   user?: User
 }
 
-type CreatePayloadReq = (args: CreatePayloadReqArgs) => Promise<PayloadRequest>
+type CreatePayloadRequest = (args: CreatePayloadRequestArgs) => Promise<PayloadRequest>
 
-export const createPayloadReq: CreatePayloadReq = async ({
+export const createPayloadRequest: CreatePayloadRequest = async ({
   context,
   depth,
   fallbackLocale,

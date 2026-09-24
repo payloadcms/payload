@@ -7,8 +7,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getPayload } from '../index.js'
 import { addLocalesToRequestFromData } from './addLocalesToRequest.js'
-import { createPayloadReq } from './createPayloadReq.js'
-import { createPayloadReqFromWebRequest } from './createPayloadReqFromWebRequest.js'
+import { createPayloadRequest } from './createPayloadRequest.js'
+import { createPayloadRequestFromWebRequest } from './createPayloadRequestFromWebRequest.js'
 
 const { initI18n } = vi.hoisted(() => ({
   initI18n: vi.fn(),
@@ -31,8 +31,8 @@ vi.mock('../index.js', () => ({
   getPayload: vi.fn(),
 }))
 
-vi.mock('./createPayloadReq.js', () => ({
-  createPayloadReq: vi.fn(),
+vi.mock('./createPayloadRequest.js', () => ({
+  createPayloadRequest: vi.fn(),
 }))
 
 const config = {
@@ -71,17 +71,17 @@ const payload = {
   config,
 } as unknown as Payload
 
-const useRealCreatePayloadReq = async () => {
+const useRealCreatePayloadRequest = async () => {
   const actual =
-    await vi.importActual<typeof import('./createPayloadReq.js')>('./createPayloadReq.js')
+    await vi.importActual<typeof import('./createPayloadRequest.js')>('./createPayloadRequest.js')
 
-  vi.mocked(createPayloadReq).mockImplementation(actual.createPayloadReq)
+  vi.mocked(createPayloadRequest).mockImplementation(actual.createPayloadRequest)
 }
 
-describe('createPayloadReqFromWebRequest', () => {
+describe('createPayloadRequestFromWebRequest', () => {
   beforeEach(() => {
     vi.mocked(getPayload).mockReset().mockResolvedValue(payload)
-    vi.mocked(createPayloadReq)
+    vi.mocked(createPayloadRequest)
       .mockReset()
       .mockImplementation(async ({ req }) => req as PayloadRequest)
     vi.mocked(executeAuthStrategies).mockReset().mockResolvedValue({
@@ -91,12 +91,12 @@ describe('createPayloadReqFromWebRequest', () => {
     initI18n.mockReset().mockResolvedValue(i18n)
   })
 
-  it('initializes the original Web Request through createPayloadReq before authentication', async () => {
+  it('initializes the original Web Request through createPayloadRequest before authentication', async () => {
     const request = new Request('http://localhost/api/posts?locale=en&depth=2')
 
-    const result = await createPayloadReqFromWebRequest({ config, request })
+    const result = await createPayloadRequestFromWebRequest({ config, request })
 
-    expect(createPayloadReq).toHaveBeenCalledWith(
+    expect(createPayloadRequest).toHaveBeenCalledWith(
       expect.objectContaining({
         locale: 'en',
         payload,
@@ -106,7 +106,7 @@ describe('createPayloadReqFromWebRequest', () => {
     expect((request as PayloadRequest).i18n).toBe(i18n)
     expect((request as PayloadRequest).query).toEqual({ depth: '2', locale: 'en' })
     expect(executeAuthStrategies).toHaveBeenCalledWith(expect.objectContaining({ req: request }))
-    expect(vi.mocked(createPayloadReq).mock.invocationCallOrder[0]).toBeLessThan(
+    expect(vi.mocked(createPayloadRequest).mock.invocationCallOrder[0]).toBeLessThan(
       vi.mocked(executeAuthStrategies).mock.invocationCallOrder[0],
     )
     expect(result).toBe(request)
@@ -118,7 +118,7 @@ describe('createPayloadReqFromWebRequest', () => {
   ] as const)('assigns %s requests to the %s API', async (url, payloadAPI) => {
     const request = new Request(url)
 
-    const result = await createPayloadReqFromWebRequest({ config, request })
+    const result = await createPayloadRequestFromWebRequest({ config, request })
 
     expect(result.payloadAPI).toBe(payloadAPI)
   })
@@ -128,7 +128,7 @@ describe('createPayloadReqFromWebRequest', () => {
       'http://localhost/api/posts?where[title][equals]=Hello&tags[]=news&tags[]=featured',
     )
 
-    const result = await createPayloadReqFromWebRequest({
+    const result = await createPayloadRequestFromWebRequest({
       config,
       params: { collection: 'posts' },
       request,
@@ -148,7 +148,7 @@ describe('createPayloadReqFromWebRequest', () => {
 
     vi.mocked(executeAuthStrategies).mockResolvedValue({ responseHeaders, user })
 
-    const result = await createPayloadReqFromWebRequest({ config, request })
+    const result = await createPayloadRequestFromWebRequest({ config, request })
 
     expect(result.responseHeaders).toBe(responseHeaders)
     expect(result.user).toBe(user)
@@ -157,9 +157,9 @@ describe('createPayloadReqFromWebRequest', () => {
   it('passes sanitized fallback locale state to common request initialization', async () => {
     const request = new Request('http://localhost/api/posts?locale=de&fallbackLocale=unsupported')
 
-    await createPayloadReqFromWebRequest({ config, request })
+    await createPayloadRequestFromWebRequest({ config, request })
 
-    expect(createPayloadReq).toHaveBeenCalledWith(
+    expect(createPayloadRequest).toHaveBeenCalledWith(
       expect.objectContaining({
         fallbackLocale: false,
         locale: 'de',
@@ -177,9 +177,9 @@ describe('createPayloadReqFromWebRequest', () => {
     } as unknown as Payload
 
     vi.mocked(getPayload).mockResolvedValue(unlocalizedPayload)
-    await useRealCreatePayloadReq()
+    await useRealCreatePayloadRequest()
 
-    const result = await createPayloadReqFromWebRequest({
+    const result = await createPayloadRequestFromWebRequest({
       config: unlocalizedConfig,
       request: new Request('http://localhost/api/posts?locale=de&fallbackLocale=en'),
     })
@@ -201,9 +201,9 @@ describe('createPayloadReqFromWebRequest', () => {
     } as unknown as Payload
 
     vi.mocked(getPayload).mockResolvedValue(noFallbackPayload)
-    await useRealCreatePayloadReq()
+    await useRealCreatePayloadRequest()
 
-    const result = await createPayloadReqFromWebRequest({
+    const result = await createPayloadRequestFromWebRequest({
       config: noFallbackConfig,
       request: new Request('http://localhost/api/posts'),
     })
@@ -217,9 +217,9 @@ describe('createPayloadReqFromWebRequest', () => {
   })
 
   it('preserves fallback locale arrays through common request initialization', async () => {
-    await useRealCreatePayloadReq()
+    await useRealCreatePayloadRequest()
 
-    const result = await createPayloadReqFromWebRequest({
+    const result = await createPayloadRequestFromWebRequest({
       config,
       request: new Request(
         'http://localhost/api/posts?locale=de&fallbackLocale[]=en&fallbackLocale[]=de',

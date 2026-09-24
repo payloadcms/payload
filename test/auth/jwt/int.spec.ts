@@ -1,7 +1,7 @@
 import type { CollectionRefreshHook, Payload } from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
-import { createPayloadReqFromWebRequest } from 'payload'
+import { createPayloadRequestFromWebRequest } from 'payload'
 import { v4 as uuid } from 'uuid'
 import { expect } from 'vitest'
 
@@ -129,14 +129,14 @@ test.suite(
         overrideAccess: true,
       })
       const headers = { Authorization: `JWT ${token}` }
-      const req = await createPayloadReqFromWebRequest({
+      const req = await createPayloadRequestFromWebRequest({
         config: payload.config,
         request: new Request(
           'http://localhost/api/auth-read-hook?locale=fr&fallbackLocale=none&depth=2',
           { headers },
         ),
       })
-      const graphQLReq = await createPayloadReqFromWebRequest({
+      const graphQLReq = await createPayloadRequestFromWebRequest({
         config: payload.config,
         request: new Request('http://localhost/api/graphql', { headers }),
       })

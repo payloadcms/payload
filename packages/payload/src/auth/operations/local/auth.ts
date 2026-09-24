@@ -1,7 +1,7 @@
 import type { Payload } from '../../../index.js'
 import type { AuthArgs, AuthResult } from '../auth.js'
 
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { auth as authOperation } from '../auth.js'
 
 export const authLocal = async (payload: Payload, options: AuthArgs): Promise<AuthResult> => {
@@ -10,6 +10,6 @@ export const authLocal = async (payload: Payload, options: AuthArgs): Promise<Au
   return await authOperation({
     canSetHeaders: Boolean(options.canSetHeaders),
     headers,
-    req: await createPayloadReq({ payload, req: req ?? { headers } }),
+    req: await createPayloadRequest({ payload, req: req ?? { headers } }),
   })
 }

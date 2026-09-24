@@ -8,7 +8,7 @@ import type { PayloadRequest } from '../types/index.js'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getPayload } from '../index.js'
 import { sanitizeLocales } from './addLocalesToRequest.js'
-import { createPayloadReq } from './createPayloadReq.js'
+import { createPayloadRequest } from './createPayloadRequest.js'
 import { formatAdminURL } from './formatAdminURL.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
@@ -23,7 +23,7 @@ type Args = {
   request: Request
 }
 
-export const createPayloadReqFromWebRequest = async ({
+export const createPayloadRequestFromWebRequest = async ({
   canSetHeaders,
   config: configPromise,
   params,
@@ -111,7 +111,7 @@ export const createPayloadReqFromWebRequest = async ({
     transactionID: undefined,
   })
 
-  const req = await createPayloadReq({
+  const req = await createPayloadRequest({
     fallbackLocale: fallbackLocale as false | TypedLocale | undefined,
     locale: locale ?? undefined,
     payload,

@@ -16,11 +16,11 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { type FindByIDArgs, findByIDOperation } from '../findByID.js'
 
 type BaseFindByIDOptions<
@@ -163,7 +163,10 @@ export async function findByIDLocal<
     joins,
     overrideAccess,
     populate,
-    req: await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload }),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     trash,

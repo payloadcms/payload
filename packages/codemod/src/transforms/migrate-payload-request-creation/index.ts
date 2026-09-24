@@ -6,14 +6,14 @@ import type { Transform } from '../../types.js'
 
 const RENAMES = {
   payload: {
-    createLocalReq: 'createPayloadReq',
-    CreateLocalReqOptions: 'CreatePayloadReqArgs',
-    createPayloadRequest: 'createPayloadReqFromWebRequest',
-    InitReqResult: 'GetAdminContextResult',
+    createLocalReq: 'createPayloadRequest',
+    CreateLocalReqOptions: 'CreatePayloadRequestArgs',
+    createPayloadRequest: 'createPayloadRequestFromWebRequest',
+    InitReqResult: 'CreateAdminContextResult',
   },
   'payload/internal': {
-    initReq: 'getAdminContext',
-    InitReqArgs: 'GetAdminContextArgs',
+    initReq: 'createAdminContext',
+    InitReqArgs: 'CreateAdminContextArgs',
     InitReqCache: 'AdminContextCache',
     InitReqPartialResult: 'PartialAdminContext',
   },
@@ -28,6 +28,18 @@ const OPTION_NAMES = [
   'urlSuffix',
   'user',
 ] as const
+
+const getImportPriority = (name: string): number => {
+  if (name === 'createPayloadRequest') {
+    return 0
+  }
+
+  if (name === 'CreateLocalReqOptions') {
+    return 2
+  }
+
+  return 1
+}
 
 export const migratePayloadRequestCreation: Transform = {
   name: 'migrate-payload-request-creation',
@@ -44,17 +56,13 @@ export const migratePayloadRequestCreation: Transform = {
             .getNamedImports()
             .map((spec) => ({ source: declaration.getModuleSpecifierValue(), spec })),
         )
-        .sort(
-          (a, b) =>
-            Number(a.spec.getName() === 'CreateLocalReqOptions') -
-            Number(b.spec.getName() === 'CreateLocalReqOptions'),
-        )
+        .sort((a, b) => getImportPriority(a.spec.getName()) - getImportPriority(b.spec.getName()))
 
       for (const { source, spec } of imports) {
         if (source !== 'payload' && (source.startsWith('.') || source.startsWith('payload/'))) {
           if (spec.getName() === 'CreateLocalReqOptions') {
             notes.push(
-              `${file.getFilePath()}: Unsupported CreateLocalReqOptions import source \`${source}\`; migrate this private/relative type import manually to Omit<CreatePayloadReqArgs, 'payload'> from payload.`,
+              `${file.getFilePath()}: Unsupported CreateLocalReqOptions import source \`${source}\`; migrate this private/relative type import manually to Omit<CreatePayloadRequestArgs, 'payload'> from payload.`,
             )
           }
         }
@@ -69,7 +77,7 @@ export const migratePayloadRequestCreation: Transform = {
         const aliasName = spec.getAliasNode()?.getText()
         const isAliasedExportMigrationArtifact =
           source === 'payload' &&
-          importedName === 'createPayloadReqFromWebRequest' &&
+          importedName === 'createPayloadRequestFromWebRequest' &&
           aliasName === 'createPayloadRequest'
         const originalName = isAliasedExportMigrationArtifact ? aliasName : importedName
 
@@ -88,6 +96,20 @@ export const migratePayloadRequestCreation: Transform = {
 
         const binding = spec.getAliasNode()!
         const references = binding.findReferencesAsNodes().filter((node) => node !== binding)
+        const isCurrentPayloadRequestCreator =
+          source === 'payload' &&
+          importedName === 'createPayloadRequest' &&
+          !isAliasedExportMigrationArtifact &&
+          references.length > 0 &&
+          references.every(isPayloadRequestCreationReference)
+
+        if (isCurrentPayloadRequestCreator) {
+          if (!hadAlias) {
+            spec.removeAlias()
+          }
+          continue
+        }
+
         const hasCollision =
           (!hadAlias || isAliasedExportMigrationArtifact) &&
           [binding, ...references].some((node) =>
@@ -201,6 +223,22 @@ export const migratePayloadRequestCreation: Transform = {
   },
   description:
     'Renames Payload request and admin-context imports, preserves options-only types, and migrates safe createLocalReq calls by capturing payload before projecting the seven old option properties; reports unsupported bindings for manual migration.',
+}
+
+function isPayloadRequestCreationReference(reference: Node): boolean {
+  const parent = reference.getParent()
+
+  if (
+    !Node.isCallExpression(parent) ||
+    parent.getExpression() !== reference ||
+    parent.getArguments().length !== 1
+  ) {
+    return false
+  }
+
+  const [argument] = parent.getArguments()
+
+  return Node.isObjectLiteralExpression(argument) && Boolean(argument.getProperty('payload'))
 }
 
 function getUnsafeOptionsReason({ options }: { options: Node }): string | undefined {

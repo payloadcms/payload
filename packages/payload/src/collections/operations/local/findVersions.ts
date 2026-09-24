@@ -9,12 +9,12 @@ import type {
 } from '../../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { findVersionsOperation } from '../findVersions.js'
 
 type BaseOptions<TSlug extends CollectionSlug> = {
@@ -135,7 +135,10 @@ export async function findVersionsLocal<TSlug extends CollectionSlug>(
     page,
     pagination,
     populate,
-    req: await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload }),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     sort,

@@ -3,12 +3,12 @@ import type { ImportMap } from '../cli/commands/generateImportMap/generateImport
 import type { SanitizedConfig } from '../config/types.js'
 import type { Payload } from '../index.js'
 import type { ServerAdapter } from './adapters/server.js'
-import type { AdminContextCache, PartialAdminContext } from './getAdminContext.js'
-import type { GetAdminContextResult } from './functions/index.js'
+import type { AdminContextCache, PartialAdminContext } from './createAdminContext.js'
+import type { CreateAdminContextResult } from './functions/index.js'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getAdminContext } from './getAdminContext.js'
+import { createAdminContext } from './createAdminContext.js'
 
 const {
   applyUserReadAccess,
@@ -139,19 +139,19 @@ const createExecutingCache = (): AdminContextCache => ({
   getPartial: vi.fn((createPartialContext: () => Promise<PartialAdminContext>) =>
     createPartialContext(),
   ),
-  getRequest: vi.fn((createContext: () => Promise<GetAdminContextResult>) => createContext()),
+  getRequest: vi.fn((createContext: () => Promise<CreateAdminContextResult>) => createContext()),
 })
 
 const createReusingCache = (): AdminContextCache => {
   const localeResults: Array<{
     cacheArgs: unknown[]
-    result: Pick<GetAdminContextResult, 'locale'>
+    result: Pick<CreateAdminContextResult, 'locale'>
   }> = []
   let partialContext: PartialAdminContext | undefined
   const contexts: Array<{
     cacheArgs: unknown[]
     key: string
-    result: GetAdminContextResult
+    result: CreateAdminContextResult
   }> = []
 
   return {
@@ -195,7 +195,7 @@ const createReusingCache = (): AdminContextCache => {
   }
 }
 
-describe('getAdminContext', () => {
+describe('createAdminContext', () => {
   beforeEach(() => {
     applyUserReadAccess.mockReset().mockImplementation(async ({ user }) => ({
       collection: user.collection,
@@ -210,7 +210,7 @@ describe('getAdminContext', () => {
   })
 
   it('should derive the URL and a nested query from requestURL', async () => {
-    const result = await getAdminContext({
+    const result = await createAdminContext({
       configPromise: config,
       importMap,
       requestURL: 'https://example.com/admin?locale=es&where%5Btitle%5D%5Bequals%5D=Hello',
@@ -233,7 +233,7 @@ describe('getAdminContext', () => {
   it('should persist an authenticated request locale', async () => {
     getPayload.mockResolvedValue({ ...payload, config: localizedConfig })
 
-    const result = await getAdminContext({
+    const result = await createAdminContext({
       configPromise: localizedConfig,
       importMap,
       requestURL: 'https://example.com/admin?locale=es',
@@ -257,7 +257,7 @@ describe('getAdminContext', () => {
     })
     getPayload.mockResolvedValue({ ...payload, config: localizedConfig })
 
-    const result = await getAdminContext({
+    const result = await createAdminContext({
       configPromise: localizedConfig,
       importMap,
       requestURL: 'https://example.com/admin?locale=es',
@@ -271,7 +271,7 @@ describe('getAdminContext', () => {
   })
 
   it('should prefer explicit request overrides over requestURL', async () => {
-    const result = await getAdminContext({
+    const result = await createAdminContext({
       configPromise: config,
       importMap,
       overrides: {
@@ -293,7 +293,7 @@ describe('getAdminContext', () => {
   })
 
   it('should ignore an invalid requestURL', async () => {
-    const result = await getAdminContext({
+    const result = await createAdminContext({
       configPromise: config,
       importMap,
       requestURL: 'not a valid URL',
@@ -305,8 +305,8 @@ describe('getAdminContext', () => {
   })
 
   it('should initialize each request directly when no cache is supplied', async () => {
-    await getAdminContext({ configPromise: config, importMap, serverAdapter })
-    await getAdminContext({ configPromise: config, importMap, serverAdapter })
+    await createAdminContext({ configPromise: config, importMap, serverAdapter })
+    await createAdminContext({ configPromise: config, importMap, serverAdapter })
 
     expect(authenticate).toHaveBeenCalledTimes(2)
     expect(getAccessResults).toHaveBeenCalledTimes(2)
@@ -315,7 +315,7 @@ describe('getAdminContext', () => {
   it('should use both cache stages when a cache is supplied', async () => {
     const cache = createExecutingCache()
 
-    await getAdminContext({
+    await createAdminContext({
       cache,
       configPromise: config,
       importMap,
@@ -329,17 +329,17 @@ describe('getAdminContext', () => {
 
   it('requires a key when cache is supplied', async () => {
     await expect(
-      getAdminContext({
+      createAdminContext({
         cache: createExecutingCache(),
         configPromise: config,
         importMap,
         serverAdapter,
       }),
-    ).rejects.toThrow('getAdminContext requires a key when cache is provided')
+    ).rejects.toThrow('createAdminContext requires a key when cache is provided')
   })
 
   it('should enable cron and forward canSetHeaders to auth strategies', async () => {
-    await getAdminContext({
+    await createAdminContext({
       canSetHeaders: true,
       configPromise: config,
       importMap,
@@ -376,10 +376,10 @@ describe('getAdminContext', () => {
       },
       serverAdapter,
     }
-    const first = await getAdminContext(args)
+    const first = await createAdminContext(args)
     first.req.context.source = 'mutated'
 
-    const second = await getAdminContext(args)
+    const second = await createAdminContext(args)
 
     expect(first.req).not.toBe(second.req)
     expect(first.req.context).not.toBe(second.req.context)
@@ -398,14 +398,14 @@ describe('getAdminContext', () => {
       serverAdapter,
     }
 
-    const rootLayoutResult = await getAdminContext({ ...args, key: 'RootLayout' })
-    await getAdminContext({ ...args, key: 'initPage' })
+    const rootLayoutResult = await createAdminContext({ ...args, key: 'RootLayout' })
+    await createAdminContext({ ...args, key: 'initPage' })
 
     expect(authenticate).toHaveBeenCalledOnce()
     expect(applyUserReadAccess).toHaveBeenCalledTimes(2)
     expect(getAccessResults).toHaveBeenCalledTimes(2)
 
-    const repeatedRootLayoutResult = await getAdminContext({ ...args, key: 'RootLayout' })
+    const repeatedRootLayoutResult = await createAdminContext({ ...args, key: 'RootLayout' })
 
     expect(authenticate).toHaveBeenCalledOnce()
     expect(applyUserReadAccess).toHaveBeenCalledTimes(2)
@@ -424,7 +424,7 @@ describe('getAdminContext', () => {
       },
     })
 
-    const result = await getAdminContext({ configPromise: config, importMap, serverAdapter })
+    const result = await createAdminContext({ configPromise: config, importMap, serverAdapter })
 
     expect(result.req.user).toHaveProperty('role', 'admin')
     expect(result.user).toEqual({ collection: 'users', id: 'user-id' })
@@ -446,11 +446,11 @@ describe('getAdminContext', () => {
       serverAdapter,
     }
 
-    const first = await getAdminContext({
+    const first = await createAdminContext({
       ...args,
       overrides: { context: { source: 'first' } },
     })
-    const second = await getAdminContext({
+    const second = await createAdminContext({
       ...args,
       overrides: { context: { source: 'second' } },
     })
@@ -472,8 +472,8 @@ describe('getAdminContext', () => {
       serverAdapter,
     }
 
-    const rootLayoutResult = await getAdminContext({ ...args, key: 'RootLayout' })
-    const pageResult = await getAdminContext({ ...args, key: 'initPage' })
+    const rootLayoutResult = await createAdminContext({ ...args, key: 'RootLayout' })
+    const pageResult = await createAdminContext({ ...args, key: 'initPage' })
 
     expect(rootLayoutResult.locale).toMatchObject({ code: 'es' })
     expect(pageResult.locale).toMatchObject({ code: 'es' })
@@ -483,7 +483,7 @@ describe('getAdminContext', () => {
   it('should use anonymous access when user read access fails', async () => {
     applyUserReadAccess.mockRejectedValueOnce(new Error('read access failed'))
 
-    const result = await getAdminContext({ configPromise: config, importMap, serverAdapter })
+    const result = await createAdminContext({ configPromise: config, importMap, serverAdapter })
 
     expect(result.req.user).toBeNull()
     expect(result.user).toBeNull()
@@ -491,7 +491,7 @@ describe('getAdminContext', () => {
   })
 
   it('should preserve an explicit request user override', async () => {
-    const result = await getAdminContext({
+    const result = await createAdminContext({
       configPromise: config,
       importMap,
       overrides: {
@@ -511,7 +511,7 @@ describe('getAdminContext', () => {
   })
 
   it('should preserve an explicit null user override', async () => {
-    const result = await getAdminContext({
+    const result = await createAdminContext({
       configPromise: config,
       importMap,
       overrides: {

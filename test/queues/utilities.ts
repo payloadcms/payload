@@ -1,7 +1,7 @@
 import {
   _internal_jobSystemGlobals,
   countRunnableOrActiveJobsForQueue,
-  createPayloadReq,
+  createPayloadRequest,
   type Payload,
 } from 'payload'
 
@@ -14,7 +14,7 @@ export async function waitUntilAutorunIsDone({
   payload: Payload
   queue: string
 }): Promise<void> {
-  const req = await createPayloadReq({ payload })
+  const req = await createPayloadRequest({ payload })
 
   return new Promise((resolve) => {
     const interval = setInterval(async () => {

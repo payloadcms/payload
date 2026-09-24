@@ -3,7 +3,7 @@ import type { Config, Plugin, SanitizedConfig } from 'payload'
 /* eslint-disable no-console */
 import { serveStdio } from '@modelcontextprotocol/server/stdio'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { createPayloadReq, getPayload } from 'payload'
+import { createPayloadRequest, getPayload } from 'payload'
 import { findConfig, loadEnv } from 'payload/node'
 
 import type { SanitizedMCPPluginConfig } from './types.js'
@@ -91,7 +91,7 @@ export const runMcpStdio = async (): Promise<void> => {
     headers.set('Authorization', process.env.PAYLOAD_MCP_AUTHORIZATION)
   }
 
-  const req = await createPayloadReq({ payload, req: { headers } })
+  const req = await createPayloadRequest({ payload, req: { headers } })
   req.payloadAPI = 'MCP' as const
   const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
 

@@ -6,7 +6,7 @@ import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import type { GetAdminContextFn } from '../Root/index.js'
+import type { CreateAdminContextFn } from '../Root/index.js'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import { NotFoundClient, PageConfigProvider } from '../../exports/client/index.js'
@@ -18,7 +18,7 @@ import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 
 export type RenderNotFoundPageArgs = {
   config: Promise<SanitizedConfig>
-  getAdminContext: GetAdminContextFn
+  createAdminContext: CreateAdminContextFn
   importMap: ImportMap
   params: Promise<{ segments: string[] }>
   searchParams: Promise<{ [key: string]: string | string[] }>
@@ -26,7 +26,7 @@ export type RenderNotFoundPageArgs = {
 
 export const renderNotFoundPage = async ({
   config: configPromise,
-  getAdminContext,
+  createAdminContext,
   importMap,
   params: paramsPromise,
   searchParams: searchParamsPromise,
@@ -43,7 +43,7 @@ export const renderNotFoundPage = async ({
     req,
     req: { payload },
     user,
-  } = await getAdminContext({
+  } = await createAdminContext({
     configPromise: config,
     importMap,
     key: 'RootLayout',

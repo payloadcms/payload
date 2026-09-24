@@ -1,4 +1,4 @@
-import { createPayloadReq, strictObject, z } from 'payload'
+import { createPayloadRequest, strictObject, z } from 'payload'
 
 import type { MCPToolResponse } from '../../../types.js'
 
@@ -53,7 +53,10 @@ export const authCollectionTool = defineCollectionTool({
     if (input.headers) {
       authHeaders = new Headers(input.headers)
     }
-    const authReq = await createPayloadReq({ payload: req.payload, req: { headers: authHeaders } })
+    const authReq = await createPayloadRequest({
+      payload: req.payload,
+      req: { headers: authHeaders },
+    })
     const result = await req.payload.auth({ headers: authHeaders, req: authReq })
 
     if (result.user) {

@@ -5,7 +5,7 @@ import type { MaybePromise } from '../../types/index.js'
 import type { LoginResult } from '../operations/login.js'
 
 import { getPayload } from '../../index.js'
-import { createPayloadReq } from '../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { loginWithCookie } from '../loginWithCookie.js'
 import { applyAuthCookie } from './cookies.js'
 
@@ -80,7 +80,7 @@ export async function login<TSlug extends AuthCollectionSlug>({
     collection: collectionConfig,
     data: loginData as Parameters<typeof loginWithCookie>[0]['data'],
     overrideAccess: true,
-    req: await createPayloadReq({ payload }),
+    req: await createPayloadRequest({ payload }),
     returnCookieAsObject: true,
   })
 

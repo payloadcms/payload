@@ -11,7 +11,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import {
-  createPayloadReq,
+  createPayloadRequest,
   Forbidden,
   getFieldsToSign,
   refreshOperation,
@@ -2814,7 +2814,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
         await setLoginAttemptLock({ id: publicUser.id, collection: publicUsersSlug, payload })
 
-        const req = await createPayloadReq({ payload, user: adminUser })
+        const req = await createPayloadRequest({ payload, user: adminUser })
 
         await payload.unlock({
           collection: publicUsersSlug,
@@ -2849,7 +2849,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
 
         await setLoginAttemptLock({ id: selectedUser.id, collection: publicUsersSlug, payload })
 
-        const req = await createPayloadReq({ payload, user: currentUser })
+        const req = await createPayloadRequest({ payload, user: currentUser })
 
         await expect(
           payload.unlock({
@@ -3095,7 +3095,7 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
           Authorization: `JWT ${authenticated.token}`,
         },
       })
-      const req = await createPayloadReq({
+      const req = await createPayloadRequest({
         payload,
         user: {
           ...authenticated.user,

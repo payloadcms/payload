@@ -1,10 +1,10 @@
 import type { CollectionSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { countOperation } from '../count.js'
 
 export type CountOptions<TSlug extends CollectionSlug> = {
@@ -75,7 +75,10 @@ export async function countLocal<TSlug extends CollectionSlug>(
     collection,
     disableErrors,
     overrideAccess,
-    req: await createPayloadReq({ ...(options as Omit<CreatePayloadReqArgs, 'payload'>), payload }),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     trash,
     where,
   })

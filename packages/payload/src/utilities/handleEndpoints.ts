@@ -7,7 +7,7 @@ import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { createPayloadReqFromWebRequest } from './createPayloadReqFromWebRequest.js'
+import { createPayloadRequestFromWebRequest } from './createPayloadRequestFromWebRequest.js'
 import { formatAdminURL, stripTrailingSlash } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
 import { mergeHeaders } from './mergeHeaders.js'
@@ -103,7 +103,7 @@ export const handleEndpoints = async ({
       // May not be supported by every endpoint
       data = await request.json()
 
-      // createPayloadReqFromWebRequest reads locale and fallbackLocale from searchParams.
+      // createPayloadRequestFromWebRequest reads locale and fallbackLocale from searchParams.
       if (data?.locale) {
         url += `?locale=${data.locale}`
       }
@@ -135,7 +135,7 @@ export const handleEndpoints = async ({
   }
 
   try {
-    req = await createPayloadReqFromWebRequest({
+    req = await createPayloadRequestFromWebRequest({
       canSetHeaders: true,
       config: incomingConfig,
       payloadInstanceCacheKey,

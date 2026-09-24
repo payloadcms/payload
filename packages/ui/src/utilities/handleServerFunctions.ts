@@ -1,6 +1,6 @@
 import type {
   DefaultServerFunctionArgs,
-  GetAdminContextResult,
+  CreateAdminContextResult,
   ImportMap,
   SanitizedConfig,
   ServerFunction,
@@ -9,18 +9,18 @@ import type {
 
 import { sharedServerFunctions } from './serverFunctionRegistry.js'
 
-type GetAdminContextFn = (args: {
+type CreateAdminContextFn = (args: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
-}) => Promise<GetAdminContextResult>
+}) => Promise<CreateAdminContextResult>
 
 type CreateServerFunctionHandlerArgs = {
   /**
    * Framework-specific admin context creation. The adapter closes over its own
-   * `ServerAdapter` / request source (Next.js: `getAdminContext` + `nextServerAdapter`;
-   * TanStack Start: its `getRequest()`-based `getAdminContext`).
+   * `ServerAdapter` / request source (Next.js: `createAdminContext` + `nextServerAdapter`;
+   * TanStack Start: its `getRequest()`-based `createAdminContext`).
    */
-  getAdminContext: GetAdminContextFn
+  createAdminContext: CreateAdminContextFn
   /**
    * Additional handlers registered alongside `sharedServerFunctions`. Reserved
    * for adapter-specific functions; today both adapters run the shared set only.
@@ -38,12 +38,12 @@ type CreateServerFunctionHandlerArgs = {
  * Factory for the framework-agnostic `handleServerFunctions` entry point.
  *
  * All adapters dispatch from the shared registry (`sharedServerFunctions`) and
- * differ only in the two injected hooks below — `getAdminContext` and `transformResult`
+ * differ only in the two injected hooks below — `createAdminContext` and `transformResult`
  * — so there is a single dispatch implementation and the handler sets cannot
  * drift between frameworks.
  */
 export const createServerFunctionHandler = ({
-  getAdminContext,
+  createAdminContext,
   serverFunctions,
   transformResult,
 }: CreateServerFunctionHandlerArgs): ServerFunctionHandler => {
@@ -60,7 +60,7 @@ export const createServerFunctionHandler = ({
       serverFunctions: extraServerFunctions,
     } = args
 
-    const { cookies, locale, permissions, req, user } = await getAdminContext({
+    const { cookies, locale, permissions, req, user } = await createAdminContext({
       configPromise,
       importMap,
     })

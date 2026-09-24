@@ -6,44 +6,44 @@ import * as qs from 'qs-esm'
 import type { ImportMap } from '../cli/commands/generateImportMap/generateImportMap.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
-import type { CreatePayloadReqArgs } from '../utilities/createPayloadReq.js'
+import type { CreatePayloadRequestArgs } from '../utilities/createPayloadRequest.js'
 import type { ServerAdapter } from './adapters/server.js'
-import type { GetAdminContextResult } from './functions/index.js'
+import type { CreateAdminContextResult } from './functions/index.js'
 
 import { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getAccessResults } from '../auth/getAccessResults.js'
 import { getPayload } from '../index.js'
-import { createPayloadReq } from '../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../utilities/createPayloadRequest.js'
 import { getRequestLanguage } from '../utilities/getRequestLanguage.js'
 import { parseCookies } from '../utilities/parseCookies.js'
 import { getRequestLocale } from './getRequestLocale.js'
 
 export type PartialAdminContext = {
   i18n: I18nClient
-} & Pick<GetAdminContextResult, 'languageCode'> &
+} & Pick<CreateAdminContextResult, 'languageCode'> &
   Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
 
 /** Framework-provided request-scoped caching hooks used to deduplicate admin context creation. */
 export type AdminContextCache = {
   /** Reuses locale preference resolution across admin contexts. */
   getLocale?: (
-    resolveLocale: () => Promise<Pick<GetAdminContextResult, 'locale'>>,
+    resolveLocale: () => Promise<Pick<CreateAdminContextResult, 'locale'>>,
     ...cacheArgs: unknown[]
-  ) => Promise<Pick<GetAdminContextResult, 'locale'>>
+  ) => Promise<Pick<CreateAdminContextResult, 'locale'>>
   /** Reuses Payload, i18n, and authentication state within the current request. */
   getPartial: (
     createPartialContext: () => Promise<PartialAdminContext>,
   ) => Promise<PartialAdminContext>
   /** Reuses a complete admin context for the supplied key and cache arguments. */
   getRequest: (
-    createContext: () => Promise<GetAdminContextResult>,
+    createContext: () => Promise<CreateAdminContextResult>,
     key: string,
     ...cacheArgs: unknown[]
-  ) => Promise<GetAdminContextResult>
+  ) => Promise<CreateAdminContextResult>
 }
 
-export type GetAdminContextArgs = {
+export type CreateAdminContextArgs = {
   /**
    * Optional framework-owned request-scoped cache.
    * Framework adapters control its lifetime to prevent request state from leaking between requests.
@@ -54,15 +54,15 @@ export type GetAdminContextArgs = {
   importMap: ImportMap
   /** Identifies the complete admin context within `cache`; required when a cache is supplied. */
   key?: string
-  overrides?: Omit<CreatePayloadReqArgs, 'payload'>
+  overrides?: Omit<CreatePayloadRequestArgs, 'payload'>
   requestURL?: string
   serverAdapter: ServerAdapter
 }
 
 /**
- * Gets the request context used by framework adapters to render the admin panel.
+ * Creates the request context used by framework adapters to render the admin panel.
  */
-export async function getAdminContext({
+export async function createAdminContext({
   cache,
   canSetHeaders,
   configPromise,
@@ -71,9 +71,9 @@ export async function getAdminContext({
   overrides,
   requestURL,
   serverAdapter,
-}: GetAdminContextArgs): Promise<GetAdminContextResult> {
+}: CreateAdminContextArgs): Promise<CreateAdminContextResult> {
   if (cache && !key) {
-    throw new Error('getAdminContext requires a key when cache is provided')
+    throw new Error('createAdminContext requires a key when cache is provided')
   }
 
   const headers = await serverAdapter.getHeaders()
@@ -113,7 +113,7 @@ export async function getAdminContext({
     ? await cache.getPartial(createPartialContext)
     : await createPartialContext()
 
-  const createContext = async (): Promise<GetAdminContextResult> => {
+  const createContext = async (): Promise<CreateAdminContextResult> => {
     const { i18n, languageCode, payload, responseHeaders, user } = partialContext
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
     const hasOptionsUserOverride = Object.hasOwn(optionsOverrides, 'user')
@@ -122,7 +122,7 @@ export async function getAdminContext({
     const userOverride = hasOptionsUserOverride ? optionsOverrides.user : reqOverrides?.user
     const requestDefaults = getRequestDefaults({ requestURL })
 
-    const req = await createPayloadReq({
+    const req = await createPayloadRequest({
       req: {
         headers,
         host: headers.get('host') ?? undefined,
@@ -141,7 +141,7 @@ export async function getAdminContext({
       req.user = null
     }
 
-    const resolveLocale = async (): Promise<Pick<GetAdminContextResult, 'locale'>> => ({
+    const resolveLocale = async (): Promise<Pick<CreateAdminContextResult, 'locale'>> => ({
       locale: await getRequestLocale({ req }),
     })
     const { locale } = cache?.getLocale

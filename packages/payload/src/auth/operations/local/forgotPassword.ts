@@ -4,7 +4,7 @@ import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { Result } from '../forgotPassword.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { forgotPasswordOperation } from '../forgotPassword.js'
 
 export type Options<TSlug extends AuthCollectionSlug> = {
@@ -46,6 +46,6 @@ export async function forgotPasswordLocal<T extends AuthCollectionSlug>(
     disableEmail,
     expiration,
     overrideAccess,
-    req: await createPayloadReq({ ...options, payload }),
+    req: await createPayloadRequest({ ...options, payload }),
   }) as Promise<Result>
 }

@@ -68,7 +68,7 @@ describe('migrate-payload-request-creation', () => {
           { context, depth, fallbackLocale, locale, req, urlSuffix, user }: Record<string, unknown>,
           payload: unknown,
         ) => ({ context, depth, fallbackLocale, locale, req, urlSuffix, user, payload }),
-        createPayloadReq: ({
+        createPayloadRequest: ({
           context,
           depth,
           fallbackLocale,
@@ -100,7 +100,7 @@ describe('migrate-payload-request-creation', () => {
       return context.observed
     }
 
-    expect(output).toContain('createPayloadReq(')
+    expect(output).toContain('createPayloadRequest(')
     expect(output).not.toContain('...options')
     expect(evaluate(output)).toEqual(evaluate(source))
     expect(evaluate(output)).toEqual({
@@ -131,7 +131,7 @@ try {
     const evaluate = async (code: string) => {
       const context = {
         createLocalReq: async ({ context }: Record<string, unknown>) => context,
-        createPayloadReq: async ({ context }: Record<string, unknown>) => context,
+        createPayloadRequest: async ({ context }: Record<string, unknown>) => context,
         observed: undefined,
       }
       const executable = new Project({ useInMemoryFileSystem: true }).createSourceFile(
@@ -145,7 +145,7 @@ try {
       return await context.observed
     }
 
-    expect(output).toContain('createPayloadReq(')
+    expect(output).toContain('createPayloadRequest(')
     expect(await evaluate(source)).toBe('rejected:getter')
     expect(await evaluate(output)).toBe('rejected:getter')
   })
@@ -161,18 +161,21 @@ try {
         useInMemoryFileSystem: true,
       })
       const actualHelper = ts.createSourceFile(
-        'createPayloadReq.ts',
-        await readFile(join(here, '../../../../payload/src/utilities/createPayloadReq.ts'), 'utf8'),
+        'createPayloadRequest.ts',
+        await readFile(
+          join(here, '../../../../payload/src/utilities/createPayloadRequest.ts'),
+          'utf8',
+        ),
         ts.ScriptTarget.Latest,
         true,
       )
       const args = actualHelper.statements.find(
-        (node) => ts.isTypeAliasDeclaration(node) && node.name.text === 'CreatePayloadReqArgs',
+        (node) => ts.isTypeAliasDeclaration(node) && node.name.text === 'CreatePayloadRequestArgs',
       )!
 
       project.createSourceFile(
         '/node_modules/payload/index.d.ts',
-        `type Payload = { id: string }; type RequestContext = Record<string, unknown>; type TypedLocale = string; type PayloadRequest = Record<string, unknown>; type User = string;\n${args.getText(actualHelper)}\nexport declare function createPayloadReq(args: CreatePayloadReqArgs): unknown`,
+        `type Payload = { id: string }; type RequestContext = Record<string, unknown>; type TypedLocale = string; type PayloadRequest = Record<string, unknown>; type User = string;\n${args.getText(actualHelper)}\nexport declare function createPayloadRequest(args: CreatePayloadRequestArgs): unknown`,
       )
       const file = project.createSourceFile('/output.ts', output)
 
@@ -183,7 +186,7 @@ try {
         file.getVariableDeclarationOrThrow('options').getType().getProperty('payload'),
       ).toBeUndefined()
       expect(output).toContain(
-        `Omit<${local === 'Options' ? 'Options' : 'CreatePayloadReqArgs'}, 'payload'>`,
+        `Omit<${local === 'Options' ? 'Options' : 'CreatePayloadRequestArgs'}, 'payload'>`,
       )
     },
   )
@@ -226,14 +229,14 @@ try {
     const intermediate = await runTransform({ source, transform: migrateAliasedExports })
 
     expect(intermediate).toBe(
-      `import { createPayloadReqFromWebRequest as createPayloadRequest } from 'payload'\nconst req = createPayloadRequest(args)`,
+      `import { createPayloadRequestFromWebRequest as createPayloadRequest } from 'payload'\nconst req = createPayloadRequest(args)`,
     )
 
     const output = await runTransform({
       source: intermediate,
       transform: migratePayloadRequestCreation,
     })
-    const expected = `import { createPayloadReqFromWebRequest } from 'payload'\nconst req = createPayloadReqFromWebRequest(args)`
+    const expected = `import { createPayloadRequestFromWebRequest } from 'payload'\nconst req = createPayloadRequestFromWebRequest(args)`
 
     expect(output).toBe(expected)
     expect(await runTransform({ source: output, transform: migratePayloadRequestCreation })).toBe(
@@ -241,8 +244,8 @@ try {
     )
   })
 
-  it('should preserve user-authored aliases of createPayloadReqFromWebRequest', async () => {
-    const source = `import { createPayloadReqFromWebRequest as webRequest } from 'payload'\nconst req = webRequest(args)`
+  it('should preserve user-authored aliases of createPayloadRequestFromWebRequest', async () => {
+    const source = `import { createPayloadRequestFromWebRequest as webRequest } from 'payload'\nconst req = webRequest(args)`
 
     expect(await runTransform({ source, transform: migratePayloadRequestCreation })).toBe(source)
   })
@@ -256,7 +259,7 @@ try {
     const evaluate = (code: string) => {
       const context = {
         createLocalReq: (options: { user: string }) => ({ ...options }),
-        createPayloadReq: (options: { user: string }) => options,
+        createPayloadRequest: (options: { user: string }) => options,
         observed: undefined,
       }
       const executable = new Project({ useInMemoryFileSystem: true }).createSourceFile(
@@ -309,8 +312,8 @@ try {
 
     const result = await migratePayloadRequestCreation.apply({ packageJsons: [], project })
 
-    expect(matching.getFullText()).toContain('createPayloadReq({ payload: payload })')
-    expect(matching.getFullText()).toContain('createPayloadReqFromWebRequest(args)')
+    expect(matching.getFullText()).toContain('createPayloadRequest({ payload: payload })')
+    expect(matching.getFullText()).toContain('createPayloadRequestFromWebRequest(args)')
     expect(dependency.getFullText()).toBe(declaration)
     expect(unsupported.getFullText()).toBe(unsupportedSource)
     expect(result.filesChanged).toEqual(['/matching.ts'])
@@ -329,7 +332,7 @@ try {
     const result = await migratePayloadRequestCreation.apply({ packageJsons: [], project })
 
     expect(result).toEqual({ filesChanged: ['/matching.ts'] })
-    expect(file.getFullText()).toContain('createPayloadReq<User>({ payload: payload })')
+    expect(file.getFullText()).toContain('createPayloadRequest<User>({ payload: payload })')
     expect(file.getDescendantsOfKind(SyntaxKind.CallExpression)[0]?.getArguments()).toHaveLength(1)
   })
 
@@ -339,7 +342,7 @@ try {
     const output = await runTransform({ source, transform: migratePayloadRequestCreation })
 
     expect(output).toBe(
-      `import { createLocalReq, createPayloadReq as local } from 'payload'\nconst callback = createLocalReq\nconst req = local({ payload: payload })`,
+      `import { createLocalReq, createPayloadRequest as local } from 'payload'\nconst callback = createLocalReq\nconst req = local({ payload: payload })`,
     )
   })
 

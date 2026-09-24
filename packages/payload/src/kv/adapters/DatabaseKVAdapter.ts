@@ -2,7 +2,7 @@ import type { CollectionConfig } from '../../index.js'
 import type { Payload, PayloadRequest } from '../../types/index.js'
 import type { KVAdapter, KVAdapterResult, KVStoreValue } from '../index.js'
 
-/** Mocked `req`, we don't need to use transactions, neither we want `createPayloadReq` overhead. */
+/** Mocked `req`, we don't need to use transactions, neither we want `createPayloadRequest` overhead. */
 const req = {} as PayloadRequest
 
 export class DatabaseKVAdapter implements KVAdapter {

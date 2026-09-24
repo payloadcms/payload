@@ -2,7 +2,7 @@ import type { MigrationResult } from 'payload'
 
 import {
   commitTransaction,
-  createPayloadReq,
+  createPayloadRequest,
   getMigrations,
   initTransaction,
   killTransaction,
@@ -28,7 +28,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<MigrationResul
     return { migrated: [], rolledBack: [] }
   }
 
-  const req = await createPayloadReq({ payload })
+  const req = await createPayloadRequest({ payload })
 
   existingMigrations.reverse()
   const rolledBack: string[] = []

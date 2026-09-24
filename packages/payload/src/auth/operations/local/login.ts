@@ -9,7 +9,7 @@ import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { LoginResult } from '../login.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { loginOperation } from '../login.js'
 
 export type Options<TSlug extends AuthCollectionSlug> = {
@@ -49,7 +49,7 @@ export async function loginLocal<TSlug extends AuthCollectionSlug>(
     data,
     depth,
     overrideAccess,
-    req: await createPayloadReq({ ...options, payload }),
+    req: await createPayloadRequest({ ...options, payload }),
     showHiddenFields,
   }
 

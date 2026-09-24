@@ -1,4 +1,4 @@
-import { createPayloadReqFromWebRequest } from 'payload'
+import { createPayloadRequestFromWebRequest } from 'payload'
 import { v4 as uuid } from 'uuid'
 import { expect } from 'vitest'
 
@@ -89,7 +89,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
       overrideAccess: true,
     })
 
-    const req = await createPayloadReqFromWebRequest({
+    const req = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request(
         'http://localhost/api/auth-read-hook?locale=fr&fallbackLocale=none&depth=2',
@@ -100,7 +100,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         },
       ),
     })
-    const graphQLReq = await createPayloadReqFromWebRequest({
+    const graphQLReq = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request('http://localhost/api/graphql', {
         headers: {
@@ -270,7 +270,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
         overrideAccess: true,
       })
     ).token!
-    const req = await createPayloadReqFromWebRequest({
+    const req = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request('http://localhost/api', {
         headers: { Authorization: `JWT ${token}` },
@@ -284,7 +284,7 @@ test.suite('API key authentication', { config: './config.ts' }, () => {
     expect('access' in apiKeyField && apiKeyField.access?.update).toBeTypeOf('function')
     expect(await apiKeyField.access!.update!({ id: target.id, req } as never)).toBe(true)
 
-    const unauthenticatedReq = await createPayloadReqFromWebRequest({
+    const unauthenticatedReq = await createPayloadRequestFromWebRequest({
       config: payload.config,
       request: new Request('http://localhost/api'),
     })

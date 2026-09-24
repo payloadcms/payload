@@ -1,4 +1,4 @@
-import { createPayloadReq, Forbidden, getAccessResults } from 'payload'
+import { createPayloadRequest, Forbidden, getAccessResults } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -9,9 +9,9 @@ const createRequest = async ({
   payload,
 }: {
   headers: Record<string, string>
-  payload: Parameters<typeof createPayloadReq>[0]['payload']
+  payload: Parameters<typeof createPayloadRequest>[0]['payload']
 }) =>
-  createPayloadReq({
+  createPayloadRequest({
     payload,
     req: {
       headers: new Headers(headers),

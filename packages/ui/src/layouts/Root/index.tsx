@@ -3,7 +3,7 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient 
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
-import type { GetAdminContextFn } from '../../views/Root/index.js'
+import type { CreateAdminContextFn } from '../../views/Root/index.js'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 
@@ -45,7 +45,7 @@ type RootLayoutProps = {
    * Framework-specific font loaders (e.g. `next/font`) are supplied by the caller.
    */
   readonly fonts?: Font[]
-  readonly getAdminContext: GetAdminContextFn
+  readonly createAdminContext: CreateAdminContextFn
   /**
    * Custom content to render inside the admin panel's `<head>` element.
    *
@@ -89,7 +89,7 @@ const RootLayoutContent = async ({
   children,
   config: configPromise,
   fonts = [],
-  getAdminContext,
+  createAdminContext,
   head: headFromProps,
   htmlProps = {},
   importMap,
@@ -106,7 +106,7 @@ const RootLayoutContent = async ({
       payload: { config },
     },
     user,
-  } = await getAdminContext({ configPromise, importMap, key: 'RootLayout' })
+  } = await createAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
   const theme = getRequestTheme({
     config,

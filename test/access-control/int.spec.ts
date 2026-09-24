@@ -7,7 +7,7 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import { AuthenticationError, createPayloadReq, Forbidden } from 'payload'
+import { AuthenticationError, createPayloadRequest, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect, vitest } from 'vitest'
 
@@ -2017,7 +2017,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         entityType: 'collection',
         fetchData: true,
         operations: ['read', 'readVersions'],
-        req: await createPayloadReq({ payload }),
+        req: await createPayloadRequest({ payload }),
       })
 
       expect(permissions.read?.permission).toBe(false)
@@ -2306,7 +2306,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
 
     test('should evaluate inherited global read version permissions against versions', async () => {
-      const req = await createPayloadReq({ payload })
+      const req = await createPayloadRequest({ payload })
 
       await payload.db.deleteVersions({
         globalSlug: inheritedReadVersionsGlobalSlug,
@@ -2398,7 +2398,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
     })
 
     test('should sanitize virtual-field constraints from inherited global read access', async () => {
-      const req = await createPayloadReq({ payload })
+      const req = await createPayloadRequest({ payload })
 
       await payload.db.deleteVersions({
         globalSlug: inheritedReadVersionsVirtualGlobalSlug,
@@ -2543,7 +2543,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
         overrideAccess: true,
       })
 
-      const req = await createPayloadReq({
+      const req = await createPayloadRequest({
         payload,
         user: {
           id: 123 as any,
@@ -2611,7 +2611,7 @@ test.suite('Access Control', { config: './config.ts', resetBetweenTests: false }
       })
 
       // Create non-admin user request
-      const nonAdminReq = await createPayloadReq({
+      const nonAdminReq = await createPayloadRequest({
         payload,
         user: {
           id: 456 as any,

@@ -8,7 +8,7 @@ import type { PayloadRequest } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { unlockOperation } from '../unlock.js'
 
 export type Options<TSlug extends AuthCollectionSlug> = {
@@ -36,6 +36,6 @@ export async function unlockLocal<TSlug extends AuthCollectionSlug>(
     collection,
     data,
     overrideAccess,
-    req: await createPayloadReq({ ...options, payload }),
+    req: await createPayloadRequest({ ...options, payload }),
   })
 }

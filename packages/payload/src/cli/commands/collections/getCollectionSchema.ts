@@ -1,5 +1,5 @@
 import { getCollectionSchemaInputSchema } from '../../../collections/operations/inputSchemas.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { getCollectionInputSchema } from '../../../utilities/entityInputSchema/getEntityInputSchema.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import { printJSON } from '../data/utilities.js'
@@ -9,7 +9,7 @@ export const createGetCollectionSchemaCommand = defineCLICommand({
   handler: async ({ args, getPayload, isJSON }) => {
     const payload = await getPayload()
     const slug = args.slug
-    const req = await createPayloadReq({ payload })
+    const req = await createPayloadRequest({ payload })
     const schema = getCollectionInputSchema({ collectionSlug: slug, req })
 
     if (!schema) {

@@ -3,7 +3,7 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { ValidationError } from 'payload'
 
 import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
-import { createPayloadReq, reload } from 'payload'
+import { createPayloadRequest, reload } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -520,7 +520,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       const takenSlug = taken.localizedSlug as string
       expect(takenSlug).toMatch(/^slug-field-\d+$/)
 
-      const req = await createPayloadReq({ payload, user: user.user })
+      const req = await createPayloadRequest({ payload, user: user.user })
 
       const regenerated = await slugifyHandler({
         collectionSlug: 'slug-fields',
@@ -546,7 +546,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       created.push(first.id)
       expect(first.slug).toBe('shared-regen')
 
-      const req = await createPayloadReq({ payload, user: user.user })
+      const req = await createPayloadRequest({ payload, user: user.user })
 
       // Regenerating from a source that slugifies to a taken slug must bump it, not hand back the
       // duplicate — otherwise the next save throws a uniqueness error.
@@ -572,7 +572,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       created.push(doc.id)
       expect(doc.slug).toBe('own-slug')
 
-      const req = await createPayloadReq({ payload, user: user.user })
+      const req = await createPayloadRequest({ payload, user: user.user })
 
       // Excluding the current doc means regenerating its own unchanged source reuses the value rather
       // than bumping past test.
@@ -1004,7 +1004,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       })
       created.push(hidden.id)
 
-      const req = await createPayloadReq({ payload, user: user.user })
+      const req = await createPayloadRequest({ payload, user: user.user })
       const createdWithAccess = await payload.create({
         collection,
         data: { title: 'Shared title' },
@@ -1031,7 +1031,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       })
       created.push(hidden.id, editable.id)
 
-      const req = await createPayloadReq({ payload, user: user.user })
+      const req = await createPayloadRequest({ payload, user: user.user })
       const updated = await payload.update({
         collection,
         id: editable.id,
@@ -1052,7 +1052,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       })
       created.push(hidden.id)
 
-      const req = await createPayloadReq({ payload, user: user.user })
+      const req = await createPayloadRequest({ payload, user: user.user })
       const createdWithAccess = await payload.create({
         collection,
         data: { localizedTitle: 'Localized title', title: 'Visible' },
@@ -1089,7 +1089,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       })
       created.push(hidden.id)
 
-      const req = await createPayloadReq({ payload, user: user.user })
+      const req = await createPayloadRequest({ payload, user: user.user })
       const createdWithAccess = await payload.create({
         collection,
         data: { title: 'Visible' },

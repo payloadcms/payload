@@ -1,9 +1,9 @@
 import { createServerFunctionHandler } from '@payloadcms/ui/utilities/handleServerFunctions'
 
-import { getAdminContext } from './getAdminContext.server.js'
+import { createAdminContext } from './createAdminContext.server.js'
 import { serializeForRsc } from './serializeForRsc.js'
 
 export const handleServerFunctions = createServerFunctionHandler({
-  getAdminContext,
+  createAdminContext,
   transformResult: serializeForRsc,
 })

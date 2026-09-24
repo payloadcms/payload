@@ -6,7 +6,7 @@ import type {
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { File } from '../../../uploads/types.js'
-import type { CreatePayloadReqArgs } from '../../../utilities/createPayloadReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   CollectionsWithoutDrafts,
   DataFromCollectionSlug,
@@ -27,7 +27,7 @@ import {
   type User,
 } from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { createOperation } from '../create.js'
 
 type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
@@ -211,8 +211,8 @@ export async function createLocal<
     )
   }
 
-  const req = await createPayloadReq({
-    ...(options as Omit<CreatePayloadReqArgs, 'payload'>),
+  const req = await createPayloadRequest({
+    ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
     payload,
   })
 

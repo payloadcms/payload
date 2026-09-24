@@ -3,7 +3,7 @@ import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../resetPassword.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { resetPasswordOperation } from '../resetPassword.js'
 
 export type Options<TSlug extends AuthCollectionSlug> = {
@@ -37,7 +37,7 @@ export async function resetPasswordLocal<TSlug extends AuthCollectionSlug>(
     collection,
     data,
     overrideAccess,
-    req: await createPayloadReq({ ...options, payload }),
+    req: await createPayloadRequest({ ...options, payload }),
   })
 
   if (collection.config.auth.removeTokenFromResponses) {

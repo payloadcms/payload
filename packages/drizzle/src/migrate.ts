@@ -2,7 +2,7 @@ import type { MigrationResult, Payload } from 'payload'
 
 import {
   commitTransaction,
-  createPayloadReq,
+  createPayloadRequest,
   initTransaction,
   killTransaction,
   readMigrationFiles,
@@ -98,7 +98,7 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
   const start = Date.now()
-  const req = await createPayloadReq({ payload })
+  const req = await createPayloadRequest({ payload })
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 

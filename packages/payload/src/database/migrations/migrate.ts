@@ -1,7 +1,7 @@
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { createPayloadReq } from '../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
@@ -30,7 +30,7 @@ export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
     }
 
     const start = Date.now()
-    const req = await createPayloadReq({ payload })
+    const req = await createPayloadRequest({ payload })
 
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
 

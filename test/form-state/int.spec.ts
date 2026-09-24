@@ -1,7 +1,7 @@
 import type { FieldState, FormState, User } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { createPayloadReq, getAccessResults } from 'payload'
+import { createPayloadRequest, getAccessResults } from 'payload'
 import React from 'react'
 import { fileURLToPath } from 'url'
 import { expect, vi } from 'vitest'
@@ -59,7 +59,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
       overrideAccess: true,
     })
 
-    const req = await createPayloadReq({ payload, user: editor })
+    const req = await createPayloadRequest({ payload, user: editor })
     const permissions = await getAccessResults({ req })
     const restrictedValue = 'client supplied'
     const title = 'Access filtered autosave'
@@ -98,7 +98,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   })
 
   test('should build entire form state', async ({ payload }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const postData = await payload.create({
       collection: postsSlug,
@@ -157,7 +157,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should use `select` to build partial form state with only specified fields', async ({
     payload,
   }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const postData = await payload.create({
       collection: postsSlug,
@@ -205,7 +205,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should not render custom components when `lastRenderedPath` exists', async ({
     payload,
   }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const { state: stateWithRow } = await buildFormState({
       collectionSlug: postsSlug,
@@ -290,7 +290,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should not render custom Field components for fields hidden by admin.condition', async ({
     payload,
   }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
@@ -356,7 +356,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should preserve values of fields nested inside a row hidden by admin.condition', async ({
     payload,
   }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
@@ -396,7 +396,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should preserve values of fields nested inside a collapsible hidden by admin.condition', async ({
     payload,
   }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
@@ -433,7 +433,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should render custom Field component when admin.condition flips from false to true via onChange', async ({
     payload,
   }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const doc = await payload.create({
       collection: conditionsSlug,
@@ -491,7 +491,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should add `addedByServer` flag to fields that originate on the server', async ({
     payload,
   }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const postData = await payload.create({
       collection: postsSlug,
@@ -1370,7 +1370,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   })
 
   test('should set rows to empty array for empty array fields', async ({ payload }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     // Create a document with an empty array
     const postData = await payload.create({
@@ -1412,7 +1412,7 @@ test.suite('Form State', { config: './config.ts', resetBetweenTests: false }, ()
   test('should resolve a promise-returning `filterOptions` on a select field into `selectFilterOptions`', async ({
     payload,
   }) => {
-    const req = await createPayloadReq({ payload, user })
+    const req = await createPayloadRequest({ payload, user })
 
     const postData = await payload.create({
       collection: postsSlug,

@@ -1,4 +1,4 @@
-import { createPayloadReqFromWebRequest as createPayloadRequest, createPayloadReqFromWebRequest as webRequest } from 'payload'
+import { createPayloadRequestFromWebRequest as createPayloadRequest, createPayloadRequestFromWebRequest as webRequest } from 'payload'
 import { unrelated } from '@payloadcms/next/utilities'
 
 const req = createPayloadRequest(args)

@@ -1,5 +1,5 @@
 import { updateGlobalLocalInputSchema } from '../../../globals/operations/inputSchemas.js'
-import { createPayloadReq } from '../../../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import { parseBoolean, parseFallbackLocale, parseJSON } from '../data/input.js'
 import {
@@ -23,7 +23,7 @@ export const createUpdateGlobalCommand = defineCLICommand({
     const payload = await getPayload()
     const slug = args.slug
     const inputData = stripGlobalVirtualFields({ slug, data: args.data, payload })
-    const req = await createPayloadReq({ payload })
+    const req = await createPayloadRequest({ payload })
     let result
 
     try {

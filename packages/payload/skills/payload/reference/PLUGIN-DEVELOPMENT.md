@@ -1350,7 +1350,7 @@ Create `dev/int.spec.ts`:
 ```ts
 import type { Payload } from 'payload'
 import config from '@payload-config'
-import { createPayloadReqFromWebRequest, getPayload } from 'payload'
+import { createPayloadRequestFromWebRequest, getPayload } from 'payload'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { customEndpointHandler } from '../src/endpoints/handler.js'
 
@@ -1385,7 +1385,7 @@ describe('Plugin integration tests', () => {
 
   test('should query custom endpoint', async () => {
     const request = new Request('http://localhost:3000/api/my-endpoint')
-    const payloadRequest = await createPayloadReqFromWebRequest({ config, request })
+    const payloadRequest = await createPayloadRequestFromWebRequest({ config, request })
     const response = await customEndpointHandler(payloadRequest)
     const data = await response.json()
     expect(data).toMatchObject({ message: 'Hello' })

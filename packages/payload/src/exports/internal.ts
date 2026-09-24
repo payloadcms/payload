@@ -4,10 +4,10 @@
 
 export {
   type AdminContextCache,
-  getAdminContext,
-  type GetAdminContextArgs,
+  createAdminContext,
+  type CreateAdminContextArgs,
   type PartialAdminContext,
-} from '../admin/getAdminContext.js'
+} from '../admin/createAdminContext.js'
 export { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 export { createCLI } from '../cli/index.js'
 export { getCommandInput } from '../cli/runtime/getCommandInput.js'

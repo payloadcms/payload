@@ -5,8 +5,8 @@ import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
-  createPayloadReq,
-  GetAdminContextResult,
+  createPayloadRequest,
+  CreateAdminContextResult,
   ImportMap,
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -31,18 +31,18 @@ import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
 
-export type GetAdminContextFn = (args: {
+export type CreateAdminContextFn = (args: {
   canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
-  overrides?: Omit<Parameters<typeof createPayloadReq>[0], 'payload'>
-}) => Promise<GetAdminContextResult>
+  overrides?: Omit<Parameters<typeof createPayloadRequest>[0], 'payload'>
+}) => Promise<CreateAdminContextResult>
 
 export type RenderRootArgs = {
   adminViews: AdminViewAdapter
   config: Promise<SanitizedConfig>
-  getAdminContext: GetAdminContextFn
+  createAdminContext: CreateAdminContextFn
   importMap: ImportMap
   /**
    * Optional React `key` applied to the rendered view (not the surrounding admin
@@ -66,7 +66,7 @@ export type RenderRootArgs = {
 export const renderRoot = async ({
   adminViews,
   config: configPromise,
-  getAdminContext,
+  createAdminContext,
   importMap,
   key,
   notFound,
@@ -154,7 +154,7 @@ export const renderRoot = async ({
     req,
     req: { payload },
     user,
-  } = await getAdminContext({
+  } = await createAdminContext({
     configPromise: config,
     importMap,
     key: 'initPage',

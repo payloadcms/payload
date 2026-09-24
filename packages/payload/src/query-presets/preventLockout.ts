@@ -1,7 +1,7 @@
 import type { Validate } from '../fields/config/types.js'
 
 import { APIError } from '../errors/APIError.js'
-import { createPayloadReq } from '../utilities/createPayloadReq.js'
+import { createPayloadRequest } from '../utilities/createPayloadRequest.js'
 import { initTransaction } from '../utilities/initTransaction.js'
 import { killTransaction } from '../utilities/killTransaction.js'
 import { queryPresetsCollectionSlug } from './config.js'
@@ -21,7 +21,7 @@ export const preventLockout: Validate = async (
 ) => {
   // Use context to ensure an infinite loop doesn't occur
   if (!incomingReq.context._preventLockout && !overrideAccess) {
-    const req = await createPayloadReq({
+    const req = await createPayloadRequest({
       context: {
         _preventLockout: true,
       },

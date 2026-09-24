@@ -1,4 +1,4 @@
-import type { GetAdminContextResult, TypedWidget, WidgetSlug } from '../../index.js'
+import type { CreateAdminContextResult, TypedWidget, WidgetSlug } from '../../index.js'
 import type { ComponentRenderer } from '../adapters/render.js'
 
 export enum EntityType {
@@ -33,4 +33,4 @@ export type WidgetServerProps<TWidget extends { data?: unknown } | never = never
     : [WidgetSlugFromWidget<{ data?: unknown } & Exclude<TWidget, never>>] extends [never]
       ? string
       : WidgetSlugFromWidget<{ data?: unknown } & Exclude<TWidget, never>>
-} & Pick<GetAdminContextResult, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>
+} & Pick<CreateAdminContextResult, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>

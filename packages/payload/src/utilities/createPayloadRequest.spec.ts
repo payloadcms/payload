@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { Payload, PayloadRequest } from '../index.js'
 
-import { createPayloadReq } from './createPayloadReq.js'
+import { createPayloadRequest } from './createPayloadRequest.js'
 
-describe('createPayloadReq', () => {
+describe('createPayloadRequest', () => {
   const mockPayload = {
     config: {
       serverURL: undefined,
@@ -25,7 +25,7 @@ describe('createPayloadReq', () => {
       url: 'http://example.com/api/test',
     }
 
-    const result = await createPayloadReq({ payload: mockPayload, req })
+    const result = await createPayloadRequest({ payload: mockPayload, req })
 
     expect(result.url).toBe('http://example.com/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
@@ -49,7 +49,7 @@ describe('createPayloadReq', () => {
 
     const req = {}
 
-    const result = await createPayloadReq({
+    const result = await createPayloadRequest({
       payload: payloadWithServerURL,
       req,
       urlSuffix: '/api',
@@ -79,7 +79,7 @@ describe('createPayloadReq', () => {
       url: 'http://actual-request.com/api/test',
     }
 
-    const result = await createPayloadReq({ payload: payloadWithServerURL, req })
+    const result = await createPayloadRequest({ payload: payloadWithServerURL, req })
 
     expect(result.url).toBe('http://actual-request.com/api/test')
     expect(payloadWithServerURL.logger.error).not.toHaveBeenCalled()
@@ -88,7 +88,7 @@ describe('createPayloadReq', () => {
   it('should fall back to localhost when neither req.url nor serverURL provided', async () => {
     const req = {}
 
-    const result = await createPayloadReq({ payload: mockPayload, req })
+    const result = await createPayloadRequest({ payload: mockPayload, req })
 
     expect(result.url).toBe('http://localhost/')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
@@ -112,7 +112,7 @@ describe('createPayloadReq', () => {
 
     const req = {}
 
-    const result = await createPayloadReq({
+    const result = await createPayloadRequest({
       payload: payloadWithServerURL,
       req,
       urlSuffix: '/api/preview',
@@ -125,7 +125,7 @@ describe('createPayloadReq', () => {
   it('should append urlSuffix to fallback URL when neither req.url nor serverURL provided', async () => {
     const req = {}
 
-    const result = await createPayloadReq({ payload: mockPayload, req, urlSuffix: '/api/test' })
+    const result = await createPayloadRequest({ payload: mockPayload, req, urlSuffix: '/api/test' })
 
     expect(result.url).toBe('http://localhost/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
@@ -145,7 +145,7 @@ describe('createPayloadReq', () => {
       url: 'http://example.com/api/posts',
     } as Partial<PayloadRequest>
 
-    const result = await createPayloadReq({
+    const result = await createPayloadRequest({
       context: { fromArgs: true },
       payload: mockPayload,
       req,
@@ -175,19 +175,19 @@ describe('createPayloadReq', () => {
     } as unknown as Payload
 
     it("normalizes localized '*' requests to 'all'", async () => {
-      const result = await createPayloadReq({ locale: '*', payload: localizedPayload })
+      const result = await createPayloadRequest({ locale: '*', payload: localizedPayload })
 
       expect(result.locale).toBe('all')
     })
 
     it('uses the default locale for localized requests without a locale', async () => {
-      const result = await createPayloadReq({ payload: localizedPayload })
+      const result = await createPayloadRequest({ payload: localizedPayload })
 
       expect(result.locale).toBe('en')
     })
 
     it('sanitizes unsupported fallback locales for localized requests', async () => {
-      const result = await createPayloadReq({
+      const result = await createPayloadRequest({
         fallbackLocale: 'fr',
         locale: 'en',
         payload: localizedPayload,
@@ -197,7 +197,7 @@ describe('createPayloadReq', () => {
     })
 
     it('does not assign locale state when localization is disabled', async () => {
-      const result = await createPayloadReq({
+      const result = await createPayloadRequest({
         fallbackLocale: 'de',
         locale: 'en',
         payload: mockPayload,
