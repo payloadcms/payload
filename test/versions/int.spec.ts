@@ -791,6 +791,31 @@ describe('Versions', () => {
         createdDocumentIDs.length = 0
       })
 
+      it('should return a base document without versions when reading drafts', async () => {
+        const document = await payload.db.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Document created before drafts were enabled',
+          },
+        })
+        createdDocumentIDs.push(document.id)
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'Document created before drafts were enabled',
+          },
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result).toMatchObject({
+          id: document.id,
+          description: 'Document created before drafts were enabled',
+        })
+      })
+
       it('should evaluate findByID access against the latest draft when the base document is denied', async () => {
         const document = await payload.create({
           collection: draftCollectionSlug,
