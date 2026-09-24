@@ -64,22 +64,22 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3E252BA3".
+ * via the `definition` "LexicalNodes_FD47D92F".
  */
-export type LexicalNodes_3E252BA3 =
+export type LexicalNodes_FD47D92F =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3E252BA3>
+  | SerializedParagraphNode<LexicalNodes_FD47D92F>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_3E252BA3>
+  | SerializedHeadingNode<LexicalNodes_FD47D92F>
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_3E252BA3>
-  | SerializedListNode<LexicalNodes_3E252BA3>
-  | SerializedListItemNode<LexicalNodes_3E252BA3>
-  | SerializedAutoLinkNode<LexicalNodes_3E252BA3, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_3E252BA3, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_FD47D92F>
+  | SerializedListNode<LexicalNodes_FD47D92F>
+  | SerializedListItemNode<LexicalNodes_FD47D92F>
+  | SerializedAutoLinkNode<LexicalNodes_FD47D92F, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_FD47D92F, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -94,6 +94,7 @@ export type LexicalNodes_3E252BA3 =
       | 'custom-tab-id'
       | 'custom-row-id'
       | 'date-fields'
+      | 'duplicate-fields'
       | 'email-fields'
       | 'radio-fields'
       | 'group-fields'
@@ -105,6 +106,7 @@ export type LexicalNodes_3E252BA3 =
       | 'relationship-fields'
       | 'select-fields'
       | 'slug-fields'
+      | 'slug-field-access'
       | 'slug-autosave'
       | 'tabs-fields-2'
       | 'tabs-fields'
@@ -122,17 +124,17 @@ export type LexicalNodes_3E252BA3 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_C8D96449".
+ * via the `definition` "LexicalNodes_DA189A21".
  */
-export type LexicalNodes_C8D96449 =
+export type LexicalNodes_DA189A21 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_C8D96449>
+  | SerializedParagraphNode<LexicalNodes_DA189A21>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_C8D96449>
+  | SerializedQuoteNode<LexicalNodes_DA189A21>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -147,6 +149,7 @@ export type LexicalNodes_C8D96449 =
       | 'custom-tab-id'
       | 'custom-row-id'
       | 'date-fields'
+      | 'duplicate-fields'
       | 'email-fields'
       | 'radio-fields'
       | 'group-fields'
@@ -158,6 +161,7 @@ export type LexicalNodes_C8D96449 =
       | 'relationship-fields'
       | 'select-fields'
       | 'slug-fields'
+      | 'slug-field-access'
       | 'slug-autosave'
       | 'tabs-fields-2'
       | 'tabs-fields'
@@ -173,11 +177,11 @@ export type LexicalNodes_C8D96449 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_C8D96449, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_C8D96449, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_C8D96449>
-  | SerializedListItemNode<LexicalNodes_C8D96449>
-  | SerializedHeadingNode<LexicalNodes_C8D96449>;
+  | SerializedAutoLinkNode<LexicalNodes_DA189A21, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_DA189A21, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_DA189A21>
+  | SerializedListItemNode<LexicalNodes_DA189A21>
+  | SerializedHeadingNode<LexicalNodes_DA189A21>;
 
 export interface Config {
   auth: {
@@ -202,6 +206,7 @@ export interface Config {
     'custom-tab-id': CustomTabId;
     'custom-row-id': CustomRowId;
     'date-fields': DateField;
+    'duplicate-fields': DuplicateField;
     'email-fields': EmailField;
     'radio-fields': RadioField;
     'group-fields': GroupField;
@@ -213,6 +218,7 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'select-fields': SelectField;
     'slug-fields': SlugField;
+    'slug-field-access': SlugFieldAccess;
     'slug-autosave': SlugAutosave;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
@@ -246,6 +252,7 @@ export interface Config {
     'custom-tab-id': CustomTabIdSelect<false> | CustomTabIdSelect<true>;
     'custom-row-id': CustomRowIdSelect<false> | CustomRowIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
+    'duplicate-fields': DuplicateFieldsSelect<false> | DuplicateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
@@ -257,6 +264,7 @@ export interface Config {
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
+    'slug-field-access': SlugFieldAccessSelect<false> | SlugFieldAccessSelect<true>;
     'slug-autosave': SlugAutosaveSelect<false> | SlugAutosaveSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
@@ -406,7 +414,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: LexicalRichText<LexicalNodes_3E252BA3> | null;
+    richTextField?: LexicalRichText<LexicalNodes_FD47D92F> | null;
     subArray?:
       | {
           text?: string | null;
@@ -573,7 +581,7 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_C8D96449> | null;
+  richText?: LexicalRichText<LexicalNodes_DA189A21> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -645,7 +653,7 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_C8D96449> | null;
+  richText?: LexicalRichText<LexicalNodes_DA189A21> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -993,6 +1001,7 @@ export interface CheckboxField {
   id: string;
   checkbox: boolean;
   checkboxNotRequired?: boolean | null;
+  checkboxRequiresTrue?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1060,7 +1069,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: LexicalRichText<LexicalNodes_3E252BA3> | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_FD47D92F> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -1245,6 +1254,46 @@ export interface DateBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "duplicate-fields".
+ */
+export interface DuplicateField {
+  id: string;
+  text: string;
+  disabledText?: string | null;
+  disabledGroup?: {
+    value?: string | null;
+  };
+  disabledArray?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disabledBlocks?: DisabledBlock[] | null;
+  childDisabledArray?:
+    | {
+        preserved?: string | null;
+        reset?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disabledLocalizedText?: string | null;
+  disabledHookText?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DisabledBlock".
+ */
+export interface DisabledBlock {
+  value?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'disabledBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "email-fields".
  */
 export interface EmailField {
@@ -1274,7 +1323,7 @@ export interface EmailField {
  */
 export interface RadioField {
   id: string;
-  radio?: ('one' | 'two' | 'three') | null;
+  radio: 'one' | 'two' | 'three';
   radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
@@ -1730,6 +1779,8 @@ export interface SelectField {
   selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   disallowOption1?: boolean | null;
   selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
+  disallowOption2?: boolean | null;
+  selectAsyncFilterOptions?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1744,8 +1795,24 @@ export interface SlugField {
   localizedTitle?: string | null;
   customSlugify: string;
   localizedSlug?: string | null;
+  localizedSharedSlug?: string | null;
   readOnlySlug?: string | null;
+  sourcelessSlug?: string | null;
   test?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-field-access".
+ */
+export interface SlugFieldAccess {
+  id: string;
+  title?: string | null;
+  slug: string;
+  localizedTitle?: string | null;
+  localizedSlug: string;
+  sourcelessSlug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1757,6 +1824,8 @@ export interface SlugAutosave {
   id: string;
   title?: string | null;
   slug: string;
+  localizedTitle?: string | null;
+  localizedSlug: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2124,6 +2193,10 @@ export interface PayloadLockedDocument {
         value: string | DateField;
       } | null)
     | ({
+        relationTo: 'duplicate-fields';
+        value: string | DuplicateField;
+      } | null)
+    | ({
         relationTo: 'email-fields';
         value: string | EmailField;
       } | null)
@@ -2166,6 +2239,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'slug-fields';
         value: string | SlugField;
+      } | null)
+    | ({
+        relationTo: 'slug-field-access';
+        value: string | SlugFieldAccess;
       } | null)
     | ({
         relationTo: 'slug-autosave';
@@ -2865,6 +2942,7 @@ export interface LocalizedTabsBlockSelect<T extends boolean = true> {
 export interface CheckboxFieldsSelect<T extends boolean = true> {
   checkbox?: T;
   checkboxNotRequired?: T;
+  checkboxRequiresTrue?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3112,6 +3190,47 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dateWithTimezoneNoDefault_tz?: T;
   dateWithTimezoneWithDisabledColumns?: T;
   dateWithTimezoneWithDisabledColumns_tz?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "duplicate-fields_select".
+ */
+export interface DuplicateFieldsSelect<T extends boolean = true> {
+  text?: T;
+  disabledText?: T;
+  disabledGroup?:
+    | T
+    | {
+        value?: T;
+      };
+  disabledArray?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  disabledBlocks?:
+    | T
+    | {
+        disabledBlock?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  childDisabledArray?:
+    | T
+    | {
+        preserved?: T;
+        reset?: T;
+        id?: T;
+      };
+  disabledLocalizedText?: T;
+  disabledHookText?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3513,6 +3632,8 @@ export interface SelectFieldsSelect<T extends boolean = true> {
   selectWithJsxLabelOption?: T;
   disallowOption1?: T;
   selectWithFilteredOptions?: T;
+  disallowOption2?: T;
+  selectAsyncFilterOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3526,8 +3647,23 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   localizedTitle?: T;
   customSlugify?: T;
   localizedSlug?: T;
+  localizedSharedSlug?: T;
   readOnlySlug?: T;
+  sourcelessSlug?: T;
   test?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-field-access_select".
+ */
+export interface SlugFieldAccessSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  localizedTitle?: T;
+  localizedSlug?: T;
+  sourcelessSlug?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3538,6 +3674,8 @@ export interface SlugFieldsSelect<T extends boolean = true> {
 export interface SlugAutosaveSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  localizedTitle?: T;
+  localizedSlug?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3923,6 +4061,7 @@ export interface CollectionQueryWidget {
       | 'custom-tab-id'
       | 'custom-row-id'
       | 'date-fields'
+      | 'duplicate-fields'
       | 'email-fields'
       | 'radio-fields'
       | 'group-fields'
@@ -3934,6 +4073,7 @@ export interface CollectionQueryWidget {
       | 'relationship-fields'
       | 'select-fields'
       | 'slug-fields'
+      | 'slug-field-access'
       | 'slug-autosave'
       | 'tabs-fields-2'
       | 'tabs-fields'
@@ -3983,6 +4123,7 @@ export interface ActivityWidget {
           | 'custom-tab-id'
           | 'custom-row-id'
           | 'date-fields'
+          | 'duplicate-fields'
           | 'email-fields'
           | 'radio-fields'
           | 'group-fields'
@@ -3994,6 +4135,7 @@ export interface ActivityWidget {
           | 'relationship-fields'
           | 'select-fields'
           | 'slug-fields'
+          | 'slug-field-access'
           | 'slug-autosave'
           | 'tabs-fields-2'
           | 'tabs-fields'

@@ -1,17 +1,47 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, LanguageOptions, SanitizedConfig, ServerProps } from 'payload'
+import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
+import type { Theme } from '@payloadcms/ui'
+import type {
+  ClientConfig,
+  ImportMap,
+  LanguageOptions,
+  SanitizedConfig,
+  SanitizedPermissions,
+  ServerProps,
+  User,
+} from 'payload'
 
 import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { getRequestEmbed } from '@payloadcms/ui/utilities/getRequestEmbed'
+import { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
 import { Outlet } from '@tanstack/react-router'
 import { applyLocaleFiltering } from 'payload/shared'
 import { createElement } from 'react'
 
-import type { RootLayoutData } from './index.js'
-
-import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.server.js'
+
+export type RootLayoutData = {
+  clientConfig: ClientConfig
+  dateFNSKey: I18nClient['dateFNSKey']
+  fallbackLang: string
+  isEmbedded: boolean
+  isNavOpen: boolean
+  languageCode: string
+  languageOptions: LanguageOptions
+  locale?: string
+  permissions: SanitizedPermissions
+  /**
+   * Custom admin provider tree (`config.admin.components.providers`) nested
+   * around the router `<Outlet />`. Built unrendered by `getLayoutData`; the
+   * layout server function renders it to an RSC payload before it reaches the
+   * client. `undefined` when no custom providers are configured.
+   */
+  providers?: React.ReactNode
+  theme: Theme
+  translations: I18nClient['translations']
+  user: null | User
+}
 
 export type GetLayoutDataArgs = {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
@@ -35,9 +65,11 @@ export async function getLayoutData({
     req: {
       payload: { config },
     },
+    user,
   } = await initReq({ configPromise, importMap })
 
   const theme = getRequestTheme({ config, cookies, headers })
+  const isEmbedded = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(
     config.i18n.supportedLanguages || {},
@@ -57,7 +89,7 @@ export async function getLayoutData({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user ?? true,
+    user: user ?? true,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -78,7 +110,7 @@ export async function getLayoutData({
       permissions,
       searchParams: {},
       server: req.server!,
-      user: req.user ?? undefined,
+      user: user ?? undefined,
     }
     // Mirror the Next adapter's `NestProviders`: render each configured provider
     // via `RenderServerComponent` so the entry's own `clientProps`/`serverProps`
@@ -101,6 +133,7 @@ export async function getLayoutData({
     clientConfig,
     dateFNSKey: req.i18n.dateFNSKey,
     fallbackLang: config.i18n.fallbackLanguage,
+    isEmbedded,
     isNavOpen: navPrefs?.open ?? true,
     languageCode,
     languageOptions,
@@ -109,6 +142,6 @@ export async function getLayoutData({
     providers,
     theme,
     translations: req.i18n.translations,
-    user: req.user,
+    user: user ?? null,
   }
 }

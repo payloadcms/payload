@@ -77,6 +77,7 @@ type Query {
 
 type User {
   id: Int!
+  _strategy: String
   updatedAt: DateTime
   createdAt: DateTime
   email: EmailAddress!
@@ -460,7 +461,6 @@ type UsersUnlockDocAccess {
 type usersMe {
   collection: String
   exp: Int
-  strategy: String
   token: String
   user: User
 }
@@ -883,6 +883,7 @@ input Post_relationHasManyField_operator {
   in: [JSON]
   not_in: [JSON]
   all: [JSON]
+  contains: JSON
   exists: Boolean
 }
 
@@ -1885,6 +1886,7 @@ input versionsPost_version__relationHasManyField_operator {
   in: [JSON]
   not_in: [JSON]
   all: [JSON]
+  contains: JSON
   exists: Boolean
 }
 
@@ -8822,13 +8824,13 @@ input mutationUserUpdate_SessionsInput {
 type usersRefreshedUser {
   exp: Int
   refreshedToken: String
-  strategy: String
   user: usersJWT
 }
 
 type usersJWT {
   email: EmailAddress!
   collection: String!
+  _strategy: String
 }
 
 type usersLoginResult {

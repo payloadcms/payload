@@ -1,4 +1,5 @@
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { RichTextSanitizer } from '../../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
 import type { SanitizedDrafts } from '../../versions/types.js'
 import type {
@@ -8,8 +9,10 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import { omitAPIKey } from '../../auth/baseFields/apiKey.js'
+import { apiKeyRevealEndpoint, authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
+import { withBaseAccess, withBaseAdminAccess } from '../../auth/withBaseAccess.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
@@ -23,11 +26,15 @@ import { formatLabels } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultCollectionEndpoints } from '../endpoints/index.js'
+import {
+  isInheritedReadVersionsAccess,
+  markInheritedReadVersionsAccess,
+} from '../../versions/isInheritedReadVersionsAccess.js'
+import { defaultCollectionEndpoints, duplicateEndpoint } from '../endpoints/index.js'
 import {
   addDefaultsToAuthConfig,
   addDefaultsToCollectionConfig,
-  addDefaultsToLoginWithUsernameConfig,
+  createInheritedReadVersionsAccess,
 } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
@@ -61,20 +68,16 @@ export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => 
   }
 }
 
-export const sanitizeCollection = async (
+export const sanitizeCollection = (
   config: Config,
   collection: CollectionConfig,
-  /**
-   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
-   * so that you can sanitize them together, after the config has been sanitized.
-   */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  richTextSanitizers?: RichTextSanitizer[],
   _validRelationships?: string[],
   /**
    * Tracker for orderable join fields - populated during sanitization
    */
   orderableJoins?: OrderableJoinInfo[],
-): Promise<SanitizedCollectionConfig> => {
+): SanitizedCollectionConfig => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
   }
@@ -143,7 +146,7 @@ export const sanitizeCollection = async (
 
   const polymorphicJoins: SanitizedJoin[] = []
 
-  sanitized.fields = await sanitizeFields({
+  sanitized.fields = sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
@@ -152,9 +155,14 @@ export const sanitizeCollection = async (
     orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
-    richTextSanitizationPromises,
+    richTextSanitizers,
     validRelationships,
   })
+
+  if (sanitized.auth) {
+    // disable duplicate for auth enabled collections by default
+    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
+  }
 
   if (sanitized.endpoints !== false) {
     if (!sanitized.endpoints) {
@@ -165,6 +173,14 @@ export const sanitizeCollection = async (
       for (const endpoint of authCollectionEndpoints) {
         sanitized.endpoints.push(endpoint)
       }
+
+      if (
+        typeof sanitized.auth === 'object' &&
+        typeof sanitized.auth.useAPIKey === 'object' &&
+        sanitized.auth.useAPIKey.reveal === true
+      ) {
+        sanitized.endpoints.push(apiKeyRevealEndpoint)
+      }
     }
 
     if (sanitized.upload) {
@@ -174,7 +190,9 @@ export const sanitizeCollection = async (
     }
 
     for (const endpoint of defaultCollectionEndpoints) {
-      sanitized.endpoints.push(endpoint)
+      if (endpoint !== duplicateEndpoint || sanitized.disableDuplicate !== true) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
   }
 
@@ -330,36 +348,53 @@ export const sanitizeCollection = async (
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
 
-    // disable duplicate for auth enabled collections by default
-    sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
-
-    if (sanitized.auth.loginWithUsername) {
-      if (sanitized.auth.loginWithUsername === true) {
-        sanitized.auth.loginWithUsername = addDefaultsToLoginWithUsernameConfig({})
-      } else {
-        const loginWithUsernameWithDefaults = addDefaultsToLoginWithUsernameConfig(
-          sanitized.auth.loginWithUsername,
-        )
-
-        // if allowEmailLogin is false, requireUsername must be true
-        if (loginWithUsernameWithDefaults.allowEmailLogin === false) {
-          loginWithUsernameWithDefaults.requireUsername = true
-        }
-        sanitized.auth.loginWithUsername = loginWithUsernameWithDefaults
-      }
-    } else {
-      sanitized.auth.loginWithUsername = false
-    }
-
     if (!collection?.admin?.useAsTitle) {
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
-    sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+    if (sanitized.auth.useAPIKey) {
+      sanitized.hooks!.beforeRead!.unshift(omitAPIKey)
+    }
+
+    sanitized.fields = mergeBaseFields(
+      sanitized.fields,
+      getBaseAuthFields(sanitized.auth, sanitized.fields),
+    )
   }
 
   if (collection?.admin?.pagination?.limits?.length) {
     sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
+  }
+
+  for (const operation of ['create', 'delete', 'read', 'unlock', 'update'] as const) {
+    sanitized.access![operation] = withBaseAccess({
+      slug: sanitized.slug,
+      access: sanitized.access?.[operation],
+      entityType: 'collection',
+      operation,
+    })
+  }
+
+  sanitized.access!.admin = withBaseAdminAccess({
+    slug: sanitized.slug,
+    access: sanitized.access?.admin,
+  })
+
+  if (sanitized.versions) {
+    const inheritsReadAccess = isInheritedReadVersionsAccess(sanitized.access!.readVersions)
+    const readVersions = inheritsReadAccess
+      ? createInheritedReadVersionsAccess(sanitized.access!.read!)
+      : sanitized.access!.readVersions
+    const readVersionsWithBaseAccess = withBaseAccess({
+      slug: sanitized.slug,
+      access: readVersions,
+      entityType: 'collection',
+      operation: 'readVersions',
+    })
+
+    sanitized.access!.readVersions = inheritsReadAccess
+      ? markInheritedReadVersionsAccess(readVersionsWithBaseAccess)
+      : readVersionsWithBaseAccess
   }
 
   validateUseAsTitle(sanitized)

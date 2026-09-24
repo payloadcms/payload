@@ -13,7 +13,6 @@
     inset-inline-start: 0;
     opacity: 0;
     border-radius: var(--radius-large);
-    transition: opacity 0.2s;
     will-change: transform;
     overflow: clip;
     box-shadow: var(--elevation-100-canvas);

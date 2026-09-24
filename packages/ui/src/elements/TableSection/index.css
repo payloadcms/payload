@@ -43,13 +43,13 @@
     display: block;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .table-section__header {
       padding: 0 calc(var(--spacer-3) - var(--spacer-2));
     }
 
     .table-section__content {
-      padding: 0 calc(var(--spacer-3) - var(--spacer-2));
       padding-bottom: var(--spacer-2);
     }
 

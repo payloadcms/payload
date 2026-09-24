@@ -74,7 +74,7 @@ export const migrateAliasedExports: Transform = {
           const [target] = [...targets]
           importDecl.setModuleSpecifier(target!)
           for (const { migration, named: spec } of migrating) {
-            applyRename({ migration, notes, sourceFile: file, spec, target: target! })
+            applyRename({ migration, notes, sourceFile: file, spec })
           }
           mutated = true
           continue
@@ -134,10 +134,9 @@ type ApplyRenameArgs = {
   notes: string[]
   sourceFile: SourceFile
   spec: ImportSpecifier
-  target: string
 }
 
-function applyRename({ migration, notes, sourceFile, spec, target }: ApplyRenameArgs): void {
+function applyRename({ migration, notes, sourceFile, spec }: ApplyRenameArgs): void {
   if (!migration.rename) {
     return
   }

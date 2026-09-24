@@ -12,6 +12,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -63,6 +64,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { title } = useDocumentTitle()
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
+  const { reportUpdate } = useDocumentEvents()
 
   const modalSlug = `delete-${id}`
 
@@ -113,7 +115,19 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           }) || json.message,
         )
 
+        // A trashed document also disappears from default queries, so both permanent
+        // deletes and trashing report as a `delete` event.
+        const deleteEvent = {
+          id,
+          entitySlug: collectionSlug,
+          operation: 'delete' as const,
+          updatedAt: new Date().toISOString(),
+        }
+
         if (redirectAfterDelete) {
+          // Navigating away tears this surface down, so just notify other surfaces.
+          reportUpdate(deleteEvent)
+
           return startRouteTransition(() =>
             router.push(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` })),
           )
@@ -122,6 +136,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         if (typeof onDelete === 'function') {
           await onDelete({ id, collectionConfig })
         }
+
+        reportUpdate(deleteEvent)
 
         return
       }
@@ -155,6 +171,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     onDelete,
     collectionConfig,
     startRouteTransition,
+    reportUpdate,
   ])
 
   if (id) {

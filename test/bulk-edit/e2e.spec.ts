@@ -12,10 +12,8 @@ import type { Config, Post } from './payload-types.js'
 import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import {
-  ensureCompilationIsDone,
   exactText,
   findTableCell,
-  initPageConsoleErrorCatch,
   selectTableRow,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
@@ -24,8 +22,9 @@ import { toggleBlockOrArrayRow } from '../__helpers/e2e/toggleCollapsible.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postsSlug, tabsSlug } from './shared.js'
+import { postsSlug, restrictedTabsSlug, tabsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -38,24 +37,23 @@ test.describe('Bulk Edit', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
   let tabsUrl: AdminUrlUtil
+  let restrictedTabsUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     tabsUrl = new AdminUrlUtil(serverURL, tabsSlug)
+    restrictedTabsUrl = new AdminUrlUtil(serverURL, restrictedTabsSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.beforeEach(async () => {
     // await throttleTest({ page, context, delay: 'Fast 3G' })
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'bulkEdit',
     })
     await page.goto(postsUrl.admin)
   })
@@ -216,8 +214,8 @@ test.describe('Bulk Edit', () => {
     await page.locator('.edit-many__toggle').click()
 
     const { field, modal } = await selectFieldToEdit(page, {
-      fieldLabel: 'Title',
       fieldID: 'title',
+      fieldLabel: 'Title',
     })
 
     await field.fill(updatedPostTitle)
@@ -261,8 +259,8 @@ test.describe('Bulk Edit', () => {
     await page.locator('.edit-many__toggle').click()
 
     const { field, modal } = await selectFieldToEdit(page, {
-      fieldLabel: 'Description',
       fieldID: 'description',
+      fieldLabel: 'Description',
     })
 
     await field.fill(description)
@@ -305,8 +303,8 @@ test.describe('Bulk Edit', () => {
     await page.locator('.edit-many__toggle').click()
 
     const { field, modal } = await selectFieldToEdit(page, {
-      fieldLabel: 'Description',
       fieldID: 'description',
+      fieldLabel: 'Description',
     })
 
     await field.fill(description)
@@ -399,8 +397,8 @@ test.describe('Bulk Edit', () => {
     await page.locator('.edit-many__toggle').click()
 
     const { field } = await selectFieldToEdit(page, {
-      fieldLabel: 'Title',
       fieldID: 'title',
+      fieldLabel: 'Title',
     })
 
     const updatedTitle = 'Post (Updated)'
@@ -419,28 +417,28 @@ test.describe('Bulk Edit', () => {
     await deleteAllPosts()
 
     const postData: RequiredDataFromCollectionSlug<'posts'> = {
-      title: 'Post 1',
       array: [
         {
-          optional: 'some optional array field',
           innerArrayOfFields: [
             {
               innerOptional: 'some inner optional array field',
             },
           ],
+          optional: 'some optional array field',
         },
       ],
+      blocks: [
+        {
+          blockType: 'textBlock',
+          textFieldForBlock: 'some text for block text',
+        },
+      ],
+      defaultValueField: 'This is NOT the default value',
       group: {
         defaultValueField: 'This is NOT the default value',
         title: 'some title',
       },
-      blocks: [
-        {
-          textFieldForBlock: 'some text for block text',
-          blockType: 'textBlock',
-        },
-      ],
-      defaultValueField: 'This is NOT the default value',
+      title: 'Post 1',
     }
 
     const updatedPostTitle = 'Post 1 (Updated)'
@@ -454,8 +452,8 @@ test.describe('Bulk Edit', () => {
     const { modal } = await selectAllAndEditMany(page)
 
     const { field } = await selectFieldToEdit(page, {
-      fieldLabel: 'Title',
       fieldID: 'title',
+      fieldLabel: 'Title',
     })
 
     await field.fill(updatedPostTitle)
@@ -467,8 +465,9 @@ test.describe('Bulk Edit', () => {
 
     const updatedPost = await payload.find({
       collection: postsSlug,
-      limit: 1,
       depth: 0,
+      limit: 1,
+      overrideAccess: true,
       where: {
         id: {
           equals: postID,
@@ -493,9 +492,9 @@ test.describe('Bulk Edit', () => {
 
     await selectAllAndEditMany(page)
 
-    const { modal, field } = await selectFieldToEdit(page, {
-      fieldLabel: 'Group > Title',
+    const { field, modal } = await selectFieldToEdit(page, {
       fieldID: 'group__title',
+      fieldLabel: 'Group > Title',
     })
 
     await field.fill('New Group Title')
@@ -509,6 +508,7 @@ test.describe('Bulk Edit', () => {
       .find({
         collection: 'posts',
         limit: 1,
+        overrideAccess: true,
       })
       ?.then((res) => res.docs[0])
 
@@ -546,7 +546,7 @@ test.describe('Bulk Edit', () => {
 
     await selectAllAndEditMany(page)
 
-    const { field } = await selectFieldToEdit(page, { fieldLabel: 'Array', fieldID: 'array' })
+    const { field } = await selectFieldToEdit(page, { fieldID: 'array', fieldLabel: 'Array' })
 
     await wait(500)
 
@@ -559,10 +559,10 @@ test.describe('Bulk Edit', () => {
     await expect(page.locator(`#field-array__0__optional`)).toBeHidden()
 
     await toggleBlockOrArrayRow({
-      page,
-      targetState: 'open',
-      rowIndex: 0,
       fieldName: 'array',
+      page,
+      rowIndex: 0,
+      targetState: 'open',
     })
 
     await expect(field.locator('#field-array__0__optional')).toBeVisible()
@@ -606,7 +606,7 @@ test.describe('Bulk Edit', () => {
 
     const postCount = 3
     for (let i = 1; i <= postCount; i++) {
-      await createPost({ title: `Post ${i}`, _status: 'published' })
+      await createPost({ _status: 'published', title: `Post ${i}` })
       // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
       await wait(50)
     }
@@ -685,7 +685,6 @@ test.describe('Bulk Edit', () => {
     const originalDoc = await payload.create({
       collection: tabsSlug,
       data: {
-        title: 'Tab Title',
         tabTab: {
           tabTabArray: [
             {
@@ -693,16 +692,18 @@ test.describe('Bulk Edit', () => {
             },
           ],
         },
+        title: 'Tab Title',
       },
+      overrideAccess: true,
     })
 
     await page.goto(tabsUrl.list)
     // Wait until page has limit in the url, to ensure it is fully loaded
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await addListFilter({
-      page,
       fieldLabel: 'ID',
       operatorLabel: 'equals',
+      page,
       value: originalDoc.id,
     })
 
@@ -719,10 +720,10 @@ test.describe('Bulk Edit', () => {
     await expect(bulkEditForm).toBeVisible()
 
     await selectInput({
+      multiSelect: true,
+      options: ['Title'],
       page,
       selectLocator: bulkEditForm.locator('.react-select'),
-      options: ['Title'],
-      multiSelect: true,
     })
 
     await bulkEditForm.locator('#field-title').fill('Updated Tab Title')
@@ -732,6 +733,7 @@ test.describe('Bulk Edit', () => {
 
     const updatedDocQuery = await payload.find({
       collection: tabsSlug,
+      overrideAccess: true,
       where: {
         id: {
           equals: originalDoc.id,
@@ -751,20 +753,21 @@ test.describe('Bulk Edit', () => {
     const originalDoc = await payload.create({
       collection: tabsSlug,
       data: {
-        title: 'Tab Doc',
         tabTab: {
           tabText: 'original value',
         },
+        title: 'Tab Doc',
       },
+      overrideAccess: true,
     })
 
     await page.goto(tabsUrl.list)
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await addListFilter({
-      page,
       fieldLabel: 'ID',
       operatorLabel: 'equals',
+      page,
       value: originalDoc.id,
     })
 
@@ -779,10 +782,10 @@ test.describe('Bulk Edit', () => {
     await expect(bulkEditForm).toBeVisible()
 
     await selectInput({
+      multiSelect: true,
+      options: ['Tab Text'],
       page,
       selectLocator: bulkEditForm.locator('.react-select'),
-      options: ['Tab Text'],
-      multiSelect: true,
     })
 
     await bulkEditForm.getByLabel('Tab Text').fill('updated value')
@@ -792,6 +795,7 @@ test.describe('Bulk Edit', () => {
 
     const updatedDocQuery = await payload.find({
       collection: tabsSlug,
+      overrideAccess: true,
       where: {
         id: {
           equals: originalDoc.id,
@@ -804,22 +808,65 @@ test.describe('Bulk Edit', () => {
       .poll(() => updatedDoc?.tabTab?.tabText, { timeout: POLL_TOPASS_TIMEOUT })
       .toEqual('updated value')
 
-    await payload.delete({ collection: tabsSlug, id: originalDoc.id })
+    await payload.delete({ id: originalDoc.id, collection: tabsSlug, overrideAccess: true })
+  })
+
+  test('should include named-tab fields in bulk edit when a collection has a restricted field', async () => {
+    const doc = await payload.create({
+      collection: restrictedTabsSlug,
+      data: { title: 'Restricted Tabs Doc' },
+      overrideAccess: true,
+    })
+
+    await page.goto(restrictedTabsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      page,
+      value: doc.id,
+    })
+
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await bulkEditForm.locator('.field-select .rs__control').click()
+
+    const selectMenu = getSelectMenu({ page })
+
+    await expect(
+      selectMenu.locator('.rs__option', { hasText: exactText('Named Tab Field') }),
+    ).toBeVisible()
+
+    await expect(
+      selectMenu.locator('.rs__option', { hasText: exactText('Named Tab No Update') }),
+    ).toBeHidden()
+
+    await payload.delete({ id: doc.id, collection: restrictedTabsSlug, overrideAccess: true })
   })
 
   test('should show clean labels for fields inside label-false groups and rows', async () => {
     const doc = await payload.create({
       collection: tabsSlug,
       data: { title: 'Label Test Doc' },
+      overrideAccess: true,
     })
 
     await page.goto(tabsUrl.list)
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await addListFilter({
-      page,
       fieldLabel: 'ID',
       operatorLabel: 'equals',
+      page,
       value: doc.id,
     })
 
@@ -841,7 +888,48 @@ test.describe('Bulk Edit', () => {
     })
     await expect(option).toBeVisible()
 
-    await payload.delete({ collection: tabsSlug, id: doc.id })
+    await payload.delete({ id: doc.id, collection: tabsSlug, overrideAccess: true })
+  })
+
+  test('should fall back to the field name for fields with label: false', async () => {
+    const doc = await payload.create({
+      collection: tabsSlug,
+      data: { title: 'No Label Doc' },
+      overrideAccess: true,
+    })
+
+    await page.goto(tabsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      page,
+      value: doc.id,
+    })
+
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await bulkEditForm.locator('.field-select .rs__control').click()
+
+    const menu = getSelectMenu({ page })
+
+    // The `label: false` field must render its humanized name, not an empty option
+    await expect(menu.locator('.rs__option', { hasText: exactText('No Label Text') })).toBeVisible()
+
+    // No option should render without text
+    const optionTexts = await menu.locator('.rs__option').allInnerTexts()
+    expect(optionTexts.every((text) => text.trim().length > 0)).toBe(true)
+
+    await payload.delete({ id: doc.id, collection: tabsSlug, overrideAccess: true })
   })
 
   test('should preserve beforeInput components when selecting multiple fields', async () => {
@@ -856,14 +944,14 @@ test.describe('Bulk Edit', () => {
 
     // Select multiple fields with beforeInput components
     await selectInput({
-      page,
-      selectLocator: modal.locator('.field-select'),
+      multiSelect: true,
       options: [
         'Field With Before Input A1',
         'Field With Before Input A2',
         'Field With Before Input B',
       ],
-      multiSelect: true,
+      page,
+      selectLocator: modal.locator('.field-select'),
     })
 
     // All fields should be visible
@@ -879,13 +967,77 @@ test.describe('Bulk Edit', () => {
     await expect(beforeInputB).toHaveCount(1)
     await expect(beforeInputB).toBeVisible()
   })
+
+  test('should preserve custom Field and Label components of previously selected fields', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    // Select the field with a custom `Field` component first, on its own
+    await selectInput({
+      multiSelect: true,
+      options: ['Field With Custom Field'],
+      page,
+      selectLocator: modal.locator('.field-select'),
+    })
+
+    await expect(modal.locator('[data-testid="custom-field"]')).toBeVisible()
+
+    // Selecting an additional field must not reset the first field to its default component
+    await selectInput({
+      clear: false,
+      multiSelect: true,
+      options: ['Field With Custom Label'],
+      page,
+      selectLocator: modal.locator('.field-select'),
+    })
+
+    await expect(modal.locator('[data-testid="custom-label"]')).toBeVisible()
+    await expect(modal.locator('[data-testid="custom-field"]')).toBeVisible()
+  })
+
+  test('should preserve values of previously selected fields when selecting another field', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    await selectInput({
+      multiSelect: true,
+      options: ['Title'],
+      page,
+      selectLocator: modal.locator('.field-select'),
+    })
+
+    await modal.locator('#field-title').fill('Bulk edited title')
+
+    await selectInput({
+      clear: false,
+      multiSelect: true,
+      options: ['Description'],
+      page,
+      selectLocator: modal.locator('.field-select'),
+    })
+
+    await expect(modal.locator('#field-description')).toBeVisible()
+    await expect(modal.locator('#field-title')).toHaveValue('Bulk edited title')
+  })
 })
 
 async function selectFieldToEdit(
   page: Page,
   {
-    fieldLabel,
     fieldID,
+    fieldLabel,
   }: {
     fieldID: string
     fieldLabel: string
@@ -909,7 +1061,7 @@ async function selectFieldToEdit(
   const field = modal.locator(`#field-${fieldID}`)
   await expect(field).toBeVisible()
 
-  return { modal, field }
+  return { field, modal }
 }
 
 async function selectAllAndEditMany(page: Page): Promise<{ modal: Locator }> {
@@ -921,7 +1073,11 @@ async function selectAllAndEditMany(page: Page): Promise<{ modal: Locator }> {
 }
 
 async function deleteAllPosts() {
-  await payload.delete({ collection: postsSlug, where: { id: { exists: true } } })
+  await payload.delete({
+    collection: postsSlug,
+    overrideAccess: true,
+    where: { id: { exists: true } },
+  })
 }
 
 async function createPost(
@@ -930,6 +1086,7 @@ async function createPost(
 ): Promise<Post> {
   return payload.create({
     collection: postsSlug,
+    overrideAccess: true,
     ...(overrides || {}),
     data: {
       title: 'Post Title',

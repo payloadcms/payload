@@ -32,6 +32,8 @@ There are several ways to optimize your [Queries](../queries/overview). Many of 
 
 When building queries, combine as many of these options together as possible. This will ensure your queries are as efficient as they can be.
 
+A particularly effective option is the [Select API](../queries/select), which limits which fields are loaded from the database. Use it with the Local and REST APIs via a field map, or pass `select: true` on GraphQL queries so Payload projects only the fields in your selection set.
+
 To learn more, see the [Query Performance](../queries/overview#performance) docs.
 
 ### Optimizing your APIs

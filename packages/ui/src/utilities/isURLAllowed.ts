@@ -16,10 +16,16 @@ export const isURLAllowed = (url: string, allowList: AllowList): boolean => {
         }
 
         if (key === 'pathname') {
-          // Convert wildcards to a regex
+          // Translate a small glob syntax to a regex. The pattern is escaped
+          // first so that metacharacters in the configured value (e.g. `.`)
+          // match literally and cannot broaden what the allow-list accepts.
+          // Wildcards become `\*` once escaped, so they are restored afterwards
+          // — translating `**` before `*` is safe because the resulting `.*`
+          // no longer contains an escaped `\*` for the next replace to match.
           const regexPattern = value
-            .replace(/\*\*/g, '.*') // Match any path
-            .replace(/\*/g, '[^/]*') // Match any part of a path segment
+            .replace(/[\\^$*+?.()|[\]{}]/g, '\\$&') // Escape regex metacharacters
+            .replace(/\\\*\\\*/g, '.*') // `**` → match any path
+            .replace(/\\\*/g, '[^/]*') // `*` → match any part of a path segment
           const regex = new RegExp(`^${regexPattern}$`)
           return regex.test(parsedUrl.pathname)
         }

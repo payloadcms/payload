@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/tanstack-start",
-  "version": "4.0.0-internal.183b315",
+  "version": "4.0.0-canary.36",
   "description": "TanStack Start framework adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -34,6 +34,11 @@
       "types": "./src/exports/server.ts",
       "default": "./src/exports/server.ts"
     },
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
+    },
     "./layouts": {
       "import": "./src/exports/layouts.ts",
       "types": "./src/exports/layouts.ts",
@@ -44,11 +49,6 @@
       "browser": "./src/exports/rsc.browser.ts",
       "import": "./src/exports/rsc.ts",
       "default": "./src/exports/rsc.ts"
-    },
-    "./vite": {
-      "import": "./src/exports/vite.ts",
-      "types": "./src/exports/vite.ts",
-      "default": "./src/exports/vite.ts"
     }
   },
   "main": "./src/index.ts",
@@ -57,7 +57,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm build:types && pnpm build:swc && pnpm build:copy-mjs",
+    "build": "pnpm build:types && pnpm test:types && pnpm build:swc && pnpm build:copy-mjs",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
     "build:copy-mjs": "node ./scripts/copyMjs.mjs",
     "build:debug": "pnpm build",
@@ -65,7 +65,8 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test:types": "tsc --project test/tsconfig.json"
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
@@ -78,15 +79,17 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "vite": ">=8.0.0"
   },
   "peerDependencies": {
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-start": "^1.168.26",
     "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -94,6 +97,9 @@
   },
   "peerDependenciesMeta": {
     "@vitejs/plugin-react": {
+      "optional": true
+    },
+    "@vitejs/plugin-rsc": {
       "optional": true
     },
     "vite": {
@@ -120,6 +126,11 @@
         "types": "./dist/exports/server.d.ts",
         "default": "./dist/exports/server.js"
       },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
+      },
       "./layouts": {
         "import": "./dist/exports/layouts.js",
         "types": "./dist/exports/layouts.d.ts",
@@ -130,11 +141,6 @@
         "browser": "./dist/exports/rsc.browser.js",
         "import": "./dist/exports/rsc.js",
         "default": "./dist/exports/rsc.js"
-      },
-      "./vite": {
-        "import": "./dist/exports/vite.js",
-        "types": "./dist/exports/vite.d.ts",
-        "default": "./dist/exports/vite.js"
       }
     },
     "main": "./dist/index.js",

@@ -30,7 +30,7 @@ app/ (or src/app/)
 │   ├── api/
 │   │   └── [...slug]/
 │   │       └── route.ts
-│   ├── custom.scss
+│   ├── custom.css
 │   └── layout.tsx
 ```
 
@@ -211,7 +211,7 @@ Not all files in the `(payload)` folder are auto-generated. Here's what you need
 | `admin/[[...segments]]/page.tsx`      | No              | Rarely needed | Never                        | Part of template. Usually no need to edit.                   |
 | `admin/[[...segments]]/not-found.tsx` | No              | Rarely needed | Never                        | Part of template. Usually no need to edit.                   |
 | `api/[...slug]/route.ts`              | No              | Rarely needed | Never                        | Part of template. Usually no need to edit.                   |
-| `custom.scss`                         | No              | Yes           | Never                        | Intended for your custom styles.                             |
+| `custom.css`                          | No              | Yes           | Never                        | Intended for your custom styles.                             |
 
 ### About the "DO NOT MODIFY" Warning
 
@@ -237,7 +237,7 @@ import { importMap } from './admin/importMap.js' // Update this path as needed
 
 - Import map path (required when moving folders)
 - Custom imports for additional functionality
-- Custom SCSS imports
+- Custom CSS imports
 - Server function logic (advanced use cases)
 
 **What you should NOT edit:**

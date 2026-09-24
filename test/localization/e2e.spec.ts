@@ -15,9 +15,7 @@ import {
   changeLocale,
   closeAllToasts,
   closeLocaleSelector,
-  ensureCompilationIsDone,
   findTableRow,
-  initPageConsoleErrorCatch,
   openLocaleSelector,
   saveDocAndAssert,
   throttleTest,
@@ -33,6 +31,7 @@ import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSav
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { blocksCollectionSlug } from './collections/Blocks/index.js'
@@ -109,10 +108,7 @@ describe('Localization', () => {
     urlLocaleRestricted = new AdminUrlUtil(serverURL, localeRestrictedSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
@@ -278,6 +274,7 @@ describe('Localization', () => {
           title: englishTitle,
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       const id = localizedPost.id.toString()
@@ -290,6 +287,7 @@ describe('Localization', () => {
           title: spanishTitle,
         },
         locale: spanishLocale,
+        overrideAccess: true,
       })
 
       await page.goto(url.edit(id))
@@ -336,7 +334,7 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('button.tabs-field__tab-button', { hasText: 'Main Nav' }).click()
-      await addBlock({ page, fieldName: 'nav__layout', blockToSelect: 'Text' })
+      await addBlock({ blockToSelect: 'Text', fieldName: 'nav__layout', page })
       await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
       await page.locator('#field-nav__layout__0__text').fill('test')
       await expect(page.locator('#field-nav__layout__0__text')).toHaveValue('test')
@@ -368,9 +366,9 @@ describe('Localization', () => {
 
     test('should not render default locale in locale selector when prefs are not default', async () => {
       await upsertPreferences<Config, GeneratedTypes<any>>({
+        key: 'locale',
         payload,
         user: client.user,
-        key: 'locale',
         value: 'es',
       })
 
@@ -453,10 +451,10 @@ describe('Localization', () => {
 
     test('should not overwrite existing data when overwrite is unchecked', async () => {
       await changeLocale(page, defaultLocale)
-      await createAndSaveDoc(page, url, { title: englishTitle, description })
+      await createAndSaveDoc(page, url, { description, title: englishTitle })
 
       await changeLocale(page, spanishLocale)
-      await fillValues({ title: spanishTitle, description: 'Spanish description' })
+      await fillValues({ description: 'Spanish description', title: spanishTitle })
       await saveDocAndAssert(page)
 
       await changeLocale(page, defaultLocale)
@@ -472,7 +470,7 @@ describe('Localization', () => {
 
     test('should overwrite existing data when overwrite is checked', async () => {
       await changeLocale(page, defaultLocale)
-      await createAndSaveDoc(page, url, { title: englishTitle, description })
+      await createAndSaveDoc(page, url, { description, title: englishTitle })
       await changeLocale(page, spanishLocale)
       await fillValues({ title: spanishTitle })
       await saveDocAndAssert(page)
@@ -566,7 +564,7 @@ describe('Localization', () => {
       await titleField.fill('English Block Title')
 
       // Add a block with content
-      await addBlock({ page, fieldName: 'content', blockToSelect: 'Block Inside Block' })
+      await addBlock({ blockToSelect: 'Block Inside Block', fieldName: 'content', page })
       const blockTextField = page.locator('#field-content__0__text')
       await blockTextField.fill('English block text content')
 
@@ -613,15 +611,6 @@ describe('Localization', () => {
 
   describe('locale change', () => {
     test('should disable fields during locale change', async () => {
-      // The Next.js adapter relies on RSC streaming to keep the form in a
-      // "loading" state until the new locale's document data arrives. On the
-      // TanStack Start adapter the locale state is updated client-side as soon
-      // as `?locale=` changes in the URL, so the form never enters the
-      // intermediate disabled state. Tracked separately as a UX gap.
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'TanStack Start adapter does not expose a route-loader-pending signal to the form, so the field never enters the disabled state. Tracked separately.',
-      )
       await page.goto(url.create)
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toBeEnabled()
@@ -636,9 +625,9 @@ describe('Localization', () => {
 
       // only throttle test after initial load to avoid timeouts
       const cdpSession = await throttleTest({
-        page,
         context,
         delay: 'Fast 4G',
+        page,
       })
 
       await localeToSelect.click()
@@ -650,9 +639,9 @@ describe('Localization', () => {
       await closeLocaleSelector(page)
 
       await cdpSession.send('Network.emulateNetworkConditions', {
-        offline: false,
-        latency: 0,
         downloadThroughput: -1,
+        latency: 0,
+        offline: false,
         uploadThroughput: -1,
       })
 
@@ -752,7 +741,7 @@ describe('Localization', () => {
       await changeLocale(page, 'en')
       const titleLocator = page.locator('#field-title')
       await titleLocator.fill('Block Test')
-      await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
+      await addBlock({ blockToSelect: 'Block Inside Block', fieldName: 'content', page })
       const rowTextInput = page.locator(`#field-content__0__text`)
       await rowTextInput.fill('text')
       await saveDocAndAssert(page)
@@ -772,7 +761,7 @@ describe('Localization', () => {
       // The only reason it passed after a retry was because after it fails, it will set the locale to pt. When it then retries, it will incorrectly start with pt instead of en.
       await page.goto(urlBlocks.create)
 
-      await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
+      await addBlock({ blockToSelect: 'Block Inside Block', fieldName: 'content', page })
       const rowTextInput = page.locator(`#field-content__0__text`)
       await rowTextInput.fill('text')
       await saveDocAndAssert(page)
@@ -784,10 +773,11 @@ describe('Localization', () => {
 
       const doc = await payload.find({
         collection: 'blocks-fields',
-        where: { id: { equals: docID } },
         locale: 'all',
+        where: { id: { equals: docID } },
+        overrideAccess: true,
       })
-      // eslint-disable-next-line payload/no-flaky-assertions
+
       expect(doc.docs).toHaveLength(1)
     })
   })
@@ -804,7 +794,7 @@ describe('Localization', () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, 'es')
       await fillValues({ title: 'Created In Spanish' })
-      await saveDocAndAssert(page, '#publish-locale')
+      await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
       await changeLocale(page, defaultLocale)
@@ -815,7 +805,7 @@ describe('Localization', () => {
       // This verifies that the Popup component is not hidden behind overflow: hidden of the parent element,
       // which is set for smaller screen sizes.
       // This was an issue until createPortal was introduced in the Popup component.
-      await page.setViewportSize({ width: 480, height: 720 })
+      await page.setViewportSize({ height: 720, width: 480 })
       await page.goto(urlBlocks.create)
       await page.locator('.form-submit .popup-button').click()
 
@@ -846,7 +836,7 @@ describe('Localization', () => {
       test('should show unpublish in specific locale when localized fields exist', async () => {
         await page.goto(urlAllFieldsLocalized.create)
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page, '#publish-locale')
+        await saveDocAndAssert(page)
         await openDocControls(page)
 
         await expect(page.locator('#action-unpublish')).toBeVisible()
@@ -865,23 +855,17 @@ describe('Localization', () => {
     })
   })
 
-  test('should not show publish specific locale button when no localized fields exist', async () => {
+  test('should not show publish all locales option when no localized fields exist', async () => {
     await page.goto(urlPostsWithDrafts.create)
-    await expect(page.locator('#publish-locale')).toHaveCount(1)
+    await expect(page.locator('#publish-all-locales')).toHaveCount(1)
     await page.goto(noLocalizedFieldsURL.create)
-    await expect(page.locator('#publish-locale')).toHaveCount(0)
+    await expect(page.locator('#publish-all-locales')).toHaveCount(0)
   })
 
   describe('duplicate selected locales', () => {
     test('should duplicate document with data from selected locales', async () => {
-      // The select-locales drawer's `payload__modal-container--enterDone`
-      // element lingers in the DOM after the confirm-and-redirect flow on the
-      // TanStack Start adapter, intercepting subsequent pointer events from
-      // the locale switcher. Tracked separately as a modal-cleanup gap.
-      test.skip(
-        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
-        'Duplicate-locales drawer leaves an empty modal container that intercepts subsequent clicks on the TanStack Start adapter. Tracked separately.',
-      )
+      test.slow()
+
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, defaultLocale)
       await fillValues({ title: 'English Title' })
@@ -945,7 +929,7 @@ describe('Localization', () => {
 
         // publish en
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page, '#publish-locale')
+        await saveDocAndAssert(page)
 
         await page.goto(urlAllFieldsLocalized.versions(docID))
 
@@ -959,7 +943,7 @@ describe('Localization', () => {
 
         // publish en
         await page.locator('#field-text').fill('EN Published')
-        await saveDocAndAssert(page, '#publish-locale')
+        await saveDocAndAssert(page)
 
         const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
 
@@ -971,7 +955,7 @@ describe('Localization', () => {
 
         // publish es
         await page.locator('#field-text').fill('ES Published')
-        await saveDocAndAssert(page, '#publish-locale')
+        await saveDocAndAssert(page)
 
         await page.goto(urlAllFieldsLocalized.versions(docID))
         await changeLocale(page, defaultLocale)
@@ -1032,8 +1016,6 @@ describe('Localization', () => {
       await payload.create({
         collection: withRequiredLocalizedFields,
         data: {
-          title: 'Existing doc title',
-          seoTitle: uniqueSeoTitle,
           nav: {
             layout: [
               {
@@ -1042,8 +1024,11 @@ describe('Localization', () => {
               },
             ],
           },
+          seoTitle: uniqueSeoTitle,
+          title: 'Existing doc title',
         },
         locale: defaultLocale,
+        overrideAccess: true,
       })
 
       // seoTitle is in the SEO tab (active by default) — fill it first
@@ -1051,7 +1036,7 @@ describe('Localization', () => {
       await page.locator('#field-title').fill('Second doc title')
 
       await page.locator('button.tabs-field__tab-button', { hasText: 'Main Nav' }).click()
-      await addBlock({ page, fieldName: 'nav__layout', blockToSelect: 'Text' })
+      await addBlock({ blockToSelect: 'Text', fieldName: 'nav__layout', page })
       await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
       await page.locator('#field-nav__layout__0__text').fill('test block')
 
@@ -1082,10 +1067,10 @@ describe('Localization', () => {
       await page.goto(url.list)
 
       const scanResults = await runAxeScan({
+        exclude: ['main'],
+        include: ['.localizer'],
         page,
         testInfo,
-        include: ['.localizer'],
-        exclude: ['main'],
       })
 
       expect(scanResults.violations.length).toBe(0)

@@ -30,41 +30,45 @@ const cloudflare =
     : await getCloudflareContext({ async: true })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'storage-r2',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [Media, MediaWithPrefix, MediaClient, Users],
+    storage: [
+      r2Storage({
+        bucket: cloudflare.env.R2,
+        collections: {
+          'media-with-prefix': {
+            prefix: 'test-prefix',
+          },
+          [mediaSlug]: true,
+        },
+      }),
+      r2Storage({
+        bucket: cloudflare.env.R2,
+        clientUploads: true,
+        collections: {
+          'media-client': true,
+        },
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [Media, MediaWithPrefix, MediaClient, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
-  },
-  storage: [
-    r2Storage({
-      bucket: cloudflare.env.R2,
-      collections: {
-        [mediaSlug]: true,
-        'media-with-prefix': {
-          prefix: 'test-prefix',
-        },
-      },
-    }),
-    r2Storage({
-      bucket: cloudflare.env.R2,
-      collections: {
-        'media-client': true,
-      },
-      clientUploads: true,
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
 
@@ -73,9 +77,9 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
   return import(/* webpackIgnore: true */ `${'__wrangler'.replaceAll('_', '')}`).then(
     ({ getPlatformProxy }) =>
       getPlatformProxy({
+        configPath: path.resolve(dirname, 'wrangler.jsonc'),
         environment: process.env.CLOUDFLARE_ENV,
         experimental: { remoteBindings: cloudflareRemoteBindings },
-        configPath: path.resolve(dirname, 'wrangler.jsonc'),
       } satisfies GetPlatformProxyOptions),
   )
 }

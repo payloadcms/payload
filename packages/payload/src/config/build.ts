@@ -29,5 +29,5 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
     }
   }
 
-  return await sanitizeConfig(config)
+  return sanitizeConfig(config)
 }

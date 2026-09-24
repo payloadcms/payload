@@ -1,6 +1,4 @@
-import type { PopulateType } from 'payload'
-
-import { z } from 'zod'
+import { restoreGlobalVersionInputSchema } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
@@ -10,8 +8,7 @@ const DEFAULT_DESCRIPTION =
   'Restore a global from a previous version in any version-enabled global.'
 
 export const restoreGlobalVersionTool = defineGlobalTool({
-  access: (args) =>
-    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.update),
+  access: (args) => defaultAccess(args) && Boolean(args.permissions?.globals?.[args.slug]?.update),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,
@@ -20,53 +17,25 @@ export const restoreGlobalVersionTool = defineGlobalTool({
     title: 'Restore Global Version',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    id: z.string().describe('The ID of the global version to restore'),
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('How many levels deep to populate relationships in response')
-      .optional()
-      .default(0),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe('Optional: locale code to restore in (e.g., "en", "es")')
-      .optional(),
-    populate: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: control which fields to include from populated relationship or upload documents.',
-      )
-      .optional(),
-    showHiddenFields: z
-      .boolean()
-      .describe('Optional: include hidden fields in the restored global response')
-      .optional(),
-  }),
-}).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
+  input: restoreGlobalVersionInputSchema,
+}).handler(async ({ slug, authorizedMCP, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { id, depth, fallbackLocale, locale, populate, showHiddenFields } = input
+  const { id, depth, fallbackLocale, locale, populate, select } = input
 
-  logger.info(`Restoring version for global: ${globalSlug} with ID: ${id}`)
+  logger.info(`Restoring version for global: ${slug} with ID: ${id}`)
 
   try {
     const result = await payload.restoreGlobalVersion({
-      id,
-      slug: globalSlug,
+      id: String(id),
+      slug,
       depth,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...(fallbackLocale ? { fallbackLocale } : {}),
+      ...(fallbackLocale !== undefined ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
-      ...(populate ? { populate: populate as PopulateType } : {}),
-      ...(showHiddenFields !== undefined ? { showHiddenFields } : {}),
+      ...(populate ? { populate } : {}),
+      ...(select ? { select } : {}),
     })
     const resultObject = result as Record<string, unknown>
     const restoredGlobal =
@@ -78,19 +47,19 @@ export const restoreGlobalVersionTool = defineGlobalTool({
       content: [
         {
           type: 'text',
-          text: `Version "${id}" restored successfully for global "${globalSlug}"!\nRestored global:\n\`\`\`json\n${JSON.stringify(restoredGlobal)}\n\`\`\``,
+          text: `Version "${id}" restored successfully for global "${slug}"!\nRestored global:\n\`\`\`json\n${JSON.stringify(restoredGlobal)}\n\`\`\``,
         },
       ],
       doc: restoredGlobal,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error restoring version ${id} for global ${globalSlug}: ${errorMessage}`)
+    logger.error(`Error restoring version ${id} for global ${slug}: ${errorMessage}`)
     return {
       content: [
         {
           type: 'text',
-          text: `❌ **Error restoring version "${id}" for global "${globalSlug}":** ${errorMessage}`,
+          text: `❌ **Error restoring version "${id}" for global "${slug}":** ${errorMessage}`,
         },
       ],
       isError: true,

@@ -209,7 +209,8 @@ Each job document contains:
   completedAt: '2024-01-15...',  // When job completed (null if pending)
   hasError: false,              // True if job failed
   totalTried: 1,                // Number of attempts
-  processing: false,            // True if currently running
+  processingUntil: null,        // Future date while a worker owns the job
+  processingToken: null,        // Internal token for the current owner
   taskStatus: {                 // Status of each task (for workflows)
     sendEmail: {
       '1': {
@@ -227,11 +228,17 @@ Each job document contains:
 }
 ```
 
+Payload increments `totalTried` after each completed attempt. While the handler runs, Payload automatically renews `processingUntil`. The claim also gets a `processingToken`, and worker updates only start while that token still matches and enough lease time remains for the configured safety buffer. If the worker disappears, the lease expires and a later jobs runner call can claim the job again. A crashed worker does not increment `totalTried` or consume a handler retry.
+
 #### Access Control
 
-By default, Payload's job operations bypass access control when used from the Local API. You can enable access control by passing `overrideAccess: false` to any job operation.
+Use Payload's dedicated Jobs APIs and endpoints, such as `payload.jobs.*`, `/run`, and `/handle-schedules`. Calling generic Local API, REST, or GraphQL CRUD directly on `payload-jobs` is not recommended because it bypasses the job operations and does not run `jobs.access.*`.
 
-To define custom access control for jobs, add an `access` property to your Jobs Config:
+Raw collection create, read, update, and delete access is denied by default. You can adjust these rules through `jobsCollectionOverrides`. REST and GraphQL always run them; Local API CRUD runs them when you pass `overrideAccess: false`.
+
+The dedicated job operations use `jobs.access.queue`, `run`, and `cancel`. Local API calls run these functions when you pass `overrideAccess: false`. The `/run` and `/handle-schedules` endpoints always check `jobs.access.run`.
+
+Configure access for the dedicated job operations in your Jobs Config:
 
 ```ts
 import type { SanitizedConfig } from 'payload'
@@ -257,9 +264,9 @@ const config: SanitizedConfig = {
 }
 ```
 
-Each access control function receives the current `req` object and should return a boolean. If no access control is defined, the default behavior allows any authenticated user to perform the operation.
+These functions receive the current `req` and return a boolean. By default, they allow authenticated users.
 
-To use access control in the Local API:
+Pass `overrideAccess: false` to run them from the Local API:
 
 ```ts
 const req = await createLocalReq({ user }, payload)
@@ -271,12 +278,6 @@ await payload.jobs.queue({
   req, // Pass the request with user context
 })
 ```
-
-<Banner type="warning">
-  It is not recommended to modify the `payload-jobs` collection's access control
-  directly, as that pattern may be deprecated in future versions. Instead—use
-  the `access` property in your Jobs Config to control job operations.
-</Banner>
 
 #### Cancelling Jobs
 

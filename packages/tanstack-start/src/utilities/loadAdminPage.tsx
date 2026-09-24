@@ -1,5 +1,7 @@
+import type { RenderableServerComponent } from '@tanstack/react-start/rsc'
 import type { ImportMap, MetaConfig, SanitizedConfig } from 'payload'
 
+import { getViewportContent } from '@payloadcms/ui/shared'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 
 import type { AdminPageMetadata } from './meta.js'
@@ -15,8 +17,10 @@ export type LoadAdminPageArgs = {
   splat?: string
 }
 
+type RSCPayload = RenderableServerComponent<React.ReactElement>
+
 export type LoadAdminPageResult =
-  | { _notFound: true; routeKey?: string; rscPayload?: React.ReactNode }
+  | { _notFound: true; routeKey?: string; rscPayload?: RSCPayload }
   | { _redirect: string }
   | {
       metadata: AdminPageMetadata
@@ -32,7 +36,7 @@ export type LoadAdminPageResult =
        * so search-only changes (e.g. list-view filtering) reconcile in place.
        */
       routeKey: string
-      rscPayload: React.ReactNode
+      rscPayload: RSCPayload
     }
 
 const resolveTitle = (title: MetaConfig['title']): string | undefined => {
@@ -169,27 +173,21 @@ export async function loadAdminPage({
   // by RSC streaming deep inside view components). Read after the render.
   const nav: { type?: 'notFound' | 'redirect'; url?: string } = {}
   const pageServerAdapter = createPageRenderServerAdapter(nav)
+  let userAgent: string | undefined
 
   // `renderRoot` calls `initReq` itself with its own overrides (query
   // re-nesting, `urlSuffix`, `fallbackLocale`). Forward them, injecting the
   // page-render `ServerAdapter` so `req.server.redirect()` / `.notFound()`
   // is recorded + thrown rather than escaping as raw TanStack nav.
-  const boundInitReq: Parameters<typeof renderRoot>[0]['initReq'] = (args) =>
-    initReq({
+  const boundInitReq: Parameters<typeof renderRoot>[0]['initReq'] = async (args) => {
+    const result = await initReq({
       configPromise: args.configPromise,
       importMap: args.importMap,
       overrides: args.overrides,
       serverAdapter: pageServerAdapter,
     })
-
-  const notFound = (): never => {
-    nav.type = 'notFound'
-    throw new Error('not-found')
-  }
-  const redirect = (url: string): never => {
-    nav.type = 'redirect'
-    nav.url = url
-    throw new Error(`redirect:${url}`)
+    userAgent = result.headers.get('user-agent') ?? undefined
+    return result
   }
 
   // Build the 404 result the route loader re-throws as TanStack `notFound()`.
@@ -211,12 +209,7 @@ export async function loadAdminPage({
     const notFoundNode = await renderNotFoundPage({
       config: Promise.resolve(config),
       importMap,
-      initReq: (args) =>
-        initReq({
-          configPromise: args.configPromise,
-          importMap: args.importMap,
-          overrides: args.overrides,
-        }),
+      initReq,
       params: Promise.resolve({ segments: splatSegments }),
       searchParams: Promise.resolve(searchParams),
     })
@@ -232,11 +225,12 @@ export async function loadAdminPage({
       config: Promise.resolve(config),
       importMap,
       initReq: boundInitReq,
-      notFound,
+      key: splat ?? '',
+      notFound: pageServerAdapter.notFound,
       // `segments` is intentionally `undefined` for the admin root (`/admin`),
       // matching Next's optional catch-all; `renderRoot` handles it at runtime.
       params: Promise.resolve({ segments }) as Parameters<typeof renderRoot>[0]['params'],
-      redirect,
+      redirect: pageServerAdapter.redirect,
       searchParams: Promise.resolve(searchParams),
     })
 
@@ -284,7 +278,10 @@ export async function loadAdminPage({
     })
 
     return {
-      metadata: toAdminPageMetadata(meta),
+      metadata: {
+        ...toAdminPageMetadata(meta),
+        viewport: getViewportContent(userAgent),
+      },
       routeKey: splat ?? '',
       rscPayload,
     }

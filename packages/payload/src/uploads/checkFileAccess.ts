@@ -21,7 +21,7 @@ export const checkFileAccess = async ({
   const { config } = collection
 
   const accessResult = await executeAccess(
-    { data: { filename }, isReadingStaticFile: true, req },
+    { slug: config.slug, data: { filename }, isReadingStaticFile: true, req },
     config.access.read,
   )
 

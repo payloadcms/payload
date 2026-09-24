@@ -39,8 +39,6 @@
   .relationship-table .table {
     margin-bottom: 0;
     background: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--color-border);
-    border-radius: var(--radius-medium);
     overflow: auto;
 
     table {

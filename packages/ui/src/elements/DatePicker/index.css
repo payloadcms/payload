@@ -23,6 +23,7 @@
     border-radius: var(--radius-large);
     display: inline-flex;
     position: relative;
+    /* stylelint-disable-next-line plugin/no-subpixel-values -- TODO: pre-existing; revisit this sub-pixel value */
     box-shadow:
       0 0 0.25px rgba(0, 0, 0, 0.08),
       0 2px 2.5px rgba(0, 0, 0, 0.15),
@@ -40,7 +41,7 @@
   }
 
   .react-datepicker-popper {
-    z-index: 10;
+    z-index: var(--z-portal-element);
     line-height: 0;
   }
 
@@ -883,6 +884,7 @@
     position: relative;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .date-time-picker .react-datepicker {
       flex-direction: column;

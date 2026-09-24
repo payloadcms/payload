@@ -179,6 +179,7 @@
     overflow: auto;
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .file-selections {
       --file-gutter-h: var(--gutter-h);
@@ -256,6 +257,10 @@
       gap: var(--spacer-2-5);
       padding-block: var(--spacer-2-5);
       padding-inline: var(--file-gutter-h);
+    }
+
+    .file-selections__collectionSelect {
+      border-bottom: none;
     }
 
     .file-selections__header__error {

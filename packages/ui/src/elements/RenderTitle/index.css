@@ -22,6 +22,10 @@
     letter-spacing: inherit;
   }
 
+  .render-title--placeholder {
+    color: var(--color-text-secondary);
+  }
+
   .render-title__id {
     vertical-align: middle;
     position: relative;
@@ -37,6 +41,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .render-title {
       --render-title-letter-spacing: -0.075px;

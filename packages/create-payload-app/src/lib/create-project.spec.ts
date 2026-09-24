@@ -117,6 +117,8 @@ describe('createProject', () => {
       it.each([
         ['blank', 'mongodb'],
         ['blank', 'postgres'],
+        ['blank-tanstack', 'mongodb'],
+        ['blank-tanstack', 'postgres'],
 
         // TODO: Re-enable these once 3.0 is stable and templates updated
         // ['website', 'mongodb'],
@@ -127,6 +129,8 @@ describe('createProject', () => {
         const projectName = 'starter-project'
 
         const template = templates.find((t) => t.name === templateName)
+
+        expect(template).toBeDefined()
 
         const cliArgs = {
           ...args,

@@ -11,13 +11,7 @@ import type { Config } from './payload-types.js'
 import { loginClientSide } from '../__helpers/e2e/auth/login.js'
 import { openRelationshipFieldDrawer } from '../__helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
 import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
-import {
-  changeLocale,
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { changeLocale, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import {
   clearSelectInput,
   getSelectInputOptions,
@@ -29,6 +23,7 @@ import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import {
@@ -58,7 +53,6 @@ test.describe('Multi Tenant', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     const { payload: payloadFromInit, serverURL: serverFromInit } =
       await initPayloadE2ENoConfig<Config>({ dirname })
@@ -73,16 +67,12 @@ test.describe('Multi Tenant', () => {
     autosaveGlobalURL = new AdminUrlUtil(serverURL, autosaveGlobalSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
   })
 
   test.beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'multiTenant',
     })
     await page.goto(usersURL.admin)
   })
@@ -312,7 +302,6 @@ test.describe('Multi Tenant', () => {
 
   test.describe('Documents', () => {
     test('should set tenant upon entering document', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -342,7 +331,6 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should allow tenant switching cancellation', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -360,14 +348,39 @@ test.describe('Multi Tenant', () => {
         urlUtil: menuItemsURL,
       })
 
-      await selectDocumentTenant({
-        action: 'cancel',
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await selectInput({
+        multiSelect: false,
+        option: 'Steel Cat',
         page,
-        payload,
-        tenant: 'Steel Cat',
+        selectLocator: page.locator('.tenantField'),
       })
 
       await expect(page.locator('#action-save')).toBeDisabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Blue Dog')
+
+      const assignTenantModal = page.locator('#assign-tenant-field-modal')
+      await assignTenantModal.locator('button', { hasText: 'Cancel' }).click()
+      await expect(assignTenantModal).toBeHidden()
+
+      await expect(page.locator('#action-save')).toBeDisabled()
+
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await expect
+        .poll(async () =>
+          getSelectInputValue({
+            multiSelect: false,
+            selectLocator: page.locator('.tenantField'),
+            selectType: 'relationship',
+          }),
+        )
+        .toBe('Blue Dog')
 
       await page.goto(menuItemsURL.list)
       await expect
@@ -378,7 +391,6 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should allow tenant switching confirmation', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -396,11 +408,32 @@ test.describe('Multi Tenant', () => {
         urlUtil: menuItemsURL,
       })
 
-      await selectDocumentTenant({
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await selectInput({
+        multiSelect: false,
+        option: 'Steel Cat',
         page,
-        payload,
-        tenant: 'Steel Cat',
+        selectLocator: page.locator('.tenantField'),
       })
+
+      await expect(page.locator('#action-save')).toBeDisabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Blue Dog')
+
+      const assignTenantModal = page.locator('#assign-tenant-field-modal')
+      await assignTenantModal.locator('button', { hasText: 'Confirm' }).click()
+      await expect(assignTenantModal).toBeHidden()
+
+      await expect(page.locator('#action-save')).toBeEnabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Steel Cat')
 
       await saveDocAndAssert(page)
     })
@@ -515,9 +548,9 @@ test.describe('Multi Tenant', () => {
       await expect(editManyDrawer).toBeVisible()
 
       await selectInput({
-        page,
         multiSelect: true,
         options: ['Site'],
+        page,
         selectLocator: editManyDrawer.locator('.edit-many-bulk-uploads__form .react-select'),
       })
 
@@ -528,9 +561,9 @@ test.describe('Multi Tenant', () => {
       await expect(inlineTenantField).toBeVisible()
 
       await selectInput({
-        page,
         multiSelect: false,
         option: 'Blue Dog',
+        page,
         selectLocator: inlineTenantField,
         selectType: 'relationship',
       })
@@ -633,6 +666,7 @@ test.describe('Multi Tenant', () => {
             equals: globalTenant,
           },
         },
+        overrideAccess: true,
       })
       await expect.poll(() => autosaveGlobal?.totalDocs).toBe(1)
       await expect.poll(() => autosaveGlobal?.docs?.[0]?.tenant).toBeDefined()
@@ -678,8 +712,8 @@ test.describe('Multi Tenant', () => {
               // Check if this is a render-list action
               if (Array.isArray(parsedPayload) && parsedPayload[0]?.name === 'render-list') {
                 renderListRequests.push({
-                  url: request.url(),
                   payload: parsedPayload,
+                  url: request.url(),
                 })
               }
             } catch (e) {
@@ -702,8 +736,8 @@ test.describe('Multi Tenant', () => {
       })
 
       await openRelationshipFieldDrawer({
-        page,
         fieldName: 'polymorphicRelationship',
+        page,
         selectRelation: 'Relationship', // select a tenant-enabled collection
       })
 
@@ -1146,7 +1180,7 @@ test.describe('Multi Tenant', () => {
       await checkbox.click()
 
       // Open the move drawer
-      const moveButton = page.getByRole('button', { exact: true, name: 'Move' })
+      const moveButton = page.getByRole('button', { name: 'Move', exact: true })
       await expect(moveButton).toBeVisible()
       await moveButton.click()
 
@@ -1242,7 +1276,6 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should filter sidebar tree when switching tenants without page navigation', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       // This test reproduces the user flow:
       // 1. Log in and go to folders
       // 2. Select Folders tab in sidebar
@@ -1260,7 +1293,6 @@ test.describe('Multi Tenant', () => {
 
       // Navigate to folders page
       await page.goto(foldersURL.list)
-      await page.waitForURL(foldersURL.list)
 
       // Click on Folders tab in sidebar to see the tree
       await openNav(page)
@@ -1357,7 +1389,12 @@ async function openAssignTenantModal({
   // Open the assign tenant modal
   const docControlsPopup = page.locator('.popup__content')
   const docControlsButton = page.locator('.doc-controls__popup .popup__trigger-wrap button')
-  await expect(docControlsButton).toBeVisible()
+
+  if (!(await docControlsButton.isVisible())) {
+    await expect(assignTenantModal).toBeVisible()
+    return
+  }
+
   await docControlsButton.click()
 
   const assignTenantButtonLocator = docControlsPopup.locator('button', { hasText: 'Assign Site' })
@@ -1381,9 +1418,9 @@ async function selectDocumentTenant({
   await closeNav(page)
   await openAssignTenantModal({ page, payload })
   await selectInput({
-    page,
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenantField'),
   })
 
@@ -1414,6 +1451,7 @@ async function getSelectedTenantFilterName({
           equals: tenantIDFromCookie,
         },
       },
+      overrideAccess: true,
     })
     return tenant?.docs?.[0]?.name || undefined
   }
@@ -1436,9 +1474,9 @@ async function setTenantFilter({
 
   await openNav(page)
   await selectInput({
-    page,
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }
@@ -1452,9 +1490,9 @@ async function switchGlobalDocTenant({
 }): Promise<void> {
   await openNav(page)
   await selectInput({
-    page,
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }

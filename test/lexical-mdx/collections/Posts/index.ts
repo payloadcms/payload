@@ -2,9 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
-  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   lexicalEditor,
+  TableFeature,
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
@@ -64,7 +64,7 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeViewFeature(),
-          EXPERIMENTAL_TableFeature(),
+          TableFeature(),
           FixedToolbarFeature(),
           BlocksFeature({
             blocks: [
@@ -87,7 +87,7 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeViewFeature(),
-          EXPERIMENTAL_TableFeature(),
+          TableFeature(),
           FixedToolbarFeature(),
           BlocksFeature({
             blocks: [

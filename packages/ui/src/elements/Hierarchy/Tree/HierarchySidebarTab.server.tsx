@@ -157,6 +157,8 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       // Merge ancestor IDs with existing expanded nodes
       const expandedSet = new Set(initialExpandedNodes)
       ancestorIds.forEach((id) => expandedSet.add(id))
+      // Include the selected node itself so its own children are loaded.
+      expandedSet.add(selectedNodeId)
       initialExpandedNodes = Array.from(expandedSet)
     }
 

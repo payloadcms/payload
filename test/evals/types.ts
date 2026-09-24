@@ -2,9 +2,15 @@ import type { LanguageModel } from 'ai'
 import type { Payload } from 'payload'
 import type { ExpectStatic } from 'vitest'
 
+import type { AuditEvent } from '../__helpers/plugins/audit/index.js'
 import type { ParsedConfig } from './assertions/parseConfig.js'
 import type { EvalConfig } from './evalConfig.js'
-import type { RunnerKind, SkillInstallMode } from './runner/types.js'
+import type {
+  AgentBuiltinTool,
+  AgentWorkspaceFile,
+  RunnerKind,
+  SkillInstallMode,
+} from './runner/types.js'
 
 // Dataset
 export type EvalCategory =
@@ -24,6 +30,8 @@ export type EvalCategory =
   | 'testing'
 
 export type EvalCase = {
+  /** Extra built-in tools available to the agent for this case. */
+  additionalAllowedTools?: AgentBuiltinTool[]
   /** Boot the starter config before the agent runs. */
   bootConfig?: boolean
   category: EvalCategory
@@ -49,6 +57,8 @@ export type EvalCase = {
    * the LLM scorer should judge the result.
    */
   verify: (args: EvalVerifyContext) => EvalVerifyResult | Promise<EvalVerifyResult>
+  /** Files copied into the agent's temporary workspace before it starts. */
+  workspaceFiles?: AgentWorkspaceFile[]
 }
 
 export type EvalExpect = ExpectStatic
@@ -61,11 +71,11 @@ export type EvalScore = (
 export type EvalVerifyContext = {
   /** Source-level AST summary from the existing TypeScript parser. */
   ast: ParsedConfig
+  /** Events recorded while the agent was running. */
+  audit: AuditEvent[]
   /** Imported generated config, normalized for easy eval assertions. */
   config: EvalConfig
   expect: EvalExpect
-  /** Tool calls recorded by the Payload MCP config. */
-  mcpToolCalls: MCPToolCall[]
   /**
    * Lazy Payload Local API for the generated config. The eval only boots Payload
    * if this object is actually used.
@@ -79,6 +89,8 @@ export type EvalVerifyContext = {
   score: EvalScore
   /** Complete generated `payload.config.ts` source. */
   source: string
+  /** Structured events emitted by the agent runner. */
+  transcript: TranscriptEvent[]
 }
 
 export type EvalVerifyResult = ConfigChangeScorerResult | void
@@ -105,16 +117,6 @@ export type EvalUsage = {
 
 // Runner
 export type SystemPromptKey = 'codegenNoSkill' | 'codegenWithSkill'
-export type MCPToolCall = {
-  input: unknown
-  name: string
-  response: {
-    content: unknown[]
-    doc?: Record<string, unknown>
-    isError?: boolean
-    structuredContent?: Record<string, unknown>
-  }
-}
 export type TranscriptEvent =
   | { content: string; isError?: boolean; toolUseId: string; type: 'tool_result' }
   | { id: string; input: unknown; name: string; type: 'tool_use' }
@@ -125,9 +127,9 @@ export type CodegenRunnerResult = {
   agentExitCode?: number
   /** For agent results: captured stderr from the CLI (fallback when stream-json parsing yields no events), truncated to ~10,000 characters. */
   agentLog?: string
+  /** Events recorded while the agent was running. */
+  audit?: AuditEvent[]
   confidence: number
-  /** Tool calls recorded by the Payload MCP config. */
-  mcpToolCalls?: MCPToolCall[]
   modifiedConfig: string
   /** For agent results: structured per-event transcript parsed from stream-json output. */
   transcript?: TranscriptEvent[]
@@ -156,6 +158,8 @@ export type EvalResult = {
   answer: string
   /** Populated when one or more structural assertions fail */
   assertionErrors?: string[]
+  /** Events recorded while the agent was running. */
+  audit?: AuditEvent[]
   category: string
   /** Named by the scorer: the precise change made to the config */
   changeDescription?: string

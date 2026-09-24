@@ -26,10 +26,10 @@ describe('withPayload', () => {
     }
   })
 
-  it('should disable devIndicators by default', () => {
+  it('should position devIndicators at the bottom left by default', () => {
     const result = withPayload({})
 
-    expect(result.devIndicators).toBe(false)
+    expect(result.devIndicators).toEqual({ position: 'bottom-left' })
   })
 
   it('should use user-provided devIndicators when specified', () => {
@@ -54,6 +54,26 @@ describe('withPayload', () => {
         delete process.env.NEXT_BASE_PATH
       } else {
         process.env.NEXT_BASE_PATH = originalBasePath
+      }
+    }
+  })
+
+  it('should mirror nextConfig.trailingSlash in process.env.NEXT_TRAILING_SLASH', () => {
+    const originalTrailingSlash = process.env.NEXT_TRAILING_SLASH
+
+    try {
+      process.env.NEXT_TRAILING_SLASH = 'true'
+
+      withPayload({ trailingSlash: false })
+      expect(process.env.NEXT_TRAILING_SLASH).toBe('false')
+
+      withPayload({ trailingSlash: true })
+      expect(process.env.NEXT_TRAILING_SLASH).toBe('true')
+    } finally {
+      if (originalTrailingSlash === undefined) {
+        delete process.env.NEXT_TRAILING_SLASH
+      } else {
+        process.env.NEXT_TRAILING_SLASH = originalTrailingSlash
       }
     }
   })

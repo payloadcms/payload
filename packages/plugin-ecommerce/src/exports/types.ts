@@ -1,5 +1,4 @@
 export type {
-  ClientUserWithCart,
   CollectionOverride,
   CollectionSlugMap,
   ContextProps,

@@ -1,19 +1,12 @@
-import type { IncomingMessage, Server, ServerResponse } from 'node:http'
-import type { AddressInfo } from 'node:net'
-import type { Document, Payload } from 'payload'
-
 import { del, list } from '@vercel/blob'
-import { upload } from '@vercel/blob/client'
+import { put } from '@vercel/blob/client'
 import dotenv from 'dotenv'
 import { readFileSync } from 'fs'
-import { createServer } from 'node:http'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { test } from '../../__helpers/int/vitest.js'
 import { collectionPrefix, mediaWithCompositePrefixesSlug } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -21,124 +14,93 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emulated') })
 
-let payload: Payload
-let restClient: NextRESTClient
-let httpServer: Server
-let handleUploadUrl: string
-
 const createdDocIDs: Array<number | string> = []
-const serverHandlerPath = '/vercel-blob-client-upload-route'
 
-describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(
-      dirname,
-      undefined,
-      true,
-      'config.compositePrefixes.ts',
-    ))
+test.suite(
+  '@payloadcms/storage-vercel-blob clientUploads (composite prefixes)',
+  { config: './config.compositePrefixes.ts' },
+  () => {
+    test.afterEach(async ({ payload }) => {
+      for (const id of createdDocIDs) {
+        await payload.delete({
+          id,
+          collection: mediaWithCompositePrefixesSlug,
+          overrideAccess: true,
+        })
+      }
 
-    httpServer = createServer(async (req: IncomingMessage, res: ServerResponse) => {
-      const chunks: Buffer[] = []
-      req.on('data', (chunk: Buffer) => chunks.push(chunk))
-      await new Promise<void>((resolve) => req.on('end', resolve))
+      createdDocIDs.length = 0
 
-      const body = Buffer.concat(chunks).toString()
-      const headers: Record<string, string> = {}
-      for (const [key, value] of Object.entries(req.headers)) {
-        if (typeof value === 'string') {
-          headers[key] = value
+      const { blobs } = await list()
+      if (blobs.length > 0) {
+        await del(blobs.map((b) => b.url))
+      }
+    })
+
+    test('should fetch a client-uploaded file using collection and document prefixes', async ({
+      restClient,
+    }) => {
+      const docPrefix = 'document-prefix'
+      const uploadedFilename = 'client-composite-image.png'
+      const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+
+      const instructionsResponse = await restClient.POST('/upload-instructions', {
+        body: JSON.stringify({
+          collectionSlug: mediaWithCompositePrefixesSlug,
+          docPrefix,
+          filename: uploadedFilename,
+          filesize: file.length,
+          mimeType: 'image/png',
+        }),
+      })
+      const instructions = (await instructionsResponse.json()) as {
+        data: { pathname: string; token: string }
+        file: {
+          filename: string
+          mimeType: string
+          size: number
+          uploadReference: { _objectKey: string; prefix: string }
         }
       }
 
-      const response = await restClient.POST(serverHandlerPath as `/${string}`, { body, headers })
-      const responseBody = await response.text()
+      expect(instructions.data.pathname).toBe(
+        `${collectionPrefix}/${instructions.file.uploadReference.prefix}/${instructions.file.uploadReference._objectKey}/${instructions.file.filename}`,
+      )
 
-      res.writeHead(response.status, {
-        'content-type': response.headers.get('content-type') ?? 'application/json',
+      await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
+        access: 'public',
+        contentType: 'image/png',
+        token: instructions.data.token,
       })
-      res.end(responseBody)
-    })
 
-    await new Promise<void>((resolve) => httpServer.listen(0, '127.0.0.1', resolve))
-    const port = (httpServer.address() as AddressInfo).port
-    handleUploadUrl = `http://127.0.0.1:${port}`
-  })
+      const formData = new FormData()
 
-  afterAll(async () => {
-    httpServer.close()
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
-    for (const id of createdDocIDs) {
-      await payload.delete({
-        id,
-        collection: mediaWithCompositePrefixesSlug,
-      })
-    }
-
-    createdDocIDs.length = 0
-
-    const { blobs } = await list()
-    if (blobs.length > 0) {
-      await del(blobs.map((b) => b.url))
-    }
-  })
-
-  it('should fetch a client-uploaded file using collection and document prefixes', async () => {
-    const docPrefix = 'document-prefix'
-    const uploadedFilename = 'client-composite-image.png'
-    const pathname = `${collectionPrefix}/${docPrefix}/${uploadedFilename}`
-    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
-
-    // Upload the file to Vercel Blob with the same collection and document prefixes that the client upload handler would use
-    //
-    await upload(pathname, new Blob([file], { type: 'image/png' }), {
-      access: 'public',
-      clientPayload: mediaWithCompositePrefixesSlug,
-      contentType: 'image/png',
-      handleUploadUrl,
-    })
-
-    const formData = new FormData()
-
-    // build formData like the admin panel does
-    formData.append(
-      '_payload',
-      JSON.stringify({
-        prefix: docPrefix,
-      }),
-    )
-    formData.append(
-      'file',
-      JSON.stringify({
-        clientUploadContext: {
+      // build formData like the admin panel does
+      formData.append(
+        '_payload',
+        JSON.stringify({
           prefix: docPrefix,
-        },
-        collectionSlug: mediaWithCompositePrefixesSlug,
-        filename: uploadedFilename,
-        mimeType: 'image/png',
-        size: file.length,
-      }),
-    )
+        }),
+      )
+      formData.append('file', JSON.stringify(instructions.file))
 
-    const createResponse = await restClient.POST(`/${mediaWithCompositePrefixesSlug}`, {
-      body: formData,
+      const createResponse = await restClient.POST(`/${mediaWithCompositePrefixesSlug}`, {
+        body: formData,
+      })
+
+      expect(createResponse.status).toBe(201)
+
+      const createdDoc = await createResponse.json()
+
+      expect(createdDoc?.doc.prefix).toBe(instructions.file.uploadReference.prefix)
+
+      const fileResponse = await restClient.GET(
+        `/${mediaWithCompositePrefixesSlug}/file/${instructions.file.filename}?prefix=${encodeURIComponent(instructions.file.uploadReference.prefix)}`,
+      )
+
+      expect(fileResponse.status).toBe(200)
+      const fileBuffer = await fileResponse.arrayBuffer()
+      expect(fileBuffer.byteLength).toBeGreaterThan(0)
     })
-
-    expect(createResponse.status).toBe(201)
-
-    const createdDoc = (await createResponse.json()) as Document
-
-    expect(createdDoc?.doc.prefix).toBe(docPrefix)
-
-    const fileResponse = await restClient.GET(
-      `/${mediaWithCompositePrefixesSlug}/file/${uploadedFilename}?prefix=${encodeURIComponent(docPrefix)}`,
-    )
-
-    expect(fileResponse.status).toBe(200)
-    const fileBuffer = await fileResponse.arrayBuffer()
-    expect(fileBuffer.byteLength).toBeGreaterThan(0)
-  })
-})
+  },
+)

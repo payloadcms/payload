@@ -9,7 +9,7 @@ import type {
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
-type CustomSelectProps = {
+export type CustomSelectProps = {
   disableKeyDown?: boolean
   disableMouseDown?: boolean
   draggableProps?: any

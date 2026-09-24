@@ -12,7 +12,7 @@
 
   .collection-list__sub-header {
     flex-basis: 100%;
-    padding-top: var(--spacer-3);
+    padding-top: var(--spacer-2-5);
   }
 
   .collection-list .table table {
@@ -33,6 +33,11 @@
     &:hover {
       text-decoration-color: var(--color-text);
     }
+  }
+
+  /* The ID cell renders its own pill with a hover background instead of an underline */
+  .collection-list .table table td.cell--linked > :is(a, button):has(.id-label) {
+    text-decoration-line: none;
   }
 
   .collection-list .table table [class^='cell']:not(.cell--linked) > p,
@@ -83,6 +88,7 @@
     margin-top: var(--spacer-2);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1024px) {
     .collection-list {
       margin-top: var(--spacer-2);
@@ -117,6 +123,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .collection-list {
       margin-bottom: var(--spacing-view-bottom);

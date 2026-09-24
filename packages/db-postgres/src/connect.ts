@@ -2,6 +2,7 @@ import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
+import { assertOperatorHandlerExtensionsInstalled } from '@payloadcms/drizzle/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { withReplicas } from 'drizzle-orm/pg-core'
 
@@ -42,6 +43,12 @@ const connectWithReconnect = async function ({
       // swallow error
     }
   })
+
+  // The client was only checked out to verify connectivity and to attach the
+  // listener above, both of which outlive the checkout. Holding on to it pins one
+  // connection for the lifetime of the pool, so `pool.end()` can never drain -
+  // including after `payload.destroy()`.
+  result.release()
 }
 
 export const connect: Connect = async function connect(
@@ -113,6 +120,11 @@ export const connect: Connect = async function connect(
   }
 
   await this.createExtensions()
+
+  await assertOperatorHandlerExtensionsInstalled({
+    drizzle: this.drizzle,
+    operatorHandlers: this.operatorHandlers,
+  })
 
   // Only push schema if not in production
   if (

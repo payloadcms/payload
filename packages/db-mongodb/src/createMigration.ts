@@ -52,11 +52,15 @@ export const createMigration: CreateMigration = async function createMigration({
   const fileName = migrationName ? `${timestamp}_${formattedName}.ts` : `${timestamp}_migration.ts`
   const filePath = `${dir}/${fileName}`
 
-  if (!skipEmpty) {
-    fs.writeFileSync(filePath, migrationFileContent)
+  if (skipEmpty) {
+    return { created: false }
   }
+
+  fs.writeFileSync(filePath, migrationFileContent)
 
   writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 
   payload.logger.info({ msg: `Migration created at ${filePath}` })
+
+  return { created: true, path: filePath }
 }

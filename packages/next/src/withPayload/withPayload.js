@@ -51,31 +51,27 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   /** @type {import('next').NextConfig} */
   const baseConfig = {
     ...nextConfig,
-    devIndicators: nextConfig.devIndicators !== undefined ? nextConfig.devIndicators : false,
+    devIndicators:
+      nextConfig.devIndicators !== undefined
+        ? nextConfig.devIndicators
+        : { position: 'bottom-left' },
     env,
     experimental: {
       ...(nextConfig.experimental || {}),
-      // Server fast refresh breaks HMR
-      turbopackServerFastRefresh: false,
     },
     sassOptions: {
       ...(nextConfig.sassOptions || {}),
       /**
        * This prevents scss warning spam during pnpm dev that looks like this:
-       * ⚠ ./test/admin/components/views/CustomMinimal/index.scss
+       * ⚠ ./path/to/some/index.scss
        * Issue while running loader
-       * SassWarning: Deprecation Warning on line 8, column 8 of file:///Users/alessio/Documents/GitHub/ payload/packages/ui/src/scss/styles.scss:8:8:
-       * Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+       * SassWarning: Deprecation Warning: Sass @import rules are deprecated and
+       * will be removed in Dart Sass 3.0.0.
        *
        * More info and automated migrator: https://sass-lang.com/d/import
        *
-       * 8 | @import 'queries';
-       *
-       *
-       * packages/ui/src/scss/styles.scss 9:9                      @import
-       * test/admin/components/views/CustomMinimal/index.scss 1:9  root stylesheet
-       *
-       * @todo: update all outdated scss imports to use @use instead of @import. Then, we can remove this.
+       * This can be triggered by any `.scss` file in a consumer's project that
+       * still uses `@import`.
        */
       silenceDeprecations: [...(nextConfig.sassOptions?.silenceDeprecations || []), 'import'],
     },
@@ -86,10 +82,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         'drizzle-kit',
         'drizzle-kit/api',
       ],
-    },
-    outputFileTracingIncludes: {
-      ...(nextConfig.outputFileTracingIncludes || {}),
-      '**/*': [...(nextConfig.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
     turbopack: {
       ...(nextConfig.turbopack || {}),
@@ -190,7 +182,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             //'@payloadcms/storage-azure',
             //'@payloadcms/storage-gcs',
             //'@payloadcms/storage-s3',
-            //'@payloadcms/storage-uploadthing',
             //'@payloadcms/storage-vercel-blob',
           ]
         : []),
@@ -264,6 +255,10 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     process.env.NEXT_BASE_PATH = nextConfig.basePath
     baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
+
+  const trailingSlash = nextConfig.trailingSlash === true ? 'true' : 'false'
+  process.env.NEXT_TRAILING_SLASH = trailingSlash
+  baseConfig.env.NEXT_TRAILING_SLASH = trailingSlash
 
   return baseConfig
 }

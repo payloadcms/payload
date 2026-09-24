@@ -19,7 +19,6 @@
     box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
     background-color: #222;
     color: white;
-    transition: box-shadow 50ms ease-out;
   }
 
   .test-recorder-button:active {

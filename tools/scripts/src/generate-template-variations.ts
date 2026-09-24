@@ -164,6 +164,18 @@ async function main() {
       base: 'none', // Do not copy from the base _template directory
     },
     {
+      name: 'blank-tanstack',
+      db: 'mongodb',
+      dirname: 'blank-tanstack',
+      sharp: true,
+      skipConfig: true,
+      skipReadme: true,
+      storage: 'localDisk',
+      configureConfig: false,
+      workspace: true,
+      base: 'none',
+    },
+    {
       name: 'website',
       db: 'mongodb',
       dirname: 'website',

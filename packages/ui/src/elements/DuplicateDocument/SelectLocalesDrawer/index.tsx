@@ -47,7 +47,7 @@ export const SelectLocalesDrawer: React.FC<SelectLocalesDrawerProps> = ({
   onConfirm,
 }) => {
   const { i18n, t } = useTranslation()
-  const { toggleModal } = useModal()
+  const { closeModal, toggleModal } = useModal()
   const [selectedLocales, setSelectedLocales] = useState<string[]>([])
 
   const localeOptions = useMemo(
@@ -72,8 +72,8 @@ export const SelectLocalesDrawer: React.FC<SelectLocalesDrawerProps> = ({
 
   const handleConfirm = useCallback(async () => {
     await onConfirm({ selectedLocales })
-    toggleModal(slug)
-  }, [onConfirm, selectedLocales, slug, toggleModal])
+    closeModal(slug)
+  }, [closeModal, onConfirm, selectedLocales, slug])
 
   return (
     <Drawer

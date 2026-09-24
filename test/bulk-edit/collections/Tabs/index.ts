@@ -13,6 +13,11 @@ export const TabsCollection: CollectionConfig = {
       name: 'title',
     },
     {
+      name: 'noLabelText',
+      type: 'text',
+      label: false,
+    },
+    {
       type: 'tabs',
       tabs: [
         {
