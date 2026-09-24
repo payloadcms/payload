@@ -1,11 +1,11 @@
 'use server'
 
 import type {
+  AdminContext,
   AdminViewAdapter,
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
-  CreateAdminContextResult,
   createPayloadRequest,
   ImportMap,
   SanitizedCollectionConfig,
@@ -31,19 +31,19 @@ import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getRouteData } from './getRouteData.js'
 
-export type CreateAdminContextFn = (args: {
+export type InitAdminContextFn = (args: {
   canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
   overrides?: Omit<Parameters<typeof createPayloadRequest>[0], 'payload'>
-}) => Promise<CreateAdminContextResult>
+}) => Promise<AdminContext>
 
 export type RenderRootArgs = {
   adminViews: AdminViewAdapter
   config: Promise<SanitizedConfig>
-  createAdminContext: CreateAdminContextFn
   importMap: ImportMap
+  initAdminContext: InitAdminContextFn
   /**
    * Optional React `key` applied to the rendered view (not the surrounding admin
    * template/nav). Adapters whose router reconciles a single RSC payload in place
@@ -66,8 +66,8 @@ export type RenderRootArgs = {
 export const renderRoot = async ({
   adminViews,
   config: configPromise,
-  createAdminContext,
   importMap,
+  initAdminContext,
   key,
   notFound,
   params: paramsPromise,
@@ -154,7 +154,7 @@ export const renderRoot = async ({
     req,
     req: { payload },
     user,
-  } = await createAdminContext({
+  } = await initAdminContext({
     configPromise: config,
     importMap,
     key: 'initPage',

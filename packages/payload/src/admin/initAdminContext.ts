@@ -8,7 +8,7 @@ import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { CreatePayloadRequestArgs } from '../utilities/createPayloadRequest.js'
 import type { ServerAdapter } from './adapters/server.js'
-import type { CreateAdminContextResult } from './functions/index.js'
+import type { AdminContext } from './functions/index.js'
 
 import { applyUserReadAccess } from '../auth/applyUserReadAccess.js'
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
@@ -21,29 +21,29 @@ import { getRequestLocale } from './getRequestLocale.js'
 
 export type PartialAdminContext = {
   i18n: I18nClient
-} & Pick<CreateAdminContextResult, 'languageCode'> &
+} & Pick<AdminContext, 'languageCode'> &
   Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
 
 /** Framework-provided request-scoped caching hooks used to deduplicate admin context creation. */
 export type AdminContextCache = {
   /** Reuses locale preference resolution across admin contexts. */
   getLocale?: (
-    resolveLocale: () => Promise<Pick<CreateAdminContextResult, 'locale'>>,
+    resolveLocale: () => Promise<Pick<AdminContext, 'locale'>>,
     ...cacheArgs: unknown[]
-  ) => Promise<Pick<CreateAdminContextResult, 'locale'>>
+  ) => Promise<Pick<AdminContext, 'locale'>>
   /** Reuses Payload, i18n, and authentication state within the current request. */
   getPartial: (
     createPartialContext: () => Promise<PartialAdminContext>,
   ) => Promise<PartialAdminContext>
   /** Reuses a complete admin context for the supplied key and cache arguments. */
   getRequest: (
-    createContext: () => Promise<CreateAdminContextResult>,
+    createContext: () => Promise<AdminContext>,
     key: string,
     ...cacheArgs: unknown[]
-  ) => Promise<CreateAdminContextResult>
+  ) => Promise<AdminContext>
 }
 
-export type CreateAdminContextArgs = {
+export type InitAdminContextArgs = {
   /**
    * Optional framework-owned request-scoped cache.
    * Framework adapters control its lifetime to prevent request state from leaking between requests.
@@ -62,7 +62,7 @@ export type CreateAdminContextArgs = {
 /**
  * Creates the request context used by framework adapters to render the admin panel.
  */
-export async function createAdminContext({
+export async function initAdminContext({
   cache,
   canSetHeaders,
   configPromise,
@@ -71,9 +71,9 @@ export async function createAdminContext({
   overrides,
   requestURL,
   serverAdapter,
-}: CreateAdminContextArgs): Promise<CreateAdminContextResult> {
+}: InitAdminContextArgs): Promise<AdminContext> {
   if (cache && !key) {
-    throw new Error('createAdminContext requires a key when cache is provided')
+    throw new Error('initAdminContext requires a key when cache is provided')
   }
 
   const headers = await serverAdapter.getHeaders()
@@ -113,7 +113,7 @@ export async function createAdminContext({
     ? await cache.getPartial(createPartialContext)
     : await createPartialContext()
 
-  const createContext = async (): Promise<CreateAdminContextResult> => {
+  const createContext = async (): Promise<AdminContext> => {
     const { i18n, languageCode, payload, responseHeaders, user } = partialContext
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
     const hasOptionsUserOverride = Object.hasOwn(optionsOverrides, 'user')
@@ -141,7 +141,7 @@ export async function createAdminContext({
       req.user = null
     }
 
-    const resolveLocale = async (): Promise<Pick<CreateAdminContextResult, 'locale'>> => ({
+    const resolveLocale = async (): Promise<Pick<AdminContext, 'locale'>> => ({
       locale: await getRequestLocale({ req }),
     })
     const { locale } = cache?.getLocale

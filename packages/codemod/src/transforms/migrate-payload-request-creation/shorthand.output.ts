@@ -1,7 +1,7 @@
 import { createPayloadRequestFromWebRequest } from 'payload'
-import { createAdminContext } from 'payload/internal'
+import { initAdminContext } from 'payload/internal'
 
-const handlers = { createPayloadRequest: createPayloadRequestFromWebRequest, initReq: createAdminContext }
+const handlers = { createPayloadRequest: createPayloadRequestFromWebRequest, initReq: initAdminContext }
 const requestKey: string = 'createPayloadRequest'
 const contextKey: string = 'initReq'
 handlers[requestKey](args)

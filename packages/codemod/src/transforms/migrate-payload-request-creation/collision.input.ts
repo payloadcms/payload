@@ -4,6 +4,6 @@ import { initReq } from 'payload/internal'
 
 const createPayloadRequestFromWebRequest = other
 const req = createLocalReq({}, payload)
-function read(createAdminContext: Function) {
+function read(initAdminContext: Function) {
   return initReq(args)
 }

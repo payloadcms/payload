@@ -6,8 +6,8 @@ import { renderServerComponent } from '@tanstack/react-start/rsc'
 
 import type { AdminPageMetadata } from './meta.js'
 
-import { createAdminContext } from './createAdminContext.server.js'
 import { getRequestI18n } from './getRequestI18n.server.js'
+import { initAdminContext } from './initAdminContext.server.js'
 import { createPageRenderServerAdapter } from './serverAdapter.server.js'
 
 export type LoadAdminPageArgs = {
@@ -133,7 +133,7 @@ const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
  * the app's `config` and generated `importMap`.
  *
  *   1. Gets the Payload admin context via the shared `renderRoot` orchestrator
- *      from `@payloadcms/ui`, passing a TanStack-bound `createAdminContext`. The injected
+ *      from `@payloadcms/ui`, passing a TanStack-bound `initAdminContext`. The injected
  *      page-render `ServerAdapter` records navigation intent and throws the
  *      framework-agnostic error contract.
  *   2. Pipes the resulting React server tree through `renderServerComponent`
@@ -175,14 +175,14 @@ export async function loadAdminPage({
   const pageServerAdapter = createPageRenderServerAdapter(nav)
   let userAgent: string | undefined
 
-  // `renderRoot` calls `createAdminContext` itself with its own overrides (query
+  // `renderRoot` calls `initAdminContext` itself with its own overrides (query
   // re-nesting, `urlSuffix`, `fallbackLocale`). Forward them, injecting the
   // page-render `ServerAdapter` so `req.server.redirect()` / `.notFound()`
   // is recorded + thrown rather than escaping as raw TanStack nav.
-  const boundCreateAdminContext: Parameters<typeof renderRoot>[0]['createAdminContext'] = async (
+  const boundInitAdminContext: Parameters<typeof renderRoot>[0]['initAdminContext'] = async (
     args,
   ) => {
-    const result = await createAdminContext({
+    const result = await initAdminContext({
       configPromise: args.configPromise,
       importMap: args.importMap,
       overrides: args.overrides,
@@ -210,8 +210,8 @@ export async function loadAdminPage({
 
     const notFoundNode = await renderNotFoundPage({
       config: Promise.resolve(config),
-      createAdminContext,
       importMap,
+      initAdminContext,
       params: Promise.resolve({ segments: splatSegments }),
       searchParams: Promise.resolve(searchParams),
     })
@@ -225,8 +225,8 @@ export async function loadAdminPage({
     const node = await renderRoot({
       adminViews: defaultAdminViews,
       config: Promise.resolve(config),
-      createAdminContext: boundCreateAdminContext,
       importMap,
+      initAdminContext: boundInitAdminContext,
       key: splat ?? '',
       notFound: pageServerAdapter.notFound,
       // `segments` is intentionally `undefined` for the admin root (`/admin`),

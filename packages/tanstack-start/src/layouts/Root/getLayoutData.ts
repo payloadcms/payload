@@ -19,7 +19,7 @@ import { Outlet } from '@tanstack/react-router'
 import { applyLocaleFiltering } from 'payload/shared'
 import { createElement } from 'react'
 
-import { createAdminContext } from '../../utilities/createAdminContext.server.js'
+import { initAdminContext } from '../../utilities/initAdminContext.server.js'
 
 export type RootLayoutData = {
   clientConfig: ClientConfig
@@ -66,7 +66,7 @@ export async function getLayoutData({
       payload: { config },
     },
     user,
-  } = await createAdminContext({ configPromise, importMap })
+  } = await initAdminContext({ configPromise, importMap })
 
   const theme = getRequestTheme({ config, cookies, headers })
   const isEmbedded = getRequestEmbed({ config, cookies })

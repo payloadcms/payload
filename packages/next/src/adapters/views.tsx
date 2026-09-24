@@ -11,7 +11,7 @@ import { renderRoot } from '@payloadcms/ui/views/Root'
 import { defaultAdminViews } from '@payloadcms/ui/views/Root/adminViews'
 import { notFound, redirect } from 'next/navigation.js'
 
-import { createAdminContext } from '../utilities/createAdminContext.js'
+import { initAdminContext } from '../utilities/initAdminContext.js'
 
 export const adminViews: AdminViewAdapter<AdminViewServerProps, MetaConfig> = defaultAdminViews
 
@@ -27,7 +27,6 @@ type PageProps = {
 }
 
 export const RootPage = (props: PageProps) =>
-  renderRoot({ ...props, adminViews, createAdminContext, notFound, redirect })
+  renderRoot({ ...props, adminViews, initAdminContext, notFound, redirect })
 
-export const NotFoundPage = (props: PageProps) =>
-  renderNotFoundPage({ ...props, createAdminContext })
+export const NotFoundPage = (props: PageProps) => renderNotFoundPage({ ...props, initAdminContext })

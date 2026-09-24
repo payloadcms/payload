@@ -3,7 +3,7 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient 
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
-import type { CreateAdminContextFn } from '../../views/Root/index.js'
+import type { InitAdminContextFn } from '../../views/Root/index.js'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 
@@ -39,7 +39,6 @@ type RootLayoutProps = {
   readonly additionalDependencyChecks?: CheckDependenciesArgs
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
-  readonly createAdminContext: CreateAdminContextFn
   /**
    * Fonts to apply to the admin `<html>` element. Each entry's
    * `variable ?? className` is appended to the `<html>` class list.
@@ -65,6 +64,7 @@ type RootLayoutProps = {
   readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
+  readonly initAdminContext: InitAdminContextFn
   /**
    * Client router adapter. Caller supplies a framework-specific provider
    * (for Next.js use the `NextRouterAdapter` exported from `@payloadcms/next`).
@@ -88,11 +88,11 @@ export const RootLayout = (props: RootLayoutProps) => {
 const RootLayoutContent = async ({
   children,
   config: configPromise,
-  createAdminContext,
   fonts = [],
   head: headFromProps,
   htmlProps = {},
   importMap,
+  initAdminContext,
   RouterAdapter,
   serverFunction,
 }: RootLayoutProps) => {
@@ -106,7 +106,7 @@ const RootLayoutContent = async ({
       payload: { config },
     },
     user,
-  } = await createAdminContext({ configPromise, importMap, key: 'RootLayout' })
+  } = await initAdminContext({ configPromise, importMap, key: 'RootLayout' })
 
   const theme = getRequestTheme({
     config,

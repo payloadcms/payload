@@ -5,21 +5,21 @@ import { createRequire } from 'node:module'
 import type React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createAdminContext } from './createAdminContext.js'
+import { initAdminContext } from './initAdminContext.js'
 
-const { counters, createPayloadAdminContext } = vi.hoisted(() => ({
+const { counters, initPayloadAdminContext } = vi.hoisted(() => ({
   counters: {
     locale: 0,
     partial: 0,
     request: 0,
   },
-  createPayloadAdminContext: vi.fn(),
+  initPayloadAdminContext: vi.fn(),
 }))
 
 vi.mock('react', () => createRequire(import.meta.url)('react'))
 
 vi.mock('payload/internal', () => ({
-  createAdminContext: createPayloadAdminContext,
+  initAdminContext: initPayloadAdminContext,
 }))
 
 vi.mock('../adapters/server.js', () => ({
@@ -46,9 +46,9 @@ const importMap = {} as ImportMap
 async function renderNavigation(): Promise<void> {
   async function Navigation() {
     await Promise.all([
-      createAdminContext({ configPromise, importMap, key: 'RootLayout' }),
-      createAdminContext({ configPromise, importMap, key: 'RootLayout' }),
-      createAdminContext({ configPromise, importMap, key: 'initPage' }),
+      initAdminContext({ configPromise, importMap, key: 'RootLayout' }),
+      initAdminContext({ configPromise, importMap, key: 'RootLayout' }),
+      initAdminContext({ configPromise, importMap, key: 'initPage' }),
     ])
 
     return null
@@ -62,13 +62,13 @@ async function renderNavigation(): Promise<void> {
 async function renderNavigationWithOverrides(): Promise<void> {
   async function Navigation() {
     await Promise.all([
-      createAdminContext({
+      initAdminContext({
         configPromise,
         importMap,
         key: 'initPage',
         overrides: { context: { source: 'first' } },
       }),
-      createAdminContext({
+      initAdminContext({
         configPromise,
         importMap,
         key: 'initPage',
@@ -84,12 +84,12 @@ async function renderNavigationWithOverrides(): Promise<void> {
   await new Response(stream).arrayBuffer()
 }
 
-describe('Next createAdminContext RSC cache', () => {
+describe('Next initAdminContext RSC cache', () => {
   beforeEach(() => {
     counters.locale = 0
     counters.partial = 0
     counters.request = 0
-    createPayloadAdminContext.mockReset().mockImplementation(async ({ cache, key, overrides }) => {
+    initPayloadAdminContext.mockReset().mockImplementation(async ({ cache, key, overrides }) => {
       await cache.getPartial(async () => {
         counters.partial += 1
         return {}

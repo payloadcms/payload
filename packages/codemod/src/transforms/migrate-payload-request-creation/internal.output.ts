@@ -1,7 +1,7 @@
-import { createAdminContext, type CreateAdminContextArgs, type AdminContextCache, type PartialAdminContext } from 'payload/internal'
-import { createAdminContext as initialize, type CreateAdminContextArgs as Args } from 'payload/internal'
+import { initAdminContext, type InitAdminContextArgs, type AdminContextCache, type PartialAdminContext } from 'payload/internal'
+import { initAdminContext as initialize, type InitAdminContextArgs as Args } from 'payload/internal'
 
-const context = createAdminContext(args as CreateAdminContextArgs)
+const context = initAdminContext(args as InitAdminContextArgs)
 const aliased = initialize(args as Args)
 type Cache = AdminContextCache
 type PartialContext = PartialAdminContext

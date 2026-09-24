@@ -24,20 +24,20 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ### Payload request creation is consolidated
 
-Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `createAdminContext`.
+Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.
 
 | Old name                                | New name                                    |
 | --------------------------------------- | ------------------------------------------- |
 | `createLocalReq`                        | `createPayloadRequest`                      |
 | `CreateLocalReqOptions` (internal type) | `Omit<CreatePayloadRequestArgs, 'payload'>` |
 | `createPayloadRequest`                  | `createPayloadRequestFromWebRequest`        |
-| `initReq`                               | `createAdminContext`                        |
-| `InitReqArgs`                           | `CreateAdminContextArgs`                    |
-| `InitReqResult`                         | `CreateAdminContextResult`                  |
+| `initReq`                               | `initAdminContext`                          |
+| `InitReqArgs`                           | `InitAdminContextArgs`                      |
+| `InitReqResult`                         | `AdminContext`                              |
 | `InitReqCache`                          | `AdminContextCache`                         |
 | `InitReqPartialResult`                  | `PartialAdminContext`                       |
 
-`createAdminContext` and its cache types are primarily contracts for framework adapters. Custom Root layout adapters must rename their injected `initReq` callback to `createAdminContext`.
+`initAdminContext` and its cache types are primarily contracts for framework adapters. Custom Root layout adapters must rename their injected `initReq` callback to `initAdminContext`.
 
 Local request creation now takes a single object argument containing `payload`. For a request without options:
 

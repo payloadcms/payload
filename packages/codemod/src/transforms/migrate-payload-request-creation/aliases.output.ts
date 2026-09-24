@@ -1,4 +1,4 @@
-import type { CreatePayloadRequestArgs as Options, CreateAdminContextResult as Result } from 'payload'
+import type { CreatePayloadRequestArgs as Options, AdminContext as Result } from 'payload'
 
 import { createPayloadRequest as local, createPayloadRequestFromWebRequest as web } from 'payload'
 

@@ -1,5 +1,5 @@
-import { createPayloadRequest, createPayloadRequestFromWebRequest, type CreateAdminContextResult } from 'payload'
+import { createPayloadRequest, createPayloadRequestFromWebRequest, type AdminContext } from 'payload'
 
 const req = await createPayloadRequest({ payload: payload })
 const web = createPayloadRequestFromWebRequest(request, config)
-type Context = CreateAdminContextResult
+type Context = AdminContext

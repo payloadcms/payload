@@ -1,14 +1,14 @@
-import type { CreateAdminContextResult } from 'payload'
-import type { AdminContextCache, CreateAdminContextArgs, PartialAdminContext } from 'payload/internal'
+import type { AdminContext } from 'payload'
+import type { AdminContextCache, InitAdminContextArgs, PartialAdminContext } from 'payload/internal'
 
-import { createAdminContext as createPayloadAdminContext } from 'payload/internal'
+import { initAdminContext as initPayloadAdminContext } from 'payload/internal'
 
 import { nextServerAdapter } from '../adapters/server.js'
 import { selectiveCache } from './selectiveCache.js'
 
 const partialContextCache = selectiveCache<PartialAdminContext>('partialContext')
-const localeCache = selectiveCache<Pick<CreateAdminContextResult, 'locale'>>('locale')
-const adminContextCache = selectiveCache<CreateAdminContextResult>('adminContext')
+const localeCache = selectiveCache<Pick<AdminContext, 'locale'>>('locale')
+const adminContextCache = selectiveCache<AdminContext>('adminContext')
 
 const cache: AdminContextCache = {
   getLocale: (resolveLocale, ...key) => localeCache.get({ create: resolveLocale, key }),
@@ -21,12 +21,12 @@ const cache: AdminContextCache = {
     }),
 }
 
-type NextCreateAdminContextArgs = {
+type NextInitAdminContextArgs = {
   key: string
-} & Omit<CreateAdminContextArgs, 'cache' | 'key' | 'serverAdapter'>
+} & Omit<InitAdminContextArgs, 'cache' | 'key' | 'serverAdapter'>
 
-export const createAdminContext = (args: NextCreateAdminContextArgs) =>
-  createPayloadAdminContext({
+export const initAdminContext = (args: NextInitAdminContextArgs) =>
+  initPayloadAdminContext({
     ...args,
     cache,
     serverAdapter: nextServerAdapter,
