@@ -257,6 +257,54 @@ describe('getCachedFormStateIfDataMatches', () => {
     ).toEqual({ items: null })
   })
 
+  it('should preserve a null array after the client records an empty row count', () => {
+    expect(
+      reduceFormStateToBlockData(
+        {
+          items: {
+            rows: [],
+            value: 0,
+          },
+        },
+        { items: null },
+      ),
+    ).toEqual({ items: null })
+  })
+
+  it('should allow a null array to be changed to an empty array', () => {
+    expect(
+      reduceFormStateToBlockData(
+        {
+          items: {
+            isModified: true,
+            rows: [],
+            value: 0,
+          },
+        },
+        { items: null },
+      ),
+    ).toEqual({})
+  })
+
+  it('should keep a null-to-empty array change after a sibling field changes', () => {
+    expect(
+      reduceFormStateToBlockData(
+        {
+          items: {
+            disableFormData: false,
+            rows: [],
+            value: 0,
+          },
+          title: {
+            isModified: true,
+            value: 'After',
+          },
+        },
+        { items: null, title: 'Before' },
+      ),
+    ).toEqual({ title: 'After' })
+  })
+
   it.each([
     {
       cachedRow: { id: 'row-1' },
@@ -331,5 +379,23 @@ describe('getCachedFormStateIfDataMatches', () => {
         },
       }),
     ).toBe(cachedFormState)
+  })
+
+  it('should rebuild form state when the cached schema path differs', () => {
+    const cachedFormState: FormState = {
+      title: { initialValue: 'Shared title', value: 'Shared title' },
+    }
+
+    expect(
+      getCachedFormStateIfDataMatches({
+        cachedFormState,
+        cachedSchemaPath: 'lexical.blocks.callout.fields',
+        currentSchemaPath: 'lexical.blocks.quote.fields',
+        formData: {
+          blockType: 'quote',
+          title: 'Shared title',
+        },
+      }),
+    ).toBe(false)
   })
 })

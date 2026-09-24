@@ -2,6 +2,7 @@ import {
   buildEditorState,
   type DefaultNodeTypes,
   type RichTextNodes,
+  type SerializedBlockNode,
   type SerializedInlineBlockNode,
 } from '@payloadcms/richtext-lexical'
 import { expect, type Page, test } from '@playwright/test'
@@ -9,10 +10,15 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../../__helpers/shared/sdk/index.js'
-import type { Config, InlineBlockWithSelect } from '../../../payload-types.js'
+import type {
+  Config,
+  InlineBlockWithSelect,
+  MyBlock,
+  MyInlineBlock,
+} from '../../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../../__helpers/e2e/assertNetworkRequests.js'
-import { saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
+import { changeLocale, saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -265,6 +271,171 @@ describe('Lexical Fully Featured - database', () => {
         },
       },
     )
+  })
+
+  test('should preserve null arrays when regular and inline block fields change', async ({
+    page,
+  }) => {
+    const doc = await payload.create({
+      collection: lexicalFullyFeaturedSlug,
+      data: {
+        richText: buildEditorState<FullyFeaturedNode>({
+          nodes: [
+            {
+              type: 'block',
+              fields: {
+                id: 'regular-block',
+                blockType: 'myBlock',
+                items: null,
+                someText: 'Regular before',
+              },
+              format: '',
+              version: 2,
+            },
+            {
+              type: 'block',
+              fields: {
+                id: 'empty-array-block',
+                blockType: 'myBlock',
+                items: null,
+                someText: 'Empty array block',
+              },
+              format: '',
+              version: 2,
+            },
+            {
+              type: 'inlineBlock',
+              fields: {
+                id: 'inline-block',
+                blockType: 'myInlineBlock',
+                items: null,
+                someText: 'Inline before',
+              },
+              version: 1,
+            },
+          ],
+        }),
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+    await expect(lexical.editor.first()).toBeVisible()
+
+    const regularBlocks = lexical.editor.locator('.LexicalEditorTheme__block-myBlock')
+    const regularBlock = regularBlocks.nth(0)
+    await regularBlock.locator('#field-someText').fill('Regular after')
+
+    const inlineBlock = lexical.editor.locator('.LexicalEditorTheme__inlineBlock').first()
+    await inlineBlock.locator('.LexicalEditorTheme__inlineBlock__container').click()
+    await expect(lexical.drawer).toBeVisible()
+    await lexical.drawer.locator('#field-someText').fill('Inline after')
+    await lexical.drawer.getByText('Save changes').click()
+    await expect(lexical.drawer).toBeHidden()
+
+    const emptyArrayBlock = regularBlocks.nth(1)
+    const itemsField = emptyArrayBlock.locator('#field-items')
+    const emptyFormStateResponsePromise = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        response.url().includes(`/admin/collections/${lexicalFullyFeaturedSlug}/`),
+    )
+    await itemsField.getByRole('button', { name: 'Add Item' }).click()
+    await expect(itemsField.locator('.array-field__row')).toHaveCount(1)
+
+    await itemsField.locator('#items-row-0 .array-actions__button').click()
+    await page.locator('.popup__content .array-actions__remove').click()
+    await emptyArrayBlock.locator('#field-someText').fill('Empty array after')
+    await emptyFormStateResponsePromise
+    await expect(itemsField.locator('.array-field__row')).toHaveCount(0)
+
+    const updateRequestPromise = page.waitForRequest(
+      (request) =>
+        request.method() === 'PATCH' && request.url().includes(`/api/${lexicalFullyFeaturedSlug}/`),
+    )
+    await saveDocAndAssert(page)
+
+    const updateRequest = await updateRequestPromise
+    const serializedUpdateData = updateRequest
+      .postData()
+      ?.match(/name="_payload"\r\n\r\n(.*?)\r\n--/s)?.[1]
+    expect(serializedUpdateData).toBeDefined()
+    const updateData = JSON.parse(serializedUpdateData as string)
+    const savedNodes = updateData.richText.root.children as FullyFeaturedNode[]
+    const savedRegularBlock = savedNodes.find(
+      (node) => node.type === 'block' && node.fields.id === 'regular-block',
+    ) as SerializedBlockNode<MyBlock> | undefined
+    const savedEmptyArrayBlock = savedNodes.find(
+      (node) => node.type === 'block' && node.fields.id === 'empty-array-block',
+    ) as SerializedBlockNode<MyBlock> | undefined
+    const savedParagraph = savedNodes.find((node) => node.type === 'paragraph')
+    const savedInlineBlock = savedParagraph?.children.find(
+      (node) => node.type === 'inlineBlock' && node.fields.blockType === 'myInlineBlock',
+    ) as SerializedInlineBlockNode<MyInlineBlock> | undefined
+
+    expect(savedRegularBlock?.fields.items).toBeNull()
+    expect(savedEmptyArrayBlock?.fields.items).toBeUndefined()
+    expect(savedInlineBlock?.fields.items).toBeNull()
+  })
+
+  test('should keep a localized block array empty after fallback is disabled', async ({ page }) => {
+    const doc = await payload.create({
+      collection: lexicalFullyFeaturedSlug,
+      data: {
+        richText: buildEditorState<FullyFeaturedNode>({
+          nodes: [
+            {
+              type: 'block',
+              fields: {
+                id: 'localized-empty-array-block',
+                blockType: 'myBlock',
+                items: null,
+                someText: 'Before',
+              },
+              format: '',
+              version: 2,
+            },
+          ],
+        }),
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+    await expect(lexical.editor.first()).toBeVisible()
+    await changeLocale(page, 'es')
+
+    const block = lexical.editor.locator('.LexicalEditorTheme__block-myBlock')
+    const itemsField = block.locator('#field-items')
+    const fallbackCheckbox = itemsField.locator('input[type="checkbox"]')
+    await expect(fallbackCheckbox).toBeChecked()
+
+    const formStateResponsePromise = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        response.url().includes(`/admin/collections/${lexicalFullyFeaturedSlug}/`),
+    )
+    await fallbackCheckbox.click()
+    await expect(fallbackCheckbox).not.toBeChecked()
+    await block.locator('#field-someText').fill('After')
+    await formStateResponsePromise
+
+    const updateRequestPromise = page.waitForRequest(
+      (request) =>
+        request.method() === 'PATCH' && request.url().includes(`/api/${lexicalFullyFeaturedSlug}/`),
+    )
+    await saveDocAndAssert(page)
+
+    const updateRequest = await updateRequestPromise
+    const serializedUpdateData = updateRequest
+      .postData()
+      ?.match(/name="_payload"\r\n\r\n(.*?)\r\n--/s)?.[1]
+    expect(serializedUpdateData).toBeDefined()
+    const updateData = JSON.parse(serializedUpdateData as string)
+    const savedNodes = updateData.richText.root.children as FullyFeaturedNode[]
+    const savedBlock = savedNodes.find(
+      (node) => node.type === 'block' && node.fields.id === 'localized-empty-array-block',
+    ) as SerializedBlockNode<MyBlock> | undefined
+
+    expect(savedBlock?.fields.items).toBeUndefined()
   })
 
   test('ensure block name can be saved and loaded', async ({ page }) => {

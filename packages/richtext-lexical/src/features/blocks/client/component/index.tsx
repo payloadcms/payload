@@ -131,18 +131,26 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const isEditable = useLexicalEditable()
 
   const blockType = formData.blockType
+  const formDataRef = useRef(formData)
+  formDataRef.current = formData
 
   const { getFormState } = useServerFunctions()
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
     // Initial form state that was calculated server-side. May have stale values
-    const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
+    const cachedState = initialLexicalFormState?.[formData.id]
+    const cachedFormState = cachedState?.formState
     if (!cachedFormState) {
       return false
     }
 
-    const matchingCachedState = getCachedFormStateIfDataMatches({ cachedFormState, formData })
+    const matchingCachedState = getCachedFormStateIfDataMatches({
+      cachedFormState,
+      cachedSchemaPath: cachedState.schemaPath,
+      currentSchemaPath: schemaFieldsPath,
+      formData,
+    })
     if (!matchingCachedState) {
       return false
     }
@@ -344,10 +352,15 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
       const controller = new AbortController()
       onChangeAbortControllerRef.current = controller
+      const blockData = reduceFormStateToBlockData(
+        deepCopyObjectSimpleWithoutReactComponents(prevFormState, { excludeFiles: true }),
+        formDataRef.current,
+      )
 
       const { state: newFormState } = await getFormState({
         id,
         collectionSlug,
+        data: blockData,
         docPermissions: {
           fields: true,
         },
@@ -357,7 +370,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         }),
         formState: prevFormState,
         globalSlug,
-        initialBlockFormState: prevFormState,
+        initialBlockData: blockData,
         operation: 'update',
         readOnly: !isEditable,
         renderAllFields: submit ? true : false,
@@ -375,6 +388,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
       const newFormStateData = reduceFormStateToBlockData(
         deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
+        blockData,
       ) as BlockFields
 
       setTimeout(() => {
@@ -754,14 +768,18 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           fields={clientBlock?.fields ?? []}
           initialState={initialState}
           onChange={[onChange]}
-          onSubmit={(formState, newData) => {
+          onSubmit={(formState) => {
             // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+            const newData = reduceFormStateToBlockData(
+              formState,
+              formDataRef.current,
+            ) as BlockFields
             newData.blockType = blockType
             editor.update(
               () => {
                 const node = $getNodeByKey(nodeKey)
                 if (node && $isBlockNode(node)) {
-                  node.setFields(newData as BlockFields, true)
+                  node.setFields(newData, true)
                 }
               },
               // Without this, the outer editor's reconciler resets DOM selection
