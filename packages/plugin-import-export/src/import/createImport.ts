@@ -49,10 +49,6 @@ export type Import = {
 
 export type CreateImportArgs = {
   defaultVersionStatus?: 'draft' | 'published'
-  /**
-   * The import document that triggered this run, passed through to the collection-level
-   * import hooks. Both callers already hold it, so it is read once and never re-fetched.
-   */
   importDoc: ImportDoc
   req: PayloadRequest
 } & Import

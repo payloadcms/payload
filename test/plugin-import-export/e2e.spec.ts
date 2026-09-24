@@ -1889,10 +1889,7 @@ test.describe('Import Export Plugin', () => {
     })
   })
 
-  // These two must drive the browser rather than post to the preview endpoints directly. The
-  // endpoints already forward whatever they are given, so the thing under test is the request
-  // body the preview components build — a test that builds its own body cannot catch a
-  // component that omits a field.
+  // Drive the browser to verify that preview components forward custom fields.
   test.describe('Hooks — custom fields on the preview forms', () => {
     const createdPostIDs: (number | string)[] = []
     const tempFiles: string[] = []
@@ -1940,7 +1937,6 @@ test.describe('Import Export Plugin', () => {
 
       const batchRefHeader = previewTable.locator('thead th').filter({ hasText: batchRefFieldName })
 
-      // export.hooks.before only adds the column once it can read the value from exportDoc
       await expect(batchRefHeader).toHaveCount(0)
 
       await page.locator(`#field-${batchRefFieldName}`).fill('E2E-EXPORT-REF')

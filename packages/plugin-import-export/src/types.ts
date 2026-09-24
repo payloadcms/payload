@@ -40,35 +40,10 @@ export type ImportResult = {
   updated: number
 }
 
-/**
- * The export document that triggered the run, including any fields added to the exports
- * collection via `overrideCollection`.
- *
- * `id` is optional because only the jobs-queue path has a saved document when the hooks
- * run. The synchronous path runs in `beforeOperation` (nothing is saved yet), and the
- * download and preview paths never persist a document at all. On those three this is the
- * submitted form data, with `id`, `createdAt` and `updatedAt` dropped — so an `id` always
- * means the document is saved. Persistence does not establish authorization for actions
- * performed by a hook. Without an id, treat the fields as unvalidated request input.
- *
- * Read once at the start of processing and reused for every batch. Queued operations read
- * the document when the job starts, not when it is queued. Treat this shared object as read-only.
- */
+/** Export document or unsaved form values. `id` indicates a saved document. Treat as read-only. */
 export type ExportDoc = { id?: number | string } & JsonObject
 
-/**
- * The import document that triggered the run, including any fields added to the imports
- * collection via `overrideCollection`.
- *
- * `id` is optional because the preview endpoint runs the before hook against form data
- * that has not been saved, with `id`, `createdAt` and `updatedAt` dropped. Both real import
- * paths — synchronous and jobs queue — always pass a saved document with an `id`, so an `id`
- * indicates a saved document, not authorization for actions performed by a hook. Without
- * an id, treat the fields as unvalidated request input.
- *
- * Read once at the start of processing and reused for every batch. Queued operations read
- * the document when the job starts, not when it is queued. Treat this shared object as read-only.
- */
+/** Import document or unsaved preview form values. `id` indicates a saved document. Treat as read-only. */
 export type ImportDoc = { id?: number | string } & JsonObject
 
 /**
@@ -81,7 +56,7 @@ export type ExportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   batchNumber: number
   /** Transformed batch — flat rows for CSV, nested docs for JSON. Modify and return this. */
   data: Record<string, unknown>[]
-  /** The export document that triggered this run. See {@link ExportDoc} — `id` may be absent. */
+  /** See {@link ExportDoc}. */
   exportDoc: ExportDoc
   /** Export format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
@@ -108,7 +83,7 @@ export type ExportAfterHook = (args: {
   batchNumber: number
   /** The batch data that was written */
   data: Record<string, unknown>[]
-  /** The export document that triggered this run. See {@link ExportDoc} — `id` may be absent. */
+  /** See {@link ExportDoc}. */
   exportDoc: ExportDoc
   /** Export format */
   format: 'csv' | 'json' | ({} & string)
@@ -136,7 +111,7 @@ export type ImportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   data: Partial<DataFromCollectionSlug<TSlug>>[]
   /** Import format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
-  /** The import document that triggered this run. See {@link ImportDoc}. */
+  /** See {@link ImportDoc}. */
   importDoc: ImportDoc
   /** Raw parsed file rows before unflattening. Read-only reference. */
   originalData: Record<string, unknown>[]
@@ -154,7 +129,7 @@ export type ImportAfterHook = (args: {
   batchNumber: number
   /** Import format */
   format: 'csv' | 'json' | ({} & string)
-  /** The import document that triggered this run. See {@link ImportDoc}. */
+  /** See {@link ImportDoc}. */
   importDoc: ImportDoc
   /**
    * Raw parsed file rows for this batch before unflattening and before-hook

@@ -33,8 +33,6 @@ export const exportBeforeHook: ExportBeforeHook<typeof postsWithHooksSlug> = (ar
     // Mask the `secret` field from exported data
     const { secret: _secret, ...rest } = row
 
-    // Stamp the editor's reference onto every row, but only when the form supplied one, so
-    // that the tests which do not set it still see unchanged output.
     return batchRef ? { ...rest, [batchRefFieldName]: batchRef } : rest
   })
 }
@@ -48,9 +46,6 @@ export const importBeforeHook: ImportBeforeHook<typeof postsWithHooksSlug> = (ar
 
   const batchRef = args.importDoc[batchRefFieldName]
 
-  // Append '_imported' to each title for verification, and the editor's reference on top of
-  // that when the form supplied one, so tests can prove an importDoc value reaches the
-  // documents that get created.
   return args.data.map((doc) => {
     if (typeof doc.title !== 'string') {
       return doc

@@ -54,11 +54,6 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-/**
- * Applies the three overrides every hook-test import/export collection needs: a distinct slug,
- * uploads pointed at this suite's directory, and a `batchRef` field standing in for a field a
- * project adds via `overrideCollection` and an editor fills in on the form.
- */
 const withTestCollectionOverrides = ({
   slug,
   collection,
@@ -71,7 +66,18 @@ const withTestCollectionOverrides = ({
     ...(typeof collection.upload === 'object' ? collection.upload : {}),
     staticDir: path.resolve(dirname, 'uploads'),
   }
-  collection.fields = [...collection.fields, { name: batchRefFieldName, type: 'text' }]
+  collection.fields = [
+    ...collection.fields,
+    { name: batchRefFieldName, type: 'text' },
+    { name: 'previewLimit', type: 'text' },
+    ...(slug.endsWith('-export')
+      ? [
+          { name: 'draft', type: 'text' } as const,
+          { name: 'userCollection', type: 'text' } as const,
+          { name: 'userID', type: 'text' } as const,
+        ]
+      : [{ name: 'fileData', type: 'text' } as const, { name: 'format', type: 'text' } as const]),
+  ]
 
   return collection
 }

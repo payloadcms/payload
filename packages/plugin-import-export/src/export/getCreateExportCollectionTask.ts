@@ -128,9 +128,7 @@ export const getCreateCollectionExportTask = (
         return { output: {} }
       }
 
-      // The job input is a fixed schema, so anything added to the exports collection via
-      // `overrideCollection` does not survive serialization. Read the document back so the
-      // export hooks receive those fields. Read once — the same snapshot serves every batch.
+      // The job input omits custom fields, so read the export document once for the hooks.
       const exportDoc = await req.payload.findByID({
         id: input.id,
         collection: input.exportCollection,

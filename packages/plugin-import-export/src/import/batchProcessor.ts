@@ -56,12 +56,6 @@ export interface ImportProcessOptions {
     after?: ImportAfterHook
     before?: ImportBeforeHook
   }
-  /**
-   * The import document that triggered this run — passed through to hook args.
-   *
-   * Supplied once by the caller at the start of processing and reused for every batch.
-   * Hooks should treat this shared object as read-only.
-   */
   importDoc: ImportDoc
   importMode: ImportMode
   matchField?: string

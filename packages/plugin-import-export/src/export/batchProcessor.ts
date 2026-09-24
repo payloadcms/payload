@@ -40,12 +40,6 @@ export interface ExportProcessOptions<TDoc = unknown> {
    * The slug of the collection to export
    */
   collectionSlug: string
-  /**
-   * The export document that triggered this run — passed through to hook args.
-   *
-   * Supplied once by the caller at the start of processing and reused for every batch.
-   * Hooks should treat this shared object as read-only.
-   */
   exportDoc: ExportDoc
   /**
    * Arguments to pass to payload.find()

@@ -853,7 +853,6 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       return doc
     }
 
-    /** Creates a post to export. */
     const createTargetPost = async ({
       collection,
       data,
@@ -868,18 +867,15 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       return post
     }
 
-    /**
-     * Posts to the download endpoint and drains the stream, so the hooks have fired by the time
-     * it returns.
-     */
     const requestDownload = async ({
       id,
       batchRef,
+      formFields,
       postID,
       restClient,
     }: {
       batchRef: string
-      /** Set only to check that a submitted id cannot pass for a saved document. */
+      formFields?: Record<string, unknown>
       id?: string
       postID: number | string
       restClient: NextRESTClient
@@ -889,6 +885,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           data: {
             ...(id ? { id } : {}),
             [batchRefFieldName]: batchRef,
+            ...formFields,
             collectionSlug: postsWithHooksSlug,
             format: 'csv',
             where: { id: { equals: postID } },
@@ -903,7 +900,6 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       return response
     }
 
-    /** Finds the rows written by an import. */
     const findImportedPosts = async ({
       collection,
       payload,
@@ -1233,7 +1229,6 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         const beforeArgs = hookCalls.exportBefore[0]!
 
         expect(beforeArgs.exportDoc[batchRefFieldName]).toBe('DOWNLOAD-REF')
-        // Nothing is ever persisted on the download path
         expect(beforeArgs.exportDoc.id).toBeUndefined()
       })
 
@@ -1277,6 +1272,29 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         expect(hookCalls.exportBefore).toHaveLength(1)
         expect(hookCalls.exportBefore[0]!.exportDoc.id).toBeUndefined()
       })
+
+      test('should preserve submitted fields named like authentication values on download', async ({
+        payload,
+        restClient,
+      }) => {
+        const post = await createTargetPost({
+          collection: postsWithHooksSlug,
+          data: { title: 'Download collision' },
+          payload,
+        })
+
+        await requestDownload({
+          batchRef: 'AUTH-COLLISION',
+          formFields: { userCollection: 'editor-value', userID: 'editor-id' },
+          postID: post.id,
+          restClient,
+        })
+
+        expect(hookCalls.exportBefore[0]!.exportDoc).toMatchObject({
+          userCollection: 'editor-value',
+          userID: 'editor-id',
+        })
+      })
     })
 
     test.describe('preview', () => {
@@ -1291,9 +1309,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
 
         const response = await restClient.POST(`/${postsWithHooksExportSlug}/export-preview`, {
           body: JSON.stringify({
-            [batchRefFieldName]: 'EXPORT-PREVIEW-REF',
             collectionSlug: postsWithHooksSlug,
             format: 'csv',
+            formData: { [batchRefFieldName]: 'EXPORT-PREVIEW-REF' },
             previewLimit: 10,
             previewPage: 1,
             where: { id: { equals: post.id } },
@@ -1308,7 +1326,6 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         const beforeArgs = hookCalls.exportBefore[0]!
 
         expect(beforeArgs.exportDoc[batchRefFieldName]).toBe('EXPORT-PREVIEW-REF')
-        // Preview runs against the open form, so nothing is saved
         expect(beforeArgs.exportDoc.id).toBeUndefined()
       })
 
@@ -1319,10 +1336,10 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
 
         const response = await restClient.POST(`/${postsWithHooksImportSlug}/preview-data`, {
           body: JSON.stringify({
-            [batchRefFieldName]: 'IMPORT-PREVIEW-REF',
             collectionSlug: postsWithHooksSlug,
             fileData,
             format: 'csv',
+            formData: { [batchRefFieldName]: 'IMPORT-PREVIEW-REF' },
             previewLimit: 10,
             previewPage: 1,
           }),
@@ -1336,8 +1353,64 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         const beforeArgs = hookCalls.importBefore[0]!
 
         expect(beforeArgs.importDoc[batchRefFieldName]).toBe('IMPORT-PREVIEW-REF')
-        // Preview runs against the open form, so nothing is saved
         expect(beforeArgs.importDoc.id).toBeUndefined()
+      })
+
+      test('should keep export preview options separate from same-named form fields', async ({
+        payload,
+        restClient,
+      }) => {
+        const post = await createTargetPost({
+          collection: postsWithHooksSlug,
+          data: { title: 'Export preview collision' },
+          payload,
+        })
+
+        const response = await restClient.POST(`/${postsWithHooksExportSlug}/export-preview`, {
+          body: JSON.stringify({
+            collectionSlug: postsWithHooksSlug,
+            draft: 'no',
+            format: 'csv',
+            formData: { draft: 'editor-draft', previewLimit: 'editor-limit' },
+            previewLimit: 10,
+            where: { id: { equals: post.id } },
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        expect(response.status).toBe(200)
+        expect(hookCalls.exportBefore[0]!.exportDoc).toMatchObject({
+          draft: 'editor-draft',
+          previewLimit: 'editor-limit',
+        })
+      })
+
+      test('should keep import preview options separate from same-named form fields', async ({
+        restClient,
+      }) => {
+        const fileData = Buffer.from('title,count\n"Import preview collision",1').toString('base64')
+
+        const response = await restClient.POST(`/${postsWithHooksImportSlug}/preview-data`, {
+          body: JSON.stringify({
+            collectionSlug: postsWithHooksSlug,
+            fileData,
+            format: 'csv',
+            formData: {
+              fileData: 'editor-file-data',
+              format: 'editor-format',
+              previewLimit: 'editor-limit',
+            },
+            previewLimit: 10,
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        expect(response.status).toBe(200)
+        expect(hookCalls.importBefore[0]!.importDoc).toMatchObject({
+          fileData: 'editor-file-data',
+          format: 'editor-format',
+          previewLimit: 'editor-limit',
+        })
       })
 
       test('should not let a submitted id make the export preview path look like a saved document', async ({
@@ -1351,10 +1424,12 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
 
         const response = await restClient.POST(`/${postsWithHooksExportSlug}/export-preview`, {
           body: JSON.stringify({
-            id: 'not-a-real-export-id',
-            [batchRefFieldName]: 'SPOOFED-PREVIEW-REF',
             collectionSlug: postsWithHooksSlug,
             format: 'csv',
+            formData: {
+              id: 'not-a-real-export-id',
+              [batchRefFieldName]: 'SPOOFED-PREVIEW-REF',
+            },
             where: { id: { equals: post.id } },
           }),
           headers: { 'Content-Type': 'application/json' },

@@ -396,7 +396,6 @@ importExportPlugin({
     {
       slug: 'posts',
       export: {
-        // The exports collection has a `batchRef` text field added here
         overrideCollection: ({ collection }) => {
           collection.fields = [
             ...collection.fields,
@@ -405,7 +404,6 @@ importExportPlugin({
           return collection
         },
         hooks: {
-          // Stamp the editor's reference onto every exported row
           before: ({ data, exportDoc }) => {
             return data.map((row) => ({ ...row, batchRef: exportDoc.batchRef }))
           },

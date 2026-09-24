@@ -26,12 +26,14 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     collectionSlug,
     fileData,
     format,
+    formData,
     previewLimit: rawPreviewLimit = DEFAULT_PREVIEW_LIMIT,
     previewPage: rawPreviewPage = 1,
   } = req.data as {
     collectionSlug: string
     fileData?: string
     format?: 'csv' | 'json'
+    formData?: Record<string, unknown>
     previewLimit?: number
     previewPage?: number
   }
@@ -109,12 +111,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         batchNumber: 1,
         data: parsedData as unknown as Parameters<typeof importHooks.before>[0]['data'],
         format: format ?? 'csv',
-        // Preview runs against the open form, so nothing is saved — this carries every field
-        // the form submitted, including any added via `overrideCollection`.
-        // `getSubmittedFormValues` drops `id`, so a hook can rely on an absent `id` meaning
-        // "not saved".
         importDoc: getSubmittedFormValues({
-          formData: (req.data ?? {}) as Record<string, unknown>,
+          formData: formData ?? {},
         }) as ImportDoc,
         originalData: originalDocs,
         req,

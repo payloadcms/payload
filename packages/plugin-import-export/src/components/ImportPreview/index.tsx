@@ -34,10 +34,7 @@ import './index.css'
 
 const baseClass = 'import-preview'
 
-/**
- * The upload field is left out of the forwarded form values: a `File` is not serializable, and
- * the file contents already travel to the endpoint as `fileData`.
- */
+// The file contents are sent separately as `fileData`.
 const nonSerializableFormKeys = ['file']
 
 /**
@@ -81,8 +78,6 @@ export const ImportPreview: React.FC = () => {
   const fileField = useFormFields(([fields]) => fields?.file || null)
 
   const { getData } = useForm()
-  // The endpoint passes the request body to import.hooks.before as `importDoc`, so the whole
-  // form has to go with it — a field added via `overrideCollection` is not read above.
   const formStateSignature = useFormFields(([fields]) =>
     getFormStateSignature({ fields, omit: nonSerializableFormKeys }),
   )
@@ -172,13 +167,13 @@ export const ImportPreview: React.FC = () => {
           // Fetch transformed data from the server
           const res = await fetch(`${routes.api}/${collectionSlug}/preview-data`, {
             body: JSON.stringify({
-              ...getSubmittedFormValues({
-                formData: getData(),
-                omit: nonSerializableFormKeys,
-              }),
               collectionSlug: targetCollectionSlug,
               fileData,
               format,
+              formData: getSubmittedFormValues({
+                formData: getData(),
+                omit: nonSerializableFormKeys,
+              }),
               previewLimit,
               previewPage,
             }),

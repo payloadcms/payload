@@ -815,6 +815,10 @@ export interface PostsWithHooksExport {
     | boolean
     | null;
   batchRef?: string | null;
+  previewLimit?: string | null;
+  draft?: string | null;
+  userCollection?: string | null;
+  userID?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -854,6 +858,10 @@ export interface PostsWithHooksJobsExport {
     | boolean
     | null;
   batchRef?: string | null;
+  previewLimit?: string | null;
+  draft?: string | null;
+  userCollection?: string | null;
+  userID?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1116,6 +1124,9 @@ export interface PostsWithHooksImport {
       | null;
   };
   batchRef?: string | null;
+  previewLimit?: string | null;
+  fileData?: string | null;
+  format?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1154,6 +1165,9 @@ export interface PostsWithHooksJobsImport {
       | null;
   };
   batchRef?: string | null;
+  previewLimit?: string | null;
+  fileData?: string | null;
+  format?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1932,6 +1946,10 @@ export interface PostsWithHooksExportSelect<T extends boolean = true> {
   collectionSlug?: T;
   where?: T;
   batchRef?: T;
+  previewLimit?: T;
+  draft?: T;
+  userCollection?: T;
+  userID?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1962,6 +1980,10 @@ export interface PostsWithHooksJobsExportSelect<T extends boolean = true> {
   collectionSlug?: T;
   where?: T;
   batchRef?: T;
+  previewLimit?: T;
+  draft?: T;
+  userCollection?: T;
+  userID?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2171,6 +2193,9 @@ export interface PostsWithHooksImportSelect<T extends boolean = true> {
         issueDetails?: T;
       };
   batchRef?: T;
+  previewLimit?: T;
+  fileData?: T;
+  format?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2202,6 +2227,9 @@ export interface PostsWithHooksJobsImportSelect<T extends boolean = true> {
         issueDetails?: T;
       };
   batchRef?: T;
+  previewLimit?: T;
+  fileData?: T;
+  format?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

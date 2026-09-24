@@ -53,8 +53,6 @@ export const ExportPreview: React.FC = () => {
     }
   })
   const { getData } = useForm()
-  // The endpoint passes the request body to export.hooks.before as `exportDoc`, so the whole
-  // form has to go with it — a field added via `overrideCollection` is not read above.
   const formStateSignature = useFormFields(([fields]) => getFormStateSignature({ fields }))
   const [dataToRender, setDataToRender] = useState<any[]>([])
   const [exportTotalDocs, setExportTotalDocs] = useState<number>(0)
@@ -109,11 +107,11 @@ export const ExportPreview: React.FC = () => {
         try {
           const res = await fetch(`${routes.api}/${collectionSlug}/export-preview`, {
             body: JSON.stringify({
-              ...getSubmittedFormValues({ formData: getData() }),
               collectionSlug: targetCollectionSlug,
               draft,
               fields,
               format,
+              formData: getSubmittedFormValues({ formData: getData() }),
               limit,
               locale,
               previewLimit,

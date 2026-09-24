@@ -46,23 +46,19 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
     }
 
     const { user } = req
-
-    body.data.userID = user?.id
-    body.data.userCollection = user?.collection
+    const exportDoc = getSubmittedFormValues({
+      formData: body.data as Record<string, unknown>,
+    }) as ExportDoc
 
     const res = await createExport({
       ...body.data,
       debug,
       download: true,
-      // Downloads are streamed and never persisted, so there is no export document. The
-      // submitted form data carries every user-authored field; `getSubmittedFormValues` drops
-      // `id`, so a hook can rely on an absent `id` meaning "not saved".
-      exportDoc: getSubmittedFormValues({
-        formData: body.data as Record<string, unknown>,
-      }) as ExportDoc,
+      exportDoc,
       maxLimit,
       req,
-      user: req.user,
+      userCollection: user?.collection,
+      userID: user?.id,
     })
 
     return res as Response

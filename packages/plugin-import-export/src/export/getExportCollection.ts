@@ -125,10 +125,6 @@ export const getExportCollection = ({
       batchSize,
       debug,
       exportCollection: collectionConfig.slug,
-      // This runs in beforeOperation, so the export document does not exist yet. The
-      // submitted form data carries every user-authored field, including any added via
-      // `overrideCollection`. `getSubmittedFormValues` drops `id` — a collection with custom
-      // IDs would otherwise carry one here for a document that is not saved yet.
       exportDoc: getSubmittedFormValues({ formData: exportData }),
       maxLimit,
       req,

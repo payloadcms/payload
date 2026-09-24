@@ -58,6 +58,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     collectionSlug,
     draft: draftFromReq,
     fields,
+    formData,
     limit: exportLimit,
     locale,
     previewLimit: rawPreviewLimit = DEFAULT_PREVIEW_LIMIT,
@@ -69,6 +70,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     draft?: 'no' | 'yes'
     fields?: string[]
     format?: 'csv' | 'json'
+    formData?: Record<string, unknown>
     limit?: number
     locale?: string
     previewLimit?: number
@@ -81,11 +83,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   const previewLimit = Math.max(MIN_PREVIEW_LIMIT, Math.min(rawPreviewLimit, MAX_PREVIEW_LIMIT))
   const previewPage = Math.max(MIN_PREVIEW_PAGE, rawPreviewPage)
 
-  // Preview runs against the open form, so nothing is saved — this carries every field the
-  // form submitted, including any added via `overrideCollection`. `getSubmittedFormValues`
-  // drops `id`, so a hook can rely on an absent `id` meaning "not saved".
   const exportDoc = getSubmittedFormValues({
-    formData: (req.data ?? {}) as Record<string, unknown>,
+    formData: formData ?? {},
   }) as ExportDoc
 
   const targetCollection = req.payload.collections[collectionSlug]

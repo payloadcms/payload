@@ -54,11 +54,6 @@ export type CreateExportArgs = {
    * If true, stream the file instead of saving it
    */
   download?: boolean
-  /**
-   * The export document that triggered this run, passed through to the collection-level
-   * export hooks. Only the jobs-queue path has a saved document here; the synchronous and
-   * download paths pass the submitted form data, which has no `id`.
-   */
   exportDoc: ExportDoc
   req: PayloadRequest
 } & Export
