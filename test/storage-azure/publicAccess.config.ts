@@ -37,7 +37,6 @@ const uploadCollection = (slug: string): CollectionConfig => ({
 })
 
 export default buildConfigWithDefaults({
-  suite: 'storage-azure-public-access',
   config: {
     admin: {
       importMap: {
@@ -75,6 +74,8 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   },
+  suite: 'storage-azure-public-access',
 })

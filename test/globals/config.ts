@@ -137,6 +137,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
@@ -144,6 +145,7 @@ export default buildConfigWithDefaults({
       data: {
         title: 'hello',
       },
+      overrideAccess: true,
     })
   },
 })

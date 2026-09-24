@@ -34,7 +34,7 @@ const signedURLBody = (
     mimeType,
   })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', () => {
+test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()
@@ -436,7 +436,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlySlug })
+        await payload.delete({ id, collection: mediaHeaderOnlySlug, overrideAccess: true })
       }
       createdIds.length = 0
     })
@@ -493,7 +493,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
+        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug, overrideAccess: true })
       }
       createdIds.length = 0
     })

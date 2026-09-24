@@ -8,6 +8,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { validateSortQuery } from '../../database/queryValidation/validateSortQuery.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
@@ -74,6 +75,8 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   })
 
   const fullWhere = combineQueries(where!, accessResults)
+
+  sanitizeWhereQuery({ fields: versionFields, payload, where: fullWhere })
 
   const select = sanitizeSelect({
     fields: buildVersionGlobalFields(payload.config, globalConfig, true),

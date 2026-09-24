@@ -159,6 +159,7 @@ mutation {
 ```ts
 const result = await payload.login({
   collection: 'collection-slug',
+  overrideAccess: false, // intentionally run the collection's login access control
   data: {
     email: 'dev@payloadcms.com',
     password: 'get-out',
@@ -223,6 +224,7 @@ const { user } = await payload.auth({ headers })
 
 await payload.update({
   collection: 'users',
+  overrideAccess: false,
   id: user.id,
   data: {
     password: 'new-password',
@@ -358,6 +360,10 @@ mutation {
 ```ts
 const result = await payload.unlock({
   collection: 'collection-slug',
+  overrideAccess: true,
+  data: {
+    email: 'dev@payloadcms.com',
+  },
 })
 ```
 
@@ -399,6 +405,7 @@ mutation {
 ```ts
 const token = await payload.forgotPassword({
   collection: 'collection-slug',
+  overrideAccess: true,
   data: {
     email: 'dev@payloadcms.com',
   },

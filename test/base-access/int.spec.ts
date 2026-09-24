@@ -20,7 +20,7 @@ const createRequest = async ({
     payload,
   )
 
-test.suite({ config: './config.ts' })('baseAccess', () => {
+test.suite('baseAccess', { config: './config.ts' }, () => {
   test('should combine base and collection query constraints', async ({ payload }) => {
     for (const data of [
       {
@@ -42,6 +42,7 @@ test.suite({ config: './config.ts' })('baseAccess', () => {
       await payload.create({
         collection: postsSlug,
         data,
+        overrideAccess: true,
       })
     }
     const req = await createRequest({
@@ -86,6 +87,7 @@ test.suite({ config: './config.ts' })('baseAccess', () => {
       collection: postsSlug,
       data,
       req,
+      overrideAccess: true,
     })
 
     expect(doc.title).toBe(data.title)

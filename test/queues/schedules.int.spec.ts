@@ -14,8 +14,9 @@ const { email, password } = devUser
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: './config.schedules.ts' })(
+test.suite(
   'Queues - scheduling, without automatic scheduling handling',
+  { config: './config.schedules.ts' },
   () => {
     test.afterAll(async () => {
       // Ensure no new crons are scheduled
@@ -65,6 +66,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -88,6 +90,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -111,6 +114,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)
@@ -138,6 +142,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -164,6 +169,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -190,6 +196,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)
@@ -213,6 +220,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(1)
@@ -230,6 +238,7 @@ test.suite({ config: './config.schedules.ts' })(
             input: {
               message: 'This task runs every second',
             },
+            overrideAccess: true,
           })
         }
         for (let i = 0; i < 3; i++) {
@@ -246,6 +255,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(3)
@@ -263,6 +273,7 @@ test.suite({ config: './config.schedules.ts' })(
             input: {
               message: 'This task runs every second - max 2 per second',
             },
+            overrideAccess: true,
           })
         }
         for (let i = 0; i < 3; i++) {
@@ -275,11 +286,13 @@ test.suite({ config: './config.schedules.ts' })(
       await payload.jobs.run({
         limit: 100,
         silent: true,
+        overrideAccess: true,
       })
 
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(2) // Would be 4 by default, if only scheduled jobs were respected in handleSchedules condition
@@ -300,11 +313,13 @@ test.suite({ config: './config.schedules.ts' })(
       // default queue is not scheduled to autorun
       await payload.jobs.run({
         silent: true,
+        overrideAccess: true,
       })
 
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(2)
@@ -332,6 +347,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(3)
@@ -355,6 +371,7 @@ test.suite({ config: './config.schedules.ts' })(
         // default queue is not scheduled to autorun => run manually
         await payload.jobs.run({
           silent: true,
+          overrideAccess: true,
         })
       }
 
@@ -366,6 +383,7 @@ test.suite({ config: './config.schedules.ts' })(
             equals: 'This task runs every second - max 2 per second',
           },
         },
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(6)
@@ -381,6 +399,7 @@ test.suite({ config: './config.schedules.ts' })(
       const allSimples = await payload.find({
         collection: 'simple',
         limit: 100,
+        overrideAccess: true,
       })
 
       expect(allSimples.totalDocs).toBe(0)

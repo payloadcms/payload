@@ -8,12 +8,17 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithAlwaysInsertFieldsSlug,
+  mediaWithPrefixSlug,
+  prefix,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/storage-azure', () => {
+test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTests: false }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
@@ -58,6 +63,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -70,6 +76,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -91,6 +98,22 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
     expect(response.status).toBe(404)
   })
 
+  test('has prefix field by default even when plugin is disabled', async ({ payload }) => {
+    // This collection uses an azureStorage plugin with enabled: false.
+    // The upload uses local storage, but the prefix field still exists.
+    const upload = await payload.create({
+      collection: mediaWithAlwaysInsertFieldsSlug,
+      data: {
+        prefix: 'test',
+      },
+      filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
+    })
+
+    expect(upload.id).toBeTruthy()
+    expect(upload.prefix).toBe('test')
+  })
+
   async function verifyUploads(
     { payload }: { payload: Payload },
     {
@@ -106,6 +129,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
     const uploadData = (await payload.findByID({
       collection: collectionSlug,
       id: uploadId,
+      overrideAccess: true,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>

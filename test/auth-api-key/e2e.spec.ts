@@ -68,6 +68,7 @@ test.beforeAll(async ({ browser }, testInfo) => {
       name: 'Existing API key user',
       apiKey: existingAPIKey,
     },
+    overrideAccess: true,
   })
 })
 
@@ -234,6 +235,7 @@ test.describe('revealable keys', () => {
       collection: restrictedRevealableKeysSlug,
       data: {},
       draft: true,
+      overrideAccess: true,
     })
 
     await page.goto(revealableKeysURL.edit(revealableKey.id))
@@ -246,6 +248,7 @@ test.describe('revealable keys', () => {
     const draft = await payload.find({
       collection: restrictedRevealableKeysSlug,
       draft: true,
+      overrideAccess: true,
       where: { id: { equals: revealableKey.id } },
     })
     const authResponse = await fetch(`${apiURL}/${restrictedRevealableKeysSlug}/me`, {
@@ -266,6 +269,7 @@ test.describe('revealable keys', () => {
       data: {
         apiKey,
       },
+      overrideAccess: true,
     })
 
     await page.goto(new AdminUrlUtil(serverURL, revealableKeysSlug).edit(revealableKey.id))
@@ -283,6 +287,7 @@ test.describe('revealable keys', () => {
     const revealableKey = await payload.create({
       collection: revealableKeysSlug,
       data: { apiKey: uuid() },
+      overrideAccess: true,
     })
     const revealURL = `**/${revealableKeysSlug}/${revealableKey.id}/api-key/reveal`
 
@@ -299,6 +304,7 @@ test.describe('revealable keys', () => {
     const apiKeyUser = await payload.create({
       collection: apiKeysSlug,
       data: { name: 'Failed update user', apiKey: uuid() },
+      overrideAccess: true,
     })
     const updateURL = `**/${apiKeysSlug}/${apiKeyUser.id}*`
 

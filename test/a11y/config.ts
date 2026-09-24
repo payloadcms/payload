@@ -79,6 +79,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -86,6 +87,7 @@ export default buildConfigWithDefaults({
       data: {
         name: 'Accessibility folder',
       },
+      overrideAccess: true,
     })
 
     const firstPost = await payload.create({
@@ -95,6 +97,7 @@ export default buildConfigWithDefaults({
         title: 'Example post one',
       },
       draft: true,
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -104,6 +107,7 @@ export default buildConfigWithDefaults({
         title: 'Example post one, second version',
       },
       draft: true,
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -113,6 +117,7 @@ export default buildConfigWithDefaults({
         title: 'Example post one, third version',
       },
       draft: false,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -123,6 +128,7 @@ export default buildConfigWithDefaults({
         title: 'Example post two',
       },
       draft: false,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -133,6 +139,7 @@ export default buildConfigWithDefaults({
         title: 'Example post three',
       },
       draft: false,
+      overrideAccess: true,
     })
   },
   suite: 'a11y',

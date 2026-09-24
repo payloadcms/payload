@@ -1,6 +1,7 @@
 import { createRequire } from 'module'
 import path from 'path'
 import fs from 'fs'
+import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 
 // Use process.cwd() to be safe in both CJS and ESM contexts within Vitest
@@ -67,8 +68,34 @@ export default defineConfig({
     projects: [
       {
         test: {
+          exclude: ['**/*.rsc.spec.ts'],
           include: ['packages/**/*.spec.ts', 'tools/**/*.spec.ts', '.github/scripts/**/*.spec.mjs'],
           name: 'unit',
+          environment: 'node',
+        },
+      },
+      {
+        resolve: {
+          dedupe: ['react', 'react-dom'],
+        },
+        test: {
+          include: ['packages/**/*.spec.tsx'],
+          name: 'components',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({ launchOptions: { channel: 'chromium' } }),
+            instances: [{ browser: 'chromium' }],
+          },
+        },
+      },
+      {
+        resolve: {
+          conditions: ['react-server'],
+        },
+        test: {
+          include: ['packages/next/**/*.rsc.spec.ts'],
+          name: 'rsc',
           environment: 'node',
         },
       },
