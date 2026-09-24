@@ -171,6 +171,29 @@ export const findByIDOperation = async <
   let docWithLocales: DataFromCollectionSlug<TSlug> | null | undefined
   let query = fullWhere
 
+  let dbSelect = select
+
+  if (
+    collectionConfig.versions?.drafts &&
+    replaceWithVersion &&
+    select &&
+    getSelectMode(select) === 'include'
+  ) {
+    dbSelect = { ...select, createdAt: true, updatedAt: true }
+  }
+
+  const findOneArgs: FindOneArgs = {
+    collection: collectionConfig.slug,
+    draftsEnabled: replaceWithVersion,
+    joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
+    locale: locale!,
+    req: {
+      transactionID: req.transactionID,
+    } as PayloadRequest,
+    select: dbSelect,
+    where: fullWhere,
+  }
+
   if (shouldQueryDrafts) {
     query = appendVersionToQueryKey(fullWhere)
 
@@ -194,30 +217,24 @@ export const findByIDOperation = async <
     })
 
     docWithLocales = docs[0]
+
+    if (!docWithLocales) {
+      const { docs: existingVersions } = await req.payload.db.queryDrafts({
+        collection: collectionConfig.slug,
+        limit: 1,
+        locale: locale!,
+        pagination: false,
+        req,
+        select: { parent: true },
+        where: appendVersionToQueryKey(where),
+      })
+
+      if (!existingVersions[0]) {
+        query = fullWhere
+        docWithLocales = await req.payload.db.findOne(findOneArgs)
+      }
+    }
   } else {
-    let dbSelect = select
-
-    if (
-      collectionConfig.versions?.drafts &&
-      replaceWithVersion &&
-      select &&
-      getSelectMode(select) === 'include'
-    ) {
-      dbSelect = { ...select, createdAt: true, updatedAt: true }
-    }
-
-    const findOneArgs: FindOneArgs = {
-      collection: collectionConfig.slug,
-      draftsEnabled: replaceWithVersion,
-      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
-      locale: locale!,
-      req: {
-        transactionID: req.transactionID,
-      } as PayloadRequest,
-      select: dbSelect,
-      where: fullWhere,
-    }
-
     docWithLocales = await req.payload.db.findOne(findOneArgs)
   }
 
