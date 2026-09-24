@@ -36,7 +36,7 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
     variantTypesSlug = 'variantTypes',
   } = props || {}
 
-  const inventoryFieldName = inventory ? getInventoryFieldName(inventory) : false
+  const inventoryFieldName = inventory ? getInventoryFieldName({ inventory }) : false
 
   const fields = [
     ...(inventoryFieldName
