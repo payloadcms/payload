@@ -26,8 +26,8 @@ const stripeMock = vi.hoisted(() => {
   return {
     createCustomer: (email: string) => {
       const customer = {
-        email,
         id: `cus_test_${customers.size + 1}`,
+        email,
         object: 'customer' as const,
       }
 
@@ -48,11 +48,11 @@ const stripeMock = vi.hoisted(() => {
     }) => {
       const id = `pi_test_${++paymentIntentSequence}`
       const paymentIntent = {
+        id,
         amount,
         client_secret: `${id}_secret_test`,
         currency: currency.toLowerCase(),
         customer,
-        id,
         metadata,
         object: 'payment_intent' as const,
         status: 'succeeded' as const,
@@ -129,8 +129,8 @@ async function createGuestCartWithItems(
     .POST('/carts', {
       auth: false,
       body: JSON.stringify({
-        items: [],
         currency: 'USD',
+        items: [],
       }),
     })
     .then((res) => res.json())
@@ -156,7 +156,7 @@ async function createGuestCartWithItems(
   return { cartId, cartSecret }
 }
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () => {
+test.suite('ecommerce', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeEach(() => {
     stripeMock.reset()
   })
@@ -174,6 +174,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       collection: 'variants',
       depth: 0,
       limit: 1,
+      overrideAccess: true,
     })
 
     expect(variants).toBeTruthy()
@@ -413,12 +414,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const products = await payload.find({
         collection: 'products',
         limit: 1,
+        overrideAccess: true,
       })
       productId = products.docs[0]?.id as string
 
       const variants = await payload.find({
         collection: 'variants',
         limit: 1,
+        overrideAccess: true,
       })
       variantId = variants.docs[0]?.id as string
     })
@@ -430,8 +433,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -470,8 +473,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -508,8 +511,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -569,8 +572,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -710,8 +713,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -794,8 +797,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           .POST('/carts', {
             auth: false,
             body: JSON.stringify({
-              items: [],
               currency: 'USD',
+              items: [],
             }),
           })
           .then((res) => res.json())
@@ -874,12 +877,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const products = await payload.find({
         collection: 'products',
         limit: 1,
+        overrideAccess: true,
       })
       productId = products.docs[0]?.id as string
 
       const variants = await payload.find({
         collection: 'variants',
         limit: 1,
+        overrideAccess: true,
       })
       variantId = variants.docs[0]?.id as string
     })
@@ -898,6 +903,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `merge-test-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -912,9 +918,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const userCartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -956,8 +962,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
         .POST('/carts', {
           auth: false,
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -983,6 +989,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `merge-combine-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -997,9 +1004,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const userCartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1047,6 +1054,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `merge-delete-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1060,9 +1068,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const userCartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1095,8 +1103,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
         .POST('/carts', {
           auth: false,
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1127,6 +1135,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `merge-invalid-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1140,9 +1149,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const userCartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1167,6 +1176,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const products = await payload.find({
         collection: 'products',
         limit: 1,
+        overrideAccess: true,
       })
       productId = products.docs[0]?.id as string
     })
@@ -1181,6 +1191,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `auth-cart-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1195,9 +1206,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const cartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1220,6 +1231,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `auth-add-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1233,9 +1245,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const cartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1265,6 +1277,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `auth-nosecret-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       await restClient.login({
@@ -1278,9 +1291,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const cartResponse = await restClient
         .POST('/carts', {
           body: JSON.stringify({
-            items: [],
             currency: 'USD',
             customer: testUser.id,
+            items: [],
           }),
         })
         .then((res) => res.json())
@@ -1297,6 +1310,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
       const products = await payload.find({
         collection: 'products',
         limit: 1,
+        overrideAccess: true,
       })
       productId = products.docs[0]?.id as string
     })
@@ -1318,6 +1332,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           email: `transfer-${Date.now()}@test.com`,
           password: 'test123',
         },
+        overrideAccess: true,
       })
 
       // Login as the user
@@ -1368,6 +1383,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
         const products = await payload.find({
           collection: 'products',
           limit: 1,
+          overrideAccess: true,
           where: {
             name: {
               equals: 'Hat',
@@ -1382,12 +1398,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           data: {
             inventory: 10,
           },
+          overrideAccess: true,
         })
 
         const productBefore = await payload.findByID({
           id: product.id,
           collection: 'products',
           depth: 0,
+          overrideAccess: true,
         })
         const startingInventory = productBefore.inventory!
         const { cartId, cartSecret } = await createGuestCartWithItems(restClient, product.id)
@@ -1432,6 +1450,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
         const transactions = await payload.find({
           collection: 'transactions',
           depth: 0,
+          overrideAccess: true,
           where: {
             'stripe.paymentIntentID': {
               equals: paymentIntentID,
@@ -1449,6 +1468,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
         const canonicalOrders = await payload.find({
           collection: 'orders',
           depth: 0,
+          overrideAccess: true,
           where: {
             transactions: {
               equals: transactions.docs[0]?.id,
@@ -1464,6 +1484,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           id: cartId,
           collection: 'carts',
           depth: 0,
+          overrideAccess: true,
         })
 
         expect(purchasedCart.purchasedAt).toBeTruthy()
@@ -1473,6 +1494,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('ecommerce', () 
           id: product.id,
           collection: 'products',
           depth: 0,
+          overrideAccess: true,
         })
 
         expect(productAfter.inventory).toBe(startingInventory - 1)

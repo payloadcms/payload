@@ -6,13 +6,14 @@ import type { ReaderPluginOptions } from './config.js'
 import { test } from '../__helpers/int/vitest.js'
 import { pagesSlug } from './config.js'
 
-test.suite({ config: './config.ts' })('Collections - Plugins', () => {
+test.suite('Collections - Plugins', { config: './config.ts' }, () => {
   test('created pages collection', async ({ payload }) => {
     const { id } = await payload.create({
       collection: pagesSlug,
       data: {
         title: 'Test Page',
       },
+      overrideAccess: true,
     })
 
     expect(id).toBeDefined()

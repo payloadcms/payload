@@ -58,7 +58,7 @@ Without this, the AI won't know project conventions and may generate code that d
 
 ### Skills
 
-Task-specific guidance (e.g., how to generate translations). Located in `.claude/skills/<name>/SKILL.md`.
+Task-specific guidance (e.g., how to generate translations). Located in `.agents/skills/<name>/SKILL.md`.
 
 Without this, you'll need to manually explain covered testing patterns and other workflows in each conversation.
 

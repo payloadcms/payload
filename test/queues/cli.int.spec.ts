@@ -5,7 +5,7 @@ import { expect } from 'vitest'
 import { test } from '../__helpers/int/vitest.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
-test.suite({ config: './config.ts', cron: false })('Queues - CLI', () => {
+test.suite('Queues - CLI', { config: './config.ts', cron: false }, () => {
   test('ensure consecutive getPayload call with cron: true will autorun jobs', async ({
     config,
     payload,
@@ -36,6 +36,7 @@ test.suite({ config: './config.ts', cron: false })('Queues - CLI', () => {
     const allSimples = await payload.find({
       collection: 'simple',
       limit: 100,
+      overrideAccess: true,
     })
 
     expect(allSimples.totalDocs).toBe(1)

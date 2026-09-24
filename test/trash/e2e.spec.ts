@@ -54,6 +54,7 @@ describe('Trash', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]!.id
     postsDocOneID = (
@@ -63,6 +64,7 @@ describe('Trash', () => {
           _status: 'published',
           title: 'Post 1',
         },
+        overrideAccess: true,
       })
     ).id
     postsDocTwoID = (
@@ -72,6 +74,7 @@ describe('Trash', () => {
           _status: 'published',
           title: 'Post 2',
         },
+        overrideAccess: true,
       })
     ).id
     await initPage({ page, serverURL })
@@ -298,6 +301,7 @@ describe('Trash', () => {
           id: trashedDoc.id,
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -374,6 +378,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -386,6 +391,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.every((doc) => doc._status === 'draft')
           })
@@ -398,6 +404,7 @@ describe('Trash', () => {
               equals: 'Ready for restore',
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -449,6 +456,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -461,6 +469,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.every((doc) => doc._status === 'published')
           })
@@ -473,6 +482,7 @@ describe('Trash', () => {
               equals: 'Ready for restore',
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -532,6 +542,7 @@ describe('Trash', () => {
                   },
                 ],
               },
+              overrideAccess: true,
             })
             return deletedPosts.docs.length
           })
@@ -575,6 +586,7 @@ describe('Trash', () => {
             id: doc.id,
             collection: postsSlug,
             trash: true, // Force permanent delete
+            overrideAccess: true,
           })
         })
       })
@@ -778,6 +790,7 @@ describe('Trash', () => {
                   },
                 ],
               },
+              overrideAccess: true,
             })
             return deletedPost.docs.length
           })
@@ -813,6 +826,7 @@ describe('Trash', () => {
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -825,6 +839,7 @@ describe('Trash', () => {
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
+              overrideAccess: true,
             })
             return docs[0]?._status === 'draft'
           })
@@ -888,6 +903,7 @@ describe('Trash', () => {
           id: incomingTrashedDoc.id,
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -945,6 +961,7 @@ describe('Trash', () => {
           id: incomingTrashedDoc.id,
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -1004,6 +1021,7 @@ describe('Trash', () => {
           id: incomingTrashedDoc.id,
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -1053,6 +1071,7 @@ describe('Trash', () => {
           id: incomingTrashedDoc.id,
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -1109,6 +1128,7 @@ describe('Trash', () => {
           id: incomingTrashedDoc.id,
           collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -1123,6 +1143,7 @@ describe('Trash', () => {
         pagination: false,
         trash: true,
         where: { name: { equals: 'Dev' } },
+        overrideAccess: true,
       })
       if (docs.length === 0) {
         throw new Error('Dev user not found! Ensure test seed data includes a Dev user.')
@@ -1138,6 +1159,7 @@ describe('Trash', () => {
         where: {
           and: [{ name: { equals: 'Dev' } }, { deletedAt: { exists: true } }],
         },
+        overrideAccess: true,
       })
 
       if (docs.length === 0) {
@@ -1146,6 +1168,7 @@ describe('Trash', () => {
           id: devUserID,
           collection: usersSlug,
           data: { deletedAt: new Date().toISOString() },
+          overrideAccess: true,
         })
       }
     }
@@ -1260,6 +1283,7 @@ describe('Trash', () => {
         _status: 'draft',
         title: 'Draft with Localized Field',
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -1271,6 +1295,7 @@ describe('Trash', () => {
       },
       draft: true,
       locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -1282,6 +1307,7 @@ describe('Trash', () => {
       },
       draft: true,
       locale: 'es',
+      overrideAccess: true,
     })
 
     await page.goto(postsUrl.edit(draftPost.id))
@@ -1323,6 +1349,7 @@ describe('Trash', () => {
         _status: 'draft',
         title: 'Draft with Localized Field',
       },
+      overrideAccess: true,
     })
 
     // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
@@ -1336,6 +1363,7 @@ describe('Trash', () => {
       },
       draft: true,
       locale: 'en',
+      overrideAccess: true,
     })
 
     // Update es locale as draft
@@ -1348,6 +1376,7 @@ describe('Trash', () => {
       },
       draft: true,
       locale: 'es',
+      overrideAccess: true,
     })
 
     await page.goto(postsUrl.list)
@@ -1401,6 +1430,7 @@ async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Pro
   return payload.create({
     collection: postsSlug,
     data,
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -1412,5 +1442,6 @@ async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'
       _status: 'published',
       deletedAt: new Date().toISOString(), // Set the post as trashed
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }

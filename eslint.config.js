@@ -62,6 +62,7 @@ export const rootEslintConfig = [
       'packages/drizzle/src/sqlite/predefinedMigrations/localize-status/**',
       'packages/codemod/src/transforms/**/*.input.ts',
       'packages/codemod/src/transforms/**/*.output.ts',
+      'packages/codemod/scripts/**',
       'packages/tanstack-start/scripts/**',
       'packages/tanstack-start/test/**',
     ],
@@ -82,6 +83,25 @@ export const rootEslintConfig = [
     files: ['packages/ui/**/*.{ts,tsx}'],
     rules: {
       'no-console': 'error',
+    },
+  },
+  {
+    files: [
+      'packages/tanstack-start/src/elements/RouterAdapter/**/*.{ts,tsx}',
+      'packages/tanstack-start/src/routes/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              message: 'Import from a targeted @payloadcms/ui subpath in the TanStack route graph.',
+              name: '@payloadcms/ui',
+            },
+          ],
+        },
+      ],
     },
   },
   {

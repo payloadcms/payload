@@ -15,8 +15,9 @@ let payload: Payload
 let restClient: NextRESTClient
 
 const { password } = devUser
-test.suite({ config: './config.ts', resetBetweenTests: false })(
+test.suite(
   'JWT authentication read access',
+  { config: './config.ts', resetBetweenTests: false },
   () => {
     test.beforeAll(({ payloadInstance, restClientInstance }) => {
       payload = payloadInstance
@@ -28,11 +29,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
 
     test.afterEach(async () => {
       for (const id of createdJWTUserIDs) {
-        await payload.delete({ id, collection: jwtUsersSlug as any })
+        await payload.delete({ id, collection: jwtUsersSlug as any, overrideAccess: true })
       }
 
       for (const id of createdRestrictedRelationshipIDs) {
-        await payload.delete({ id, collection: restrictedRelationshipsSlug as any })
+        await payload.delete({
+          id,
+          collection: restrictedRelationshipsSlug as any,
+          overrideAccess: true,
+        })
       }
 
       createdJWTUserIDs.length = 0
@@ -46,6 +51,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
           privateField: 'private value',
           publicField: 'public value',
         },
+        overrideAccess: true,
       })
 
       const email = `jwt-user-${uuid()}@example.com`
@@ -57,6 +63,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
           restrictedField: 'restricted value',
           restrictedRelationship: restrictedRelationship.id,
         },
+        overrideAccess: true,
       })
 
       createdRestrictedRelationshipIDs.push(restrictedRelationship.id)
@@ -65,6 +72,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
       const { token } = await payload.login({
         collection: jwtUsersSlug as any,
         data: { email, password },
+        overrideAccess: true,
       })
 
       const authenticated = await restClient
@@ -98,6 +106,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
         data: {
           publicField: 'public relationship',
         },
+        overrideAccess: true,
       })
       const email = `jwt-req-user-${uuid()}@example.com`
       const user = await payload.create({
@@ -108,6 +117,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
           restrictedField: 'restricted value',
           restrictedRelationship: restrictedRelationship.id,
         },
+        overrideAccess: true,
       })
 
       createdRestrictedRelationshipIDs.push(restrictedRelationship.id)
@@ -116,6 +126,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
       const { token } = await payload.login({
         collection: jwtUsersSlug as any,
         data: { email, password },
+        overrideAccess: true,
       })
       const headers = { Authorization: `JWT ${token}` }
       const req = await createPayloadRequest({
@@ -171,6 +182,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
           password,
           restrictedField,
         },
+        overrideAccess: true,
       })
 
       createdJWTUserIDs.push(user.id)
@@ -178,6 +190,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })(
       const authenticated = await payload.login({
         collection: jwtUsersSlug as any,
         data: { email, password },
+        overrideAccess: true,
       })
       const refreshHooks = payload.collections[jwtUsersSlug]!.config.hooks.refresh
       const hookEmail = `hook-${email}`

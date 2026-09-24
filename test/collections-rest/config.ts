@@ -452,6 +452,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     const rel1 = await payload.create({
@@ -459,12 +460,14 @@ export default buildConfigWithDefaults({
       data: {
         name: 'name',
       },
+      overrideAccess: true,
     })
     const rel2 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name2',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -472,6 +475,7 @@ export default buildConfigWithDefaults({
       data: {
         point: [10, 20],
       },
+      overrideAccess: true,
     })
 
     // Relation - hasMany
@@ -481,6 +485,7 @@ export default buildConfigWithDefaults({
         relationHasManyField: rel1.id,
         title: 'rel to hasMany',
       },
+      overrideAccess: true,
     })
     await payload.create({
       collection: postsSlug,
@@ -488,6 +493,7 @@ export default buildConfigWithDefaults({
         relationHasManyField: rel2.id,
         title: 'rel to hasMany 2',
       },
+      overrideAccess: true,
     })
 
     // Relation - relationTo multi
@@ -500,6 +506,7 @@ export default buildConfigWithDefaults({
         },
         title: 'rel to multi',
       },
+      overrideAccess: true,
     })
 
     // Relation - relationTo multi hasMany
@@ -518,6 +525,7 @@ export default buildConfigWithDefaults({
         ],
         title: 'rel to multi hasMany',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -526,6 +534,7 @@ export default buildConfigWithDefaults({
         id: 'test',
         name: 'inside row',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -534,6 +543,7 @@ export default buildConfigWithDefaults({
         id: 123,
         name: 'name',
       },
+      overrideAccess: true,
     })
   },
 })
