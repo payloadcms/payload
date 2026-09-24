@@ -11,6 +11,7 @@ import {
   summarizeBenchmark,
 } from './benchmarkReport.js'
 import { countUniqueReachableSchemas, describeMongooseSchema } from './describeMongooseSchema.js'
+import { createMeasuredSchemaBuildContext } from './measuredSchemaBuildContext.js'
 
 const createSample = (overrides: Partial<BenchmarkSample>): BenchmarkSample => ({
   externalDelta: 0,
@@ -38,6 +39,31 @@ const createRun = ({
 })
 
 describe('MongoDB schema benchmark helpers', () => {
+  test('should keep cache metrics in a benchmark-only wrapper', () => {
+    const { context, snapshot } = createMeasuredSchemaBuildContext<object>()
+    const definition = {}
+
+    context.getOrCreate({
+      build: () => ({}),
+      definition,
+      label: 'block:hero',
+      variantKey: 'live',
+    })
+    context.getOrCreate({
+      build: () => ({}),
+      definition,
+      label: 'block:hero',
+      variantKey: 'live',
+    })
+
+    expect(context).not.toHaveProperty('snapshot')
+    expect(snapshot()).toEqual({
+      entries: [{ hits: 1, label: 'block:hero', misses: 1, variantKey: 'live' }],
+      hits: 1,
+      misses: 1,
+    })
+  })
+
   test('should calculate median, minimum, and maximum without averaging outliers', () => {
     const samples = [
       createSample({ heapUsedDelta: 10, initializationMs: 10, schemaConstructors: 10 }),

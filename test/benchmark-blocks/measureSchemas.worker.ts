@@ -1,6 +1,5 @@
 import type { Schema } from 'mongoose'
 import type { Payload, SanitizedCollectionConfig, SanitizedConfig } from 'payload'
-import type { SchemaBuildContextSnapshot } from 'payload/internal'
 
 import mongoose from 'mongoose'
 import { execFileSync } from 'node:child_process'
@@ -9,6 +8,7 @@ import os from 'node:os'
 import { performance } from 'node:perf_hooks'
 import process from 'node:process'
 
+import type { SchemaBuildCacheSnapshot } from './measuredSchemaBuildContext.js'
 import type { SchemaAllocationCategory } from './schemaAllocationCategory.js'
 import type { BenchmarkScenarioName } from './schemaScenarios.js'
 
@@ -17,6 +17,7 @@ import {
   describeMongooseSchema,
   type MongooseSchemaDescriptor,
 } from './describeMongooseSchema.js'
+import { createMeasuredSchemaBuildContext } from './measuredSchemaBuildContext.js'
 import {
   classifySchemaAllocation,
   createSchemaAllocationCounts,
@@ -43,7 +44,7 @@ export type WorkerResult = {
 }
 
 export type AttributionWorkerResult = {
-  cache: SchemaBuildContextSnapshot
+  cache: SchemaBuildCacheSnapshot
   descriptors: MongooseSchemaDescriptor[]
   environment: WorkerResult['environment']
   scenario: BenchmarkScenarioName
@@ -135,23 +136,20 @@ const runAttribution = async ({
 }): Promise<AttributionWorkerResult> => {
   const { buildVersionCollectionFields, buildVersionCompoundIndexes, buildVersionGlobalFields } =
     await import('payload')
-  const { createSchemaBuildContext } = await import('payload/internal')
   const { buildCollectionSchema } = await import(
     '../../packages/db-mongodb/src/models/buildCollectionSchema.js'
   )
   const { buildSchema } = await import('../../packages/db-mongodb/src/models/buildSchema.js')
   const descriptors: MongooseSchemaDescriptor[] = []
-  const schemaBuildContext = createSchemaBuildContext<Schema>({
-    onEvent: (event) => {
-      if (event.action === 'store' && event.schema) {
-        descriptors.push(
-          describeMongooseSchema({
-            label: event.label,
-            schema: event.schema,
-            variantKey: event.variantKey,
-          }),
-        )
-      }
+  const { context: schemaBuildContext, snapshot } = createMeasuredSchemaBuildContext<Schema>({
+    onStore: ({ label, schema, variantKey }) => {
+      descriptors.push(
+        describeMongooseSchema({
+          label,
+          schema,
+          variantKey,
+        }),
+      )
     },
   })
   const payload = createPayloadFixture({ config })
@@ -210,7 +208,7 @@ const runAttribution = async ({
     }
 
     return {
-      cache: schemaBuildContext.snapshot(),
+      cache: snapshot(),
       descriptors,
       environment: getEnvironment(),
       scenario,

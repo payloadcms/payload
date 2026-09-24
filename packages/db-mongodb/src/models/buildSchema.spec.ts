@@ -63,7 +63,7 @@ describe('MongoDB schema build context', () => {
   test('should build a diamond graph once per block and variant', () => {
     const blocks = createDiamondBlockGraph()
     const payload = createPayloadFixture({ blocks })
-    const context = createSchemaBuildContext<Schema>()
+    const { builds, context } = createRecordedSchemaBuildContext()
     const schema = buildSchemaWithContext({
       buildSchemaOptions: {},
       configFields: createRootFields(),
@@ -71,13 +71,8 @@ describe('MongoDB schema build context', () => {
       schemaBuildContext: context,
     })
 
-    expect(context.snapshot().entries).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ label: 'block:leaf', misses: 1 }),
-        expect.objectContaining({ label: 'block:root', misses: 1 }),
-      ]),
-    )
-    expect(context.snapshot().hits).toBeGreaterThan(0)
+    expect(builds.filter(({ label }) => label === 'block:leaf')).toHaveLength(1)
+    expect(builds.filter(({ label }) => label === 'block:root')).toHaveLength(1)
     expect(getBlockDiscriminator({ path: 'layoutA', schema, slug: 'root' })).toBeDefined()
     expect(getBlockDiscriminator({ path: 'layoutB', schema, slug: 'root' })).toBeDefined()
   })
@@ -128,22 +123,9 @@ describe('MongoDB schema build context', () => {
       slug: 'shared',
       fields: [{ name: 'localizedText', type: 'text', localized: true }],
     }
-    const englishStores: Schema[] = []
-    const multilingualStores: Schema[] = []
-    const englishContext = createSchemaBuildContext<Schema>({
-      onEvent: (event) => {
-        if (event.action === 'store' && event.schema) {
-          englishStores.push(event.schema)
-        }
-      },
-    })
-    const multilingualContext = createSchemaBuildContext<Schema>({
-      onEvent: (event) => {
-        if (event.action === 'store' && event.schema) {
-          multilingualStores.push(event.schema)
-        }
-      },
-    })
+    const { builds: englishBuilds, context: englishContext } = createRecordedSchemaBuildContext()
+    const { builds: multilingualBuilds, context: multilingualContext } =
+      createRecordedSchemaBuildContext()
 
     buildDirectBlockSchema({
       block: sharedBlock,
@@ -156,20 +138,20 @@ describe('MongoDB schema build context', () => {
       payload: createPayloadFixture({ blocks: [sharedBlock], locales: ['en', 'de'] }),
     })
 
-    expect(englishStores).toHaveLength(1)
-    expect(multilingualStores).toHaveLength(1)
-    expect(englishStores[0]).not.toBe(multilingualStores[0])
-    expect(describeSchema(englishStores[0]!).paths.map(({ path }) => path)).toContain(
+    expect(englishBuilds).toHaveLength(1)
+    expect(multilingualBuilds).toHaveLength(1)
+    expect(englishBuilds[0]?.schema).not.toBe(multilingualBuilds[0]?.schema)
+    expect(describeSchema(englishBuilds[0]!.schema).paths.map(({ path }) => path)).toContain(
       'localizedText.en',
     )
-    expect(describeSchema(multilingualStores[0]!).paths.map(({ path }) => path)).toContain(
+    expect(describeSchema(multilingualBuilds[0]!.schema).paths.map(({ path }) => path)).toContain(
       'localizedText.de',
     )
   })
 
   test('should create separate templates for localized and nonlocalized placements', () => {
     const block: Block = { slug: 'shared', fields: [{ name: 'text', type: 'text' }] }
-    const context = createSchemaBuildContext<Schema>()
+    const { builds, context } = createRecordedSchemaBuildContext()
 
     buildSchemaWithContext({
       buildSchemaOptions: {},
@@ -181,16 +163,10 @@ describe('MongoDB schema build context', () => {
       schemaBuildContext: context,
     })
 
-    expect(context.snapshot().entries).toEqual(
+    expect(builds.map(({ variantKey }) => variantKey)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          misses: 1,
-          variantKey: expect.stringContaining('isLocalized:false'),
-        }),
-        expect.objectContaining({
-          misses: 1,
-          variantKey: expect.stringContaining('isLocalized:true'),
-        }),
+        expect.stringContaining('isLocalized:false'),
+        expect.stringContaining('isLocalized:true'),
       ]),
     )
   })
@@ -198,7 +174,7 @@ describe('MongoDB schema build context', () => {
   test('should create separate templates for live and version schemas', () => {
     const block: Block = { slug: 'shared', fields: [{ name: 'text', type: 'text' }] }
     const payload = createPayloadFixture({ blocks: [block] })
-    const context = createSchemaBuildContext<Schema>()
+    const { builds, context } = createRecordedSchemaBuildContext()
 
     buildDirectBlockSchema({ block, context, payload })
     buildDirectBlockSchema({
@@ -208,8 +184,7 @@ describe('MongoDB schema build context', () => {
       payload,
     })
 
-    expect(context.snapshot().misses).toBe(2)
-    expect(context.snapshot().entries.map(({ variantKey }) => variantKey)).toEqual(
+    expect(builds.map(({ variantKey }) => variantKey)).toEqual(
       expect.arrayContaining([
         expect.stringContaining('draftsEnabled:false'),
         expect.stringContaining('draftsEnabled:true'),
@@ -270,7 +245,7 @@ describe('MongoDB schema build context', () => {
   test('should cache an inline block only when the same object identity is reused', () => {
     const sharedInlineBlock: Block = { slug: 'inline', fields: [{ name: 'text', type: 'text' }] }
     const separateInlineBlock: Block = { slug: 'inline', fields: [{ name: 'text', type: 'text' }] }
-    const context = createSchemaBuildContext<Schema>()
+    const { builds, context } = createRecordedSchemaBuildContext()
 
     buildSchemaWithContext({
       buildSchemaOptions: {},
@@ -283,11 +258,7 @@ describe('MongoDB schema build context', () => {
       schemaBuildContext: context,
     })
 
-    expect(context.snapshot()).toEqual({
-      entries: [expect.objectContaining({ hits: 1, label: 'block:inline', misses: 2 })],
-      hits: 1,
-      misses: 2,
-    })
+    expect(builds.filter(({ label }) => label === 'block:inline')).toHaveLength(2)
   })
 
   test('should leave compiled model schemas usable after context.clear()', () => {
@@ -307,6 +278,32 @@ describe('MongoDB schema build context', () => {
     expect(getBlockDiscriminator({ path: 'layoutA', schema, slug: 'root' })).toBeDefined()
   })
 })
+
+const createRecordedSchemaBuildContext = (): {
+  builds: Array<{ label: string; schema: Schema; variantKey: string }>
+  context: MongoSchemaBuildContext
+} => {
+  const cacheContext = createSchemaBuildContext<Schema>()
+  const builds: Array<{ label: string; schema: Schema; variantKey: string }> = []
+
+  return {
+    builds,
+    context: {
+      clear: cacheContext.clear,
+      getOrCreate: (args) =>
+        cacheContext.getOrCreate({
+          ...args,
+          build: () => {
+            const schema = args.build()
+
+            builds.push({ label: args.label, schema, variantKey: args.variantKey })
+
+            return schema
+          },
+        }),
+    },
+  }
+}
 
 const buildDirectBlockSchema = ({
   block,

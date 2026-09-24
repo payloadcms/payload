@@ -1,10 +1,14 @@
 import { describe, expect, test, vi } from 'vitest'
 
-import type { SchemaBuildCacheEvent } from './createSchemaBuildContext.js'
-
 import { createSchemaBuildContext } from './createSchemaBuildContext.js'
 
 describe('createSchemaBuildContext', () => {
+  test('should not expose cache metrics from the production context', () => {
+    const context = createSchemaBuildContext<object>()
+
+    expect(context).not.toHaveProperty('snapshot')
+  })
+
   test('should build once for the same definition identity and variant', () => {
     const context = createSchemaBuildContext<object>()
     const definition = {}
@@ -27,11 +31,6 @@ describe('createSchemaBuildContext', () => {
     expect(first).toBe(artifact)
     expect(second).toBe(artifact)
     expect(build).toHaveBeenCalledOnce()
-    expect(context.snapshot()).toEqual({
-      entries: [{ hits: 1, label: 'block:hero', misses: 1, variantKey: 'live' }],
-      hits: 1,
-      misses: 1,
-    })
   })
 
   test('should build separate artifacts for separate variants', () => {
@@ -52,7 +51,6 @@ describe('createSchemaBuildContext', () => {
     })
 
     expect(live).not.toBe(version)
-    expect(context.snapshot().misses).toBe(2)
   })
 
   test('should build a fresh artifact when caching is disabled', () => {
@@ -75,11 +73,6 @@ describe('createSchemaBuildContext', () => {
 
     expect(first).not.toBe(second)
     expect(build).toHaveBeenCalledTimes(2)
-    expect(context.snapshot()).toEqual({
-      entries: [{ hits: 0, label: 'block:hero', misses: 2, variantKey: 'live' }],
-      hits: 0,
-      misses: 2,
-    })
   })
 
   test('should not merge equal definitions with different object identities', () => {
@@ -98,11 +91,6 @@ describe('createSchemaBuildContext', () => {
     })
 
     expect(first).not.toBe(second)
-    expect(context.snapshot()).toEqual({
-      entries: [{ hits: 0, label: 'block:hero', misses: 2, variantKey: 'live' }],
-      hits: 0,
-      misses: 2,
-    })
   })
 
   test('should not share artifacts between contexts', () => {
@@ -123,8 +111,6 @@ describe('createSchemaBuildContext', () => {
     })
 
     expect(first).not.toBe(second)
-    expect(firstContext.snapshot().misses).toBe(1)
-    expect(secondContext.snapshot().misses).toBe(1)
   })
 
   test('should retry after a builder throws', () => {
@@ -146,35 +132,7 @@ describe('createSchemaBuildContext', () => {
     expect(build).toHaveBeenCalledTimes(2)
   })
 
-  test('should report ordered hit, miss, and store events', () => {
-    const events: SchemaBuildCacheEvent<object>[] = []
-    const context = createSchemaBuildContext<object>({
-      onEvent: (event) => events.push(event),
-    })
-    const definition = {}
-    const artifact = {}
-
-    context.getOrCreate({
-      build: () => artifact,
-      definition,
-      label: 'block:a|b',
-      variantKey: 'variant|one',
-    })
-    context.getOrCreate({
-      build: () => ({ unused: true }),
-      definition,
-      label: 'block:a|b',
-      variantKey: 'variant|one',
-    })
-
-    expect(events).toEqual([
-      { action: 'miss', label: 'block:a|b', variantKey: 'variant|one' },
-      { action: 'store', label: 'block:a|b', schema: artifact, variantKey: 'variant|one' },
-      { action: 'hit', label: 'block:a|b', variantKey: 'variant|one' },
-    ])
-  })
-
-  test('should reset artifacts and counters when cleared', () => {
+  test('should reset artifacts when cleared', () => {
     const context = createSchemaBuildContext<object>()
     const definition = {}
     const first = context.getOrCreate({
@@ -186,8 +144,6 @@ describe('createSchemaBuildContext', () => {
 
     context.clear()
 
-    expect(context.snapshot()).toEqual({ entries: [], hits: 0, misses: 0 })
-
     const second = context.getOrCreate({
       build: () => ({ build: 2 }),
       definition,
@@ -196,10 +152,5 @@ describe('createSchemaBuildContext', () => {
     })
 
     expect(second).not.toBe(first)
-    expect(context.snapshot()).toEqual({
-      entries: [{ hits: 0, label: 'block:hero', misses: 1, variantKey: 'live' }],
-      hits: 0,
-      misses: 1,
-    })
   })
 })
