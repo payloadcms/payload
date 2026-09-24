@@ -766,7 +766,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
 
       test.afterEach(async ({ payload }) => {
         for (const id of createdDocumentIDs) {
-          await payload.delete({ id, collection: draftCollectionSlug })
+          await payload.delete({ id, collection: draftCollectionSlug, overrideAccess: true })
         }
         createdDocumentIDs.length = 0
       })
@@ -805,6 +805,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             title: 'Draft access allowed',
           },
           draft: true,
+          overrideAccess: true,
         })
         createdDocumentIDs.push(document.id)
 
@@ -815,6 +816,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'draft allowed',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const result = await payload.findByID({
@@ -841,6 +843,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             title: 'Draft access denied',
           },
           draft: true,
+          overrideAccess: true,
         })
         createdDocumentIDs.push(document.id)
 
@@ -851,6 +854,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () =
             description: 'draft denied',
           },
           draft: true,
+          overrideAccess: true,
         })
 
         const result = await payload.findByID({
