@@ -1,3 +1,5 @@
+import { getTableColumns } from 'drizzle-orm'
+
 import type { BaseSQLiteAdapter, Insert } from './types.js'
 
 export const insert: Insert = async function (
@@ -11,7 +13,9 @@ export const insert: Insert = async function (
   // Batch insert if limitedBoundParameters: true
   if (this.limitedBoundParameters && Array.isArray(values)) {
     const results: Record<string, unknown>[] = []
-    const colsPerRow = values.reduce((max, row) => Math.max(max, Object.keys(row).length), 1)
+    // Drizzle emits a value for every table column per row, not just the keys present on the row —
+    // omitted columns fall back to their default / defaultFn, which is also a bound parameter
+    const colsPerRow = Math.max(1, Object.keys(getTableColumns(table)).length)
     const maxParams = 100
     const maxRowsPerBatch = Math.max(1, Math.floor(maxParams / colsPerRow))
 
