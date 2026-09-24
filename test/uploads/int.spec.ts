@@ -1466,6 +1466,38 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       })
     })
     test.describe('read', () => {
+      test('should use the image size mime type when dynamically resizing a size with a different format', async ({
+        payload,
+        restClient,
+      }) => {
+        const file = await getFileByPath(path.resolve(dirname, './image.png'))
+        file.name = `size-mime-${randomUUID()}.png`
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+          overrideAccess: true,
+        })) as unknown as Media
+
+        try {
+          const size = mediaDoc.sizes!.differentFormatFromMainImage!
+
+          expect(size.mimeType).toBe('image/jpeg')
+
+          const response = await restClient.GET(`/${mediaSlug}/file/${size.filename}`, {
+            query: { width: 100 },
+          })
+          const body = Buffer.from(await response.arrayBuffer())
+
+          expect(response.status).toBe(200)
+          await expect(sharp(body).metadata()).resolves.toMatchObject({ format: 'jpeg', width: 100 })
+          expect(response.headers.get('content-type')).toBe('image/jpeg')
+        } finally {
+          await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
+        }
+      })
+
       test('should serve files with hash characters in filename', async ({
         payload,
         restClient,
