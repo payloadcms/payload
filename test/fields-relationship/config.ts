@@ -19,6 +19,9 @@ import { RelationshipUpdatedExternally } from './collections/UpdatedExternally/i
 import { Versions } from './collections/Versions/index.js'
 import { Video } from './collections/Video/index.js'
 import { seed } from './seed.js'
+import { globalRelationshipSlug, relationRestrictedSlug } from './slugs.js'
+
+export const constrainedRelationName = 'Constrained relation'
 
 export default buildConfigWithDefaults({
   suite: 'fields-relationship',
@@ -43,6 +46,21 @@ export default buildConfigWithDefaults({
       Podcast,
       MixedMedia,
       Versions,
+    ],
+    globals: [
+      {
+        access: { update: () => true },
+        fields: [
+          {
+            name: 'restrictedRelationship',
+            filterOptions: { name: { equals: constrainedRelationName } },
+            relationTo: relationRestrictedSlug,
+            type: 'relationship',
+          },
+        ],
+        slug: globalRelationshipSlug,
+        versions: false,
+      },
     ],
     localization: {
       defaultLocale: 'en',

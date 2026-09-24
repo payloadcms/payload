@@ -1,12 +1,13 @@
-import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import type { Collection1 } from './payload-types.js'
 
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
+import { constrainedRelationName } from './config.js'
 import {
   collection1Slug,
+  globalRelationshipSlug,
   relationRestrictedSlug,
   slug,
   versionedRelationshipFieldSlug,
@@ -14,7 +15,6 @@ import {
 
 const { email, password } = devUser
 const constrainedFilterValue = 'constrained-read'
-const constrainedRelationName = 'Constrained relation'
 
 test.suite('Relationship Fields', { config: './config.ts' }, () => {
   test.beforeEach(async ({ restClient }) => {
@@ -121,6 +121,67 @@ test.suite('Relationship Fields', { config: './config.ts' }, () => {
           }),
         ],
       },
+    })
+  })
+
+  test('should allow elevated callers to update a global with a constrained relationship', async ({
+    payload,
+  }) => {
+    const relationDoc = await payload.create({
+      collection: relationRestrictedSlug,
+      data: { name: constrainedRelationName },
+      overrideAccess: true,
+    })
+
+    const globalDoc = await payload.updateGlobal({
+      slug: globalRelationshipSlug,
+      data: { restrictedRelationship: relationDoc.id },
+      depth: 0,
+      overrideAccess: true,
+    })
+
+    expect(globalDoc.restrictedRelationship).toBe(relationDoc.id)
+  })
+
+  test('should enforce read access when updating a global relationship', async ({ payload }) => {
+    const relationDoc = await payload.create({
+      collection: relationRestrictedSlug,
+      data: { name: constrainedRelationName },
+      overrideAccess: true,
+    })
+
+    await expect(
+      payload.updateGlobal({
+        slug: globalRelationshipSlug,
+        data: { restrictedRelationship: relationDoc.id },
+        depth: 0,
+        overrideAccess: false,
+      }),
+    ).rejects.toMatchObject({
+      name: 'ValidationError',
+      data: { errors: [expect.objectContaining({ path: 'restrictedRelationship' })] },
+    })
+  })
+
+  test('should enforce global relationship filter options for elevated callers', async ({
+    payload,
+  }) => {
+    const relationDoc = await payload.create({
+      collection: relationRestrictedSlug,
+      data: { name: 'Outside global filter' },
+      overrideAccess: true,
+    })
+
+    await expect(
+      payload.updateGlobal({
+        slug: globalRelationshipSlug,
+        data: { restrictedRelationship: relationDoc.id },
+        depth: 0,
+        overrideAccess: true,
+      }),
+    ).rejects.toMatchObject({
+      name: 'ValidationError',
+      data: { errors: [expect.objectContaining({ path: 'restrictedRelationship' })] },
     })
   })
 
