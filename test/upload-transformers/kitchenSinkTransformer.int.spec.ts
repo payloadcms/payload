@@ -17,10 +17,7 @@ const dirname = path.dirname(filename)
 let restClient: NextRESTClient
 let payload: Payload
 
-test.suite({
-  config: './config.ts',
-  resetBetweenTests: false,
-})('Kitchen sink Sharp transformer', () => {
+test.suite('Kitchen sink Sharp transformer', { config: './config.ts', resetBetweenTests: false }, () => {
   const docIDs: (number | string)[] = []
 
   test.beforeAll(({ payloadInstance, restClientInstance }) => {

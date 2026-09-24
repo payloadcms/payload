@@ -274,7 +274,7 @@ export const generateFileData = async <T>({
           transform: (task) =>
             transformUploadFile({
               collectionSlug: collectionConfig.slug,
-              file: originalWebFile!,
+              file: task.file ?? originalWebFile!,
               options: task.options,
               pipeline,
               req,

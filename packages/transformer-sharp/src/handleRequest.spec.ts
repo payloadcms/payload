@@ -7,6 +7,7 @@ import { createHandleRequest } from './handleRequest.js'
 import { resolveSharpDynamicDefaults } from './sharpTransformer.js'
 
 const makeFakePipeline = (outputBuffer: Buffer) => ({
+  metadata: vi.fn().mockResolvedValue({ height: 100, width: 100 }),
   resize: vi.fn().mockReturnThis(),
   toBuffer: vi.fn().mockResolvedValue(outputBuffer),
 })
@@ -181,6 +182,7 @@ describe('createHandleRequest', () => {
 
   it('should let an unexpected Sharp error propagate uncaught', async () => {
     const pipeline = {
+      metadata: vi.fn().mockResolvedValue({ height: 100, width: 100 }),
       resize: vi.fn().mockReturnThis(),
       toBuffer: vi.fn().mockRejectedValue(new Error('sharp exploded')),
     }

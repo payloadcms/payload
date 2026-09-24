@@ -25,10 +25,7 @@ const dirname = path.dirname(filename)
 let restClient: NextRESTClient
 let payload: Payload
 
-test.suite({
-  config: './config.ts',
-  resetBetweenTests: false,
-})('Upload transformers', () => {
+test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
     payload = payloadInstance
     restClient = restClientInstance

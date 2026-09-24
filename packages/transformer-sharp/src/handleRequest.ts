@@ -55,13 +55,49 @@ export function createHandleRequest({
       ? { animated: true }
       : {}
 
+    const withoutEnlargement = parseResult.withoutEnlargement ?? dynamicDefaults.withoutEnlargement
+
+    // With a single dimension Sharp derives the other from the aspect ratio, so the
+    // output size is only known once the source is probed.
+    if (parseResult.width === undefined || parseResult.height === undefined) {
+      const metadata = await sharpDependency(sourceBuffer, sharpOptions).metadata()
+      const output = getAspectRatioOutputDimensions({
+        height: parseResult.height,
+        sourceHeight: metadata.pageHeight ?? metadata.height,
+        sourceWidth: metadata.width,
+        width: parseResult.width,
+        withoutEnlargement,
+      })
+
+      if (
+        output &&
+        (output.width > dynamicDefaults.maxWidth ||
+          output.height > dynamicDefaults.maxHeight ||
+          output.width * output.height > dynamicDefaults.maxPixels)
+      ) {
+        return {
+          response: Response.json(
+            {
+              errors: [
+                {
+                  message: `Requested dimensions (${output.width}x${output.height}) exceed the configured maximum.`,
+                },
+              ],
+            },
+            { status: 400 },
+          ),
+          status: 'complete',
+        }
+      }
+    }
+
     const resizedBuffer = await sharpDependency(sourceBuffer, sharpOptions)
       .resize({
         fit: dynamicDefaults.fit,
         height: parseResult.height,
         position: dynamicDefaults.position,
         width: parseResult.width,
-        withoutEnlargement: parseResult.withoutEnlargement ?? dynamicDefaults.withoutEnlargement,
+        withoutEnlargement,
       })
       .toBuffer()
 
@@ -76,5 +112,31 @@ export function createHandleRequest({
       }),
       status: 'continue',
     }
+  }
+}
+
+function getAspectRatioOutputDimensions({
+  height,
+  sourceHeight,
+  sourceWidth,
+  width,
+  withoutEnlargement,
+}: {
+  height: number | undefined
+  sourceHeight: number | undefined
+  sourceWidth: number | undefined
+  width: number | undefined
+  withoutEnlargement: boolean
+}): { height: number; width: number } | undefined {
+  if (!sourceWidth || !sourceHeight) {
+    return undefined
+  }
+
+  const scale = width !== undefined ? width / sourceWidth : height! / sourceHeight
+  const effectiveScale = withoutEnlargement ? Math.min(scale, 1) : scale
+
+  return {
+    height: Math.round(sourceHeight * effectiveScale),
+    width: Math.round(sourceWidth * effectiveScale),
   }
 }
