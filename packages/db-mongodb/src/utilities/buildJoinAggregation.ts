@@ -112,10 +112,15 @@ export const buildJoinAggregation = async ({
       where: whereJoin,
     })
 
-    const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
-    const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
+    // buildSortParam always returns at least 1 key. $sort and $sortArray.sortBy
+    // both accept multi-key specs, so include every key instead of only the first.
+    const sortSpec = buildMultiKeySortSpec(sort)
 
-    const projectSort = sortProperty !== '_id' && sortProperty !== 'relationTo'
+    // Sort keys that don't need to be projected because they are already present:
+    // _id is always included in $project output and relationTo is projected explicitly.
+    const projectSortProperties = Object.keys(sortSpec).filter(
+      (sortProperty) => sortProperty !== '_id' && sortProperty !== 'relationTo',
+    )
 
     const aliases: string[] = []
 
@@ -159,9 +164,7 @@ export const buildJoinAggregation = async ({
           pipeline: [
             ...basePipeline,
             {
-              $sort: {
-                [sortProperty]: sortDirection,
-              },
+              $sort: sortSpec,
             },
             {
               // Unfortunately, we can't use $skip here because we can lose data, instead we do $slice then
@@ -170,9 +173,9 @@ export const buildJoinAggregation = async ({
             {
               $project: {
                 value: '$_id',
-                ...(projectSort && {
-                  [sortProperty]: 1,
-                }),
+                ...Object.fromEntries(
+                  projectSortProperties.map((sortProperty) => [sortProperty, 1]),
+                ),
                 relationTo: 1,
               },
             },
@@ -229,9 +232,7 @@ export const buildJoinAggregation = async ({
         [`${as}.docs`]: {
           $sortArray: {
             input: `$${as}.docs`,
-            sortBy: {
-              [sortProperty]: sortDirection,
-            },
+            sortBy: sortSpec,
           },
         },
       },
@@ -319,8 +320,9 @@ export const buildJoinAggregation = async ({
         sort: useDrafts ? getQueryDraftsSort({ collectionConfig, sort: sortJoin }) : sortJoin,
         timestamps: true,
       })
-      const sortProperty = Object.keys(sort)[0]!
-      const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
+      // buildSortParam always returns at least 1 key. $sort accepts a multi-key
+      // spec, so include every key instead of only the first.
+      const sortSpec = buildMultiKeySortSpec(sort)
 
       const $match = await JoinModel.buildQuery({
         locale,
@@ -337,7 +339,7 @@ export const buildJoinAggregation = async ({
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
         { $match },
         {
-          $sort: { [sortProperty]: sortDirection },
+          $sort: sortSpec,
         },
       ]
 
@@ -501,4 +503,20 @@ export const buildJoinAggregation = async ({
   }
 
   return aggregate
+}
+
+/**
+ * Converts the sort record produced by {@link buildSortParam} into a MongoDB
+ * sort spec covering every sort key. buildSortParam returns each requested key
+ * (plus a fallback tiebreaker), so passing only the first key to `$sort` or
+ * `$sortArray` would silently drop the remaining keys.
+ */
+const buildMultiKeySortSpec = (sort: Record<string, string>): Record<string, -1 | 1> => {
+  const sortSpec: Record<string, -1 | 1> = {}
+
+  for (const [sortProperty, sortDirection] of Object.entries(sort)) {
+    sortSpec[sortProperty] = sortDirection === 'asc' ? 1 : -1
+  }
+
+  return sortSpec
 }
