@@ -1,4 +1,6 @@
 'use client'
+import type { AriaAttributes } from 'react'
+
 import React from 'react'
 
 import './index.css'
@@ -7,10 +9,13 @@ const baseClass = 'popup-button'
 
 export type PopupButtonRenderProps = {
   active: boolean
-  'aria-expanded': boolean
-  'aria-haspopup': true
+  'aria-controls': AriaAttributes['aria-controls']
+  'aria-expanded': AriaAttributes['aria-expanded']
+  'aria-haspopup'?: AriaAttributes['aria-haspopup']
   onClick: React.MouseEventHandler
   onKeyDown: React.KeyboardEventHandler
+  role?: 'menuitem'
+  tabIndex?: -1
 }
 
 export type PopupTriggerProps = {
@@ -19,8 +24,11 @@ export type PopupTriggerProps = {
   buttonAriaLabel?: string
   buttonType: 'custom' | 'default'
   className?: string
+  contentId: string
   disabled?: boolean
+  isMenuItem?: boolean
   noBackground?: boolean
+  popupType?: AriaAttributes['aria-haspopup']
   renderButton?: (props: PopupButtonRenderProps) => React.ReactNode
   setActive: (active: boolean, viaKeyboard?: boolean) => void
   size?: 'large' | 'medium'
@@ -33,8 +41,11 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     buttonAriaLabel,
     buttonType,
     className,
+    contentId,
     disabled,
+    isMenuItem,
     noBackground,
+    popupType,
     renderButton,
     setActive,
     size,
@@ -52,11 +63,27 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     .filter(Boolean)
     .join(' ')
 
-  const handleClick: React.MouseEventHandler = () => {
+  const handleClick: React.MouseEventHandler = (event) => {
+    if (disabled) {
+      event.preventDefault()
+      return
+    }
     setActive(!active, false)
   }
 
   const handleKeyDown: React.KeyboardEventHandler = (e) => {
+    if (e.key === 'Escape' && active) {
+      e.preventDefault()
+      e.stopPropagation()
+      setActive(false)
+      return
+    }
+    if (disabled) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+      }
+      return
+    }
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       setActive(!active, true)
@@ -69,10 +96,13 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
       <>
         {renderButton({
           active,
+          'aria-controls': contentId,
           'aria-expanded': active,
-          'aria-haspopup': true,
+          'aria-haspopup': popupType,
           onClick: handleClick,
           onKeyDown: handleKeyDown,
+          role: isMenuItem ? 'menuitem' : undefined,
+          tabIndex: isMenuItem ? -1 : undefined,
         })}
       </>
     )
@@ -81,12 +111,15 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
   if (buttonType === 'custom') {
     return (
       <div
+        aria-controls={contentId}
+        aria-expanded={active}
+        aria-haspopup={popupType}
         aria-label={buttonAriaLabel}
         className={classes}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        role="button"
-        tabIndex={0}
+        role={isMenuItem ? 'menuitem' : 'button'}
+        tabIndex={isMenuItem ? -1 : 0}
       >
         {button}
       </div>
@@ -95,12 +128,16 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
 
   return (
     <button
+      aria-controls={contentId}
+      aria-expanded={active}
+      aria-haspopup={popupType}
       aria-label={buttonAriaLabel}
       className={classes}
       disabled={disabled}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      tabIndex={0}
+      role={isMenuItem ? 'menuitem' : undefined}
+      tabIndex={isMenuItem ? -1 : 0}
       type="button"
     >
       {button}

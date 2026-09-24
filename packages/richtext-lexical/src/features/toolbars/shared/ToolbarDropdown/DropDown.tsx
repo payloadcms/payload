@@ -1,8 +1,15 @@
 'use client'
 import { Button } from '@payloadcms/ui'
 import { $addUpdateTag, isDOMNode, type LexicalEditor } from 'lexical'
-import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import React, {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
 import type { ToolbarGroupItem } from '../../types.js'
 
@@ -67,7 +74,10 @@ export function DropDownItem({
       className={className}
       disabled={enabled === false}
       extraButtonProps={{
+        'aria-checked': item.isActive ? Boolean(active) : undefined,
         'data-item-key': itemKey,
+        role: item.isActive ? 'menuitemcheckbox' : 'menuitem',
+        tabIndex: -1,
       }}
       icon={Icon}
       iconPosition="left"
@@ -85,7 +95,7 @@ export function DropDownItem({
           })
         }
       }}
-      onMouseDown={(e) => {
+      onMouseDown={(e: React.MouseEvent) => {
         // This is required for Firefox compatibility. Without it, the dropdown will disappear without the onClick being called.
         // This only happens in Firefox. Must be something about how Firefox handles focus events differently.
         e.preventDefault()
@@ -100,17 +110,21 @@ export function DropDownItem({
 }
 
 function DropDownItems({
+  id,
   children,
   dropdownKey,
   dropDownRef,
   itemsContainerClassNames,
   onClose,
+  shouldAutoFocus,
 }: {
   children: React.ReactNode
   dropdownKey?: string
   dropDownRef: React.Ref<HTMLDivElement>
+  id: string
   itemsContainerClassNames?: string[]
-  onClose: () => void
+  onClose: (options?: { restoreFocus?: boolean }) => void
+  shouldAutoFocus: boolean
 }): React.ReactElement {
   const [items, setItems] = useState<Array<React.RefObject<HTMLButtonElement | null>>>()
   const [highlightedItem, setHighlightedItem] =
@@ -129,27 +143,31 @@ function DropDownItems({
     }
 
     const { key } = event
+    const enabledItems = items.filter((item) => !item.current?.disabled)
 
-    if (['ArrowDown', 'ArrowUp', 'Escape', 'Tab'].includes(key)) {
+    if (['ArrowDown', 'ArrowUp', 'Escape'].includes(key)) {
       event.preventDefault()
     }
 
-    if (key === 'Escape' || key === 'Tab') {
+    if (key === 'Escape') {
       onClose()
+    } else if (key === 'Tab') {
+      setTimeout(() => onClose({ restoreFocus: false }))
     } else if (key === 'ArrowUp') {
       setHighlightedItem((prev) => {
         if (prev == null) {
-          return items[0]
+          return enabledItems[0]
         }
-        const index = items.indexOf(prev) - 1
-        return items[index === -1 ? items.length - 1 : index]
+        const index = enabledItems.indexOf(prev) - 1
+        return enabledItems[index === -1 ? enabledItems.length - 1 : index]
       })
     } else if (key === 'ArrowDown') {
       setHighlightedItem((prev) => {
         if (prev == null) {
-          return items[0]
+          return enabledItems[0]
         }
-        return items[items.indexOf(prev) + 1]
+        const index = enabledItems.indexOf(prev)
+        return enabledItems[index === enabledItems.length - 1 ? 0 : index + 1]
       })
     }
   }
@@ -162,14 +180,14 @@ function DropDownItems({
   )
 
   useEffect(() => {
-    if (items != null && highlightedItem == null) {
-      setHighlightedItem(items[0])
+    if (shouldAutoFocus && items != null && highlightedItem == null) {
+      setHighlightedItem(items.find((item) => !item.current?.disabled))
     }
 
     if (highlightedItem != null && highlightedItem?.current != null) {
       highlightedItem.current.focus()
     }
-  }, [items, highlightedItem])
+  }, [items, highlightedItem, shouldAutoFocus])
 
   return (
     <DropDownContext value={contextValue}>
@@ -177,8 +195,12 @@ function DropDownItems({
         className={(itemsContainerClassNames ?? ['toolbar-popup__dropdown-items']).join(' ')}
         data-dropdown-key={dropdownKey}
         data-theme="dark"
+        id={id}
         onKeyDown={handleKeyDown}
+        popover="manual"
         ref={dropDownRef}
+        role="menu"
+        tabIndex={-1}
       >
         {children}
       </div>
@@ -209,11 +231,14 @@ export function DropDown({
 }): React.ReactNode {
   const dropDownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const openedViaKeyboardRef = useRef(false)
+  const generatedId = useId()
+  const menuId = `toolbar-dropdown-${dropdownKey}-${generatedId}`
   const [showDropDown, setShowDropDown] = useState(false)
 
-  const handleClose = (): void => {
+  const handleClose = ({ restoreFocus = true }: { restoreFocus?: boolean } = {}): void => {
     setShowDropDown(false)
-    if (buttonRef?.current != null) {
+    if (restoreFocus && buttonRef?.current != null) {
       buttonRef.current.focus()
     }
   }
@@ -223,10 +248,37 @@ export function DropDown({
     const dropDown = dropDownRef.current
 
     if (showDropDown && button !== null && dropDown !== null) {
-      const { left, top } = button.getBoundingClientRect()
-      const scrollTopOffset = window.scrollY || document.documentElement.scrollTop
-      dropDown.style.top = `${top + scrollTopOffset + button.offsetHeight + 5}px`
-      dropDown.style.left = `${Math.min(left - 5, window.innerWidth - dropDown.offsetWidth - 20)}px`
+      if (!dropDown.matches(':popover-open')) {
+        dropDown.showPopover()
+      }
+
+      const updatePosition = (): void => {
+        const { bottom, left, top } = button.getBoundingClientRect()
+        const offset = 8
+        const gap = 5
+        const below = bottom + gap
+        const above = top - dropDown.offsetHeight - gap
+        const maxTop = Math.max(offset, window.innerHeight - dropDown.offsetHeight - offset)
+        const preferredTop =
+          below + dropDown.offsetHeight + offset <= window.innerHeight
+            ? below
+            : above >= offset
+              ? above
+              : below
+
+        dropDown.style.position = 'fixed'
+        dropDown.style.top = `${Math.max(offset, Math.min(preferredTop, maxTop))}px`
+        dropDown.style.left = `${Math.max(8, Math.min(left - 5, window.innerWidth - dropDown.offsetWidth - 20))}px`
+      }
+
+      updatePosition()
+      window.addEventListener('resize', updatePosition)
+      window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
+
+      return () => {
+        window.removeEventListener('resize', updatePosition)
+        window.removeEventListener('scroll', updatePosition, { capture: true })
+      }
     }
   }, [dropDownRef, buttonRef, showDropDown])
 
@@ -256,28 +308,27 @@ export function DropDown({
     }
   }, [dropDownRef, buttonRef, showDropDown, stopCloseOnClickSelf])
 
-  const portal = createPortal(
-    <DropDownItems
-      dropdownKey={dropdownKey}
-      dropDownRef={dropDownRef}
-      itemsContainerClassNames={itemsContainerClassNames}
-      onClose={handleClose}
-    >
-      {children}
-    </DropDownItems>,
-    document.body,
-  )
-
   return (
     <React.Fragment>
       <button
+        aria-controls={menuId}
+        aria-expanded={showDropDown}
+        aria-haspopup="menu"
         aria-label={buttonAriaLabel}
         className={buttonClassName + (showDropDown ? ' active' : '')}
         data-dropdown-key={dropdownKey}
         disabled={disabled}
         onClick={(event) => {
           event.preventDefault()
+          openedViaKeyboardRef.current = false
           setShowDropDown(!showDropDown)
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            openedViaKeyboardRef.current = true
+            setShowDropDown(!showDropDown)
+          }
         }}
         onMouseDown={(e) => {
           // This fixes a bug where you are unable to click the button if you are in a NESTED editor (editor in blocks field in editor).
@@ -293,7 +344,18 @@ export function DropDown({
         <i className="toolbar-popup__dropdown-caret" />
       </button>
 
-      {showDropDown && <React.Fragment>{portal}</React.Fragment>}
+      {showDropDown && (
+        <DropDownItems
+          dropdownKey={dropdownKey}
+          dropDownRef={dropDownRef}
+          id={menuId}
+          itemsContainerClassNames={itemsContainerClassNames}
+          onClose={handleClose}
+          shouldAutoFocus={openedViaKeyboardRef.current}
+        >
+          {children}
+        </DropDownItems>
+      )}
     </React.Fragment>
   )
 }

@@ -50,13 +50,13 @@ export function getSelectMenu({ page }: { page: Page }): Locator {
 }
 
 export async function selectInput({
-  page,
-  selectLocator,
-  options,
-  option,
-  multiSelect = true,
   clear = true,
   filter,
+  multiSelect = true,
+  option,
+  options,
+  page,
+  selectLocator,
   selectType = 'select',
 }: { page: Page } & SelectReactOptionsParams) {
   if (filter) {
@@ -76,7 +76,7 @@ export async function selectInput({
         .count()
 
       if (alreadySelected === 0) {
-        await selectOption({ page, selectLocator, optionText })
+        await selectOption({ optionText, page, selectLocator })
       }
     }
   } else if (option) {
@@ -85,7 +85,7 @@ export async function selectInput({
       .count()
 
     if (alreadySelected === 0) {
-      await selectOption({ page, selectLocator, optionText: option })
+      await selectOption({ optionText: option, page, selectLocator })
     }
   }
 }
@@ -99,15 +99,15 @@ export async function openSelectMenu({
 }): Promise<void> {
   const menu = getSelectMenu({ page })
   if (await menu.isHidden()) {
-    await selectLocator.locator('button.dropdown-indicator').click()
+    await selectLocator.locator('.rs__control').click()
   }
   await menu.waitFor({ state: 'visible', timeout: 2000 })
 }
 
 async function selectOption({
+  optionText,
   page,
   selectLocator,
-  optionText,
 }: {
   optionText: string
   page: Page
@@ -126,8 +126,8 @@ type GetSelectInputValueFunction = <TMultiSelect = true>(args: {
 }) => Promise<TMultiSelect extends true ? string[] : false | string | undefined>
 
 export const getSelectInputValue: GetSelectInputValueFunction = async ({
-  selectLocator,
   multiSelect = false,
+  selectLocator,
   selectType = 'select',
 }) => {
   if (multiSelect) {

@@ -131,6 +131,13 @@ export const renderTable = ({
   const isPolymorphic = collections
 
   const isGroupingBy = Boolean(query?.groupBy)
+  const tableId = [
+    'payload-table',
+    clientCollectionConfig?.slug || 'results',
+    isGroupingBy ? encodeURIComponent(String(groupByValue ?? key)) : undefined,
+  ]
+    .filter(Boolean)
+    .join('-')
 
   if (isPolymorphic) {
     clientFields = []
@@ -282,10 +289,15 @@ export const renderTable = ({
                 groupByValue={groupByValue}
                 heading={heading}
               />
-              <GroupByPageControls data={data} groupByValue={groupByValue} />
+              <GroupByPageControls data={data} groupByValue={groupByValue} tableId={tableId} />
             </TableSectionHeader>
             <TableSectionContent>
-              <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+              <Table
+                appearance={tableAppearance}
+                columns={columnsToUse}
+                data={data?.docs || []}
+                id={tableId}
+              />
             </TableSectionContent>
           </SelectionProvider>
         </TableSectionRoot>
@@ -305,7 +317,12 @@ export const renderTable = ({
             </TableSectionHeader>
           )}
           <TableSectionContent>
-            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+            <Table
+              appearance={tableAppearance}
+              columns={columnsToUse}
+              data={data?.docs || []}
+              id={tableId}
+            />
           </TableSectionContent>
         </TableSectionRoot>
       ),
@@ -337,6 +354,7 @@ export const renderTable = ({
             collection={clientCollectionConfig}
             columns={columnsToUse}
             data={data?.docs || []}
+            id={tableId}
           />
         </TableSectionContent>
       </TableSectionRoot>

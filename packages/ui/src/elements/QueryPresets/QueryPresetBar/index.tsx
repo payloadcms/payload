@@ -293,6 +293,7 @@ export const QueryPresetBar: React.FC<{
         <Popup
           className={`${baseClass}__popup`}
           horizontalAlign="left"
+          popupType="menu"
           portalClassName={`${baseClass}__popup-content`}
           render={({ close }) => (
             <Fragment>
@@ -406,8 +407,9 @@ export const QueryPresetBar: React.FC<{
               </PopupList.MenuItem>
             </Fragment>
           )}
-          renderButton={({ active, onClick, onKeyDown }) => (
+          renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
             <FilterTrigger
+              {...ariaProps}
               className={`${baseClass}__trigger`}
               id="select-preset"
               isActive={Boolean(activePreset)}

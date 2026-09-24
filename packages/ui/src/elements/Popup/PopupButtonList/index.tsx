@@ -9,6 +9,16 @@ import './index.css'
 
 const baseClass = 'popup-button-list'
 
+const Group: React.FC<{
+  children: React.ReactNode
+  className?: string
+  role?: 'group'
+}> = ({ children, className, role }) => (
+  <div className={className} role={role}>
+    {children}
+  </div>
+)
+
 export { PopupListDivider as Divider } from '../PopupDivider/index.js'
 export { PopupListGroupLabel as GroupLabel } from '../PopupGroupLabel/index.js'
 
@@ -26,7 +36,7 @@ export const ButtonGroup: React.FC<{
   ]
     .filter(Boolean)
     .join(' ')
-  return <div className={classes}>{children}</div>
+  return <Group className={classes}>{children}</Group>
 }
 
 /**
@@ -46,7 +56,7 @@ export const MenuItem: React.FC<{
   ]
     .filter(Boolean)
     .join(' ')
-  return <div className={classes}>{children}</div>
+  return <Group className={classes}>{children}</Group>
 }
 
 /**
@@ -58,11 +68,18 @@ export const RadioGroup: React.FC<{
   className?: string
 }> = ({ children, className }) => {
   const classes = [baseClass, className, `${baseClass}--with-icons`].filter(Boolean).join(' ')
-  return <div className={classes}>{children}</div>
+  return (
+    <Group className={classes} role="group">
+      {children}
+    </Group>
+  )
 }
+
+export const CheckboxGroup = RadioGroup
 
 type MenuButtonProps = {
   active?: boolean
+  ariaChecked?: boolean
   children: React.ReactNode
   className?: string
   disabled?: boolean
@@ -70,17 +87,20 @@ type MenuButtonProps = {
   icon?: React.ReactNode
   id?: string
   onClick?: (e?: React.MouseEvent) => void
+  role?: 'menuitem' | 'menuitemcheckbox' | 'menuitemradio'
 }
 
 export const Button: React.FC<MenuButtonProps> = ({
   id,
   active,
+  ariaChecked,
   children,
   className,
   disabled,
   href,
   icon,
   onClick,
+  role,
 }) => {
   const classes = [
     `${baseClass}__button`,
@@ -98,6 +118,7 @@ export const Button: React.FC<MenuButtonProps> = ({
     if (href) {
       return (
         <Link
+          aria-checked={ariaChecked}
           className={classes}
           href={href}
           id={id}
@@ -107,6 +128,8 @@ export const Button: React.FC<MenuButtonProps> = ({
             }
           }}
           prefetch={false}
+          role={role ?? 'menuitem'}
+          tabIndex={-1}
         >
           {iconElement}
           <span className={`${baseClass}__label`}>{children}</span>
@@ -117,6 +140,7 @@ export const Button: React.FC<MenuButtonProps> = ({
     if (onClick) {
       return (
         <button
+          aria-checked={ariaChecked}
           className={classes}
           id={id}
           onClick={(e) => {
@@ -124,6 +148,8 @@ export const Button: React.FC<MenuButtonProps> = ({
               onClick(e)
             }
           }}
+          role={role ?? 'menuitem'}
+          tabIndex={-1}
           type="button"
         >
           {iconElement}
@@ -134,10 +160,24 @@ export const Button: React.FC<MenuButtonProps> = ({
   }
 
   return (
-    <div className={classes} id={id}>
+    <button
+      aria-disabled="true"
+      className={classes}
+      data-popup-prevent-close
+      id={id}
+      onClick={(event) => event.preventDefault()}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+        }
+      }}
+      role={role ?? 'menuitem'}
+      tabIndex={-1}
+      type="button"
+    >
       {iconElement}
       <span className={`${baseClass}__label`}>{children}</span>
-    </div>
+    </button>
   )
 }
 
@@ -149,10 +189,27 @@ export const RadioGroupItem: React.FC<Omit<MenuButtonProps, 'icon'>> = (props) =
   return (
     <Button
       {...props}
+      ariaChecked={Boolean(props.active)}
       className={[`${baseClass}__button--radio-group-item`, props.className]
         .filter(Boolean)
         .join(' ')}
       icon={props.active ? <CheckIcon size={16} /> : undefined}
+      role="menuitemradio"
+    />
+  )
+}
+
+/** A Button variant for independently selectable items within CheckboxGroup. */
+export const CheckboxGroupItem: React.FC<Omit<MenuButtonProps, 'icon'>> = (props) => {
+  return (
+    <Button
+      {...props}
+      ariaChecked={Boolean(props.active)}
+      className={[`${baseClass}__button--radio-group-item`, props.className]
+        .filter(Boolean)
+        .join(' ')}
+      icon={props.active ? <CheckIcon size={16} /> : undefined}
+      role="menuitemcheckbox"
     />
   )
 }

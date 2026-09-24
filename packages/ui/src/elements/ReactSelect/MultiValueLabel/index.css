@@ -1,12 +1,17 @@
 @layer payload-default {
   .multi-value-label {
+    align-self: center;
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     display: flex;
     align-items: center;
+    height: var(--spacer-4);
+    margin-block: calc(var(--stroke-width-medium) * -1);
     max-width: 9.375rem;
+    min-width: 0;
+    overflow: hidden;
     color: currentColor;
     padding-left: var(--spacer-1-5);
   }
@@ -16,9 +21,44 @@
   }
 
   .multi-value-label__text {
-    text-overflow: ellipsis;
+    align-items: center;
+    display: flex;
+    max-width: 100%;
+    min-width: 0;
     overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+
+    & > span {
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .multi-value-label__drag-button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: grab;
+    display: flex;
+    font: inherit;
+    height: var(--spacer-4);
+    max-width: 100%;
+    min-width: var(--spacer-4);
+    padding: 0;
+    text-align: start;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
   }
 
   .multi-value-label__text--editable {

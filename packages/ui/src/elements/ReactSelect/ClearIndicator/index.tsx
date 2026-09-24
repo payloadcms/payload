@@ -3,34 +3,34 @@ import type { ClearIndicatorProps } from 'react-select'
 
 import React from 'react'
 
-import type { Option as OptionType } from '../types.js'
+import type { CustomSelectProps, Option as OptionType } from '../types.js'
 
 import { CircledXIcon } from '../../../icons/CircledX/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.css'
 
 const baseClass = 'clear-indicator'
 
 export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (props) => {
-  const {
-    clearValue,
-    innerProps: { ref, ...restInnerProps },
-  } = props
+  const { clearValue, selectProps } = props
+  const { t } = useTranslation()
+  const { customProps } = selectProps as {
+    customProps?: CustomSelectProps
+  } & typeof selectProps
+  const label = customProps?.clearValueLabel || t('general:clear')
 
   return (
-    <div
+    <button
+      aria-label={label}
       className={baseClass}
-      ref={ref}
-      {...restInnerProps}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          clearValue()
-          e.stopPropagation()
-        }
+      onClick={(event) => {
+        event.stopPropagation()
+        clearValue()
       }}
-      role="button"
-      tabIndex={0}
+      onMouseDown={(event) => event.stopPropagation()}
+      type="button"
     >
       <CircledXIcon className={`${baseClass}__icon`} size={24} />
-    </div>
+    </button>
   )
 }

@@ -35,6 +35,7 @@ const {
   'grep-invert': grepInvert,
   headed,
   part,
+  'screen-reader': screenReader,
   shard,
   'update-snapshots': updateSnapshots,
   workers,
@@ -50,7 +51,8 @@ const effectiveGrepInvert = grepInvert ?? (grep === '@visual' ? undefined : '@vi
 
 // Run all
 if (!suiteName) {
-  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
+  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/${testFilePattern}`)
 
   const totalFiles = files.length
 
@@ -90,6 +92,7 @@ if (!suiteName) {
       baseTestFolder,
       grepInvertArg: effectiveGrepInvert,
       headedArg: headed,
+      screenReaderArg: screenReader,
       suitePaths: file,
       updateSnapshotsArg: updateSnapshots,
     })
@@ -111,7 +114,10 @@ if (!suiteName) {
     .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
 
-  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
+  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
+  const allSuitesInFolder = await globby(
+    `${suiteFolderPath.replace(/\\/g, '/')}/${testFilePattern}`,
+  )
 
   const baseTestFolder = inputSuitePath.split('__')[0]
 
@@ -131,6 +137,7 @@ if (!suiteName) {
     grepArg: grep,
     grepInvertArg: effectiveGrepInvert,
     headedArg: headed,
+    screenReaderArg: screenReader,
     shardArg: shard,
     suiteConfigPath,
     suitePaths: allSuitesInFolder,
@@ -155,6 +162,7 @@ async function executePlaywright({
   grepArg,
   grepInvertArg,
   headedArg,
+  screenReaderArg,
   shardArg,
   suiteConfigPath,
   suitePaths,
@@ -167,6 +175,7 @@ async function executePlaywright({
   grepArg?: string
   grepInvertArg?: string
   headedArg?: boolean
+  screenReaderArg?: boolean
   shardArg?: string
   suiteConfigPath?: string
   suitePaths: string | string[]
@@ -177,7 +186,9 @@ async function executePlaywright({
   console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
-    `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
+    screenReaderArg
+      ? 'playwright.screen-reader.config.ts'
+      : `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
   const spawnDevArgs: string[] = [

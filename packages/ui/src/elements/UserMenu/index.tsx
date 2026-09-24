@@ -82,6 +82,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       className={baseClass}
       horizontalAlign="right"
       onToggleClose={() => setActiveMobileSubmenu(null)}
+      popupType="menu"
       renderButton={({ active, ...ariaProps }) => (
         <button
           {...ariaProps}
@@ -133,7 +134,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
         // Normal menu content (desktop always; mobile when no active submenu)
         <>
           {/* Profile header */}
-          <a className={`${baseClass}__profile`} href={accountHref}>
+          <a className={`${baseClass}__profile`} href={accountHref} role="menuitem" tabIndex={-1}>
             <div className={`${baseClass}__avatar`}>
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
             </div>

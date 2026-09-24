@@ -6,7 +6,6 @@ import React, { useCallback } from 'react'
 
 import { FilterTrigger } from '../../../elements/FilterTrigger/index.js'
 import { Popup, PopupList } from '../../../elements/Popup/index.js'
-import { CheckIcon } from '../../../icons/Check/index.js'
 
 const baseClass = 'type-filter'
 
@@ -36,14 +35,14 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
     <Popup
       className={baseClass}
       horizontalAlign="left"
+      popupType="menu"
       render={() => (
-        <PopupList.RadioGroup>
+        <PopupList.CheckboxGroup>
           {options.map(({ label, value }) => {
             const isActive = selectedValues?.includes(value)
             return (
-              <PopupList.Button
+              <PopupList.CheckboxGroupItem
                 active={isActive}
-                icon={isActive ? <CheckIcon size={16} /> : undefined}
                 key={value}
                 onClick={() => {
                   const newSelectedValues = isActive
@@ -53,13 +52,14 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
                 }}
               >
                 {label}
-              </PopupList.Button>
+              </PopupList.CheckboxGroupItem>
             )
           })}
-        </PopupList.RadioGroup>
+        </PopupList.CheckboxGroup>
       )}
-      renderButton={({ active, onClick, onKeyDown }) => (
+      renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
         <FilterTrigger
+          {...ariaProps}
           isActive={isRefined}
           onClear={handleClear}
           onClick={onClick}

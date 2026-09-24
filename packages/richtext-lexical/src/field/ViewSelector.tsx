@@ -37,6 +37,7 @@ export function ViewSelector(): null | React.ReactElement {
         }
         buttonType="custom"
         horizontalAlign="left"
+        popupType="menu"
         render={({ close }) => (
           <PopupList.ButtonGroup>
             {allViews.map((viewName) => {

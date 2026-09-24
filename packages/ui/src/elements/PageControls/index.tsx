@@ -8,6 +8,7 @@ import type { IListQueryContext } from '../../providers/ListQuery/types.js'
 
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
+import { useTableID } from '../../elements/Table/TableIdentity.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
@@ -24,8 +25,18 @@ export const PageControlsComponent: React.FC<{
   handlePerPageChange?: IListQueryContext['handlePerPageChange']
   limit?: number
   limits?: number[]
-}> = ({ AfterPageControls, data, handlePageChange, handlePerPageChange, limit, limits }) => {
+  tableId?: string
+}> = ({
+  AfterPageControls,
+  data,
+  handlePageChange,
+  handlePerPageChange,
+  limit,
+  limits,
+  tableId,
+}) => {
   const { i18n } = useTranslation()
+  const resolvedTableID = useTableID(tableId)
 
   return (
     <div className={baseClass}>
@@ -40,6 +51,7 @@ export const PageControlsComponent: React.FC<{
           onChange={handlePageChange}
           page={data.page}
           prevPage={data.prevPage}
+          tableId={resolvedTableID}
           totalPages={data.totalPages}
         />
         {data.totalDocs > 0 && (
@@ -56,6 +68,7 @@ export const PageControlsComponent: React.FC<{
               limit={limit}
               limits={limits}
               resetPage={data.totalDocs <= data.pagingCounter}
+              tableId={resolvedTableID}
             />
           </div>
         )}
@@ -73,7 +86,8 @@ export const PageControlsComponent: React.FC<{
 export const PageControls: React.FC<{
   AfterPageControls?: React.ReactNode
   collectionConfig: ClientCollectionConfig
-}> = ({ AfterPageControls, collectionConfig }) => {
+  tableId?: string
+}> = ({ AfterPageControls, collectionConfig, tableId }) => {
   const {
     data,
     defaultLimit: initialLimit,
@@ -90,6 +104,7 @@ export const PageControls: React.FC<{
       handlePerPageChange={handlePerPageChange}
       limit={isNumber(query.limit) ? query.limit : initialLimit}
       limits={collectionConfig?.admin?.pagination?.limits}
+      tableId={tableId}
     />
   )
 }

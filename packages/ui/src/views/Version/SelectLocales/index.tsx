@@ -24,6 +24,7 @@ export const SelectLocales: React.FC<Props> = ({ locales, onChange }) => {
     <Popup
       className={baseClass}
       horizontalAlign="right"
+      popupType="menu"
       render={() => (
         <PopupList.RadioGroup>
           {locales.map((locale) => (

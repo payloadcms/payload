@@ -20,4 +20,9 @@
   .multi-value--is-dragging {
     z-index: 2;
   }
+
+  .multi-value.rs__multi-value:has(.multi-value-label__drag-button:focus-visible) {
+    outline: var(--accessibility-outline);
+    outline-offset: calc(var(--stroke-width-small) * -1);
+  }
 }
