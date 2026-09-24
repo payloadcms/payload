@@ -846,6 +846,30 @@ describe('Block fields', () => {
       )
     })
 
+    test('should retain a default inline block type when a top-level condition becomes true', async () => {
+      await page.goto(url.create)
+
+      const testBlocks = page.locator('#field-testBlocks')
+
+      await expect(testBlocks).toBeHidden()
+      await page.locator('label[for=field-showInlineBlocks]').click()
+      await expect(testBlocks).toBeVisible()
+      await expect(testBlocks.locator('.blocks-field__row')).toHaveCount(1)
+
+      await page.locator('#field-enabledBlocks').fill('blockOne')
+      await expect(testBlocks.locator('.blocks-field__row')).toHaveCount(1)
+
+      await saveDocAndAssert(page)
+
+      const id = page.url().split('/').pop()!
+      createdIDs.push(id)
+
+      const { doc } = await client.findByID({ id, slug: 'block-fields' })
+
+      expect(doc.testBlocks).toHaveLength(1)
+      expect(doc.testBlocks[0].blockType).toBe('testBlock')
+    })
+
     test('ensure static filterOptions are respected', async () => {
       await page.goto(url.create)
       const addButton = page.locator(
