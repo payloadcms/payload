@@ -21,6 +21,8 @@ import { Regression2 } from './collections/Regression-2/index.js'
 import { RestrictedTrash } from './collections/RestrictedTrash/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
+  accessRelationChildSlug,
+  accessRelationParentSlug,
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
   differentiatedTrashSlug,
@@ -30,7 +32,13 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  inheritedReadVersionsGlobalSlug,
+  inheritedReadVersionsSlug,
+  inheritedReadVersionsVirtualGlobalSlug,
+  inheritedReadVersionsVirtualRelatedSlug,
+  inheritedReadVersionsVirtualSlug,
   nonAdminEmail,
+  postReferencesSlug,
   publicUserEmail,
   publicUsersSlug,
   readNotUpdateGlobalSlug,
@@ -42,6 +50,7 @@ import {
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
+  selfReferentialSlug,
   siblingDataSlug,
   slug,
   unrestrictedSlug,
@@ -68,6 +77,17 @@ const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) =>
 }
 
 export const requestHeaders = new Headers({ authorization: 'Bearer testBearerToken' })
+let inheritedReadVersionsAllowedID: number | string | undefined
+let inheritedReadVersionsAllowedVersionID: number | string | undefined
+
+export const setInheritedReadVersionsAllowedID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedID = id
+}
+
+export const setInheritedReadVersionsAllowedVersionID = (id: number | string | undefined): void => {
+  inheritedReadVersionsAllowedVersionID = id
+}
+
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.get('authorization') === requestHeaders.get('authorization')
 }
@@ -96,6 +116,14 @@ export const getConfig: () => Partial<Config> = () => ({
       baseDir: path.resolve(dirname),
     },
     user: 'users',
+  },
+  baseAccess: {
+    collections: {
+      readVersions: ({ id, slug }) =>
+        slug !== inheritedReadVersionsSlug || inheritedReadVersionsAllowedVersionID === undefined
+          ? true
+          : id === inheritedReadVersionsAllowedVersionID,
+    },
   },
   blocks: [
     {
@@ -157,6 +185,10 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: publicUsersSlug,
+      access: {
+        create: () => true,
+        read: () => true,
+      },
       auth: true,
       fields: [],
       versions: false,
@@ -165,9 +197,19 @@ export const getConfig: () => Partial<Config> = () => ({
       slug,
       access: {
         ...openAccess,
+        // Unauthenticated callers cannot read posts titled "archived".
+        read: ({ req }) => (req.user ? true : { title: { not_equals: 'archived' } }),
         update: () => false,
       },
       fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'title2',
+          type: 'text',
+        },
         {
           name: 'restrictedField',
           type: 'text',
@@ -226,15 +268,93 @@ export const getConfig: () => Partial<Config> = () => ({
           collection: 'relation-restricted',
           on: 'post',
         },
+        {
+          name: 'reference',
+          type: 'relationship',
+          relationTo: postReferencesSlug,
+        },
+        {
+          name: 'references',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: postReferencesSlug,
+        },
+        {
+          name: 'polymorphicReference',
+          type: 'relationship',
+          relationTo: [postReferencesSlug, unrestrictedSlug],
+        },
       ],
       versions: false,
     },
     {
+      slug: postReferencesSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'post',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: slug,
+        },
+        {
+          name: 'singlePost',
+          type: 'relationship',
+          hasMany: false,
+          relationTo: slug,
+        },
+        {
+          name: 'joinedPosts',
+          type: 'join',
+          collection: slug,
+          on: 'reference',
+        },
+        {
+          name: 'joinedPostsMany',
+          type: 'join',
+          collection: slug,
+          on: 'references',
+        },
+        {
+          name: 'polymorphicJoinedPosts',
+          type: 'join',
+          collection: [slug, unrestrictedSlug],
+          on: 'reference',
+        },
+        {
+          name: 'joinedPostsPolymorphicOn',
+          type: 'join',
+          collection: slug,
+          on: 'polymorphicReference',
+        },
+      ],
+    },
+    {
       slug: unrestrictedSlug,
+      access: {
+        read: () => true,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'restrictedName',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'reference',
+          type: 'relationship',
+          relationTo: postReferencesSlug,
         },
         {
           name: 'info',
@@ -255,6 +375,32 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'relationship',
           hasMany: true,
           relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'userRestrictedDoc',
+          type: 'relationship',
+          relationTo: userRestrictedCollectionSlug,
+        },
+        {
+          name: 'fullyRestrictedDocs',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: fullyRestrictedSlug,
+        },
+        {
+          name: 'restrictedUserDocs',
+          type: 'relationship',
+          access: {
+            read: () => false,
+          },
+          hasMany: true,
+          relationTo: createNotUpdateCollectionSlug,
+        },
+        {
+          name: 'restrictedRelatedItems',
+          type: 'join',
+          collection: fullyRestrictedSlug,
+          on: 'unrestrictedDoc',
         },
         {
           name: 'createNotUpdateDocs',
@@ -325,6 +471,23 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
+        },
+        {
+          name: 'restrictedName',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'unrestrictedDoc',
+          type: 'relationship',
+          relationTo: unrestrictedSlug,
+        },
       ],
       versions: false,
     },
@@ -349,7 +512,14 @@ export const getConfig: () => Partial<Config> = () => ({
       access: {
         create: () => true,
         delete: () => false,
-        read: () => true,
+        read: ({ req }) =>
+          req.user
+            ? true
+            : {
+                name: {
+                  not_equals: 'archived',
+                },
+              },
         update: ({ req }) => ({
           name: {
             equals: req.user?.email,
@@ -382,6 +552,11 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'hiddenName',
+          type: 'text',
+          hidden: true,
         },
       ],
       versions: false,
@@ -538,6 +713,17 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: false,
         },
       ],
+      hooks: {
+        beforeDelete: [
+          ({ id, req }) => {
+            const beforeDeleteCalls = req.context.beforeDeleteCalls
+
+            if (Array.isArray(beforeDeleteCalls)) {
+              beforeDeleteCalls.push(id)
+            }
+          },
+        ],
+      },
       labels: {
         plural: 'Doc Level Access',
         singular: 'Doc Level Access',
@@ -676,6 +862,55 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
       versions: { drafts: true },
+    },
+    {
+      slug: inheritedReadVersionsSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? id === inheritedReadVersionsAllowedID
+            : {
+                secret: {
+                  equals: 'allowed',
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'secret',
+          type: 'text',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: inheritedReadVersionsVirtualRelatedSlug,
+      access: { read: () => true },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: inheritedReadVersionsVirtualSlug,
+      access: {
+        read: () => ({ relatedLabel: { equals: 'allowed' } }),
+      },
+      fields: [
+        {
+          name: 'related',
+          type: 'relationship',
+          relationTo: inheritedReadVersionsVirtualRelatedSlug,
+        },
+        {
+          name: 'relatedLabel',
+          type: 'text',
+          virtual: 'related.label',
+        },
+      ],
+      versions: true,
     },
     BlocksFieldAccess,
     Disabled,
@@ -856,8 +1091,123 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
       versions: false,
     },
+    // Parent collection whose read access returns a where constraint, with a
+    // relationship to a child collection that ALSO returns a where constraint.
+    {
+      slug: accessRelationParentSlug,
+      access: {
+        ...openAccess,
+        // Unauthenticated callers only see "published" parents.
+        read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'status',
+          type: 'text',
+        },
+        {
+          name: 'child',
+          type: 'relationship',
+          relationTo: accessRelationChildSlug,
+        },
+      ],
+    },
+    {
+      slug: accessRelationChildSlug,
+      access: {
+        ...openAccess,
+        // Child also constrains read access with a where query.
+        read: ({ req: { user } }) => (user ? true : { createdAt: { exists: true } }),
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          name: 'nested',
+          type: 'group',
+          fields: [
+            {
+              name: 'isActive',
+              type: 'checkbox',
+              defaultValue: true,
+            },
+          ],
+        },
+      ],
+    },
+    // Self-referential relationship on a collection whose read access returns a where
+    // constraint. Querying through `parent` must apply that constraint to the related doc.
+    {
+      slug: selfReferentialSlug,
+      access: {
+        ...openAccess,
+        read: ({ req: { user } }) => (user ? true : { isPublic: { equals: true } }),
+      },
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+        },
+        {
+          name: 'isPublic',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: selfReferentialSlug,
+        },
+      ],
+    },
   ],
   globals: [
+    {
+      slug: inheritedReadVersionsGlobalSlug,
+      access: {
+        read: ({ id }) =>
+          id
+            ? false
+            : {
+                visible: {
+                  equals: true,
+                },
+              },
+      },
+      fields: [
+        {
+          name: 'visible',
+          type: 'checkbox',
+        },
+      ],
+      versions: true,
+    },
+    {
+      slug: inheritedReadVersionsVirtualGlobalSlug,
+      access: {
+        read: () => ({ relatedLabel: { equals: 'allowed' } }),
+        update: () => true,
+      },
+      fields: [
+        {
+          name: 'related',
+          type: 'relationship',
+          relationTo: inheritedReadVersionsVirtualRelatedSlug,
+        },
+        {
+          name: 'relatedLabel',
+          type: 'text',
+          virtual: 'related.label',
+        },
+      ],
+      versions: true,
+    },
     {
       slug: 'settings',
       access: {
@@ -890,7 +1240,7 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'test',
       access: {
         read: async ({ req: { payload } }) => {
-          const access = await payload.findGlobal({ slug: 'settings' })
+          const access = await payload.findGlobal({ slug: 'settings', overrideAccess: true })
           return Boolean(access.test)
         },
       },
@@ -952,6 +1302,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -960,6 +1311,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: nonAdminEmail,
       password: 'test',
     },
+    overrideAccess: true,
   })
 
   // Regular user - can access admin panel but has limited delete permissions
@@ -970,6 +1322,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       password: 'test',
       roles: ['user'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -978,6 +1331,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: publicUserEmail,
       password: 'test',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -985,6 +1339,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       restrictedField: 'restricted',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -992,6 +1347,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'read-only',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1040,6 +1396,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       },
       title: 'Blocks Field Access Test Document',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1047,6 +1404,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'versioned',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1063,6 +1421,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         },
       ],
     },
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
@@ -1070,6 +1429,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'dev@payloadcms.com',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1107,6 +1467,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
       },
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1122,6 +1483,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         text: 'Text2',
       },
     },
+    overrideAccess: true,
   })
 
   // Seed read-restricted collection
@@ -1134,6 +1496,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       _status: 'published',
       title: 'Differentiated Doc 1',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1142,5 +1505,6 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       _status: 'published',
       title: 'Restricted Doc 1',
     },
+    overrideAccess: true,
   })
 }

@@ -25,12 +25,14 @@ export type InitReqResult = {
   locale?: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
+  /** The authenticated user after read access for client-facing consumers. */
+  user?: PayloadRequest['user']
 }
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
   renderComponent?: ComponentRenderer
-} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
+} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req' | 'user'>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>

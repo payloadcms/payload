@@ -25,6 +25,9 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": ["playwright", "payload"],
+  "skillOverrides": {
+    "audit-dependencies": "user-invocable-only"
+  },
   "permissions": {
     "allow": [
       "Bash(gh issue view:*)",

@@ -33,6 +33,7 @@ The `authenticate` function is passed the following arguments:
 | **`headers`** \*       | The headers on the incoming request. Useful for retrieving identifiable information on a request.                   |
 | **`payload`** \*       | The Payload class. Useful for authenticating the identifiable information against Payload.                          |
 | **`isGraphQL`**        | Whether or not the strategy is being executed within the GraphQL endpoint. Default is `false`.                      |
+| **`req`**              | The request that initiated authentication, when available.                                                          |
 
 ### Example Strategy
 

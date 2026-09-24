@@ -27,11 +27,12 @@ let user: AuthenticatedUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hooks', () => {
+test.suite('@payloadcms/plugin-import-export — hooks', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
+      overrideAccess: true,
     })
 
     user = loginResult.user!
@@ -52,6 +53,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithHooksSlug,
         data: { count: 1, secret: 'top-secret', title: 'Hook Test' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -61,12 +63,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           format: 'csv',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
         user,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-hooks-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -94,6 +98,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithHooksSlug,
         data: { count: 2, secret: 'hidden', title: 'After Hook Test' },
+        overrideAccess: true,
       })
 
       await payload.create({
@@ -103,6 +108,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           format: 'csv',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
         user,
       })
 
@@ -123,6 +129,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithHooksSlug,
         data: { count: 3, secret: 'json-secret', title: 'JSON Hook Test' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -132,12 +139,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           format: 'json',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
         user,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-hooks-export',
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -159,6 +168,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           payload.create({
             collection: postsWithHooksSlug,
             data: { count: i, title: `Batch Post ${i}` },
+            overrideAccess: true,
           }),
         ),
       )
@@ -170,6 +180,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           collectionSlug: postsWithHooksSlug,
           format: 'csv',
         },
+        overrideAccess: true,
         user,
       })
 
@@ -188,6 +199,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithHooksSlug,
         data: { count: 4, secret: 'streamed-secret', title: 'Download Hook Test' },
+        overrideAccess: true,
       })
 
       const response = await restClient.POST('/posts-with-hooks-export/download', {
@@ -229,12 +241,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         collection: 'posts-with-hooks-import',
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
         file,
+        overrideAccess: true,
         user,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -254,6 +268,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       // before hook appends '_imported' to title — verify it landed in DB
       const importedDocs = await payload.find({
         collection: postsWithHooksSlug,
+        overrideAccess: true,
         where: { title: { equals: 'Original Title_imported' } },
       })
       expect(importedDocs.docs).toHaveLength(1)
@@ -272,12 +287,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         collection: 'posts-with-hooks-import',
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
         file,
+        overrideAccess: true,
         user,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -306,12 +323,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         collection: 'posts-with-hooks-import',
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
         file,
+        overrideAccess: true,
         user,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -336,12 +355,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         collection: 'posts-with-hooks-import',
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
         file,
+        overrideAccess: true,
         user,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -350,6 +371,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
 
       const imported = await payload.find({
         collection: postsWithHooksSlug,
+        overrideAccess: true,
         where: { title: { equals: 'JSON Import Hook_imported' } },
       })
       expect(imported.docs).toHaveLength(1)
@@ -377,12 +399,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         collection: 'posts-with-hooks-import',
         data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
         file,
+        overrideAccess: true,
         user,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -420,12 +444,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           importMode: 'create',
         },
         file,
+        overrideAccess: true,
         user,
       })
 
       importDoc = await payload.findByID({
         id: importDoc.id,
         collection: 'posts-with-hooks-import',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -443,6 +469,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { count: 42, excerpt: 'Original excerpt', title: 'Rename Me' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -452,12 +479,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           format: 'csv',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
         user,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-column-map-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -478,6 +507,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { count: 1, excerpt: 'x', sharedName: 'shared value', title: 'Field Rename' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -487,12 +517,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           format: 'csv',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
         user,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-column-map-export',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -509,6 +541,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { count: 11, excerpt: 'preview excerpt', title: 'Preview Rename' },
+        overrideAccess: true,
       })
 
       const res = await restClient.POST('/posts-with-column-map-export/export-preview', {
@@ -548,6 +581,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { count: 22, excerpt: 'json preview', title: 'JSON Preview Rename' },
+        overrideAccess: true,
       })
 
       const res = await restClient.POST('/posts-with-column-map-export/export-preview', {
@@ -577,6 +611,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
         data: { count: 7, excerpt: 'json excerpt', title: 'JSON Rename' },
+        overrideAccess: true,
       })
 
       let exportDoc = await payload.create({
@@ -586,12 +621,14 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           format: 'json',
           where: { id: { equals: post.id } },
         },
+        overrideAccess: true,
         user,
       })
 
       exportDoc = await payload.findByID({
         id: exportDoc.id,
         collection: 'posts-with-column-map-export',
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
@@ -627,6 +664,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           importMode: 'create',
         },
         file,
+        overrideAccess: true,
         user,
       })
 
@@ -634,6 +672,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
 
       const imported = await payload.find({
         collection: postsWithColumnMapSlug,
+        overrideAccess: true,
         sort: 'title',
         where: { title: { in: ['Imported A', 'Imported B'] } },
       })
@@ -677,11 +716,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           importMode: 'create',
         },
         file,
+        overrideAccess: true,
         user,
       })
 
       const imported = await payload.find({
         collection: postsWithColumnMapSlug,
+        overrideAccess: true,
         sort: 'title',
         where: { title: { in: ['JSON A', 'JSON B'] } },
       })
@@ -776,11 +817,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           importMode: 'create',
         },
         file,
+        overrideAccess: true,
         user,
       })
 
       const imported = await payload.find({
         collection: postsWithColumnMapSlug,
+        overrideAccess: true,
         where: { title: { equals: 'Dropped Test' } },
       })
 
@@ -820,6 +863,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           importMode: 'create',
         },
         file: buildCSVFile({ name, rows }),
+        overrideAccess: true,
         user,
       })
 
@@ -847,6 +891,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
           format: 'csv',
           where,
         },
+        overrideAccess: true,
         user,
       })
 
@@ -862,7 +907,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
       data: { count?: number; secret?: string; title: string }
       payload: Payload
     }) => {
-      const post = await payload.create({ collection, data })
+      const post = await payload.create({ collection, data, overrideAccess: true })
 
       return post
     }
@@ -911,6 +956,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
     }) => {
       const imported = await payload.find({
         collection,
+        overrideAccess: true,
         where: { title: { contains: title } },
       })
 
@@ -1204,6 +1250,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         const savedExportDoc = await payload.findByID({
           id: exportDoc.id,
           collection: postsWithHooksExportSlug,
+          overrideAccess: true,
         })
 
         const rows = await readCSV(path.join(dirname, 'uploads', savedExportDoc.filename as string))
@@ -1305,6 +1352,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         const post = await payload.create({
           collection: postsWithHooksSlug,
           data: { count: 8, secret: 'preview-secret', title: 'Preview ExportDoc' },
+          overrideAccess: true,
         })
 
         const response = await restClient.POST(`/${postsWithHooksExportSlug}/export-preview`, {
@@ -1420,6 +1468,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-import-export — hook
         const post = await payload.create({
           collection: postsWithHooksSlug,
           data: { count: 10, secret: 'spoofed-preview-secret', title: 'Spoofed Preview' },
+          overrideAccess: true,
         })
 
         const response = await restClient.POST(`/${postsWithHooksExportSlug}/export-preview`, {

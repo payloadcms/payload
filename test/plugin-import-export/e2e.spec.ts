@@ -311,12 +311,14 @@ test.describe('Import Export Plugin', () => {
           where: {
             'input.collectionSlug': { equals: 'custom-id-pages' },
           },
+          overrideAccess: true,
         })
         await payload.delete({
           collection: 'exports' as any,
           where: {
             collectionSlug: { equals: 'custom-id-pages' },
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -325,6 +327,7 @@ test.describe('Import Export Plugin', () => {
             id: `e2e-export-${uniqueId}-1`,
             title: 'E2E Export Custom Page 1',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -333,6 +336,7 @@ test.describe('Import Export Plugin', () => {
             id: `e2e-export-${uniqueId}-2`,
             title: 'E2E Export Custom Page 2',
           },
+          overrideAccess: true,
         })
 
         await page.goto(customIdPagesURL.list)
@@ -389,6 +393,7 @@ test.describe('Import Export Plugin', () => {
               equals: exportId,
             },
           },
+          overrideAccess: true,
         })
         expect(docs.length).toBe(1)
         expect(docs[0].collectionSlug).toBe('custom-id-pages')
@@ -438,6 +443,7 @@ test.describe('Import Export Plugin', () => {
             id: `preview-export-${uniqueId}-1`,
             title: 'Preview Export Test 1',
           },
+          overrideAccess: true,
         })
         createdPages.push(`preview-export-${uniqueId}-1`)
 
@@ -447,6 +453,7 @@ test.describe('Import Export Plugin', () => {
             id: `preview-export-${uniqueId}-2`,
             title: 'Preview Export Test 2',
           },
+          overrideAccess: true,
         })
         createdPages.push(`preview-export-${uniqueId}-2`)
 
@@ -502,6 +509,7 @@ test.describe('Import Export Plugin', () => {
           await payload.delete({
             id,
             collection: 'custom-id-pages' as any,
+            overrideAccess: true,
           })
         }
       })
@@ -640,6 +648,7 @@ test.describe('Import Export Plugin', () => {
           where: {
             title: { contains: pattern },
           },
+          overrideAccess: true,
         })
       }
       createdPageTitlePatterns.length = 0
@@ -648,6 +657,7 @@ test.describe('Import Export Plugin', () => {
         await payload.delete({
           id,
           collection: 'pages',
+          overrideAccess: true,
         })
       }
       createdPageIDs.length = 0
@@ -695,6 +705,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Import Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
@@ -734,6 +745,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E JSON Import' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
@@ -803,6 +815,7 @@ test.describe('Import Export Plugin', () => {
           excerpt: 'Original excerpt',
           title: 'E2E Update Test Original',
         },
+        overrideAccess: true,
       })
 
       createdPageIDs.push(existingDoc.id)
@@ -850,6 +863,7 @@ test.describe('Import Export Plugin', () => {
             equals: existingDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(updatedDoc?.title).toBe('E2E Update Test Modified')
@@ -891,6 +905,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Published Status Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBe(2)
@@ -935,6 +950,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { equals: 'E2E Explicit Draft Test' },
         },
+        overrideAccess: true,
       })
 
       expect(draftDocs.docs.length).toBe(1)
@@ -946,6 +962,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { equals: 'E2E Explicit Published Test' },
         },
+        overrideAccess: true,
       })
 
       expect(publishedDocs.docs.length).toBe(1)
@@ -1018,6 +1035,7 @@ test.describe('Import Export Plugin', () => {
           where: {
             id: { contains: `e2e-custom-${uniqueId}` },
           },
+          overrideAccess: true,
         })
 
         expect(importedPages.totalDocs).toBe(2)
@@ -1102,6 +1120,7 @@ test.describe('Import Export Plugin', () => {
           limit: 1,
           sort: '-createdAt',
           where: {},
+          overrideAccess: true,
         })
         expect(docs[0]?.status).toBe('completed')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -1111,6 +1130,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'S3 E2E Import' },
         },
+        overrideAccess: true,
       })
 
       expect(posts.totalDocs).toBeGreaterThanOrEqual(3)
@@ -1120,10 +1140,12 @@ test.describe('Import Export Plugin', () => {
       await payload.create({
         collection: postsWithS3Slug,
         data: { title: 'S3 E2E Export 1' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: postsWithS3Slug,
         data: { title: 'S3 E2E Export 2' },
+        overrideAccess: true,
       })
 
       await page.goto(s3ExportsURL.create)
@@ -1238,7 +1260,7 @@ test.describe('Import Export Plugin', () => {
     test.beforeAll(async () => {
       pagesURL = new AdminUrlUtil(serverURL, 'pages')
 
-      const users = await payload.find({ collection: 'users', limit: 1 })
+      const users = await payload.find({ collection: 'users', limit: 1, overrideAccess: true })
       const userId = users.docs[0]!.id
 
       await payload.create({
@@ -1250,6 +1272,7 @@ test.describe('Import Export Plugin', () => {
           customRelNameEmail: userId,
           title: 'E2E beforeExport Preview Test',
         },
+        overrideAccess: true,
       })
     })
 
@@ -1257,6 +1280,7 @@ test.describe('Import Export Plugin', () => {
       await payload.delete({
         collection: 'pages',
         where: { title: { equals: 'E2E beforeExport Preview Test' } },
+        overrideAccess: true,
       })
     })
 
@@ -1313,6 +1337,7 @@ test.describe('Import Export Plugin', () => {
         await payload.create({
           collection: 'posts-with-limits',
           data: { title: `E2E Limit Test Post ${i}` },
+          overrideAccess: true,
         })
       }
     })
@@ -1324,6 +1349,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Limit Test Post' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -1472,12 +1498,14 @@ test.describe('Import Export Plugin', () => {
       const devUsers = await payload.find({
         collection: 'users',
         where: { email: { equals: 'dev@payloadcms.com' } },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: devUsers.docs[0]!.id,
         collection: 'users',
         data: { limit: 7 },
+        overrideAccess: true,
       })
 
       // Create 10 test documents (more than both limits)
@@ -1485,6 +1513,7 @@ test.describe('Import Export Plugin', () => {
         await payload.create({
           collection: 'posts-with-limits',
           data: { title: `E2E Dynamic Limit Post ${i}` },
+          overrideAccess: true,
         })
       }
     })
@@ -1494,12 +1523,14 @@ test.describe('Import Export Plugin', () => {
       const devUsers = await payload.find({
         collection: 'users',
         where: { email: { equals: 'dev@payloadcms.com' } },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: devUsers.docs[0]!.id,
         collection: 'users',
         data: { limit: null as unknown as number },
+        overrideAccess: true,
       })
 
       // Clean up test documents
@@ -1508,6 +1539,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Dynamic Limit Post' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -1662,6 +1694,7 @@ test.describe('Import Export Plugin', () => {
         await payload.delete({
           collection: postsWithColumnMapSlug,
           where: { title: { equals: title } },
+          overrideAccess: true,
         })
       }
       createdTitles.length = 0
@@ -1696,6 +1729,7 @@ test.describe('Import Export Plugin', () => {
         const { docs } = await payload.find({
           collection: postsWithColumnMapSlug,
           where: { title: { in: ['E2E Foreign A', 'E2E Foreign B'] } },
+          overrideAccess: true,
         })
         expect(docs).toHaveLength(2)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -1704,6 +1738,7 @@ test.describe('Import Export Plugin', () => {
         collection: postsWithColumnMapSlug,
         sort: 'title',
         where: { title: { in: ['E2E Foreign A', 'E2E Foreign B'] } },
+        overrideAccess: true,
       })
 
       expect(imported.docs[0]!.title).toBe('E2E Foreign A')
@@ -1717,6 +1752,7 @@ test.describe('Import Export Plugin', () => {
       await payload.create({
         collection: postsWithColumnMapSlug,
         data: { count: 99, excerpt: 'exported summary', title: 'E2E Export Rename' },
+        overrideAccess: true,
       })
       createdTitles.push('E2E Export Rename')
 
@@ -1737,6 +1773,7 @@ test.describe('Import Export Plugin', () => {
         collection: 'posts-with-column-map-export',
         limit: 1,
         sort: '-createdAt',
+        overrideAccess: true,
       })
 
       expect(exports.docs).toHaveLength(1)
@@ -1756,6 +1793,7 @@ test.describe('Import Export Plugin', () => {
       await payload.delete({
         id: exportDoc.id,
         collection: 'posts-with-column-map-export',
+        overrideAccess: true,
       })
     })
   })
@@ -1769,6 +1807,7 @@ test.describe('Import Export Plugin', () => {
         const doc = await payload.create({
           collection: postsWithHooksSlug,
           data: { count: i, secret: `secret-${i}`, title: `Hook Preview Post ${i}` },
+          overrideAccess: true,
         })
         createdPostIds.push(doc.id)
       }
@@ -1776,7 +1815,9 @@ test.describe('Import Export Plugin', () => {
 
     test.afterAll(async () => {
       for (const id of createdPostIds) {
-        await payload.delete({ id, collection: postsWithHooksSlug }).catch(() => null)
+        await payload
+          .delete({ id, collection: postsWithHooksSlug, overrideAccess: true })
+          .catch(() => null)
       }
     })
 

@@ -206,6 +206,7 @@
     border-color: var(--color-border);
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .collapsible__content {
       padding: var(--spacer-2-5);

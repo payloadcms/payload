@@ -132,6 +132,7 @@ export const getCreateCollectionExportTask = (
       const exportDoc = await req.payload.findByID({
         id: input.id,
         collection: input.exportCollection,
+        overrideAccess: true,
         req,
       })
 

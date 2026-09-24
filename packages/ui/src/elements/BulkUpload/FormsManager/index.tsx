@@ -153,20 +153,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
 
-  const baseAPIPath = formatAdminURL({
+  const actionURL = formatAdminURL({
     apiRoute: api,
-    path: '',
+    path: `/${collectionSlug}`,
   })
-
-  const actionURL = `${baseAPIPath}/${collectionSlug}`
 
   const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
       locale: code || undefined,
     }
 
-    const docAccessURL = `/${collectionSlug}/access`
-    const res = await fetch(`${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`, {
+    const docAccessPath: `/${string}/access?${string}` = `/${collectionSlug}/access?${qs.stringify(params)}`
+    const res = await fetch(formatAdminURL({ apiRoute: api, path: docAccessPath }), {
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
@@ -177,7 +175,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     const json: SanitizedDocumentPermissions = await res.json()
     const publishedAccessJSON = await fetch(
-      `${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`,
+      formatAdminURL({ apiRoute: api, path: docAccessPath }),
       {
         body: JSON.stringify({
           _status: 'published',
@@ -203,7 +201,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     setHasPublishPermission(publishedAccessJSON?.update)
     setHasInitializedDocPermissions(true)
-  }, [baseAPIPath, code, collectionSlug, i18n.language])
+  }, [api, code, collectionSlug, i18n.language])
 
   const initializeSharedFormState = React.useCallback(
     async (abortController?: AbortController) => {
@@ -402,6 +400,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               form.formState,
               overrides,
               getUploadHandler({ collectionSlug }),
+              config.collections.find(({ slug }) => slug === collectionSlug)?.upload
+                ?.allowRestrictedFileTypes,
             ),
             credentials: 'include',
             method: 'POST',
@@ -582,6 +582,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       actionURL,
       code,
       collectionSlug,
+      config.collections,
       getUploadHandler,
       getFormState,
       docPermissions,

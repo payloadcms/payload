@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.36",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -110,7 +110,7 @@
     "bundle:types": "rollup -c rollup.dts.config.mjs",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles": "copyfiles -u 1 -e \"**/*.spec.*\" \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pretest": "pnpm build"
@@ -144,9 +144,10 @@
     "qs-esm": "8.0.1",
     "range-parser": "1.2.1",
     "sanitize-filename": "1.6.4",
+    "sax": "1.6.1",
     "ts-essentials": "10.0.3",
     "tsx": "4.22.4",
-    "undici": "7.28.0",
+    "undici": "7.29.1",
     "uuid": "14.0.0",
     "ws": "^8.16.0",
     "zod": "catalog:"
@@ -159,9 +160,10 @@
     "@types/nodemailer": "^8.0.0",
     "@types/pluralize": "0.0.33",
     "@types/range-parser": "1.2.7",
+    "@types/sax": "1.2.7",
     "@types/ws": "^8.5.10",
-    "copyfiles": "2.4.1",
-    "cross-env": "10.1.0",
+    "copyfiles": "catalog:",
+    "cross-env": "catalog:",
     "esbuild": "0.27.1",
     "graphql-http": "1.22.4",
     "react-datepicker": "7.6.0",

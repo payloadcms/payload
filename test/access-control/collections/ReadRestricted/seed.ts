@@ -73,6 +73,7 @@ export const seedReadRestricted = async (payload: Payload): Promise<void> => {
         restrictedAdvanced: 'Hidden advanced setting',
       },
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -118,6 +119,7 @@ export const seedReadRestricted = async (payload: Payload): Promise<void> => {
         restrictedAdvanced: 'Private advanced config',
       },
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -157,5 +159,6 @@ export const seedReadRestricted = async (payload: Payload): Promise<void> => {
         restrictedAdvanced: 'Third advanced hidden',
       },
     },
+    overrideAccess: true,
   })
 }

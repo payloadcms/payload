@@ -95,6 +95,7 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
     if (deleteID) {
       await payload.delete({
         collection: 'payload-jobs',
+        overrideAccess: true,
         req,
         where: {
           and: [{ id: { equals: deleteID } }, { taskSlug: { equals: 'schedulePublish' } }],
@@ -109,7 +110,13 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
         global,
         locale: localeToPublish,
         timezone,
-        user: user.id,
+        user:
+          user && user.collection
+            ? {
+                relationTo: user.collection,
+                value: user.id,
+              }
+            : undefined,
       },
       task: 'schedulePublish',
       waitUntil: date,

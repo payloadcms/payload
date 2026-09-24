@@ -738,6 +738,7 @@ export interface PostsWithS3Export {
     | number
     | boolean
     | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1049,6 +1050,7 @@ export interface PostsWithS3Import {
       | boolean
       | null;
   };
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1887,6 +1889,7 @@ export interface PostsWithS3ExportSelect<T extends boolean = true> {
   fields?: T;
   collectionSlug?: T;
   where?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2132,6 +2135,7 @@ export interface PostsWithS3ImportSelect<T extends boolean = true> {
         issues?: T;
         issueDetails?: T;
       };
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

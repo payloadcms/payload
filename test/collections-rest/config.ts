@@ -42,6 +42,7 @@ export const pointSlug = 'point'
 export const customIdSlug = 'custom-id'
 export const customIdNumberSlug = 'custom-id-number'
 export const errorOnHookSlug = 'error-on-hooks'
+export const updateShapesSlug = 'update-shapes'
 
 export const endpointsSlug = 'endpoints'
 
@@ -59,6 +60,92 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [
+      {
+        slug: updateShapesSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'items',
+            type: 'array',
+            fields: [
+              {
+                name: 'publicField',
+                type: 'text',
+              },
+              {
+                name: 'restrictedField',
+                type: 'text',
+                access: {
+                  update: () => false,
+                },
+              },
+            ],
+          },
+          {
+            name: 'content',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'update-shape-block',
+                fields: [
+                  {
+                    name: 'publicField',
+                    type: 'text',
+                  },
+                  {
+                    name: 'restrictedField',
+                    type: 'text',
+                    access: {
+                      update: () => false,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            name: 'number',
+            type: 'number',
+          },
+          {
+            name: 'numbers',
+            type: 'number',
+            hasMany: true,
+          },
+          {
+            name: 'relations',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: relationSlug,
+          },
+          {
+            name: 'polymorphicRelations',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: [relationSlug, postsSlug],
+          },
+          {
+            name: 'hookedPolymorphicRelations',
+            type: 'relationship',
+            hasMany: true,
+            hooks: {
+              beforeChange: [
+                ({ value }) => {
+                  if (value && typeof value === 'object' && !Array.isArray(value)) {
+                    return Object.assign(Object.create({ $push: value }), value)
+                  }
+
+                  return value
+                },
+              ],
+            },
+            relationTo: [relationSlug, postsSlug],
+          },
+        ],
+        versions: {
+          drafts: true,
+        },
+      },
       {
         slug: postsSlug,
         access: openAccess,
@@ -365,6 +452,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     const rel1 = await payload.create({
@@ -372,12 +460,14 @@ export default buildConfigWithDefaults({
       data: {
         name: 'name',
       },
+      overrideAccess: true,
     })
     const rel2 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name2',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -385,6 +475,7 @@ export default buildConfigWithDefaults({
       data: {
         point: [10, 20],
       },
+      overrideAccess: true,
     })
 
     // Relation - hasMany
@@ -394,6 +485,7 @@ export default buildConfigWithDefaults({
         relationHasManyField: rel1.id,
         title: 'rel to hasMany',
       },
+      overrideAccess: true,
     })
     await payload.create({
       collection: postsSlug,
@@ -401,6 +493,7 @@ export default buildConfigWithDefaults({
         relationHasManyField: rel2.id,
         title: 'rel to hasMany 2',
       },
+      overrideAccess: true,
     })
 
     // Relation - relationTo multi
@@ -413,6 +506,7 @@ export default buildConfigWithDefaults({
         },
         title: 'rel to multi',
       },
+      overrideAccess: true,
     })
 
     // Relation - relationTo multi hasMany
@@ -431,6 +525,7 @@ export default buildConfigWithDefaults({
         ],
         title: 'rel to multi hasMany',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -439,6 +534,7 @@ export default buildConfigWithDefaults({
         id: 'test',
         name: 'inside row',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -447,6 +543,7 @@ export default buildConfigWithDefaults({
         id: 123,
         name: 'name',
       },
+      overrideAccess: true,
     })
   },
 })
