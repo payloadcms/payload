@@ -154,6 +154,28 @@ describe('Versions', () => {
       versionURL = new AdminUrlUtil(serverURL, versionCollectionSlug)
     })
 
+    test('should open a base document without versions in the Admin panel', async () => {
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: '/api',
+          path: '/create-versionless-draft-document',
+          serverURL,
+        }),
+        { method: 'POST' },
+      )
+      const document: { id: number | string } = await response.json()
+
+      expect(response.ok).toBe(true)
+
+      await page.goto(url.edit(document.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('#field-title')).toHaveValue('Versionless document')
+      await expect(page.locator('#field-description')).toHaveValue(
+        'Document created before drafts were enabled',
+      )
+    })
+
     test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
       // Create a published document
       const publishedDoc = await payload.create({
