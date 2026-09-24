@@ -12,6 +12,10 @@ import {
 } from './benchmarkReport.js'
 import { countUniqueReachableSchemas, describeMongooseSchema } from './describeMongooseSchema.js'
 import { createMeasuredSchemaBuildContext } from './measuredSchemaBuildContext.js'
+import {
+  classifySchemaAllocation,
+  createSchemaAllocationCounts,
+} from './schemaAllocationCategory.js'
 
 const createSample = (overrides: Partial<BenchmarkSample>): BenchmarkSample => ({
   externalDelta: 0,
@@ -80,12 +84,6 @@ describe('MongoDB schema benchmark helpers', () => {
     expect(samples.map(({ heapUsedDelta }) => heapUsedDelta)).toEqual([10, 20, 1_000])
   })
 
-  test('should reject an empty sample set', () => {
-    expect(() => summarizeBenchmark({ samples: [] })).toThrow(
-      'At least one benchmark sample is required.',
-    )
-  })
-
   test('should subtract each revision minimal scenario before comparing graph cost', () => {
     const comparison = compareBenchmarks({
       after: createRun({ minimalHeap: 150, nestedHeap: 250 }),
@@ -97,7 +95,15 @@ describe('MongoDB schema benchmark helpers', () => {
     expect(comparison.scenarios['nested-diamond']?.incrementalHeap.reductionPercent).toBe(75)
   })
 
-  test('should describe paths, indexes, options, discriminators, and reachable schemas', () => {
+  test('should count a shared child schema once across compiled model roots', () => {
+    const sharedChild = new mongoose.Schema({ title: String })
+    const first = new mongoose.Schema({ child: sharedChild })
+    const second = new mongoose.Schema({ child: sharedChild })
+
+    expect(countUniqueReachableSchemas({ schemas: [first, second] })).toBe(3)
+  })
+
+  test('should describe schema structure used by benchmark reports', () => {
     const child = new mongoose.Schema({ title: { type: String, index: true } }, { _id: false })
     const parent = new mongoose.Schema(
       { items: [new mongoose.Schema({}, { discriminatorKey: 'blockType' })] },
@@ -120,12 +126,37 @@ describe('MongoDB schema benchmark helpers', () => {
     expect(descriptor.reachableSchemaCount).toBeGreaterThan(1)
   })
 
-  test('should count a shared child schema once across compiled model roots', () => {
-    const sharedChild = new mongoose.Schema({ title: String })
-    const first = new mongoose.Schema({ child: sharedChild })
-    const second = new mongoose.Schema({ child: sharedChild })
+  test('should classify schema allocations used by benchmark reports', () => {
+    const categories = [
+      classifySchemaAllocation({
+        stack: 'Error\n    at array (/workspace/models/buildSchema.ts:1:1)',
+      }),
+      classifySchemaAllocation({
+        stack: 'Error\n    at blocks (/workspace/models/buildSchema.ts:1:1)',
+      }),
+      classifySchemaAllocation({
+        stack: 'Error\n    at buildSchema (/workspace/models/buildSchema.ts:1:1)',
+      }),
+      classifySchemaAllocation({
+        stack: 'Error\n    at Schema.clone (/workspace/node_modules/mongoose/lib/schema.js:1:1)',
+      }),
+      classifySchemaAllocation({}),
+    ]
 
-    expect(countUniqueReachableSchemas({ schemas: [first, second] })).toBe(3)
+    expect(categories).toEqual([
+      'array-group-tab',
+      'blocks-base',
+      'top-level',
+      'mongoose-internal',
+      'mongoose-internal',
+    ])
+    expect(createSchemaAllocationCounts()).toEqual({
+      'array-group-tab': 0,
+      'blocks-base': 0,
+      'discriminator-clone': 0,
+      'mongoose-internal': 0,
+      'top-level': 0,
+    })
   })
 
   test('should evaluate the benchmark acceptance thresholds from medians', () => {

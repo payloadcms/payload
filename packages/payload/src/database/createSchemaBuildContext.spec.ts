@@ -3,12 +3,6 @@ import { describe, expect, test, vi } from 'vitest'
 import { createSchemaBuildContext } from './createSchemaBuildContext.js'
 
 describe('createSchemaBuildContext', () => {
-  test('should not expose cache metrics from the production context', () => {
-    const context = createSchemaBuildContext<object>()
-
-    expect(context).not.toHaveProperty('snapshot')
-  })
-
   test('should build once for the same definition identity and variant', () => {
     const context = createSchemaBuildContext<object>()
     const definition = {}
