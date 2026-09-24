@@ -145,7 +145,7 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   )
 
   if (isTaggedRelease && !Object.values(sections).some((commits) => commits.length > 0)) {
-    throw new Error(`No changes for ${toVersion} between ${fromVersion} and ${toVersion}`)
+    console.log(`WARNING: No changelog items between ${fromVersion} and ${toVersion}`)
   }
 
   // Sort commits by scope, unscoped first

@@ -89,27 +89,29 @@ describe('generateReleaseNotes', () => {
     expect(releaseUrl).toContain('tag=v4.0.0-canary.10')
   })
 
-  it('should reject a tagged release with no changes', async () => {
-    await expect(
-      generateReleaseNotes({
-        fromVersion: 'v4.0.0-canary.9',
-        toVersion: 'v4.0.0-canary.10',
-      }),
-    ).rejects.toThrow(/no changes/i)
+  it('should write notes without sections for a tagged release with no changes', async () => {
+    const { releaseNotes, releaseTag } = await generateReleaseNotes({
+      fromVersion: 'v4.0.0-canary.9',
+      toVersion: 'v4.0.0-canary.10',
+    })
+
+    expect(releaseTag).toBe('v4.0.0-canary.10')
+    expect(releaseNotes).not.toContain('###')
   })
 
-  it('should reject a tagged release with only its bump commit', async () => {
+  it('should write notes without sections for a tagged release with only its bump commit', async () => {
     vi.mocked(getLatestCommits).mockResolvedValueOnce([releaseBumpCommit])
 
-    await expect(
-      generateReleaseNotes({
-        fromVersion: 'v4.0.0-canary.9',
-        toVersion: 'v4.0.0-canary.10',
-      }),
-    ).rejects.toThrow(/no changes/i)
+    const { releaseNotes } = await generateReleaseNotes({
+      fromVersion: 'v4.0.0-canary.9',
+      toVersion: 'v4.0.0-canary.10',
+    })
+
+    expect(releaseNotes).not.toContain('###')
+    expect(releaseNotes).not.toContain('**release:** v4.0.0-canary.10')
   })
 
-  it('should reject a tagged release with only current and unpublished prior bump commits', async () => {
+  it('should write notes without sections for a tagged release with only current and unpublished prior bump commits', async () => {
     vi.mocked(getLatestCommits).mockResolvedValueOnce([
       releaseBumpCommit,
       {
@@ -119,11 +121,12 @@ describe('generateReleaseNotes', () => {
       },
     ])
 
-    await expect(
-      generateReleaseNotes({
-        fromVersion: 'v4.0.0-canary.7',
-        toVersion: 'v4.0.0-canary.10',
-      }),
-    ).rejects.toThrow(/no changes/i)
+    const { releaseNotes } = await generateReleaseNotes({
+      fromVersion: 'v4.0.0-canary.7',
+      toVersion: 'v4.0.0-canary.10',
+    })
+
+    expect(releaseNotes).not.toContain('###')
+    expect(releaseNotes).not.toContain('v4.0.0-canary.8')
   })
 })
