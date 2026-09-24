@@ -100,8 +100,7 @@ export const migratePayloadRequestCreation: Transform = {
           source === 'payload' &&
           importedName === 'createPayloadRequest' &&
           !isAliasedExportMigrationArtifact &&
-          references.length > 0 &&
-          references.every(isPayloadRequestCreationReference)
+          references.some(isPayloadRequestCreationReference)
 
         if (isCurrentPayloadRequestCreator) {
           if (!hadAlias) {
@@ -238,7 +237,10 @@ function isPayloadRequestCreationReference(reference: Node): boolean {
 
   const [argument] = parent.getArguments()
 
-  return Node.isObjectLiteralExpression(argument) && Boolean(argument.getProperty('payload'))
+  return (
+    (Node.isObjectLiteralExpression(argument) && Boolean(argument.getProperty('payload'))) ||
+    Boolean(argument?.getType().getProperty('payload'))
+  )
 }
 
 function getUnsafeOptionsReason({ options }: { options: Node }): string | undefined {

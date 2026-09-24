@@ -55,6 +55,43 @@ describe('migrate-payload-request-creation', () => {
     },
   )
 
+  it.each([
+    `const args = { payload, user }; const req = createPayloadRequest(args)`,
+    `const args = { payload }; const req = createPayloadRequest({ ...args })`,
+    `export const makeRequest = createPayloadRequest; const req = createPayloadRequest({ payload })`,
+    `function build(args: { payload: unknown }) { return createPayloadRequest(args) }`,
+  ])('should preserve current request creation: %s', async (body) => {
+    const source = `import { createPayloadRequest } from 'payload'\n${body}`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/current.ts', source)
+
+    const result = await migratePayloadRequestCreation.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(await runTransform({ source, transform: migratePayloadRequestCreation })).toBe(source)
+  })
+
+  it('should preserve an aliased current request creator with variable arguments', async () => {
+    const source = `import { createPayloadRequest as local } from 'payload'
+const args = { payload, user }
+const req = local(args)`
+
+    expect(await runTransform({ source, transform: migratePayloadRequestCreation })).toBe(source)
+  })
+
+  it('should migrate legacy web request creation with variable arguments', async () => {
+    const source = `import { createPayloadRequest } from 'payload'
+const args = { config, request }
+const req = createPayloadRequest(args)`
+
+    expect(await runTransform({ source, transform: migratePayloadRequestCreation })).toBe(
+      `import { createPayloadRequestFromWebRequest } from 'payload'
+const args = { config, request }
+const req = createPayloadRequestFromWebRequest(args)`,
+    )
+  })
+
   it('should register the transform', () => {
     expect(transforms).toContain(migratePayloadRequestCreation)
   })
