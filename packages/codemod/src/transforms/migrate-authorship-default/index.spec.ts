@@ -78,4 +78,21 @@ describe('migrate-authorship-default', () => {
 
     expect(result).toBe(output)
   })
+
+  it('adds authorship: false to inline buildConfig collection and global entries', async () => {
+    const input = await fixture('build-config.input.ts')
+    const output = await fixture('build-config.output.ts')
+
+    const result = await runTransform({ source: input, transform: migrateAuthorshipDefault })
+
+    expect(result).toBe(output)
+  })
+
+  it('is idempotent on build-config output', async () => {
+    const output = await fixture('build-config.output.ts')
+
+    const result = await runTransform({ source: output, transform: migrateAuthorshipDefault })
+
+    expect(result).toBe(output)
+  })
 })

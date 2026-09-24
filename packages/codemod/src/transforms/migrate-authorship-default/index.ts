@@ -12,11 +12,12 @@ const isAuthorshipConfigTypeName = (typeText: string): boolean => {
 }
 
 /**
- * Finds object literals typed as CollectionConfig or GlobalConfig and adds
- * `authorship: false` if the property is absent. Covers three annotation forms:
+ * Finds Collection/Global config object literals and adds `authorship: false` if the property
+ * is absent. Covers three annotation forms plus inline entries in a `buildConfig` call:
  *   const X: CollectionConfig = { ... }
  *   { ... } satisfies GlobalConfig
  *   { ... } as CollectionConfig
+ *   buildConfig({ collections: [ { ... } ], globals: [ { ... } ] })
  */
 export const migrateAuthorshipDefault: Transform = {
   name: 'migrate-authorship-default',
@@ -112,5 +113,45 @@ const resolveAuthorshipConfigObject = (node: Node) => {
     return undefined
   }
 
+  // Form 4: inline entries in `buildConfig({ collections: [ { ... } ], globals: [ { ... } ] })`
+  if (Node.isObjectLiteralExpression(node) && isInlineBuildConfigEntry(node)) {
+    return node
+  }
+
   return undefined
+}
+
+const CONFIG_ENTRY_PROPERTY_NAMES = new Set(['collections', 'globals'])
+
+/**
+ * True when `node` is an inline object-literal element of a `collections` or `globals` array
+ * passed to a `buildConfig(...)` call, e.g. `buildConfig({ collections: [{ ... }] })`.
+ */
+const isInlineBuildConfigEntry = (node: Node): boolean => {
+  const array = node.getParent()
+  if (!array || !Node.isArrayLiteralExpression(array)) {
+    return false
+  }
+
+  const property = array.getParent()
+  if (!property || !Node.isPropertyAssignment(property)) {
+    return false
+  }
+
+  if (!CONFIG_ENTRY_PROPERTY_NAMES.has(property.getName())) {
+    return false
+  }
+
+  const configObject = property.getParent()
+  if (!configObject || !Node.isObjectLiteralExpression(configObject)) {
+    return false
+  }
+
+  const call = configObject.getParent()
+  if (!call || !Node.isCallExpression(call)) {
+    return false
+  }
+
+  const callee = call.getExpression()
+  return Node.isIdentifier(callee) && callee.getText() === 'buildConfig'
 }
