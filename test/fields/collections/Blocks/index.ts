@@ -449,7 +449,7 @@ export const BlockFields: CollectionConfig = {
       defaultValue: [{ blockType: 'conditionalReference' }],
     },
     {
-      name: 'consumer',
+      name: 'showConditionalFields',
       type: 'checkbox',
     },
     {
@@ -460,7 +460,7 @@ export const BlockFields: CollectionConfig = {
           name: 'conditionalConfiguration',
           type: 'blocks',
           admin: {
-            condition: (data) => Boolean(data.consumer),
+            condition: (data) => Boolean(data.showConditionalFields),
           },
           blockReferences: ['conditionalReference'],
           blocks: [],

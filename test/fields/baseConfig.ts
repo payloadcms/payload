@@ -116,7 +116,7 @@ export const baseConfig: Partial<Config> = {
           name: 'testBlocks',
           type: 'blocks',
           admin: {
-            condition: (data) => Boolean(data.consumer),
+            condition: (data) => Boolean(data.showConditionalFields),
           },
           blocks: [
             {

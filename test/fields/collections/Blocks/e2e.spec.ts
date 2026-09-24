@@ -792,7 +792,7 @@ describe('Block fields', () => {
       createdIDs.length = 0
     })
 
-    test('should retain a referenced block type when a nested default block condition becomes true', async () => {
+    test('should retain block type when a block condition becomes true within a block reference', async () => {
       await page.goto(url.create)
 
       const configuration = page.locator('#field-configuration')
@@ -801,7 +801,7 @@ describe('Block fields', () => {
       await expect(configuration.locator('.blocks-field__row').first()).toBeVisible()
       await expect(conditionalBlock).toBeHidden()
 
-      await page.locator('label[for=field-consumer]').click()
+      await page.locator('label[for=field-showConditionalFields]').click()
 
       await expect(conditionalBlock).toBeVisible()
       await expect(conditionalBlock.locator('.blocks-field__row')).toHaveCount(1)
@@ -827,7 +827,7 @@ describe('Block fields', () => {
       )
 
       await expect(conditionalConfiguration).toBeHidden()
-      await page.locator('label[for=field-consumer]').click()
+      await page.locator('label[for=field-showConditionalFields]').click()
       await expect(conditionalConfiguration).toBeVisible()
 
       await page.locator('#field-enabledBlocks').fill('blockOne')
