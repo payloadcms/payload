@@ -1,7 +1,7 @@
 @layer payload-default {
   :root {
-    --font-family-sans: 'Inter';
-    --font-family-mono: 'Roboto Mono';
+    --font-family-sans: 'Inter', sans-serif;
+    --font-family-mono: 'Roboto Mono', 'SF Mono', Menlo, Consolas, Monaco, monospace;
     --text-letter-spacing: 0.005em; /* 0.5% */
 
     /* Body — Small */
