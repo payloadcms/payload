@@ -111,7 +111,6 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: 'draft-with-array',
-      versions: { drafts: true },
       fields: [
         {
           name: 'items',
@@ -121,7 +120,17 @@ export const getConfig: () => Partial<Config> = () => ({
             type: 'text' as const,
           })),
         },
+        {
+          name: 'itemsWithDefaults',
+          type: 'array',
+          fields: Array.from({ length: 8 }, (_, i) => ({
+            name: `text${i + 1}`,
+            type: 'text' as const,
+            defaultValue: `default${i + 1}`,
+          })),
+        },
       ],
+      versions: { drafts: true },
     },
     {
       slug: 'simple-localized',
