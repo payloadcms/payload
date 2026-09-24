@@ -1,7 +1,15 @@
-import type { GraphQLObjectType, GraphQLResolveInfo, SelectionSetNode } from 'graphql'
+import type { FieldNode, GraphQLObjectType, GraphQLResolveInfo, SelectionSetNode } from 'graphql'
 import type { FieldBase, JoinField, RelationshipField, TypedCollectionSelect } from 'payload'
 
-import { getNamedType, isInterfaceType, isObjectType, isUnionType, Kind } from 'graphql'
+import {
+  doTypesOverlap,
+  getNamedType,
+  isCompositeType,
+  isInterfaceType,
+  isObjectType,
+  isUnionType,
+  Kind,
+} from 'graphql'
 
 export function buildSelectForCollection(info: GraphQLResolveInfo): SelectType {
   return buildSelect(info)
@@ -12,13 +20,15 @@ export function buildSelectForCollectionMany(info: GraphQLResolveInfo): SelectTy
 
 export function resolveSelect(info: GraphQLResolveInfo, select: SelectType): SelectType {
   if (select) {
+    const fieldNamesByPath = getFieldNamesByPath(info)
     const traversePath: string[] = []
     const traverseTree = (path: GraphQLResolveInfo['path']) => {
       const pathKey = path.key
       const pathType = info.schema.getType(path.typename) as GraphQLObjectType
 
       if (pathType) {
-        const lookupKey = path === info.path ? info.fieldName : pathKey
+        const lookupKey =
+          fieldNamesByPath.get(path) ?? (path === info.path ? info.fieldName : pathKey)
         const field = pathType?.getFields()?.[lookupKey]?.extensions?.field as
           | JoinField
           | RelationshipField
@@ -53,6 +63,81 @@ export function resolveSelect(info: GraphQLResolveInfo, select: SelectType): Sel
   }
 
   return select
+}
+
+function getFieldNamesByPath(info: GraphQLResolveInfo): Map<GraphQLResolveInfo['path'], string> {
+  const fieldNamesByPath = new Map<GraphQLResolveInfo['path'], string>()
+  const paths: GraphQLResolveInfo['path'][] = []
+  let path: GraphQLResolveInfo['path'] | undefined = info.path
+
+  while (path) {
+    paths.unshift(path)
+    path = path.prev
+  }
+
+  let selectionSets: SelectionSetNode[] = [info.operation.selectionSet]
+
+  for (const currentPath of paths) {
+    if (typeof currentPath.key === 'number') {
+      continue
+    }
+
+    const responseKey = currentPath.key
+    const selectedFields = selectionSets.flatMap((selectionSet) =>
+      findFieldsByResponseKey(info, selectionSet, responseKey, currentPath.typename),
+    )
+
+    if (!selectedFields.length) {
+      break
+    }
+
+    fieldNamesByPath.set(currentPath, selectedFields[0].name.value)
+    selectionSets = selectedFields.flatMap((field) => field.selectionSet ?? [])
+  }
+
+  return fieldNamesByPath
+}
+
+function findFieldsByResponseKey(
+  info: GraphQLResolveInfo,
+  selectionSet: SelectionSetNode,
+  responseKey: string,
+  parentTypeName: string | undefined,
+): FieldNode[] {
+  const fields: FieldNode[] = []
+
+  for (const selection of selectionSet.selections) {
+    if (selection.kind === Kind.FIELD) {
+      if ((selection.alias?.value ?? selection.name.value) === responseKey) {
+        fields.push(selection)
+      }
+      continue
+    }
+
+    const fragment =
+      selection.kind === Kind.FRAGMENT_SPREAD ? info.fragments[selection.name.value] : selection
+    const fragmentTypeName = fragment?.typeCondition?.name.value
+    const fragmentType = fragmentTypeName && info.schema.getType(fragmentTypeName)
+    const parentType = parentTypeName && info.schema.getType(parentTypeName)
+
+    if (
+      fragmentType &&
+      parentType &&
+      isCompositeType(fragmentType) &&
+      isCompositeType(parentType) &&
+      !doTypesOverlap(info.schema, fragmentType, parentType)
+    ) {
+      continue
+    }
+
+    if (fragment) {
+      fields.push(
+        ...findFieldsByResponseKey(info, fragment.selectionSet, responseKey, parentTypeName),
+      )
+    }
+  }
+
+  return fields
 }
 
 function buildSelect(info: GraphQLResolveInfo) {
