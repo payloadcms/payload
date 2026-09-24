@@ -255,6 +255,7 @@ export const canDeleteCustomer: Access<Customer> = async ({ req, id }) => {
   // Query another Collection using the `id`
   const result = await req.payload.find({
     collection: 'contracts',
+    overrideAccess: true,
     limit: 0,
     depth: 0,
     where: {

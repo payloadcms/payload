@@ -21,6 +21,7 @@ export const hierarchyCollectionAfterDelete =
         data: {
           [fieldName]: null,
         },
+        overrideAccess: true,
         req,
         where: {
           [fieldName]: {

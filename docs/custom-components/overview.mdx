@@ -232,15 +232,16 @@ Here is an example:
 
 ```tsx
 import React from 'react'
-import type { Payload } from 'payload'
+import type { ServerProps } from 'payload'
 
 async function MyServerComponent({
   payload, // highlight-line
-}: {
-  payload: Payload
-}) {
+  user, // highlight-line
+}: Pick<ServerProps, 'payload' | 'user'>) {
   const page = await payload.findByID({
     collection: 'pages',
+    overrideAccess: false,
+    user,
     id: '123',
   })
 
@@ -250,10 +251,11 @@ async function MyServerComponent({
 
 Each Custom Component receives the following props by default:
 
-| Prop      | Description                                 |
-| --------- | ------------------------------------------- |
-| `payload` | The [Payload](../local-api/overview) class. |
-| `i18n`    | The [i18n](../configuration/i18n) object.   |
+| Prop      | Description                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------- |
+| `payload` | The [Payload](../local-api/overview) class.                                                 |
+| `i18n`    | The [i18n](../configuration/i18n) object.                                                   |
+| `user`    | The current user with [field read access](#server-principal-vs-read-filtered-user) applied. |
 
 <Banner type="warning">
   **Reminder:** All Custom Components also receive various other props that are
@@ -462,9 +464,11 @@ All Server Components automatically receive the `locale` object as a prop by def
 ```tsx
 import React from 'react'
 
-export default async function MyServerComponent({ payload, locale }) {
+export default async function MyServerComponent({ payload, locale, user }) {
   const localizedPage = await payload.findByID({
     collection: 'pages',
+    overrideAccess: false,
+    user,
     id: '123',
     locale,
   })
