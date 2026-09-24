@@ -210,3 +210,44 @@ export const deleteDocumentLocks = async ({
     where: buildBulkLockedDocumentQuery(collectionSlug, ids),
   })
 }
+
+type DeleteUserLocksArgs = {
+  /**
+   * Slug of the auth collection the deleted users belong to
+   */
+  collectionSlug: string
+  /**
+   * IDs of the users being deleted
+   */
+  ids: (number | string)[]
+  req: PayloadRequest
+}
+
+/**
+ * Removes document locks owned by the given user ids. Must run before the user rows are
+ * deleted: the database cascade on the lock's user relationship removes the rel row but
+ * leaves the parent lock row behind, orphaning it with no user.
+ */
+export const deleteUserLocks = async ({
+  collectionSlug,
+  ids,
+  req,
+}: DeleteUserLocksArgs): Promise<void> => {
+  const { payload } = req
+
+  if (!ids.length || !payload.collections?.[lockedDocumentsCollectionSlug]) {
+    return
+  }
+
+  await payload.db.deleteMany({
+    collection: lockedDocumentsCollectionSlug,
+    // Not passing req fails on postgres
+    req: payload.db.name === 'mongoose' ? undefined : req,
+    where: {
+      and: [
+        { 'user.relationTo': { equals: collectionSlug } },
+        { 'user.value': { in: ids } },
+      ],
+    },
+  })
+}
