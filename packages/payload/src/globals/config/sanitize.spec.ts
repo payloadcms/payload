@@ -1,4 +1,5 @@
 import type { GlobalConfig } from './types.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 import { describe, expect, it, vi } from 'vitest'
 
@@ -8,6 +9,12 @@ const minimalConfig = {
   collections: [],
   globals: [],
 } as any
+
+const req = {
+  payload: {
+    config: minimalConfig,
+  },
+} as PayloadRequest
 
 describe('baseAccess', () => {
   it('should combine base and global access constraints', async () => {
@@ -66,6 +73,42 @@ describe('baseAccess', () => {
     })
   })
 
+  it('should inherit the effective read constraint for readVersions', async () => {
+    const config = {
+      ...minimalConfig,
+      baseAccess: {
+        globals: {
+          read: () => ({
+            tenant: {
+              equals: 'tenant-1',
+            },
+          }),
+        },
+      },
+    }
+    const global: GlobalConfig = {
+      slug: 'settings',
+      access: {
+        read: () => true,
+      },
+      fields: [],
+      versions: true,
+    }
+    const req = {
+      payload: {
+        config,
+      },
+    } as any
+
+    const result = sanitizeGlobal(config, global)
+
+    await expect(result.access.readVersions({ req, slug: 'settings' })).resolves.toEqual({
+      'version.tenant': {
+        equals: 'tenant-1',
+      },
+    })
+  })
+
   it('should not apply collection base access to globals', async () => {
     const collectionBaseAccess = vi.fn(() => false)
     const globalAccess = vi.fn(() => true)
@@ -100,6 +143,9 @@ describe('baseAccess', () => {
   it('should not grant access when resource access uses the authenticated fallback', async () => {
     const config = {
       ...minimalConfig,
+      admin: {
+        user: 'users',
+      },
       baseAccess: {
         globals: {
           readVersions: () => true,
@@ -130,6 +176,7 @@ describe('baseAccess', () => {
             config,
           },
           user: {
+            collection: 'users',
             id: 'user-1',
           },
         } as any,
@@ -280,5 +327,44 @@ describe('sanitizeGlobal', () => {
 
     expect((result.versions as any).max).toBe(50)
     expect((result.versions as any).drafts).toBeTruthy()
+  })
+
+  it('should use an explicit readVersions access function instead of read access', async () => {
+    const result = sanitizeGlobal(minimalConfig, {
+      slug: 'header',
+      fields: [],
+      access: { read: () => false, readVersions: () => true },
+    })
+
+    await expect(result.access.readVersions({ req })).resolves.toBe(true)
+  })
+
+  it.each([true, false])(
+    'should pass through a %s result from read access to readVersions',
+    async (readResult) => {
+      const result = sanitizeGlobal(minimalConfig, {
+        slug: 'header',
+        fields: [],
+        access: { read: async () => readResult },
+      })
+
+      await expect(result.access.readVersions({ req })).resolves.toBe(readResult)
+    },
+  )
+
+  it('should translate inherited read queries to global version fields', async () => {
+    const result = sanitizeGlobal(minimalConfig, {
+      slug: 'header',
+      fields: [],
+      access: {
+        read: async () => ({
+          or: [{ title: { equals: 'Header' } }, { visible: { equals: true } }],
+        }),
+      },
+    })
+
+    await expect(result.access.readVersions({ req })).resolves.toEqual({
+      or: [{ 'version.title': { equals: 'Header' } }, { 'version.visible': { equals: true } }],
+    })
   })
 })

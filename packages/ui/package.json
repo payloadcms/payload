@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "4.0.0-canary.14",
+  "version": "4.0.0-canary.36",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -111,6 +111,11 @@
       "types": "./src/views/NotFound/page.tsx",
       "default": "./src/views/NotFound/page.tsx"
     },
+    "./views/NotFound/client": {
+      "import": "./src/views/NotFound/client.tsx",
+      "types": "./src/views/NotFound/client.tsx",
+      "default": "./src/views/NotFound/client.tsx"
+    },
     "./views/Root/getCustomViewByRoute": {
       "import": "./src/views/Root/getCustomViewByRoute.ts",
       "types": "./src/views/Root/getCustomViewByRoute.ts",
@@ -140,6 +145,11 @@
       "import": "./src/views/*/index.tsx",
       "types": "./src/views/*/index.tsx",
       "default": "./src/views/*/index.tsx"
+    },
+    "./providers/*": {
+      "import": "./src/providers/*/index.tsx",
+      "types": "./src/providers/*/index.tsx",
+      "default": "./src/providers/*/index.tsx"
     },
     "./elements/*": {
       "import": "./src/elements/*/index.tsx",
@@ -265,11 +275,6 @@
       "import": "./src/utilities/getPreferences.ts",
       "types": "./src/utilities/getPreferences.ts",
       "default": "./src/utilities/getPreferences.ts"
-    },
-    "./utilities/initReq": {
-      "import": "./src/utilities/initReq.ts",
-      "types": "./src/utilities/initReq.ts",
-      "default": "./src/utilities/initReq.ts"
     },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
@@ -565,6 +570,11 @@
         "import": "./dist/views/NotFound/page.js",
         "types": "./dist/views/NotFound/page.d.ts",
         "default": "./dist/views/NotFound/page.js"
+      },
+      "./views/NotFound/client": {
+        "import": "./dist/views/NotFound/client.js",
+        "types": "./dist/views/NotFound/client.d.ts",
+        "default": "./dist/views/NotFound/client.js"
       },
       "./views/Root/getCustomViewByRoute": {
         "import": "./dist/views/Root/getCustomViewByRoute.js",

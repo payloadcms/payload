@@ -37,6 +37,7 @@ export const generateSubmissionCollection = (
             _existingForm = await payload.findByID({
               id: value,
               collection: formSlug,
+              overrideAccess: true,
               req,
             })
 

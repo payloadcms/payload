@@ -18,7 +18,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/storage-azure', () => {
+test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTests: false }, () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
@@ -63,6 +63,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -75,6 +76,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -126,6 +128,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/sto
     const uploadData = (await payload.findByID({
       collection: collectionSlug,
       id: uploadId,
+      overrideAccess: true,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>

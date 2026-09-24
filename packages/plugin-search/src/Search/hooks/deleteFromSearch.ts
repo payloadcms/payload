@@ -9,6 +9,7 @@ export const deleteFromSearch: DeleteFromSearch =
       await payload.delete({
         collection: searchSlug,
         depth: 0,
+        overrideAccess: true,
         req,
         where: {
           'doc.relationTo': {

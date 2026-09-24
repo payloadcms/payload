@@ -28,6 +28,7 @@ export async function sendOrderAccessEmail({
       },
       limit: 1,
       depth: 0,
+      overrideAccess: true,
     })
 
     const order = orders[0]

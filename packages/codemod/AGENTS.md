@@ -1,4 +1,4 @@
-# @payloadcms/codemod — Claude Guidance
+# @payloadcms/codemod — Agent Guidance
 
 Package-scoped rules. See `README.md` for usage and the mechanical authoring recipe.
 

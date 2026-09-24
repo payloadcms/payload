@@ -32,7 +32,7 @@ function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
 
 const configPath = './config.compositePrefixes.ts'
 
-test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite prefixes)', () => {
+test.suite('@payloadcms/plugin-cloud-storage (composite prefixes)', { config: configPath }, () => {
   let TEST_BUCKET: string
 
   test.beforeEach(async () => {
@@ -71,6 +71,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite 
             prefix: docPrefix,
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         expect(upload.id).toBeTruthy()
@@ -93,6 +94,7 @@ test.suite({ config: configPath })('@payloadcms/plugin-cloud-storage (composite 
           collection: mediaWithCompositePrefixesSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         expect(upload.id).toBeTruthy()
