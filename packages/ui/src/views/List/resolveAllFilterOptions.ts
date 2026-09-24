@@ -28,10 +28,17 @@ export const resolveAllFilterOptions = async ({
         return
       }
 
+      // Mirror reduceFieldsToOptions: a `virtual: 'path.to.field'` field is keyed by its
+      // virtual path, not its own name — otherwise the WhereBuilder looks the resolved
+      // filterOptions up under a key that was never set.
       const fieldPath = fieldAffectsData(field)
-        ? pathPrefix
-          ? `${pathPrefix}.${field.name}`
-          : field.name
+        ? 'virtual' in field && typeof field.virtual === 'string'
+          ? pathPrefix
+            ? `${pathPrefix}.${field.virtual}`
+            : field.virtual
+          : pathPrefix
+            ? `${pathPrefix}.${field.name}`
+            : field.name
         : pathPrefix
 
       if (
