@@ -4,6 +4,7 @@ import type { AccessConfig, CurrenciesConfig, InventoryConfig } from '../../../t
 
 import { inventoryField } from '../../../fields/inventoryField.js'
 import { pricesField } from '../../../fields/pricesField.js'
+import { getInventoryFieldName } from '../../../utilities/inventory.js'
 import { variantsCollectionBeforeChange as beforeChange } from './hooks/beforeChange.js'
 import { validateOptions } from './hooks/validateOptions.js'
 
@@ -83,7 +84,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
       required: true,
       validate: validateOptions({ productsCollectionSlug: productsSlug }),
     },
-    ...(inventory ? [inventoryField()] : []),
+    ...(inventory ? [inventoryField({ fieldName: getInventoryFieldName(inventory) })] : []),
   ]
 
   if (supportedCurrencies?.length && supportedCurrencies.length > 0) {
