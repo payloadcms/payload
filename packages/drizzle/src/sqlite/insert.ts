@@ -1,3 +1,5 @@
+import { getTableColumns } from 'drizzle-orm'
+
 import type { BaseSQLiteAdapter, Insert } from './types.js'
 
 export const insert: Insert = async function (
@@ -11,9 +13,17 @@ export const insert: Insert = async function (
   // Batch insert if limitedBoundParameters: true
   if (this.limitedBoundParameters && Array.isArray(values)) {
     const results: Record<string, unknown>[] = []
-    const colsPerRow = Object.keys(values[0]).length
+    // Size each batch from the table's columns, not from the keys of the first row.
+    // Drizzle emits every column of the table for a multi-row insert, and a column
+    // left to a JS-generated default (e.g. an `id` from `$defaultFn`) is bound as a
+    // parameter too — so a row can bind more parameters than it has keys. Version
+    // rows have no `id` key, which is how 20 rows of a 6-column table went out as
+    // 120 parameters. Parameters added by ON CONFLICT ... DO UPDATE SET count once
+    // per statement, so they come off the budget first.
+    const colsPerRow = Object.keys(getTableColumns(table)).length
     const maxParams = 100
-    const maxRowsPerBatch = Math.max(1, Math.floor(maxParams / colsPerRow))
+    const setParams = onConflictDoUpdate?.set ? Object.keys(onConflictDoUpdate.set).length : 0
+    const maxRowsPerBatch = Math.max(1, Math.floor((maxParams - setParams) / colsPerRow))
 
     for (let i = 0; i < values.length; i += maxRowsPerBatch) {
       const batch = values.slice(i, i + maxRowsPerBatch)
