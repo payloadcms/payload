@@ -68,6 +68,8 @@ export const getRelatedPosts = {
     // Find related posts
     const posts = await req.payload.find({
       collection: 'posts',
+      overrideAccess: false,
+      req,
       where: {
         category: {
           equals: id,
@@ -117,6 +119,8 @@ export const createEndpoint = {
 
     const result = await req.payload.create({
       collection: 'posts',
+      overrideAccess: false,
+      req,
       data,
     })
 
@@ -141,6 +145,8 @@ export const uploadEndpoint = {
 
     const result = await req.payload.create({
       collection: 'media',
+      overrideAccess: false,
+      req,
       data: req.data,
       file: req.file,
     })
@@ -211,6 +217,8 @@ export const searchEndpoint = {
 
     const results = await req.payload.find({
       collection: 'posts',
+      overrideAccess: false,
+      req,
       where: {
         title: {
           contains: query,
@@ -272,6 +280,8 @@ export const endpoint = {
 
     const result = await req.payload.find({
       collection: 'posts',
+      overrideAccess: false,
+      req,
       locale: req.locale,
     })
 
@@ -327,6 +337,8 @@ export const externalUsersLogin = {
     // Find user with tenant constraint
     const userQuery = await req.payload.find({
       collection: 'users',
+      overrideAccess: true,
+      req,
       where: {
         and: [
           { email: { equals: email } },
@@ -344,6 +356,8 @@ export const externalUsersLogin = {
     // Authenticate user
     const result = await req.payload.login({
       collection: 'users',
+      overrideAccess: false,
+      req,
       data: { email, password },
     })
 
@@ -426,6 +440,8 @@ export const previewEndpoint = {
     // Preview data
     const results = await req.payload.find({
       collection,
+      overrideAccess: false,
+      req,
       where,
       limit,
       depth: 0,

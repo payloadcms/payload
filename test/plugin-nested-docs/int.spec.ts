@@ -446,11 +446,12 @@ test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
         id: draft.id,
