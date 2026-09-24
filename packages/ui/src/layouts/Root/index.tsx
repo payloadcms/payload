@@ -39,13 +39,13 @@ type RootLayoutProps = {
   readonly additionalDependencyChecks?: CheckDependenciesArgs
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  readonly createAdminContext: CreateAdminContextFn
   /**
    * Fonts to apply to the admin `<html>` element. Each entry's
    * `variable ?? className` is appended to the `<html>` class list.
    * Framework-specific font loaders (e.g. `next/font`) are supplied by the caller.
    */
   readonly fonts?: Font[]
-  readonly createAdminContext: CreateAdminContextFn
   /**
    * Custom content to render inside the admin panel's `<head>` element.
    *
@@ -88,8 +88,8 @@ export const RootLayout = (props: RootLayoutProps) => {
 const RootLayoutContent = async ({
   children,
   config: configPromise,
-  fonts = [],
   createAdminContext,
+  fonts = [],
   head: headFromProps,
   htmlProps = {},
   importMap,

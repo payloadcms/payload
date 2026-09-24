@@ -34,18 +34,18 @@ export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  'additionalDependencyChecks' | 'fonts' | 'createAdminContext' | 'RouterAdapter'
+  'additionalDependencyChecks' | 'createAdminContext' | 'fonts' | 'RouterAdapter'
 >
 
 export const RootLayout = (props: Props) => (
   <UIRootLayout
     {...props}
     additionalDependencyChecks={nextDependencyChecks}
+    createAdminContext={createAdminContext}
     fonts={[
       { className: inter.className, variable: inter.variable },
       { className: robotoMono.className, variable: robotoMono.variable },
     ]}
-    createAdminContext={createAdminContext}
     RouterAdapter={NextRouterAdapter}
   />
 )
