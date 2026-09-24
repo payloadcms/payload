@@ -68,7 +68,7 @@ export const initiatePaymentHandler: InitiatePayment =
     const data = req.data
     const payload = req.payload
     const user = req.user as null | UserWithCart
-    const inventoryFieldName = inventory ? getInventoryFieldName(inventory) : false
+    const inventoryFieldName = inventory ? getInventoryFieldName({ inventory }) : false
 
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID
