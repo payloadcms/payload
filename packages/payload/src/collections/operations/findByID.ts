@@ -119,6 +119,13 @@ export const findByIDOperation = async <
       return null!
     }
 
+    const isValidID =
+      (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && Number.isFinite(id))
+
+    if (!isValidID) {
+      throw new NotFound(t)
+    }
+
     const where = { id: { equals: id } }
 
     let fullWhere = combineQueries(where, accessResult)
@@ -156,10 +163,6 @@ export const findByIDOperation = async <
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////
-
-    if (!fullWhere?.and?.[0]?.id) {
-      throw new NotFound(t)
-    }
 
     const shouldQueryDrafts = !args.data && replaceWithVersion && hasDraftsEnabled(collectionConfig)
     let docFromDB: DataFromCollectionSlug<TSlug> | null | undefined
