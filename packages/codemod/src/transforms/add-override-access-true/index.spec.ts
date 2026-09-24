@@ -49,6 +49,19 @@ describe('add-override-access-true', () => {
     expect(result).toBe(output)
   })
 
+  it('should preserve a block comment before an existing trailing comma', async () => {
+    const input = `await payload.find({
+  collection: 'posts' /* note */,
+})`
+
+    const result = await runTransform({ source: input, transform: addOverrideAccessTrue })
+
+    expect(result).toBe(`await payload.find({
+  collection: 'posts' /* note */,
+  overrideAccess: true,
+})`)
+  })
+
   it('should handle a comment between properties without corrupting the preceding comma', async () => {
     const input = await fixture({ name: 'comment-between-properties.input.ts' })
     const output = await fixture({ name: 'comment-between-properties.output.ts' })

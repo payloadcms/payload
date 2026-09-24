@@ -176,13 +176,22 @@ const planInsertion = ({ object }: { object: ObjectLiteralExpression }): Inserti
   const lastProperty = properties[properties.length - 1]!
   const fullText = object.getSourceFile().getFullText()
 
-  // Step past any whitespace to see whether the last property already has a
-  // trailing comma. Inserting after that comma, rather than after the property,
-  // is what keeps a following comment attached to the end of the object.
+  // Step past trivia to find an existing trailing comma, including when a
+  // comment sits between the last property and the comma.
   let cursor = lastProperty.getEnd()
 
-  while (cursor < fullText.length && /\s/.test(fullText[cursor]!)) {
-    cursor += 1
+  while (cursor < object.getEnd()) {
+    if (/\s/.test(fullText[cursor]!)) {
+      cursor += 1
+    } else if (fullText.startsWith('//', cursor)) {
+      const newline = fullText.indexOf('\n', cursor + 2)
+      cursor = newline === -1 ? object.getEnd() : newline
+    } else if (fullText.startsWith('/*', cursor)) {
+      const commentEnd = fullText.indexOf('*/', cursor + 2)
+      cursor = commentEnd === -1 ? object.getEnd() : commentEnd + 2
+    } else {
+      break
+    }
   }
 
   const hasTrailingComma = fullText[cursor] === ','
