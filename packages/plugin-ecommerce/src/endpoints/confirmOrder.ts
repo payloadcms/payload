@@ -380,6 +380,7 @@ const finalizeTransactionOrder = async ({
     id: transactionID,
     collection: transactionsSlug,
     depth: 0,
+    overrideAccess: true,
     req,
   })
 
@@ -395,6 +396,7 @@ const finalizeTransactionOrder = async ({
     collection: ordersSlug,
     depth: 0,
     limit: 1,
+    overrideAccess: true,
     pagination: false,
     req,
     where: { transactions: { equals: transactionID } },
@@ -410,6 +412,7 @@ const finalizeTransactionOrder = async ({
       ...orderData,
       transactions: [transactionID],
     },
+    overrideAccess: true,
     req,
   })) as RecordValue
   const orderID = requireDocumentID({ fieldName: 'order ID', value: order.id })
@@ -418,6 +421,7 @@ const finalizeTransactionOrder = async ({
     id: cartID,
     collection: cartsSlug,
     data: { purchasedAt: new Date().toISOString() },
+    overrideAccess: true,
     req,
   })
 
@@ -432,6 +436,7 @@ const finalizeTransactionOrder = async ({
     id: transactionID,
     collection: transactionsSlug,
     data: { order: orderID, status: 'succeeded' },
+    overrideAccess: true,
     req,
   })
 
@@ -501,6 +506,7 @@ const waitForCanonicalOrder = async ({
       id: transactionID,
       collection: transactionsSlug,
       depth: 0,
+      overrideAccess: true,
       req,
     })
 
@@ -549,6 +555,7 @@ const findExactlyLinkedOrder = async ({
     collection: ordersSlug,
     depth: 0,
     limit: 2,
+    overrideAccess: true,
     pagination: false,
     req,
     where: { transactions: { equals: transactionID } },

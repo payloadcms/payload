@@ -4638,11 +4638,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
         id: draft.id,
@@ -4688,11 +4689,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      const res = await payload.jobs.run()
+      const res = await payload.jobs.run({ overrideAccess: true })
 
       expect(res.jobStatus[Object.keys(res.jobStatus)[0]].status).toBe('error-reached-max-retries')
 
@@ -4756,7 +4758,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('success')
 
@@ -4812,7 +4814,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
 
@@ -4850,6 +4852,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -4866,7 +4869,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
 
@@ -4908,6 +4911,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -4924,7 +4928,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       // A `0` id must reach findByID (which fails here) rather than being dropped to an
       // overrideAccess publish, so the doc stays a draft.
@@ -4965,11 +4969,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
         id: published.id,
@@ -5010,6 +5015,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5063,6 +5069,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5110,11 +5117,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findGlobal({
         slug: draftGlobalSlug,
@@ -5146,11 +5154,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findGlobal({
         slug: draftGlobalSlug,

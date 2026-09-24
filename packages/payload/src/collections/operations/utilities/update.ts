@@ -16,6 +16,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type {
   DataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -59,7 +60,6 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   filesToUpload: FileToSave[]
   id: number | string
   locale: string
-  overrideAccess: boolean
   overrideLock: boolean
   payload: Payload
   populate?: PopulateType
@@ -68,7 +68,7 @@ export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   select: SelectType
   showHiddenFields: boolean
   unpublishAllLocales?: boolean
-}
+} & Pick<Required<SharedLocalAPIOptions>, 'overrideAccess'>
 
 /**
  * This function is used to update a document in the DB and return the result.

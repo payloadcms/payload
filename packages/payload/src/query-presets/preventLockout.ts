@@ -43,6 +43,7 @@ export const preventLockout: Validate = async (
         ...data,
         isTemp: true,
       },
+      overrideAccess: true,
       req,
     })
 
@@ -82,6 +83,7 @@ export const preventLockout: Validate = async (
         await req.payload.delete({
           id: tempPreset.id,
           collection: queryPresetsCollectionSlug,
+          overrideAccess: true,
           req,
         })
       }

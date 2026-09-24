@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "4.0.0-canary.36",
+  "version": "4.0.0-canary.37",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -275,11 +275,6 @@
       "import": "./src/utilities/getPreferences.ts",
       "types": "./src/utilities/getPreferences.ts",
       "default": "./src/utilities/getPreferences.ts"
-    },
-    "./utilities/initReq": {
-      "import": "./src/utilities/initReq.ts",
-      "types": "./src/utilities/initReq.ts",
-      "default": "./src/utilities/initReq.ts"
     },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
