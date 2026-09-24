@@ -442,6 +442,33 @@ export const BlockFields: CollectionConfig = {
       blocks: [],
     },
     {
+      name: 'configuration',
+      type: 'blocks',
+      blockReferences: ['conditionalReference'],
+      blocks: [],
+      defaultValue: [{ blockType: 'conditionalReference' }],
+    },
+    {
+      name: 'consumer',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'conditionalConfiguration',
+          type: 'blocks',
+          admin: {
+            condition: (data) => Boolean(data.consumer),
+          },
+          blockReferences: ['conditionalReference'],
+          blocks: [],
+          defaultValue: [{ blockType: 'conditionalReference' }],
+        },
+      ],
+    },
+    {
       name: 'localizedReferencesLocalizedBlock',
       type: 'blocks',
       blockReferences: ['localizedTextReference'],
