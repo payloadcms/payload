@@ -45,7 +45,7 @@ import RestoreAccessGlobal, { RestoreAccessNoVersionsGlobal } from './globals/Re
 import SimpleDraftGlobal from './globals/SimpleDraft.js'
 import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
-import { draftCollectionSlug, draftWithUploadCloudStorageCollectionSlug } from './slugs.js'
+import { draftWithUploadCloudStorageCollectionSlug } from './slugs.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 export default buildConfigWithDefaults({
   admin: {
@@ -85,25 +85,6 @@ export default buildConfigWithDefaults({
     RestoreAccessLocalized,
     Users,
     SecondaryAdminUsers,
-  ],
-  endpoints: [
-    {
-      handler: async (req) => {
-        const document = await req.payload.db.create({
-          collection: draftCollectionSlug,
-          data: {
-            description: 'Document created before drafts were enabled',
-            title: {
-              en: 'Versionless document',
-            },
-          },
-        })
-
-        return Response.json({ id: document.id })
-      },
-      method: 'post',
-      path: '/create-versionless-draft-document',
-    },
   ],
   globals: [
     AutosaveGlobal,
