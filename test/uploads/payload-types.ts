@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_8B572FD4".
+ * via the `definition` "LexicalNodes_5A8D4991".
  */
-export type LexicalNodes_8B572FD4 =
+export type LexicalNodes_5A8D4991 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_8B572FD4>
+  | SerializedParagraphNode<LexicalNodes_5A8D4991>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_8B572FD4>
+  | SerializedHeadingNode<LexicalNodes_5A8D4991>
   | SerializedUploadNode<'gif-resize'>
   | SerializedUploadNode<'filename-compound-index'>
   | SerializedUploadNode<'no-image-sizes'>
@@ -128,12 +128,13 @@ export type LexicalNodes_8B572FD4 =
   | SerializedUploadNode<'media-without-write-access'>
   | SerializedUploadNode<'media-with-image-size-admin-props'>
   | SerializedUploadNode<'prefix-media'>
+  | SerializedUploadNode<'file-access-media'>
   | SerializedUploadNode<'media-with-fields'>
-  | SerializedQuoteNode<LexicalNodes_8B572FD4>
-  | SerializedListNode<LexicalNodes_8B572FD4>
-  | SerializedListItemNode<LexicalNodes_8B572FD4>
-  | SerializedAutoLinkNode<LexicalNodes_8B572FD4, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_8B572FD4, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_5A8D4991>
+  | SerializedListNode<LexicalNodes_5A8D4991>
+  | SerializedListItemNode<LexicalNodes_5A8D4991>
+  | SerializedAutoLinkNode<LexicalNodes_5A8D4991, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_5A8D4991, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -221,6 +222,7 @@ export interface Config {
     'media-without-write-access': MediaWithoutWriteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
     'prefix-media': PrefixMedia;
+    'file-access-media': FileAccessMedia;
     'media-with-fields': MediaWithField;
     'payload-kv': PayloadKv;
     users: User;
@@ -296,6 +298,7 @@ export interface Config {
     'media-without-write-access': MediaWithoutWriteAccessSelect<false> | MediaWithoutWriteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
     'prefix-media': PrefixMediaSelect<false> | PrefixMediaSelect<true>;
+    'file-access-media': FileAccessMediaSelect<false> | FileAccessMediaSelect<true>;
     'media-with-fields': MediaWithFieldsSelect<false> | MediaWithFieldsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -565,7 +568,7 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_8B572FD4> | null;
+  richText?: LexicalRichText<LexicalNodes_5A8D4991> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -2048,6 +2051,37 @@ export interface PrefixMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-access-media".
+ */
+export interface FileAccessMedia {
+  id: string;
+  prefix?: string | null;
+  requestMetadata?: string | null;
+  visibility: 'public' | 'restricted';
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-fields".
  */
 export interface MediaWithField {
@@ -2313,6 +2347,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -2595,6 +2630,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'prefix-media';
         value: string | PrefixMedia;
+      } | null)
+    | ({
+        relationTo: 'file-access-media';
+        value: string | FileAccessMedia;
       } | null)
     | ({
         relationTo: 'media-with-fields';
@@ -4424,6 +4463,40 @@ export interface PrefixMediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-access-media_select".
+ */
+export interface FileAccessMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  requestMetadata?: T;
+  visibility?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-fields_select".
  */
 export interface MediaWithFieldsSelect<T extends boolean = true> {
@@ -4732,6 +4805,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -4858,6 +4932,7 @@ export interface CollectionQueryWidget {
       | 'media-without-write-access'
       | 'media-with-image-size-admin-props'
       | 'prefix-media'
+      | 'file-access-media'
       | 'media-with-fields'
       | 'users';
     where?:
@@ -4949,6 +5024,7 @@ export interface ActivityWidget {
           | 'media-without-write-access'
           | 'media-with-image-size-admin-props'
           | 'prefix-media'
+          | 'file-access-media'
           | 'media-with-fields'
           | 'users'
         )[]

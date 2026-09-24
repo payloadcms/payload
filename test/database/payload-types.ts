@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_56C44267".
+ * via the `definition` "LexicalNodes_B1AC347C".
  */
-export type LexicalNodes_56C44267 =
+export type LexicalNodes_B1AC347C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_56C44267>
+  | SerializedParagraphNode<LexicalNodes_B1AC347C>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_56C44267>
+  | SerializedHeadingNode<LexicalNodes_B1AC347C>
   | {
       type: 'upload';
       /**
@@ -79,15 +79,16 @@ export type LexicalNodes_56C44267 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_56C44267>
-  | SerializedListNode<LexicalNodes_56C44267>
-  | SerializedListItemNode<LexicalNodes_56C44267>
-  | SerializedAutoLinkNode<LexicalNodes_56C44267, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_56C44267, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_B1AC347C>
+  | SerializedListNode<LexicalNodes_B1AC347C>
+  | SerializedListItemNode<LexicalNodes_B1AC347C>
+  | SerializedAutoLinkNode<LexicalNodes_B1AC347C, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_B1AC347C, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'noTimeStamps'
       | 'categories'
       | 'simple'
+      | 'draft-with-array'
       | 'simple-localized'
       | 'categories-custom-id'
       | 'posts'
@@ -127,6 +128,7 @@ export interface Config {
     noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
+    'draft-with-array': DraftWithArray;
     'simple-localized': SimpleLocalized;
     'categories-custom-id': CategoriesCustomId;
     posts: Post;
@@ -165,6 +167,7 @@ export interface Config {
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
+    'draft-with-array': DraftWithArraySelect<false> | DraftWithArraySelect<true>;
     'simple-localized': SimpleLocalizedSelect<false> | SimpleLocalizedSelect<true>;
     'categories-custom-id': CategoriesCustomIdSelect<false> | CategoriesCustomIdSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -432,6 +435,42 @@ export interface BlockFirst {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-array".
+ */
+export interface DraftWithArray {
+  id: string;
+  items?:
+    | {
+        text1?: string | null;
+        text2?: string | null;
+        text3?: string | null;
+        text4?: string | null;
+        text5?: string | null;
+        text6?: string | null;
+        text7?: string | null;
+        text8?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  itemsWithDefaults?:
+    | {
+        text1?: string | null;
+        text2?: string | null;
+        text3?: string | null;
+        text4?: string | null;
+        text5?: string | null;
+        text6?: string | null;
+        text7?: string | null;
+        text8?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "simple-localized".
  */
 export interface SimpleLocalized {
@@ -487,7 +526,7 @@ export interface DefaultValue {
 export interface RelationA {
   id: string;
   title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_56C44267> | null;
+  richText?: LexicalRichText<LexicalNodes_B1AC347C> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -499,7 +538,7 @@ export interface RelationB {
   id: string;
   title?: string | null;
   relationship?: (string | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_56C44267> | null;
+  richText?: LexicalRichText<LexicalNodes_B1AC347C> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -874,6 +913,10 @@ export interface PayloadLockedDocument {
         value: string | Simple;
       } | null)
     | ({
+        relationTo: 'draft-with-array';
+        value: string | DraftWithArray;
+      } | null)
+    | ({
         relationTo: 'simple-localized';
         value: string | SimpleLocalized;
       } | null)
@@ -1047,6 +1090,41 @@ export interface SimpleSelect<T extends boolean = true> {
   number?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-array_select".
+ */
+export interface DraftWithArraySelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        text1?: T;
+        text2?: T;
+        text3?: T;
+        text4?: T;
+        text5?: T;
+        text6?: T;
+        text7?: T;
+        text8?: T;
+        id?: T;
+      };
+  itemsWithDefaults?:
+    | T
+    | {
+        text1?: T;
+        text2?: T;
+        text3?: T;
+        text4?: T;
+        text5?: T;
+        text6?: T;
+        text7?: T;
+        text8?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1748,6 +1826,7 @@ export interface CollectionQueryWidget {
       | 'noTimeStamps'
       | 'categories'
       | 'simple'
+      | 'draft-with-array'
       | 'simple-localized'
       | 'categories-custom-id'
       | 'posts'
@@ -1798,6 +1877,7 @@ export interface ActivityWidget {
           | 'noTimeStamps'
           | 'categories'
           | 'simple'
+          | 'draft-with-array'
           | 'simple-localized'
           | 'categories-custom-id'
           | 'posts'

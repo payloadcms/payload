@@ -1459,6 +1459,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -2082,6 +2083,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -2767,6 +2769,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -2904,6 +2907,50 @@ export interface CollectionQueryWidget {
     sortField?: string | null;
     sortDirection?: ('asc' | 'desc') | null;
     limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'lexical-benchmark'
+          | 'lexical-fully-featured'
+          | 'lexical-autosave'
+          | 'lexical-link-feature'
+          | 'lexical-lists-features'
+          | 'lexical-heading-feature'
+          | 'lexical-jsx-converter'
+          | 'lexical-fields'
+          | 'lexical-views'
+          | 'lexical-views-frontend'
+          | 'lexical-views-provider'
+          | 'lexical-views-provider-default'
+          | 'lexical-views-provider-fallback'
+          | 'lexical-views-nested'
+          | 'lexical-localized-fields'
+          | 'lexicalObjectReferenceBug'
+          | 'LexicalInBlock'
+          | 'lexical-autosave-block'
+          | 'lexical-access-control'
+          | 'lexical-relationship-fields'
+          | 'collision'
+          | 'lexical-nested-blocks'
+          | 'rich-text-fields'
+          | 'text-fields'
+          | 'uploads'
+          | 'uploads2'
+          | 'array-fields'
+          | 'OnDemandForm'
+          | 'OnDemandOutsideForm'
+          | 'lexical-custom-cell'
+          | 'users'
+        )[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

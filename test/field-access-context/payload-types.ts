@@ -67,35 +67,18 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    posts: Post;
-    drafts: Draft;
-    'default-sort': DefaultSort;
-    'non-unique-sort': NonUniqueSort;
-    localized: Localized;
-    orderable: Orderable;
-    'orderable-join': OrderableJoin;
+    'field-access-context-parents': FieldAccessContextParent;
+    'field-access-context-children': FieldAccessContextChild;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    'orderable-join': {
-      orderableJoinField1: 'orderable';
-      orderableJoinField2: 'orderable';
-      nonOrderableJoinField: 'orderable';
-      'group.orderableJoinField': 'orderable';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
-    posts: PostsSelect<false> | PostsSelect<true>;
-    drafts: DraftsSelect<false> | DraftsSelect<true>;
-    'default-sort': DefaultSortSelect<false> | DefaultSortSelect<true>;
-    'non-unique-sort': NonUniqueSortSelect<false> | NonUniqueSortSelect<true>;
-    localized: LocalizedSelect<false> | LocalizedSelect<true>;
-    orderable: OrderableSelect<false> | OrderableSelect<true>;
-    'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
+    'field-access-context-parents': FieldAccessContextParentsSelect<false> | FieldAccessContextParentsSelect<true>;
+    'field-access-context-children': FieldAccessContextChildrenSelect<false> | FieldAccessContextChildrenSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -105,10 +88,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'nb') | ('en' | 'nb')[];
-  globals: {};
-  globalsSelect: {};
-  locale: 'en' | 'nb';
+  fallbackLocale: null;
+  globals: {
+    'field-access-context-global': FieldAccessContextGlobal;
+  };
+  globalsSelect: {
+    'field-access-context-global': FieldAccessContextGlobalSelect<false> | FieldAccessContextGlobalSelect<true>;
+  };
+  locale: null;
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
@@ -140,116 +127,28 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "field-access-context-parents".
  */
-export interface Post {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
-  group?: {
-    text?: string | null;
-    number?: number | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts".
- */
-export interface Draft {
-  id: string;
-  _order?: string | null;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-sort".
- */
-export interface DefaultSort {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-unique-sort".
- */
-export interface NonUniqueSort {
+export interface FieldAccessContextParent {
   id: string;
   title?: string | null;
-  order?: number | null;
+  accessCreateProbe?: string | null;
+  accessReadProbe?: string | null;
+  accessUpdateProbe?: string | null;
+  distinctProbe?: string | null;
+  permissionsProbe?: string | null;
+  child?: (string | null) | FieldAccessContextChild;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized".
+ * via the `definition` "field-access-context-children".
  */
-export interface Localized {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
-  group?: {
-    text?: string | null;
-    number?: number | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable".
- */
-export interface Orderable {
-  id: string;
-  _orderable_group_orderableJoinField_order?: string | null;
-  _orderable_orderableJoinField2_order?: string | null;
-  _orderable_orderableJoinField1_order?: string | null;
-  _order?: string | null;
-  title?: string | null;
-  orderableField?: (string | null) | OrderableJoin;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable-join".
- */
-export interface OrderableJoin {
+export interface FieldAccessContextChild {
   id: string;
   title?: string | null;
-  orderableJoinField1?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  orderableJoinField2?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  nonOrderableJoinField?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  group?: {
-    orderableJoinField?: {
-      docs?: (string | Orderable)[];
-      hasNextPage?: boolean;
-      totalDocs?: number;
-    };
-  };
+  childReadProbe?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -304,32 +203,12 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'field-access-context-parents';
+        value: string | FieldAccessContextParent;
       } | null)
     | ({
-        relationTo: 'drafts';
-        value: string | Draft;
-      } | null)
-    | ({
-        relationTo: 'default-sort';
-        value: string | DefaultSort;
-      } | null)
-    | ({
-        relationTo: 'non-unique-sort';
-        value: string | NonUniqueSort;
-      } | null)
-    | ({
-        relationTo: 'localized';
-        value: string | Localized;
-      } | null)
-    | ({
-        relationTo: 'orderable';
-        value: string | Orderable;
-      } | null)
-    | ({
-        relationTo: 'orderable-join';
-        value: string | OrderableJoin;
+        relationTo: 'field-access-context-children';
+        value: string | FieldAccessContextChild;
       } | null)
     | ({
         relationTo: 'users';
@@ -379,99 +258,26 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "field-access-context-parents_select".
  */
-export interface PostsSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  number2?: T;
-  group?:
-    | T
-    | {
-        text?: T;
-        number?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts_select".
- */
-export interface DraftsSelect<T extends boolean = true> {
-  _order?: T;
-  text?: T;
-  number?: T;
-  number2?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-sort_select".
- */
-export interface DefaultSortSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-unique-sort_select".
- */
-export interface NonUniqueSortSelect<T extends boolean = true> {
+export interface FieldAccessContextParentsSelect<T extends boolean = true> {
   title?: T;
-  order?: T;
+  accessCreateProbe?: T;
+  accessReadProbe?: T;
+  accessUpdateProbe?: T;
+  distinctProbe?: T;
+  permissionsProbe?: T;
+  child?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized_select".
+ * via the `definition` "field-access-context-children_select".
  */
-export interface LocalizedSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  number2?: T;
-  group?:
-    | T
-    | {
-        text?: T;
-        number?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable_select".
- */
-export interface OrderableSelect<T extends boolean = true> {
-  _orderable_group_orderableJoinField_order?: T;
-  _orderable_orderableJoinField2_order?: T;
-  _orderable_orderableJoinField1_order?: T;
-  _order?: T;
+export interface FieldAccessContextChildrenSelect<T extends boolean = true> {
   title?: T;
-  orderableField?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable-join_select".
- */
-export interface OrderableJoinSelect<T extends boolean = true> {
-  title?: T;
-  orderableJoinField1?: T;
-  orderableJoinField2?: T;
-  nonOrderableJoinField?: T;
-  group?:
-    | T
-    | {
-        orderableJoinField?: T;
-      };
+  childReadProbe?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -540,6 +346,28 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-access-context-global".
+ */
+export interface FieldAccessContextGlobal {
+  id: string;
+  globalReadProbe?: string | null;
+  globalChild?: (string | null) | FieldAccessContextChild;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-access-context-global_select".
+ */
+export interface FieldAccessContextGlobalSelect<T extends boolean = true> {
+  globalReadProbe?: T;
+  globalChild?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -555,15 +383,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection:
-      | 'posts'
-      | 'drafts'
-      | 'default-sort'
-      | 'non-unique-sort'
-      | 'localized'
-      | 'orderable'
-      | 'orderable-join'
-      | 'users';
+    relatedCollection: 'field-access-context-parents' | 'field-access-context-children' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -585,18 +405,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?:
-      | (
-          | 'posts'
-          | 'drafts'
-          | 'default-sort'
-          | 'non-unique-sort'
-          | 'localized'
-          | 'orderable'
-          | 'orderable-join'
-          | 'users'
-        )[]
-      | null;
+    excludedCollections?: ('field-access-context-parents' | 'field-access-context-children' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

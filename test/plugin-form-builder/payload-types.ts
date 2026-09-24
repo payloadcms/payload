@@ -121,6 +121,8 @@ export interface Config {
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -183,9 +185,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: LexicalRichText<LexicalNodes_0568D85A>;
   redirect?: {
@@ -196,9 +195,6 @@ export interface Form {
     } | null;
     url?: string | null;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -207,9 +203,6 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: LexicalRichText<LexicalNodes_0568D85A> | null;
         id?: string | null;
       }[]
@@ -377,13 +370,7 @@ export interface Textarea {
 export interface Upload {
   name: string;
   label?: string | null;
-  /**
-   * Select which upload collection to store files in
-   */
   uploadCollection: 'media' | 'documents';
-  /**
-   * Restrict allowed file types (e.g., image/*, application/pdf). Leave empty to allow all types.
-   */
   mimeTypes?:
     | {
         mimeType: string;
@@ -391,9 +378,6 @@ export interface Upload {
       }[]
     | null;
   width?: number | null;
-  /**
-   * Maximum file size in bytes. Leave empty for no limit.
-   */
   maxFileSize?: number | null;
   required?: boolean | null;
   multiple?: boolean | null;
@@ -443,6 +427,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -525,9 +510,6 @@ export interface FormSubmission {
   payment?: {
     field?: string | null;
     status?: string | null;
-    /**
-     * Amount in cents
-     */
     amount?: number | null;
     paymentProcessor?: string | null;
     creditCard?: {
@@ -655,6 +637,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -985,6 +968,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'pages' | 'users' | 'media' | 'documents' | 'forms' | 'form-submissions';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('pages' | 'users' | 'media' | 'documents' | 'forms' | 'form-submissions')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -102,7 +102,7 @@ export interface Config {
     configurable: ConfigurableWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
-    activity: RecentlyViewedWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -155,6 +155,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -352,6 +353,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -467,7 +469,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'tickets' | 'revenue' | 'events' | 'payload-kv';
+    relatedCollection: 'tickets' | 'revenue' | 'events' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -487,9 +489,9 @@ export interface CollectionQueryWidget {
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "activity_widget".
  */
-export interface RecentlyViewedWidget {
+export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'payload-kv')[] | null;
+    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

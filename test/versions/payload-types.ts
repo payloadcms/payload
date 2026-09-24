@@ -837,6 +837,8 @@ export interface DraftWithUpload {
 export interface DraftWithUploadCloudStorage {
   id: string;
   alt?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1616,6 +1618,8 @@ export interface DraftWithUploadSelect<T extends boolean = true> {
  */
 export interface DraftWithUploadCloudStorageSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

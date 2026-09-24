@@ -265,6 +265,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -739,6 +740,7 @@ export interface PostsWithS3Export {
     | boolean
     | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1051,6 +1053,7 @@ export interface PostsWithS3Import {
       | null;
   };
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1502,6 +1505,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1890,6 +1894,7 @@ export interface PostsWithS3ExportSelect<T extends boolean = true> {
   collectionSlug?: T;
   where?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2136,6 +2141,7 @@ export interface PostsWithS3ImportSelect<T extends boolean = true> {
         issueDetails?: T;
       };
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

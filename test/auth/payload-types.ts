@@ -374,7 +374,7 @@ export interface User {
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
@@ -440,7 +440,7 @@ export interface ApiKey {
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   collection: 'api-keys';
 }
@@ -474,7 +474,7 @@ export interface RotateSecret {
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   collection: 'rotate-secret';
 }
@@ -487,7 +487,7 @@ export interface RotateSecretSecondary {
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   collection: 'rotate-secret-secondary';
 }
@@ -500,7 +500,7 @@ export interface RotateSecretLogin {
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
@@ -540,7 +540,7 @@ export interface ApiKeysWithFieldReadAccess {
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
-  apiKeyPreview?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   collection: 'api-keys-with-field-read-access';
 }
@@ -761,7 +761,7 @@ export interface UsersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
@@ -819,7 +819,7 @@ export interface ApiKeysSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
 }
 /**
@@ -848,7 +848,7 @@ export interface RotateSecretSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
 }
 /**
@@ -859,7 +859,7 @@ export interface RotateSecretSecondarySelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
 }
 /**
@@ -870,7 +870,7 @@ export interface RotateSecretLoginSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
@@ -906,7 +906,7 @@ export interface ApiKeysWithFieldReadAccessSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
-  apiKeyPreview?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
 }
 /**

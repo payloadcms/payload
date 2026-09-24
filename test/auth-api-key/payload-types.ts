@@ -64,40 +64,31 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'api-keys': ApiKeyAuthOperations;
+    revealableKeys: RevealableKeyAuthOperations;
+    restrictedRevealableKeys: RestrictedRevealableKeyAuthOperations;
+    tenantRevealableKeys: TenantRevealableKeyAuthOperations;
   };
   blocks: {};
   collections: {
-    posts: Post;
-    drafts: Draft;
-    'default-sort': DefaultSort;
-    'non-unique-sort': NonUniqueSort;
-    localized: Localized;
-    orderable: Orderable;
-    'orderable-join': OrderableJoin;
-    'payload-kv': PayloadKv;
     users: User;
+    'api-keys': ApiKey;
+    revealableKeys: RevealableKey;
+    restrictedRevealableKeys: RestrictedRevealableKey;
+    tenantRevealableKeys: TenantRevealableKey;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    'orderable-join': {
-      orderableJoinField1: 'orderable';
-      orderableJoinField2: 'orderable';
-      nonOrderableJoinField: 'orderable';
-      'group.orderableJoinField': 'orderable';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
-    posts: PostsSelect<false> | PostsSelect<true>;
-    drafts: DraftsSelect<false> | DraftsSelect<true>;
-    'default-sort': DefaultSortSelect<false> | DefaultSortSelect<true>;
-    'non-unique-sort': NonUniqueSortSelect<false> | NonUniqueSortSelect<true>;
-    localized: LocalizedSelect<false> | LocalizedSelect<true>;
-    orderable: OrderableSelect<false> | OrderableSelect<true>;
-    'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
+    revealableKeys: RevealableKeysSelect<false> | RevealableKeysSelect<true>;
+    restrictedRevealableKeys: RestrictedRevealableKeysSelect<false> | RestrictedRevealableKeysSelect<true>;
+    tenantRevealableKeys: TenantRevealableKeysSelect<false> | TenantRevealableKeysSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -105,16 +96,16 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'nb') | ('en' | 'nb')[];
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'fr') | ('en' | 'fr')[];
   globals: {};
   globalsSelect: {};
-  locale: 'en' | 'nb';
+  locale: 'en' | 'fr';
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
   };
-  user: User;
+  user: User | ApiKey | RevealableKey | RestrictedRevealableKey | TenantRevealableKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -138,137 +129,77 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
-  group?: {
-    text?: string | null;
-    number?: number | null;
+export interface ApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts".
- */
-export interface Draft {
-  id: string;
-  _order?: string | null;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-sort".
- */
-export interface DefaultSort {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-unique-sort".
- */
-export interface NonUniqueSort {
-  id: string;
-  title?: string | null;
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized".
- */
-export interface Localized {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
-  group?: {
-    text?: string | null;
-    number?: number | null;
+  login: {
+    email: string;
+    password: string;
   };
-  updatedAt: string;
-  createdAt: string;
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable".
- */
-export interface Orderable {
-  id: string;
-  _orderable_group_orderableJoinField_order?: string | null;
-  _orderable_orderableJoinField2_order?: string | null;
-  _orderable_orderableJoinField1_order?: string | null;
-  _order?: string | null;
-  title?: string | null;
-  orderableField?: (string | null) | OrderableJoin;
-  updatedAt: string;
-  createdAt: string;
+export interface RevealableKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable-join".
- */
-export interface OrderableJoin {
-  id: string;
-  title?: string | null;
-  orderableJoinField1?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
+export interface RestrictedRevealableKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
   };
-  orderableJoinField2?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
+  login: {
+    email: string;
+    password: string;
   };
-  nonOrderableJoinField?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
+  registerFirstUser: {
+    email: string;
+    password: string;
   };
-  group?: {
-    orderableJoinField?: {
-      docs?: (string | Orderable)[];
-      hasNextPage?: boolean;
-      totalDocs?: number;
-    };
+  unlock: {
+    email: string;
+    password: string;
   };
-  updatedAt: string;
-  createdAt: string;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+export interface TenantRevealableKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -298,48 +229,128 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys".
+ */
+export interface ApiKey {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'api-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "revealableKeys".
+ */
+export interface RevealableKey {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'revealableKeys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restrictedRevealableKeys".
+ */
+export interface RestrictedRevealableKey {
+  id: string;
+  denyCollectionReadAccess?: boolean | null;
+  denyAPIKeyUpdateAccess?: boolean | null;
+  denyCollectionUpdateAccess?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'restrictedRevealableKeys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenantRevealableKeys".
+ */
+export interface TenantRevealableKey {
+  id: string;
+  tenant?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  apiKey?: string | null;
+  apiKeyLast4?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'tenantRevealableKeys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'posts';
-        value: string | Post;
-      } | null)
-    | ({
-        relationTo: 'drafts';
-        value: string | Draft;
-      } | null)
-    | ({
-        relationTo: 'default-sort';
-        value: string | DefaultSort;
-      } | null)
-    | ({
-        relationTo: 'non-unique-sort';
-        value: string | NonUniqueSort;
-      } | null)
-    | ({
-        relationTo: 'localized';
-        value: string | Localized;
-      } | null)
-    | ({
-        relationTo: 'orderable';
-        value: string | Orderable;
-      } | null)
-    | ({
-        relationTo: 'orderable-join';
-        value: string | OrderableJoin;
-      } | null)
-    | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      }
+    | {
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      }
+    | {
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      }
+    | {
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -349,10 +360,27 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      }
+    | {
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      }
+    | {
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      }
+    | {
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -379,112 +407,6 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  number2?: T;
-  group?:
-    | T
-    | {
-        text?: T;
-        number?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts_select".
- */
-export interface DraftsSelect<T extends boolean = true> {
-  _order?: T;
-  text?: T;
-  number?: T;
-  number2?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-sort_select".
- */
-export interface DefaultSortSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-unique-sort_select".
- */
-export interface NonUniqueSortSelect<T extends boolean = true> {
-  title?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized_select".
- */
-export interface LocalizedSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  number2?: T;
-  group?:
-    | T
-    | {
-        text?: T;
-        number?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable_select".
- */
-export interface OrderableSelect<T extends boolean = true> {
-  _orderable_group_orderableJoinField_order?: T;
-  _orderable_orderableJoinField2_order?: T;
-  _orderable_orderableJoinField1_order?: T;
-  _order?: T;
-  title?: T;
-  orderableField?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable-join_select".
- */
-export interface OrderableJoinSelect<T extends boolean = true> {
-  title?: T;
-  orderableJoinField1?: T;
-  orderableJoinField2?: T;
-  nonOrderableJoinField?: T;
-  group?:
-    | T
-    | {
-        orderableJoinField?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -505,6 +427,64 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys_select".
+ */
+export interface ApiKeysSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  apiKey?: T;
+  apiKeyLast4?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "revealableKeys_select".
+ */
+export interface RevealableKeysSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  apiKey?: T;
+  apiKeyLast4?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restrictedRevealableKeys_select".
+ */
+export interface RestrictedRevealableKeysSelect<T extends boolean = true> {
+  denyCollectionReadAccess?: T;
+  denyAPIKeyUpdateAccess?: T;
+  denyCollectionUpdateAccess?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  apiKey?: T;
+  apiKeyLast4?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenantRevealableKeys_select".
+ */
+export interface TenantRevealableKeysSelect<T extends boolean = true> {
+  tenant?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  apiKey?: T;
+  apiKeyLast4?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -555,15 +535,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection:
-      | 'posts'
-      | 'drafts'
-      | 'default-sort'
-      | 'non-unique-sort'
-      | 'localized'
-      | 'orderable'
-      | 'orderable-join'
-      | 'users';
+    relatedCollection: 'users' | 'api-keys' | 'revealableKeys' | 'restrictedRevealableKeys' | 'tenantRevealableKeys';
     where?:
       | {
           [k: string]: unknown;
@@ -586,16 +558,7 @@ export interface CollectionQueryWidget {
 export interface ActivityWidget {
   data?: {
     excludedCollections?:
-      | (
-          | 'posts'
-          | 'drafts'
-          | 'default-sort'
-          | 'non-unique-sort'
-          | 'localized'
-          | 'orderable'
-          | 'orderable-join'
-          | 'users'
-        )[]
+      | ('users' | 'api-keys' | 'revealableKeys' | 'restrictedRevealableKeys' | 'tenantRevealableKeys')[]
       | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
