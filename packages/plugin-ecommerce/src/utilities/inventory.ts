@@ -11,7 +11,11 @@ export const defaultInventoryFieldName = 'inventory'
  * Accepts the plugin's `inventory` option and falls back to
  * {@link defaultInventoryFieldName} when no override is configured.
  */
-export const getInventoryFieldName = (inventory?: boolean | InventoryConfig): string => {
+export const getInventoryFieldName = ({
+  inventory,
+}: {
+  inventory?: boolean | InventoryConfig
+}): string => {
   if (typeof inventory === 'object' && inventory.fieldName) {
     return inventory.fieldName
   }
