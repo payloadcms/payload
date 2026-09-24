@@ -4,14 +4,14 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath, mapAsync } from 'payload'
 import { wait } from 'payload/shared'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
+import { errorOnHookSlug, nestedRelationsSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
 
@@ -1374,6 +1374,202 @@ describe('collections-graphql', () => {
       expect(errors[0].path[0]).toEqual('QueryWithInternalError')
       expect(errors[0].extensions.statusCode).toEqual(500)
       expect(errors[0].extensions.name).toEqual('Error')
+    })
+  })
+
+  describe('select projection', () => {
+    const createdMediaIDs: (number | string)[] = []
+    const createdNestedRelationIDs: (number | string)[] = []
+    const createdRelationIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdNestedRelationIDs) {
+        await payload.delete({ collection: nestedRelationsSlug, id })
+      }
+      for (const id of createdMediaIDs) {
+        await payload.delete({ collection: 'media', id })
+      }
+      for (const id of createdRelationIDs) {
+        await payload.delete({ collection: relationSlug, id })
+      }
+
+      createdMediaIDs.length = 0
+      createdNestedRelationIDs.length = 0
+      createdRelationIDs.length = 0
+    })
+
+    it('should keep sub-selection for an aliased relationship', async () => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'aliased' },
+      })
+
+      createdRelationIDs.push(relation.id)
+
+      const doc = await payload.create({
+        collection: nestedRelationsSlug,
+        data: { topLevelRelation: relation.id },
+      })
+
+      createdNestedRelationIDs.push(doc.id)
+
+      const query = `query {
+        NestedRelation(id: ${formatID(doc.id)}, select: true) {
+          aliased: topLevelRelation { id name }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.NestedRelation.aliased).toMatchObject({ id: relation.id, name: 'aliased' })
+    })
+
+    it('should keep sub-selection for a relationship nested in an array', async () => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'in-array' },
+      })
+
+      createdRelationIDs.push(relation.id)
+
+      const doc = await payload.create({
+        collection: nestedRelationsSlug,
+        data: {
+          array: [{ link: relation.id }],
+        },
+      })
+
+      createdNestedRelationIDs.push(doc.id)
+
+      const query = `query {
+        NestedRelation(id: ${formatID(doc.id)}, select: true) {
+          array { link { id name } }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.NestedRelation.array[0].link).toMatchObject({
+        id: relation.id,
+        name: 'in-array',
+      })
+    })
+
+    it('should keep sub-selection for a block relationship selected through an inline fragment', async () => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'inline-fragment' },
+      })
+
+      createdRelationIDs.push(relation.id)
+
+      const doc = await payload.create({
+        collection: nestedRelationsSlug,
+        data: {
+          blocks: [{ blockType: 'content', link: relation.id }],
+        },
+      })
+
+      createdNestedRelationIDs.push(doc.id)
+
+      const query = `query {
+        NestedRelation(id: ${formatID(doc.id)}, select: true) {
+          blocks { ... on Content { link { id name } } }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.NestedRelation.blocks[0].link).toMatchObject({
+        id: relation.id,
+        name: 'inline-fragment',
+      })
+    })
+
+    it('should keep sub-selection for a block relationship selected through a named fragment', async () => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'named-fragment' },
+      })
+
+      createdRelationIDs.push(relation.id)
+
+      const doc = await payload.create({
+        collection: nestedRelationsSlug,
+        data: {
+          blocks: [{ blockType: 'content', link: relation.id }],
+        },
+      })
+
+      createdNestedRelationIDs.push(doc.id)
+
+      const query = `query {
+        NestedRelation(id: ${formatID(doc.id)}, select: true) {
+          blocks { ...ContentFields }
+        }
+      }
+
+      fragment ContentFields on Content {
+        link { id name }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.NestedRelation.blocks[0].link).toMatchObject({
+        id: relation.id,
+        name: 'named-fragment',
+      })
+    })
+
+    it('should keep sub-selection for a relationship nested in an upload', async () => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'in-upload' },
+      })
+
+      createdRelationIDs.push(relation.id)
+
+      const file = await getFileByPath(path.resolve(dirname, '../uploads/test-image.jpg'))
+      const media = await payload.create({
+        collection: 'media',
+        data: {
+          link: relation.id,
+          title: 'upload',
+        },
+        file,
+      })
+
+      createdMediaIDs.push(media.id)
+
+      const doc = await payload.create({
+        collection: nestedRelationsSlug,
+        data: { upload: media.id },
+      })
+
+      createdNestedRelationIDs.push(doc.id)
+
+      const query = `query {
+        NestedRelation(id: ${formatID(doc.id)}, select: true) {
+          upload { link { id name } }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(data.NestedRelation.upload.link).toMatchObject({
+        id: relation.id,
+        name: 'in-upload',
+      })
     })
   })
 })

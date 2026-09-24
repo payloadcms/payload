@@ -62,16 +62,16 @@ function formattedNameResolver({
   Context,
   any
 > {
-  if ('name' in field) {
-    if (formatName(field.name) !== field.name) {
-      return {
-        ...rest,
-        extensions: { ...rest.extensions, field },
-        resolve: (parent) => parent[field.name],
-      }
-    }
+  const config: GraphQLFieldConfig<any, Context, any> = {
+    ...rest,
+    extensions: { ...rest.extensions, field },
   }
-  return rest
+
+  if ('name' in field && formatName(field.name) !== field.name) {
+    config.resolve = (parent) => parent[field.name]
+  }
+
+  return config
 }
 
 type SharedArgs = {

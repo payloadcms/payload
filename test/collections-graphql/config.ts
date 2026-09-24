@@ -43,6 +43,8 @@ export const pointSlug = 'point'
 
 export const errorOnHookSlug = 'error-on-hooks'
 
+export const nestedRelationsSlug = 'nested-relations'
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -387,6 +389,11 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
         },
+        {
+          name: 'link',
+          type: 'relationship',
+          relationTo: relationSlug,
+        },
       ],
       upload: true,
     },
@@ -400,6 +407,49 @@ export default buildConfigWithDefaults({
         {
           name: 'number',
           type: 'number',
+        },
+      ],
+    },
+    {
+      slug: nestedRelationsSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'topLevelRelation',
+          type: 'relationship',
+          relationTo: relationSlug,
+        },
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              name: 'link',
+              type: 'relationship',
+              relationTo: relationSlug,
+            },
+          ],
+        },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'content',
+              fields: [
+                {
+                  name: 'link',
+                  type: 'relationship',
+                  relationTo: relationSlug,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'upload',
+          type: 'upload',
+          relationTo: 'media',
         },
       ],
     },
