@@ -26,8 +26,8 @@ import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
-  test.options({ db: 'mongo' }).describe('transform actions', () => {
+test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
+  test.options.describe('transform actions', { db: 'mongo' }, () => {
     test('should create and not throw an error', async ({ payload }) => {
       // the collection has hooks that will cause an error if transform actions is not handled properly
       const doc = await payload.create({
@@ -1190,6 +1190,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
       const doc = await payload.create({
         collection: overrideAccessSlug,
         data: { title: 'Test Default' },
+        // TODO:: Update test when overrideAccess default is flipped to false
       })
 
       createdIDs.push(doc.id)
@@ -1197,6 +1198,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Hooks', () => {
       const result = await payload.findByID({
         collection: overrideAccessSlug,
         id: doc.id,
+        // TODO:: Update test when overrideAccess default is flipped to false
       })
 
       expect(result.beforeReadCalled).toBe(true)

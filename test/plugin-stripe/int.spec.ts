@@ -34,7 +34,7 @@ const stripeCustomerList = {
   url: '/v1/customers',
 }
 
-test.suite({ config: './config.ts' })('Stripe Plugin', () => {
+test.suite('Stripe Plugin', { config: './config.ts' }, () => {
   test.beforeEach(() => {
     stripeMocks.Stripe.mockClear()
     stripeMocks.customersList.mockReset()

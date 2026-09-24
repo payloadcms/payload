@@ -16,8 +16,9 @@ const dirname = path.dirname(filename)
  * searchPlugin processes the collection config — fixing the silent upload failure
  * that occurred when s3Storage appeared after searchPlugin in the old `plugins` array.
  */
-test.suite({ config: './searchBeforeS3.config.ts' })(
+test.suite(
   'Search plugin before S3 - Issue #15431',
+  { config: './searchBeforeS3.config.ts' },
   () => {
     test.beforeEach(async () => {
       await createTestBucket()

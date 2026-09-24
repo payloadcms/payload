@@ -24,7 +24,7 @@ const dirname = path.dirname(filename)
 _internal_jobSystemGlobals.shouldAutoRun = false
 _internal_jobSystemGlobals.shouldAutoSchedule = false
 
-test.suite({ config: './config.ts' })('Queues - Payload', () => {
+test.suite('Queues - Payload', { config: './config.ts' }, () => {
   let processingLeaseDefaults: {
     duration: number
     safetyBuffer: number
@@ -1370,8 +1370,9 @@ test.suite({ config: './config.ts' })('Queues - Payload', () => {
 
   test.describe('worker recovery', () => {
     // The child process can share the file-backed SQLite test database.
-    test.options({ db: (type) => type.startsWith('sqlite') })(
+    test.options(
       'should recover a job after its worker process is killed',
+      { db: (type) => type.startsWith('sqlite') },
       async ({ payload }) => {
         _internal_jobSystemGlobals.shouldAutoRun = false
         payload.config.jobs.deleteJobOnComplete = false

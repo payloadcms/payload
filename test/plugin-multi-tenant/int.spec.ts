@@ -20,10 +20,12 @@ import {
 
 let token: string
 
-test.suite({
+const suiteOptions = {
   config: './config.ts',
   resetBetweenTests: false,
-})('@payloadcms/plugin-multi-tenant', () => {
+}
+
+test.suite('@payloadcms/plugin-multi-tenant', suiteOptions, () => {
   test.beforeAll(async ({ restClientInstance: restClient }) => {
     const data = await restClient
       .POST('/users/login', {

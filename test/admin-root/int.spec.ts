@@ -8,7 +8,7 @@ let token: string
 
 const { email, password } = devUser
 
-test.suite({ config: './config.ts' })('Admin (Root) Tests', () => {
+test.suite('Admin (Root) Tests', { config: './config.ts' }, () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__

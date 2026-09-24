@@ -155,7 +155,7 @@ plugin-<name>/
     "react-dom": "^19.2.6",
     "rimraf": "^6.0.1",
     "typescript": "^6.0.3",
-    "vitest": "5.0.0"
+    "vitest": "5.0.1"
   },
   "peerDependencies": {
     "payload": "^3.82.1"

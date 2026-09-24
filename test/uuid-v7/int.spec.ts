@@ -10,8 +10,9 @@ const dirname = path.dirname(filename)
 
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-test.suite({ config: './config.ts', db: (adapter) => adapter === 'postgres-uuidv7' })(
+test.suite(
   'UUID v7 idType (postgres)',
+  { config: './config.ts', db: (adapter) => adapter === 'postgres-uuidv7' },
   () => {
     test('should expose uuidv7 adapter idType', ({ payload }) => {
       expect(payload.db.idType).toBe('uuidv7')

@@ -17,7 +17,7 @@ const dirname = path.dirname(filename)
 // path for temp config created after initial migration which should have blocks as json enabled
 const tempConfigPath = path.resolve(dirname, 'GENERATED_after_migration.config.ts')
 
-test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
+test.suite('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
   test('should migrate to blocks as json', async () => {
     // seed initital data
     const payload = await getPayload({ config })
@@ -52,13 +52,13 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
         // @ts-expect-error not generated
         collection: 'posts-batches',
         data: {
+          title: `Batch Post ${i + 1}`,
           content: [
             {
               blockType: 'textBlock',
               text: `This is batch post content ${i + 1}`,
             },
           ],
-          title: `Batch Post ${i + 1}`,
         },
         overrideAccess: true,
       })
@@ -74,10 +74,10 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
         content: [
           {
             blockType: 'textBlock',
-            manyRelations: [relatedItem.id],
-            relation: relatedItem.id,
-            select: 'option1',
             text: 'This is a text block',
+            relation: relatedItem.id,
+            manyRelations: [relatedItem.id],
+            select: 'option1',
           },
         ],
       },
@@ -92,9 +92,9 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
         content: [
           {
             blockType: 'textBlock',
-            manyRelations: [relatedItem.id],
-            relation: relatedItem.id,
             text: 'This is a text block',
+            relation: relatedItem.id,
+            manyRelations: [relatedItem.id],
           },
         ],
       },
@@ -103,26 +103,26 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
 
     // create another version of post
     await payload.update({
-      id: versionedPost.id,
       collection: 'posts-versioned',
+      id: versionedPost.id,
       data: {
+        title: 'Versioned Post 1 - Updated',
         content: [
           {
             blockType: 'textBlock',
-            manyRelations: [relatedItem.id],
-            relation: relatedItem.id,
             text: 'This is a text block - updated',
+            relation: relatedItem.id,
+            manyRelations: [relatedItem.id],
           },
         ],
-        title: 'Versioned Post 1 - Updated',
       },
       overrideAccess: true,
     })
 
     // and more
     await payload.update({
-      id: versionedPost.id,
       collection: 'posts-versioned',
+      id: versionedPost.id,
       data: {
         title: 'Versioned Post 1 - Updated Again',
       },
@@ -174,8 +174,8 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
     process.env.PAYLOAD_CONFIG_PATH = tempConfigPath
 
     await adapter.createMigration({
-      file: '@payloadcms/db-postgres/blocks-as-json',
       payload,
+      file: '@payloadcms/db-postgres/blocks-as-json',
     })
 
     process.env.PAYLOAD_DROP_DATABASE = 'false'
@@ -200,8 +200,8 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
 
     // verify data was migrated
     const updatedPost = await migratedPayload.findByID({
-      id: post.id,
       collection: 'posts',
+      id: post.id,
       depth: 0,
       overrideAccess: true,
     })
@@ -211,16 +211,16 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
         id: expect.any(String),
         blockName: null,
         blockType: 'textBlock',
-        manyRelations: [relatedItem.id],
-        relation: relatedItem.id,
-        select: 'option1',
         text: 'This is a text block',
+        relation: relatedItem.id,
+        manyRelations: [relatedItem.id],
+        select: 'option1',
       },
     ])
 
     const updatedVersionedPost = await migratedPayload.findByID({
-      id: versionedPost.id,
       collection: 'posts-versioned',
+      id: versionedPost.id,
       depth: 0,
       overrideAccess: true,
     })
@@ -229,18 +229,18 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
     const { totalDocs: batchPostsTotal } = await migratedPayload.find({
       // @ts-expect-error not generated
       collection: 'posts-batches',
-      limit: 0,
       overrideAccess: true,
+      limit: 0,
     })
     expect(batchPostsTotal).toBe(1000)
 
     // Verify a sample batch post
     const sampleBatchPost = await migratedPayload.findByID({
       // @ts-expect-error not generated
-      id: batchPosts[500], // Check middle post
       collection: 'posts-batches',
-      depth: 0,
+      id: batchPosts[500], // Check middle post
       overrideAccess: true,
+      depth: 0,
     })
     expect(sampleBatchPost.title).toBe('Batch Post 501')
     expect(sampleBatchPost.content).toEqual([
@@ -257,18 +257,18 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
         id: expect.any(String),
         blockName: null,
         blockType: 'textBlock',
-        manyRelations: [relatedItem.id],
-        relation: relatedItem.id,
         text: 'This is a text block - updated',
+        relation: relatedItem.id,
+        manyRelations: [relatedItem.id],
       },
     ])
 
     const updatedVersions = await migratedPayload.findVersions({
       collection: 'posts-versioned',
-      depth: 0,
       limit: 0,
-      overrideAccess: true,
       sort: 'createdAt',
+      depth: 0,
+      overrideAccess: true,
     })
 
     expect(updatedVersions.totalDocs).toBe(3)
@@ -278,9 +278,9 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
         id: expect.any(String),
         blockName: null,
         blockType: 'textBlock',
-        manyRelations: [relatedItem.id],
-        relation: relatedItem.id,
         text: 'This is a text block',
+        relation: relatedItem.id,
+        manyRelations: [relatedItem.id],
       },
     ])
 
@@ -289,9 +289,9 @@ test.suite({ db: 'drizzle' })('migrateToBlocksAsJSON', () => {
         id: expect.any(String),
         blockName: null,
         blockType: 'textBlock',
-        manyRelations: [relatedItem.id],
-        relation: relatedItem.id,
         text: 'This is a text block - updated',
+        relation: relatedItem.id,
+        manyRelations: [relatedItem.id],
       },
     ])
 

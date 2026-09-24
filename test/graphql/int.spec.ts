@@ -8,7 +8,7 @@ import { expect } from 'vitest'
 import { test } from '../__helpers/int/vitest.js'
 import { idToString } from '../__helpers/shared/idToString.js'
 
-test.suite({ config: './config.ts' })('graphql', () => {
+test.suite('graphql', { config: './config.ts' }, () => {
   test.describe('graphql', () => {
     test('should return 404 when GraphQL is disabled', async ({ payload, restClient }) => {
       const originalDisable = payload.config.graphQL?.disable

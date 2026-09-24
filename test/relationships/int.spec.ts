@@ -32,7 +32,7 @@ import {
 
 type EasierChained = { id: string; relation: EasierChained }
 
-test.suite({ config: './config.ts' })('Relationships', () => {
+test.suite('Relationships', { config: './config.ts' }, () => {
   test.beforeEach(async ({ restClient }) => {
     await restClient.login({ slug: usersSlug, credentials: devUser })
   })
@@ -531,8 +531,9 @@ test.suite({ config: './config.ts' })('Relationships', () => {
 
       // MongoDB dedupes $in at execution, so the bug is only visible in the
       // filter Payload hands to Mongoose — not in the returned docs.
-      test.options({ db: 'mongo' })(
+      test.options(
         'should not duplicate IDs in $in when querying through a relationship',
+        { db: 'mongo' },
         async ({ payload }) => {
           const movie = await payload.create({
             collection: 'movies',
@@ -802,8 +803,9 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           })
 
           // `near` on a point field is not implemented by the drizzle sqlite adapter
-          test.options({ db: (adapter) => !adapter.startsWith('sqlite') })(
+          test.options(
             'should support equals with a geospatial nested query',
+            { db: (adapter) => !adapter.startsWith('sqlite') },
             async ({ payload }) => {
               const nearbyMovie = await payload.create({
                 collection: 'movies',
@@ -1024,8 +1026,9 @@ test.suite({ config: './config.ts' })('Relationships', () => {
           expect(query2.totalDocs).toStrictEqual(2)
         })
 
-        test.options({ db: 'mongo' })(
+        test.options(
           'should treat an ObjectId as a relationship ID',
+          { db: 'mongo' },
           async ({ payload }) => {
             const movie = await payload.create({ collection: 'movies', data: {}, overrideAccess: true })
 
@@ -1054,8 +1057,9 @@ test.suite({ config: './config.ts' })('Relationships', () => {
         )
 
         // all operator is not supported in Postgres yet for any fields
-        test.options({ db: 'mongo' })(
+        test.options(
           'should query using "all" by hasMany relationship field',
+          { db: 'mongo' },
           async ({ payload }) => {
             const movie1 = await payload.create({
               collection: 'movies',
@@ -2305,8 +2309,9 @@ test.suite({ config: './config.ts' })('Relationships', () => {
     })
 
     // all operator is not supported in Postgres yet for any fields
-    test.options({ db: 'mongo' })(
+    test.options(
       'should allow REST all querying on polymorphic relationships',
+      { db: 'mongo' },
       async ({ payload, restClient }) => {
         const movie = await payload.create({
           collection: 'movies',

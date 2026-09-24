@@ -61,7 +61,7 @@ import {
 const collection = localizedPostsSlug
 const global = 'global-text'
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Localization', () => {
+test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, () => {
   test.describe('Localization with fallback true', () => {
     let post1: LocalizedPost
     let postWithLocalizedData: LocalizedPost

@@ -17,7 +17,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('@payloadcms/storage-gcs', () => {
+test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests: false }, () => {
   let bucket: Bucket
 
   const clearBucket = async () => {

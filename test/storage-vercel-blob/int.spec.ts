@@ -19,7 +19,7 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated') })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
+test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
     await clearTestBlobs()
   })

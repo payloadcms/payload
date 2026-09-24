@@ -11,7 +11,7 @@ import { postDoc } from './config.js'
 
 let token: string
 
-test.suite({ config: './config.ts' })('dataloader', () => {
+test.suite('dataloader', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',

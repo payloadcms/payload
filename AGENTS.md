@@ -166,21 +166,24 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 **Integration tests MUST use the shared fixture wrapper:**
 
 - Import `test` from `test/__helpers/int/vitest.ts`, not directly from Vitest
-- Wrap Payload-backed tests in one root `test.suite({ config: './config.ts' })`
+- Wrap Payload-backed tests in one root `test.suite('My Feature', { config: './config.ts' }, () => { ... })`
 - Read `payload`, `restClient`, `sdk`, or `cli` from the test or hook arguments
 - Do not initialize Payload manually or add database reset/seed hooks; the fixture initializes
   Payload once per file, resets and seeds before each test that uses it, and destroys it afterward
 - Existing suites that intentionally manage shared state can set `resetBetweenTests: false`. The fixture
   resets and seeds once for the file, and the suite keeps responsibility for between-test cleanup.
   New suites should use the default per-test reset behavior.
-- Use `test.suite({})` only for integration tests that do not use Payload
+- Use `test.suite('My Feature', {}, () => { ... })` only for integration tests that do not use Payload
+- Use `test.options('Name', { db: 'drizzle' }, callback)` for database-specific tests, and
+  `test.options.describe('Name', { db: 'mongo' }, callback)` for database-specific groups.
+  Keep the name first and use one call so VS Code does not discover the options as a fake test.
 
 ```typescript
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('My Feature', () => {
+test.suite('My Feature', { config: './config.ts' }, () => {
   test('should create a record', async ({ payload }) => {
     const record = await payload.create({
       collection: 'my-collection',

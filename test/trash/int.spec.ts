@@ -18,7 +18,7 @@ import { usersSlug } from './collections/Users/index.js'
 
 let user: any
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('trash', () => {
+test.suite('trash', { config: './config.ts', resetBetweenTests: false }, () => {
   let restrictedCollectionDoc: RestrictedCollection
   let postsDocOne: Post
   let postsDocTwo: Post

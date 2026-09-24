@@ -50,7 +50,7 @@ const dirname = path.dirname(filename)
 const formatGraphQLID = ({ payload }: { payload: Payload }, id: number | string) =>
   payload.db.defaultIDType === 'number' ? id : `"${id}"`
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Versions', () => {
+test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () => {
   let secondaryAdminUser: JsonObject
   let user: JsonObject
 

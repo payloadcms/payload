@@ -6,7 +6,7 @@ import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-nested-docs', () => {
+test.suite('@payloadcms/plugin-nested-docs', { config: './config.ts' }, () => {
   test.describe('seed', () => {
     test('should populate two levels of breadcrumbs', async ({ payload }) => {
       const query = await payload.find({

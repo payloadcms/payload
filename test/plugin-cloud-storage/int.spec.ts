@@ -107,7 +107,7 @@ export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   return test.describe
 }
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => {
+test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => {
   test.describe('getFilePrefix', () => {
     const mockReq = {
       payload: {
