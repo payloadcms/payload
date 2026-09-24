@@ -139,4 +139,22 @@ describe('getFieldByPath', () => {
     expect(sourceField).toBeDefined()
     expect(fieldInBlock?.field).toBe(sourceField)
   })
+
+  it('reports whether the resolved path crosses a blocks field', () => {
+    const inBlock = getFieldByPath({ fields, path: 'blocks.block1.text1' })
+    assert(inBlock)
+    expect(inBlock.pathCrossesBlocks).toBe(true)
+
+    const inBlock2 = getFieldByPath({ fields, path: 'blocks.block2.text2' })
+    assert(inBlock2)
+    expect(inBlock2.pathCrossesBlocks).toBe(true)
+
+    const inArray = getFieldByPath({ fields, path: 'array.text' })
+    assert(inArray)
+    expect(inArray.pathCrossesBlocks).toBe(false)
+
+    const topLevel = getFieldByPath({ fields, path: 'text' })
+    assert(topLevel)
+    expect(topLevel.pathCrossesBlocks).toBe(false)
+  })
 })
