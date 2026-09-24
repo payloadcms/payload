@@ -22,6 +22,16 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// Content collections are openly accessible so any acting user (`users` or `admins`) and trusted
+// server ops can exercise authorship stamping under the `overrideAccess: false` default. The
+// `users` collection keeps a restrictive read to test the id-reference fallback.
+const openAccess = {
+  create: () => true,
+  delete: () => true,
+  read: () => true,
+  update: () => true,
+}
+
 export const seed: NonNullable<Config['onInit']> = async (payload) => {
   await payload.create({
     collection: usersSlug,
@@ -29,6 +39,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   // A second user used by access-control tests; `users` read is restricted to own record.
@@ -38,6 +49,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: 'other@payloadcms.com',
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 }
 
@@ -66,6 +78,7 @@ export default buildConfigWithDefaults({
       {
         // Default authorship: both createdBy and updatedBy
         slug: postsSlug,
+        access: openAccess,
         fields: [
           {
             name: 'title',
@@ -100,6 +113,7 @@ export default buildConfigWithDefaults({
       {
         // Only createdBy tracked
         slug: createdOnlySlug,
+        access: openAccess,
         authorship: { updatedBy: false },
         fields: [
           {
@@ -114,6 +128,7 @@ export default buildConfigWithDefaults({
       {
         // Only updatedBy tracked
         slug: updatedOnlySlug,
+        access: openAccess,
         authorship: { createdBy: false },
         fields: [
           {
@@ -129,6 +144,7 @@ export default buildConfigWithDefaults({
         // Both authorship fields customized via the exported builders (unhidden + relabelled)
         // while the stamping hooks are preserved.
         slug: customAuthorshipSlug,
+        access: openAccess,
         fields: [
           {
             name: 'title',
@@ -170,6 +186,7 @@ export default buildConfigWithDefaults({
       {
         // Default authorship on a global
         slug: menuSlug,
+        access: { read: () => true, update: () => true },
         fields: [
           {
             name: 'title',

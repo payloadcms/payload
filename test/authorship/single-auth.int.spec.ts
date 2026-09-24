@@ -34,13 +34,15 @@ test.suite(
     test.beforeAll(async ({ payloadInstance }) => {
       payload = payloadInstance
 
-      const userDoc = (await payload.find({ collection: usersSlug, depth: 0, limit: 1 })).docs[0]!
+      const userDoc = (
+        await payload.find({ collection: usersSlug, depth: 0, limit: 1, overrideAccess: true })
+      ).docs[0]!
       user = { ...userDoc, collection: usersSlug }
     })
 
     test.afterEach(async () => {
       for (const id of createdPostIDs) {
-        await payload.delete({ id, collection: postsSlug }).catch(() => null)
+        await payload.delete({ id, collection: postsSlug, overrideAccess: true }).catch(() => null)
       }
       createdPostIDs.length = 0
     })
@@ -86,6 +88,7 @@ test.suite(
         id: created.id,
         collection: postsSlug,
         depth: 1,
+        overrideAccess: true,
         populate: { [usersSlug]: { email: true } },
       })
 

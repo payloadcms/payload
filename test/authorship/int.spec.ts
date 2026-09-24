@@ -30,11 +30,20 @@ let otherUser: TestUser
 
 const createdPostIDs: (number | string)[] = []
 
-const createPost = async ({ data, user }: { data: Partial<Post>; user?: TestUser }) => {
+const createPost = async ({
+  data,
+  overrideAccess,
+  user,
+}: {
+  data: Partial<Post>
+  overrideAccess?: boolean
+  user?: TestUser
+}) => {
   const doc = await payload.create({
     collection: postsSlug,
     data,
     depth: 0,
+    overrideAccess,
     user,
   })
   createdPostIDs.push(doc.id)
@@ -51,6 +60,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
         collection: usersSlug,
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: devUser.email } },
       })
     ).docs[0]!
@@ -62,6 +72,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
         email: 'admin@payloadcms.com',
         password: devUser.password,
       },
+      overrideAccess: true,
     })
     admin = { ...adminDoc, collection: adminsSlug }
 
@@ -70,6 +81,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
         collection: usersSlug,
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: 'other@payloadcms.com' } },
       })
     ).docs[0]!
@@ -78,7 +90,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
 
   test.afterEach(async () => {
     for (const id of createdPostIDs) {
-      await payload.delete({ id, collection: postsSlug }).catch(() => null)
+      await payload.delete({ id, collection: postsSlug, overrideAccess: true }).catch(() => null)
     }
     createdPostIDs.length = 0
   })
@@ -154,7 +166,11 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
 
   test('should not derive createdBy on a later write when the stored value is null (migrated/anonymous doc)', async () => {
     // A migrated or anonymously created doc has createdBy stored as null.
-    const post = await createPost({ data: { createdBy: null, title: 'anonymous' }, user })
+    const post = await createPost({
+      data: { createdBy: null, title: 'anonymous' },
+      overrideAccess: true,
+      user,
+    })
     expect(post.createdBy).toBeFalsy()
 
     // Editing it later must not backfill the editor as the creator.
@@ -178,6 +194,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
       collection: postsSlug,
       data: { title: 'updated', updatedBy: { relationTo: adminsSlug, value: admin.id } },
       depth: 0,
+      overrideAccess: true,
       user,
     })
 
@@ -195,6 +212,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
       collection: postsSlug,
       data: { title: 'updated', updatedBy: { relationTo: usersSlug, value: user.id } },
       depth: 0,
+      overrideAccess: true,
       user: admin,
     })
 
@@ -207,6 +225,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
         createdBy: { relationTo: adminsSlug, value: admin.id },
         title: 'explicit',
       },
+      overrideAccess: true,
       user,
     })
 
@@ -221,6 +240,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
       collection: postsSlug,
       data: { title: 'updated', updatedBy: null },
       depth: 0,
+      overrideAccess: true,
       user,
     })
 
@@ -230,7 +250,11 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
   test('should honor an explicit null updatedBy even when the stored value is already empty', async () => {
     // updatedBy starts cleared, so an explicit `null` matches it; presence, not equality, must
     // decide, so it stays cleared instead of being re-stamped to the acting user.
-    const post = await createPost({ data: { title: 'created', updatedBy: null }, user })
+    const post = await createPost({
+      data: { title: 'created', updatedBy: null },
+      overrideAccess: true,
+      user,
+    })
     expect(post.updatedBy).toBeFalsy()
 
     const updated = await payload.update({
@@ -238,6 +262,7 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
       collection: postsSlug,
       data: { title: 'updated', updatedBy: null },
       depth: 0,
+      overrideAccess: true,
       user,
     })
 
@@ -368,12 +393,15 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
       id: createdUser.id,
       collection: usersSlug,
       depth: 0,
+      overrideAccess: true,
     })
 
     // Session writes on login must not bump the user's authorship metadata.
     expect(afterLogin.updatedBy).toEqual(createdUser.updatedBy)
 
-    await payload.delete({ id: createdUser.id, collection: usersSlug }).catch(() => null)
+    await payload
+      .delete({ id: createdUser.id, collection: usersSlug, overrideAccess: true })
+      .catch(() => null)
   })
 
   test('should not inject authorship fields when authorship is false', () => {
@@ -540,8 +568,12 @@ test.suite('Authorship', { config: './config.ts', resetBetweenTests: false }, ()
     })
     expect(spoofed.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
 
-    await payload.delete({ id: created.id, collection: rawAuthorshipSlug }).catch(() => null)
-    await payload.delete({ id: spoofed.id, collection: rawAuthorshipSlug }).catch(() => null)
+    await payload
+      .delete({ id: created.id, collection: rawAuthorshipSlug, overrideAccess: true })
+      .catch(() => null)
+    await payload
+      .delete({ id: spoofed.id, collection: rawAuthorshipSlug, overrideAccess: true })
+      .catch(() => null)
   })
 
   test.describe('GraphQL', () => {
