@@ -18,7 +18,7 @@ import type {
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { File } from '../../../uploads/types.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   BulkOperationResult,
   DraftFlagFromCollectionSlug,
@@ -28,7 +28,7 @@ import type {
 
 import { APIError } from '../../../errors/index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
 
@@ -245,7 +245,10 @@ async function updateLocal<
     )
   }
 
-  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+  const req = await createPayloadRequest({
+    ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+    payload,
+  })
   req.file = file ?? (await getFileByPath(filePath!))
 
   const args = {

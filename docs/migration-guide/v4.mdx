@@ -22,6 +22,55 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Payload request creation is consolidated
+
+Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.
+
+| Old name                                | New name                                    |
+| --------------------------------------- | ------------------------------------------- |
+| `createLocalReq`                        | `createPayloadRequest`                      |
+| `CreateLocalReqOptions` (internal type) | `Omit<CreatePayloadRequestArgs, 'payload'>` |
+| `createPayloadRequest`                  | `createPayloadRequestFromWebRequest`        |
+| `initReq`                               | `initAdminContext`                          |
+| `InitReqArgs`                           | `InitAdminContextArgs`                      |
+| `InitReqResult`                         | `AdminContext`                              |
+| `InitReqCache`                          | `AdminContextCache`                         |
+| `InitReqPartialResult`                  | `PartialAdminContext`                       |
+
+`initAdminContext` and its cache types are primarily contracts for framework adapters. Custom Root layout adapters must rename their injected `initReq` callback to `initAdminContext`.
+
+Local request creation now takes a single object argument containing `payload`. For a request without options:
+
+```diff
+-import { createLocalReq } from 'payload'
++import { createPayloadRequest } from 'payload'
+
+-const req = await createLocalReq({}, payload)
++const req = await createPayloadRequest({ payload })
+```
+
+`CreatePayloadRequestArgs` is exported from `payload` and requires `payload`. Options-only values should use `Omit<CreatePayloadRequestArgs, 'payload'>`. The old `CreateLocalReqOptions` type was declared in the internal request utility, not exported from the package root; relative/private imports of that type require manual migration. The codemod handles an existing named import of that type only when its source is `payload`.
+
+Web request conversion uses its new role-specific name:
+
+```diff
+-import { createPayloadRequest } from 'payload'
++import { createPayloadRequestFromWebRequest } from 'payload'
+
+-const req = await createPayloadRequest({ config, request })
++const req = await createPayloadRequestFromWebRequest({ config, request })
+```
+
+#### Codemod
+
+To migrate automatically, there's a codemod for this change available by running:
+
+```bash
+npx @payloadcms/codemod --transform migrate-payload-request-creation
+```
+
+Automatic call migration requires a plain identifier payload argument and either `{}` or an initialized local `const` options identifier. The options type must expose all seven old option properties, or be `any`. For that identifier form, the generated argument captures payload first and uses forwarding getters for `context`, `depth`, `fallbackLocale`, `locale`, `req`, `urlSuffix`, and `user`. This preserves inherited getters, their read order, and rejected promises from throwing getters without reading unrelated properties. Complex expressions, mutable/unresolved options bindings, narrow option types, collisions, and unsupported type usages are left unchanged with notes for manual migration.
+
 ### JWT authentication is versioned without moving token data
 
 Payload 4 keeps the decoded JWT payload flat, so integrations can continue reading `id`, `collection`, `sid`, `email`, and fields selected by `saveToJWT` from the same paths as Payload 3.
@@ -396,20 +445,20 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 **Pass-through re-exports** — same name, new source:
 
-| Symbol                        | Old source                   | New source       |
-| ----------------------------- | ---------------------------- | ---------------- |
-| `Column`                      | `@payloadcms/ui`             | `payload`        |
-| `ListViewSlots`               | `@payloadcms/ui`             | `payload`        |
-| `ListViewClientProps`         | `@payloadcms/ui`             | `payload`        |
-| `EntityType`                  | `@payloadcms/ui/shared`      | `payload/shared` |
-| `formatAdminURL`              | `@payloadcms/ui/shared`      | `payload/shared` |
-| `mergeListSearchAndWhere`     | `@payloadcms/ui/shared`      | `payload/shared` |
-| `mergeHeaders`                | `@payloadcms/next/utilities` | `payload`        |
-| `headersWithCors`             | `@payloadcms/next/utilities` | `payload`        |
-| `createPayloadRequest`        | `@payloadcms/next/utilities` | `payload`        |
-| `addDataAndFileToRequest`     | `@payloadcms/next/utilities` | `payload`        |
-| `sanitizeLocales`             | `@payloadcms/next/utilities` | `payload`        |
-| `addLocalesToRequestFromData` | `@payloadcms/next/utilities` | `payload`        |
+| Symbol                        | Old source                   | New source                                        |
+| ----------------------------- | ---------------------------- | ------------------------------------------------- |
+| `Column`                      | `@payloadcms/ui`             | `payload`                                         |
+| `ListViewSlots`               | `@payloadcms/ui`             | `payload`                                         |
+| `ListViewClientProps`         | `@payloadcms/ui`             | `payload`                                         |
+| `EntityType`                  | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `formatAdminURL`              | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `mergeListSearchAndWhere`     | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `mergeHeaders`                | `@payloadcms/next/utilities` | `payload`                                         |
+| `headersWithCors`             | `@payloadcms/next/utilities` | `payload`                                         |
+| `createPayloadRequest`        | `@payloadcms/next/utilities` | `createPayloadRequestFromWebRequest` in `payload` |
+| `addDataAndFileToRequest`     | `@payloadcms/next/utilities` | `payload`                                         |
+| `sanitizeLocales`             | `@payloadcms/next/utilities` | `payload`                                         |
+| `addLocalesToRequestFromData` | `@payloadcms/next/utilities` | `payload`                                         |
 
 **Renamed types** — use the new canonical name from `payload`:
 
@@ -428,7 +477,7 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 + import { headersWithCors, mergeHeaders } from 'payload'
 ```
 
-Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
+Running `npx @payloadcms/codemod --transform migrate-aliased-exports` preserves old local bindings by importing renamed symbols with an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'` or `import { createPayloadRequestFromWebRequest as createPayloadRequest } from 'payload'`). Run `migrate-payload-request-creation` to complete the request helper's identifier and call-site migration, or drop the other aliases and rename their usages manually if you want to fully commit to the new names.
 
 ### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
 
