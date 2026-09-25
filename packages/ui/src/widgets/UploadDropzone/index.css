@@ -1,0 +1,50 @@
+@layer payload-default {
+  .upload-dropzone-widget {
+    padding: var(--spacer-2);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-large);
+  }
+  .upload-dropzone-widget .upload-dropzone-widget__zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacer-3);
+    min-block-size: calc(var(--spacer-6) * 4.5);
+    padding: var(--spacer-4) var(--spacer-3);
+    border: var(--stroke-width-small) dashed var(--color-border);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+    text-align: center;
+  }
+  .upload-dropzone-widget__icon {
+    inline-size: var(--spacer-6);
+    block-size: var(--spacer-6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-selected);
+    color: var(--color-text-brand);
+    border-radius: var(--radius-full);
+  }
+  .upload-dropzone-widget p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+  .upload-dropzone-widget__drag {
+    display: none;
+  }
+  .upload-dropzone-widget .dragging {
+    background: var(--color-bg-selected);
+    border-color: var(--color-border-brand);
+  }
+  .upload-dropzone-widget .dragging .upload-dropzone-widget__drag {
+    display: block;
+  }
+  .upload-dropzone-widget .dragging .upload-dropzone-widget__prompt,
+  .upload-dropzone-widget .dragging .btn {
+    display: none;
+  }
+}

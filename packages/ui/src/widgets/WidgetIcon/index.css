@@ -1,0 +1,23 @@
+@layer payload-default {
+  .widget-icon {
+    display: inline-block;
+    inline-size: var(--spacer-4);
+    block-size: var(--spacer-4);
+    flex-shrink: 0;
+    background: currentColor;
+    mask-repeat: no-repeat;
+    mask-position: center;
+  }
+  .widget-icon--pin {
+    mask-image: url('./assets/pin.svg');
+  }
+  .widget-icon--pin-solid {
+    mask-image: url('./assets/pin-solid.svg');
+  }
+  .widget-icon--table {
+    mask-image: url('./assets/table.svg');
+  }
+  .widget-icon--images {
+    mask-image: url('./assets/images.svg');
+  }
+}

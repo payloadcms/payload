@@ -5,6 +5,13 @@ import { FolderIcon as FolderIcon_3817bf644402e67bfe6577f60ef982de } from '@payl
 import { HierarchySidebarTabServer as HierarchySidebarTabServer_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { TagIcon as TagIcon_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { CollectionQueryWidget as CollectionQueryWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { QueryPresetsWhereField as QueryPresetsWhereField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
+import { CollectionQuerySortField as CollectionQuerySortField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
+import { RecentlyViewedWidget as RecentlyViewedWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { RecentlyViewedCollectionsField as RecentlyViewedCollectionsField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
+import { WelcomeWidget as WelcomeWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { UploadDropzoneWidget as UploadDropzoneWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
@@ -16,4 +23,14 @@ export const importMap = {
     HierarchySidebarTabServer_ab83ff7e88da8d3530831f296ec4756a,
   '@payloadcms/ui#TagIcon': TagIcon_3817bf644402e67bfe6577f60ef982de,
   '@payloadcms/ui/rsc#CollectionCards': CollectionCards_ab83ff7e88da8d3530831f296ec4756a,
+  '@payloadcms/ui/rsc#CollectionQueryWidget':
+    CollectionQueryWidget_ab83ff7e88da8d3530831f296ec4756a,
+  '@payloadcms/ui#QueryPresetsWhereField': QueryPresetsWhereField_3817bf644402e67bfe6577f60ef982de,
+  '@payloadcms/ui#CollectionQuerySortField':
+    CollectionQuerySortField_3817bf644402e67bfe6577f60ef982de,
+  '@payloadcms/ui/rsc#RecentlyViewedWidget': RecentlyViewedWidget_ab83ff7e88da8d3530831f296ec4756a,
+  '@payloadcms/ui#RecentlyViewedCollectionsField':
+    RecentlyViewedCollectionsField_3817bf644402e67bfe6577f60ef982de,
+  '@payloadcms/ui/rsc#WelcomeWidget': WelcomeWidget_ab83ff7e88da8d3530831f296ec4756a,
+  '@payloadcms/ui/rsc#UploadDropzoneWidget': UploadDropzoneWidget_ab83ff7e88da8d3530831f296ec4756a,
 }

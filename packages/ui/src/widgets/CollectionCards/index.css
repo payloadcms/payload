@@ -1,24 +1,26 @@
 @layer payload-default {
   .collections {
     display: flex;
-    width: 100%;
-    --gap: var(--spacer-3);
-    --cols: 5;
+    inline-size: 100%;
+    min-inline-size: 0;
+    container-type: inline-size;
+    container-name: collection-cards;
+    --gap: var(--spacer-2-5);
+    --cols: 2;
   }
 
   .collections__wrap {
-    width: 100%;
+    inline-size: 100%;
     display: flex;
     flex-direction: column;
     gap: var(--spacer-3);
-    padding-bottom: var(--spacer-6);
   }
 
   .collections__group {
     display: flex;
     flex-direction: column;
     gap: var(--gap);
-    padding-top: var(--spacer-2);
+    padding-block-start: var(--spacer-2);
   }
 
   .collections__label {
@@ -35,12 +37,37 @@
     padding: 0;
     margin: 0;
     list-style: none;
-    gap: var(--spacer-3);
+    gap: var(--spacer-2-5);
     display: grid;
-    grid-template-columns: repeat(var(--cols), 1fr);
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
 
     .card {
-      height: 100%;
+      block-size: 100%;
+      min-block-size: calc(var(--spacer-5) * 2);
+      padding: var(--spacer-2-5);
+      border-radius: var(--radius-large);
+      background: var(--color-bg);
+      &:hover,
+      &:focus-within {
+        background: var(--color-bg-secondary);
+      }
+      .card__title {
+        margin: 0;
+        padding-inline-end: var(--spacer-4);
+      }
+      .card__actions {
+        inset-block-start: var(--spacer-2);
+        inset-inline-end: var(--spacer-2);
+      }
+      @media (hover: hover) {
+        .card__actions:not(:has(.locked)) {
+          opacity: 0;
+        }
+        &:hover .card__actions,
+        &:focus-within .card__actions {
+          opacity: 1;
+        }
+      }
     }
   }
 
@@ -49,40 +76,19 @@
     justify-content: unset;
   }
 
-  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
-  @media (max-width: 1440px) {
-    .collections {
+  @container collection-cards (min-width: 768px) {
+    .collections__card-list {
       --cols: 4;
     }
   }
-
-  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
-  @media (max-width: 1024px) {
-    .collections {
-      --gap: var(--spacer-3);
-      --cols: 2;
-    }
-  }
-
-  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
-  @media (max-width: 768px) {
-    .collections {
-      --cols: 2;
-    }
-
-    .collections__wrap {
-      gap: var(--spacer-3);
-    }
-
+  @container collection-cards (min-width: 1024px) {
     .collections__card-list {
-      gap: var(--spacer-2);
+      --cols: 6;
     }
   }
-
-  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
-  @media (max-width: 400px) {
-    .collections {
-      --cols: 1;
+  @container collection-cards (min-width: 1440px) {
+    .collections__card-list {
+      --cols: 8;
     }
   }
 }

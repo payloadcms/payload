@@ -5,6 +5,7 @@
 
   :root {
     /* Special */
+    --color-icon-favorite: var(--ramp-yellow-500);
     --special-bg-hover-on-light-canvas: var(--ramp-black-300);
     --special-text-highlight: var(--color-blue-300);
 

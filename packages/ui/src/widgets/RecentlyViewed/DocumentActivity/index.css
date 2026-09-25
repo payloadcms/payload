@@ -1,0 +1,193 @@
+@layer payload-default {
+  .document-activity {
+    --document-activity-thumbnail-height: calc(var(--spacer-6) * 3.5);
+    --document-activity-card-height: calc(
+      var(--document-activity-thumbnail-height) + var(--spacer-2) + var(--spacer-1) * 2 +
+        var(--text-body-medium-line-height) * 2 + var(--spacer-2-5) + var(--stroke-width-small) * 2
+    );
+    container-type: inline-size;
+    container-name: activity;
+    min-inline-size: 0;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+  .document-activity__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacer-2);
+    margin-block-end: var(--spacer-3);
+  }
+  .document-activity__header .tabs {
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    padding: 0;
+    border: 0;
+  }
+  .document-activity__header .tabs__tabs-wrap {
+    margin-block-end: 0;
+    padding-block-end: 0;
+  }
+  .document-activity__header .tabs__tabs {
+    box-shadow: none;
+    gap: var(--spacer-1);
+  }
+  .document-activity__header .tabs__tab-button {
+    margin: 0;
+    min-block-size: var(--spacer-4);
+    padding: var(--spacer-1) var(--spacer-2);
+    font-size: var(--text-body-medium-font-size);
+    border-radius: var(--radius-medium);
+  }
+  .document-activity__header .tabs__tab-button::after {
+    display: none;
+  }
+  .document-activity__header .tabs__tab-button--active {
+    background: var(--color-bg-secondary);
+  }
+  .document-activity__views {
+    display: flex;
+    gap: var(--spacer-0);
+  }
+  .document-activity__views button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-medium);
+    color: var(--color-text-secondary);
+    background: transparent;
+    cursor: pointer;
+  }
+  .document-activity__views button[aria-pressed='true'] {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+  }
+  .document-activity button:focus-visible {
+    outline: var(--stroke-width-medium) solid var(--color-border-brand);
+    outline-offset: var(--spacer-1);
+  }
+  .document-activity__items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .document-activity__items:not([data-tab='pinned']) > :nth-child(n + 3) {
+    display: none;
+  }
+  .document-activity__items--grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacer-2-5);
+  }
+  .document-activity__placeholder {
+    display: none;
+    min-block-size: var(--document-activity-card-height);
+    border: var(--stroke-width-small) dashed var(--color-border);
+    border-radius: var(--radius-large);
+    background: var(--color-bg);
+  }
+  .document-activity__items--grid > .document-activity__placeholder:nth-child(-n + 2) {
+    display: list-item;
+  }
+  .document-activity__items--list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+  .document-activity__columns {
+    display: none;
+  }
+  .document-activity__empty {
+    border: var(--stroke-width-small) dashed var(--color-border);
+    border-radius: var(--radius-large);
+    padding: var(--spacer-5) var(--spacer-3);
+    background: var(--color-bg);
+    min-block-size: var(--document-activity-card-height);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacer-2);
+    text-align: center;
+  }
+  .document-activity__empty-copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+  .document-activity__empty p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+  .document-activity__empty strong {
+    font-family: var(--text-body-large-strong-font-family);
+    font-size: var(--text-body-large-strong-font-size);
+    font-weight: var(--text-body-large-strong-font-weight);
+    line-height: var(--text-body-large-strong-line-height);
+  }
+  .document-activity__empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--spacer-6);
+    block-size: var(--spacer-6);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-selected);
+    color: var(--color-text-brand);
+  }
+  @container activity (min-width: 400px) {
+    .document-activity__items--list:not([data-tab='pinned']) > :nth-child(-n + 4) {
+      display: list-item;
+    }
+  }
+  @container activity (min-width: 768px) {
+    .document-activity__items--grid > .document-activity__placeholder:nth-child(-n + 4),
+    .document-activity__items--grid:not([data-tab='pinned']) > :nth-child(-n + 4),
+    .document-activity__items--list:not([data-tab='pinned']) > :nth-child(-n + 8) {
+      display: list-item;
+    }
+    .document-activity__items--grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .document-activity__columns {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr 1fr;
+      gap: var(--spacer-3);
+      padding-inline: var(--spacer-2) var(--spacer-3);
+      padding-block: var(--spacer-1);
+      color: var(--color-text-secondary);
+    }
+    .document-activity__columns button {
+      border: 0;
+      padding: 0;
+      text-align: start;
+      color: inherit;
+      background: transparent;
+      font: inherit;
+      cursor: pointer;
+    }
+  }
+  @container activity (min-width: 1024px) {
+    .document-activity__items--grid > .document-activity__placeholder:nth-child(-n + 6),
+    .document-activity__items--grid:not([data-tab='pinned']) > :nth-child(-n + 6) {
+      display: list-item;
+    }
+    .document-activity__items--grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+  @container activity (min-width: 1440px) {
+    .document-activity__items--grid > .document-activity__placeholder:nth-child(-n + 8),
+    .document-activity__items--grid:not([data-tab='pinned']) > :nth-child(-n + 8) {
+      display: list-item;
+    }
+    .document-activity__items--grid {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+  }
+}

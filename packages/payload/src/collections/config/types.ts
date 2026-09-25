@@ -527,6 +527,8 @@ export type CollectionAdminOptions = {
    * Function to generate custom preview URL
    */
   preview?: GeneratePreviewURL
+  /** Upload field path used for document thumbnails, including named groups and tabs. */
+  useAsThumbnail?: string
   /**
    * Field to use as title in Edit View and first column in List view
    */

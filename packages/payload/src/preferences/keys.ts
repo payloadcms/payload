@@ -5,8 +5,11 @@
 
 export const PREFERENCE_KEYS = {
   /**
-   * Stores dashboard layout configuration
+   * Stores pinned documents and dashboard document display preferences
    */
+  DASHBOARD_DOCUMENTS: 'dashboard-documents',
+
+  /** Stores dashboard layout configuration */
   DASHBOARD_LAYOUT: 'dashboard-layout',
 
   /**

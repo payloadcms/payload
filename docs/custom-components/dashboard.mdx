@@ -175,9 +175,21 @@ export default async function SalesSummaryWidgetComponent({
 
 ### Built-in Widgets
 
-Payload includes a built-in `collections` widget that displays collection and global cards.
+Payload includes these built-in widgets:
 
-If you don't define a `defaultLayout`, the collections widget will be automatically included in your dashboard.
+| Slug               | Description                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| `collections`      | Collection and global cards with shortcuts to create documents.                           |
+| `collection-query` | Documents matching a configurable collection query.                                       |
+| `activity`         | Pinned documents, recently viewed documents, and recent drafts, with grid and list views. |
+| `welcome`          | A greeting using the current user's title, username, or email.                            |
+| `upload-dropzone`  | Drag-and-drop or button access to bulk upload for a configured upload collection.         |
+
+The activity widget saves pins, the selected tab, and the view mode per user. It respects document read access and collection visibility. Recent drafts include the latest accessible drafts across the selected collections. Thumbnails use `admin.useAsThumbnail` or the first upload field. The Updated by column displays a populated `updatedBy` relationship to an auth collection when available; otherwise it displays a dash.
+
+Configure the upload widget's `collection` field to choose its destination. It defaults to Media when available, or the first visible upload collection. The widget is only shown when the user can create documents in that collection and bulk upload is enabled.
+
+Without a `defaultLayout`, the dashboard includes collections and activity. The blank template starts with welcome, activity, and collections; upload is available in the widget picker. Existing saved dashboards keep their layout until the user resets it.
 
 ### User Customization
 

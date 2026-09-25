@@ -564,3 +564,6 @@ export type {
 
 export { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 export { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
+
+export { DocumentActivityWidget } from '../../widgets/RecentlyViewed/DocumentActivity/index.js'
+export { UploadDropzoneWidgetClient } from '../../widgets/UploadDropzone/index.client.js'

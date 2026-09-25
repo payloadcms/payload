@@ -233,8 +233,48 @@ const addDefaultDashboardWidgets = ({
       richTextSanitizers,
       validRelationships,
     }),
-    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
+    label: ({ t }) => t('dashboard:documents'),
     minWidth: 'x-small',
+  })
+  dashboard.widgets.push({
+    slug: 'welcome',
+    Component: '@payloadcms/ui/rsc#WelcomeWidget',
+    label: ({ t }) => t('general:welcome'),
+    minWidth: 'full',
+  })
+  dashboard.widgets.push({
+    slug: 'upload-dropzone',
+    Component: '@payloadcms/ui/rsc#UploadDropzoneWidget',
+    fields: sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: [
+        {
+          name: 'collection',
+          type: 'select',
+          defaultValue:
+            config.collections?.find(
+              (collection) => collection.upload && collection.slug === 'media',
+            )?.slug ||
+            config.collections?.find(
+              (collection) => collection.upload && collection.admin?.hidden !== true,
+            )?.slug,
+          label: ({ t }) => t('general:collection'),
+          options: (config.collections || [])
+            .filter((collection) => collection.upload && collection.admin?.hidden !== true)
+            .map((collection) => ({
+              label: collection.labels?.plural || collection.slug,
+              value: collection.slug,
+            })),
+          required: true,
+        },
+      ],
+      parentIsLocalized: false,
+      richTextSanitizers,
+      validRelationships,
+    }),
+    label: ({ t }) => t('dashboard:uploadDropzone'),
+    minWidth: 'small',
   })
   dashboard.defaultLayout ??= [
     {

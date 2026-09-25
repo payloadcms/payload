@@ -1,0 +1,13 @@
+@layer payload-default {
+  .welcome-widget {
+    margin: 0;
+    padding-block-start: var(--spacer-1);
+    font-family: var(--text-heading-large-font-family);
+    font-size: var(--text-heading-large-font-size);
+    font-weight: var(--text-heading-large-font-weight);
+    line-height: var(--text-heading-large-line-height);
+    letter-spacing: var(--text-heading-large-letter-spacing);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+  }
+}

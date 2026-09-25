@@ -36,3 +36,6 @@ export { upsertPreferences } from '../../utilities/upsertPreferences.js'
 export { CollectionCards } from '../../widgets/CollectionCards/index.js'
 export { CollectionQueryWidget } from '../../widgets/CollectionQuery/index.js'
 export { RecentlyViewedWidget } from '../../widgets/RecentlyViewed/index.js'
+
+export { UploadDropzoneWidget } from '../../widgets/UploadDropzone/index.js'
+export { WelcomeWidget } from '../../widgets/Welcome/index.js'

@@ -283,11 +283,14 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
 
     const d = new DashboardHelper(page)
-    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+    const activityCard = d.widgetByPos(15).locator('.document-activity')
 
-    await expect(activityCard.locator('.widget-card__title')).toHaveText('You recently viewed')
+    await expect(activityCard.getByRole('tab', { name: 'Recently viewed' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
 
-    const rowTitles = activityCard.locator('.widget-card__row-title')
+    const rowTitles = activityCard.locator('.dashboard-document__title')
     await expect(rowTitles).toHaveCount(2)
     // The most recently viewed document is listed first.
     await expect(rowTitles.nth(0)).toHaveText(secondDoc.title)
@@ -313,8 +316,8 @@ describe('Dashboard', () => {
     await page.goto(url.admin)
 
     const d = new DashboardHelper(page)
-    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
-    await expect(activityCard.locator('.widget-card__row-title')).toHaveCount(2)
+    const activityCard = d.widgetByPos(15).locator('.document-activity')
+    await expect(activityCard.locator('.dashboard-document__title')).toHaveCount(2)
 
     // Open the activity widget configuration.
     await d.setEditing()
@@ -350,7 +353,7 @@ describe('Dashboard', () => {
     await d.saveChangesAndValidate()
 
     // The excluded collection's document drops out; the remaining document still renders.
-    const rowTitles = activityCard.locator('.widget-card__row-title')
+    const rowTitles = activityCard.locator('.dashboard-document__title')
     await expect(rowTitles).toHaveCount(1)
     await expect(rowTitles.nth(0)).toHaveText(event.title)
   })
