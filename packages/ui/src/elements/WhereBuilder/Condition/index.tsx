@@ -170,6 +170,7 @@ export const Condition: React.FC<Props> = (props) => {
             <span className={`${baseClass}__join-label`}>{t('general:where')}</span>
           ) : (
             <ReactSelect
+              aria-label={t('general:filterJoin')}
               classNames={{
                 menu: () => 'condition__join-menu',
               }}
@@ -188,6 +189,7 @@ export const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
+              aria-label={t('general:filterField')}
               disabled={disabled}
               filterOption={(option, inputValue) =>
                 ((option?.data?.plainTextLabel as string) || option.label)
@@ -204,6 +206,7 @@ export const Condition: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
+              aria-label={t('general:filterOperator')}
               disabled={disabled}
               isClearable={false}
               onChange={handleOperatorChange}
@@ -230,6 +233,7 @@ export const Condition: React.FC<Props> = (props) => {
         </div>
         <div className={`${baseClass}__actions`}>
           <Button
+            aria-label={t('general:removeFilter')}
             buttonStyle="ghost"
             className={`${baseClass}__actions-remove`}
             disabled={disableRemoveButton}
