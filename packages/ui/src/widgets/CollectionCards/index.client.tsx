@@ -102,7 +102,7 @@ export const CollectionCardsClient: React.FC<CollectionCardsData> = ({
                             ) : hasCreatePermission && type === EntityType.collection ? (
                               <Button
                                 aria-label={t('general:createNewLabel', {
-                                  label,
+                                  label: title,
                                 })}
                                 buttonStyle="ghost"
                                 el="link"
