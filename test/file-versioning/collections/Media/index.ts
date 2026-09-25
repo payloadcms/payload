@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { mediaSlug } from '../../shared.js'
+import { mediaDir, mediaSlug } from '../../shared.js'
 
 export const Media: CollectionConfig = {
   slug: mediaSlug,
@@ -10,6 +10,6 @@ export const Media: CollectionConfig = {
     update: () => true,
   },
   fields: [{ name: 'alt', type: 'text' }],
-  upload: { filesRequiredOnCreate: false },
+  upload: { filesRequiredOnCreate: false, staticDir: mediaDir },
   versions: true,
 }
