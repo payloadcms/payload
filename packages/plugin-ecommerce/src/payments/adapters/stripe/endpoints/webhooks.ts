@@ -37,7 +37,7 @@ export const webhooksEndpoint: (props: Props) => Endpoint = (props) => {
         let event: Stripe.Event | undefined
 
         try {
-          event = stripe.webhooks.constructEvent(body, stripeSignature, webhookSecret)
+          event = await stripe.webhooks.constructEventAsync(body, stripeSignature, webhookSecret)
         } catch (err: unknown) {
           const msg: string = err instanceof Error ? err.message : JSON.stringify(err)
           req.payload.logger.error(`Error constructing Stripe event: ${msg}`)
