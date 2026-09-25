@@ -1,5 +1,5 @@
 'use client'
-import type { Option, OptionObject, SelectFieldClientComponent } from 'payload'
+import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -21,7 +21,7 @@ const normalizeOption = (option: Option): OptionObject =>
  * default and unchecking one adds it to the stored exclusions. Storing exclusions means collections
  * added later are visible by default.
  */
-export const RecentlyViewedCollectionsField: SelectFieldClientComponent = ({
+export const RecentlyViewedCollectionsField: React.FC<SelectFieldClientProps> = ({
   field,
   path: pathFromProps,
   readOnly,

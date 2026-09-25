@@ -386,19 +386,20 @@ non-polymorphic relationship.
 ```tsx
 import type React from 'react'
 import { RelationshipField } from '@payloadcms/ui'
-import type { RelationshipFieldServerComponent } from 'payload'
+import type { RelationshipFieldServerProps } from 'payload'
 
-export const CustomRelationshipFieldServer: RelationshipFieldServerComponent =
-  ({ clientField, path, schemaPath, permissions }) => {
-    return (
-      <RelationshipField
-        field={clientField}
-        path={path}
-        schemaPath={schemaPath}
-        permissions={permissions}
-      />
-    )
-  }
+export const CustomRelationshipFieldServer: React.FC<
+  RelationshipFieldServerProps
+> = ({ clientField, path, schemaPath, permissions }) => {
+  return (
+    <RelationshipField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
 ```
 
 #### Client Component
@@ -407,10 +408,10 @@ export const CustomRelationshipFieldServer: RelationshipFieldServerComponent =
 'use client'
 import React from 'react'
 import { RelationshipField } from '@payloadcms/ui'
-import type { RelationshipFieldClientComponent } from 'payload'
+import type { RelationshipFieldClientProps } from 'payload'
 
-export const CustomRelationshipFieldClient: RelationshipFieldClientComponent = (
-  props,
+export const CustomRelationshipFieldClient = (
+  props: RelationshipFieldClientProps,
 ) => {
   return <RelationshipField {...props} />
 }

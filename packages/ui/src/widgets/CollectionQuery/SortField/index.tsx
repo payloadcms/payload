@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, TextFieldClientComponent } from 'payload'
+import type { OptionObject, TextFieldClientProps } from 'payload'
 
 import React, { useCallback, useMemo } from 'react'
 
@@ -13,7 +13,7 @@ import { getCollectionFieldPaths } from '../getCollectionFieldPaths.js'
 
 const baseFieldValues = new Set(['createdAt', 'id', 'updatedAt'])
 
-export const CollectionQuerySortField: TextFieldClientComponent = ({
+export const CollectionQuerySortField: React.FC<TextFieldClientProps> = ({
   field,
   path: pathFromProps,
   readOnly,

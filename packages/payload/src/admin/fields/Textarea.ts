@@ -4,13 +4,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { TextareaField, TextareaFieldClient } from '../../fields/config/types.js'
 import type { TextareaFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -39,18 +33,6 @@ export type TextareaFieldServerProps = ServerFieldBase<
   TextareaFieldClientWithoutType
 > &
   TextareaFieldBaseServerProps
-
-export type TextareaFieldServerComponent = FieldServerComponent<
-  TextareaField,
-  TextareaFieldClientWithoutType,
-  TextareaFieldBaseServerProps
->
-
-export type TextareaFieldClientComponent = FieldClientComponent<
-  TextareaFieldClientWithoutType,
-  TextareaFieldBaseClientProps
->
-
 export type TextareaFieldLabelServerComponent = FieldLabelServerComponent<
   TextareaField,
   TextareaFieldClientWithoutType

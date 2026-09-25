@@ -11,6 +11,7 @@ import { migrateBuildScript } from './transforms/migrate-build-script/index.js'
 import { migrateDbTypesSubpath } from './transforms/migrate-db-types-subpath/index.js'
 import { migrateDisabledFields } from './transforms/migrate-disabled-fields/index.js'
 import { migrateDocumentTitleContext } from './transforms/migrate-document-title-context/index.js'
+import { migrateFieldComponentTypes } from './transforms/migrate-field-component-types/index.js'
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
 import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
@@ -40,6 +41,7 @@ export const transforms: Transform[] = [
   migrateListViewSelectAPI,
   migrateDisabledFields,
   migrateForceSelect,
+  migrateFieldComponentTypes,
   migrateAliasedExports,
   migratePayloadRequestCreation,
   migrateBlockReferencesToBlocks,

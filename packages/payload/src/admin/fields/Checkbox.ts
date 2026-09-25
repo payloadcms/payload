@@ -3,13 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { CheckboxField, CheckboxFieldClient } from '../../fields/config/types.js'
 import type { CheckboxFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -38,18 +32,6 @@ export type CheckboxFieldClientProps = CheckboxFieldBaseClientProps &
 
 export type CheckboxFieldServerProps = CheckboxFieldBaseServerProps &
   ServerFieldBase<CheckboxField, CheckboxFieldClientWithoutType>
-
-export type CheckboxFieldServerComponent = FieldServerComponent<
-  CheckboxField,
-  CheckboxFieldClientWithoutType,
-  CheckboxFieldBaseServerProps
->
-
-export type CheckboxFieldClientComponent = FieldClientComponent<
-  CheckboxFieldClientWithoutType,
-  CheckboxFieldBaseClientProps
->
-
 export type CheckboxFieldLabelServerComponent = FieldLabelServerComponent<
   CheckboxField,
   CheckboxFieldClientWithoutType

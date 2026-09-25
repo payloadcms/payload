@@ -2,13 +2,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { JoinField, JoinFieldClient } from '../../fields/config/types.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -29,19 +23,8 @@ type JoinFieldBaseServerProps = Pick<FieldPaths, 'path'>
 export type JoinFieldClientProps = ClientFieldBase<JoinFieldClientWithoutType> &
   JoinFieldBaseClientProps
 
-export type JoinFieldServerProps = JoinFieldBaseServerProps & ServerFieldBase<JoinField>
-
-export type JoinFieldServerComponent = FieldServerComponent<
-  JoinField,
-  JoinFieldClientWithoutType,
-  JoinFieldBaseServerProps
->
-
-export type JoinFieldClientComponent = FieldClientComponent<
-  JoinFieldClientWithoutType,
-  JoinFieldBaseClientProps
->
-
+export type JoinFieldServerProps = JoinFieldBaseServerProps &
+  ServerFieldBase<JoinField, JoinFieldClientWithoutType>
 export type JoinFieldLabelServerComponent = FieldLabelServerComponent<JoinField>
 
 export type JoinFieldLabelClientComponent = FieldLabelClientComponent<JoinFieldClientWithoutType>

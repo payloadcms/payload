@@ -3,13 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { SelectField, SelectFieldClient } from '../../fields/config/types.js'
 import type { SelectFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -35,18 +29,6 @@ export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutTyp
 
 export type SelectFieldServerProps = SelectFieldBaseServerProps &
   ServerFieldBase<SelectField, SelectFieldClientWithoutType>
-
-export type SelectFieldServerComponent = FieldServerComponent<
-  SelectField,
-  SelectFieldClientWithoutType,
-  SelectFieldBaseServerProps
->
-
-export type SelectFieldClientComponent = FieldClientComponent<
-  SelectFieldClientWithoutType,
-  SelectFieldBaseClientProps
->
-
 export type SelectFieldLabelServerComponent = FieldLabelServerComponent<
   SelectField,
   SelectFieldClientWithoutType

@@ -2,13 +2,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { CollapsibleField, CollapsibleFieldClient } from '../../fields/config/types.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -29,17 +23,6 @@ export type CollapsibleFieldServerProps = ServerFieldBase<
   CollapsibleField,
   CollapsibleFieldClientWithoutType
 >
-
-export type CollapsibleFieldServerComponent = FieldServerComponent<
-  CollapsibleField,
-  CollapsibleFieldClientWithoutType
->
-
-export type CollapsibleFieldClientComponent = FieldClientComponent<
-  CollapsibleFieldClientWithoutType,
-  CollapsibleFieldBaseClientProps
->
-
 export type CollapsibleFieldLabelServerComponent = FieldLabelServerComponent<
   CollapsibleField,
   CollapsibleFieldClientWithoutType

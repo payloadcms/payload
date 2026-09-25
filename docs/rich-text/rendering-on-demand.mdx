@@ -21,8 +21,9 @@ If you have an existing Form and want to render a richtext field within it, you 
 
 ```tsx
 'use client'
+import type React from 'react'
 
-import type { JSONFieldClientComponent } from 'payload'
+import type { JSONFieldClientProps } from 'payload'
 
 import {
   buildEditorState,
@@ -31,7 +32,7 @@ import {
 
 import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 
-export const Component: JSONFieldClientComponent = (args) => {
+export const Component: React.FC<JSONFieldClientProps> = (args) => {
   return (
     <RenderLexical
       field={{
@@ -52,7 +53,7 @@ export const Component: JSONFieldClientComponent = (args) => {
 'use client'
 
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
-import type { JSONFieldClientComponent } from 'payload'
+import type { JSONFieldClientProps } from 'payload'
 
 import {
   buildEditorState,
@@ -62,7 +63,7 @@ import React, { useState } from 'react'
 
 import { lexicalFullyFeaturedSlug } from '../../slugs.js'
 
-export const Component: JSONFieldClientComponent = (args) => {
+export const Component: React.FC<JSONFieldClientProps> = (args) => {
   // Manually manage the editor state
   const [value, setValue] = useState<DefaultTypedEditorState | undefined>(() =>
     buildEditorState<DefaultNodeTypes>({ text: 'state default' }),

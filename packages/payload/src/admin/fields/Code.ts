@@ -4,13 +4,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { CodeField, CodeFieldClient } from '../../fields/config/types.js'
 import type { CodeFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -36,18 +30,6 @@ export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &
 
 export type CodeFieldServerProps = CodeFieldBaseServerProps &
   ServerFieldBase<CodeField, CodeFieldClientWithoutType>
-
-export type CodeFieldServerComponent = FieldServerComponent<
-  CodeField,
-  CodeFieldClientWithoutType,
-  CodeFieldBaseServerProps
->
-
-export type CodeFieldClientComponent = FieldClientComponent<
-  CodeFieldClientWithoutType,
-  CodeFieldBaseClientProps
->
-
 export type CodeFieldLabelServerComponent = FieldLabelServerComponent<
   CodeField,
   CodeFieldClientWithoutType

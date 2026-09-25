@@ -77,9 +77,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { CheckboxField } from '@payloadcms/ui'
-import type { CheckboxFieldServerComponent } from 'payload'
+import type { CheckboxFieldServerProps } from 'payload'
 
-export const CustomCheckboxFieldServer: CheckboxFieldServerComponent = ({
+export const CustomCheckboxFieldServer: React.FC<CheckboxFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -102,9 +102,9 @@ export const CustomCheckboxFieldServer: CheckboxFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { CheckboxField } from '@payloadcms/ui'
-import type { CheckboxFieldClientComponent } from 'payload'
+import type { CheckboxFieldClientProps } from 'payload'
 
-export const CustomCheckboxFieldClient: CheckboxFieldClientComponent = (
+export const CustomCheckboxFieldClient: React.FC<CheckboxFieldClientProps> = (
   props,
 ) => {
   return <CheckboxField {...props} />

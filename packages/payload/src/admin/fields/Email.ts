@@ -3,13 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { EmailField, EmailFieldClient } from '../../fields/config/types.js'
 import type { EmailFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -33,18 +27,6 @@ export type EmailFieldClientProps = ClientFieldBase<EmailFieldClientWithoutType>
 
 export type EmailFieldServerProps = EmailFieldBaseServerProps &
   ServerFieldBase<EmailField, EmailFieldClientWithoutType>
-
-export type EmailFieldServerComponent = FieldServerComponent<
-  EmailField,
-  EmailFieldClientWithoutType,
-  EmailFieldBaseServerProps
->
-
-export type EmailFieldClientComponent = FieldClientComponent<
-  EmailFieldClientWithoutType,
-  EmailFieldBaseClientProps
->
-
 export type EmailFieldLabelServerComponent = FieldLabelServerComponent<
   EmailField,
   EmailFieldClientWithoutType

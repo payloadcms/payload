@@ -1,6 +1,6 @@
 'use client'
 
-import type { SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientProps } from 'payload'
 
 import { FieldLabel, ReactSelect, useDocumentInfo, useField, useListQuery } from '@payloadcms/ui'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -20,7 +20,7 @@ const options = [
 
 const defaultOption: OrderOption = options[0]
 
-export const SortOrder: SelectFieldClientComponent = (props) => {
+export const SortOrder: React.FC<SelectFieldClientProps> = (props) => {
   const { id } = useDocumentInfo()
   const { query } = useListQuery()
 

@@ -227,10 +227,11 @@ export const Posts: CollectionConfig = {
 
 ```tsx
 'use client'
+import type React from 'react'
 import { useField } from '@payloadcms/ui'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
-export const CustomField: TextFieldClientComponent = () => {
+export const CustomField: React.FC<TextFieldClientProps> = () => {
   const { value, setValue } = useField()
 
   return <input value={value || ''} onChange={(e) => setValue(e.target.value)} />

@@ -104,9 +104,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { TextField } from '@payloadcms/ui'
-import type { TextFieldServerComponent } from 'payload'
+import type { TextFieldServerProps } from 'payload'
 
-export const CustomTextFieldServer: TextFieldServerComponent = ({
+export const CustomTextFieldServer: React.FC<TextFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -129,9 +129,11 @@ export const CustomTextFieldServer: TextFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { TextField } from '@payloadcms/ui'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
-export const CustomTextFieldClient: TextFieldClientComponent = (props) => {
+export const CustomTextFieldClient: React.FC<TextFieldClientProps> = (
+  props,
+) => {
   return <TextField {...props} />
 }
 ```

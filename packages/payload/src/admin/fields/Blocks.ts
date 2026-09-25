@@ -4,13 +4,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { BlocksField, BlocksFieldClient } from '../../fields/config/types.js'
 import type { BlocksFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -33,18 +27,6 @@ export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
 
 export type BlocksFieldServerProps = BlocksFieldBaseServerProps &
   ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
-
-export type BlocksFieldServerComponent = FieldServerComponent<
-  BlocksField,
-  BlocksFieldClientWithoutType,
-  BlocksFieldBaseServerProps
->
-
-export type BlocksFieldClientComponent = FieldClientComponent<
-  BlocksFieldClientWithoutType,
-  BlocksFieldBaseClientProps
->
-
 export type BlocksFieldLabelServerComponent = FieldLabelServerComponent<
   BlocksField,
   BlocksFieldClientWithoutType

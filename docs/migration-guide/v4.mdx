@@ -479,6 +479,46 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 Running `npx @payloadcms/codemod --transform migrate-aliased-exports` preserves old local bindings by importing renamed symbols with an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'` or `import { createPayloadRequestFromWebRequest as createPayloadRequest } from 'payload'`). Run `migrate-payload-request-creation` to complete the request helper's identifier and call-site migration, or drop the other aliases and rename their usages manually if you want to fully commit to the new names.
 
+### Field component types replaced by props types
+
+The concrete field component aliases named `<FieldType>FieldClientComponent` and `<FieldType>FieldServerComponent` have been removed. Use the corresponding `<FieldType>FieldClientProps` or `<FieldType>FieldServerProps` type instead.
+
+For a named component, apply the props type through React:
+
+```diff
+- import type { TextFieldClientComponent } from 'payload'
++ import type { TextFieldClientProps } from 'payload'
++ import type React from 'react'
+
+- export const CustomTextField: TextFieldClientComponent = (props) => {
++ export const CustomTextField: React.FC<TextFieldClientProps> = (props) => {
+    // ...
+  }
+```
+
+Or annotate the function parameter directly:
+
+```diff
+- import type { TextFieldServerComponent } from 'payload'
++ import type { TextFieldServerProps } from 'payload'
+
+- const CustomTextField: TextFieldServerComponent = async (props) => {
++ export default async function (props: TextFieldServerProps) {
+    // ...
+  }
+- export default CustomTextField
+```
+
+This change covers the main client and server component types for every concrete field type. Admin-view types such as `AdminViewComponent` and `DocumentTabComponent` are tracked separately and are not part of this field-type migration.
+
+#### Codemod
+
+To migrate automatically, there's a codemod for this change available by running:
+
+```bash
+npx @payloadcms/codemod --transform migrate-field-component-types
+```
+
 ### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
 
 The exported `DefaultValue` type's function variant previously declared a synchronous-only return type (`SerializableValue`), even though Payload has always awaited the result of a `defaultValue` function at runtime. The type now correctly reflects this and allows `Promise<SerializableValue> | SerializableValue`.

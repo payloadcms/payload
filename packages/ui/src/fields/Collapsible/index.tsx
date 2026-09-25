@@ -1,5 +1,5 @@
 'use client'
-import type { CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
+import type { CollapsibleFieldClientProps, DocumentPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
@@ -22,7 +22,7 @@ import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'collapsible-field'
 
-const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
+const CollapsibleFieldComponent: React.FC<CollapsibleFieldClientProps> = (props) => {
   const {
     field,
     field: { admin: { className, description, initCollapsed = false } = {}, fields, label } = {},
