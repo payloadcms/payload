@@ -441,7 +441,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         }
 
         // Check shared cache
-        const cached = getCachedDoc(relation, locale, id)
+        const cached = getCachedDoc({ id, collection: relation, locale })
         if (cached) {
           cachedDocs.push(cached.doc)
         } else {
@@ -557,7 +557,12 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       i18n,
     })
 
-    updateDoc(mostRecentUpdate.entitySlug, locale, docID, mostRecentUpdate.doc)
+    updateDoc({
+      id: docID,
+      collection: mostRecentUpdate.entitySlug,
+      doc: mostRecentUpdate.doc,
+      locale,
+    })
 
     if (hasMany) {
       const currentValue = value ? (Array.isArray(value) ? value : [value]) : []
@@ -628,7 +633,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         i18n,
       })
 
-      invalidateDoc(args.collectionConfig.slug, locale, String(args.id))
+      invalidateDoc({ id: String(args.id), collection: args.collectionConfig.slug, locale })
 
       if (hasMany) {
         onChange(

@@ -9,10 +9,11 @@ import { usePathname } from '../RouterAdapter/index.js'
 type CacheKey = `${string}:${string}:${number | string}`
 type BatchKey = `${string}:${string}`
 
-const toCacheKey = (collection: string, locale: string, id: number | string): CacheKey =>
+const toCacheKey = ({ id, collection, locale }: DocLocation): CacheKey =>
   `${collection}:${locale}:${id}`
 
-const toBatchKey = (collection: string, locale: string): BatchKey => `${collection}:${locale}`
+const toBatchKey = ({ collection, locale }: Omit<DocLocation, 'id'>): BatchKey =>
+  `${collection}:${locale}`
 
 type CachedDoc = {
   doc: Record<string, unknown>
@@ -33,22 +34,18 @@ type PendingRequest = {
   select: Record<string, true>
 }
 
+type DocLocation = {
+  collection: string
+  id: number | string
+  locale: string
+}
+
 type RelationshipValueCacheContextType = {
   clearAll: () => void
-  getCachedDoc: (collection: string, locale: string, id: number | string) => CachedDoc | undefined
-  getDoc: (args: {
-    collection: string
-    id: number | string
-    locale: string
-    select: Record<string, true>
-  }) => Promise<CachedDoc | undefined>
-  invalidateDoc: (collection: string, locale: string, id: number | string) => void
-  updateDoc: (
-    collection: string,
-    locale: string,
-    id: number | string,
-    doc: Record<string, unknown>,
-  ) => void
+  getCachedDoc: (args: DocLocation) => CachedDoc | undefined
+  getDoc: (args: { select: Record<string, true> } & DocLocation) => Promise<CachedDoc | undefined>
+  invalidateDoc: (args: DocLocation) => void
+  updateDoc: (args: { doc: Record<string, unknown> } & DocLocation) => void
 }
 
 const Context = createContext<RelationshipValueCacheContextType>({
@@ -143,7 +140,7 @@ export const RelationshipValueCacheProvider: React.FC<{
             const data = await response.json()
 
             for (const doc of data.docs) {
-              fetchedDocs.set(toCacheKey(collection, locale, doc.id), { id: doc.id, doc })
+              fetchedDocs.set(toCacheKey({ id: doc.id, collection, locale }), { id: doc.id, doc })
             }
           }
         } catch {
@@ -178,14 +175,13 @@ export const RelationshipValueCacheProvider: React.FC<{
   }, [flushBatch])
 
   const getDoc = useCallback(
-    (args: {
-      collection: string
-      id: number | string
-      locale: string
-      select: Record<string, true>
-    }): Promise<CachedDoc | undefined> => {
-      const { id, collection, locale, select } = args
-      const key = toCacheKey(collection, locale, id)
+    ({
+      id,
+      collection,
+      locale,
+      select,
+    }: { select: Record<string, true> } & DocLocation): Promise<CachedDoc | undefined> => {
+      const key = toCacheKey({ id, collection, locale })
 
       // Return from cache if available
       const cached = cacheRef.current.get(key)
@@ -200,7 +196,7 @@ export const RelationshipValueCacheProvider: React.FC<{
       }
 
       // Add to pending batch
-      const batch = toBatchKey(collection, locale)
+      const batch = toBatchKey({ collection, locale })
       let pending = pendingBatchRef.current.get(batch)
 
       if (!pending) {
@@ -232,21 +228,24 @@ export const RelationshipValueCacheProvider: React.FC<{
     [scheduleBatchFlush],
   )
 
-  const getCachedDoc = useCallback((collection: string, locale: string, id: number | string) => {
-    return cacheRef.current.get(toCacheKey(collection, locale, id))
+  const getCachedDoc = useCallback((docLocation: DocLocation) => {
+    return cacheRef.current.get(toCacheKey(docLocation))
   }, [])
 
-  const invalidateDoc = useCallback((collection: string, locale: string, id: number | string) => {
-    const key = toCacheKey(collection, locale, id)
+  const invalidateDoc = useCallback((docLocation: DocLocation) => {
+    const key = toCacheKey(docLocation)
     cacheGenerationRef.current++
     cacheRef.current.delete(key)
     inFlightRef.current.delete(key)
   }, [])
 
   const updateDoc = useCallback(
-    (collection: string, locale: string, id: number | string, doc: Record<string, unknown>) => {
+    ({ doc, ...docLocation }: { doc: Record<string, unknown> } & DocLocation) => {
       cacheGenerationRef.current++
-      cacheRef.current.set(toCacheKey(collection, locale, id), { id, doc: { ...doc, id } })
+      cacheRef.current.set(toCacheKey(docLocation), {
+        id: docLocation.id,
+        doc: { ...doc, id: docLocation.id },
+      })
     },
     [],
   )
