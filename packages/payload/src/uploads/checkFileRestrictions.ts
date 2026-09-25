@@ -1,13 +1,27 @@
-import { fileTypeFromBuffer } from 'file-type'
+import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type'
+import fs from 'fs/promises'
 
 import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
 import { ValidationError } from '../errors/index.js'
 import { validateMimeType } from '../utilities/validateMimeType.js'
 import { validatePDF } from '../utilities/validatePDF.js'
-import { detectSvgFromXml } from './detectSvgFromXml.js'
 import { getFileTypeFallback } from './getFileTypeFallback.js'
-import { validateSvg } from './validateSvg.js'
+import {
+  getFileExtension,
+  getMimeTypeEssence,
+  getSanitizedUploadFilename,
+  isSvgUpload,
+  isXmlUpload,
+} from './getFileTypeIdentity.js'
+import { hasFullFileContents } from './hasFullFileContents.js'
+import { isProcessableImage } from './isProcessableImage.js'
+import {
+  isISOBaseMediaMimeType,
+  validateISOBaseMediaBuffer,
+  validateISOBaseMediaFile,
+} from './validateISOBaseMediaFile.js'
+import { inspectSvg, inspectSvgFile } from './validateSvg.js'
 
 /**
  * Restricted file types and their extensions.
@@ -28,6 +42,7 @@ export const RESTRICTED_FILE_EXT_AND_TYPES: FileAllowList = [
   { extensions: ['lnk'], mimeType: 'application/x-ms-shortcut' },
   { extensions: ['pkg'], mimeType: 'application/x-apple-installer' },
   { extensions: ['htm', 'html', 'shtml', 'xhtml'], mimeType: 'text/html' },
+  { extensions: [], mimeType: 'application/xhtml+xml' },
   { extensions: ['php', 'phtml'], mimeType: 'application/x-httpd-php' },
   { extensions: ['js', 'jse'], mimeType: 'text/javascript' },
   { extensions: ['jsp'], mimeType: 'application/x-jsp' },
@@ -47,13 +62,13 @@ export const RESTRICTED_FILE_EXT_AND_TYPES: FileAllowList = [
 ]
 
 export const checkFileRestrictions = async ({
+  checkFileContents = true,
   collection,
   file,
   req,
-}: checkFileRestrictionsParams): Promise<void> => {
+}: checkFileRestrictionsParams): Promise<{ ext: string; mime: string } | undefined> => {
   const errors: string[] = []
   const { upload: uploadConfig } = collection
-  const useTempFiles = req?.payload?.config?.upload?.useTempFiles ?? false
   const configMimeTypes =
     uploadConfig &&
     typeof uploadConfig === 'object' &&
@@ -82,16 +97,106 @@ export const checkFileRestrictions = async ({
     )
   }
 
-  // Skip validation if `allowRestrictedFileTypes` is true
-  if (allowRestrictedFileTypes) {
+  const typeFromExtension = getFileExtension(getSanitizedUploadFilename(file.name))
+  const mimeTypeEssence = getMimeTypeEssence(file.mimetype)
+
+  if (!checkFileContents) {
+    const isAllowed = configMimeTypes.length
+      ? validateMimeType(file.mimetype, configMimeTypes)
+      : !RESTRICTED_FILE_EXT_AND_TYPES.some(
+          ({ extensions, mimeType }) =>
+            mimeType === mimeTypeEssence || extensions.includes(typeFromExtension.toLowerCase()),
+        )
+
+    if (!isAllowed) {
+      throw new ValidationError({
+        errors: [{ message: `File type '${file.mimetype}' is not allowed.`, path: 'file' }],
+      })
+    }
+
     return
+  }
+
+  // For temp files, use fileTypeFromFile so large files (e.g. video) are never loaded into memory
+  // just for detection. Content validation streams SVG/XML temp files and only loads a full
+  // temp-file buffer for PDF integrity checks.
+  const { tempFilePath } = file
+  const isTempFile = !!tempFilePath && (!file.data || file.data.length === 0)
+
+  // Lazily reads the full file — only reached for PDF validation.
+  let _fileBuffer: Buffer | undefined
+  const getFileBuffer = async (): Promise<Buffer> => {
+    if (_fileBuffer) {
+      return _fileBuffer
+    }
+    if (!isTempFile || !tempFilePath) {
+      return (_fileBuffer = file.data)
+    }
+    try {
+      _fileBuffer = await fs.readFile(tempFilePath)
+      return _fileBuffer
+    } catch {
+      throw new ValidationError({
+        errors: [{ message: 'Could not read uploaded file for validation.', path: 'file' }],
+      })
+    }
+  }
+
+  let isSvg = isSvgUpload({ filename: file.name, mimeType: file.mimetype })
+  let svgInspection: Awaited<ReturnType<typeof inspectSvgFile>> | undefined
+
+  const getSvgInspection = async () => {
+    svgInspection ??=
+      isTempFile && tempFilePath ? await inspectSvgFile(tempFilePath) : inspectSvg(file.data)
+    return svgInspection
+  }
+
+  let detected
+  try {
+    detected =
+      isTempFile && tempFilePath
+        ? await fileTypeFromFile(tempFilePath)
+        : await fileTypeFromBuffer(file.data)
+  } catch {
+    if (configMimeTypes.length > 0) {
+      throw new ValidationError({
+        errors: [{ message: 'Could not read uploaded file for type detection.', path: 'file' }],
+      })
+    }
+  }
+
+  if (
+    isSvg ||
+    isXmlUpload({ filename: file.name, mimeType: file.mimetype }) ||
+    detected?.mime === 'application/xml' ||
+    (!detected && isProcessableImage(file.mimetype))
+  ) {
+    const inspection = await getSvgInspection()
+    isSvg = inspection.isSvg
+    if (inspection.isSvg) {
+      detected = { ext: 'svg', mime: 'image/svg+xml' }
+    } else if (inspection.isValid && !detected) {
+      detected = { ext: 'xml', mime: 'application/xml' }
+    }
+  }
+
+  if (
+    detected &&
+    isISOBaseMediaMimeType(detected.mime) &&
+    (hasFullFileContents(file) || configMimeTypes.length > 0)
+  ) {
+    const isValidISOBaseMedia =
+      isTempFile && tempFilePath
+        ? await validateISOBaseMediaFile(tempFilePath)
+        : await validateISOBaseMediaBuffer(file.data)
+
+    if (!isValidISOBaseMedia) {
+      errors.push('Invalid or corrupted ISO base media file.')
+    }
   }
 
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
-    let detected = await fileTypeFromBuffer(file.data)
-    const typeFromExtension = file.name.split('.').pop() || ''
-
     // Handle SVG files that are detected as XML due to <?xml declarations
     if (
       detected?.mime === 'application/xml' &&
@@ -99,13 +204,12 @@ export const checkFileRestrictions = async ({
         (type) => type.includes('image/') && (type.includes('svg') || type === 'image/*'),
       )
     ) {
-      const isSvg = detectSvgFromXml(file.data)
       if (isSvg) {
-        detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
+        detected = { ext: 'svg', mime: 'image/svg+xml' }
       }
     }
 
-    if (!detected && !useTempFiles) {
+    if (!detected) {
       const mimeTypeFromExtension = getFileTypeFallback(file.name).mime
       const extIsValid = validateMimeType(mimeTypeFromExtension, configMimeTypes)
 
@@ -114,17 +218,9 @@ export const checkFileRestrictions = async ({
           `File type ${mimeTypeFromExtension} (from extension ${typeFromExtension}) is not allowed.`,
         )
       } else {
-        // SVG security check (text-based files not detectable by buffer)
-        if (typeFromExtension.toLowerCase() === 'svg') {
-          const isSafeSvg = validateSvg(file.data)
-          if (!isSafeSvg) {
-            errors.push('SVG file contains potentially harmful content.')
-          }
-        }
-
         // PDF validation
         if (mimeTypeFromExtension === 'application/pdf') {
-          const isValidPDF = validatePDF(file.data)
+          const isValidPDF = validatePDF(await getFileBuffer())
           if (!isValidPDF) {
             errors.push('Invalid or corrupted PDF file.')
           }
@@ -141,7 +237,7 @@ export const checkFileRestrictions = async ({
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
 
     if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
-      const isValidPDF = validatePDF(file?.data)
+      const isValidPDF = validatePDF(await getFileBuffer())
       if (!isValidPDF) {
         errors.push('Invalid PDF file.')
       }
@@ -150,10 +246,10 @@ export const checkFileRestrictions = async ({
     if (detected && !passesMimeTypeCheck) {
       errors.push(`Invalid MIME type: ${detected.mime}.`)
     }
-  } else {
+  } else if (!allowRestrictedFileTypes) {
     const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
-      const hasRestrictedExt = type.extensions.some((ext) => file.name.toLowerCase().endsWith(ext))
-      const hasRestrictedMime = type.mimeType === file.mimetype
+      const hasRestrictedExt = type.extensions.includes(typeFromExtension.toLowerCase())
+      const hasRestrictedMime = type.mimeType === mimeTypeEssence
       return hasRestrictedExt || hasRestrictedMime
     })
     if (isRestricted) {
@@ -163,10 +259,45 @@ export const checkFileRestrictions = async ({
     }
   }
 
+  if (isSvg) {
+    const isSafeSvg = (await getSvgInspection()).isSafe
+    if (!isSafeSvg) {
+      errors.push('SVG file contains potentially harmful content.')
+    }
+  }
+
   if (errors.length > 0) {
     req.payload.logger.error(errors.join(', '))
     throw new ValidationError({
       errors: [{ message: errors.join(', '), path: 'file' }],
     })
   }
+
+  return detected
+}
+
+export const checkFileMetadataRestrictions = async ({
+  collection,
+  filename,
+  filesize = 0,
+  mimeType,
+  req,
+}: {
+  collection: checkFileRestrictionsParams['collection']
+  filename: string
+  filesize?: number
+  mimeType: string
+  req: checkFileRestrictionsParams['req']
+}): Promise<void> => {
+  await checkFileRestrictions({
+    checkFileContents: false,
+    collection,
+    file: {
+      name: filename,
+      data: Buffer.alloc(0),
+      mimetype: mimeType,
+      size: filesize,
+    },
+    req,
+  })
 }

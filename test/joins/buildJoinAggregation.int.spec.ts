@@ -5,13 +5,13 @@ import type { SanitizedCollectionConfig } from 'payload'
 // @ts-ignore
 import { type MongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig, buildVersionCollectionFields, getPayload } from 'payload'
-import { expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import { buildJoinAggregation } from '../../packages/db-mongodb/src/utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from '../../packages/db-mongodb/src/utilities/buildProjectionFromSelect.js'
-import { describe } from '../__helpers/int/vitest.js'
+import { test } from '../__helpers/int/vitest.js'
 
-describe(
+test.suite(
   'buildJoinAggregation',
   { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
   () => {
@@ -38,6 +38,7 @@ describe(
                   on: 'categories',
                 },
               ],
+              versions: false,
             },
             {
               slug: 'versioned-categories',
@@ -74,6 +75,7 @@ describe(
                   hasMany: true,
                 },
               ],
+              versions: false,
             },
             {
               slug: 'versioned-posts',
@@ -111,7 +113,7 @@ describe(
     const getLookups = (aggregation: mongoose.PipelineStage[]) =>
       aggregation.filter((each) => '$lookup' in each).map((each) => each.$lookup)
 
-    it('should add all the joins to the aggregation', async () => {
+    test('should add all the joins to the aggregation', async () => {
       const adapter = await getAdapter()
 
       const aggregation = await buildJoinAggregation({
@@ -122,7 +124,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
 
       expect(lookups).toHaveLength(2)
 
@@ -137,7 +139,7 @@ describe(
       expect(lookups[1]!.localField).toBe('_id')
     })
 
-    it('should add only 1 join because of the projection (include)', async () => {
+    test('should add only 1 join because of the projection (include)', async () => {
       const adapter = await getAdapter()
 
       const aggregation = await buildJoinAggregation({
@@ -155,7 +157,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
       expect(lookups).toHaveLength(1)
 
       expect(lookups[0]!.as).toBe('posts.docs')
@@ -164,7 +166,7 @@ describe(
       expect(lookups[0]!.localField).toBe('_id')
     })
 
-    it('should add only 1 join because of the projection (exclude)', async () => {
+    test('should add only 1 join because of the projection (exclude)', async () => {
       const adapter = await getAdapter()
 
       const aggregation = await buildJoinAggregation({
@@ -182,7 +184,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
       expect(lookups).toHaveLength(1)
 
       expect(lookups[0]!.as).toBe('postsMany.docs')
@@ -191,7 +193,7 @@ describe(
       expect(lookups[0]!.localField).toBe('_id')
     })
 
-    it('should not add any joins because of the projection', async () => {
+    test('should not add any joins because of the projection', async () => {
       const adapter = await getAdapter()
 
       const aggregation = await buildJoinAggregation({
@@ -211,7 +213,7 @@ describe(
       expect(aggregation).toHaveLength(0)
     })
 
-    it('should add all the joins to the aggregation with versions', async () => {
+    test('should add all the joins to the aggregation with versions', async () => {
       const adapter = await getAdapter()
 
       const aggregation = await buildJoinAggregation({
@@ -224,7 +226,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
 
       expect(lookups).toHaveLength(2)
 
@@ -239,7 +241,7 @@ describe(
       expect(lookups[1]!.localField).toBe('parent')
     })
 
-    it('should add only 1 join because of the projection (include) with versions', async () => {
+    test('should add only 1 join because of the projection (include) with versions', async () => {
       const adapter = await getAdapter()
       const fields = buildVersionCollectionFields(
         adapter.payload.config,
@@ -266,7 +268,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
       expect(lookups).toHaveLength(1)
 
       expect(lookups[0]!.as).toBe('version.posts.docs')
@@ -275,7 +277,7 @@ describe(
       expect(lookups[0]!.localField).toBe('parent')
     })
 
-    it('should add only 1 join because of the projection (exclude) with versions', async () => {
+    test('should add only 1 join because of the projection (exclude) with versions', async () => {
       const adapter = await getAdapter()
       const fields = buildVersionCollectionFields(
         adapter.payload.config,
@@ -302,7 +304,7 @@ describe(
 
       expect(aggregation).toBeInstanceOf(Array)
 
-      const lookups = getLookups(aggregation!)
+      const lookups = getLookups(aggregation)
       expect(lookups).toHaveLength(1)
 
       expect(lookups[0]!.as).toBe('version.postsMany.docs')
@@ -311,7 +313,7 @@ describe(
       expect(lookups[0]!.localField).toBe('parent')
     })
 
-    it('should not add any joins because of the projection with versions', async () => {
+    test('should not add any joins because of the projection with versions', async () => {
       const adapter = await getAdapter()
       const fields = buildVersionCollectionFields(
         adapter.payload.config,

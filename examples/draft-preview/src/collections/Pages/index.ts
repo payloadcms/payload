@@ -5,6 +5,7 @@ import { loggedIn } from './access/loggedIn'
 import { publishedOrLoggedIn } from './access/publishedOrLoggedIn'
 import { formatSlug } from './hooks/formatSlug'
 import { revalidatePage } from './hooks/revalidatePage'
+import { PreviewSearchParams } from '@/app/(app)/preview/route'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -18,11 +19,9 @@ export const Pages: CollectionConfig = {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     preview: ({ slug, collection }: { slug: string; collection: CollectionSlug }) => {
       const encodedParams = new URLSearchParams({
-        slug,
-        collection,
         path: `/${slug}`,
         previewSecret: process.env.PREVIEW_SECRET || '',
-      })
+      } satisfies PreviewSearchParams)
 
       return `${process.env.NEXT_PUBLIC_SERVER_URL}/preview?${encodedParams.toString()}`
     },

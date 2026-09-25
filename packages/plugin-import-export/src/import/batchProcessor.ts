@@ -1,8 +1,9 @@
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, User } from 'payload'
 
 import { isolateObjectProperty } from 'payload'
 
-import type { ImportMode, ImportResult } from './createImport.js'
+import type { ImportAfterHook, ImportBeforeHook, ImportDoc, ImportResult } from '../types.js'
+import type { ImportMode } from './createImport.js'
 
 import {
   type BatchError,
@@ -47,11 +48,23 @@ export interface ImportBatchResult {
  */
 export interface ImportProcessOptions {
   collectionSlug: string
-  documents: Record<string, unknown>[]
+  docs: Record<string, unknown>[]
+  /** Export format — passed through to hook args */
+  format?: 'csv' | 'json'
+  /** Lifecycle hooks for this import operation */
+  hooks?: {
+    after?: ImportAfterHook
+    before?: ImportBeforeHook
+  }
+  importDoc: ImportDoc
   importMode: ImportMode
   matchField?: string
+  /** Raw parsed rows before unflattening — used as originalData in hooks */
+  originalDocs?: Record<string, unknown>[]
   req: PayloadRequest
-  user?: TypedUser
+  /** Total number of batches (pre-computed for hook args) */
+  totalBatches?: number
+  user?: User
 }
 
 /**
@@ -124,7 +137,7 @@ type ProcessImportBatchOptions = {
   matchField: string | undefined
   options: { batchSize: number; defaultVersionStatus: 'draft' | 'published' }
   req: PayloadRequest
-  user?: TypedUser
+  user?: User
 }
 
 /**
@@ -238,22 +251,19 @@ async function processImportBatch({
             user,
           })
 
-          // Update for other locales
           if (savedDocument && Object.keys(localeUpdates).length > 0) {
             for (const [locale, localeData] of Object.entries(localeUpdates)) {
               try {
-                const localeReq = { ...req, locale }
                 await req.payload.update({
                   id: savedDocument.id as number | string,
                   collection: collectionSlug,
                   data: localeData,
                   draft: collectionHasVersions ? false : undefined,
                   overrideAccess: false,
-                  req: localeReq,
+                  req: { ...req, locale },
                   user,
                 })
               } catch (error) {
-                // Log but don't fail the entire import if a locale update fails
                 req.payload.logger.error({
                   err: error,
                   msg: `Failed to update locale ${locale} for document ${String(savedDocument.id)}`,
@@ -386,24 +396,19 @@ async function processImportBatch({
               user,
             })
 
-            // Update for other locales
             if (savedDocument && Object.keys(localeUpdates).length > 0) {
               for (const [locale, localeData] of Object.entries(localeUpdates)) {
                 try {
-                  // Clone the request with the specific locale
-                  const localeReq = { ...req, locale }
                   await req.payload.update({
                     id: existingDoc.id as number | string,
                     collection: collectionSlug,
                     data: localeData,
                     depth: 0,
-                    // Don't specify draft - this creates a new draft for versioned collections
                     overrideAccess: false,
-                    req: localeReq,
+                    req: { ...req, locale },
                     user,
                   })
                 } catch (error) {
-                  // Log but don't fail the entire import if a locale update fails
                   req.payload.logger.error({
                     err: error,
                     msg: `Failed to update locale ${locale} for document ${String(existingDoc.id)}`,
@@ -499,22 +504,19 @@ async function processImportBatch({
               user,
             })
 
-            // Update for other locales
             if (savedDocument && Object.keys(localeUpdates).length > 0) {
               for (const [locale, localeData] of Object.entries(localeUpdates)) {
                 try {
-                  // Clone the request with the specific locale
-                  const localeReq = { ...req, locale }
                   await req.payload.update({
                     id: savedDocument.id as number | string,
                     collection: collectionSlug,
                     data: localeData,
                     draft: collectionHasVersions ? false : undefined,
                     overrideAccess: false,
-                    req: localeReq,
+                    req: { ...req, locale },
+                    user,
                   })
                 } catch (error) {
-                  // Log but don't fail the entire import if a locale update fails
                   req.payload.logger.error({
                     err: error,
                     msg: `Failed to update locale ${locale} for document ${String(savedDocument.id)}`,
@@ -610,8 +612,21 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
   }
 
   const processImport = async (processOptions: ImportProcessOptions): Promise<ImportResult> => {
-    const { collectionSlug, documents, importMode, matchField, req, user } = processOptions
+    const {
+      collectionSlug,
+      docs: documents,
+      format = 'csv',
+      hooks,
+      importDoc,
+      importMode,
+      matchField,
+      originalDocs: originalDocs,
+      req,
+      totalBatches: totalBatchesFromOptions,
+      user,
+    } = processOptions
     const batches = createBatches(documents, processorOptions.batchSize)
+    const totalBatches = totalBatchesFromOptions ?? batches.length
 
     const result: ImportResult = {
       errors: [],
@@ -626,8 +641,27 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         continue
       }
 
+      const batchNumber = i + 1
+      const batchStart = i * processorOptions.batchSize
+      const originalBatch = originalDocs
+        ? originalDocs.slice(batchStart, batchStart + currentBatch.length)
+        : currentBatch
+
+      const batchToProcess: Record<string, unknown>[] =
+        hooks?.before && currentBatch.length > 0
+          ? ((await hooks.before({
+              batchNumber,
+              data: currentBatch as Parameters<ImportBeforeHook>[0]['data'],
+              format,
+              importDoc,
+              originalData: originalBatch,
+              req,
+              totalBatches,
+            })) as Record<string, unknown>[])
+          : currentBatch
+
       const batchResult = await processImportBatch({
-        batch: currentBatch,
+        batch: batchToProcess,
         batchIndex: i,
         collectionSlug,
         importMode,
@@ -637,18 +671,23 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         user,
       })
 
-      // Update results
+      let batchImported = 0
+      let batchUpdated = 0
       for (const success of batchResult.successful) {
         if (success.operation === 'created') {
           result.imported++
+          batchImported++
         } else if (success.operation === 'updated') {
           result.updated++
+          batchUpdated++
         } else {
           // Fallback
           if (importMode === 'create') {
             result.imported++
+            batchImported++
           } else {
             result.updated++
+            batchUpdated++
           }
         }
       }
@@ -658,6 +697,25 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
           doc: error.documentData,
           error: error.error,
           index: error.rowNumber - 1, // Convert back to 0-indexed
+        })
+      }
+
+      if (hooks?.after) {
+        const batchHookResult: ImportResult = {
+          errors:
+            batchResult.failed.length > 0 ? result.errors.slice(-batchResult.failed.length) : [],
+          imported: batchImported,
+          total: batchToProcess.length,
+          updated: batchUpdated,
+        }
+        await hooks.after({
+          batchNumber,
+          format,
+          importDoc,
+          originalData: originalBatch,
+          req,
+          result: batchHookResult,
+          totalBatches,
         })
       }
     }

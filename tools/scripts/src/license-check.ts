@@ -71,7 +71,9 @@ async function runLicenseCheck(
       cwd: path.join(PROJECT_ROOT, 'packages', pkg),
     },
   )
-  const a: Record<string, { licenses: string; repository: string }> = JSON.parse(result.stdout)
+  const a: Record<string, { licenses: string; repository: string }> = JSON.parse(
+    result.stdout.toString(),
+  )
   const results: {
     component: string
     package: string

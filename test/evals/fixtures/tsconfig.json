@@ -11,7 +11,14 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "lib": ["ES2022"],
+    "types": ["node"],
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "paths": {
+      "@payloadcms/db-mongodb": ["./db-mongodb-stub.ts"],
+      "@payloadcms/db-sqlite": ["./db-sqlite-stub.ts"],
+      "@payloadcms/richtext-lexical": ["./richtext-lexical-stub.ts"],
+      "@/*": ["./*"]
+    }
   }
 }

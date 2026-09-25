@@ -1,10 +1,7 @@
-import { Button } from '@payloadcms/ui'
-import LinkImport from 'next/link.js'
-import React from 'react'
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
-
 import type { AdminViewServerProps } from 'payload'
+
+import { Button } from '@payloadcms/ui'
+import React from 'react'
 
 import {
   customParamViewPath,
@@ -40,14 +37,13 @@ export function CustomViewWithParam({ initPageResult, params }: AdminViewServerP
         as `{customParamViewPath}`
       </p>
       <div className="custom-view__controls">
-        <Button buttonStyle="secondary" el="link" Link={Link} to={`${adminRoute}`}>
+        <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
           Go to Dashboard
         </Button>
         &nbsp; &nbsp; &nbsp;
         <Button
           buttonStyle="secondary"
           el="link"
-          Link={Link}
           to={`${adminRoute}/${customParamViewPathBase}${!paramValue ? '/123' : ''}`}
         >
           {`Go To ${paramValue ? 'Child' : 'Parent'} Param View`}

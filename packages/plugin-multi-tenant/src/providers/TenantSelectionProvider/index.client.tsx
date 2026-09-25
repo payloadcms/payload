@@ -2,12 +2,12 @@
 
 import type { OptionObject } from 'payload'
 
-import { toast, useAuth, useConfig } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation.js'
+import { toast, useAuth, useConfig, useRouter } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
 import { generateCookie } from '../../utilities/generateCookie.js'
+import { shouldRefreshTenantSelection } from '../../utilities/shouldRefreshTenantSelection.js'
 
 type ContextType = {
   /**
@@ -243,27 +243,60 @@ export const TenantSelectionProviderClient = ({
   }, [initialTenantOptions])
 
   React.useEffect(() => {
-    if (userChanged || (initialValue && String(initialValue) !== getTenantCookie())) {
-      if (userID) {
-        // user logging in
-        void syncTenants()
-      } else {
-        // user logging out
-        setSelectedTenantID(undefined)
-        deleteTenantCookie()
-        setTenantOptions((prev) => (prev.length > 0 ? [] : prev))
-        router.refresh()
-      }
+    const hasTenantSelectionMismatch =
+      initialValue && String(initialValue) !== getTenantCookie()
+
+    if (userID && (userChanged || tenantOptions.length === 0 || hasTenantSelectionMismatch)) {
+      // Sync on login, and when the provider remounts after login without tenant options.
+      void syncTenants()
+    } else if (!userID && (userChanged || hasTenantSelectionMismatch)) {
+      // user logging out
+      setSelectedTenantID(undefined)
+      deleteTenantCookie()
+      setTenantOptions((prev) => (prev.length > 0 ? [] : prev))
+      router.refresh()
+    }
+
+    if (userChanged) {
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, initialValue, router])
+  }, [userID, userChanged, syncTenants, initialValue, router, tenantOptions.length])
 
   /**
-   * If there is no initial value, clear the tenant and refresh the router.
-   * Needed for stale tenantIDs set as a cookie.
+   * Populate tenant options when the provider mounts already-authenticated but
+   * without server-provided options. This happens when a provider setup remounts
+   * this subtree on login (see `config.conditionalProvider`): the remounted
+   * instance initializes `prevUserID` to the current user, so `userChanged` above
+   * is `false` and never fires `syncTenants`, while the server still rendered the
+   * logged-out tree so `initialTenantOptions` is empty — leaving the selector
+   * unrendered. Unlike `router.refresh()`, `syncTenants()` is a plain client fetch
+   * that cannot trigger a remount loop, so this is safe on every framework adapter.
+   */
+  const didInitialSync = React.useRef(false)
+  React.useEffect(() => {
+    if (
+      !didInitialSync.current &&
+      !userChanged &&
+      userID &&
+      tenantOptions.length === 0 &&
+      initialTenantOptions.length === 0
+    ) {
+      didInitialSync.current = true
+      void syncTenants()
+    }
+  }, [userChanged, userID, tenantOptions.length, initialTenantOptions, syncTenants])
+
+  /**
+   * If there is no initial value and a stale tenant cookie exists, clear the
+   * tenant and refresh the router.
    */
   React.useEffect(() => {
-    if (!initialValue) {
+    if (
+      shouldRefreshTenantSelection({
+        initialValue,
+        tenantCookie: getTenantCookie(),
+      })
+    ) {
       setTenant({ id: undefined, refresh: true })
     }
   }, [initialValue, setTenant])

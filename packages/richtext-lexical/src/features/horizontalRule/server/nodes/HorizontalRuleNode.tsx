@@ -12,15 +12,7 @@ import type * as React from 'react'
 import { addClassNamesToElement } from '@lexical/utils'
 import { $applyNodeReplacement, createCommand, DecoratorNode } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
-
-/**
- * Serialized representation of a horizontal rule node. Serialized = converted to JSON. This is what is stored in the database / in the lexical editor state.
- */
-export type SerializedHorizontalRuleNode = StronglyTypedLeafNode<
-  SerializedLexicalNode,
-  'horizontalrule'
->
+import type { SerializedHorizontalRuleNode } from '../schema.js'
 
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> = createCommand(
   'INSERT_HORIZONTAL_RULE_COMMAND',
@@ -60,7 +52,7 @@ export class HorizontalRuleServerNode extends DecoratorNode<null | React.ReactEl
    * The data for this node is stored serialized as JSON. This is the "load function" of that node: it takes the saved data and converts it into a node.
    */
   static override importJSON(
-    serializedNode: SerializedHorizontalRuleNode,
+    _serializedNode: Record<string, unknown> & SerializedHorizontalRuleNode,
   ): HorizontalRuleServerNode {
     return $createHorizontalRuleServerNode()
   }

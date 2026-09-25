@@ -32,7 +32,7 @@ Simply add a task to the `jobs.tasks` array in your Payload config. A task consi
 | `onFail`        | Function to be executed if the task fails.                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `onSuccess`     | Function to be executed if the task succeeds.                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `retries`       | Specify the number of times that this step should be retried if it fails. If this is undefined, the task will either inherit the retries from the workflow or have no retries. If this is 0, the task will not be retried. By default, this is undefined.                                                                                                                                                                                        |
-| `concurrency`   | Control how jobs with the same concurrency key are handled. Jobs with the same key will run exclusively (one at a time). Requires `jobs.enableConcurrencyControl: true` to be set. See [Concurrency Controls](/docs/jobs-queue/workflows#concurrency-controls) for details.                                                                                                                                                                      |
+| `concurrency`   | Control how jobs with the same concurrency key are handled. Jobs with the same key will run exclusively (one at a time). See [Concurrency Controls](/docs/jobs-queue/workflows#concurrency-controls) for details.                                                                                                                                                                                                                                |
 | `schedule`      | Define one or more schedules to automatically queue this task periodically. Each schedule requires a `cron` expression and a `queue` name. See [Job Schedules](/docs/jobs-queue/schedules) for complete documentation.                                                                                                                                                                                                                           |
 
 The logic for the Task is defined in the `handler` - which can be defined as a function, or a path to a function. The `handler` will run once a worker picks up a Job that includes this task.
@@ -77,6 +77,7 @@ export default buildConfig({
         handler: async ({ input, job, req }) => {
           const newPost = await req.payload.create({
             collection: 'post',
+            overrideAccess: true,
             req,
             data: {
               title: input.title,
@@ -132,6 +133,7 @@ export default buildConfig({
           // Send daily digest emails
           const users = await req.payload.find({
             collection: 'users',
+            overrideAccess: true,
             where: { subscribed: { equals: true } },
           })
 
@@ -221,6 +223,7 @@ Creating or updating documents based on other document changes:
   handler: async ({ input, req }) => {
     const posts = await req.payload.find({
       collection: 'posts',
+      overrideAccess: true,
       where: {
         category: {
           equals: input.categoryId,
@@ -232,6 +235,7 @@ Creating or updating documents based on other document changes:
     for (const post of posts.docs) {
       await req.payload.update({
         collection: 'posts',
+        overrideAccess: true,
         id: post.id,
         data: {
           categoryUpdatedAt: new Date().toISOString(),
@@ -266,6 +270,7 @@ Calling third-party services without blocking your API:
   handler: async ({ input, req }) => {
     const doc = await req.payload.findByID({
       collection: 'documents',
+      overrideAccess: true,
       id: input.documentId,
     })
 
@@ -308,6 +313,7 @@ Sometimes you want to fail a task based on business logic:
   handler: async ({ input, req }) => {
     const order = await req.payload.findByID({
       collection: 'orders',
+      overrideAccess: true,
       id: input.orderId,
     })
 
@@ -336,6 +342,7 @@ Tasks fail by throwing errors. When a task encounters any type of failure—whet
 handler: async ({ input, req }) => {
   const order = await req.payload.findByID({
     collection: 'orders',
+    overrideAccess: true,
     id: input.orderId,
   })
 
@@ -376,14 +383,16 @@ After a task fails, you can inspect the job to understand what went wrong:
 const job = await payload.jobs.queue({
   task: 'processPayment',
   input: { orderId: '123', amount: 100 },
+  overrideAccess: true,
 })
 
 // Run the job
-await payload.jobs.run()
+await payload.jobs.run({ overrideAccess: true })
 
 // Check the job status
 const completedJob = await payload.findByID({
   collection: 'payload-jobs',
+  overrideAccess: true,
   id: job.id,
 })
 
@@ -469,6 +478,7 @@ export const createPostHandler: TaskHandler<'createPost'> = async ({
 }) => {
   const newPost = await req.payload.create({
     collection: 'post',
+    overrideAccess: true,
     req,
     data: {
       title: input.title,
@@ -552,9 +562,6 @@ You can run sub-tasks within an existing task, by using the `tasks` or `inlineTa
 export default buildConfig({
   // ...
   jobs: {
-    // It is recommended to set `addParentToTaskLog` to `true` when using nested tasks, so that the parent task is included in the task log
-    // This allows for better observability and debugging of the task execution
-    addParentToTaskLog: true,
     tasks: [
       {
         slug: 'parentTask',

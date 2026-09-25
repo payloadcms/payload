@@ -108,7 +108,7 @@ export const fieldTypeConditions: {
   },
   json: {
     component: 'Text',
-    operators: [...base, like, contains, notLike, within, intersects],
+    operators: [exists],
   },
   number: {
     component: 'Number',
@@ -128,7 +128,7 @@ export const fieldTypeConditions: {
   },
   richText: {
     component: 'Text',
-    operators: [...base, like, notLike, contains],
+    operators: [exists],
   },
   select: {
     component: 'Select',

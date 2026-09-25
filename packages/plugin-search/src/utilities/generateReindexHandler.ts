@@ -79,6 +79,10 @@ export const generateReindexHandler =
     const payload = req.payload
     const { reindexBatchSize: batchSize, syncDrafts } = pluginConfig
 
+    const defaultLocale = payload.config.localization
+      ? payload.config.localization.defaultLocale
+      : req.locale
+
     const defaultLocalApiProps = {
       overrideAccess: false,
       req,
@@ -93,6 +97,7 @@ export const generateReindexHandler =
       const { totalDocs } = await payload.count({
         collection,
         ...defaultLocalApiProps,
+        locale: defaultLocale,
         req: undefined,
         where: drafts ? undefined : whereStatusPublished,
       })
@@ -125,10 +130,6 @@ export const generateReindexHandler =
 
       // Loop through batches, then documents, then locales per document
       for (let i = 0; i < totalBatches; i++) {
-        const defaultLocale = req.payload.config.localization
-          ? req.payload.config.localization.defaultLocale
-          : req.locale
-
         const { docs } = await payload.find({
           collection,
           depth: 0,

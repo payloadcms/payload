@@ -20,7 +20,7 @@ export function helpMessage(): void {
   console.log(chalk`
   {bold USAGE}
 
-      {dim Inside of an existing Next.js project}
+      {dim Inside of an existing Next.js or TanStack project}
 
       {dim $} {bold npx create-payload-app}
 
@@ -38,11 +38,13 @@ export function helpMessage(): void {
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
+      --no-agent                    Skip writing AGENTS.md
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies
       --use-bun                     Use bun to install dependencies (experimental)
       --no-deps                     Do not install any dependencies
+      --payload-version {underline value}       Install a specific Payload version or npm dist-tag (default: canary)
       -h                            Show help
 `)
 }
@@ -73,6 +75,14 @@ ${header('Documentation:')}
 }
 
 export function successfulNextInit(): string {
+  return successfulFrameworkInit()
+}
+
+export function successfulTanStackInit(): string {
+  return successfulFrameworkInit()
+}
+
+function successfulFrameworkInit(): string {
   return `- ${createTerminalLink(
     'Getting Started',
     'https://payloadcms.com/docs/getting-started/what-is-payload',

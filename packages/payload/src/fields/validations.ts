@@ -1,10 +1,10 @@
-import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 import type { TFunction } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
+import type { core } from 'zod'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -26,6 +26,7 @@ import type {
   RelationshipValueSingle,
   RichTextField,
   SelectField,
+  SlugField,
   TextareaField,
   TextField,
   UploadField,
@@ -101,6 +102,14 @@ export const text: TextFieldValidation = (
 
   return true
 }
+
+export type SlugFieldValidation = Validate<string, unknown, unknown, SlugField>
+
+// A slug is always populated by the field's hooks (source-derived or the `<singular>-<N>` fallback),
+// so an empty value is never a user error — `required` only drives the admin asterisk. Uniqueness is
+// enforced in the field's `beforeChange` hook (see generateSlug) rather than here, because draft
+// saves skip validation but still run hooks.
+export const slug: SlugFieldValidation = () => true
 
 export type PasswordFieldValidation = Validate<string, unknown, unknown, TextField>
 
@@ -298,7 +307,7 @@ export const textarea: TextareaFieldValidation = (
 export type CodeFieldValidation = Validate<string, unknown, unknown, CodeField>
 
 export const code: CodeFieldValidation = (value, { req: { t }, required }) => {
-  if (required && value === undefined) {
+  if (required && (!value || (typeof value === 'string' && value.length === 0))) {
     return t('validation:required')
   }
 
@@ -312,7 +321,7 @@ export type JSONFieldValidation = Validate<
   { jsonError?: string } & JSONField
 >
 
-export const json: JSONFieldValidation = (
+export const json: JSONFieldValidation = async (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
@@ -369,11 +378,19 @@ export const json: JSONFieldValidation = (
     try {
       jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
-      // @ts-expect-error missing types
-      const ajv = new Ajv()
+      const { fromJSONSchema } = await import('zod')
+      // `JSONSchema4` allows any string for `$schema`, while zod narrows it to the three drafts it
+      // supports. zod ignores `$schema` at runtime, so the wider type is safe to pass through.
+      const zodSchema = fromJSONSchema(schema as core.JSONSchema.JSONSchema)
 
-      if (!ajv.validate(schema, value)) {
-        return ajv.errorsText()
+      const result = zodSchema.safeParse(value)
+
+      if (!result.success) {
+        return result.error.issues
+          .map((issue) =>
+            issue.path.length ? `${issue.path.join('.')}: ${issue.message}` : issue.message,
+          )
+          .join(', ')
       }
     } catch (error) {
       return error instanceof Error ? error.message : 'Unknown error'
@@ -632,7 +649,17 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
+  {
+    id,
+    blockData,
+    data,
+    filterOptions,
+    overrideAccess,
+    relationTo,
+    req,
+    req: { t, user },
+    siblingData,
+  },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -695,7 +722,9 @@ const validateFilterOptions: Validate<
           const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
+            disableErrors: true,
             limit: 0,
+            overrideAccess: overrideAccess ?? false,
             pagination: false,
             req,
             where: findWhere,
@@ -957,13 +986,13 @@ export type SelectFieldManyValidation = Validate<string[], unknown, unknown, Sel
 
 export type SelectFieldSingleValidation = Validate<string, unknown, unknown, SelectField>
 
-export const select: SelectFieldValidation = (
+export const select: SelectFieldValidation = async (
   value,
   { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
   const filteredOptions =
     typeof filterOptions === 'function'
-      ? filterOptions({
+      ? await filterOptions({
           data,
           options,
           req,
@@ -1093,6 +1122,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
  * These can be re-used in custom validations
  */
 export const validations = {
+  slug,
   array,
   blocks,
   checkbox,

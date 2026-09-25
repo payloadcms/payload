@@ -10,10 +10,10 @@ export type TypedPayloadSDK = PayloadSDK<GeneratedTypes>
  */
 export const getSDK = (config: SanitizedConfig) => {
   const api = {
-    GET: REST_GET(config),
-    POST: REST_POST(config),
-    PATCH: REST_PATCH(config),
     DELETE: REST_DELETE(config),
+    GET: REST_GET(config),
+    PATCH: REST_PATCH(config),
+    POST: REST_POST(config),
     PUT: REST_PUT(config),
   }
 
@@ -21,7 +21,7 @@ export const getSDK = (config: SanitizedConfig) => {
     baseURL: ``,
     fetch: (path: string, init: RequestInit) => {
       const [slugs, search] = path.slice(1).split('?')
-      const url = `${config.serverURL || 'http://localhost:3000'}${config.routes.api}/${slugs}${search ? `?${search}` : ''}`
+      const url = `${config.serverURL || `http://localhost:${process.env.PORT || 3000}`}${config.routes.api}/${slugs}${search ? `?${search}` : ''}`
 
       if (init.body instanceof FormData) {
         const file = init.body.get('file') as Blob

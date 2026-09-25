@@ -1,0 +1,23 @@
+@layer payload-default {
+  .status {
+    display: flex;
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+
+  .status__value-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .status__action {
+    text-decoration: underline;
+  }
+}

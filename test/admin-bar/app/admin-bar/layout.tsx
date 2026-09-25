@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { PayloadAdminBar } from '@payloadcms/admin-bar'
 import React from 'react'
 
-import './app.scss'
+import './app.css'
 
 export const metadata: Metadata = {
   description: 'Payload Admin Bar',
@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PayloadAdminBar
           adminPath="/admin"
           apiPath="/api"
-          cmsURL="http://localhost:3000"
+          cmsURL={process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'}
           collection="pages"
           devMode
           id="1"

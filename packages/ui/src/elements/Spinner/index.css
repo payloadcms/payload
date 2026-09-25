@@ -1,0 +1,32 @@
+@layer payload-default {
+  .spinner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    color: var(--color-icon-secondary);
+  }
+
+  .spinner--sm {
+    gap: calc(var(--spacer-1) / 2);
+  }
+
+  .spinner--sm .spinner__text {
+    font-size: var(--text-caption-font-size);
+  }
+
+  .spinner--md .spinner__text {
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .spinner--lg .spinner__text {
+    font-family: var(--text-body-large-font-family);
+    font-size: var(--text-body-large-font-size);
+    font-weight: var(--text-body-large-font-weight);
+    line-height: var(--text-body-large-line-height);
+    letter-spacing: var(--text-body-large-letter-spacing);
+  }
+}

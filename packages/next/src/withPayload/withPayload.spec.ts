@@ -26,6 +26,18 @@ describe('withPayload', () => {
     }
   })
 
+  it('should position devIndicators at the bottom left by default', () => {
+    const result = withPayload({})
+
+    expect(result.devIndicators).toEqual({ position: 'bottom-left' })
+  })
+
+  it('should use user-provided devIndicators when specified', () => {
+    const result = withPayload({ devIndicators: { appIsrStatus: true } })
+
+    expect(result.devIndicators).toEqual({ appIsrStatus: true })
+  })
+
   it('should not modify process.env.NEXT_BASE_PATH when basePath is not provided', () => {
     const originalBasePath = process.env.NEXT_BASE_PATH
 
@@ -42,6 +54,26 @@ describe('withPayload', () => {
         delete process.env.NEXT_BASE_PATH
       } else {
         process.env.NEXT_BASE_PATH = originalBasePath
+      }
+    }
+  })
+
+  it('should mirror nextConfig.trailingSlash in process.env.NEXT_TRAILING_SLASH', () => {
+    const originalTrailingSlash = process.env.NEXT_TRAILING_SLASH
+
+    try {
+      process.env.NEXT_TRAILING_SLASH = 'true'
+
+      withPayload({ trailingSlash: false })
+      expect(process.env.NEXT_TRAILING_SLASH).toBe('false')
+
+      withPayload({ trailingSlash: true })
+      expect(process.env.NEXT_TRAILING_SLASH).toBe('true')
+    } finally {
+      if (originalTrailingSlash === undefined) {
+        delete process.env.NEXT_TRAILING_SLASH
+      } else {
+        process.env.NEXT_TRAILING_SLASH = originalTrailingSlash
       }
     }
   })

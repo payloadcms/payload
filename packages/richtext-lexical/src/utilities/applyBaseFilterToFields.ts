@@ -1,4 +1,4 @@
-import type { Block, Field, SanitizedConfig, TypedUser } from 'payload'
+import type { Field, SanitizedConfig, User } from 'payload'
 
 import { combineWhereConstraints } from 'payload/shared'
 
@@ -38,7 +38,7 @@ export function applyBaseFilterToFields(fields: Field[], config: SanitizedConfig
 
         // Check if collection is hidden
         const hidden = admin?.hidden
-        if (typeof hidden === 'function' && hidden({ user } as { user: TypedUser })) {
+        if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
           return false
         }
 
@@ -89,10 +89,9 @@ export function applyBaseFilterToFields(fields: Field[], config: SanitizedConfig
 
     // Handle blocks
     if (field.type === 'blocks') {
-      const blocks = (field.blockReferences ?? field.blocks ?? []) as Block[]
       return {
         ...field,
-        blocks: blocks.map((block) => {
+        blocks: field.blocks.map((block) => {
           if (typeof block === 'string') {
             return block
           }

@@ -11,6 +11,7 @@ import {
   useConfig,
   useDebouncedEffect,
   useDocumentInfo,
+  useForm,
   useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
@@ -23,8 +24,12 @@ import type {
 import type { ExportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
-import './index.scss'
+import {
+  getFormStateSignature,
+  getSubmittedFormValues,
+} from '../../utilities/getSubmittedFormValues.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
+import './index.css'
 
 const baseClass = 'export-preview'
 
@@ -47,6 +52,8 @@ export const ExportPreview: React.FC = () => {
       where: fields['where']?.value as Where,
     }
   })
+  const { getData } = useForm()
+  const formStateSignature = useFormFields(([fields]) => getFormStateSignature({ fields }))
   const [dataToRender, setDataToRender] = useState<any[]>([])
   const [exportTotalDocs, setExportTotalDocs] = useState<number>(0)
   const [maxLimit, setMaxLimit] = useState<number | undefined>(undefined)
@@ -104,6 +111,7 @@ export const ExportPreview: React.FC = () => {
               draft,
               fields,
               format,
+              formData: getSubmittedFormValues({ formData: getData() }),
               limit,
               locale,
               previewLimit,
@@ -197,6 +205,8 @@ export const ExportPreview: React.FC = () => {
       draft,
       fields,
       format,
+      formStateSignature,
+      getData,
       i18n,
       limit,
       locale,

@@ -12,4 +12,5 @@ export const MediaWithAlwaysInsertFields: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

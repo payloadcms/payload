@@ -1,14 +1,19 @@
-import type { PayloadRequest, PopulateType } from '../../types/index.js'
+import type { PayloadRequest, PopulateType, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { NotFound } from '../../errors/index.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
+import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
+import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 
 export type Arguments = {
   depth?: number
@@ -50,25 +55,30 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     }
 
     // /////////////////////////////////////
-    // Access
-    // /////////////////////////////////////
-
-    if (!overrideAccess) {
-      await executeAccess({ req }, globalConfig.access.update)
-    }
-
-    // /////////////////////////////////////
     // Retrieve original raw version
     // /////////////////////////////////////
+
+    // The selected version must satisfy read-version access.
+    const readVersionsAccessResult = overrideAccess
+      ? true
+      : await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
+
+    const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
+    const where = combineQueries({ id: { equals: id } }, readVersionsAccessResult)
+
+    sanitizeWhereQuery({ fields: versionFields, payload, where })
 
     const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
       global: globalConfig.slug,
       limit: 1,
       req,
-      where: { id: { equals: id } },
+      where,
     })
 
     if (!versionDocs || versionDocs.length === 0) {
+      if (hasWhereAccessResult(readVersionsAccessResult)) {
+        throw new Forbidden(req.t)
+      }
       throw new NotFound(req.t)
     }
 
@@ -78,10 +88,35 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     rawVersion.version.globalType = globalConfig.slug
 
     // Overwrite draft status if draft is true
-
     if (draft) {
       rawVersion.version._status = 'draft'
     }
+
+    // A localized `_status` can publish and unpublish locales in one restore, so authorize every
+    // status it writes. executeAccess throws Forbidden on the first denial.
+    const restoredStatuses = getRestoredStatusesToAuthorize(rawVersion.version._status)
+
+    const updateAccessResults: Array<boolean | Where> = []
+
+    if (overrideAccess) {
+      updateAccessResults.push(true)
+    } else {
+      const statusesToAuthorize = restoredStatuses.length > 0 ? restoredStatuses : [undefined]
+
+      for (const status of statusesToAuthorize) {
+        updateAccessResults.push(
+          await executeAccess(
+            {
+              slug: globalConfig.slug,
+              data: { _status: status },
+              req,
+            },
+            globalConfig.access.update,
+          ),
+        )
+      }
+    }
+
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
@@ -89,12 +124,31 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     const previousDoc = await payload.findGlobal({
       slug: globalConfig.slug,
       depth,
+      overrideAccess: true,
       req,
     })
+
+    req.context.isRestoringVersion = true
 
     // /////////////////////////////////////
     // Update global
     // /////////////////////////////////////
+
+    for (const updateAccessResult of updateAccessResults) {
+      if (!hasWhereAccessResult(updateAccessResult)) {
+        continue
+      }
+
+      const constrainedGlobal = await payload.db.findGlobal({
+        slug: globalConfig.slug,
+        req,
+        where: updateAccessResult,
+      })
+
+      if (!constrainedGlobal || Object.keys(constrainedGlobal).length === 0) {
+        throw new Forbidden(req.t)
+      }
+    }
 
     const global = await payload.db.findGlobal({
       slug: globalConfig.slug,

@@ -1,41 +1,45 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { AuthenticatedUser, CollectionSlug } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { extractID } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
 import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
 
-let payload: Payload
-let restClient: NextRESTClient
-let user: any
+let user: AuthenticatedUser
 let restrictedUser: any
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('@payloadcms/plugin-import-export', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-    user = await payload.login({
+const suiteOptions = {
+  config: './config.ts',
+  resetBetweenTests: false,
+}
+
+test.suite('@payloadcms/plugin-import-export', suiteOptions, () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
+    const loginResult = await payload.login({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
+
+    user = loginResult.user!
     const userDocs = await payload.find({
       collection: 'users',
+      overrideAccess: true,
       where: {
         email: { equals: regularUser.email },
       },
@@ -46,12 +50,27 @@ describe('@payloadcms/plugin-import-export', () => {
     }
   })
 
-  afterAll(async () => {
-    await payload.destroy()
+  test.describe('i18n scoping', () => {
+    test('should only merge plugin translations for supportedLanguages', ({ payload }) => {
+      const supportedLangKeys = Object.keys(payload.config.i18n.supportedLanguages)
+      expect(supportedLangKeys.sort()).toEqual(['en', 'es', 'he'])
+
+      // German is not in supportedLanguages — plugin-import-export must not contribute keys to test.
+      const deTranslations = payload.config.i18n.translations.de as
+        | Record<string, unknown>
+        | undefined
+
+      expect(deTranslations?.['plugin-import-export']).toBeUndefined()
+
+      // It should be present for supportedLanguages.
+      expect(payload.config.i18n.translations.en).toHaveProperty('plugin-import-export')
+      expect(payload.config.i18n.translations.es).toHaveProperty('plugin-import-export')
+      expect(payload.config.i18n.translations.he).toHaveProperty('plugin-import-export')
+    })
   })
 
-  describe('graphql', () => {
-    it('should not break graphql', async () => {
+  test.describe('graphql', () => {
+    test('should not break graphql', async ({ restClient }) => {
       const query = `query {
         __schema {
           queryType {
@@ -69,28 +88,30 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('exports', () => {
-    it('should create a file for collection csv from defined fields', async () => {
+  test.describe('exports', () => {
+    test('should create a file for collection csv from defined fields', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
-          collectionSlug: 'pages',
           name: 'pages.csv',
-          sort: 'createdAt',
+          collectionSlug: 'pages',
           fields: ['id', 'title', 'group.value', 'group.array.field1', 'createdAt', 'updatedAt'],
           format: 'csv',
+          sort: 'createdAt',
           where: {
             title: { contains: 'Title ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toContain('pages.csv')
@@ -106,26 +127,31 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].updatedAt).toBeDefined()
     })
 
-    it('should create a file for collection csv with all documents when limit 0', async () => {
+    test('should create a file for collection csv with all documents when limit 0', async ({
+      payload,
+    }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
           limit: 0,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const { totalDocs: totalNumberOfDocs } = await payload.count({
         collection: 'pages',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -135,25 +161,30 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data).toHaveLength(totalNumberOfDocs)
     })
 
-    it('should create a file for collection csv with all documents when no limit', async () => {
+    test('should create a file for collection csv with all documents when no limit', async ({
+      payload,
+    }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const { totalDocs: totalNumberOfDocs } = await payload.count({
         collection: 'pages',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -163,28 +194,31 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data).toHaveLength(totalNumberOfDocs)
     })
 
-    it('should create a file for collection csv from limit and page 1', async () => {
+    test('should create a file for collection csv from limit and page 1', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
           limit: 100,
           page: 1,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const pages = await payload.find({
         collection: 'pages',
         limit: 100,
+        overrideAccess: true,
         page: 1,
       })
 
@@ -198,28 +232,31 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual(firstDocOnPage1?.title)
     })
 
-    it('should create a file for collection csv from limit and page 2', async () => {
+    test('should create a file for collection csv from limit and page 2', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
           limit: 100,
           page: 2,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const pages = await payload.find({
         collection: 'pages',
         limit: 100,
+        overrideAccess: true,
         page: 2,
       })
 
@@ -233,45 +270,49 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual(firstDocOnPage2?.title)
     })
 
-    it('should not create a file for collection csv when limit < 0', async () => {
+    test('should not create a file for collection csv when limit < 0', async ({ payload }) => {
       await expect(
         payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             format: 'csv',
             limit: -1,
           },
+          overrideAccess: true,
+          user,
         }),
       ).rejects.toThrow(/Limit/)
     })
 
-    it('should create a file for collection csv with any positive limit value', async () => {
+    test('should create a file for collection csv with any positive limit value', async ({
+      payload,
+    }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
           limit: 99,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
     })
 
-    it('should export results sorted ASC by title when sort="title"', async () => {
+    test('should export results sorted ASC by title when sort="title"', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -280,13 +321,16 @@ describe('@payloadcms/plugin-import-export', () => {
             or: [{ title: { contains: 'Title' } }, { title: { contains: 'Array' } }],
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -297,10 +341,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('Array 0')
     })
 
-    it('should export results sorted DESC by title when sort="-title"', async () => {
+    test('should export results sorted DESC by title when sort="-title"', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -309,13 +352,16 @@ describe('@payloadcms/plugin-import-export', () => {
             or: [{ title: { contains: 'Title' } }, { title: { contains: 'Array' } }],
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -326,44 +372,48 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('Title 4')
     })
 
-    it('should create a file for collection csv with draft data', async () => {
+    test('should create a file for collection csv with draft data', async ({ payload }) => {
       const draftPage = await payload.create({
         collection: 'pages',
-        user,
         data: {
-          title: 'Draft Page',
           _status: 'published',
+          title: 'Draft Page',
         },
+        overrideAccess: true,
+        user,
       })
 
       await payload.update({
-        collection: 'pages',
         id: draftPage.id,
+        collection: 'pages',
         data: {
-          title: 'Draft Page Updated',
           _status: 'draft',
+          title: 'Draft Page Updated',
         },
+        overrideAccess: true,
       })
 
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'title', '_status'],
-          locale: 'en',
           format: 'csv',
+          locale: 'en',
           where: {
             title: { contains: 'Draft ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -375,26 +425,28 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0]._status).toStrictEqual('draft')
     })
 
-    it('should create a file for collection csv from one locale', async () => {
+    test('should create a file for collection csv from one locale', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'localized'],
-          locale: 'en',
           format: 'csv',
+          locale: 'en',
           where: {
             title: { contains: 'Localized ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -405,26 +457,28 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].localized).toStrictEqual('en test')
     })
 
-    it('should create a file for collection csv from multiple locales', async () => {
+    test('should create a file for collection csv from multiple locales', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'localized'],
-          locale: 'all',
           format: 'csv',
+          locale: 'all',
           where: {
             title: { contains: 'Localized ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -436,10 +490,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].localized_es).toStrictEqual('es test')
     })
 
-    it('should create a file for collection csv from array', async () => {
+    test('should create a file for collection csv from array', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'array'],
@@ -448,13 +501,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Array ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -467,11 +523,12 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].array_1_field2).toStrictEqual('baz')
     })
 
-    it('should create a CSV file with columns matching the order of the fields array', async () => {
+    test('should create a CSV file with columns matching the order of the fields array', async ({
+      payload,
+    }) => {
       const fields = ['id', 'group.value', 'group.array.field1', 'title', 'createdAt', 'updatedAt']
       const doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields,
@@ -480,13 +537,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Title ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -501,11 +561,10 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(str.indexOf('createdAt')).toBeLessThan(str.indexOf('updatedAt'))
     })
 
-    it('should create a CSV file with virtual fields', async () => {
+    test('should create a CSV file with virtual fields', async ({ payload }) => {
       const fields = ['id', 'virtual', 'virtualRelationship']
       const doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields,
@@ -514,13 +573,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Virtual ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -531,10 +593,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].virtualRelationship).toStrictEqual('name value')
     })
 
-    it('should create a file for collection csv from array.subfield', async () => {
+    test('should create a file for collection csv from array.subfield', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'array.field1'],
@@ -543,13 +604,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Array Subfield ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -562,10 +626,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].array_1_field2).toBeUndefined()
     })
 
-    it('should create a file for collection csv from hasMany field', async () => {
+    test('should create a file for collection csv from hasMany field', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'hasManyNumber'],
@@ -574,13 +637,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'hasMany Number ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -594,10 +660,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasManyNumber_4).toStrictEqual('3')
     })
 
-    it('should create a file for collection csv from blocks field', async () => {
+    test('should create a file for collection csv from blocks field', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'blocks'],
@@ -606,13 +671,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Blocks ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -623,10 +691,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
 
-    it('should create a csv of all fields when fields is empty', async () => {
+    test('should create a csv of all fields when fields is empty', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: [],
@@ -635,13 +702,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Title ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -654,7 +724,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].createdAt).toBeDefined()
     })
 
-    it('should run custom toCSV function on a field', async () => {
+    test('should run beforeExport hook on a field', async ({ payload }) => {
       const fields = [
         'id',
         'custom',
@@ -665,7 +735,6 @@ describe('@payloadcms/plugin-import-export', () => {
       ]
       const doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields,
@@ -674,13 +743,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Custom ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -697,10 +769,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].customRelationship).toBeUndefined()
     })
 
-    it('should create a JSON file for collection', async () => {
+    test('should create a JSON file for collection', async ({ payload }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'title'],
@@ -710,13 +781,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'JSON ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -726,15 +800,15 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('JSON 0')
     })
 
-    it('should download an existing export JSON file', async () => {
+    test('should download an existing export JSON file', async ({ restClient }) => {
       const response = await restClient.POST('/exports/download', {
         body: JSON.stringify({
           data: {
             collectionSlug: 'pages',
+            drafts: 'yes',
             fields: ['id', 'title'],
             format: 'json',
             sort: 'title',
-            drafts: 'yes',
           },
         }),
         headers: { 'Content-Type': 'application/json' },
@@ -753,22 +827,26 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(typeof data[0].title).toBe('string')
     })
 
-    it('should create an export with every field when no fields are defined', async () => {
+    test('should create an export with every field when no fields are defined', async ({
+      payload,
+    }) => {
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'json',
           sort: 'title',
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -781,10 +859,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].updatedAt).toBeDefined()
     })
 
-    it('should create jobs task for exports', async () => {
+    test('should create jobs task for exports', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'exports' as CollectionSlug,
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'title'],
@@ -794,12 +871,15 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Jobs ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
       const {
         docs: [job],
       } = await payload.find({
         collection: 'payload-jobs',
+        overrideAccess: true,
         sort: '-createdAt',
       })
 
@@ -819,11 +899,12 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(input.userID).toBeDefined()
       expect(input.userCollection).toBeDefined()
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports' as CollectionSlug,
         id: doc.id,
+        collection: 'exports' as CollectionSlug,
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -833,22 +914,24 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('Jobs 0')
     })
 
-    it('should export a large dataset without any duplicates', async () => {
+    test('should export a large dataset without any duplicates', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'posts',
           fields: ['id', 'title'],
           format: 'csv',
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -867,21 +950,23 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(duplicateIds).toHaveLength(0)
     })
 
-    it('should only include selected fields in CSV export, nothing else', async () => {
+    test('should only include selected fields in CSV export, nothing else', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'posts-export',
-        user,
         data: {
           collectionSlug: 'posts',
           fields: ['title'],
           format: 'csv',
           limit: 5,
         },
+        overrideAccess: true,
+        user,
       })
 
       const exportDoc = await payload.findByID({
-        collection: 'posts-export',
         id: doc.id,
+        collection: 'posts-export',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -895,21 +980,23 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toBeDefined()
     })
 
-    it('should preserve user-specified field order in CSV export', async () => {
+    test('should preserve user-specified field order in CSV export', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'posts-export',
-        user,
         data: {
           collectionSlug: 'posts',
           fields: ['title', 'id', 'createdAt'],
           format: 'csv',
           limit: 1,
         },
+        overrideAccess: true,
+        user,
       })
 
       const exportDoc = await payload.findByID({
-        collection: 'posts-export',
         id: doc.id,
+        collection: 'posts-export',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -922,10 +1009,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(columns).toStrictEqual(['title', 'id', 'createdAt'])
     })
 
-    it('should export polymorphic relationship fields to CSV', async () => {
+    test('should export polymorphic relationship fields to CSV', async ({ payload }) => {
       const doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'hasOnePolymorphic', 'hasManyPolymorphic'],
@@ -934,13 +1020,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Polymorphic' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -956,10 +1045,50 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
     })
 
-    it('should export hasMany monomorphic relationship fields to CSV', async () => {
+    test('should not produce duplicate columns for hasOne polymorphic relationship export', async ({
+      payload,
+    }) => {
       const doc = await payload.create({
         collection: 'exports',
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'hasOnePolymorphic'],
+          format: 'csv',
+          where: {
+            title: { contains: 'Polymorphic' },
+          },
+        },
+        overrideAccess: true,
         user,
+      })
+
+      await payload.jobs.run({ overrideAccess: true })
+
+      const exportDoc = await payload.findByID({
+        id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const buffer = fs.readFileSync(expectedPath)
+      const headerLine = buffer.toString().split('\n')[0] ?? ''
+      const headers = headerLine.split(',').map((h) => h.replace(/^\ufeff/, '').trim())
+
+      expect(headers).toContain('hasOnePolymorphic_id')
+      expect(headers).toContain('hasOnePolymorphic_relationTo')
+
+      const leakedColumns = headers.filter(
+        (h) =>
+          h.startsWith('hasOnePolymorphic_value') || h.startsWith('hasOnePolymorphic_relationTo_'),
+      )
+      expect(leakedColumns).toEqual([])
+    })
+
+    test('should export hasMany monomorphic relationship fields to CSV', async ({ payload }) => {
+      const doc = await payload.create({
+        collection: 'exports',
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'hasManyMonomorphic'],
@@ -968,13 +1097,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Monomorphic' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -987,7 +1119,9 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     // disabled so we don't always run a massive test
-    it.skip('should create a file from a large set of collection documents', async () => {
+    test.skip('should create a file from a large set of collection documents', async ({
+      payload,
+    }) => {
       const allPromises = []
       let promises = []
       for (let i = 0; i < 100000; i++) {
@@ -995,7 +1129,6 @@ describe('@payloadcms/plugin-import-export', () => {
           await payload.create({
             collection: 'pages',
             data: {
-              title: `Array ${i}`,
               blocks: [
                 {
                   blockType: 'hero',
@@ -1006,7 +1139,9 @@ describe('@payloadcms/plugin-import-export', () => {
                   richText: richTextData,
                 },
               ],
+              title: `Array ${i}`,
             },
+            overrideAccess: true,
           }),
         )
         if (promises.length >= 500) {
@@ -1021,19 +1156,21 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'blocks'],
           format: 'csv',
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       doc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(doc.filename).toBeDefined()
@@ -1044,11 +1181,12 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].blocks_1_content_blockType).toStrictEqual('content')
     })
 
-    describe('schema-based column inference', () => {
-      it('should generate columns from schema without scanning documents', async () => {
+    test.describe('schema-based column inference', () => {
+      test('should generate columns from schema without scanning documents', async ({
+        payload,
+      }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'localized', 'hasOnePolymorphic', 'array'],
@@ -1057,13 +1195,16 @@ describe('@payloadcms/plugin-import-export', () => {
               title: { equals: 'Title 0' },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({
-          collection: 'exports',
           id: doc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBeDefined()
@@ -1080,26 +1221,28 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(headerLine).toContain('array_0_field2')
       })
 
-      it('should include all locale columns when locale is all', async () => {
+      test('should include all locale columns when locale is all', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'localized'],
-            locale: 'all',
             format: 'csv',
+            locale: 'all',
             where: {
               title: { contains: 'Localized ' },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({
-          collection: 'exports',
           id: doc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBeDefined()
@@ -1112,10 +1255,9 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(headerLine).toContain('localized_de')
       })
 
-      it('should generate correct columns for empty export', async () => {
+      test('should generate correct columns for empty export', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'excerpt'],
@@ -1124,13 +1266,16 @@ describe('@payloadcms/plugin-import-export', () => {
               title: { equals: 'nonexistent-title-xyz' },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({
-          collection: 'exports',
           id: doc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBeDefined()
@@ -1143,10 +1288,11 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(content).toContain('excerpt')
       })
 
-      it('should include virtual fields in export columns (they have values)', async () => {
+      test('should include virtual fields in export columns (they have values)', async ({
+        payload,
+      }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             format: 'csv',
@@ -1154,13 +1300,16 @@ describe('@payloadcms/plugin-import-export', () => {
               title: { contains: 'Virtual ' },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         doc = await payload.findByID({
-          collection: 'exports',
           id: doc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBeDefined()
@@ -1173,38 +1322,42 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    describe('toCSV derived columns positioning', () => {
-      it('should position derived columns at the base field position and remove the original column', async () => {
+    test.describe('beforeExport derived columns positioning', () => {
+      test('should position derived columns at the base field position and remove the original column', async ({
+        payload,
+      }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Derived Columns Test',
-            customRelationship: user.user.id,
-            excerpt: 'test excerpt',
             _status: 'published',
+            customRelationship: user.id,
+            excerpt: 'test excerpt',
+            title: 'Derived Columns Test',
           },
+          overrideAccess: true,
         })
 
         const fields = ['id', 'title', 'customRelationship', 'excerpt']
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields,
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const columns = Object.keys(data[0])
 
-        // The original customRelationship column should NOT exist since toCSV
+        // The original customRelationship column should NOT exist since beforeExport
         // returned undefined and wrote derived columns instead
         const customRelIdx = columns.indexOf('customRelationship')
         expect(customRelIdx).toBe(-1)
@@ -1219,35 +1372,39 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(emailIdx).toBe(titleIdx + 2)
         expect(excerptIdx).toBeGreaterThan(emailIdx)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should remove original column when toCSV writes _name and _email (no _id)', async () => {
+      test('should remove original column when beforeExport hook writes _name and _email (no _id)', async ({
+        payload,
+      }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'NameEmail Derived Test',
-            customRelNameEmail: user.user.id,
-            excerpt: 'test excerpt',
             _status: 'published',
+            customRelNameEmail: user.id,
+            excerpt: 'test excerpt',
+            title: 'NameEmail Derived Test',
           },
+          overrideAccess: true,
         })
 
         const fields = ['id', 'title', 'customRelNameEmail', 'excerpt']
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields,
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const columns = Object.keys(data[0])
@@ -1267,37 +1424,41 @@ describe('@payloadcms/plugin-import-export', () => {
 
         // Verify the values are correct
         expect(data[0].customRelNameEmail_name).toBe('name value')
-        expect(data[0].customRelNameEmail_email).toBe(user.user.email)
+        expect(data[0].customRelNameEmail_email).toBe(user.email)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should remove original column when toCSV writes _id and _locationName', async () => {
+      test('should remove original column when beforeExport hook writes _id and _locationName', async ({
+        payload,
+      }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'IdLocationName Derived Test',
-            customRelIdName: user.user.id,
-            excerpt: 'test excerpt',
             _status: 'published',
+            customRelIdName: user.id,
+            excerpt: 'test excerpt',
+            title: 'IdLocationName Derived Test',
           },
+          overrideAccess: true,
         })
 
         const fields = ['id', 'title', 'customRelIdName', 'excerpt']
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields,
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const columns = Object.keys(data[0])
@@ -1316,21 +1477,25 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(excerptIdx).toBeGreaterThan(locationNameIdx)
 
         // Verify the values are correct
-        expect(data[0].customRelIdName_id).toBe(String(user.user.id))
+        expect(data[0].customRelIdName_id).toBe(String(user.id))
         expect(data[0].customRelIdName_locationName).toBe('name value')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should keep derived columns before trailing fields and match preview column order', async () => {
+      test('should keep derived columns before trailing fields and match preview column order', async ({
+        payload,
+        restClient,
+      }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Derived Position With Preview Test',
-            customRelationship: user.user.id,
-            excerpt: 'trailing field value',
             _status: 'published',
+            customRelationship: user.id,
+            excerpt: 'trailing field value',
+            title: 'Derived Position With Preview Test',
           },
+          overrideAccess: true,
         })
 
         const fields = ['id', 'title', 'customRelationship', 'excerpt']
@@ -1338,18 +1503,19 @@ describe('@payloadcms/plugin-import-export', () => {
         // Export
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields,
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const exportColumns = Object.keys(data[0])
@@ -1381,38 +1547,43 @@ describe('@payloadcms/plugin-import-export', () => {
 
         expect(previewResponse.columns).toStrictEqual(exportColumns)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should respect custom field order with toCSV field first and match preview column order', async () => {
+      test('should respect custom field order with beforeExport field first and match preview column order', async ({
+        payload,
+        restClient,
+      }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Custom Order toCSV First Test',
-            customRelationship: user.user.id,
-            excerpt: 'some excerpt',
             _status: 'published',
+            customRelationship: user.id,
+            excerpt: 'some excerpt',
+            title: 'Custom Order beforeExport First Test',
           },
+          overrideAccess: true,
         })
 
-        // Put the toCSV relationship field first
+        // Put the beforeExport relationship field first
         const fields = ['customRelationship', 'id', 'title', 'excerpt']
 
         // Export
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields,
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
         const exportColumns = Object.keys(data[0])
@@ -1445,97 +1616,105 @@ describe('@payloadcms/plugin-import-export', () => {
 
         expect(previewResponse.columns).toStrictEqual(exportColumns)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
     })
 
-    describe('date field export', () => {
-      it('should export date fields as ISO strings', async () => {
+    test.describe('date field export', () => {
+      test('should export date fields as ISO strings', async ({ payload }) => {
         const dateValue = '2026-01-22T00:00:00.000Z'
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Date Export Test',
-            date: dateValue,
             _status: 'published',
+            date: dateValue,
+            title: 'Date Export Test',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'date'],
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
 
         expect(data[0].date).toBe('2026-01-22T00:00:00.000Z')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should handle null date values', async () => {
+      test('should handle null date values', async ({ payload }) => {
         const page = await payload.create({
           collection: 'pages',
-          data: { title: 'Null Date Test', date: null, _status: 'published' },
+          data: { _status: 'published', date: null, title: 'Null Date Test' },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'date'],
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
 
         expect(data[0].date).toBe('')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should not include timezone column when only date field is selected', async () => {
+      test('should not include timezone column when only date field is selected', async ({
+        payload,
+      }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Date With TZ Test',
+            _status: 'published',
             dateWithTimezone: '2026-01-25T12:00:00.000Z',
             dateWithTimezone_tz: 'Europe/London',
-            _status: 'published',
+            title: 'Date With TZ Test',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'dateWithTimezone'],
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const csvContent = fs.readFileSync(csvPath, 'utf-8')
         const headerLine = csvContent.split('\n')[0]
@@ -1543,34 +1722,38 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(headerLine).toContain('dateWithTimezone')
         expect(headerLine).not.toContain('dateWithTimezone_tz')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should not create duplicate columns when selecting both date and timezone fields', async () => {
+      test('should not create duplicate columns when selecting both date and timezone fields', async ({
+        payload,
+      }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Date With TZ Duplicate Test',
+            _status: 'published',
             dateWithTimezone: '2026-01-25T12:00:00.000Z',
             dateWithTimezone_tz: 'Europe/London',
-            _status: 'published',
+            title: 'Date With TZ Duplicate Test',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'dateWithTimezone', 'dateWithTimezone_tz'],
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const csvContent = fs.readFileSync(csvPath, 'utf-8')
         const headerLine = csvContent.split('\n')[0]
@@ -1583,24 +1766,30 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data[0].dateWithTimezone).toBe('2026-01-25T12:00:00.000Z')
         expect(data[0].dateWithTimezone_tz).toBe('Europe/London')
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
     })
 
-    describe('export collection config options', () => {
-      it('should apply per-collection overrideCollection to create custom export collection', () => {
+    test.describe('export collection config options', () => {
+      test('should apply per-collection overrideCollection to create custom export collection', ({
+        payload,
+      }) => {
         const customExportCollection = payload.collections['posts-no-jobs-queue-export']
         expect(customExportCollection).toBeDefined()
         expect(customExportCollection.config.admin?.group).toBe('Posts No Jobs Queue')
       })
 
-      it('should apply format and disableSave options to custom export collection', () => {
+      test('should apply format and disableSave options to custom export collection', ({
+        payload,
+      }) => {
         const customExportCollection = payload.collections['posts-no-jobs-queue-export']
         expect(customExportCollection.config.admin?.custom?.format).toBe('csv')
         expect(customExportCollection.config.admin?.custom?.disableSave).toBe(true)
       })
 
-      it('should reject download request with mismatched format when format is forced', async () => {
+      test('should reject download request with mismatched format when format is forced', async ({
+        restClient,
+      }) => {
         const response = await restClient.POST('/posts-no-jobs-queue-export/download', {
           body: JSON.stringify({
             data: {
@@ -1620,34 +1809,36 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    describe('json and richText fields CSV serialization', () => {
-      it('should serialize json and richText fields as JSON strings in single columns', async () => {
+    test.describe('json and richText fields CSV serialization', () => {
+      test('should serialize json and richText fields as JSON strings in single columns', async ({
+        payload,
+      }) => {
         const jsonData = {
           key: 'value',
           nested: {
-            deep: 'data',
             array: [1, 2, 3],
+            deep: 'data',
           },
         }
 
         const testPage = await payload.create({
           collection: 'pages',
           data: {
-            title: 'JSON Serialization Test',
-            jsonField: jsonData,
-            richTextField: richTextData,
             blocks: [
               {
                 blockType: 'content',
                 richText: richTextData,
               },
             ],
+            jsonField: jsonData,
+            richTextField: richTextData,
+            title: 'JSON Serialization Test',
           },
+          overrideAccess: true,
         })
 
         let exportDoc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             format: 'csv',
@@ -1655,13 +1846,16 @@ describe('@payloadcms/plugin-import-export', () => {
               id: { equals: testPage.id },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
-          collection: 'exports',
           id: exportDoc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
@@ -1701,42 +1895,45 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(flattenedRichTextKeys).toHaveLength(0)
 
         await payload.delete({
-          collection: 'pages',
           id: testPage.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
       })
 
-      it('should roundtrip json and richText fields through CSV export/import', async () => {
+      test('should roundtrip json and richText fields through CSV export/import', async ({
+        payload,
+      }) => {
         const jsonData = {
+          array: [{ a: 1 }, { b: 2 }],
           complex: {
             nested: {
               deeply: {
-                value: 'test',
                 numbers: [1, 2, 3, 4, 5],
+                value: 'test',
               },
             },
           },
-          array: [{ a: 1 }, { b: 2 }],
         }
 
         const testPage = await payload.create({
           collection: 'pages',
           data: {
-            title: 'JSON Roundtrip CSV Test',
-            jsonField: jsonData,
-            richTextField: richTextData,
             blocks: [
               {
                 blockType: 'content',
                 richText: richTextData,
               },
             ],
+            jsonField: jsonData,
+            richTextField: richTextData,
+            title: 'JSON Roundtrip CSV Test',
           },
+          overrideAccess: true,
         })
 
         let exportDoc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             format: 'csv',
@@ -1744,42 +1941,48 @@ describe('@payloadcms/plugin-import-export', () => {
               id: { equals: testPage.id },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
-          collection: 'exports',
           id: exportDoc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
 
         await payload.delete({
-          collection: 'pages',
           id: testPage.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'json-roundtrip.csv',
             data: fs.readFileSync(csvPath),
             mimetype: 'text/csv',
-            name: 'json-roundtrip.csv',
             size: fs.statSync(csvPath).size,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -1787,6 +1990,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'JSON Roundtrip CSV Test' },
           },
@@ -1811,38 +2015,136 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'JSON Roundtrip CSV Test' },
           },
         })
       })
 
-      it('should handle json fields in deeply nested array structures', async () => {
-        const jsonData = { level: 'nested', data: [1, 2, 3] }
+      test('should roundtrip a block containing a nested array with richText through CSV export/import', async ({
+        payload,
+      }) => {
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            blocks: [
+              {
+                blockType: 'faqSection',
+                faqs: [
+                  { answer: richTextData, question: 'What is Payload?' },
+                  { answer: richTextData, question: 'Is it open source?' },
+                ],
+              },
+            ],
+            title: 'FAQ Block Roundtrip Test',
+          },
+          overrideAccess: true,
+        })
+
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: { id: { equals: testPage.id } },
+          },
+          overrideAccess: true,
+          user,
+        })
+
+        await payload.jobs.run({ overrideAccess: true })
+
+        exportDoc = await payload.findByID({
+          id: exportDoc.id,
+          collection: 'exports',
+          overrideAccess: true,
+        })
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+
+        await payload.delete({ id: testPage.id, collection: 'pages', overrideAccess: true })
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          data: { collectionSlug: 'pages', importMode: 'create' },
+          file: {
+            name: 'faq-roundtrip.csv',
+            data: fs.readFileSync(csvPath),
+            mimetype: 'text/csv',
+            size: fs.statSync(csvPath).size,
+          },
+          overrideAccess: true,
+          user,
+        })
+
+        await payload.jobs.run({ overrideAccess: true })
+
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          overrideAccess: true,
+          where: { title: { equals: 'FAQ Block Roundtrip Test' } },
+        })
+
+        expect(importedPages.docs).toHaveLength(1)
+        const imported = importedPages.docs[0]
+
+        expect(imported?.blocks).toHaveLength(1)
+        const faqBlock = imported?.blocks?.[0]
+        expect(faqBlock?.blockType).toBe('faqSection')
+
+        const faqs = (faqBlock as any)?.faqs
+        expect(Array.isArray(faqs)).toBe(true)
+        expect(faqs).toHaveLength(2)
+
+        expect(faqs[0]?.question).toBe('What is Payload?')
+        expect(typeof faqs[0]?.answer).not.toBe('string')
+        expect(faqs[0]?.answer?.root?.type).toBe('root')
+
+        expect(faqs[1]?.question).toBe('Is it open source?')
+        expect(typeof faqs[1]?.answer).not.toBe('string')
+
+        await payload.delete({
+          collection: 'pages',
+          overrideAccess: true,
+          where: { title: { equals: 'FAQ Block Roundtrip Test' } },
+        })
+      })
+
+      test('should handle json fields in deeply nested array structures', async ({ payload }) => {
+        const jsonData = { data: [1, 2, 3], level: 'nested' }
 
         const testPage = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Nested Array Test',
-            jsonField: jsonData,
             array: [
               { field1: 'array-item-1-field1', field2: 'array-item-1-field2' },
               { field1: 'array-item-2-field1', field2: 'array-item-2-field2' },
               { field1: 'array-item-3-field1', field2: 'array-item-3-field2' },
             ],
             group: {
-              value: 'group value',
               array: [
                 { field1: 'nested-array-1', field2: 'nested-value-1' },
                 { field1: 'nested-array-2', field2: 'nested-value-2' },
               ],
+              value: 'group value',
             },
+            jsonField: jsonData,
+            title: 'Nested Array Test',
           },
+          overrideAccess: true,
         })
 
         let exportDoc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             format: 'csv',
@@ -1850,13 +2152,16 @@ describe('@payloadcms/plugin-import-export', () => {
               id: { equals: testPage.id },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
-          collection: 'exports',
           id: exportDoc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
@@ -1877,36 +2182,40 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(row.group_array_1_field1).toBe('nested-array-2')
 
         await payload.delete({
-          collection: 'pages',
           id: testPage.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'nested-array-test.csv',
             data: fs.readFileSync(csvPath),
             mimetype: 'text/csv',
-            name: 'nested-array-test.csv',
             size: fs.statSync(csvPath).size,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'Nested Array Test' },
           },
@@ -1928,23 +2237,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'Nested Array Test' },
           },
         })
       })
 
-      it('should update json and richText fields in update mode', async () => {
-        const initialJson = { version: 1, data: 'initial' }
-        const updatedJson = { version: 2, data: 'updated', extra: [1, 2, 3] }
+      test('should update json and richText fields in update mode', async ({ payload }) => {
+        const initialJson = { data: 'initial', version: 1 }
+        const updatedJson = { data: 'updated', extra: [1, 2, 3], version: 2 }
 
         const existingPage = await payload.create({
           collection: 'pages',
           data: {
-            title: 'JSON Update Mode Test',
             jsonField: initialJson,
             richTextField: richTextData,
+            title: 'JSON Update Mode Test',
           },
+          overrideAccess: true,
         })
 
         expect(existingPage.jsonField).toEqual(initialJson)
@@ -1957,25 +2268,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'update',
             matchField: 'id',
           },
           file: {
+            name: 'json-update-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'json-update-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -1983,32 +2296,35 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(importDoc.summary?.issues).toBe(0)
 
         const updatedPage = await payload.findByID({
-          collection: 'pages',
           id: existingPage.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
 
         expect(updatedPage.jsonField).toEqual(updatedJson)
         expect((updatedPage.richTextField as typeof richTextData)?.root?.type).toBe('root')
 
         await payload.delete({
-          collection: 'pages',
           id: existingPage.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
       })
 
-      it('should handle json and richText fields in upsert mode', async () => {
+      test('should handle json and richText fields in upsert mode', async ({ payload }) => {
         const timestamp = Date.now()
         const existingJson = { id: 'existing', value: 100 }
-        const newJson = { id: 'new', value: 200, nested: { key: 'value' } }
-        const updatedExistingJson = { id: 'existing', value: 150, modified: true }
+        const newJson = { id: 'new', nested: { key: 'value' }, value: 200 }
+        const updatedExistingJson = { id: 'existing', modified: true, value: 150 }
 
         const existingPage = await payload.create({
           collection: 'pages',
           data: {
-            title: `JSON Upsert Existing ${timestamp}`,
             jsonField: existingJson,
             richTextField: richTextData,
+            title: `JSON Upsert Existing ${timestamp}`,
           },
+          overrideAccess: true,
         })
 
         const csvContent =
@@ -2020,25 +2336,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'upsert',
             matchField: 'title',
           },
           file: {
+            name: 'json-upsert-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'json-upsert-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -2047,14 +2365,16 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(importDoc.summary?.issues).toBe(0)
 
         const updatedPage = await payload.findByID({
-          collection: 'pages',
           id: existingPage.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
 
         expect(updatedPage.jsonField).toEqual(updatedExistingJson)
 
         const newPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: `JSON Upsert New ${timestamp}` },
           },
@@ -2066,6 +2386,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             or: [
               { title: { equals: `JSON Upsert Existing ${timestamp}` } },
@@ -2075,12 +2396,12 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
 
-      it('should import json fields from manually created CSV', async () => {
+      test('should import json fields from manually created CSV', async ({ payload }) => {
         const manualJson = {
           settings: {
-            theme: 'dark',
             notifications: true,
             preferences: ['email', 'sms'],
+            theme: 'dark',
           },
         }
 
@@ -2092,24 +2413,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'manual-json-csv.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'manual-json-csv.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -2117,6 +2440,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPage = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'Manual CSV Import' },
           },
@@ -2127,23 +2451,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { equals: 'Manual CSV Import' },
           },
         })
       })
 
-      it('should handle multiple imports updating the same json fields', async () => {
-        const jsonV1 = { version: 1, items: ['a'] }
-        const jsonV2 = { version: 2, items: ['a', 'b'] }
-        const jsonV3 = { version: 3, items: ['a', 'b', 'c'] }
+      test('should handle multiple imports updating the same json fields', async ({ payload }) => {
+        const jsonV1 = { items: ['a'], version: 1 }
+        const jsonV2 = { items: ['a', 'b'], version: 2 }
+        const jsonV3 = { items: ['a', 'b', 'c'], version: 3 }
 
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Sequential Import Test',
             jsonField: jsonV1,
+            title: 'Sequential Import Test',
           },
+          overrideAccess: true,
         })
 
         let csvContent =
@@ -2154,25 +2480,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'update',
             matchField: 'id',
           },
           file: {
+            name: 'sequential-1.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'sequential-1.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         let updatedPage = await payload.findByID({
-          collection: 'pages',
           id: page.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
         expect(updatedPage.jsonField).toEqual(jsonV2)
 
@@ -2184,60 +2512,65 @@ describe('@payloadcms/plugin-import-export', () => {
 
         importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'update',
             matchField: 'id',
           },
           file: {
+            name: 'sequential-2.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'sequential-2.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         updatedPage = await payload.findByID({
-          collection: 'pages',
           id: page.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
         expect(updatedPage.jsonField).toEqual(jsonV3)
 
         await payload.delete({
-          collection: 'pages',
           id: page.id,
+          collection: 'pages',
+          overrideAccess: true,
         })
       })
     })
 
-    describe('Excel compatibility', () => {
-      it('should include UTF-8 BOM at the start of CSV files', async () => {
+    test.describe('Excel compatibility', () => {
+      test('should include UTF-8 BOM at the start of CSV files', async ({ payload }) => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'BOM Test',
-            excerpt: 'Testing BOM presence',
             _status: 'published',
+            excerpt: 'Testing BOM presence',
+            title: 'BOM Test',
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title'],
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const buffer = fs.readFileSync(csvPath)
 
@@ -2245,36 +2578,38 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(buffer[1]).toBe(0xbb)
         expect(buffer[2]).toBe(0xbf)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should correctly encode UTF-8 characters for Excel', async () => {
+      test('should correctly encode UTF-8 characters for Excel', async ({ payload }) => {
         const unicodeTitle = 'Ümlauts, émojis 🎉, 日本語, and spëcial çharacters'
         const unicodeExcerpt = 'Ñoño señor • bullet points • áéíóú'
 
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: unicodeTitle,
-            excerpt: unicodeExcerpt,
             _status: 'published',
+            excerpt: unicodeExcerpt,
+            title: unicodeTitle,
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'excerpt'],
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
 
         const rawContent = fs.readFileSync(csvPath, 'utf-8')
@@ -2287,57 +2622,65 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data[0].title).toBe(unicodeTitle)
         expect(data[0].excerpt).toBe(unicodeExcerpt)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should handle special CSV characters that could break Excel parsing', async () => {
+      test('should handle special CSV characters that could break Excel parsing', async ({
+        payload,
+      }) => {
         const specialCharsTitle = 'Title with "quotes" and, commas'
         const specialCharsExcerpt = 'Line1\nLine2\nLine3 with\ttabs'
 
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: specialCharsTitle,
-            excerpt: specialCharsExcerpt,
             _status: 'published',
+            excerpt: specialCharsExcerpt,
+            title: specialCharsTitle,
           },
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'excerpt'],
             format: 'csv',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const csvPath = path.join(dirname, './uploads', doc.filename as string)
         const data = await readCSV(csvPath)
 
         expect(data[0].title).toBe(specialCharsTitle)
         expect(data[0].excerpt).toBe(specialCharsExcerpt)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should preserve Hebrew characters in CSV download via streaming endpoint', async () => {
+      test('should preserve Hebrew characters in CSV download via streaming endpoint', async ({
+        payload,
+        restClient,
+      }) => {
         const hebrewTitle = 'Hebrew BOM Test'
         const hebrewLocalized = 'בדיקה עברית'
 
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: hebrewTitle,
-            localized: hebrewLocalized,
             _status: 'published',
+            localized: hebrewLocalized,
+            title: hebrewTitle,
           },
           locale: 'he',
+          overrideAccess: true,
         })
 
         const response = await restClient.POST('/exports/download', {
@@ -2371,26 +2714,26 @@ describe('@payloadcms/plugin-import-export', () => {
         const content = buffer.toString('utf-8')
         expect(content).toContain(hebrewLocalized)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should preserve Hebrew characters in job-created CSV export', async () => {
+      test('should preserve Hebrew characters in job-created CSV export', async ({ payload }) => {
         const hebrewTitle = 'Hebrew Jobs Test'
         const hebrewLocalized = 'שלום עולם'
 
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: hebrewTitle,
-            localized: hebrewLocalized,
             _status: 'published',
+            localized: hebrewLocalized,
+            title: hebrewTitle,
           },
           locale: 'he',
+          overrideAccess: true,
         })
 
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'localized'],
@@ -2398,11 +2741,13 @@ describe('@payloadcms/plugin-import-export', () => {
             locale: 'he',
             where: { id: { equals: page.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
 
         // Verify filename includes collection slug and csv extension
         expect(doc.filename).toContain('-pages')
@@ -2425,36 +2770,41 @@ describe('@payloadcms/plugin-import-export', () => {
         const data = await readCSV(csvPath)
         expect(data[0].localized).toBe(hebrewLocalized)
 
-        await payload.delete({ collection: 'pages', id: page.id })
+        await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
       })
 
-      it('should preserve Hebrew characters in hook-created CSV export (no jobs queue)', async () => {
+      test('should preserve Hebrew characters in hook-created CSV export (no jobs queue)', async ({
+        payload,
+      }) => {
         const hebrewTitle = 'Hebrew Hooks Test'
         const hebrewContent = 'טקסט בעברית'
 
         const post = await payload.create({
           collection: 'posts',
           data: {
-            title: hebrewTitle,
-            content: richTextData,
             _status: 'published',
+            content: richTextData,
+            title: hebrewTitle,
           },
+          overrideAccess: true,
         })
 
         const doc = await payload.create({
           collection: 'posts-export',
-          user,
           data: {
             collectionSlug: 'posts',
             fields: ['id', 'title'],
             format: 'csv',
             where: { id: { equals: post.id } },
           },
+          overrideAccess: true,
+          user,
         })
 
         const exportDoc = await payload.findByID({
-          collection: 'posts-export',
           id: doc.id,
+          collection: 'posts-export',
+          overrideAccess: true,
         })
 
         // Verify filename includes collection slug and csv extension
@@ -2478,26 +2828,27 @@ describe('@payloadcms/plugin-import-export', () => {
         const data = await readCSV(csvPath)
         expect(data[0].title).toBe(hebrewTitle)
 
-        await payload.delete({ collection: 'posts', id: post.id })
+        await payload.delete({ id: post.id, collection: 'posts', overrideAccess: true })
       })
     })
 
-    describe('fields', () => {
-      it('should export checkbox field as true/false strings', async () => {
+    test.describe('fields', () => {
+      test('should export checkbox field as true/false strings', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'checkbox'],
             format: 'csv',
             where: { title: { contains: 'Checkbox ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2508,21 +2859,22 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(['false', '0', '']).toContain(falseDoc?.checkbox)
       })
 
-      it('should export select field values', async () => {
+      test('should export select field values', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'select'],
             format: 'csv',
             where: { title: { contains: 'Select ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2531,21 +2883,22 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data.find((d) => d.title === 'Select 2')?.select).toBe('option3')
       })
 
-      it('should export select hasMany field values', async () => {
+      test('should export select hasMany field values', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'selectHasMany'],
             format: 'csv',
             where: { title: { contains: 'SelectMany ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2553,21 +2906,22 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(selectManyDoc).toBeDefined()
       })
 
-      it('should export radio field values', async () => {
+      test('should export radio field values', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'radio'],
             format: 'csv',
             where: { title: { contains: 'Radio ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2576,21 +2930,22 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data.find((d) => d.title === 'Radio 2')?.radio).toBe('radio3')
       })
 
-      it('should export email field values', async () => {
+      test('should export email field values', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'email'],
             format: 'csv',
             where: { title: { contains: 'Email ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2598,21 +2953,22 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data.find((d) => d.title === 'Email 1')?.email).toBe('test1@example.com')
       })
 
-      it('should export textarea field with multiline content', async () => {
+      test('should export textarea field with multiline content', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'textarea'],
             format: 'csv',
             where: { title: { contains: 'Textarea ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2621,84 +2977,88 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(textarea0?.textarea).toContain('Line 2')
       })
 
-      it('should export code field values', async () => {
+      test('should export code field values', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'code'],
             format: 'csv',
             where: { title: { contains: 'Code ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
         expect(data.find((d) => d.title === 'Code 0')?.code).toContain('function test0')
       })
 
-      it('should export point field values', async () => {
+      test('should export point field values', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'point'],
             format: 'csv',
             where: { title: { contains: 'Point ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
         expect(data.find((d) => d.title === 'Point 0')).toBeDefined()
       })
 
-      it('should export hasMany text field values', async () => {
+      test('should export hasMany text field values', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'textHasMany'],
             format: 'csv',
             where: { title: { contains: 'TextMany ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
         expect(data.find((d) => d.title === 'TextMany 0')).toBeDefined()
       })
 
-      it('should export upload field values as IDs', async () => {
+      test('should export upload field values as IDs', async ({ payload }) => {
         let doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'pages',
             fields: ['id', 'title', 'upload'],
             format: 'csv',
             where: { title: { contains: 'Upload ' } },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        doc = await payload.findByID({ id: doc.id, collection: 'exports', overrideAccess: true })
         const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
 
         expect(data).toHaveLength(3)
@@ -2709,15 +3069,16 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    describe('custom ID exports', () => {
+    test.describe('custom ID exports', () => {
       const createdCustomIdPages: string[] = []
 
-      afterEach(async () => {
+      test.afterEach(async ({ payload }) => {
         for (const id of createdCustomIdPages) {
           try {
             await payload.delete({
-              collection: customIdPagesSlug as CollectionSlug,
               id,
+              collection: customIdPagesSlug as CollectionSlug,
+              overrideAccess: true,
             })
           } catch {
             // Ignore cleanup errors
@@ -2726,13 +3087,14 @@ describe('@payloadcms/plugin-import-export', () => {
         createdCustomIdPages.length = 0
       })
 
-      it('should export documents with custom text IDs to CSV', async () => {
+      test('should export documents with custom text IDs to CSV', async ({ payload }) => {
         await payload.create({
           collection: customIdPagesSlug as CollectionSlug,
           data: {
             id: 'export-custom-1',
             title: 'Export Custom Page 1',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -2741,28 +3103,31 @@ describe('@payloadcms/plugin-import-export', () => {
             id: 'export-custom-2',
             title: 'Export Custom Page 2',
           },
+          overrideAccess: true,
         })
 
         createdCustomIdPages.push('export-custom-1', 'export-custom-2')
 
         let exportDoc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: customIdPagesSlug,
-            format: 'csv',
             fields: ['id', 'title'],
+            format: 'csv',
             where: {
               id: { in: ['export-custom-1', 'export-custom-2'] },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
-          collection: 'exports',
           id: exportDoc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toContain('.csv')
@@ -2780,13 +3145,14 @@ describe('@payloadcms/plugin-import-export', () => {
         )
       })
 
-      it('should export documents with custom text IDs to JSON', async () => {
+      test('should export documents with custom text IDs to JSON', async ({ payload }) => {
         await payload.create({
           collection: customIdPagesSlug as CollectionSlug,
           data: {
             id: 'export-json-1',
             title: 'Export JSON Page 1',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -2795,28 +3161,31 @@ describe('@payloadcms/plugin-import-export', () => {
             id: 'export-json-2',
             title: 'Export JSON Page 2',
           },
+          overrideAccess: true,
         })
 
         createdCustomIdPages.push('export-json-1', 'export-json-2')
 
         let exportDoc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: customIdPagesSlug,
-            format: 'json',
             fields: ['id', 'title'],
+            format: 'json',
             where: {
               id: { in: ['export-json-1', 'export-json-2'] },
             },
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         exportDoc = await payload.findByID({
-          collection: 'exports',
           id: exportDoc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toContain('.json')
@@ -2836,10 +3205,11 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('imports', () => {
-    beforeEach(async () => {
+  test.describe('imports', () => {
+    test.beforeEach(async ({ payload }) => {
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           id: { exists: true },
         },
@@ -2847,31 +3217,32 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'imports',
+        overrideAccess: true,
         where: {
           id: { exists: true },
         },
       })
     })
 
-    it('should import collection documents from CSV with defined fields', async () => {
+    test('should import collection documents from CSV with defined fields', async ({ payload }) => {
       const createdPages = []
       for (let i = 0; i < 3; i++) {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: `Import Test ${i}`,
             group: {
-              value: `group value ${i}`,
               array: [{ field1: `test ${i}` }],
+              value: `group value ${i}`,
             },
+            title: `Import Test ${i}`,
           },
+          overrideAccess: true,
         })
         createdPages.push(page)
       }
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'title', 'group.value', 'group.array.field1'],
@@ -2880,19 +3251,23 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Import Test ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Import Test ' },
         },
@@ -2900,31 +3275,33 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'import-test.csv',
           data: fs.readFileSync(csvPath),
           mimetype: 'text/csv',
-          name: 'import-test.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       if (importDoc.status !== 'completed') {
         console.log('Import did not complete (CSV test):', {
+          issueDetails: importDoc.summary?.issueDetails,
           status: importDoc.status,
           summary: importDoc.summary,
-          issueDetails: importDoc.summary?.issueDetails,
         })
       }
       expect(importDoc.status).toBe('completed')
@@ -2933,10 +3310,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Import Test ' },
         },
-        sort: 'title',
       })
 
       expect(importedPages.docs).toHaveLength(3)
@@ -2945,19 +3323,19 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPages.docs[0]?.group?.array?.[0]?.field1).toBe('test 0')
     })
 
-    it('should import collection documents from JSON', async () => {
+    test('should import collection documents from JSON', async ({ payload }) => {
       const testData = [
         {
-          title: 'JSON Import 1',
           group: {
             value: 'json group 1',
           },
+          title: 'JSON Import 1',
         },
         {
-          title: 'JSON Import 2',
           group: {
             value: 'json group 2',
           },
+          title: 'JSON Import 2',
         },
       ]
 
@@ -2965,24 +3343,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'import-test.json',
           data: jsonBuffer,
           mimetype: 'application/json',
-          name: 'import-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -2991,10 +3371,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'JSON Import ' },
         },
-        sort: 'title',
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -3002,37 +3383,39 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPages.docs[0]?.group?.value).toBe('json group 1')
     })
 
-    it('should update existing documents in update mode', async () => {
+    test('should update existing documents in update mode', async ({ payload }) => {
       const page1 = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Update Test 1',
           group: {
             value: 'initial value 1',
           },
+          title: 'Update Test 1',
         },
+        overrideAccess: true,
       })
 
       const page2 = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Update Test 2',
           group: {
             value: 'initial value 2',
           },
+          title: 'Update Test 2',
         },
+        overrideAccess: true,
       })
 
       const updateData = [
         {
           id: page1.id,
-          title: 'Updated Test 1',
           group_value: 'updated value 1',
+          title: 'Updated Test 1',
         },
         {
           id: page2.id,
-          title: 'Updated Test 2',
           group_value: 'updated value 2',
+          title: 'Updated Test 2',
         },
       ]
 
@@ -3044,25 +3427,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'update',
           matchField: 'id',
         },
         file: {
+          name: 'update-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'update-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3071,36 +3456,38 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importDoc.summary?.issues).toBe(0)
 
       const updatedPage1 = await payload.findByID({
-        collection: 'pages',
         id: page1.id,
+        collection: 'pages',
+        overrideAccess: true,
       })
 
       expect(updatedPage1.title).toBe('Updated Test 1')
       expect(updatedPage1.group?.value).toBe('updated value 1')
     })
 
-    it('should handle upsert mode correctly', async () => {
+    test('should handle upsert mode correctly', async ({ payload }) => {
       const timestamp = Date.now()
       const existingPage = await payload.create({
         collection: 'pages',
-        draft: false,
         data: {
-          title: `Upsert Test ${timestamp}`,
-          excerpt: 'existing',
           _status: 'published',
+          excerpt: 'existing',
+          title: `Upsert Test ${timestamp}`,
         },
+        draft: false,
+        overrideAccess: true,
       })
 
       const upsertData = [
         {
           id: String(existingPage.id), // Ensure ID is a string
-          title: `Upsert Test ${timestamp} Updated`,
           excerpt: 'updated',
+          title: `Upsert Test ${timestamp} Updated`,
         },
         {
           id: '999999', // Non-existent ID
-          title: `Upsert Test ${timestamp} New`,
           excerpt: 'new',
+          title: `Upsert Test ${timestamp} New`,
         },
       ]
 
@@ -3112,25 +3499,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const initialImportDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'upsert',
           matchField: 'id',
         },
         file: {
+          name: 'upsert-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'upsert-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const importDoc = await payload.findByID({
-        collection: 'imports',
         id: initialImportDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3139,16 +3528,16 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importDoc.summary?.issues).toBe(0)
 
       const publishedPage = await payload.findByID({
-        collection: 'pages',
         id: existingPage.id,
+        collection: 'pages',
         depth: 0,
         draft: false, // Get published version
         overrideAccess: true,
       })
 
       const draftPage = await payload.findByID({
-        collection: 'pages',
         id: existingPage.id,
+        collection: 'pages',
         depth: 0,
         draft: true, // Get draft version
         overrideAccess: true,
@@ -3160,6 +3549,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const newPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: `Upsert Test ${timestamp} New` },
         },
@@ -3168,7 +3558,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(newPages.docs[0]?.excerpt).toBe('new')
     })
 
-    it('should import localized fields from CSV with single locale', async () => {
+    test('should import localized fields from CSV with single locale', async ({ payload }) => {
       const csvContent =
         'title,localized\n' +
         '"Localized Import 1","en single locale test 1"\n' +
@@ -3178,24 +3568,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'localized-single-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'localized-single-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3204,20 +3596,22 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        locale: 'en',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Localized Import ' },
         },
-        locale: 'en',
-        sort: 'title',
       })
 
       expect(importedPages.docs).toHaveLength(2)
       expect(importedPages.docs[0]?.localized).toBe('en single locale test 1')
     })
 
-    it('should import localized fields from CSV with multiple locales', async () => {
+    test('should import localized fields from CSV with multiple locales', async ({ payload }) => {
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Localized ' },
         },
@@ -3232,24 +3626,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'localized-multi-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'localized-multi-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3258,11 +3654,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPagesEn = await payload.find({
         collection: 'pages',
+        locale: 'en',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Multi-locale Import ' },
         },
-        locale: 'en',
-        sort: 'title',
       })
 
       expect(importedPagesEn.docs).toHaveLength(2)
@@ -3270,18 +3667,21 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPagesEs = await payload.find({
         collection: 'pages',
+        locale: 'es',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Multi-locale Import ' },
         },
-        locale: 'es',
-        sort: 'title',
       })
 
       expect(importedPagesEs.docs).toHaveLength(2)
       expect(importedPagesEs.docs[0]?.localized).toBe('Spanish text 1')
     })
 
-    it('should import localized fields correctly regardless of CSV column order', async () => {
+    test('should import localized fields correctly regardless of CSV column order', async ({
+      payload,
+    }) => {
       // CSV columns intentionally put 'de' before 'en' (the defaultLocale)
       // to verify the import uses defaultLocale, not CSV column order
       const csvContent =
@@ -3293,24 +3693,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'locale-order-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'locale-order-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3320,11 +3722,12 @@ describe('@payloadcms/plugin-import-export', () => {
       // Verify English (defaultLocale) has the correct English values, not German
       const importedPagesEn = await payload.find({
         collection: 'pages',
+        locale: 'en',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Locale Order Test ' },
         },
-        locale: 'en',
-        sort: 'title',
       })
 
       expect(importedPagesEn.docs).toHaveLength(2)
@@ -3334,11 +3737,12 @@ describe('@payloadcms/plugin-import-export', () => {
       // Verify German has the correct German values, not missing
       const importedPagesDe = await payload.find({
         collection: 'pages',
+        locale: 'de',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Locale Order Test ' },
         },
-        locale: 'de',
-        sort: 'title',
       })
 
       expect(importedPagesDe.docs).toHaveLength(2)
@@ -3348,11 +3752,12 @@ describe('@payloadcms/plugin-import-export', () => {
       // Verify Spanish has the correct Spanish values
       const importedPagesEs = await payload.find({
         collection: 'pages',
+        locale: 'es',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Locale Order Test ' },
         },
-        locale: 'es',
-        sort: 'title',
       })
 
       expect(importedPagesEs.docs).toHaveLength(2)
@@ -3362,13 +3767,14 @@ describe('@payloadcms/plugin-import-export', () => {
       // Cleanup
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Locale Order Test ' },
         },
       })
     })
 
-    it('should import array fields from CSV', async () => {
+    test('should import array fields from CSV', async ({ payload }) => {
       const csvContent =
         'title,array_0_field1,array_0_field2,array_1_field1,array_1_field2\n' +
         '"Array Import 1","foo1","bar1","foo2","bar2"\n' +
@@ -3378,24 +3784,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'array-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'array-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3404,10 +3812,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Array Import ' },
         },
-        sort: 'title',
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -3418,7 +3827,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPages.docs[0]?.array?.[1]?.field2).toBe('bar2')
     })
 
-    it('should import blocks fields from CSV', async () => {
+    test('should import blocks fields from CSV', async ({ payload }) => {
       const csvContent =
         'title,blocks_0_hero_blockType,blocks_0_hero_title,blocks_1_content_blockType,blocks_1_content_richText\n' +
         '"Blocks Import 1","hero","Hero Title 1","content","{""root"":{""children"":[{""children"":[{""text"":""Sample content""}],""type"":""paragraph""}],""type"":""root""}}"'
@@ -3427,24 +3836,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'blocks-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'blocks-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3453,6 +3864,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Blocks Import 1' },
         },
@@ -3464,13 +3876,14 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(blocks?.[0]?.blockType).toBe('hero')
       const heroBlock = blocks?.[0]
       if (heroBlock?.blockType === 'hero') {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect((heroBlock as { blockType: 'hero'; title?: string })?.title).toBe('Hero Title 1')
       }
       expect(blocks?.[1]?.blockType).toBe('content')
     })
 
-    it('should import hasMany number fields from CSV with various formats', async () => {
+    test('should import hasMany number fields from CSV with various formats', async ({
+      payload,
+    }) => {
       const csvContent =
         'title,hasManyNumber\n' +
         '"HasMany Comma-Separated","1,2,3,5,8"\n' + // Comma-separated format
@@ -3483,25 +3896,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
-          importMode: 'create',
           debug: true, // Enable debug logging
+          importMode: 'create',
         },
         file: {
+          name: 'hasmany-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'hasmany-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       if (importDoc.status !== 'completed') {
@@ -3517,10 +3932,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'HasMany ' },
         },
-        sort: 'title',
       })
 
       expect(importedPages.docs).toHaveLength(5)
@@ -3534,10 +3950,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const empty = importedPages.docs.find((d) => d?.title === 'HasMany Empty')
 
       if (empty?.hasManyNumber) {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(empty?.hasManyNumber).toEqual([])
       } else {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(empty?.hasManyNumber).not.toBeTruthy()
       }
 
@@ -3548,10 +3962,11 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(mixedEmpty?.hasManyNumber).toEqual([1, 3, 5])
     })
 
-    it('should import relationship fields from CSV', async () => {
+    test('should import relationship fields from CSV', async ({ payload }) => {
       const users = await payload.find({
         collection: 'users',
         limit: 3,
+        overrideAccess: true,
       })
       const userId1 = users.docs[0]?.id
       const userId2 = users.docs[1]?.id || userId1 // Fallback if only one user
@@ -3566,24 +3981,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'relationship-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'relationship-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3592,10 +4009,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        depth: 1,
+        overrideAccess: true,
         where: {
           title: { contains: 'Relationship Import ' },
         },
-        depth: 1,
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -3609,26 +4027,29 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(extractID(page2?.author)).toBe(userId2)
     })
 
-    it('should handle explicit null vs empty polymorphic relationships in import', async () => {
-      const users = await payload.find({ collection: 'users', limit: 1 })
-      const posts = await payload.find({ collection: 'posts', limit: 1 })
+    test('should handle explicit null vs empty polymorphic relationships in import', async ({
+      payload,
+    }) => {
+      const users = await payload.find({ collection: 'users', limit: 1, overrideAccess: true })
+      const posts = await payload.find({ collection: 'posts', limit: 1, overrideAccess: true })
       const userId = users.docs[0]?.id
       const postId = posts.docs[0]?.id
 
       const existingPage = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Original Title',
           excerpt: 'Original Excerpt',
+          group: {
+            value: 'Original Group Value',
+          },
+          hasManyPolymorphic: [{ relationTo: 'posts', value: postId! }],
           hasOnePolymorphic: {
             relationTo: 'users',
             value: userId!,
           },
-          hasManyPolymorphic: [{ relationTo: 'posts', value: postId! }],
-          group: {
-            value: 'Original Group Value',
-          },
+          title: 'Original Title',
         },
+        overrideAccess: true,
       })
 
       const csvUpdate = [
@@ -3638,25 +4059,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'update',
           matchField: 'id',
         },
         file: {
+          name: 'update-polymorphic-test.csv',
           data: Buffer.from(csvUpdate),
           mimetype: 'text/csv',
-          name: 'update-polymorphic-test.csv',
           size: csvUpdate.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3664,8 +4087,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importDoc.summary?.updated).toBe(1)
 
       const updatedPage = await payload.findByID({
-        collection: 'pages',
         id: existingPage.id,
+        collection: 'pages',
+        overrideAccess: true,
       })
 
       expect(updatedPage.title).toBe('Updated Title')
@@ -3674,19 +4098,22 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(updatedPage.hasManyPolymorphic).toHaveLength(1)
 
       await payload.delete({
-        collection: 'pages',
         id: existingPage.id,
+        collection: 'pages',
+        overrideAccess: true,
       })
     })
 
-    it('should import polymorphic relationship fields from CSV', async () => {
+    test('should import polymorphic relationship fields from CSV', async ({ payload }) => {
       const users = await payload.find({
         collection: 'users',
         limit: 1,
+        overrideAccess: true,
       })
       const posts = await payload.find({
         collection: 'posts',
         limit: 2,
+        overrideAccess: true,
       })
       const userId = users.docs[0]?.id
       const postId1 = posts.docs[0]?.id
@@ -3700,24 +4127,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'polymorphic-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'polymorphic-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3726,10 +4155,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        depth: 0,
+        overrideAccess: true,
         where: {
           title: { equals: 'Polymorphic Import 1' },
         },
-        depth: 0,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -3749,7 +4179,7 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    it('should skip virtual fields during import', async () => {
+    test('should skip virtual fields during import', async ({ payload }) => {
       const csvContent =
         'title,virtual,virtualRelationship\n' +
         '"Virtual Import Test","ignored value","ignored relationship"'
@@ -3758,24 +4188,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'virtual-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'virtual-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3784,6 +4216,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Virtual Import Test' },
         },
@@ -3793,7 +4226,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPages.docs[0]?.virtual).toBe('virtual value')
     })
 
-    it('should correctly handle draft/published status when creating documents', async () => {
+    test('should correctly handle draft/published status when creating documents', async ({
+      payload,
+    }) => {
       const csvContent =
         'title,_status\n' +
         '"Draft Import 1","draft"\n' +
@@ -3804,24 +4239,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'status-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'status-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3830,10 +4267,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const draftPages = await payload.find({
         collection: 'pages',
+        draft: true,
+        overrideAccess: true,
         where: {
           title: { contains: 'Draft Import ' },
         },
-        draft: true,
       })
 
       expect(draftPages.docs).toHaveLength(2)
@@ -3841,16 +4279,19 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const publishedPages = await payload.find({
         collection: 'pages',
+        draft: false,
+        overrideAccess: true, // Query for published documents only
         where: {
           title: { contains: 'Published Import ' },
         },
-        draft: false, // Query for published documents only
       })
 
       expect(publishedPages.docs).toHaveLength(1)
     })
 
-    it('should default to creating published documents when no _status specified', async () => {
+    test('should default to creating published documents when no _status specified', async ({
+      payload,
+    }) => {
       payload.config.debug = true
 
       const csvContent =
@@ -3862,24 +4303,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'default-status-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'default-status-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -3888,10 +4331,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const pages = await payload.find({
         collection: 'pages',
+        draft: false,
+        overrideAccess: true, // Query for published documents
         where: {
           title: { contains: 'Default Status Test ' },
         },
-        draft: false, // Query for published documents
       })
 
       expect(pages.docs).toHaveLength(2)
@@ -3899,30 +4343,32 @@ describe('@payloadcms/plugin-import-export', () => {
       payload.config.debug = false
     })
 
-    it('should handle error scenarios gracefully', async () => {
+    test('should handle error scenarios gracefully', async ({ payload }) => {
       const missingFieldCsv = ''
       const missingFieldBuffer = Buffer.from(missingFieldCsv)
 
       let importDoc1 = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'missing-field-test.csv',
           data: missingFieldBuffer,
           mimetype: 'text/csv',
-          name: 'missing-field-test.csv',
           size: missingFieldBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc1 = await payload.findByID({
-        collection: 'imports',
         id: importDoc1.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc1.status).toBe('completed')
@@ -3934,24 +4380,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc2 = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'invalid-type-test.csv',
           data: invalidTypeBuffer,
           mimetype: 'text/csv',
-          name: 'invalid-type-test.csv',
           size: invalidTypeBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc2 = await payload.findByID({
-        collection: 'imports',
         id: importDoc2.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc2.status).toBe('completed')
@@ -3963,25 +4411,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc3 = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'update',
           matchField: 'id',
         },
         file: {
+          name: 'non-existent-test.csv',
           data: nonExistentBuffer,
           mimetype: 'text/csv',
-          name: 'non-existent-test.csv',
           size: nonExistentBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc3 = await payload.findByID({
-        collection: 'imports',
         id: importDoc3.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc3.status).toBe('failed')
@@ -3989,7 +4439,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importDoc3.summary?.updated).toBe(0)
     })
 
-    it('should handle partial import success correctly', async () => {
+    test('should handle partial import success correctly', async ({ payload }) => {
       const timestamp = Date.now()
       const mixedCsv =
         'title,hasManyNumber_0,_status\n' +
@@ -4002,24 +4452,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'mixed-import-test.csv',
           data: mixedBuffer,
           mimetype: 'text/csv',
-          name: 'mixed-import-test.csv',
           size: mixedBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('partial')
@@ -4057,8 +4509,8 @@ describe('@payloadcms/plugin-import-export', () => {
         const allPages = await payload.find({
           collection: 'pages',
           draft: true,
-          overrideAccess: true,
           limit: 100,
+          overrideAccess: true,
         })
         console.log('  Total pages in collection:', allPages.docs.length)
         const relevantPages = allPages.docs.filter(
@@ -4074,7 +4526,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(validPage2.docs).toHaveLength(1)
     })
 
-    it('should import nested group fields correctly', async () => {
+    test('should import nested group fields correctly', async ({ payload }) => {
       const csvContent =
         'title,group_value,group_ignore,group_array_0_field1,group_array_0_field2\n' +
         '"Nested Group Import","nested value","ignore value","array field 1","array field 2"'
@@ -4083,24 +4535,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'nested-group-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'nested-group-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4109,6 +4563,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Nested Group Import' },
         },
@@ -4123,7 +4578,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(page?.group?.array?.[0]?.field2).toBe('array field 2')
     })
 
-    it('should handle tabs and collapsible fields during import', async () => {
+    test('should handle tabs and collapsible fields during import', async ({ payload }) => {
       const csvContent =
         'title,tabToCSV,namedTab_tabToCSV,textFieldInCollapsible\n' +
         '"Tab Import Test","tab value 1","named tab value","collapsible value"'
@@ -4132,24 +4587,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'tabs-collapsible-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'tabs-collapsible-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4158,6 +4615,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Tab Import Test' },
         },
@@ -4170,7 +4628,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(page?.textFieldInCollapsible).toBe('collapsible value')
     })
 
-    it('should skip disabled fields during import', async () => {
+    test('should skip disabled fields during import', async ({ payload }) => {
       const pagesCollection = payload.config.collections.find((c) => c.slug === 'pages')
       if (pagesCollection && pagesCollection.admin) {
         pagesCollection.admin.custom = {
@@ -4189,24 +4647,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'disabled-fields-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'disabled-fields-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4215,6 +4675,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Disabled Fields Test' },
         },
@@ -4233,7 +4694,7 @@ describe('@payloadcms/plugin-import-export', () => {
       }
     })
 
-    it('should create jobs task for imports', async () => {
+    test('should create jobs task for imports', async ({ payload }) => {
       const csvContent =
         'title,excerpt\n' + '"Jobs Import 1","excerpt 1"\n' + '"Jobs Import 2","excerpt 2"'
 
@@ -4241,21 +4702,23 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const doc = await payload.create({
         collection: 'imports' as CollectionSlug,
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'jobs-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'jobs-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
       const { docs: jobs } = await payload.find({
         collection: 'payload-jobs' as CollectionSlug,
+        overrideAccess: true,
         where: {
           taskSlug: { equals: 'createCollectionImport' },
         },
@@ -4279,11 +4742,12 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(input.importCollection).toStrictEqual('imports')
       expect(input.userCollection).toBeDefined()
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const importDoc = await payload.findByID({
-        collection: 'imports' as CollectionSlug,
         id: doc.id,
+        collection: 'imports' as CollectionSlug,
+        overrideAccess: true,
       })
 
       interface ImportDocWithStatus {
@@ -4297,10 +4761,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        overrideAccess: true, // Sort by title to ensure consistent order
+        sort: 'title',
         where: {
           title: { contains: 'Jobs Import ' },
         },
-        sort: 'title', // Sort by title to ensure consistent order
       })
 
       expect(importedPages.docs).toHaveLength(2)
@@ -4308,30 +4773,32 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPages.docs[0]?.excerpt).toBe('excerpt 1')
     })
 
-    it('should successfully roundtrip export and import with toCSV/fromCSV functions', async () => {
+    test('should successfully roundtrip export and import with beforeExport/beforeImport hooks', async ({
+      payload,
+    }) => {
       const createdPages = []
       for (let i = 0; i < 3; i++) {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: `Roundtrip Test ${i}`,
             custom: 'custom value',
+            customRelationship: user.id,
             group: {
               custom: 'group custom value',
             },
-            tabToCSV: 'tab custom value',
             namedTab: {
               tabToCSV: 'named tab custom value',
             },
-            customRelationship: user.id,
+            tabToCSV: 'tab custom value',
+            title: `Roundtrip Test ${i}`,
           },
+          overrideAccess: true,
         })
         createdPages.push(page)
       }
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: [
@@ -4348,13 +4815,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Roundtrip Test ' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -4365,6 +4835,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Roundtrip Test ' },
         },
@@ -4372,24 +4843,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'roundtrip-test.csv',
           data: fs.readFileSync(csvPath),
           mimetype: 'text/csv',
-          name: 'roundtrip-test.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4398,11 +4871,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        depth: 1,
+        overrideAccess: true,
+        sort: 'title',
         where: {
           title: { contains: 'Roundtrip Test ' },
         },
-        sort: 'title',
-        depth: 1,
       })
 
       expect(importedPages.docs).toHaveLength(3)
@@ -4411,45 +4885,29 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPages.docs[0]?.group?.custom).toBe('group custom value toCSV')
     })
 
-    it('should handle all field types in export/import roundtrip', async () => {
+    test('should handle all field types in export/import roundtrip', async ({ payload }) => {
       const testUser = await payload.find({
         collection: 'users',
         limit: 1,
+        overrideAccess: true,
       })
       const testPost = await payload.create({
         collection: 'posts',
         data: {
           title: 'Test Post for Roundtrip',
         },
+        overrideAccess: true,
       })
 
       const testPage = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Complete Roundtrip Test',
-          excerpt: 'Test excerpt',
-          localized: 'Localized content',
-          hasManyNumber: [10, 20, 30, 40, 50],
-          relationship: testUser.docs[0]?.id,
-          author: testUser.docs[0]?.id,
-          hasOnePolymorphic: {
-            relationTo: 'posts',
-            value: testPost.id,
-          },
-          hasManyPolymorphic: [
-            {
-              relationTo: 'users',
-              value: testUser.docs[0]?.id,
-            },
-            {
-              relationTo: 'posts',
-              value: testPost.id,
-            },
-          ],
+          _status: 'published',
           array: [
             { field1: 'array1-field1', field2: 'array1-field2' },
             { field1: 'array2-field1', field2: 'array2-field2' },
           ],
+          author: testUser.docs[0]?.id,
           blocks: [
             {
               blockType: 'hero',
@@ -4460,18 +4918,36 @@ describe('@payloadcms/plugin-import-export', () => {
               richText: richTextData,
             },
           ],
+          excerpt: 'Test excerpt',
           group: {
-            value: 'Group value',
-            ignore: 'Should be included',
             array: [{ field1: 'nested1', field2: 'nested2' }],
+            ignore: 'Should be included',
+            value: 'Group value',
           },
-          _status: 'published',
+          hasManyNumber: [10, 20, 30, 40, 50],
+          hasManyPolymorphic: [
+            {
+              relationTo: 'users',
+              value: testUser.docs[0]?.id,
+            },
+            {
+              relationTo: 'posts',
+              value: testPost.id,
+            },
+          ],
+          hasOnePolymorphic: {
+            relationTo: 'posts',
+            value: testPost.id,
+          },
+          localized: 'Localized content',
+          relationship: testUser.docs[0]?.id,
+          title: 'Complete Roundtrip Test',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: [],
@@ -4481,42 +4957,48 @@ describe('@payloadcms/plugin-import-export', () => {
             id: { equals: testPage.id },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
 
       await payload.delete({
-        collection: 'pages',
         id: testPage.id,
+        collection: 'pages',
+        overrideAccess: true,
       })
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'complete-roundtrip.csv',
           data: fs.readFileSync(csvPath),
           mimetype: 'text/csv',
-          name: 'complete-roundtrip.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -4525,10 +5007,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPages = await payload.find({
         collection: 'pages',
+        depth: 0,
+        overrideAccess: true,
         where: {
           title: { equals: 'Complete Roundtrip Test' },
         },
-        depth: 0,
       })
 
       expect(importedPages.docs).toHaveLength(1)
@@ -4553,13 +5036,14 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(imported?.group?.array).toHaveLength(1)
 
       await payload.delete({
-        collection: 'posts',
         id: testPost.id,
+        collection: 'posts',
+        overrideAccess: true,
       })
     })
 
-    describe('batch processing', () => {
-      it('should process large imports in batches', async () => {
+    test.describe('batch processing', () => {
+      test('should process large imports in batches', async ({ payload }) => {
         const rows = ['title,excerpt']
         for (let i = 0; i < 250; i++) {
           rows.push(`"Batch Test ${i}","Excerpt ${i}"`)
@@ -4569,24 +5053,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'batch-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'batch-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -4595,23 +5081,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPages = await payload.find({
           collection: 'pages',
+          limit: 300,
+          overrideAccess: true,
           where: {
             title: { contains: 'Batch Test ' },
           },
-          limit: 300,
         })
 
         expect(importedPages.totalDocs).toBe(250)
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Batch Test ' },
           },
         })
       })
 
-      it('should handle errors in batch processing and continue', async () => {
+      test('should handle errors in batch processing and continue', async ({ payload }) => {
         const csvContent = `title,excerpt,relationship
 "Valid Doc 1","Excerpt 1",""
 "Valid Doc 2","Excerpt 2","invalid-id"
@@ -4623,24 +5111,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'batch-errors-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'batch-errors-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('partial')
@@ -4649,16 +5139,18 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Valid Doc ' },
           },
         })
       })
 
-      it('should report row numbers in errors correctly', async () => {
+      test('should report row numbers in errors correctly', async ({ payload }) => {
         const testUser = await payload.find({
           collection: 'users',
           limit: 1,
+          overrideAccess: true,
         })
         const userId = testUser.docs[0]?.id
 
@@ -4672,45 +5164,48 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'row-numbers-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'row-numbers-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.summary?.imported).toBe(3)
 
         if (importDoc.summary?.issueDetails && Array.isArray(importDoc.summary.issueDetails)) {
           const issues = importDoc.summary.issueDetails as Array<{ error: string; row: number }>
-          // eslint-disable-next-line vitest/no-conditional-expect
+
           expect(issues).toHaveLength(1)
-          // eslint-disable-next-line vitest/no-conditional-expect
+
           expect(issues[0]?.row).toBe(3)
         }
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Row ' },
           },
         })
       })
 
-      it('should handle batch processing with localized fields', async () => {
+      test('should handle batch processing with localized fields', async ({ payload }) => {
         const rows = ['title,localized_en,localized_es']
         for (let i = 0; i < 150; i++) {
           rows.push(`"Batch Localized ${i}","English ${i}","Spanish ${i}"`)
@@ -4720,24 +5215,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'batch-localized-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'batch-localized-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -4746,11 +5243,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPagesEn = await payload.find({
           collection: 'pages',
+          limit: 200,
+          locale: 'en',
+          overrideAccess: true,
           where: {
             title: { contains: 'Batch Localized ' },
           },
-          locale: 'en',
-          limit: 200,
         })
 
         expect(importedPagesEn.totalDocs).toBe(150)
@@ -4758,48 +5256,54 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPagesEs = await payload.find({
           collection: 'pages',
+          limit: 200,
+          locale: 'es',
+          overrideAccess: true,
           where: {
             title: { contains: 'Batch Localized ' },
           },
-          locale: 'es',
-          limit: 200,
         })
 
         expect(importedPagesEs.docs[0]?.localized).toContain('Spanish')
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Batch Localized ' },
           },
         })
       })
 
-      it('should respect defaultVersionStatus configuration and create published documents', async () => {
+      test('should respect defaultVersionStatus configuration and create published documents', async ({
+        payload,
+      }) => {
         const csvContent =
           'title,excerpt\n"Default Status Test 1","Test excerpt 1"\n"Default Status Test 2","Test excerpt 2"'
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'default-status-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'default-status-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -4808,10 +5312,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const publishedPages = await payload.find({
           collection: 'pages',
+          draft: false,
+          overrideAccess: true,
           where: {
             title: { contains: 'Default Status Test ' },
           },
-          draft: false,
         })
 
         expect(publishedPages.totalDocs).toBe(2)
@@ -4821,37 +5326,42 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Default Status Test ' },
           },
         })
       })
 
-      it('should create draft documents when explicit _status:draft is in CSV', async () => {
+      test('should create draft documents when explicit _status:draft is in CSV', async ({
+        payload,
+      }) => {
         const csvContent =
           'title,excerpt,_status\n"Explicit Draft Test 1","Test excerpt 1","draft"\n"Explicit Draft Test 2","Test excerpt 2","draft"'
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'explicit-draft-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'explicit-draft-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -4860,10 +5370,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const draftPages = await payload.find({
           collection: 'pages',
+          draft: true,
+          overrideAccess: true,
           where: {
             title: { contains: 'Explicit Draft Test ' },
           },
-          draft: true,
         })
 
         expect(draftPages.totalDocs).toBe(2)
@@ -4873,38 +5384,43 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Explicit Draft Test ' },
           },
         })
       })
 
-      it('should create published documents in upsert mode when document does not exist', async () => {
+      test('should create published documents in upsert mode when document does not exist', async ({
+        payload,
+      }) => {
         const csvContent =
           'title,excerpt\n"Upsert New Published Test 1","Test excerpt 1"\n"Upsert New Published Test 2","Test excerpt 2"'
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'upsert',
             matchField: 'title',
           },
           file: {
+            name: 'upsert-new-published-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'upsert-new-published-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -4913,10 +5429,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const publishedPages = await payload.find({
           collection: 'pages',
+          draft: false,
+          overrideAccess: true,
           where: {
             title: { contains: 'Upsert New Published Test ' },
           },
-          draft: false,
         })
 
         expect(publishedPages.totalDocs).toBe(2)
@@ -4926,37 +5443,42 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Upsert New Published Test ' },
           },
         })
       })
 
-      it('should handle manual CSV with localized fields without locale suffix', async () => {
+      test('should handle manual CSV with localized fields without locale suffix', async ({
+        payload,
+      }) => {
         const csvContent =
           'title,localized\n"Manual Locale Test 1","Default locale content 1"\n"Manual Locale Test 2","Default locale content 2"'
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'manual-locale-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'manual-locale-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -4965,6 +5487,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Manual Locale Test ' },
           },
@@ -4980,6 +5503,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: {
             title: { contains: 'Manual Locale Test ' },
           },
@@ -4987,8 +5511,8 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    describe('fields', () => {
-      it('should import checkbox field from CSV', async () => {
+    test.describe('fields', () => {
+      test('should import checkbox field from CSV', async ({ payload }) => {
         const csvContent =
           'title,checkbox\n' +
           '"Checkbox Import True","true"\n' +
@@ -5000,30 +5524,36 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'checkbox-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'checkbox-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(4)
 
         const importedPages = await payload.find({
           collection: 'pages',
-          where: { title: { contains: 'Checkbox Import ' } },
+          overrideAccess: true,
           sort: 'title',
+          where: { title: { contains: 'Checkbox Import ' } },
         })
 
         expect(importedPages.docs).toHaveLength(4)
@@ -5040,11 +5570,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { contains: 'Checkbox Import ' } },
         })
       })
 
-      it('should import select field from CSV', async () => {
+      test('should import select field from CSV', async ({ payload }) => {
         const csvContent =
           'title,select\n' +
           '"Select Import 1","option1"\n' +
@@ -5055,30 +5586,36 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'select-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'select-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(3)
 
         const importedPages = await payload.find({
           collection: 'pages',
-          where: { title: { contains: 'Select Import ' } },
+          overrideAccess: true,
           sort: 'title',
+          where: { title: { contains: 'Select Import ' } },
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5094,11 +5631,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { contains: 'Select Import ' } },
         })
       })
 
-      it('should import radio field from CSV', async () => {
+      test('should import radio field from CSV', async ({ payload }) => {
         const csvContent =
           'title,radio\n' +
           '"Radio Import 1","radio1"\n' +
@@ -5109,30 +5647,36 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'radio-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'radio-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(3)
 
         const importedPages = await payload.find({
           collection: 'pages',
-          where: { title: { contains: 'Radio Import ' } },
+          overrideAccess: true,
           sort: 'title',
+          where: { title: { contains: 'Radio Import ' } },
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5142,11 +5686,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { contains: 'Radio Import ' } },
         })
       })
 
-      it('should import email field from CSV', async () => {
+      test('should import email field from CSV', async ({ payload }) => {
         const csvContent =
           'title,email\n' +
           '"Email Import 1","user1@example.com"\n' +
@@ -5156,30 +5701,36 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'email-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'email-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(2)
 
         const importedPages = await payload.find({
           collection: 'pages',
-          where: { title: { contains: 'Email Import ' } },
+          overrideAccess: true,
           sort: 'title',
+          where: { title: { contains: 'Email Import ' } },
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5192,39 +5743,46 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { contains: 'Email Import ' } },
         })
       })
 
-      it('should import textarea field with multiline content from CSV', async () => {
+      test('should import textarea field with multiline content from CSV', async ({ payload }) => {
         const csvContent = 'title,textarea\n' + '"Textarea Import 1","Line 1\nLine 2\nLine 3"'
 
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'textarea-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'textarea-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(1)
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { equals: 'Textarea Import 1' } },
         })
 
@@ -5234,39 +5792,46 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { equals: 'Textarea Import 1' } },
         })
       })
 
-      it('should import code field from CSV', async () => {
+      test('should import code field from CSV', async ({ payload }) => {
         const csvContent = 'title,code\n' + '"Code Import 1","function hello() { return 42; }"'
 
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'code-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'code-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(1)
 
         const importedPages = await payload.find({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { equals: 'Code Import 1' } },
         })
 
@@ -5275,11 +5840,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { equals: 'Code Import 1' } },
         })
       })
 
-      it('should import point field from CSV', async () => {
+      test('should import point field from CSV', async ({ payload }) => {
         const csvContent =
           'title,point_0,point_1\n' +
           '"Point Import SF","-122.4194","37.7749"\n' +
@@ -5289,30 +5855,36 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'point-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'point-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(2)
 
         const importedPages = await payload.find({
           collection: 'pages',
-          where: { title: { contains: 'Point Import ' } },
+          overrideAccess: true,
           sort: 'title',
+          where: { title: { contains: 'Point Import ' } },
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5325,11 +5897,14 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { contains: 'Point Import ' } },
         })
       })
 
-      it('should import selectHasMany field from CSV with indexed format', async () => {
+      test('should import selectHasMany field from CSV with indexed format', async ({
+        payload,
+      }) => {
         const csvContent =
           'title,selectHasMany_0,selectHasMany_1,selectHasMany_2\n' +
           '"SelectHasMany Import 1","tagA","tagB",""\n' +
@@ -5340,30 +5915,36 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'select-hasmany-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'select-hasmany-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(3)
 
         const importedPages = await payload.find({
           collection: 'pages',
-          where: { title: { contains: 'SelectHasMany Import ' } },
+          overrideAccess: true,
           sort: 'title',
+          where: { title: { contains: 'SelectHasMany Import ' } },
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5379,11 +5960,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { contains: 'SelectHasMany Import ' } },
         })
       })
 
-      it('should import textHasMany field from CSV with indexed format', async () => {
+      test('should import textHasMany field from CSV with indexed format', async ({ payload }) => {
         const csvContent =
           'title,textHasMany_0,textHasMany_1,textHasMany_2\n' +
           '"TextHasMany Import 1","value1","value2",""\n' +
@@ -5394,30 +5976,36 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'text-hasmany-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'text-hasmany-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(3)
 
         const importedPages = await payload.find({
           collection: 'pages',
-          where: { title: { contains: 'TextHasMany Import ' } },
+          overrideAccess: true,
           sort: 'title',
+          where: { title: { contains: 'TextHasMany Import ' } },
         })
 
         expect(importedPages.docs).toHaveLength(3)
@@ -5433,11 +6021,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { contains: 'TextHasMany Import ' } },
         })
       })
 
-      it('should import upload field from CSV with media ID', async () => {
+      test('should import upload field from CSV with media ID', async ({ payload }) => {
         const imageFilePath = path.resolve(dirname, './image.png')
         const imageFile = await getFileByPath(imageFilePath)
 
@@ -5450,6 +6039,7 @@ describe('@payloadcms/plugin-import-export', () => {
             ...imageFile,
             name: 'import-test-media.png',
           } as File,
+          overrideAccess: true,
         })
 
         const csvContent = `title,upload\n"Upload Import 1","${media.id}"\n"Upload Import 2","${media.id}"`
@@ -5458,31 +6048,37 @@ describe('@payloadcms/plugin-import-export', () => {
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'pages',
             importMode: 'create',
           },
           file: {
+            name: 'upload-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'upload-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
-        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        importDoc = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
+        })
 
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(2)
 
         const importedPages = await payload.find({
           collection: 'pages',
-          where: { title: { contains: 'Upload Import ' } },
-          sort: 'title',
           depth: 0,
+          overrideAccess: true,
+          sort: 'title',
+          where: { title: { contains: 'Upload Import ' } },
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5491,24 +6087,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'pages',
+          overrideAccess: true,
           where: { title: { contains: 'Upload Import ' } },
         })
         await payload.delete({
-          collection: 'media',
           id: media.id,
+          collection: 'media',
+          overrideAccess: true,
         })
       })
     })
 
-    describe('custom ID imports', () => {
+    test.describe('custom ID imports', () => {
       const createdCustomIdPages: string[] = []
 
-      afterEach(async () => {
+      test.afterEach(async ({ payload }) => {
         for (const id of createdCustomIdPages) {
           try {
             await payload.delete({
-              collection: customIdPagesSlug as CollectionSlug,
               id,
+              collection: customIdPagesSlug as CollectionSlug,
+              overrideAccess: true,
             })
           } catch {
             // Ignore cleanup errors
@@ -5517,7 +6116,7 @@ describe('@payloadcms/plugin-import-export', () => {
         createdCustomIdPages.length = 0
       })
 
-      it('should import documents with custom text IDs in create mode', async () => {
+      test('should import documents with custom text IDs in create mode', async ({ payload }) => {
         const testData = [
           { id: 'custom-page-1', title: 'Custom ID Page 1' },
           { id: 'custom-page-2', title: 'Custom ID Page 2' },
@@ -5528,24 +6127,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: customIdPagesSlug,
             importMode: 'create',
           },
           file: {
+            name: 'custom-id-import.json',
             data: jsonBuffer,
             mimetype: 'application/json',
-            name: 'custom-id-import.json',
             size: jsonBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5554,6 +6155,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPages = await payload.find({
           collection: customIdPagesSlug as CollectionSlug,
+          overrideAccess: true,
           sort: 'id',
         })
 
@@ -5566,30 +6168,32 @@ describe('@payloadcms/plugin-import-export', () => {
         createdCustomIdPages.push('custom-page-1', 'custom-page-2', 'custom-page-3')
       })
 
-      it('should import documents with custom text IDs from CSV', async () => {
+      test('should import documents with custom text IDs from CSV', async ({ payload }) => {
         const csvContent = `id,title\ncustom-csv-1,CSV Custom Page 1\ncustom-csv-2,CSV Custom Page 2`
         const csvBuffer = Buffer.from(csvContent)
 
         const importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: customIdPagesSlug,
             importMode: 'create',
           },
           file: {
+            name: 'custom-id-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'custom-id-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5597,10 +6201,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPages = await payload.find({
           collection: customIdPagesSlug as CollectionSlug,
+          overrideAccess: true,
+          sort: 'id',
           where: {
             id: { in: ['custom-csv-1', 'custom-csv-2'] },
           },
-          sort: 'id',
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5610,7 +6215,9 @@ describe('@payloadcms/plugin-import-export', () => {
         createdCustomIdPages.push('custom-csv-1', 'custom-csv-2')
       })
 
-      it('should preserve custom IDs in upsert mode when creating new documents', async () => {
+      test('should preserve custom IDs in upsert mode when creating new documents', async ({
+        payload,
+      }) => {
         const testData = [
           { id: 'upsert-custom-1', title: 'Upsert Custom Page 1' },
           { id: 'upsert-custom-2', title: 'Upsert Custom Page 2' },
@@ -5620,25 +6227,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: customIdPagesSlug,
             importMode: 'upsert',
             matchField: 'id',
           },
           file: {
+            name: 'upsert-custom-id.json',
             data: jsonBuffer,
             mimetype: 'application/json',
-            name: 'upsert-custom-id.json',
             size: jsonBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5646,10 +6255,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedPages = await payload.find({
           collection: customIdPagesSlug as CollectionSlug,
+          overrideAccess: true,
+          sort: 'id',
           where: {
             id: { in: ['upsert-custom-1', 'upsert-custom-2'] },
           },
-          sort: 'id',
         })
 
         expect(importedPages.docs).toHaveLength(2)
@@ -5659,13 +6269,16 @@ describe('@payloadcms/plugin-import-export', () => {
         createdCustomIdPages.push('upsert-custom-1', 'upsert-custom-2')
       })
 
-      it('should update existing documents with custom IDs in upsert mode', async () => {
+      test('should update existing documents with custom IDs in upsert mode', async ({
+        payload,
+      }) => {
         await payload.create({
           collection: customIdPagesSlug,
           data: {
             id: 'existing-custom-1',
             title: 'Original Title',
           },
+          overrideAccess: true,
         })
 
         createdCustomIdPages.push('existing-custom-1')
@@ -5676,45 +6289,51 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: customIdPagesSlug,
             importMode: 'upsert',
             matchField: 'id',
           },
           file: {
+            name: 'upsert-update-custom-id.json',
             data: jsonBuffer,
             mimetype: 'application/json',
-            name: 'upsert-update-custom-id.json',
             size: jsonBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
         expect(completedImport.summary?.updated).toBe(1)
 
         const updatedPage = await payload.findByID({
-          collection: customIdPagesSlug as CollectionSlug,
           id: 'existing-custom-1',
+          collection: customIdPagesSlug as CollectionSlug,
+          overrideAccess: true,
         })
 
         expect(updatedPage.title).toBe('Updated Title via Upsert')
       })
 
-      it('should update existing documents with custom IDs in update mode', async () => {
+      test('should update existing documents with custom IDs in update mode', async ({
+        payload,
+      }) => {
         await payload.create({
           collection: customIdPagesSlug as CollectionSlug,
           data: {
             id: 'update-mode-custom-1',
             title: 'Original Title for Update Mode',
           },
+          overrideAccess: true,
         })
 
         createdCustomIdPages.push('update-mode-custom-1')
@@ -5736,14 +6355,16 @@ describe('@payloadcms/plugin-import-export', () => {
             mimetype: 'application/json',
             size: jsonBuffer.length,
           },
+          overrideAccess: true,
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
           id: importDoc.id,
           collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('completed')
@@ -5752,12 +6373,15 @@ describe('@payloadcms/plugin-import-export', () => {
         const updatedPage = await payload.findByID({
           id: 'update-mode-custom-1',
           collection: customIdPagesSlug as CollectionSlug,
+          overrideAccess: true,
         })
 
         expect(updatedPage.title).toBe('Updated via Update Mode')
       })
 
-      it('should report issue for non-existing documents in update mode with custom IDs', async () => {
+      test('should report issue for non-existing documents in update mode with custom IDs', async ({
+        payload,
+      }) => {
         const testData = [{ id: 'non-existing-custom-id', title: 'This should fail' }]
 
         const jsonBuffer = Buffer.from(JSON.stringify(testData))
@@ -5775,14 +6399,16 @@ describe('@payloadcms/plugin-import-export', () => {
             mimetype: 'application/json',
             size: jsonBuffer.length,
           },
+          overrideAccess: true,
           user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const completedImport = await payload.findByID({
           id: importDoc.id,
           collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(completedImport.status).toBe('failed')
@@ -5792,8 +6418,10 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('collection configuration', () => {
-    it('should exclude collections with custom export collections from base exports', () => {
+  test.describe('collection configuration', () => {
+    test('should exclude collections with custom export collections from base exports', ({
+      payload,
+    }) => {
       const exportsConfig = payload.collections['exports'].config
       const validSlugs =
         exportsConfig.admin?.custom?.['plugin-import-export']?.collectionSlugs || []
@@ -5808,7 +6436,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(validSlugs).toContain(customIdPagesSlug)
     })
 
-    it('should exclude collections with custom import collections from base imports', () => {
+    test('should exclude collections with custom import collections from base imports', ({
+      payload,
+    }) => {
       const importsConfig = payload.collections['imports'].config
       const validSlugs =
         importsConfig.admin?.custom?.['plugin-import-export']?.collectionSlugs || []
@@ -5822,7 +6452,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(validSlugs).toContain(customIdPagesSlug)
     })
 
-    it('custom export collection should only have its target collection slug', () => {
+    test('custom export collection should only have its target collection slug', ({ payload }) => {
       const postsExportConfig = payload.collections['posts-export'].config
       const validSlugs =
         postsExportConfig.admin?.custom?.['plugin-import-export']?.collectionSlugs || []
@@ -5831,7 +6461,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(validSlugs).toEqual(['posts'])
     })
 
-    it('custom import collection should only have its target collection slug', () => {
+    test('custom import collection should only have its target collection slug', ({ payload }) => {
       const postsImportConfig = payload.collections['posts-import'].config
       const validSlugs =
         postsImportConfig.admin?.custom?.['plugin-import-export']?.collectionSlugs || []
@@ -5841,23 +6471,27 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('posts-exports-only and posts-imports-only collections', () => {
-    describe('posts-exports-only', () => {
-      it('should export from posts-exports-only collection (no jobs queue)', async () => {
+  test.describe('posts-exports-only and posts-imports-only collections', () => {
+    test.describe('posts-exports-only', () => {
+      test('should export from posts-exports-only collection (no jobs queue)', async ({
+        payload,
+      }) => {
         const doc = await payload.create({
           collection: 'exports',
-          user,
           data: {
             collectionSlug: 'posts-exports-only',
             format: 'csv',
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const exportDoc = await payload.findByID({
-          collection: 'exports',
           id: doc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -5869,31 +6503,36 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data[0].title).toContain('Export Only Post')
       })
 
-      it('should not allow restricted user to export from posts-exports-only (access control)', async () => {
+      test('should not allow restricted user to export from posts-exports-only (access control)', async ({
+        payload,
+      }) => {
         const doc = await payload.create({
           collection: 'exports',
-          user: restrictedUser,
           data: {
             collectionSlug: 'posts-exports-only',
             format: 'csv',
           },
+          overrideAccess: true,
+          user: restrictedUser,
         })
 
         const {
           docs: [latestJob],
         } = await payload.find({
           collection: 'payload-jobs',
-          sort: '-createdAt',
           limit: 1,
+          overrideAccess: true,
+          sort: '-createdAt',
         })
 
         expect(latestJob).toBeDefined()
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         const exportDoc = await payload.findByID({
-          collection: 'exports',
           id: doc.id,
+          collection: 'exports',
+          overrideAccess: true,
         })
 
         const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
@@ -5903,31 +6542,35 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    describe('posts-imports-only', () => {
-      it('should import to posts-imports-only collection (no jobs queue, synchronous)', async () => {
+    test.describe('posts-imports-only', () => {
+      test('should import to posts-imports-only collection (no jobs queue, synchronous)', async ({
+        payload,
+      }) => {
         const csvContent = 'title\n"Sync Import Test 1"\n"Sync Import Test 2"\n"Sync Import Test 3"'
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'posts-imports-only',
             importMode: 'create',
           },
           file: {
+            name: 'sync-import-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'sync-import-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -5936,6 +6579,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedDocs = await payload.find({
           collection: 'posts-imports-only',
+          overrideAccess: true,
           where: {
             title: { contains: 'Sync Import Test' },
           },
@@ -5945,36 +6589,40 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'posts-imports-only',
+          overrideAccess: true,
           where: {
             title: { contains: 'Sync Import Test' },
           },
         })
       })
 
-      it('should not allow restricted user to import to posts-imports-only (access control)', async () => {
+      test('should not allow restricted user to import to posts-imports-only (access control)', async ({
+        payload,
+      }) => {
         const csvContent = 'title\n"Restricted Import Test 1"\n"Restricted Import Test 2"'
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user: restrictedUser,
           data: {
             collectionSlug: 'posts-imports-only',
             importMode: 'create',
           },
           file: {
+            name: 'restricted-import-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'restricted-import-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user: restrictedUser,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
           overrideAccess: true,
         })
 
@@ -5984,6 +6632,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedDocs = await payload.find({
           collection: 'posts-imports-only',
+          overrideAccess: true,
           where: {
             title: { contains: 'Restricted Import Test' },
           },
@@ -5992,31 +6641,35 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(importedDocs.totalDocs).toBe(0)
       })
 
-      it('should create draft documents when defaultVersionStatus is draft in plugin config', async () => {
+      test('should create draft documents when defaultVersionStatus is draft in plugin config', async ({
+        payload,
+      }) => {
         const csvContent =
           'title,_status\n"Default Draft Config Test 1",""\n"Default Draft Config Test 2",""\n"Default Draft Config Override Test","published"'
         const csvBuffer = Buffer.from(csvContent)
 
         let importDoc = await payload.create({
           collection: 'imports',
-          user,
           data: {
             collectionSlug: 'posts-imports-only',
             importMode: 'create',
           },
           file: {
+            name: 'default-draft-config-test.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'default-draft-config-test.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
-        await payload.jobs.run()
+        await payload.jobs.run({ overrideAccess: true })
 
         importDoc = await payload.findByID({
-          collection: 'imports',
           id: importDoc.id,
+          collection: 'imports',
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -6025,10 +6678,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const draftDocs = await payload.find({
           collection: 'posts-imports-only',
+          draft: true,
+          overrideAccess: true,
           where: {
             title: { contains: 'Default Draft Config Test' },
           },
-          draft: true,
         })
 
         expect(draftDocs.totalDocs).toBe(2)
@@ -6038,10 +6692,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const publishedDocs = await payload.find({
           collection: 'posts-imports-only',
+          draft: false,
+          overrideAccess: true,
           where: {
             title: { equals: 'Default Draft Config Override Test' },
           },
-          draft: false,
         })
 
         expect(publishedDocs.totalDocs).toBe(1)
@@ -6049,6 +6704,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'posts-imports-only',
+          overrideAccess: true,
           where: {
             or: [
               { title: { contains: 'Default Draft Config Test' } },
@@ -6060,32 +6716,35 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('access control with jobs queue', () => {
-    it('should respect access control when export uses jobs queue', async () => {
+  test.describe('access control with jobs queue', () => {
+    test('should respect access control when export uses jobs queue', async ({ payload }) => {
       for (let i = 0; i < 3; i++) {
         await payload.create({
           collection: 'pages',
           data: {
             title: `Access Control Export Test ${i}`,
           },
+          overrideAccess: true,
         })
       }
 
       const doc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
           limit: 100,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportDoc = await payload.findByID({
-        collection: 'exports',
         id: doc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportDoc.filename).toBeDefined()
@@ -6095,30 +6754,32 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data.length).toBeGreaterThan(0)
     })
 
-    it('should respect access control when import uses jobs queue', async () => {
+    test('should respect access control when import uses jobs queue', async ({ payload }) => {
       const csvContent = 'title\n"Jobs Queue Import 1"\n"Jobs Queue Import 2"'
       const csvBuffer = Buffer.from(csvContent)
 
       const importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'jobs-queue-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'jobs-queue-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const updatedImportDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(updatedImportDoc.status).toBe('completed')
@@ -6126,6 +6787,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedDocs = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Jobs Queue Import' },
         },
@@ -6135,6 +6797,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Jobs Queue Import' },
         },
@@ -6142,24 +6805,26 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('preview endpoints', () => {
-    it('should return export preview data for CSV format', async () => {
+  test.describe('preview endpoints', () => {
+    test('should return export preview data for CSV format', async ({ payload, restClient }) => {
       await payload.create({
         collection: 'pages',
         data: {
-          title: 'Preview Export Test 1',
-          excerpt: 'Excerpt for preview 1',
           _status: 'published',
+          excerpt: 'Excerpt for preview 1',
+          title: 'Preview Export Test 1',
         },
+        overrideAccess: true,
       })
 
       await payload.create({
         collection: 'pages',
         data: {
-          title: 'Preview Export Test 2',
-          excerpt: 'Excerpt for preview 2',
           _status: 'published',
+          excerpt: 'Excerpt for preview 2',
+          title: 'Preview Export Test 2',
         },
+        overrideAccess: true,
       })
 
       const response = await restClient
@@ -6187,23 +6852,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Preview Export Test' },
         },
       })
     })
 
-    it('should return export preview data for JSON format', async () => {
+    test('should return export preview data for JSON format', async ({ payload, restClient }) => {
       await payload.create({
         collection: 'pages',
         data: {
-          title: 'JSON Preview Export Test',
+          _status: 'published',
           excerpt: 'JSON excerpt',
           group: {
             value: 'nested group value',
           },
-          _status: 'published',
+          title: 'JSON Preview Export Test',
         },
+        overrideAccess: true,
       })
 
       const response = await restClient
@@ -6229,13 +6896,14 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'JSON Preview Export Test' },
         },
       })
     })
 
-    it('should return import preview data for CSV', async () => {
+    test('should return import preview data for CSV', async ({ restClient }) => {
       const csvContent =
         'title,excerpt\n"Import Preview Test 1","Excerpt 1"\n"Import Preview Test 2","Excerpt 2"'
       const base64Data = Buffer.from(csvContent).toString('base64')
@@ -6259,10 +6927,10 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.totalDocs).toBe(2)
     })
 
-    it('should return import preview data for JSON', async () => {
+    test('should return import preview data for JSON', async ({ restClient }) => {
       const jsonContent = JSON.stringify([
-        { title: 'JSON Import Preview 1', excerpt: 'Excerpt 1' },
-        { title: 'JSON Import Preview 2', excerpt: 'Excerpt 2' },
+        { excerpt: 'Excerpt 1', title: 'JSON Import Preview 1' },
+        { excerpt: 'Excerpt 2', title: 'JSON Import Preview 2' },
       ])
       const base64Data = Buffer.from(jsonContent).toString('base64')
 
@@ -6284,7 +6952,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.totalDocs).toBe(2)
     })
 
-    it('should handle invalid collection slug in export preview', async () => {
+    test('should handle invalid collection slug in export preview', async ({ restClient }) => {
       const response = await restClient.POST('/exports/export-preview', {
         body: JSON.stringify({
           collectionSlug: 'nonexistent-collection',
@@ -6300,17 +6968,69 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data.error).toContain('not found')
     })
 
-    it('should apply toCSV customizations in export preview and remove replaced columns', async () => {
+    test('rejects an invalid preview field path and keeps collection access unchanged', async ({
+      payload,
+      restClient,
+    }) => {
+      const post = await payload.create({
+        collection: 'posts-imports-only',
+        data: {
+          title: 'Preview field validation',
+        },
+        overrideAccess: true,
+      })
+      const objectPrototypeBefore = Object.getOwnPropertyDescriptors(Object.prototype)
+
+      try {
+        const previewResponse = await restClient.POST('/exports/export-preview', {
+          auth: false,
+          body: JSON.stringify({
+            collectionSlug: 'posts-imports-only',
+            fields: ['__proto__.overrideAccess'],
+            format: 'json',
+          }),
+        })
+        const objectPrototypeAfterPreview = Object.getOwnPropertyDescriptors(Object.prototype)
+
+        const updateResponse = await restClient.PATCH(`/posts-imports-only/${post.id}`, {
+          auth: false,
+          body: JSON.stringify({ title: 'Updated preview field validation' }),
+        })
+        const unchangedPost = await payload.findByID({
+          id: post.id,
+          collection: 'posts-imports-only',
+          overrideAccess: true,
+        })
+
+        expect(previewResponse.status).toBe(400)
+        expect(objectPrototypeAfterPreview).toEqual(objectPrototypeBefore)
+        expect(updateResponse.status).toBe(403)
+        expect(unchangedPost.title).toBe('Preview field validation')
+      } finally {
+        delete (Object.prototype as Record<string, unknown>).overrideAccess
+        await payload.delete({
+          id: post.id,
+          collection: 'posts-imports-only',
+          overrideAccess: true,
+        })
+      }
+    })
+
+    test('should apply beforeExport hook customizations in export preview and remove replaced columns', async ({
+      payload,
+      restClient,
+    }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Preview toCSV Test',
-          customRelationship: user.user.id,
-          customRelNameEmail: user.user.id,
-          customRelIdName: user.user.id,
-          excerpt: 'preview excerpt',
           _status: 'published',
+          customRelationship: user.id,
+          customRelIdName: user.id,
+          customRelNameEmail: user.id,
+          excerpt: 'preview excerpt',
+          title: 'Preview beforeExport Test',
         },
+        overrideAccess: true,
       })
 
       const response = await restClient
@@ -6354,27 +7074,31 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(doc.customRelationship_email).toBeDefined()
 
       expect(doc.customRelNameEmail_name).toBe('name value')
-      expect(doc.customRelNameEmail_email).toBe(user.user.email)
+      expect(doc.customRelNameEmail_email).toBe(user.email)
 
-      expect(doc.customRelIdName_id).toBe(user.user.id)
+      expect(doc.customRelIdName_id).toBe(user.id)
       expect(doc.customRelIdName_locationName).toBe('name value')
 
       // excerpt should still be present
       expect(doc.excerpt).toBe('preview excerpt')
 
-      await payload.delete({ collection: 'pages', id: page.id })
+      await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
     })
 
-    it('should remove replaced columns from preview when no fields are selected', async () => {
+    test('should remove replaced columns from preview when no fields are selected', async ({
+      payload,
+      restClient,
+    }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Preview No Fields toCSV Test',
-          customRelationship: user.user.id,
-          customRelNameEmail: user.user.id,
-          customRelIdName: user.user.id,
           _status: 'published',
+          customRelationship: user.id,
+          customRelIdName: user.id,
+          customRelNameEmail: user.id,
+          title: 'Preview No Fields beforeExport Test',
         },
+        overrideAccess: true,
       })
 
       const response = await restClient
@@ -6392,7 +7116,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(response.docs).toHaveLength(1)
 
-      // Original columns replaced by toCSV should not appear in columns or doc data
+      // Original columns replaced by beforeExport hook should not appear in columns or doc data
       const responseColumns: string[] = response.columns
       const doc = response.docs[0]
 
@@ -6414,10 +7138,10 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(responseColumns).not.toContain('customRelIdName')
       expect(doc).not.toHaveProperty('customRelIdName')
 
-      await payload.delete({ collection: 'pages', id: page.id })
+      await payload.delete({ id: page.id, collection: 'pages', overrideAccess: true })
     })
 
-    it('should handle invalid collection slug in import preview', async () => {
+    test('should handle invalid collection slug in import preview', async ({ restClient }) => {
       const csvContent = 'title\n"Test"'
       const base64Data = Buffer.from(csvContent).toString('base64')
 
@@ -6437,7 +7161,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data.error).toContain('not found')
     })
 
-    it('should handle missing file data in import preview', async () => {
+    test('should handle missing file data in import preview', async ({ restClient }) => {
       const response = await restClient.POST('/imports/preview-data', {
         body: JSON.stringify({
           collectionSlug: 'pages',
@@ -6453,7 +7177,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data.error).toContain('No file data')
     })
 
-    it('should paginate import preview data for CSV', async () => {
+    test('should paginate import preview data for CSV', async ({ restClient }) => {
       const rows = ['title,excerpt']
       for (let i = 0; i < 15; i++) {
         rows.push(`"Import Pagination Test ${i}","Excerpt ${i}"`)
@@ -6520,10 +7244,10 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(responsePage2.hasPrevPage).toBe(true)
     })
 
-    it('should paginate import preview data for JSON', async () => {
+    test('should paginate import preview data for JSON', async ({ restClient }) => {
       const items = []
       for (let i = 0; i < 11; i++) {
-        items.push({ title: `JSON Import Test ${i}`, excerpt: `Excerpt ${i}` })
+        items.push({ excerpt: `Excerpt ${i}`, title: `JSON Import Test ${i}` })
       }
       const jsonContent = JSON.stringify(items)
       const base64Data = Buffer.from(jsonContent).toString('base64')
@@ -6586,7 +7310,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(responsePage2.hasPrevPage).toBe(true)
     })
 
-    it('should default to previewLimit 10 and previewPage 1 for import preview', async () => {
+    test('should default to previewLimit 10 and previewPage 1 for import preview', async ({
+      restClient,
+    }) => {
       const rows = ['title,excerpt']
       for (let i = 0; i < 25; i++) {
         rows.push(`"Default Pagination Test ${i}","Excerpt ${i}"`)
@@ -6620,14 +7346,15 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.totalPages).toBe(3)
     })
 
-    it('should respect preview limit (max 10)', async () => {
+    test('should respect preview limit (max 10)', async ({ payload, restClient }) => {
       for (let i = 0; i < 15; i++) {
         await payload.create({
           collection: 'pages',
           data: {
-            title: `Preview Limit Test ${i}`,
             _status: 'published',
+            title: `Preview Limit Test ${i}`,
           },
+          overrideAccess: true,
         })
       }
 
@@ -6651,20 +7378,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Preview Limit Test' },
         },
       })
     })
 
-    it('should respect export limit when paginating preview (limit 11, per page 10)', async () => {
+    test('should respect export limit when paginating preview (limit 11, per page 10)', async ({
+      payload,
+      restClient,
+    }) => {
       for (let i = 0; i < 15; i++) {
         await payload.create({
           collection: 'pages',
           data: {
-            title: `Preview Pagination Test ${i}`,
             _status: 'published',
+            title: `Preview Pagination Test ${i}`,
           },
+          overrideAccess: true,
         })
       }
 
@@ -6734,20 +7466,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Preview Pagination Test' },
         },
       })
     })
 
-    it('should return empty docs when preview page exceeds export limit boundary', async () => {
+    test('should return empty docs when preview page exceeds export limit boundary', async ({
+      payload,
+      restClient,
+    }) => {
       for (let i = 0; i < 5; i++) {
         await payload.create({
           collection: 'pages',
           data: {
-            title: `Preview Boundary Test ${i}`,
             _status: 'published',
+            title: `Preview Boundary Test ${i}`,
           },
+          overrideAccess: true,
         })
       }
 
@@ -6783,13 +7520,17 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Preview Boundary Test' },
         },
       })
     })
 
-    it('should have matching column order between preview and export when no fields selected', async () => {
+    test('should have matching column order between preview and export when no fields selected', async ({
+      payload,
+      restClient,
+    }) => {
       const previewResponse: { columns: string[]; docs: unknown[] } = await restClient
         .POST('/posts-export/export-preview', {
           body: JSON.stringify({
@@ -6808,17 +7549,19 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const exportDoc = await payload.create({
         collection: 'posts-export',
-        user,
         data: {
           collectionSlug: 'posts',
           format: 'csv',
           limit: 5,
         },
+        overrideAccess: true,
+        user,
       })
 
       const finalExportDoc = await payload.findByID({
-        collection: 'posts-export',
         id: exportDoc.id,
+        collection: 'posts-export',
+        overrideAccess: true,
       })
 
       expect(finalExportDoc.filename).toBeDefined()
@@ -6829,7 +7572,10 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(previewResponse.columns).toStrictEqual(exportColumns)
     })
 
-    it('should have matching column order between preview and export with selected fields', async () => {
+    test('should have matching column order between preview and export with selected fields', async ({
+      payload,
+      restClient,
+    }) => {
       const selectedFields = ['title', 'id', 'createdAt']
 
       const previewResponse: { columns: string[]; docs: unknown[] } = await restClient
@@ -6851,18 +7597,20 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const exportDoc = await payload.create({
         collection: 'posts-export',
-        user,
         data: {
           collectionSlug: 'posts',
           fields: selectedFields,
           format: 'csv',
           limit: 5,
         },
+        overrideAccess: true,
+        user,
       })
 
       const finalExportDoc = await payload.findByID({
-        collection: 'posts-export',
         id: exportDoc.id,
+        collection: 'posts-export',
+        overrideAccess: true,
       })
 
       expect(finalExportDoc.filename).toBeDefined()
@@ -6875,12 +7623,13 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('rich text field handling', () => {
-    it('should preserve Lexical numeric properties on JSON export/import', async () => {
+  test.describe('rich text field handling', () => {
+    test('should preserve Lexical numeric properties on JSON export/import', async ({
+      payload,
+    }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Rich Text JSON Test',
           blocks: [
             {
               blockType: 'content',
@@ -6888,12 +7637,13 @@ describe('@payloadcms/plugin-import-export', () => {
               richText: richTextData,
             },
           ],
+          title: 'Rich Text JSON Test',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'json',
@@ -6901,13 +7651,16 @@ describe('@payloadcms/plugin-import-export', () => {
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -6918,6 +7671,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           id: { equals: page.id },
         },
@@ -6926,30 +7680,33 @@ describe('@payloadcms/plugin-import-export', () => {
       const jsonBuffer = Buffer.from(JSON.stringify(exportedData))
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'rich-text-test.json',
           data: jsonBuffer,
           mimetype: 'application/json',
-          name: 'rich-text-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
 
       const importedPage = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Rich Text JSON Test' },
         },
@@ -6963,17 +7720,17 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Rich Text JSON Test' },
         },
       })
     })
 
-    it('should export rich text inside blocks to CSV and import back', async () => {
+    test('should export rich text inside blocks to CSV and import back', async ({ payload }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Rich Text CSV Block Test',
           blocks: [
             {
               blockType: 'content',
@@ -6981,12 +7738,13 @@ describe('@payloadcms/plugin-import-export', () => {
               richText: richTextData,
             },
           ],
+          title: 'Rich Text CSV Block Test',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -6994,19 +7752,23 @@ describe('@payloadcms/plugin-import-export', () => {
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           id: { equals: page.id },
         },
@@ -7014,30 +7776,33 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'rich-text-csv-test.csv',
           data: fs.readFileSync(csvPath),
           mimetype: 'text/csv',
-          name: 'rich-text-csv-test.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
 
       const importedPage = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Rich Text CSV Block Test' },
         },
@@ -7051,6 +7816,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Rich Text CSV Block Test' },
         },
@@ -7058,8 +7824,8 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('error recovery', () => {
-    it('should continue processing after individual document errors', async () => {
+  test.describe('error recovery', () => {
+    test('should continue processing after individual document errors', async ({ payload }) => {
       const csvContent =
         'title\n' +
         '"Error Recovery Test 1"\n' +
@@ -7071,24 +7837,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'error-recovery-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'error-recovery-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7096,6 +7864,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedDocs = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Error Recovery Test' },
         },
@@ -7105,13 +7874,14 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Error Recovery Test' },
         },
       })
     })
 
-    it('should report accurate error counts on partial failure', async () => {
+    test('should report accurate error counts on partial failure', async ({ payload }) => {
       const csvContent =
         'title\n' +
         '"Partial Fail Test 1"\n' +
@@ -7124,24 +7894,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'partial-fail-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'partial-fail-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7150,55 +7922,58 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Partial Fail Test' },
         },
       })
     })
 
-    it('should handle malformed CSV gracefully', async () => {
+    test('should handle malformed CSV gracefully', async ({ payload }) => {
       const malformedCSV = 'title,excerpt\n"Unclosed quote,Value'
       const csvBuffer = Buffer.from(malformedCSV)
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'malformed-csv-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 'malformed-csv-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(['failed', 'completed', 'pending']).toContain(importDoc.status)
     })
   })
 
-  describe('custom field functions edge cases', () => {
-    it('should handle toCSV function that returns undefined', async () => {
+  test.describe('custom field functions edge cases', () => {
+    test('should handle beforeExport hook that returns undefined', async ({ payload }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'ToCSV Undefined Test',
           custom: 'test value',
+          title: 'ToCSV Undefined Test',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'title', 'custom'],
@@ -7207,13 +7982,16 @@ describe('@payloadcms/plugin-import-export', () => {
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportedDoc.filename).toBeDefined()
@@ -7224,25 +8002,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           id: { equals: page.id },
         },
       })
     })
 
-    it('should apply fromCSV to reconstruct relationships', async () => {
+    test('should apply beforeImport hook to reconstruct relationships', async ({ payload }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'FromCSV Relationship Test',
-          customRelationship: user.id,
           _status: 'published',
+          customRelationship: user.id,
+          title: 'FromCSV Relationship Test',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'title', 'customRelationship'],
@@ -7251,13 +8030,16 @@ describe('@payloadcms/plugin-import-export', () => {
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7268,6 +8050,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           id: { equals: page.id },
         },
@@ -7275,30 +8058,33 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'from-csv-test.csv',
           data: fs.readFileSync(csvPath),
           mimetype: 'text/csv',
-          name: 'from-csv-test.csv',
           size: fs.statSync(csvPath).size,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
 
       const importedPage = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'FromCSV Relationship Test' },
         },
@@ -7309,6 +8095,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'FromCSV Relationship Test' },
         },
@@ -7316,22 +8103,22 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('disabled fields in complex structures', () => {
-    it('should exclude disabled fields from export', async () => {
+  test.describe('disabled fields in complex structures', () => {
+    test('should exclude disabled fields from export', async ({ payload }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Disabled Field Test',
           group: {
-            value: 'include this',
             ignore: 'this field exists but is not disabled',
+            value: 'include this',
           },
+          title: 'Disabled Field Test',
         },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'title', 'group.value'],
@@ -7340,13 +8127,16 @@ describe('@payloadcms/plugin-import-export', () => {
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7357,6 +8147,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           id: { equals: page.id },
         },
@@ -7364,24 +8155,24 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('JSON-specific tests', () => {
-    it('should import deeply nested JSON objects', async () => {
+  test.describe('JSON-specific tests', () => {
+    test('should import deeply nested JSON objects', async ({ payload }) => {
       const nestedData = [
         {
-          title: 'Deeply Nested Test',
-          group: {
-            value: 'nested value',
-            array: [
-              { field1: 'array item 1', field2: 'value 1' },
-              { field1: 'array item 2', field2: 'value 2' },
-            ],
-          },
           blocks: [
             {
               blockType: 'hero',
               title: 'Hero Block Title',
             },
           ],
+          group: {
+            array: [
+              { field1: 'array item 1', field2: 'value 1' },
+              { field1: 'array item 2', field2: 'value 2' },
+            ],
+            value: 'nested value',
+          },
+          title: 'Deeply Nested Test',
         },
       ]
 
@@ -7389,24 +8180,26 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'deeply-nested-test.json',
           data: jsonBuffer,
           mimetype: 'application/json',
-          name: 'deeply-nested-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
@@ -7414,6 +8207,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importedPage = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Deeply Nested Test' },
         },
@@ -7430,35 +8224,38 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'Deeply Nested Test' },
         },
       })
     })
 
-    it('should handle JSON export and import roundtrip with all field types', async () => {
+    test('should handle JSON export and import roundtrip with all field types', async ({
+      payload,
+    }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'JSON Roundtrip Test',
-          excerpt: 'Test excerpt',
-          localized: 'localized value',
-          hasManyNumber: [1, 2, 3, 4, 5],
           array: [
             { field1: 'a1', field2: 'a2' },
             { field1: 'b1', field2: 'b2' },
           ],
+          excerpt: 'Test excerpt',
           group: {
-            value: 'group value',
             array: [{ field1: 'ga1', field2: 'ga2' }],
+            value: 'group value',
           },
+          hasManyNumber: [1, 2, 3, 4, 5],
+          localized: 'localized value',
+          title: 'JSON Roundtrip Test',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'json',
@@ -7466,13 +8263,16 @@ describe('@payloadcms/plugin-import-export', () => {
             id: { equals: page.id },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7484,6 +8284,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           id: { equals: page.id },
         },
@@ -7492,30 +8293,33 @@ describe('@payloadcms/plugin-import-export', () => {
       const jsonBuffer = Buffer.from(JSON.stringify(exportedData))
       let importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'json-roundtrip-test.json',
           data: jsonBuffer,
           mimetype: 'application/json',
-          name: 'json-roundtrip-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       importDoc = await payload.findByID({
-        collection: 'imports',
         id: importDoc.id,
+        collection: 'imports',
+        overrideAccess: true,
       })
 
       expect(importDoc.status).toBe('completed')
 
       const importedPage = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'JSON Roundtrip Test' },
         },
@@ -7530,6 +8334,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { equals: 'JSON Roundtrip Test' },
         },
@@ -7537,20 +8342,21 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('limit and pagination edge cases', () => {
-    it('should handle page exceeding total pages', async () => {
+  test.describe('limit and pagination edge cases', () => {
+    test('should handle page exceeding total pages', async ({ payload }) => {
       await payload.create({
         collection: 'pages',
-        data: { title: 'Pagination Test 1', _status: 'published' },
+        data: { _status: 'published', title: 'Pagination Test 1' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'pages',
-        data: { title: 'Pagination Test 2', _status: 'published' },
+        data: { _status: 'published', title: 'Pagination Test 2' },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -7560,13 +8366,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Pagination Test' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportedDoc.filename).toBeDefined()
@@ -7577,23 +8386,24 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Pagination Test' },
         },
       })
     })
 
-    it('should handle very large limit values', async () => {
+    test('should handle very large limit values', async ({ payload }) => {
       for (let i = 0; i < 5; i++) {
         await payload.create({
           collection: 'pages',
           data: { title: `Large Limit Test ${i}` },
+          overrideAccess: true,
         })
       }
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -7602,13 +8412,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Large Limit Test' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportedDoc.filename).toBeDefined()
@@ -7619,25 +8432,27 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Large Limit Test' },
         },
       })
     })
 
-    it('should export correctly with limit=1', async () => {
+    test('should export correctly with limit=1', async ({ payload }) => {
       await payload.create({
         collection: 'pages',
         data: { title: 'Single Limit Test 1' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: 'pages',
         data: { title: 'Single Limit Test 2' },
+        overrideAccess: true,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -7646,13 +8461,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Single Limit Test' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
@@ -7662,6 +8480,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Single Limit Test' },
         },
@@ -7669,18 +8488,19 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('streaming export edge cases', () => {
-    it('should stream large exports without memory issues', async () => {
+  test.describe('streaming export edge cases', () => {
+    test('should stream large exports without memory issues', async ({ payload }) => {
       const promises = []
       for (let i = 0; i < 100; i++) {
         promises.push(
           payload.create({
             collection: 'pages',
             data: {
-              title: `Stream Test ${i}`,
-              excerpt: `Excerpt for stream test ${i}`,
               _status: 'published',
+              excerpt: `Excerpt for stream test ${i}`,
+              title: `Stream Test ${i}`,
             },
+            overrideAccess: true,
           }),
         )
       }
@@ -7688,7 +8508,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -7696,13 +8515,16 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Stream Test' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportedDoc.filename).toBeDefined()
@@ -7713,16 +8535,16 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: 'Stream Test' },
         },
       })
     })
 
-    it('should handle empty result set in streaming export', async () => {
+    test('should handle empty result set in streaming export', async ({ payload }) => {
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -7730,21 +8552,24 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { equals: 'NonExistent Document XYZ123' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const exportedDoc = await payload.findByID({
-        collection: 'exports',
         id: exportDoc.id,
+        collection: 'exports',
+        overrideAccess: true,
       })
 
       expect(exportedDoc).toBeDefined()
     })
   })
 
-  describe('concurrent operations', () => {
-    it('should handle multiple simultaneous imports', async () => {
+  test.describe('concurrent operations', () => {
+    test('should handle multiple simultaneous imports', async ({ payload }) => {
       const timestamp = Date.now()
 
       const csv1 = `title\n"Concurrent Import A1 ${timestamp}"\n"Concurrent Import A2 ${timestamp}"`
@@ -7752,39 +8577,41 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const import1 = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: `concurrent-import-1-${timestamp}.csv`,
           data: Buffer.from(csv1),
           mimetype: 'text/csv',
-          name: `concurrent-import-1-${timestamp}.csv`,
           size: csv1.length,
         },
+        overrideAccess: true,
+        user,
       })
 
       const import2 = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: `concurrent-import-2-${timestamp}.csv`,
           data: Buffer.from(csv2),
           mimetype: 'text/csv',
-          name: `concurrent-import-2-${timestamp}.csv`,
           size: csv2.length,
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const [finalImport1, finalImport2] = await Promise.all([
-        payload.findByID({ collection: 'imports', id: import1.id }),
-        payload.findByID({ collection: 'imports', id: import2.id }),
+        payload.findByID({ id: import1.id, collection: 'imports', overrideAccess: true }),
+        payload.findByID({ id: import2.id, collection: 'imports', overrideAccess: true }),
       ])
 
       expect(finalImport1.status).toBe('completed')
@@ -7794,6 +8621,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const allDocs = await payload.find({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           and: [
             { title: { contains: 'Concurrent Import' } },
@@ -7806,17 +8634,19 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           title: { contains: String(timestamp) },
         },
       })
     })
 
-    it('should handle export during active import', async () => {
+    test('should handle export during active import', async ({ payload }) => {
       for (let i = 0; i < 5; i++) {
         await payload.create({
           collection: 'pages',
-          data: { title: `Concurrent Export Source ${i}`, _status: 'published' },
+          data: { _status: 'published', title: `Concurrent Export Source ${i}` },
+          overrideAccess: true,
         })
       }
 
@@ -7824,22 +8654,22 @@ describe('@payloadcms/plugin-import-export', () => {
         'title\n"Concurrent Import During Export 1"\n"Concurrent Import During Export 2"'
       const importDoc = await payload.create({
         collection: 'imports',
-        user,
         data: {
           collectionSlug: 'pages',
           importMode: 'create',
         },
         file: {
+          name: 'concurrent-test.csv',
           data: Buffer.from(csvData),
           mimetype: 'text/csv',
-          name: 'concurrent-test.csv',
           size: csvData.length,
         },
+        overrideAccess: true,
+        user,
       })
 
       const exportDoc = await payload.create({
         collection: 'exports',
-        user,
         data: {
           collectionSlug: 'pages',
           format: 'csv',
@@ -7847,13 +8677,15 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'Concurrent Export Source' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const [finalImport, finalExport] = await Promise.all([
-        payload.findByID({ collection: 'imports', id: importDoc.id }),
-        payload.findByID({ collection: 'exports', id: exportDoc.id }),
+        payload.findByID({ id: importDoc.id, collection: 'imports', overrideAccess: true }),
+        payload.findByID({ id: exportDoc.id, collection: 'exports', overrideAccess: true }),
       ])
 
       expect(finalImport.status).toBe('completed')
@@ -7862,12 +8694,13 @@ describe('@payloadcms/plugin-import-export', () => {
       if (finalExport.filename) {
         const csvPath = path.join(dirname, './uploads', finalExport.filename)
         const exportedData = await readCSV(csvPath)
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(exportedData).toHaveLength(5)
       }
 
       await payload.delete({
         collection: 'pages',
+        overrideAccess: true,
         where: {
           or: [
             { title: { contains: 'Concurrent Export Source' } },
@@ -7878,28 +8711,30 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
-  describe('max limit enforcement', () => {
+  test.describe('max limit enforcement', () => {
     const createdPostIds: (number | string)[] = []
 
-    beforeEach(async () => {
+    test.beforeEach(async ({ payload }) => {
       // Create 10 test documents (more than the limit of 5)
       for (let i = 0; i < 10; i++) {
         const doc = await payload.create({
           collection: 'posts-with-limits',
           data: { title: `Limit Test Post ${i}` },
+          overrideAccess: true,
         })
         createdPostIds.push(doc.id)
       }
     })
 
-    afterAll(async () => {
+    test.afterAll(async ({ payloadInstance }) => {
       // Clean up all test documents
       if (createdPostIds.length > 0) {
         for (const id of createdPostIds) {
           try {
-            await payload.delete({
-              collection: 'posts-with-limits',
+            await payloadInstance.delete({
               id,
+              collection: 'posts-with-limits',
+              overrideAccess: true,
             })
           } catch {
             // Document may have already been deleted
@@ -7909,15 +8744,16 @@ describe('@payloadcms/plugin-import-export', () => {
       }
     })
 
-    describe('export max limit', () => {
-      it('should limit export to maxLimit when no user limit specified', async () => {
+    test.describe('export max limit', () => {
+      test('should limit export to maxLimit when no user limit specified', async ({ payload }) => {
         const exportDoc = await payload.create({
           collection: 'posts-with-limits-export',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             format: 'csv',
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -7928,15 +8764,18 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data).toHaveLength(5)
       })
 
-      it('should clamp user limit to maxLimit when user limit exceeds maxLimit', async () => {
+      test('should clamp user limit to maxLimit when user limit exceeds maxLimit', async ({
+        payload,
+      }) => {
         const exportDoc = await payload.create({
           collection: 'posts-with-limits-export',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             format: 'csv',
             limit: 100,
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -7947,15 +8786,16 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data).toHaveLength(5)
       })
 
-      it('should use user limit when it is below maxLimit', async () => {
+      test('should use user limit when it is below maxLimit', async ({ payload }) => {
         const exportDoc = await payload.create({
           collection: 'posts-with-limits-export',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             format: 'csv',
             limit: 3,
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -7966,7 +8806,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data).toHaveLength(3)
       })
 
-      it('should include maxLimit in export preview response', async () => {
+      test('should include maxLimit in export preview response', async ({ restClient }) => {
         const response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
           body: JSON.stringify({
             collectionSlug: 'posts-with-limits',
@@ -7983,7 +8823,10 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(result.totalDocs).toBe(5)
       })
 
-      it('should have preview match exactly what is exported', async () => {
+      test('should have preview match exactly what is exported', async ({
+        payload,
+        restClient,
+      }) => {
         const previewResponse = await restClient.POST(`/posts-with-limits-export/export-preview`, {
           body: JSON.stringify({
             collectionSlug: 'posts-with-limits',
@@ -8004,11 +8847,12 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const exportDoc = await payload.create({
           collection: 'posts-with-limits-export',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             format: 'csv',
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(exportDoc.filename).toBeDefined()
@@ -8020,7 +8864,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(exportedData).toHaveLength(5)
       })
 
-      it('should have preview pagination respect maxLimit', async () => {
+      test('should have preview pagination respect maxLimit', async ({ restClient }) => {
         const page1Response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
           body: JSON.stringify({
             collectionSlug: 'posts-with-limits',
@@ -8064,8 +8908,8 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    describe('import max limit', () => {
-      it('should reject import when document count exceeds maxLimit', async () => {
+    test.describe('import max limit', () => {
+      test('should reject import when document count exceeds maxLimit', async ({ payload }) => {
         const csvContent = Array.from({ length: 10 }, (_, i) => `"Exceed Limit Import ${i}"`).join(
           '\n',
         )
@@ -8074,17 +8918,18 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importDoc = await payload.create({
           collection: 'posts-with-limits-import',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             importMode: 'create',
           },
           file: {
+            name: 'exceed-limit-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'exceed-limit-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(importDoc.status).toBe('failed')
@@ -8093,6 +8938,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importedDocs = await payload.find({
           collection: 'posts-with-limits',
+          overrideAccess: true,
           where: {
             title: { contains: 'Exceed Limit Import' },
           },
@@ -8101,7 +8947,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(importedDocs.totalDocs).toBe(0)
       })
 
-      it('should allow import when document count equals maxLimit', async () => {
+      test('should allow import when document count equals maxLimit', async ({ payload }) => {
         const csvContent = Array.from({ length: 5 }, (_, i) => `"Exact Limit Import ${i}"`).join(
           '\n',
         )
@@ -8110,17 +8956,18 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importDoc = await payload.create({
           collection: 'posts-with-limits-import',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             importMode: 'create',
           },
           file: {
+            name: 'exact-limit-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'exact-limit-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -8129,13 +8976,14 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'posts-with-limits',
+          overrideAccess: true,
           where: {
             title: { contains: 'Exact Limit Import' },
           },
         })
       })
 
-      it('should allow import when document count is below maxLimit', async () => {
+      test('should allow import when document count is below maxLimit', async ({ payload }) => {
         const csvContent = Array.from({ length: 3 }, (_, i) => `"Below Limit Import ${i}"`).join(
           '\n',
         )
@@ -8144,17 +8992,18 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const importDoc = await payload.create({
           collection: 'posts-with-limits-import',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             importMode: 'create',
           },
           file: {
+            name: 'below-limit-import.csv',
             data: csvBuffer,
             mimetype: 'text/csv',
-            name: 'below-limit-import.csv',
             size: csvBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(importDoc.status).toBe('completed')
@@ -8163,13 +9012,16 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'posts-with-limits',
+          overrideAccess: true,
           where: {
             title: { contains: 'Below Limit Import' },
           },
         })
       })
 
-      it('should include maxLimit and limitExceeded in import preview response', async () => {
+      test('should include maxLimit and limitExceeded in import preview response', async ({
+        restClient,
+      }) => {
         const csvContent = Array.from({ length: 10 }, (_, i) => `"Preview Limit Test ${i}"`).join(
           '\n',
         )
@@ -8179,8 +9031,8 @@ describe('@payloadcms/plugin-import-export', () => {
         const response = await restClient.POST(`/posts-with-limits-import/preview-data`, {
           body: JSON.stringify({
             collectionSlug: 'posts-with-limits',
-            format: 'csv',
             fileData: csvBuffer.toString('base64'),
+            format: 'csv',
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -8194,15 +9046,18 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(result.totalDocs).toBe(10)
       })
 
-      it('should have import preview accurately predict import outcome', async () => {
+      test('should have import preview accurately predict import outcome', async ({
+        payload,
+        restClient,
+      }) => {
         const exceedsLimitCsv = `title\n${Array.from({ length: 10 }, (_, i) => `"Predict Fail ${i}"`).join('\n')}`
         const exceedsBuffer = Buffer.from(exceedsLimitCsv)
 
         const exceedsPreview = await restClient.POST(`/posts-with-limits-import/preview-data`, {
           body: JSON.stringify({
             collectionSlug: 'posts-with-limits',
-            format: 'csv',
             fileData: exceedsBuffer.toString('base64'),
+            format: 'csv',
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -8217,17 +9072,18 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const failedImport = await payload.create({
           collection: 'posts-with-limits-import',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             importMode: 'create',
           },
           file: {
+            name: 'predict-fail.csv',
             data: exceedsBuffer,
             mimetype: 'text/csv',
-            name: 'predict-fail.csv',
             size: exceedsBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(failedImport.status).toBe('failed')
@@ -8238,8 +9094,8 @@ describe('@payloadcms/plugin-import-export', () => {
         const withinPreview = await restClient.POST(`/posts-with-limits-import/preview-data`, {
           body: JSON.stringify({
             collectionSlug: 'posts-with-limits',
-            format: 'csv',
             fileData: withinBuffer.toString('base64'),
+            format: 'csv',
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -8254,17 +9110,18 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const successImport = await payload.create({
           collection: 'posts-with-limits-import',
-          user,
           data: {
             collectionSlug: 'posts-with-limits',
             importMode: 'create',
           },
           file: {
+            name: 'predict-success.csv',
             data: withinBuffer,
             mimetype: 'text/csv',
-            name: 'predict-success.csv',
             size: withinBuffer.length,
           },
+          overrideAccess: true,
+          user,
         })
 
         expect(successImport.status).toBe('completed')
@@ -8272,20 +9129,22 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({
           collection: 'posts-with-limits',
+          overrideAccess: true,
           where: {
             title: { contains: 'Predict Success' },
           },
         })
       })
     })
-    describe('dynamic user-based export limits', () => {
+    test.describe('dynamic user-based export limits', () => {
       const createdPostIds: (number | string)[] = []
       let userWithDynamicLimit: any
 
-      beforeAll(async () => {
+      test.beforeAll(async ({ payloadInstance: payload }) => {
         // Find the dev user and set their limit to 7
         const devUserDocs = await payload.find({
           collection: 'users',
+          overrideAccess: true,
           where: { email: { equals: devUser.email } },
         })
 
@@ -8295,6 +9154,7 @@ describe('@payloadcms/plugin-import-export', () => {
           id: devUserId,
           collection: 'users',
           data: { limit: 7 },
+          overrideAccess: true,
         })
 
         // Use the user document directly (not login result) so req.user.limit is accessible
@@ -8305,42 +9165,49 @@ describe('@payloadcms/plugin-import-export', () => {
           const doc = await payload.create({
             collection: 'posts-with-limits',
             data: { title: `Dynamic Limit Post ${i}` },
+            overrideAccess: true,
           })
 
           createdPostIds.push(doc.id)
         }
       })
 
-      afterAll(async () => {
+      test.afterAll(async ({ payloadInstance }) => {
         // Reset the dev user's limit
-        const devUserDocs = await payload.find({
+        const devUserDocs = await payloadInstance.find({
           collection: 'users',
+          overrideAccess: true,
           where: { email: { equals: devUser.email } },
         })
 
         const devUserId = devUserDocs.docs[0]?.id
 
-        await payload.update({
+        await payloadInstance.update({
           id: devUserId,
           collection: 'users',
           data: { limit: null as unknown as number },
+          overrideAccess: true,
         })
 
         // Restore the original user login state
-        user = await payload.login({
+        const loginResult = await payloadInstance.login({
           collection: 'users',
           data: {
             email: devUser.email,
             password: devUser.password,
           },
+          overrideAccess: true,
         })
+
+        user = loginResult.user!
 
         // Clean up test documents
         for (const id of createdPostIds) {
           try {
-            await payload.delete({
+            await payloadInstance.delete({
               id,
               collection: 'posts-with-limits',
+              overrideAccess: true,
             })
           } catch {
             // Document may have already been deleted
@@ -8349,14 +9216,15 @@ describe('@payloadcms/plugin-import-export', () => {
         createdPostIds.length = 0
       })
 
-      describe('export with dynamic user limit of 7', () => {
-        it('should export up to 7 documents when user limit is set to 7', async () => {
+      test.describe('export with dynamic user limit of 7', () => {
+        test('should export up to 7 documents when user limit is set to 7', async ({ payload }) => {
           const exportDoc = await payload.create({
             collection: 'posts-with-limits-export',
             data: {
               collectionSlug: 'posts-with-limits',
               format: 'csv',
             },
+            overrideAccess: true,
             user: userWithDynamicLimit,
           })
 
@@ -8368,7 +9236,7 @@ describe('@payloadcms/plugin-import-export', () => {
           expect(data).toHaveLength(7)
         })
 
-        it('should clamp request limit to dynamic maxLimit of 7', async () => {
+        test('should clamp request limit to dynamic maxLimit of 7', async ({ payload }) => {
           const exportDoc = await payload.create({
             collection: 'posts-with-limits-export',
             data: {
@@ -8376,6 +9244,7 @@ describe('@payloadcms/plugin-import-export', () => {
               format: 'csv',
               limit: 100,
             },
+            overrideAccess: true,
             user: userWithDynamicLimit,
           })
 
@@ -8387,7 +9256,7 @@ describe('@payloadcms/plugin-import-export', () => {
           expect(data).toHaveLength(7)
         })
 
-        it('should allow export with limit below dynamic maxLimit of 7', async () => {
+        test('should allow export with limit below dynamic maxLimit of 7', async ({ payload }) => {
           const exportDoc = await payload.create({
             collection: 'posts-with-limits-export',
             data: {
@@ -8395,6 +9264,7 @@ describe('@payloadcms/plugin-import-export', () => {
               format: 'csv',
               limit: 4,
             },
+            overrideAccess: true,
             user: userWithDynamicLimit,
           })
 
@@ -8406,7 +9276,7 @@ describe('@payloadcms/plugin-import-export', () => {
           expect(data).toHaveLength(4)
         })
 
-        it('should reflect dynamic maxLimit of 7 in export preview', async () => {
+        test('should reflect dynamic maxLimit of 7 in export preview', async ({ restClient }) => {
           const response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
             body: JSON.stringify({
               collectionSlug: 'posts-with-limits',
@@ -8423,7 +9293,10 @@ describe('@payloadcms/plugin-import-export', () => {
           expect(result.totalDocs).toBe(7)
         })
 
-        it('should have preview match exactly what is exported with dynamic limit', async () => {
+        test('should have preview match exactly what is exported with dynamic limit', async ({
+          payload,
+          restClient,
+        }) => {
           const previewResponse = await restClient.POST(
             `/posts-with-limits-export/export-preview`,
             {
@@ -8449,6 +9322,7 @@ describe('@payloadcms/plugin-import-export', () => {
               collectionSlug: 'posts-with-limits',
               format: 'csv',
             },
+            overrideAccess: true,
             user: userWithDynamicLimit,
           })
 
@@ -8461,7 +9335,9 @@ describe('@payloadcms/plugin-import-export', () => {
           expect(exportedData).toHaveLength(7)
         })
 
-        it('should have preview pagination respect dynamic maxLimit of 7', async () => {
+        test('should have preview pagination respect dynamic maxLimit of 7', async ({
+          restClient,
+        }) => {
           const page1Response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
             body: JSON.stringify({
               collectionSlug: 'posts-with-limits',
@@ -8505,8 +9381,10 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
 
-      describe('import limit remains static despite user limit change', () => {
-        it('should reject import with 7 documents when static import limit is 5', async () => {
+      test.describe('import limit remains static despite user limit change', () => {
+        test('should reject import with 7 documents when static import limit is 5', async ({
+          payload,
+        }) => {
           const csvContent = Array.from(
             { length: 7 },
             (_, i) => `"Dynamic Import Exceed ${i}"`,
@@ -8526,6 +9404,7 @@ describe('@payloadcms/plugin-import-export', () => {
               mimetype: 'text/csv',
               size: csvBuffer.length,
             },
+            overrideAccess: true,
             user: userWithDynamicLimit,
           })
 
@@ -8534,13 +9413,16 @@ describe('@payloadcms/plugin-import-export', () => {
 
           await payload.delete({
             collection: 'posts-with-limits',
+            overrideAccess: true,
             where: {
               title: { contains: 'Dynamic Import Exceed' },
             },
           })
         })
 
-        it('should allow import within static limit of 5 even with user limit of 7', async () => {
+        test('should allow import within static limit of 5 even with user limit of 7', async ({
+          payload,
+        }) => {
           const csvContent = Array.from(
             { length: 5 },
             (_, i) => `"Dynamic Import Within ${i}"`,
@@ -8560,6 +9442,7 @@ describe('@payloadcms/plugin-import-export', () => {
               mimetype: 'text/csv',
               size: csvBuffer.length,
             },
+            overrideAccess: true,
             user: userWithDynamicLimit,
           })
 
@@ -8568,13 +9451,16 @@ describe('@payloadcms/plugin-import-export', () => {
 
           await payload.delete({
             collection: 'posts-with-limits',
+            overrideAccess: true,
             where: {
               title: { contains: 'Dynamic Import Within' },
             },
           })
         })
 
-        it('should show static maxLimit of 5 in import preview despite user limit of 7', async () => {
+        test('should show static maxLimit of 5 in import preview despite user limit of 7', async ({
+          restClient,
+        }) => {
           const csvContent = Array.from(
             { length: 10 },
             (_, i) => `"Dynamic Preview Import ${i}"`,
@@ -8607,20 +9493,21 @@ describe('@payloadcms/plugin-import-export', () => {
   // The int test environment uses in-process route handlers, but getFileFromDoc uses
   // fetch() which requires a real HTTP server. See e2e.spec.ts for S3 tests that run
   // with a real server.
-  describe.skip('S3 storage', () => {
+  test.describe.skip('S3 storage', () => {
     const createdPostIDs: (number | string)[] = []
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       await createTestBucket()
       await clearTestBucket()
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdPostIDs) {
         try {
           await payload.delete({
-            collection: postsWithS3Slug as CollectionSlug,
             id,
+            collection: postsWithS3Slug as CollectionSlug,
+            overrideAccess: true,
           })
         } catch {
           // Ignore cleanup errors
@@ -8630,23 +9517,24 @@ describe('@payloadcms/plugin-import-export', () => {
       await clearTestBucket()
     })
 
-    it('should import CSV file stored in S3', async () => {
+    test('should import CSV file stored in S3', async ({ payload }) => {
       const csvContent = `title\n"S3 Import Test 1"\n"S3 Import Test 2"\n"S3 Import Test 3"`
       const csvBuffer = Buffer.from(csvContent)
 
       const importDoc = await payload.create({
         collection: 'posts-with-s3-import' as CollectionSlug,
-        user,
         data: {
           collectionSlug: postsWithS3Slug,
           importMode: 'create',
         },
         file: {
+          name: 's3-import-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 's3-import-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
       expect((importDoc as any).status).toBe('completed')
@@ -8655,6 +9543,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const posts = await payload.find({
         collection: postsWithS3Slug as CollectionSlug,
+        overrideAccess: true,
         where: {
           title: { contains: 'S3 Import Test' },
         },
@@ -8664,15 +9553,17 @@ describe('@payloadcms/plugin-import-export', () => {
       posts.docs.forEach((post) => createdPostIDs.push(post.id))
     })
 
-    it('should export to S3 and verify file is accessible', async () => {
+    test('should export to S3 and verify file is accessible', async ({ payload, restClient }) => {
       const testPosts = await Promise.all([
         payload.create({
           collection: postsWithS3Slug as CollectionSlug,
           data: { title: 'S3 Export Test 1' },
+          overrideAccess: true,
         }),
         payload.create({
           collection: postsWithS3Slug as CollectionSlug,
           data: { title: 'S3 Export Test 2' },
+          overrideAccess: true,
         }),
       ])
 
@@ -8680,7 +9571,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const exportDoc = await payload.create({
         collection: 'posts-with-s3-export' as CollectionSlug,
-        user,
         data: {
           collectionSlug: postsWithS3Slug,
           format: 'csv',
@@ -8688,6 +9578,8 @@ describe('@payloadcms/plugin-import-export', () => {
             title: { contains: 'S3 Export Test' },
           },
         },
+        overrideAccess: true,
+        user,
       })
 
       expect((exportDoc as any).status).toBe('completed')
@@ -8706,30 +9598,31 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(exportedCSV).toContain('S3 Export Test 2')
     })
 
-    it('should handle import errors gracefully when file is in S3', async () => {
+    test('should handle import errors gracefully when file is in S3', async ({ payload }) => {
       const csvContent = `wrongfield\n"Some Value"`
       const csvBuffer = Buffer.from(csvContent)
 
       const importDoc = await payload.create({
         collection: 'posts-with-s3-import' as CollectionSlug,
-        user,
         data: {
           collectionSlug: postsWithS3Slug,
           importMode: 'create',
         },
         file: {
+          name: 's3-import-error-test.csv',
           data: csvBuffer,
           mimetype: 'text/csv',
-          name: 's3-import-error-test.csv',
           size: csvBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
       expect((importDoc as any).status).toBe('failed')
       expect((importDoc as any).summary?.issues).toBeGreaterThan(0)
     })
 
-    it('should import JSON file stored in S3', async () => {
+    test('should import JSON file stored in S3', async ({ payload }) => {
       const jsonContent = JSON.stringify([
         { title: 'S3 JSON Import 1' },
         { title: 'S3 JSON Import 2' },
@@ -8738,17 +9631,18 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const importDoc = await payload.create({
         collection: 'posts-with-s3-import' as CollectionSlug,
-        user,
         data: {
           collectionSlug: postsWithS3Slug,
           importMode: 'create',
         },
         file: {
+          name: 's3-json-import-test.json',
           data: jsonBuffer,
           mimetype: 'application/json',
-          name: 's3-json-import-test.json',
           size: jsonBuffer.length,
         },
+        overrideAccess: true,
+        user,
       })
 
       expect((importDoc as any).status).toBe('completed')
@@ -8756,6 +9650,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const posts = await payload.find({
         collection: postsWithS3Slug as CollectionSlug,
+        overrideAccess: true,
         where: {
           title: { contains: 'S3 JSON Import' },
         },

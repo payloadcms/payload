@@ -1,0 +1,9 @@
+@layer payload-default {
+  .sort-by-fields {
+    --field-width: 25%;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+}

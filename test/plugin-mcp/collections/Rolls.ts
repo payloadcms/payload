@@ -29,4 +29,5 @@ export const Rolls: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }

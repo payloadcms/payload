@@ -9,7 +9,12 @@ import type { User } from '@/payload-types'
 // it ensures that only admins can create and update the `roles` field
 export const ensureFirstUserIsAdmin: FieldHook<User> = async ({ operation, req, value }) => {
   if (operation === 'create') {
-    const users = await req.payload.find({ collection: 'users', depth: 0, limit: 0 })
+    const users = await req.payload.find({
+      collection: 'users',
+      depth: 0,
+      limit: 0,
+      overrideAccess: true,
+    })
     if (users.totalDocs === 0) {
       // if `admin` not in array of values, add it
       if (!(value || []).includes('admin')) {

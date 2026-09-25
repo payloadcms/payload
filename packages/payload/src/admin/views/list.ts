@@ -2,13 +2,41 @@ import type { SanitizedCollectionPermission } from '../../auth/types.js'
 import type {
   CollectionAdminOptions,
   SanitizedCollectionConfig,
+  TypeWithID,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
+import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
-import type { ResolvedFilterOptions } from '../../types/index.js'
+import type { ResolvedFilterOptions, Where } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
 import type { Data, ViewTypes } from '../types.js'
+import type { RelatedDocumentsGrouped } from './hierarchyList.js'
+
+export type HierarchyViewData = {
+  /**
+   * Collections allowed for creation based on parent's collectionSpecific field.
+   * Undefined means all related collections are allowed.
+   * Always includes the hierarchy collection itself.
+   */
+  allowedCollections?: Array<{ label: string; slug: string }>
+  /** Base filter applied to hierarchy collection queries (e.g., tenant filter) */
+  baseFilter?: Where
+  /** Breadcrumb trail to the current parent */
+  breadcrumbs: Array<{ id: number | string; title: string }>
+  /** Children of the current parent (same collection) */
+  childrenData: PaginatedDocs
+  /** The current parent document data (for display and collectionSpecific field access) */
+  parent: null | (Record<string, unknown> & TypeWithID)
+  /** The parent field name for building queries */
+  parentFieldName: string
+  /** The parent ID being viewed */
+  parentId: null | number | string
+  /** Base filters for related collections (keyed by collection slug) */
+  relatedBaseFilters?: Record<string, Where>
+  /** Related documents grouped by collection */
+  relatedDocumentsByCollection: RelatedDocumentsGrouped
+}
 
 export type ListViewSlots = {
   AfterList?: React.ReactNode
@@ -17,6 +45,7 @@ export type ListViewSlots = {
   BeforeListTable?: React.ReactNode
   Description?: React.ReactNode
   listMenuItems?: React.ReactNode[]
+  NoResults?: React.ReactNode
   Table: React.ReactNode | React.ReactNode[]
 }
 
@@ -37,6 +66,7 @@ export type ListViewServerPropsOnly = {
 export type ListViewServerProps = ListViewClientProps & ListViewServerPropsOnly
 
 export type ListViewClientProps = {
+  baseFilter?: Where
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
   columnState: Column[]
@@ -47,6 +77,18 @@ export type ListViewClientProps = {
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
+  /**
+   * Hierarchy view data - present when viewing a hierarchy collection with a parent selected
+   */
+  hierarchyData?: HierarchyViewData
+  /**
+   * Resolved full-size icon component for hierarchy collections (used in drawer subheader)
+   */
+  HierarchyIcon?: React.ReactNode
+  /**
+   * Resolved small icon component for hierarchy collections (used in table rows)
+   */
+  HierarchySmallIcon?: React.ReactNode
   /**
    * @deprecated
    */
@@ -69,6 +111,7 @@ export type ListViewSlotSharedClientProps = {
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
   newDocumentURL: string
+  viewType: ViewTypes
 }
 
 // BeforeList
@@ -80,6 +123,11 @@ export type BeforeListServerProps = BeforeListClientProps & BeforeListServerProp
 export type BeforeListTableClientProps = ListViewSlotSharedClientProps
 export type BeforeListTableServerPropsOnly = {} & ListViewServerPropsOnly
 export type BeforeListTableServerProps = BeforeListTableClientProps & BeforeListTableServerPropsOnly
+
+// NoResults
+export type NoResultsClientProps = ListViewSlotSharedClientProps
+export type NoResultsServerPropsOnly = {} & ListViewServerPropsOnly
+export type NoResultsServerProps = NoResultsClientProps & NoResultsServerPropsOnly
 
 // AfterList
 export type AfterListClientProps = ListViewSlotSharedClientProps

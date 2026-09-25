@@ -5,6 +5,7 @@ import { Drawer, EditDepthProvider, useModal } from '@payloadcms/ui'
 import React from 'react'
 
 import { DrawerContent } from './DrawerContent.js'
+import { useDrawerSubmit } from './useDrawerSubmit.js'
 
 export type FieldsDrawerProps = {
   readonly className?: string
@@ -37,11 +38,18 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   schemaPathSuffix,
 }) => {
   const { closeModal } = useModal()
+  const { headerActions, submitRef } = useDrawerSubmit()
+
   // The Drawer only renders its children (and itself) if it's open. Thus, by extracting the main content
   // to DrawerContent, this should be faster
   return (
     <EditDepthProvider>
-      <Drawer className={className} slug={drawerSlug} title={drawerTitle ?? ''}>
+      <Drawer
+        className={className}
+        headerActions={headerActions}
+        slug={drawerSlug}
+        title={drawerTitle ?? ''}
+      >
         <DrawerContent
           data={data}
           featureKey={featureKey}
@@ -62,6 +70,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
           schemaFieldsPathOverride={schemaFieldsPathOverride}
           schemaPath={schemaPath}
           schemaPathSuffix={schemaPathSuffix}
+          submitRef={submitRef}
         />
       </Drawer>
     </EditDepthProvider>

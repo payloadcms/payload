@@ -1,0 +1,23 @@
+@layer payload-default {
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--stroke-width-medium);
+    z-index: 9999;
+    opacity: 1;
+  }
+
+  .progress-bar__progress {
+    height: 100%;
+    background-color: var(--color-text);
+    transition: width ease-in var(--transition-duration);
+  }
+
+  .progress-bar--fade-out {
+    opacity: 0;
+    transition: opacity linear var(--transition-duration);
+    transition-delay: var(--transition-duration);
+  }
+}

@@ -38,4 +38,5 @@ export const LocalizedCollection: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

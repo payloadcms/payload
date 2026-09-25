@@ -15,4 +15,5 @@ export const RelationToNoFilesRequired: CollectionConfig = {
       relationTo: noFilesRequiredSlug,
     },
   ],
+  versions: false,
 }

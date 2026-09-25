@@ -7,7 +7,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 export type SortColumnProps = {
   readonly appearance?: 'condensed' | 'default'
@@ -39,9 +39,24 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
     descClasses.push(`${baseClass}--active`)
   }
 
+  const isSorted = sort === asc || sort === desc
+
+  const descLabel = t('general:sortByLabelDirection', {
+    direction: t('general:descending'),
+    label,
+  })
+  const ascLabel = t('general:sortByLabelDirection', {
+    direction: t('general:ascending'),
+    label,
+  })
+
   return (
     <div
-      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+      className={[
+        baseClass,
+        appearance && `${baseClass}--appearance-${appearance}`,
+        isSorted && `${baseClass}--sorted`,
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -51,26 +66,22 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button
-            aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:ascending'),
-              label,
-            })}
-            className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => void handleSortChange(asc)}
-            type="button"
-          >
-            <ChevronIcon direction="up" />
-          </button>
-          <button
-            aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:descending'),
-              label,
-            })}
+            aria-label={descLabel}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(desc)}
+            title={descLabel}
             type="button"
           >
-            <ChevronIcon />
+            <ChevronIcon size={16} />
+          </button>
+          <button
+            aria-label={ascLabel}
+            className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
+            onClick={() => void handleSortChange(asc)}
+            title={ascLabel}
+            type="button"
+          >
+            <ChevronIcon direction="up" size={16} />
           </button>
         </div>
       )}

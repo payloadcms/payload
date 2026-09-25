@@ -11,16 +11,16 @@ export const discardBulkUploadModalSlug = 'bulk-upload--discard-without-saving'
 export function DiscardWithoutSaving() {
   const { t } = useTranslation()
   const { closeModal } = useModal()
-  const { drawerSlug } = useBulkUpload()
+  const { modalSlug } = useBulkUpload()
 
   const onCancel = React.useCallback(() => {
     closeModal(discardBulkUploadModalSlug)
   }, [closeModal])
 
   const onConfirm = React.useCallback(() => {
-    closeModal(drawerSlug)
+    closeModal(modalSlug)
     closeModal(discardBulkUploadModalSlug)
-  }, [closeModal, drawerSlug])
+  }, [closeModal, modalSlug])
 
   return (
     <ConfirmationModal

@@ -1,0 +1,44 @@
+@layer payload-default {
+  .field-type.relationship {
+    position: relative;
+
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+  }
+
+  .relationship__wrap {
+    display: flex;
+    gap: var(--spacer-1);
+    width: 100%;
+
+    div.react-select {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .relationship__input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .relationship__error-loading {
+    border: var(--stroke-width-small) solid var(--field-color-border-error);
+    min-height: var(--spacer-6);
+    padding: var(--spacer-2) var(--spacer-3);
+    background-color: var(--field-color-error-bg);
+    color: var(--field-color-error-text);
+  }
+
+  .relationship.error > .relationship__wrap .rs__control {
+    border-color: var(--field-color-border-error);
+
+    &:hover {
+      border-color: var(--field-color-border-error);
+    }
+  }
+}

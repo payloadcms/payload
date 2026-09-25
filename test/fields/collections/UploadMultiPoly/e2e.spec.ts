@@ -7,15 +7,16 @@ import type { Config } from '../../payload-types.js'
 
 import {
   closeAllToasts,
-  ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
 } from '../../../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsMultiPoly } from '../../slugs.js'
 
@@ -33,21 +34,14 @@ let url: AdminUrlUtil
 describe('Upload polymorphic with hasMany', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     url = new AdminUrlUtil(serverURL, uploadsMultiPoly)
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'fieldsTest',
-      uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    await initPage({ page, serverURL })
   })
 
   test('should upload in new doc', async ({ page }) => {
@@ -59,7 +53,7 @@ describe('Upload polymorphic with hasMany', () => {
     })
     await multiPolyButton.click()
 
-    const uploadModal = page.locator('#media-bulk-upload-drawer-slug-1')
+    const uploadModal = page.locator('#media-bulk-upload-modal-slug-1')
     await expect(uploadModal).toBeVisible()
 
     await uploadModal
@@ -88,11 +82,12 @@ describe('Upload polymorphic with hasMany', () => {
     await expect(collectionSelector).toBeVisible()
     const fieldSelector = collectionSelector.locator('.react-select')
     await fieldSelector.click({ delay: 100 })
-    const options = uploadModal.locator('.rs__option')
+    const fieldSelectorMenu = getSelectMenu({ page })
+    const options = fieldSelectorMenu.locator('.rs__option')
     // Select an option
     await options.locator('text=Upload 2').click()
 
-    await expect(uploadModal.locator('.bulk-upload--drawer-header')).toContainText('Upload 2')
+    await expect(collectionSelector.locator('.rs__single-value')).toContainText('Upload 2')
     await saveButton.click()
     await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
     await closeAllToasts(page)
@@ -112,7 +107,7 @@ describe('Upload polymorphic with hasMany', () => {
     })
     await multiPolyButton.click()
 
-    const uploadModal = page.locator('#media-bulk-upload-drawer-slug-1')
+    const uploadModal = page.locator('#media-bulk-upload-modal-slug-1')
     await expect(uploadModal).toBeVisible()
 
     await uploadModal
@@ -141,11 +136,12 @@ describe('Upload polymorphic with hasMany', () => {
     await expect(collectionSelector).toBeVisible()
     const fieldSelector = collectionSelector.locator('.react-select')
     await fieldSelector.click({ delay: 100 })
-    const options = uploadModal.locator('.rs__option')
+    const fieldSelectorMenu = getSelectMenu({ page })
+    const options = fieldSelectorMenu.locator('.rs__option')
     // Select an option
     await options.locator('text=Upload 2').click()
 
-    await expect(uploadModal.locator('.bulk-upload--drawer-header')).toContainText('Upload 2')
+    await expect(collectionSelector.locator('.rs__single-value')).toContainText('Upload 2')
     await saveButton.click()
     await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
     await closeAllToasts(page)

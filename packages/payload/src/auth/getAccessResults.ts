@@ -22,7 +22,7 @@ export async function getAccessResults({
 
   if (userCollectionConfig && payload.config.admin.user === user?.collection) {
     results.canAccessAdmin = userCollectionConfig.access.admin
-      ? await userCollectionConfig.access.admin({ req })
+      ? await userCollectionConfig.access.admin({ slug: userCollectionConfig.slug, req })
       : isLoggedIn
   } else {
     results.canAccessAdmin = false

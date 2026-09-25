@@ -30,6 +30,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
           equals: plan.product,
         },
       },
+      overrideAccess: true,
     })
 
     payloadProductID = productQuery.docs?.[0]?.id
@@ -55,6 +56,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
       where: {
         stripeID: customerStripeID,
       },
+      overrideAccess: true,
     })
 
     const foundCustomer = customerReq.docs[0]
@@ -95,6 +97,7 @@ export const subscriptionCreatedOrUpdated = async (args) => {
             skipSync: true,
             subscriptions,
           },
+          overrideAccess: true,
         })
 
         payload.logger.info(`✅ Successfully updated subscription.`)

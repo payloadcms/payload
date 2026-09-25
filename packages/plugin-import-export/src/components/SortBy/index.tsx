@@ -16,7 +16,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { applySortOrder, normalizeQueryParam, stripSortDash } from '../../utilities/sortHelpers.js'
 import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'sort-by-fields'
 
@@ -123,7 +123,6 @@ export const SortBy: SelectFieldClientComponent = (props) => {
     <div className={baseClass}>
       <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
-        className={baseClass}
         disabled={props.readOnly}
         getOptionValue={(option) => String(option.value)}
         inputId={`field-${props.path.replace(/\./g, '__')}`}

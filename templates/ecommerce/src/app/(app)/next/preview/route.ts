@@ -1,26 +1,30 @@
-import type { CollectionSlug, PayloadRequest } from 'payload'
+import type { PayloadRequest } from 'payload'
 import { getPayload } from 'payload'
 
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { NextRequest } from 'next/server'
 
 import configPromise from '@payload-config'
 
-export async function GET(req: Request): Promise<Response> {
+export type PreviewSearchParams = {
+  path: string
+  previewSecret: string
+}
+
+export async function GET(req: NextRequest): Promise<Response> {
   const payload = await getPayload({ config: configPromise })
 
   const { searchParams } = new URL(req.url)
 
   const path = searchParams.get('path')
-  const collection = searchParams.get('collection') as CollectionSlug
-  const slug = searchParams.get('slug')
   const previewSecret = searchParams.get('previewSecret')
 
   if (previewSecret !== process.env.PREVIEW_SECRET) {
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
 
-  if (!path || !collection || !slug) {
+  if (!path) {
     return new Response('Insufficient search params', { status: 404 })
   }
 

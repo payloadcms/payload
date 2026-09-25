@@ -44,4 +44,5 @@ export const Posts: CollectionConfig = {
       localized: true,
     },
   ],
+  versions: false,
 }

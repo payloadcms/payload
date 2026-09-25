@@ -19,6 +19,11 @@ export const FormatField: SelectFieldClientComponent = (props) => {
   const { getEntityConfig } = useConfig()
   const width = props.field.admin?.width
 
+  const styles = useMemo<React.CSSProperties>(
+    () => ({ '--field-width': width }) as React.CSSProperties,
+    [width],
+  )
+
   const { setValue, value: formatValue } = useField<Format>()
   const { value: targetCollectionSlug } = useField<string>({ path: 'collectionSlug' })
 
@@ -61,7 +66,7 @@ export const FormatField: SelectFieldClientComponent = (props) => {
   const isReadOnly = Boolean(forcedFormat) || props.readOnly
 
   return (
-    <div className={baseClass} style={{ width }}>
+    <div className={baseClass} style={styles}>
       <FieldLabel label={props.field.label} path={props.path} />
       <ReactSelect
         className={'format-field'}

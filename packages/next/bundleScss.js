@@ -8,6 +8,10 @@ async function build() {
   await esbuild.build({
     entryPoints: ['src/esbuildEntry.ts'],
     bundle: true,
+    loader: {
+      '.png': 'empty',
+      '.svg': 'empty',
+    },
     minify: true,
     outdir: 'dist/prod',
     packages: 'external',

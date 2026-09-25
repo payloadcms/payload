@@ -1,0 +1,171 @@
+@layer payload-default {
+  .payload-richtext-code-block.collapsible--collapsed {
+    .rah-static {
+      height: unset !important;
+      max-height: 150px !important;
+      position: relative;
+      border-radius: var(--radius-medium);
+
+      &::after {
+        content: '';
+        pointer-events: none;
+        background: linear-gradient(
+          to bottom,
+          transparent 0%,
+          var(--color-bg) 90%,
+          var(--color-bg) 100%
+        );
+        position: absolute;
+        height: 100px;
+        top: 50px;
+        inset-inline-start: 0;
+        inset-inline-end: 0;
+      }
+
+      > div {
+        display: unset !important;
+      }
+    }
+  }
+
+  .payload-richtext-code-block {
+    .collapsible__toggle-wrap {
+      background: var(--color-bg);
+      border: none;
+      border-radius: var(--radius-medium);
+      height: auto;
+      padding: var(--spacer-1) var(--spacer-2-5);
+      overflow: visible;
+
+      &:not(.toggle-disabled):hover {
+        background: var(--color-bg);
+      }
+    }
+
+    .collapsible__header-wrap {
+      overflow: visible;
+      padding: 0;
+    }
+
+    .popup__caret {
+      display: none;
+    }
+
+    .collapsible__content {
+      padding: 0;
+      border: none;
+    }
+
+    .LexicalEditorTheme__block__block-header {
+      overflow: visible;
+    }
+
+    .code-editor,
+    .monaco-editor,
+    .overflow-guard {
+      border-width: 0;
+      border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+      background: var(--color-bg);
+    }
+
+    .popup-button {
+      padding: 0 0 0 var(--spacer-1);
+    }
+
+    .copy-to-clipboard,
+    .code-block-collapse-button,
+    .popup-button,
+    .LexicalEditorTheme__block__removeButton.btn {
+      border-radius: var(--radius-medium);
+      color: var(--color-icon-secondary);
+      min-width: var(--spacer-4);
+      min-height: var(--spacer-4);
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: var(--color-icon);
+        background-color: var(--color-bg-transparent-hover);
+      }
+
+      &:active {
+        background-color: var(--color-bg-transparent-pressed);
+      }
+
+      &:focus-visible {
+        outline: var(--stroke-width-small) solid var(--color-border-brand-strong);
+        outline-offset: calc(var(--stroke-width-small) / -1);
+      }
+    }
+  }
+
+  .payload-richtext-code-block__pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--spacer-4);
+    color: var(--color-icon-tertiary);
+  }
+
+  .payload-richtext-code-block__actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .payload-richtext-code-block__language-selector {
+    pointer-events: all;
+  }
+
+  .payload-richtext-code-block__language-selector-button {
+    display: flex;
+    flex-direction: row;
+    width: max-content;
+    align-items: center;
+    color: var(--color-text-secondary);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    padding-inline-start: var(--spacer-1);
+
+    & path {
+      fill-opacity: 1;
+    }
+
+    &:hover {
+      color: var(--color-text);
+
+      & path {
+        fill: var(--color-text);
+      }
+    }
+  }
+
+  .payload-richtext-code-block__chevron {
+    color: var(--color-icon-secondary);
+    width: var(--spacer-3);
+    height: var(--spacer-4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+}
+
+/* Override the collapsible container to use a simple border wrapper */
+.payload-richtext-code-block {
+  border: var(--stroke-width-small) solid var(--color-border);
+  border-radius: var(--radius-medium);
+
+  &:focus-within {
+    outline: var(--stroke-width-small) solid var(--color-border-brand-strong);
+    outline-offset: calc(var(--stroke-width-small) / -1);
+  }
+}
+
+/* Add left padding to Monaco line numbers area */
+.payload-richtext-code-block .monaco-editor .margin {
+  padding-inline-start: var(--spacer-2);
+}

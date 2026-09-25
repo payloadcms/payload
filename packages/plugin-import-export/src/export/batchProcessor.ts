@@ -2,7 +2,9 @@
  * Export-specific batch processor for processing documents in batches during export.
  * Uses the generic batch processing utilities from useBatchProcessor.
  */
-import type { PayloadRequest, SelectType, Sort, TypedUser, Where } from 'payload'
+import type { PayloadRequest, SelectType, Sort, User, Where } from 'payload'
+
+import type { ExportAfterHook, ExportBeforeHook, ExportDoc } from '../types.js'
 
 import { type BatchProcessorOptions } from '../utilities/useBatchProcessor.js'
 
@@ -26,7 +28,7 @@ export interface ExportFindArgs {
   page?: number
   select?: SelectType
   sort?: Sort
-  user?: TypedUser
+  user?: User
   where?: Where
 }
 
@@ -38,6 +40,7 @@ export interface ExportProcessOptions<TDoc = unknown> {
    * The slug of the collection to export
    */
   collectionSlug: string
+  exportDoc: ExportDoc
   /**
    * Arguments to pass to payload.find()
    */
@@ -46,6 +49,11 @@ export interface ExportProcessOptions<TDoc = unknown> {
    * The export format - affects column tracking for CSV
    */
   format: 'csv' | 'json'
+  /** Lifecycle hooks for this export operation */
+  hooks?: {
+    after?: ExportAfterHook
+    before?: ExportBeforeHook
+  }
   /**
    * Maximum number of documents to export
    */
@@ -58,6 +66,8 @@ export interface ExportProcessOptions<TDoc = unknown> {
    * Starting page for pagination (default: 1)
    */
   startPage?: number
+  /** Total number of docs available (used to compute totalBatches for hooks) */
+  totalDocs?: number
   /**
    * Transform function to apply to each document
    */
@@ -98,13 +108,21 @@ export interface ExportResult {
  *   format: 'csv',
  *   maxDocs: 1000,
  *   req,
- *   transformDoc: (doc) => flattenObject({ doc }),
+ *   transformDoc: (doc) => flattenObject({ data: doc }),
  * })
  * ```
  */
 export function createExportBatchProcessor(options: ExportBatchProcessorOptions = {}) {
   const batchSize = options.batchSize ?? 100
   const debug = options.debug ?? false
+
+  const computeTotalBatches = (totalDocs: number | undefined, maxDocs: number): number => {
+    const effectiveDocs =
+      totalDocs !== undefined
+        ? Math.min(totalDocs, maxDocs === Number.POSITIVE_INFINITY ? totalDocs : maxDocs)
+        : 0
+    return effectiveDocs > 0 ? Math.ceil(effectiveDocs / batchSize) : 1
+  }
 
   /**
    * Process an export operation by fetching and transforming documents in batches.
@@ -115,7 +133,19 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
   const processExport = async <TDoc>(
     processOptions: ExportProcessOptions<TDoc>,
   ): Promise<ExportResult> => {
-    const { findArgs, format, maxDocs, req, startPage = 1, transformDoc } = processOptions
+    const {
+      exportDoc,
+      findArgs,
+      format,
+      hooks,
+      maxDocs,
+      req,
+      startPage = 1,
+      totalDocs,
+      transformDoc,
+    } = processOptions
+
+    const totalBatches = computeTotalBatches(totalDocs, maxDocs)
 
     const docs: Record<string, unknown>[] = []
     const columnsSet = new Set<string>()
@@ -144,19 +174,46 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
         )
       }
 
-      for (const doc of result.docs) {
-        const transformedDoc = transformDoc(doc as TDoc)
-        docs.push(transformedDoc)
+      const batchNumber = currentPage - startPage + 1
+      const originalDocs = result.docs as Record<string, unknown>[]
+      const batchData = result.docs.map((doc) => transformDoc(doc as TDoc))
 
-        // Track columns for CSV format
+      const dataToWrite =
+        hooks?.before && batchData.length > 0
+          ? await hooks.before({
+              batchNumber,
+              data: batchData,
+              exportDoc,
+              format,
+              originalData: originalDocs,
+              req,
+              totalBatches,
+            })
+          : batchData
+
+      for (const row of dataToWrite) {
+        docs.push(row)
+
         if (format === 'csv') {
-          for (const key of Object.keys(transformedDoc)) {
+          for (const key of Object.keys(row)) {
             if (!columnsSet.has(key)) {
               columnsSet.add(key)
               columns.push(key)
             }
           }
         }
+      }
+
+      if (hooks?.after && dataToWrite.length > 0) {
+        await hooks.after({
+          batchNumber,
+          data: dataToWrite,
+          exportDoc,
+          format,
+          originalData: originalDocs,
+          req,
+          totalBatches,
+        })
       }
 
       fetched += result.docs.length
@@ -187,7 +244,19 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
   async function* streamExport<TDoc>(
     processOptions: ExportProcessOptions<TDoc>,
   ): AsyncGenerator<{ columns: string[]; docs: Record<string, unknown>[] }> {
-    const { findArgs, format, maxDocs, req, startPage = 1, transformDoc } = processOptions
+    const {
+      exportDoc,
+      findArgs,
+      format,
+      hooks,
+      maxDocs,
+      req,
+      startPage = 1,
+      totalDocs,
+      transformDoc,
+    } = processOptions
+
+    const totalBatches = computeTotalBatches(totalDocs, maxDocs)
 
     const columnsSet = new Set<string>()
     const columns: string[] = []
@@ -215,15 +284,26 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
         )
       }
 
-      const batchDocs: Record<string, unknown>[] = []
+      const batchNumber = currentPage - startPage + 1
+      const originalDocs = result.docs as Record<string, unknown>[]
+      const batchData = result.docs.map((doc) => transformDoc(doc as TDoc))
 
-      for (const doc of result.docs) {
-        const transformedDoc = transformDoc(doc as TDoc)
-        batchDocs.push(transformedDoc)
+      const dataToWrite =
+        hooks?.before && batchData.length > 0
+          ? await hooks.before({
+              batchNumber,
+              data: batchData,
+              exportDoc,
+              format,
+              originalData: originalDocs,
+              req,
+              totalBatches,
+            })
+          : batchData
 
-        // Track columns for CSV format
+      for (const row of dataToWrite) {
         if (format === 'csv') {
-          for (const key of Object.keys(transformedDoc)) {
+          for (const key of Object.keys(row)) {
             if (!columnsSet.has(key)) {
               columnsSet.add(key)
               columns.push(key)
@@ -232,7 +312,19 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
         }
       }
 
-      yield { columns: [...columns], docs: batchDocs }
+      yield { columns: [...columns], docs: dataToWrite }
+
+      if (hooks?.after && dataToWrite.length > 0) {
+        await hooks.after({
+          batchNumber,
+          data: dataToWrite,
+          exportDoc,
+          format,
+          originalData: originalDocs,
+          req,
+          totalBatches,
+        })
+      }
 
       fetched += result.docs.length
       hasNextPage = result.hasNextPage && fetched < maxDocs

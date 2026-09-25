@@ -39,7 +39,24 @@ export type CollectionPreferences = {
   editViewType?: 'default' | 'live-preview'
   groupBy?: string
   limit?: number
-  listViewType?: 'folders' | 'list'
+  listViewType?: 'hierarchy' | 'list'
   preset?: DefaultDocumentIDType
   sort?: string
+}
+
+/**
+ * A single document the user has viewed in the admin. Only identity and timestamp are stored;
+ * display fields (title, thumbnail, etc.) are computed at render time from the live document.
+ */
+export type RecentlyViewedItem = {
+  collectionSlug: string
+  id: DefaultDocumentIDType
+  viewedAt: string
+}
+
+/**
+ * The `recently-viewed` preference value: the user's recently viewed documents, most recent first.
+ */
+export type RecentlyViewedPreferences = {
+  items: RecentlyViewedItem[]
 }

@@ -36,7 +36,7 @@ export function GenerateConfirmation(props: GenerateConfirmationProps) {
         onClick={() => {
           toggleModal(modalSlug)
         }}
-        size="small"
+        size="medium"
       >
         {t('authentication:generateNewAPIKey')}
       </Button>

@@ -6,76 +6,84 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'field-perf',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      {
+        slug: 'blocks-collection',
+        fields: [
+          {
+            name: 'layout',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'content',
+                fields: [
+                  {
+                    name: 'richText',
+                    type: 'richText',
+                  },
+                  {
+                    name: 'field1',
+                    type: 'text',
+                  },
+                  {
+                    name: 'field2',
+                    type: 'text',
+                  },
+                  {
+                    name: 'field3',
+                    type: 'text',
+                  },
+                  {
+                    name: 'field4',
+                    type: 'text',
+                  },
+                  {
+                    name: 'field5',
+                    type: 'text',
+                  },
+                  {
+                    name: 'field6',
+                    type: 'text',
+                  },
+                  {
+                    name: 'field7',
+                    type: 'text',
+                  },
+                  {
+                    name: 'field8',
+                    type: 'text',
+                  },
+                  {
+                    name: 'field9',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [
-    {
-      slug: 'blocks-collection',
-      fields: [
-        {
-          name: 'layout',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'content',
-              fields: [
-                {
-                  name: 'richText',
-                  type: 'richText',
-                },
-                {
-                  name: 'field1',
-                  type: 'text',
-                },
-                {
-                  name: 'field2',
-                  type: 'text',
-                },
-                {
-                  name: 'field3',
-                  type: 'text',
-                },
-                {
-                  name: 'field4',
-                  type: 'text',
-                },
-                {
-                  name: 'field5',
-                  type: 'text',
-                },
-                {
-                  name: 'field6',
-                  type: 'text',
-                },
-                {
-                  name: 'field7',
-                  type: 'text',
-                },
-                {
-                  name: 'field8',
-                  type: 'text',
-                },
-                {
-                  name: 'field9',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -84,11 +92,6 @@ export default buildConfigWithDefaults({
         layout: [...Array(100)].map((row, i) => ({
           blockName: `Block ${i}`,
           blockType: 'content',
-          richText: [
-            {
-              children: [{ text: '' }],
-            },
-          ],
           field1: 'text field 1',
           field2: 'text field 2',
           field3: 'text field 3',
@@ -98,11 +101,14 @@ export default buildConfigWithDefaults({
           field7: 'text field 7',
           field8: 'text field 8',
           field9: 'text field 9',
+          richText: [
+            {
+              children: [{ text: '' }],
+            },
+          ],
         })),
       },
+      overrideAccess: true,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

@@ -1,13 +1,15 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
-import React, { useCallback } from 'react'
+import React from 'react'
 
-import { useTranslation } from '../../providers/Translation/index.js'
-import { Button } from '../Button/index.js'
-import { drawerZBase, useDrawerDepth } from '../Drawer/index.js'
-import './index.scss'
-
-const baseClass = 'confirmation-modal'
+import {
+  DialogBody,
+  DialogCancel,
+  DialogConfirm,
+  DialogFooter,
+  DialogHeader,
+  DialogModal,
+} from '../Dialog/index.js'
+import './index.css'
 
 export type OnCancel = () => void
 
@@ -32,77 +34,22 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     confirmLabel,
     heading,
     modalSlug,
-    onCancel: onCancelFromProps,
-    onConfirm: onConfirmFromProps,
+    onCancel,
+    onConfirm,
   } = props
 
-  const editDepth = useDrawerDepth()
-
-  const [confirming, setConfirming] = React.useState(false)
-
-  const { closeModal, isModalOpen } = useModal()
-  const { t } = useTranslation()
-
-  const onConfirm = useCallback(async () => {
-    if (!confirming) {
-      setConfirming(true)
-
-      if (typeof onConfirmFromProps === 'function') {
-        await onConfirmFromProps()
-      }
-
-      setConfirming(false)
-      closeModal(modalSlug)
-    }
-  }, [confirming, onConfirmFromProps, closeModal, modalSlug])
-
-  const onCancel = useCallback(() => {
-    if (!confirming) {
-      closeModal(modalSlug)
-
-      if (typeof onCancelFromProps === 'function') {
-        onCancelFromProps()
-      }
-    }
-  }, [confirming, onCancelFromProps, closeModal, modalSlug])
-
-  if (!isModalOpen(modalSlug)) {
-    return null
-  }
-
   return (
-    <Modal
-      className={[baseClass, className].filter(Boolean).join(' ')}
-      // Fixes https://github.com/payloadcms/payload/issues/13778
-      closeOnBlur={false}
-      slug={modalSlug}
-      style={{
-        zIndex: drawerZBase + editDepth,
-      }}
-    >
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__content`}>
-          {typeof heading === 'string' ? <h1>{heading}</h1> : heading}
+    <DialogModal className={className} slug={modalSlug}>
+      <DialogHeader showClose title={heading} />
+      <DialogBody>
+        <div className="confirmation-modal__body">
           {typeof body === 'string' ? <p>{body}</p> : body}
         </div>
-        <div className={`${baseClass}__controls`}>
-          <Button
-            buttonStyle="secondary"
-            disabled={confirming}
-            id="confirm-cancel"
-            onClick={onCancel}
-            size="large"
-            type="button"
-          >
-            {cancelLabel || t('general:cancel')}
-          </Button>
-          <Button id="confirm-action" onClick={onConfirm} size="large">
-            {confirming
-              ? confirmingLabel || `${t('general:loading')}...`
-              : confirmLabel || t('general:confirm')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+      </DialogBody>
+      <DialogFooter>
+        <DialogCancel label={cancelLabel} onClick={onCancel} />
+        <DialogConfirm label={confirmLabel} loadingLabel={confirmingLabel} onClick={onConfirm} />
+      </DialogFooter>
+    </DialogModal>
   )
 }

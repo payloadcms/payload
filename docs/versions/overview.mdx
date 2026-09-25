@@ -26,9 +26,10 @@ _Comparing an old version to a newer version of a document_
 - Build a powerful publishing schedule mechanism to create documents and have them become publicly readable automatically at a future date
 
 <Banner type="success">
-  Versions are extremely performant and totally opt-in. They don't change the
-  shape of your data at all. All versions are stored in a separate Collection
-  and can be turned on and off easily at your risk.
+  Versions are extremely performant. They don't change the shape of your data at
+  all. All versions are stored in a separate collection or global. Versions are{' '}
+  <strong>enabled by default</strong> for every collection and global — set{' '}
+  <code>versions: false</code> to opt out.
 </Banner>
 
 ## Options
@@ -51,7 +52,29 @@ When you have versions, drafts, _and_ `autosave` enabled, the Admin UI will auto
 
 ## Collection config
 
-Configuring Versions is done by adding the `versions` key to your Collection configs. Set it to `true` to enable default Versions settings, or customize versions options by setting the property equal to an object containing the following available options:
+Versions are **enabled by default** for every collection (`maxPerDoc: 100`, drafts disabled). You only need to set the `versions` key explicitly when you want to opt out or customise the behaviour:
+
+```ts
+// Opt out entirely
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: true,
+  fields: [],
+  versions: false,
+}
+
+// Customise — enable drafts and cap history to 50 versions per document
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [],
+  versions: {
+    drafts: { autosave: true },
+    maxPerDoc: 50,
+  },
+}
+```
+
+The available options are:
 
 | Option      | Description                                                                                                                                                        |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -60,11 +83,22 @@ Configuring Versions is done by adding the `versions` key to your Collection con
 
 ## Global config
 
-Global versions work similarly to Collection versions but have a slightly different set of config properties supported.
+Global versions are **enabled by default** (`max: 100`, drafts disabled), the same as collections. Set `versions: false` to opt out, or pass an object to customise:
+
+```ts
+// Opt out entirely
+export const Header: GlobalConfig = {
+  slug: 'header',
+  fields: [],
+  versions: false,
+}
+```
+
+The available options differ slightly from collections — globals use `max` instead of `maxPerDoc`:
 
 | Option   | Description                                                                                                                                                   |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `max`    | Use this setting to control how many versions to keep on a global by global basis. Must be an integer.                                                        |
+| `max`    | Use this setting to control how many versions to keep on a global by global basis. Must be an integer. Defaults to 100, use 0 to save all versions.           |
 | `drafts` | Enable [Drafts](/docs/versions/drafts) mode for this global. To enable, set to `true` or pass an object with `draft` [options](/docs/versions/drafts#options) |
 
 ### Database impact

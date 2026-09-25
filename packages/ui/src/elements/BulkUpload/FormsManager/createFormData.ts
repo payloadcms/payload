@@ -1,15 +1,15 @@
-import type { CollectionSlug, FormState } from 'payload'
+import type { FormState } from 'payload'
 
 import { serialize } from 'object-to-formdata'
-import { reduceFieldsToValues } from 'payload/shared'
+import { reduceFieldsToValues, uploadRequiresServerValidation } from 'payload/shared'
 
 import type { UploadHandlersContext } from '../../../providers/UploadHandlers/index.js'
 
 export async function createFormData(
   formState: FormState = {},
   overrides: Record<string, any> = {},
-  collectionSlug: CollectionSlug,
   uploadHandler: ReturnType<UploadHandlersContext['getUploadHandler']>,
+  allowRestrictedFileTypes?: boolean,
 ) {
   const data = reduceFieldsToValues(formState, true)
   let file = data?.file
@@ -18,24 +18,21 @@ export async function createFormData(
     delete data.file
   }
 
-  if (file && typeof uploadHandler === 'function') {
-    let filename = file.name
-
-    const clientUploadContext = await uploadHandler({
-      docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
-      file,
-      updateFilename: (value) => {
-        filename = value
-      },
-    })
-
-    file = JSON.stringify({
-      clientUploadContext,
-      collectionSlug,
-      filename,
+  if (
+    file &&
+    typeof uploadHandler === 'function' &&
+    !uploadRequiresServerValidation({
+      allowRestrictedFileTypes,
+      filename: file.name,
       mimeType: file.type,
-      size: file.size,
     })
+  ) {
+    file = JSON.stringify(
+      await uploadHandler({
+        docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
+        file,
+      }),
+    )
   }
 
   const dataWithOverrides = {

@@ -1,0 +1,8 @@
+@layer payload-default {
+  .collapsible-field__row-label-wrap {
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+}

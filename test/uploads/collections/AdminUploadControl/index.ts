@@ -20,4 +20,5 @@ export const AdminUploadControl: CollectionConfig = {
     },
   },
   fields: [],
+  versions: false,
 }

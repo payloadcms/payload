@@ -14,4 +14,5 @@ export const Media2: CollectionConfig = {
   upload: {
     staticDir: path.resolve(dirname, './uploads2'),
   },
+  versions: false,
 }

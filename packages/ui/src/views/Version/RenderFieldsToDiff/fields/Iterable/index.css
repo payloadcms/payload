@@ -1,0 +1,40 @@
+@layer payload-default {
+  .iterable-diff-label-container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+  }
+
+  .iterable-diff__label {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-style: normal;
+    font-weight: var(--font-weight-strong);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+  }
+
+  .iterable-diff__locale-label {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    padding: var(--spacer-1);
+
+    [dir='ltr'] & {
+      margin-right: var(--spacer-1);
+    }
+
+    [dir='rtl'] & {
+      margin-left: var(--spacer-1);
+    }
+  }
+
+  .iterable-diff__row:not(:first-of-type) {
+    margin-top: var(--spacer-2);
+  }
+
+  .iterable-diff__no-rows {
+    color: var(--color-text-tertiary);
+  }
+}

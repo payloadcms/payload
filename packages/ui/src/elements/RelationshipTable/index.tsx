@@ -3,6 +3,7 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   type CollectionSlug,
   type Column,
+  type DocumentEvent,
   type JoinFieldClient,
   type ListQuery,
   type PaginatedDocs,
@@ -13,24 +14,22 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
-import { Pill } from '../../elements/Pill/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { AnimateHeight } from '../AnimateHeight/index.js'
-import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js'
 import { NoListResults } from '../NoListResults/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'relationship-table'
 
@@ -38,6 +37,7 @@ type RelationshipTableComponentProps = {
   readonly AfterInput?: React.ReactNode
   readonly allowCreate?: boolean
   readonly BeforeInput?: React.ReactNode
+  readonly Description?: React.ReactNode
   readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly fieldPath?: string
@@ -60,6 +60,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     AfterInput,
     allowCreate = true,
     BeforeInput,
+    Description,
     disableTable = false,
     field,
     fieldPath,
@@ -75,7 +76,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const { i18n, t } = useTranslation()
 
   const [query, setQuery] = useState<ListQuery>()
-  const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
@@ -138,7 +138,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       }
 
       // map columns from string[] to CollectionPreferences['columns']
-      const defaultColumns = field.admin.defaultColumns
+      const defaultColumns = field.admin?.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
             accessor,
             active: true,
@@ -146,7 +146,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         : undefined
 
       const renderRowTypes =
-        typeof field.admin.disableRowTypes === 'boolean'
+        typeof field.admin?.disableRowTypes === 'boolean'
           ? !field.admin.disableRowTypes
           : Array.isArray(relationTo)
 
@@ -177,8 +177,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
-      field.admin.defaultColumns,
-      field.admin.disableRowTypes,
+      field.admin?.defaultColumns,
+      field.admin?.disableRowTypes,
       field.collection,
       field.name,
       field.orderable,
@@ -267,15 +267,67 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     }
   }, [isDrawerOpen])
 
+  // Keep this table in sync with documents created, updated, or deleted elsewhere
+  // (a sibling join table, the relationship field, or an inline drawer edit).
+  const { mostRecentUpdate } = useDocumentEvents()
+  const lastHandledEventRef = useRef<DocumentEvent | null>(null)
+
+  const handleDocumentEvent = useEffectEvent((event: DocumentEvent | null) => {
+    if (disableTable || !event || event === lastHandledEventRef.current) {
+      return
+    }
+
+    const relationSlugs = Array.isArray(relationTo) ? relationTo : [relationTo]
+
+    if (!relationSlugs.includes(event.entitySlug)) {
+      return
+    }
+
+    lastHandledEventRef.current = event
+
+    // Skip the refetch when the current data already reflects this event — e.g. this
+    // table's own drawer already applied it optimistically via onDrawerSave/onDrawerDelete,
+    // or a fresh mount already loaded data that includes it. Otherwise saving/deleting from
+    // this table's own drawer (which also emits a matching event) would render a second time.
+    const eventDocID = event.doc?.id ?? event.id
+
+    const existingDoc = isPolymorphic
+      ? data?.docs?.find(
+          (doc) => doc.relationTo === event.entitySlug && doc.value?.id === eventDocID,
+        )
+      : data?.docs?.find((doc) => doc.id === eventDocID)
+
+    const existingUpdatedAt = isPolymorphic ? existingDoc?.value?.updatedAt : existingDoc?.updatedAt
+
+    const isAlreadyReflected =
+      event.operation === 'delete'
+        ? !existingDoc
+        : Boolean(existingDoc) && existingUpdatedAt === event.updatedAt
+
+    if (isAlreadyReflected) {
+      return
+    }
+
+    void renderTable()
+  })
+
+  useEffect(() => {
+    handleDocumentEvent(mostRecentUpdate)
+  }, [mostRecentUpdate])
+
   const canCreate =
     allowCreate !== false &&
     permissions?.collections?.[isPolymorphic ? relationTo[0] : relationTo]?.create
 
-  useEffect(() => {
+  const openSelectedCollectionDrawer = useEffectEvent(() => {
     if (isPolymorphic && selectedCollection) {
       openDrawer()
     }
-  }, [selectedCollection, openDrawer, isPolymorphic])
+  })
+
+  useEffect(() => {
+    openSelectedCollectionDrawer()
+  }, [selectedCollection, isPolymorphic])
 
   useEffect(() => {
     if (isPolymorphic && !isDrawerOpen && selectedCollection) {
@@ -294,80 +346,75 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [columnState, field, collectionConfig],
   )
 
+  const addNewButton = (
+    <AddNewButton
+      allowCreate={allowCreate !== false}
+      baseClass={baseClass}
+      buttonStyle="ghost"
+      className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ''}`}
+      collections={config.collections}
+      i18n={i18n}
+      label={i18n.t('fields:addNew')}
+      onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+      permissions={permissions}
+      relationTo={relationTo}
+    />
+  )
+
+  const columnsButton = <ListColumnSelectionButton collectionSlug={collectionConfig?.slug} />
+
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__header`}>
-        {Label}
-        <div className={`${baseClass}__actions`}>
-          <AddNewButton
-            allowCreate={allowCreate !== false}
-            baseClass={baseClass}
-            buttonStyle="none"
-            className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ' doc-drawer__toggler'}`}
-            collections={config.collections}
-            i18n={i18n}
-            icon={isPolymorphic ? 'plus' : undefined}
-            label={i18n.t('fields:addNew')}
-            onClick={isPolymorphic ? setSelectedCollection : openDrawer}
-            permissions={permissions}
-            relationTo={relationTo}
-          />
-          <Pill
-            aria-controls={`${baseClass}-columns`}
-            aria-expanded={openColumnSelector}
-            className={`${baseClass}__toggle-columns ${
-              openColumnSelector ? `${baseClass}__buttons-active` : ''
-            }`}
-            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
-            onClick={() => setOpenColumnSelector(!openColumnSelector)}
-            pillStyle="light"
-            size="small"
-          >
-            {t('general:columns')}
-          </Pill>
-        </div>
-      </div>
-      {BeforeInput}
       {isLoadingTable ? (
-        <p>{t('general:loading')}</p>
+        <Fragment>
+          <div className={`${baseClass}__header`}>
+            {Label}
+            <div className={`${baseClass}__actions`}>{addNewButton}</div>
+            {Description}
+          </div>
+          {BeforeInput}
+          <p>{t('general:loading')}</p>
+        </Fragment>
       ) : (
         <Fragment>
           {data?.docs && data.docs.length === 0 && (
-            <NoListResults
-              Actions={
-                canCreate
-                  ? [
-                      <AddNewButton
-                        allowCreate={canCreate}
-                        baseClass={baseClass}
-                        collections={config.collections}
-                        i18n={i18n}
-                        key="create"
-                        label={i18n.t('general:createNewLabel', {
-                          label: isPolymorphic
-                            ? i18n.t('general:document')
-                            : getTranslation(collectionConfig?.labels?.singular, i18n),
-                        })}
-                        onClick={isPolymorphic ? setSelectedCollection : openDrawer}
-                        permissions={permissions}
-                        relationTo={relationTo}
-                      />,
-                    ]
-                  : []
-              }
-              Message={
-                <>
-                  <h3>{i18n.t('general:noResultsFound')}</h3>
-                  <p>
-                    {i18n.t('general:noResults', {
-                      label: isPolymorphic
-                        ? i18n.t('general:documents')
-                        : getTranslation(collectionConfig?.labels?.plural, i18n),
-                    })}
-                  </p>
-                </>
-              }
-            />
+            <Fragment>
+              <div className={`${baseClass}__header`}>
+                {Label}
+                <div className={`${baseClass}__actions`}>{addNewButton}</div>
+                {Description}
+              </div>
+              {BeforeInput}
+              <NoListResults
+                Actions={
+                  canCreate
+                    ? [
+                        <AddNewButton
+                          allowCreate={canCreate}
+                          baseClass={baseClass}
+                          collections={config.collections}
+                          i18n={i18n}
+                          key="create"
+                          label={i18n.t('general:createNewLabel', {
+                            label: isPolymorphic
+                              ? i18n.t('general:document')
+                              : getTranslation(collectionConfig?.labels?.singular, i18n),
+                          })}
+                          onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+                          permissions={permissions}
+                          relationTo={relationTo}
+                        />,
+                      ]
+                    : []
+                }
+                description={i18n.t('general:noResults', {
+                  label: isPolymorphic
+                    ? i18n.t('general:documents')
+                    : getTranslation(collectionConfig?.labels?.plural, i18n),
+                })}
+                title={i18n.t('general:noResultsFound')}
+              />
+            </Fragment>
           )}
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
@@ -389,17 +436,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     <DrawerLink currentDrawerID={currentDrawerID} onDrawerOpen={onDrawerOpen} />
                   }
                 >
-                  <AnimateHeight
-                    className={`${baseClass}__columns`}
-                    height={openColumnSelector ? 'auto' : 0}
-                    id={`${baseClass}-columns`}
-                  >
-                    <div className={`${baseClass}__columns-inner`}>
-                      {collectionConfig && (
-                        <ColumnSelector collectionSlug={collectionConfig.slug} />
-                      )}
+                  <div className={`${baseClass}__header`}>
+                    {Label}
+                    <div className={`${baseClass}__actions`}>
+                      {addNewButton}
+                      {columnsButton}
                     </div>
-                  </AnimateHeight>
+                    {Description}
+                  </div>
+                  {BeforeInput}
                   {Table}
                   <RelationshipTablePagination />
                 </TableColumnsProvider>

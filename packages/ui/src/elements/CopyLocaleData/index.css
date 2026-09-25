@@ -1,0 +1,22 @@
+@layer payload-default {
+  .copy-locale-data__sub-header {
+    padding: var(--spacer-2-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .copy-locale-data__content {
+    padding: var(--spacer-2-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2-5);
+
+    > * {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-1);
+    }
+  }
+}

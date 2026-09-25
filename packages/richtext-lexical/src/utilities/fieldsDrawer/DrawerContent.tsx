@@ -4,12 +4,10 @@ import type { FormState } from 'payload'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   Form,
-  FormSubmit,
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
   useServerFunctions,
-  useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
@@ -19,8 +17,14 @@ import { v4 as uuid } from 'uuid'
 import type { FieldsDrawerProps } from './Drawer.js'
 
 import { useEditorConfigContext } from '../../lexical/config/client/EditorConfigProvider.js'
+import { RegisterFormSubmit } from './useDrawerSubmit.js'
+import './index.css'
 
-export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = ({
+export const DrawerContent: React.FC<
+  {
+    submitRef: React.RefObject<(() => void) | null>
+  } & Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>
+> = ({
   data,
   featureKey,
   fieldMapOverride,
@@ -28,8 +32,8 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   schemaFieldsPathOverride,
   schemaPath,
   schemaPathSuffix,
+  submitRef,
 }) => {
-  const { t } = useTranslation()
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
@@ -152,6 +156,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   return (
     <Form
       beforeSubmit={[onChange]}
+      className="fields-drawer"
       disableValidationOnSubmit
       fields={Array.isArray(fields) ? fields : []}
       initialState={initialState}
@@ -168,7 +173,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         permissions={true}
         readOnly={!isEditable}
       />
-      <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+      <RegisterFormSubmit submitRef={submitRef} />
     </Form>
   )
 }

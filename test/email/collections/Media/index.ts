@@ -32,4 +32,5 @@ export const MediaCollection: CollectionConfig = {
       },
     ],
   },
+  versions: false,
 }

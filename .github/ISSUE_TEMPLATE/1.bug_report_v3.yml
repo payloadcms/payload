@@ -1,7 +1,12 @@
-name: Functionality Bug
-description: '[REPRODUCTION REQUIRED] - Create a bug report'
-labels: ['status: needs-triage', 'validate-reproduction']
+name: Functionality Bug (v3)
+description: '[REPRODUCTION REQUIRED] - Report a bug in Payload v3'
+labels: ['status: needs-triage', 'validate-reproduction', 'v3']
 body:
+  - type: markdown
+    attributes:
+      value: |
+        > **Payload v3 is in maintenance mode.** Only bug fixes are being accepted against v3 — new features are not. If you want to propose a new feature, please open a discussion targeting Payload v4 instead: https://github.com/payloadcms/payload/discussions
+
   - type: textarea
     attributes:
       label: Describe the Bug
@@ -51,7 +56,6 @@ body:
         - 'plugin: nested-docs'
         - 'plugin: redirects'
         - 'plugin: richtext-lexical'
-        - 'plugin: richtext-slate'
         - 'plugin: search'
         - 'plugin: sentry'
         - 'plugin: seo'

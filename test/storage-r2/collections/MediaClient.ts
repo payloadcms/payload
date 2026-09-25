@@ -31,4 +31,5 @@ export const MediaClient: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

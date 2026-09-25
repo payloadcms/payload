@@ -1,12 +1,12 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 
-import { type JsonObject, type Payload, type TypedUser } from '../../../index.js'
+import { type JsonObject, type Payload, type User } from '../../../index.js'
 import { isUserLocked } from '../../isUserLocked.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
   payload: Payload
-  user: TypedUser
+  user: User
 }
 
 // Note: this function does not use req in its updates, as we want those to be visible in parallel requests that are on a different
@@ -115,7 +115,7 @@ export const incrementLoginAttempts = async ({
       // However, this request (the incorrect login attempt request) can kill the successful login attempt here.
 
       // Fetch user sessions separately (do not do this in the updateOne select in order to preserve the returning: true db call optimization)
-      const currentUser = await payload.db.findOne<TypedUser>({
+      const currentUser = await payload.db.findOne<User>({
         collection: collection.slug,
         select: {
           sessions: true,
@@ -129,7 +129,7 @@ export const incrementLoginAttempts = async ({
       if (currentUser?.sessions?.length) {
         // Does not hurt also removing expired sessions
         currentUser.sessions = currentUser.sessions.filter((session) => {
-          const sessionCreatedAt = new Date(session.createdAt)
+          const sessionCreatedAt = new Date(session.createdAt ?? 0)
           const twentySecondsAgo = new Date(currentTime - 20000)
 
           // Remove sessions created within the last 20 seconds

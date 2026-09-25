@@ -17,7 +17,7 @@ import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys.js'
 import { isOnHandleElement } from '../utils/isOnHandleElement.js'
 import { setHandlePosition } from '../utils/setHandlePosition.js'
 import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
-import './index.scss'
+import './index.css'
 import { setTargetLine } from './setTargetLine.js'
 
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu'
@@ -74,6 +74,7 @@ function useDraggableBlockMenu(
   const targetLineRef = useRef<HTMLDivElement>(null)
   const debugHighlightRef = useRef<HTMLDivElement>(null)
   const isDraggingBlockRef = useRef<boolean>(false)
+  const highlightTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const [draggableBlockElem, setDraggableBlockElem] = useState<HTMLElement | null>(null)
   const [lastTargetBlock, setLastTargetBlock] = useState<{
     boundingBox?: DOMRect
@@ -213,9 +214,13 @@ function useDraggableBlockMenu(
         return false
       }
 
+      // Always prevent default and set dropEffect during drag to maintain the move cursor
+      event.preventDefault()
+      event.dataTransfer!.dropEffect = 'move'
+
       if (draggableBlockElem !== targetBlockElem) {
         const { isBelow, willStayInSamePosition } = setTargetLine(
-          editorConfig?.admin?.hideGutter ? '0px' : '3rem',
+          editorConfig?.admin?.hideGutter ? '0px' : 'var(--spacer-5)',
           blockHandleHorizontalOffset +
             (editorConfig?.admin?.hideGutter
               ? (menuRef?.current?.getBoundingClientRect()?.width ?? 0)
@@ -229,11 +234,6 @@ function useDraggableBlockMenu(
           debugHighlightRef,
           isFoundNodeEmptyParagraph,
         )
-
-        // Prevent default event to be able to trigger onDrop events
-        // Calling preventDefault() adds the green plus icon to the cursor,
-        // indicating that the drop is allowed.
-        event.preventDefault()
 
         if (!willStayInSamePosition) {
           setLastTargetBlock({
@@ -339,7 +339,7 @@ function useDraggableBlockMenu(
         })
 
         const newInsertedElem = editor.getElementByKey(draggedNode.getKey())
-        setTimeout(() => {
+        const highlightTimer = setTimeout(() => {
           // add new temp html element to newInsertedElem with the same height and width and the class block-selected
           // to highlight the new inserted element
           const newInsertedElemRect = newInsertedElem?.getBoundingClientRect()
@@ -349,7 +349,7 @@ function useDraggableBlockMenu(
           const highlightElem = document.createElement('div')
           highlightElem.className = 'lexical-block-highlighter'
 
-          highlightElem.style.backgroundColor = 'var(--theme-elevation-1000'
+          highlightElem.style.backgroundColor = 'var(--color-bg-inverse)'
           highlightElem.style.transition = 'opacity 0.5s ease-in-out'
           highlightElem.style.zIndex = '1'
           highlightElem.style.pointerEvents = 'none'
@@ -365,13 +365,16 @@ function useDraggableBlockMenu(
           highlightElem.style.top = `${newInsertedElemRect.top + window.scrollY - 4}px`
           highlightElem.style.left = `${newInsertedElemRect.left - 4}px`
 
-          setTimeout(() => {
+          const fadeTimer = setTimeout(() => {
             highlightElem.style.opacity = '0'
-            setTimeout(() => {
+            const removeTimer = setTimeout(() => {
               highlightElem.remove()
             }, 500)
+            highlightTimersRef.current.push(removeTimer)
           }, 1000)
+          highlightTimersRef.current.push(fadeTimer)
         }, 120)
+        highlightTimersRef.current.push(highlightTimer)
       })
 
       return true
@@ -385,6 +388,8 @@ function useDraggableBlockMenu(
     return () => {
       document.removeEventListener('dragover', onDragover)
       document.removeEventListener('drop', onDrop)
+      highlightTimersRef.current.forEach(clearTimeout)
+      highlightTimersRef.current = []
     }
   }, [
     scrollerElem,
@@ -402,6 +407,7 @@ function useDraggableBlockMenu(
       return
     }
     setDragImage(dataTransfer, draggableBlockElem)
+    dataTransfer.effectAllowed = 'move'
     let nodeKey = ''
     editor.update(() => {
       const node = $getNearestNodeFromDOMNode(draggableBlockElem)

@@ -27,25 +27,31 @@ async function replacePayloadConfigPath(rootDir: string, configPath: string) {
 }
 
 export const createTestHooks = (testSuiteName = '_community', testSuiteConfig = 'config.ts') => {
+  const framework = process.env.PAYLOAD_FRAMEWORK || 'next'
   const rootDir = getNextRootDir().rootDir
 
   return {
     /**
-     * Clear next webpack cache and set '@payload-config' path in tsconfig.json
+     * Clear framework cache and set '@payload-config' path in tsconfig.json
      */
     beforeTest: async () => {
-      // Delete entire .next cache folder
-      const nextCache = path.resolve(rootDir, './.next')
-      if (existsSync(nextCache)) {
-        await rm(nextCache, { recursive: true })
+      if (framework === 'tanstack-start') {
+        const tanstackRootDir = path.resolve(dirname, '..', 'app-tanstack')
+        const tanstackConfigPath = `../test/${testSuiteName}/${testSuiteConfig}`
+        await replacePayloadConfigPath(tanstackRootDir, tanstackConfigPath)
+      } else {
+        const nextCache = path.resolve(rootDir, './.next')
+        if (existsSync(nextCache)) {
+          await rm(nextCache, { recursive: true })
+        }
+
+        const configPath =
+          process.env.PAYLOAD_TEST_PROD === 'true'
+            ? `./${testSuiteName}/${testSuiteConfig}`
+            : `./test/${testSuiteName}/${testSuiteConfig}`
+
+        await replacePayloadConfigPath(rootDir, configPath)
       }
-
-      const configPath =
-        process.env.PAYLOAD_TEST_PROD === 'true'
-          ? `./${testSuiteName}/${testSuiteConfig}`
-          : `./test/${testSuiteName}/${testSuiteConfig}`
-
-      await replacePayloadConfigPath(rootDir, configPath)
 
       process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, testSuiteConfig)
     },

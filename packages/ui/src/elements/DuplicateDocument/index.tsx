@@ -4,7 +4,6 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
@@ -15,6 +14,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -43,7 +43,8 @@ export const DuplicateDocument: React.FC<Props> = ({
   const router = useRouter()
   const modified = useFormModified()
   const { openModal } = useModal()
-  const { code: localeCode } = useLocale()
+  const locale = useLocale()
+  const localeCode = locale?.code
   const { setModified } = useForm()
   const { startRouteTransition } = useRouteTransition()
 

@@ -24,9 +24,9 @@ export default function Private({ widgetSlug }: WidgetServerProps) {
         <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>Private Widget</h3>
         <div
           style={{
-            background: 'var(--theme-success-500)',
+            background: 'var(--color-bg-brand)',
             borderRadius: '12px',
-            color: 'var(--theme-elevation-0)',
+            color: 'var(--color-text-onbrand)',
             fontSize: '12px',
             fontWeight: 600,
             padding: '4px 8px',
@@ -38,8 +38,8 @@ export default function Private({ widgetSlug }: WidgetServerProps) {
 
       <div
         style={{
-          background: 'var(--theme-elevation-50)',
-          border: '1px solid var(--theme-elevation-200)',
+          background: 'var(--color-bg-secondary)',
+          border: '1px solid var(--color-border)',
           borderRadius: '8px',
           flex: 1,
           padding: '16px',
@@ -48,7 +48,7 @@ export default function Private({ widgetSlug }: WidgetServerProps) {
       >
         <div
           style={{
-            color: 'var(--theme-elevation-500)',
+            color: 'var(--color-text-secondary)',
             fontSize: '14px',
             marginBottom: '8px',
           }}
@@ -60,7 +60,7 @@ export default function Private({ widgetSlug }: WidgetServerProps) {
         </div>
         <div
           style={{
-            color: 'var(--theme-text)',
+            color: 'var(--color-text)',
             fontSize: '12px',
             opacity: 0.7,
           }}

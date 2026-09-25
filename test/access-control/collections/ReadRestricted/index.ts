@@ -276,4 +276,5 @@ export const ReadRestricted: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

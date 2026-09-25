@@ -11,6 +11,13 @@ export const _internal_safeFetchGlobal = {
   lookup,
 }
 
+const buildBlockedFetchError = (hostname: string): Error =>
+  new Error(
+    `Blocked unsafe attempt to ${hostname}. This host resolves to a private or internal address. ` +
+      `If this is a trusted destination, allowlist it via the upload collection's "skipSafeFetch" option ` +
+      `(https://payloadcms.com/docs/upload/overview#skip-safe-fetch).`,
+  )
+
 const isSafeIp = (ip: string) => {
   try {
     if (!ip) {
@@ -45,7 +52,7 @@ const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
       }
 
       if (ips.some((ip) => !isSafeIp(ip))) {
-        callback(new Error(`Blocked unsafe attempt to ${hostname}`), address, family)
+        callback(buildBlockedFetchError(hostname), address, family)
         return
       }
 
@@ -54,9 +61,15 @@ const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
   })
 }
 
-const safeDispatcher = new Agent({
-  connect: { lookup: ssrfFilterInterceptor },
-})
+let safeDispatcher: Agent | undefined
+
+const getSafeDispatcher = (): Agent => {
+  if (!safeDispatcher) {
+    safeDispatcher = new Agent({ connect: { lookup: ssrfFilterInterceptor } })
+  }
+  return safeDispatcher
+}
+
 /**
  * A "safe" version of undici's fetch that prevents SSRF attacks.
  *
@@ -79,12 +92,12 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>): Promis
 
     if (ipaddr.isValid(hostname)) {
       if (!isSafeIp(hostname)) {
-        throw new Error(`Blocked unsafe attempt to ${hostname}`)
+        throw buildBlockedFetchError(hostname)
       }
     }
     return (await undiciFetch(url, {
       ...options,
-      dispatcher: safeDispatcher,
+      dispatcher: getSafeDispatcher(),
       redirect: 'manual', // Prevent automatic redirects
     })) as unknown as Response
   } catch (error) {

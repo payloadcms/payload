@@ -1,6 +1,5 @@
-import type { Payload, TypedUser, ViewTypes } from 'payload'
+import type { Payload, ServerAdapter, User, ViewTypes } from 'payload'
 
-import { unauthorized } from 'next/navigation.js'
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 
 import type { MultiTenantPluginConfig } from '../types.js'
@@ -19,14 +18,15 @@ type Args = {
   docID?: number | string
   headers: Headers
   payload: Payload
+  server: ServerAdapter
   slug: string
   tenantFieldName: string
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  user?: TypedUser
-  userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
+  user?: User
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
   view: ViewTypes
 }
 export async function getGlobalViewRedirect({
@@ -34,6 +34,7 @@ export async function getGlobalViewRedirect({
   docID,
   headers,
   payload,
+  server,
   tenantFieldName,
   tenantsArrayFieldName,
   tenantsArrayTenantFieldName,
@@ -51,7 +52,7 @@ export async function getGlobalViewRedirect({
   let redirectRoute: `/${string}` | void = undefined
 
   if (!user) {
-    return unauthorized()
+    return server.unauthorized()
   }
 
   if (!tenant) {
@@ -74,6 +75,7 @@ export async function getGlobalViewRedirect({
         collection: collectionSlug,
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         pagination: false,
         select: {
           id: true,
@@ -170,6 +172,7 @@ async function generateCreateRedirect({
         },
         depth: 0,
         draft: true,
+        overrideAccess: true,
         select: {
           id: true,
         },

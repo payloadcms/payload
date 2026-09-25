@@ -1,24 +1,23 @@
 import type { BlobDownloadResponseParsed, ContainerClient } from '@azure/storage-blob'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
 import {
+  buildStoragePathData,
   getFilePrefix as getDocPrefix,
-  getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 interface GetFileArgs {
   client: ContainerClient
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
@@ -54,13 +53,13 @@ const abortRequestAndDestroyStream = ({
 
 export async function getFile({
   client,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   let blob: BlobDownloadResponseParsed | undefined = undefined
@@ -75,21 +74,23 @@ export async function getFile({
 
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
-      filename,
-      prefixQueryParam,
-      req,
-    })
-
-    const key = getFileKey({
       collectionPrefix,
-      docPrefix,
-      filename: sanitizeFilename(filename),
+      doc,
+      filename,
+      req,
+      uploadReference,
       useCompositePrefixes,
     })
 
-    const blockBlobClient = client.getBlockBlobClient(key)
+    const { storageFilePath } = buildStoragePathData({
+      collectionPrefix,
+      docPrefix,
+      filename,
+      useCompositePrefixes,
+    })
+
+    const blockBlobClient = client.getBlockBlobClient(storageFilePath)
 
     // Get file size for range validation
     const properties = await blockBlobClient.getProperties()
@@ -133,9 +134,9 @@ export async function getFile({
       headers.append('ETag', String(properties.etag))
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (properties.contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Apply a restrictive policy to XML-family responses served through Payload.
+    if (isXmlMimeType(properties.contentType)) {
+      headers.append('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

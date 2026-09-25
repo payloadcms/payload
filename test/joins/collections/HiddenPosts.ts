@@ -20,4 +20,5 @@ export const HiddenPosts: CollectionConfig = {
       relationTo: categoriesSlug,
     },
   ],
+  versions: false,
 }

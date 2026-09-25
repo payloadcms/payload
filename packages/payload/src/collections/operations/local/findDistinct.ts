@@ -1,7 +1,6 @@
 import type {
   CollectionSlug,
   DataFromCollectionSlug,
-  Document,
   PaginatedDistinctDocs,
   Payload,
   PayloadRequest,
@@ -9,11 +8,13 @@ import type {
   RequestContext,
   Sort,
   TypedLocale,
+  User,
   Where,
 } from '../../../index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 
-import { APIError, createLocalReq } from '../../../index.js'
+import { APIError, createPayloadRequest } from '../../../index.js'
 import { findDistinctOperation } from '../findDistinct.js'
 
 export type Options<
@@ -53,12 +54,6 @@ export type Options<
    */
   locale?: 'all' | TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * Get a specific page number (if limit is specified)
    * @default 1
    */
@@ -92,16 +87,15 @@ export type Options<
    * @default false
    */
   trash?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function findDistinct<
   TSlug extends CollectionSlug,
@@ -116,7 +110,7 @@ export async function findDistinct<
     disableErrors,
     field,
     limit,
-    overrideAccess = true,
+    overrideAccess = false,
     page,
     populate,
     showHiddenFields,
@@ -141,7 +135,10 @@ export async function findDistinct<
     overrideAccess,
     page,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     showHiddenFields,
     sort,
     trash,

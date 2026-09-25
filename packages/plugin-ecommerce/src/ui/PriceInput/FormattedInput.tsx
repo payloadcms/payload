@@ -20,6 +20,7 @@ interface Props {
   path: string
   placeholder?: string
   readOnly?: boolean
+  required?: boolean
   supportedCurrencies: Currency[]
 }
 
@@ -34,6 +35,7 @@ export const FormattedInput: React.FC<Props> = ({
   path,
   placeholder = '0.00',
   readOnly,
+  required,
   supportedCurrencies,
 }) => {
   const { setValue, value } = useField<number>({ path })
@@ -136,16 +138,16 @@ export const FormattedInput: React.FC<Props> = ({
 
   return (
     <div className={`field-type number ${baseClass}`}>
-      {label && <FieldLabel as="label" htmlFor={id} label={label} />}
+      {label && <FieldLabel as="label" htmlFor={id} label={label} required={required} />}
 
-      <div className={`${baseClass}Container`}>
+      <div className={`${baseClass}Container form-input-group`}>
         <div className={`${baseClass}CurrencySymbol`}>
           <span>{currency.symbol}</span>
         </div>
 
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
-          className={`${baseClass}Input`}
+          className={`${baseClass}Input form-input`}
           disabled={disabled || readOnly}
           id={id}
           onBlur={handleInputBlur}

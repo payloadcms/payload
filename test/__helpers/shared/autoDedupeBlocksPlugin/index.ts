@@ -27,16 +27,14 @@ export const autoDedupeBlocksPlugin =
       callback: ({ field }) => {
         if (field.type === 'blocks') {
           if (field?.blocks?.length) {
-            field.blockReferences = new Array(field.blocks.length)
             for (let i = 0; i < field.blocks.length; i++) {
               const block = field.blocks[i]
-              if (!block) {
+              if (!block || typeof block === 'string') {
                 continue
               }
               deduplicateBlock({ block, config, silent })
-              field.blockReferences[i] = block.slug as BlockSlug
+              field.blocks[i] = block.slug as BlockSlug
             }
-            field.blocks = []
           }
 
           if (debug && !silent) {

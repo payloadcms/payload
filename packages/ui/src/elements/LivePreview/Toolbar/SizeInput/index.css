@@ -1,0 +1,11 @@
+@layer payload-default {
+  /* Keep the toolbar size input compact rather than filling available space */
+  .toolbar-input {
+    width: max-content;
+  }
+
+  .toolbar-input .form-input {
+    flex: 0 0 auto;
+    width: calc(var(--spacer-4) * 2);
+  }
+}

@@ -19,4 +19,5 @@ export const migrationsCollection: CollectionConfig = {
   ],
   graphQL: false,
   lockDocuments: false,
+  versions: false,
 }

@@ -1,25 +1,11 @@
-import type { Payload } from 'payload'
+import { expect } from 'vitest'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
-
+import { test } from '../../__helpers/int/vitest.js'
 import { devUser } from '../../credentials.js'
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import { collectionSlug } from './config.js'
+import { collectionSlug } from './shared.js'
 
-let restClient: NextRESTClient | undefined
-let payload: Payload | undefined
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Forgot password operation with localized fields', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname, 'auth/forgot-password-localized'))
-
+test.suite('Forgot password operation with localized fields', { config: './config.ts' }, () => {
+  test.beforeEach(async ({ payload, restClient }) => {
     // Register a user with additional localized field
     const res = await restClient?.POST(`/${collectionSlug}/first-register?locale=en`, {
       body: JSON.stringify({
@@ -43,19 +29,19 @@ describe('Forgot password operation with localized fields', () => {
       data: {
         localizedField: 'Polish content',
       },
+      overrideAccess: true,
     })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should successfully process forgotPassword operation with localized fields', async () => {
+  test('should successfully process forgotPassword operation with localized fields', async ({
+    payload,
+  }) => {
     // Attempt to trigger forgotPassword operation
     const token = await payload?.forgotPassword({
       collection: collectionSlug,
       data: { email: devUser.email },
       disableEmail: true,
+      overrideAccess: true,
     })
 
     // Verify token was generated successfully
@@ -64,13 +50,14 @@ describe('Forgot password operation with localized fields', () => {
     expect(token?.length).toBeGreaterThan(0)
   })
 
-  it('should not throw validation errors for localized fields', async () => {
+  test('should not throw validation errors for localized fields', async ({ payload }) => {
     // We expect this not to throw an error
     await expect(
       payload?.forgotPassword({
         collection: collectionSlug,
         data: { email: devUser.email },
         disableEmail: true,
+        overrideAccess: true,
       }),
     ).resolves.not.toThrow()
   })

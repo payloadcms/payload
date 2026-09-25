@@ -1,15 +1,14 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 import type { Readable } from 'stream'
 
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import {
+  buildStoragePathData,
   getFilePrefix as getDocPrefix,
-  getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 export type SignedDownloadsConfig =
   | {
@@ -26,14 +25,14 @@ export type SignedDownloadsConfig =
 interface GetFileArgs {
   bucket: string
   client: AWS.S3
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   signedDownloads: SignedDownloadsConfig
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
@@ -68,14 +67,14 @@ const abortRequestAndDestroyStream = ({
 export async function getFile({
   bucket,
   client,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   signedDownloads,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   let object: AWS.GetObjectOutput | undefined = undefined
@@ -90,21 +89,23 @@ export async function getFile({
 
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
-      filename,
-      prefixQueryParam,
-      req,
-    })
-
-    const key = getFileKey({
       collectionPrefix,
-      docPrefix,
-      filename: sanitizeFilename(filename),
+      doc,
+      filename,
+      req,
+      uploadReference,
       useCompositePrefixes,
     })
 
-    if (signedDownloads && !clientUploadContext) {
+    const { storageFilePath } = buildStoragePathData({
+      collectionPrefix,
+      docPrefix,
+      filename,
+      useCompositePrefixes,
+    })
+
+    if (signedDownloads && !uploadReference) {
       let useSignedURL = true
       if (
         typeof signedDownloads === 'object' &&
@@ -114,7 +115,7 @@ export async function getFile({
       }
 
       if (useSignedURL) {
-        const command = new GetObjectCommand({ Bucket: bucket, Key: key })
+        const command = new GetObjectCommand({ Bucket: bucket, Key: storageFilePath })
         const signedUrl = await getSignedUrl(
           client,
           command,
@@ -127,7 +128,7 @@ export async function getFile({
     // Get file size first for range validation and to set Content-Length header before streaming
     const headObject = await client.headObject({
       Bucket: bucket,
-      Key: key,
+      Key: storageFilePath,
     })
     const fileSize = headObject.ContentLength
 
@@ -163,9 +164,9 @@ export async function getFile({
       headers.append('ETag', headObject.ETag)
     }
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (headObject.ContentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Apply a restrictive policy to XML-family responses served through Payload.
+    if (isXmlMimeType(headObject.ContentType)) {
+      headers.append('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
@@ -189,7 +190,7 @@ export async function getFile({
     object = await client.getObject(
       {
         Bucket: bucket,
-        Key: key,
+        Key: storageFilePath,
         Range: rangeForS3,
       },
       { abortSignal: abortController.signal },
@@ -201,7 +202,7 @@ export async function getFile({
 
     if (!isNodeReadableStream(object.Body)) {
       req.payload.logger.error({
-        key,
+        key: storageFilePath,
         msg: 'S3 object body is not a readable stream',
       })
       return new Response('Internal Server Error', { status: 500 })
@@ -211,7 +212,7 @@ export async function getFile({
     stream.on('error', (err: Error) => {
       req.payload.logger.error({
         err,
-        key,
+        key: storageFilePath,
         msg: 'Error while streaming S3 object (aborting)',
       })
       abortRequestAndDestroyStream({ abortController, object })
