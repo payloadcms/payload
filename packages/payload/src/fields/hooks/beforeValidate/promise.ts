@@ -360,7 +360,8 @@ export const promise = async <T>({
     onFieldAccess?.({ accessResult, path })
 
     if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
-      const isDocumentValueAllowed = operation === 'update' || accessResult
+      const isDocumentValueAllowed =
+        operation === 'update' || operation === 'validate' || accessResult
 
       siblingData[field.name!] =
         !fallbackResult.executed || !isDocumentValueAllowed

@@ -6,6 +6,7 @@ import type { PayloadRequest } from '../../types/index.js'
 import type { Collection, RequiredDataFromCollectionSlug, TypeWithID } from '../config/types.js'
 import type { ValidationResult } from './local/validate.js'
 
+import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -14,9 +15,10 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { deepMergeWithSourceArraysIgnoringUndefined } from '../../utilities/deepMerge.js'
 import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
 import { toValidationResult } from '../../utilities/toValidationResult.js'
-import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
@@ -29,6 +31,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   dataIsLocaleKeyed?: boolean
   draft: boolean
   id?: number | string
+  onValidationData?: (data: JsonObject) => void
   overrideAccess: boolean
   req: PayloadRequest
   trash?: boolean
@@ -53,6 +56,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   data: incomingData,
   dataIsLocaleKeyed = false,
   draft,
+  onValidationData,
   overrideAccess,
   req,
   trash,
@@ -70,11 +74,12 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   let docWithLocales: JsonObject = {}
 
   if (id !== undefined) {
-    const where = appendNonTrashedFilter({
+    const idWhere = appendNonTrashedFilter({
       enableTrash: collectionConfig.trash,
       trash: Boolean(trash),
-      where: combineQueries({ id: { equals: id } }, accessResult),
+      where: { id: { equals: id } },
     })
+    const where = combineQueries(idWhere, accessResult)
     const query: FindOneArgs = {
       collection: collectionConfig.slug,
       locale: req.locale!,
@@ -82,26 +87,52 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
       where,
     }
 
-    let storedDocument = await req.payload.db.findOne<
-      RequiredDataFromCollectionSlug<TSlug> & TypeWithID
-    >({ ...query, req })
+    let storedDocument: (RequiredDataFromCollectionSlug<TSlug> & TypeWithID) | undefined
+
+    if (draft && collectionConfig.versions?.drafts) {
+      const { docs } = await req.payload.db.queryDrafts<
+        RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+      >({
+        collection: collectionConfig.slug,
+        limit: 1,
+        locale: req.locale!,
+        pagination: false,
+        req,
+        where: appendVersionToQueryKey(where),
+      })
+
+      storedDocument = docs[0]
+
+      if (!storedDocument && hasWherePolicy) {
+        const { docs: existingVersions } = await req.payload.db.queryDrafts({
+          collection: collectionConfig.slug,
+          limit: 1,
+          locale: req.locale!,
+          pagination: false,
+          req,
+          select: { parent: true },
+          where: appendVersionToQueryKey(idWhere),
+        })
+
+        if (existingVersions[0]) {
+          throw new Forbidden(req.t)
+        }
+      }
+    }
+
+    if (!storedDocument) {
+      storedDocument =
+        (await req.payload.db.findOne<RequiredDataFromCollectionSlug<TSlug> & TypeWithID>({
+          ...query,
+          req,
+        })) ?? undefined
+    }
 
     if (!storedDocument && hasWherePolicy) {
       throw new Forbidden(req.t)
     }
     if (!storedDocument) {
       throw new NotFound(req.t)
-    }
-
-    if (draft && collectionConfig.versions?.drafts) {
-      storedDocument = await replaceWithDraftIfAvailable({
-        accessResult,
-        doc: storedDocument,
-        entity: collectionConfig,
-        entityType: 'collection',
-        overrideAccess,
-        req,
-      })
     }
 
     docWithLocales = deepCopyObjectSimple(storedDocument)
@@ -122,19 +153,43 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
     locale: req.locale!,
   })
 
-  data = await beforeValidate({
-    id,
-    collection: collectionConfig,
-    context: req.context,
-    data,
-    doc: originalDoc,
-    global: null,
-    operation: 'validate',
-    overrideAccess,
-    req,
-  })
-
   try {
+    onValidationData?.(deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(originalDoc, data))
+
+    if (collectionConfig.auth) {
+      if (id === undefined) {
+        ensureUsernameOrEmail<TSlug>({
+          authOptions: collectionConfig.auth,
+          collectionSlug: collectionConfig.slug,
+          data: data as RequiredDataFromCollectionSlug<TSlug>,
+          operation: 'create',
+          req,
+        })
+      } else {
+        ensureUsernameOrEmail<TSlug>({
+          authOptions: collectionConfig.auth,
+          collectionSlug: collectionConfig.slug,
+          data: data as RequiredDataFromCollectionSlug<TSlug>,
+          operation: 'update',
+          originalDoc: originalDoc as RequiredDataFromCollectionSlug<TSlug>,
+          req,
+        })
+      }
+    }
+
+    data = await beforeValidate({
+      id,
+      collection: collectionConfig,
+      context: req.context,
+      data,
+      doc: originalDoc,
+      global: null,
+      operation: 'validate',
+      overrideAccess,
+      req,
+    })
+    onValidationData?.(data)
+
     if (collectionConfig.hooks.beforeValidate?.length) {
       for (const hook of collectionConfig.hooks.beforeValidate) {
         data =

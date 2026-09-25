@@ -39,7 +39,11 @@ export async function runLocaleScopedValidation<TData>({
   locale: ValidationLocaleSelector
   payload: Payload
   req: Partial<PayloadRequest> | undefined
-  runPass: (args: { data: TData; req: PayloadRequest }) => Promise<ValidationResult>
+  runPass: (args: {
+    data: TData
+    onValidationData: (data: JsonObject) => void
+    req: PayloadRequest
+  }) => Promise<ValidationResult>
   user: null | undefined | User
   validationDataLocale: string | undefined
 }): Promise<ValidationResult> {
@@ -79,10 +83,19 @@ export async function runLocaleScopedValidation<TData>({
             }) as TData)
           : validationCandidateData
 
-      return runPass({ data: validationData, req: localeReq })
+      let mergedValidationData = validationData as JsonObject
+      const result = await runPass({
+        data: validationData,
+        onValidationData: (mergedData) => {
+          mergedValidationData = mergedData
+        },
+        req: localeReq,
+      })
+
+      return { data: mergedValidationData, result }
     },
   })
-  const rawErrors = results.flatMap((result) => result.errors)
+  const rawErrors = results.flatMap(({ result }) => result.errors)
 
   // A non-localized field carries one shared value, so every locale pass validates it
   // identically and would otherwise report the same failure once per resolved locale.
@@ -90,8 +103,9 @@ export async function runLocaleScopedValidation<TData>({
     locales.length > 1
       ? dedupeNonLocalizedFieldErrors({
           configBlockReferences: payload.config.blocks,
-          data: data as JsonObject,
-          errors: rawErrors,
+          errors: results.flatMap(({ data: validationData, result }) =>
+            result.errors.map((error) => ({ data: validationData, error })),
+          ),
           fields,
         })
       : rawErrors
@@ -104,19 +118,17 @@ export async function runLocaleScopedValidation<TData>({
 
 function dedupeNonLocalizedFieldErrors({
   configBlockReferences,
-  data,
   errors,
   fields,
 }: {
   configBlockReferences: SanitizedConfig['blocks']
-  data: JsonObject
-  errors: ValidationFieldError[]
+  errors: { data: JsonObject; error: ValidationFieldError }[]
   fields: Field[]
 }): ValidationFieldError[] {
-  const seenNonLocalizedPaths = new Set<string>()
+  const seenNonLocalizedErrors = new Set<string>()
   const deduped: ValidationFieldError[] = []
 
-  for (const error of errors) {
+  for (const { data, error } of errors) {
     const isLocalized = isValidationErrorPathLocalized({
       configBlockReferences,
       data,
@@ -129,11 +141,13 @@ function dedupeNonLocalizedFieldErrors({
       continue
     }
 
-    if (seenNonLocalizedPaths.has(error.path)) {
+    const errorIdentity = JSON.stringify([error.path, error.message])
+
+    if (seenNonLocalizedErrors.has(errorIdentity)) {
       continue
     }
 
-    seenNonLocalizedPaths.add(error.path)
+    seenNonLocalizedErrors.add(errorIdentity)
     deduped.push({ ...error, locale: undefined })
   }
 

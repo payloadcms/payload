@@ -35,7 +35,7 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
   locale: ValidationLocaleSelector
   /**
    * Skip global and field access control.
-   * @default true
+   * @default false
    */
   overrideAccess?: boolean
   /** An existing request to reuse for user, locale, and context. */
@@ -80,7 +80,7 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
     data,
     dataIsLocaleKeyed,
     locale,
-    overrideAccess = true,
+    overrideAccess = false,
     validationDataLocale,
   } = options
   const { draft = false } = options
@@ -102,13 +102,14 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
     locale,
     payload,
     req: options.req,
-    runPass: ({ data: validationData, req }) =>
+    runPass: ({ data: validationData, onValidationData, req }) =>
       validateOperation({
         slug,
         data: validationData,
         dataIsLocaleKeyed,
         draft,
         globalConfig,
+        onValidationData,
         overrideAccess,
         req,
       }),

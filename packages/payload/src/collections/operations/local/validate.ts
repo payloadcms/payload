@@ -55,7 +55,7 @@ type BaseOptions<TSlug extends CollectionSlug> = {
   locale: ValidationLocaleSelector
   /**
    * Skip collection and field access control.
-   * @default true
+   * @default false
    */
   overrideAccess?: boolean
   /**
@@ -145,7 +145,7 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
     dataIsLocaleKeyed,
     draft = false,
     locale,
-    overrideAccess = true,
+    overrideAccess = false,
     validationDataLocale,
     validationTrash,
   } = options
@@ -173,13 +173,14 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
     locale,
     payload,
     req: options.req,
-    runPass: ({ data: validationData, req }) =>
+    runPass: ({ data: validationData, onValidationData, req }) =>
       validateOperation({
         id,
         collection,
         data: validationData,
         dataIsLocaleKeyed,
         draft,
+        onValidationData,
         overrideAccess,
         req,
         trash: validationTrash,

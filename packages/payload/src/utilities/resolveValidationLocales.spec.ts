@@ -6,6 +6,7 @@ import type { TypedLocale } from '../index.js'
 
 import {
   cloneValidationRequest,
+  cloneValidationValue,
   resolveValidationLocales,
   runValidationLocalePasses,
 } from './resolveValidationLocales.js'
@@ -58,6 +59,17 @@ describe('resolveValidationLocales', () => {
     await expect(
       resolveValidationLocales({ locale: 'all', req: createReq(filteredLocalization) }),
     ).resolves.toEqual(['en'])
+  })
+
+  it('should reject "all" when filterAvailableLocales returns no locales', async () => {
+    const filteredLocalization = {
+      ...localization,
+      filterAvailableLocales: () => [],
+    } as SanitizedLocalizationConfig
+
+    await expect(
+      resolveValidationLocales({ locale: 'all', req: createReq(filteredLocalization) }),
+    ).rejects.toThrow(/no validation locales are available/i)
   })
 
   it('should reject a locale excluded by filterAvailableLocales as unavailable', async () => {
@@ -246,5 +258,23 @@ describe('cloneValidationRequest', () => {
 
     expect(cloned.payload).toBe(payload)
     expect(cloned.transactionID).toBe('txn-1')
+  })
+})
+
+describe('cloneValidationValue', () => {
+  it('should preserve custom class instances by reference', () => {
+    class ValidationService {
+      #value = 'available'
+
+      getValue(): string {
+        return this.#value
+      }
+    }
+
+    const service = new ValidationService()
+    const cloned = cloneValidationValue({ service })
+
+    expect(cloned.service).toBe(service)
+    expect(cloned.service.getValue()).toBe('available')
   })
 })

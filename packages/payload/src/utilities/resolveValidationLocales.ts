@@ -66,6 +66,10 @@ export async function resolveValidationLocales({
   }
 
   if (locale === 'all') {
+    if (availableLocaleCodes.length === 0) {
+      throw new APIError('No validation locales are available.', httpStatus.BAD_REQUEST)
+    }
+
     return [...new Set(availableLocaleCodes)] as TypedLocale[]
   }
 
@@ -251,9 +255,15 @@ export function cloneValidationValue<T>(value: T, cache = new WeakMap<object, un
     return value
   }
 
+  const prototype = Object.getPrototypeOf(value)
+
+  if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
+    return value
+  }
+
   const clonedValue: Record<PropertyKey, unknown> | unknown[] = Array.isArray(value)
     ? []
-    : Object.create(Object.getPrototypeOf(value))
+    : Object.create(prototype)
   cache.set(objectValue, clonedValue)
 
   for (const key of Reflect.ownKeys(value)) {

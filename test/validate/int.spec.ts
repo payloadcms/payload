@@ -4,7 +4,7 @@ import { buildEditorState } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
-import { createLocalReq, getFileByPath } from 'payload'
+import { createLocalReq } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect } from 'vitest'
 
@@ -27,6 +27,7 @@ import {
   publishCollectionSlug,
   publishGlobalSlug,
   validationAccessSourceGlobalSlug,
+  validationAuthCollectionSlug,
   validationCollectionSlug,
   validationCustomButtonsCollectionSlug,
   validationDeniedCollectionSlug,
@@ -74,7 +75,7 @@ function buildNestedFieldValidateBlockRichText(value: string) {
   }
 }
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local API', () => {
+test.suite('validate Local API', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
     payload = payloadInstance
     restClient = restClientInstance
@@ -83,10 +84,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       slug: validationGlobalSlug,
       data: {
         location: [-0.12, 51.5],
+        metadata: {
+          nestedTitle: 'Stored nested title',
+        },
         summary: 'stored global summary',
         title: 'Stored global title',
-      },
+      } as never,
       locale: 'en',
+      overrideAccess: true,
     })
     await payload.updateGlobal({
       slug: validationDraftSourceGlobalSlug,
@@ -97,6 +102,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       },
       draft: true,
       locale: 'en',
+      overrideAccess: true,
     })
     await payload.updateGlobal({
       slug: validationAccessSourceGlobalSlug,
@@ -105,6 +111,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         title: 'Stored private title',
       },
       locale: 'en',
+      overrideAccess: true,
     })
   })
 
@@ -117,52 +124,68 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       payload.delete({
         collection: publishCollectionSlug,
         disableTransaction: true,
+        overrideAccess: true,
         trash: true,
+        where: { id: { exists: true } },
+      }),
+      payload.delete({
+        collection: validationAuthCollectionSlug,
+        disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: validationCollectionSlug,
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: validationCustomButtonsCollectionSlug,
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: validationDeniedCollectionSlug,
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: validationFallbackCollectionSlug,
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: validationWhereCollectionSlug,
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: validationUploadsSlug,
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: validationPublishUploadsSlug,
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: writeTargetsSlug,
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
         collection: 'payload-jobs',
         disableTransaction: true,
+        overrideAccess: true,
         where: { id: { exists: true } },
       }),
     ])
@@ -171,6 +194,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
   })
 
   test.describe('collections', () => {
+    test('should enforce collection access by default', async () => {
+      await expect(
+        payload.validate({
+          collection: validationDeniedCollectionSlug,
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+    })
+
     test('should fall back to collection update access with the validate operation', async () => {
       await expect(
         payload.validate({
@@ -380,6 +417,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           scope: 'allowed',
           title: 'Stored title',
         },
+        overrideAccess: true,
       })
 
       await expect(
@@ -411,6 +449,81 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         status: 403,
       })
       expect(fallbackAccessEvents.every(({ operation }) => operation === 'validate')).toBe(true)
+    })
+
+    test('should apply validation access to the latest collection draft before the main document', async () => {
+      const stored = await payload.create({
+        collection: validationWhereCollectionSlug,
+        data: {
+          scope: 'main-denied',
+          title: 'Published title',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: stored.id,
+        collection: validationWhereCollectionSlug,
+        data: {
+          scope: 'draft-allowed',
+          title: 'Draft title',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.validate({
+          id: stored.id,
+          collection: validationWhereCollectionSlug,
+          context: {
+            validationScope: 'draft-allowed',
+          },
+          draft: true,
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
+    test('should not fall back to an allowed main document when the latest draft is denied', async () => {
+      const stored = await payload.create({
+        collection: validationWhereCollectionSlug,
+        data: {
+          scope: 'main-allowed',
+          title: 'Published title',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        id: stored.id,
+        collection: validationWhereCollectionSlug,
+        data: {
+          scope: 'draft-denied',
+          title: 'Draft title',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.validate({
+          id: stored.id,
+          collection: validationWhereCollectionSlug,
+          context: {
+            validationScope: 'main-allowed',
+          },
+          draft: true,
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
     })
 
     test('should isolate operation-sensitive entity and nested field permission discovery', async () => {
@@ -567,6 +680,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'English title',
         },
         locale: 'en',
+        overrideAccess: true,
       })
       const result = await payload.validate({
         id: stored.id,
@@ -593,6 +707,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'English title',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const result = await payload.validate({
@@ -620,6 +735,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'Stored title',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const result = await payload.validate({
@@ -695,6 +811,136 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       expect(result.errors.filter((error) => error.path === 'summary')).toHaveLength(1)
     })
 
+    test('should preserve locale information for a stored localized field inside an omitted array', async () => {
+      const draft = await payload.create({
+        collection: publishCollectionSlug,
+        data: {
+          ...getPublishCollectionLocaleData({ title: 'English draft' }),
+          nestedLocalizedArray: [{ value: '' }],
+        } as never,
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+      })
+      const nestedRowID = (draft as unknown as { nestedLocalizedArray: { id: string }[] })
+        .nestedLocalizedArray[0]!.id
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          ...getPublishCollectionLocaleData({ title: 'Spanish draft' }),
+          nestedLocalizedArray: [{ id: nestedRowID, value: 'Spanish value' }],
+        } as never,
+        draft: true,
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: ['en', 'es'],
+        overrideAccess: true,
+      })
+
+      expect(result.errors).toContainEqual(
+        expect.objectContaining({
+          locale: 'en',
+          path: 'nestedLocalizedArray.0.value',
+        }),
+      )
+      expect(result.errors).not.toContainEqual(
+        expect.objectContaining({
+          locale: 'es',
+          path: 'nestedLocalizedArray.0.value',
+        }),
+      )
+    })
+
+    test('should preserve locale information when an omitted array hook returns a nested localized error', async () => {
+      const draft = await payload.create({
+        collection: publishCollectionSlug,
+        data: {
+          ...getPublishCollectionLocaleData({ title: 'English draft' }),
+          nestedLocalizedArray: [{ value: 'English value' }],
+        } as never,
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+      })
+      const nestedRowID = (draft as unknown as { nestedLocalizedArray: { id: string }[] })
+        .nestedLocalizedArray[0]!.id
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          ...getPublishCollectionLocaleData({ title: 'Spanish draft' }),
+          nestedLocalizedArray: [{ id: nestedRowID, value: 'Spanish value' }],
+        } as never,
+        draft: true,
+        locale: 'es',
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        context: {
+          throwStoredNestedLocalizedArrayValidationError: true,
+        },
+        draft: true,
+        locale: ['en', 'es'],
+        overrideAccess: true,
+      })
+
+      expect(result.errors).toEqual([
+        expect.objectContaining({
+          locale: 'en',
+          message: 'Stored nested localized field validation failure',
+          path: 'nestedLocalizedArray.0.value',
+        }),
+        expect.objectContaining({
+          locale: 'es',
+          message: 'Stored nested localized field validation failure',
+          path: 'nestedLocalizedArray.0.value',
+        }),
+      ])
+    })
+
+    test('should preserve different messages for one non-localized path', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context: {
+          availableLocaleCodes: ['en', 'de'],
+          throwMultipleValidationErrors: true,
+        },
+        data: {
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: 'all',
+      })
+
+      expect(result).toEqual({
+        errors: [
+          {
+            locale: undefined,
+            message: 'Summary failed the first check',
+            path: 'summary',
+          },
+          {
+            locale: undefined,
+            message: 'Summary failed the second check',
+            path: 'summary',
+          },
+        ],
+        valid: false,
+      })
+    })
+
     test('should deduplicate explicit locales in deterministic order', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
@@ -721,7 +967,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
             title: 'Candidate title',
           },
           locale: [],
-        }),
+        } as never),
       ).rejects.toThrow('Validation requires a locale')
 
       await expect(
@@ -748,6 +994,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           locale: ['en', 'es'],
         }),
       ).rejects.toThrow('es')
+
+      await expect(
+        payload.validate({
+          collection: validationCollectionSlug,
+          context: {
+            availableLocaleCodes: [],
+          },
+          data: {
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          },
+          locale: 'all',
+        }),
+      ).rejects.toThrow('No validation locales are available')
     })
 
     test('should cap concurrent locale passes at three with isolated request state', async () => {
@@ -882,10 +1142,75 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         ],
         valid: false,
       })
-      expect(await payload.count({ collection: validationCollectionSlug })).toEqual({
+      expect(
+        await payload.count({ collection: validationCollectionSlug, overrideAccess: true }),
+      ).toEqual({
         totalDocs: 0,
       })
       expect(req.operation).toBe('update')
+    })
+
+    test('should require a username or email for auth collection create validation', async () => {
+      const authFields = payload.collections[validationAuthCollectionSlug]!.config.fields
+
+      expect(
+        authFields
+          .filter((field) => 'name' in field && ['email', 'username'].includes(field.name))
+          .map((field) => ({
+            name: 'name' in field ? field.name : '',
+            required: 'required' in field ? field.required : undefined,
+          })),
+      ).toEqual([
+        { name: 'email', required: false },
+        { name: 'username', required: false },
+      ])
+
+      const result = await payload.validate({
+        collection: validationAuthCollectionSlug,
+        data: {
+          password: 'validation-password',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toEqual({
+        errors: expect.arrayContaining([
+          expect.objectContaining({ message: 'Username or email is required', path: 'username' }),
+          expect.objectContaining({ message: 'Username or email is required', path: 'email' }),
+        ]),
+        valid: false,
+      })
+    })
+
+    test('should prevent clearing both username and email during auth collection validation', async () => {
+      const stored = await payload.create({
+        collection: validationAuthCollectionSlug,
+        data: {
+          password: 'validation-password',
+          username: 'stored-user',
+        },
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        id: stored.id,
+        collection: validationAuthCollectionSlug,
+        data: {
+          email: '',
+          username: '',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toEqual({
+        errors: expect.arrayContaining([
+          expect.objectContaining({ message: 'Username or email is required', path: 'username' }),
+          expect.objectContaining({ message: 'Username or email is required', path: 'email' }),
+        ]),
+        valid: false,
+      })
     })
 
     test('should return a successful result for valid create data', async () => {
@@ -920,6 +1245,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'Candidate title',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(result.valid).toBe(true)
@@ -951,6 +1277,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'Candidate title',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(result.valid).toBe(true)
@@ -1045,6 +1372,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         id: stored.id,
         collection: validationCollectionSlug,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(result).toEqual({
@@ -1056,6 +1384,41 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         summary: 'stored summary',
         title: 'Stored title',
       })
+    })
+
+    test('should keep collection creates as drafts when publishAllLocales is requested', async () => {
+      const draft = await payload.create({
+        collection: publishCollectionSlug,
+        data: getPublishCollectionLocaleData({ title: 'English draft' }),
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+        publishAllLocales: true,
+      })
+
+      expect(draft._status).toBe('draft')
+    })
+
+    test('should keep collection updates as drafts when publishAllLocales is requested', async () => {
+      const draft = await seedPublishCollection({
+        de: 'German draft',
+        en: 'English draft',
+        es: 'Spanish draft',
+      })
+
+      const updatedDraft = await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          title: 'Updated English draft',
+        },
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+        publishAllLocales: true,
+      })
+
+      expect(updatedDraft._status).toBe('draft')
     })
 
     test('should use the published collection as the validation base unless draft is true', async () => {
@@ -1073,6 +1436,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'English published',
         },
         locale: 'en',
+        overrideAccess: true,
       })
       await payload.update({
         id: draft.id,
@@ -1082,10 +1446,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       const versionsBefore = await payload.countVersions({
         collection: publishCollectionSlug,
+        overrideAccess: true,
         where: {
           parent: {
             equals: draft.id,
@@ -1113,15 +1479,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         id: draft.id,
         collection: publishCollectionSlug,
         locale: 'en',
+        overrideAccess: true,
       })
       const draftAfter = await payload.findByID({
         id: draft.id,
         collection: publishCollectionSlug,
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
       const versionsAfter = await payload.countVersions({
         collection: publishCollectionSlug,
+        overrideAccess: true,
         where: {
           parent: {
             equals: draft.id,
@@ -1160,6 +1529,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'Stored title',
         },
         locale: 'en',
+        overrideAccess: true,
       })
 
       const result = await payload.validate({
@@ -1185,6 +1555,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       await expect(
         payload.validate({
           collection: validationCollectionSlug,
+          context: {
+            denyValidationAccess: true,
+          },
           data: {
             summary: 'candidate summary',
             title: 'Candidate title',
@@ -1247,9 +1620,47 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         valid: false,
       })
     })
+
+    test('should return a validation result when a collection field beforeValidate hook throws a ValidationError', async () => {
+      await expect(
+        payload.validate({
+          collection: validationCollectionSlug,
+          context: {
+            throwFieldValidationError: true,
+          },
+          data: {
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          },
+          locale: 'en',
+        }),
+      ).resolves.toEqual({
+        errors: [
+          expect.objectContaining({
+            message: 'Collection field validation failure',
+            path: 'title',
+          }),
+        ],
+        valid: false,
+      })
+    })
   })
 
   test.describe('globals', () => {
+    test('should enforce global access by default', async () => {
+      await expect(
+        payload.validateGlobal({
+          slug: validationDeniedGlobalSlug,
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+    })
+
     test('should fall back to global update access with the validate operation', async () => {
       await expect(
         payload.validateGlobal({
@@ -1430,24 +1841,29 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
     test('should load a draft-only global only when draft validation is requested', async () => {
       const versionsBefore = await payload.countGlobalVersions({
         global: validationDraftSourceGlobalSlug,
+        overrideAccess: true,
       })
 
       const draftResult = await payload.validateGlobal({
         slug: validationDraftSourceGlobalSlug,
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
       const defaultResult = await payload.validateGlobal({
         slug: validationDraftSourceGlobalSlug,
         locale: 'en',
+        overrideAccess: true,
       })
       const mainResult = await payload.validateGlobal({
         slug: validationDraftSourceGlobalSlug,
         draft: false,
         locale: 'en',
+        overrideAccess: true,
       })
       const versionsAfter = await payload.countGlobalVersions({
         global: validationDraftSourceGlobalSlug,
+        overrideAccess: true,
       })
 
       expect(draftResult).toEqual({
@@ -1489,6 +1905,43 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       })
       expect(globalValidationSourceEvents).toEqual([validationDraftSourceGlobalSlug])
       expect(req.operation).toBe('read')
+    })
+
+    test('should not fall back to an allowed main global when the latest draft is denied', async () => {
+      await payload.updateGlobal({
+        slug: validationDraftSourceGlobalSlug,
+        data: {
+          _status: 'published',
+          scope: 'main-allowed',
+          title: 'Published title',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+      await payload.updateGlobal({
+        slug: validationDraftSourceGlobalSlug,
+        data: {
+          scope: 'draft-denied',
+          title: 'Draft title',
+        },
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      await expect(
+        payload.validateGlobal({
+          slug: validationDraftSourceGlobalSlug,
+          context: {
+            validationScope: 'main-allowed',
+          },
+          draft: true,
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
     })
 
     test('should reject a Where policy that filters out the persisted main global', async () => {
@@ -1618,6 +2071,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       const afterValidation = await payload.findGlobal({
         slug: validationGlobalSlug,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(result).toEqual({
@@ -1648,6 +2102,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       const afterValidation = await payload.findGlobal({
         slug: validationGlobalSlug,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(result).toMatchObject({
@@ -1678,6 +2133,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       })
     })
 
+    test('should keep global updates as drafts when publishAllLocales is requested', async () => {
+      const draft = await payload.updateGlobal({
+        slug: publishGlobalSlug,
+        data: getPublishGlobalLocaleData({ title: 'English draft' }),
+        draft: true,
+        locale: 'en',
+        overrideAccess: true,
+        publishAllLocales: true,
+      })
+
+      expect(draft._status).toBe('draft')
+    })
+
     test('should use the published global as the validation base unless draft is true', async () => {
       await seedPublishGlobal({
         de: 'German optional',
@@ -1691,6 +2159,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'English published',
         },
         locale: 'en',
+        overrideAccess: true,
       })
       await payload.updateGlobal({
         slug: publishGlobalSlug,
@@ -1699,10 +2168,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       const versionsBefore = await payload.countGlobalVersions({
         global: publishGlobalSlug,
+        overrideAccess: true,
       })
       const defaultResult = await payload.validateGlobal({
         slug: publishGlobalSlug,
@@ -1721,14 +2192,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       const publishedAfter = await payload.findGlobal({
         slug: publishGlobalSlug,
         locale: 'en',
+        overrideAccess: true,
       })
       const draftAfter = await payload.findGlobal({
         slug: publishGlobalSlug,
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
       const versionsAfter = await payload.countGlobalVersions({
         global: publishGlobalSlug,
+        overrideAccess: true,
       })
 
       expect(defaultResult).toEqual({
@@ -1761,6 +2235,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       await expect(
         payload.validateGlobal({
           slug: validationGlobalSlug,
+          context: {
+            denyValidationAccess: true,
+          },
           locale: 'en',
           overrideAccess: false,
           req,
@@ -1805,6 +2282,30 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         errors: [
           expect.objectContaining({
             message: 'Global hook validation failure',
+            path: 'title',
+          }),
+        ],
+        valid: false,
+      })
+    })
+
+    test('should return a validation result when a global field beforeValidate hook throws a ValidationError', async () => {
+      await expect(
+        payload.validateGlobal({
+          slug: validationGlobalSlug,
+          context: {
+            throwFieldValidationError: true,
+          },
+          data: {
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          },
+          locale: 'en',
+        }),
+      ).resolves.toEqual({
+        errors: [
+          expect.objectContaining({
+            message: 'Global field validation failure',
             path: 'title',
           }),
         ],
@@ -1906,7 +2407,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         ],
         valid: false,
       })
-      expect(await payload.count({ collection: validationCollectionSlug })).toEqual({
+      expect(
+        await payload.count({ collection: validationCollectionSlug, overrideAccess: true }),
+      ).toEqual({
         totalDocs: 0,
       })
     })
@@ -2006,6 +2509,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'English published',
         },
         locale: 'en',
+        overrideAccess: true,
       })
       await payload.update({
         id: draft.id,
@@ -2015,6 +2519,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       const response = await restClient.POST(
@@ -2046,6 +2551,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'English published',
         },
         locale: 'en',
+        overrideAccess: true,
       })
       await payload.updateGlobal({
         slug: publishGlobalSlug,
@@ -2054,6 +2560,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       const response = await restClient.POST(`/globals/${publishGlobalSlug}/validate?locale=en`)
@@ -2079,6 +2586,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'Stored title',
         },
         locale: 'en',
+        overrideAccess: true,
       })
       const response = await restClient.POST(
         `/${validationCollectionSlug}/${stored.id}/validate?locale=en`,
@@ -2092,6 +2600,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         id: stored.id,
         collection: validationCollectionSlug,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(response.status).toBe(200)
@@ -2118,6 +2627,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       const afterValidation = await payload.findGlobal({
         slug: validationGlobalSlug,
         locale: 'en',
+        overrideAccess: true,
       })
 
       expect(response.status).toBe(200)
@@ -2237,6 +2747,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
       await payload.update({
         id: draft.id,
@@ -2247,6 +2758,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         },
         draft: true,
         locale: 'de',
+        overrideAccess: true,
       })
 
       // This collection uses the default access control, which requires an
@@ -2258,6 +2770,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           email: adminEmail,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       try {
@@ -2310,7 +2823,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           expect.arrayContaining([expect.objectContaining({ locale: 'de', path: 'title' })]),
         )
       } finally {
-        await payload.delete({ id: adminUser.id, collection: 'users' })
+        await payload.delete({ id: adminUser.id, collection: 'users', overrideAccess: true })
       }
     })
   })
@@ -2325,6 +2838,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           email: 'validation-graphql-api@example.com',
           password: 'validation-graphql-api-password',
         },
+        overrideAccess: true,
       })
       graphqlUserID = user.id
 
@@ -2338,11 +2852,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
     })
 
     test.afterAll(async () => {
-      await payload.delete({ id: graphqlUserID, collection: 'users' })
+      await payload.delete({ id: graphqlUserID, collection: 'users', overrideAccess: true })
     })
 
     test('should return a validation result for an invalid collection create candidate without persisting it', async () => {
-      const docsBefore = await payload.count({ collection: writeTargetsSlug })
+      const docsBefore = await payload.count({
+        collection: writeTargetsSlug,
+        overrideAccess: true,
+      })
 
       const query = `mutation {
         validateValidationWriteTarget(data: {}) {
@@ -2362,7 +2879,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       expect(data.validateValidationWriteTarget.errors).toEqual(
         expect.arrayContaining([expect.objectContaining({ path: 'title' })]),
       )
-      expect(await payload.count({ collection: writeTargetsSlug })).toEqual(docsBefore)
+      expect(await payload.count({ collection: writeTargetsSlug, overrideAccess: true })).toEqual(
+        docsBefore,
+      )
     })
 
     test('should return a valid result for a valid collection create candidate', async () => {
@@ -2402,7 +2921,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
 
       expect(data.validateValidationWriteTarget.valid).toBe(false)
       await expect(
-        payload.findByID({ id: target.id, collection: writeTargetsSlug }),
+        payload.findByID({
+          id: target.id,
+          collection: writeTargetsSlug,
+          overrideAccess: true,
+        }),
       ).resolves.toMatchObject({ title: 'stored target' })
     })
 
@@ -2426,6 +2949,25 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         expect.arrayContaining([expect.objectContaining({ path: 'title' })]),
       )
     })
+
+    test('should accept partial global validation data at every nesting level', async () => {
+      const query = `mutation {
+        validateValidationSetting(data: { metadata: {} }) {
+          valid
+          errors {
+            path
+            message
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(response.errors).toBeUndefined()
+      expect(response.data.validateValidationSetting).toEqual({ errors: [], valid: true })
+    })
   })
 
   test.describe('write safety', () => {
@@ -2434,7 +2976,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         'Payload writes are not allowed during validation',
       )
 
-      expect(await payload.count({ collection: writeTargetsSlug })).toEqual({ totalDocs: 0 })
+      expect(await payload.count({ collection: writeTargetsSlug, overrideAccess: true })).toEqual({
+        totalDocs: 0,
+      })
     })
 
     test('should reject an update that reuses the validation request before a row is written', async () => {
@@ -2448,6 +2992,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         payload.findByID({
           id: target.id,
           collection: writeTargetsSlug,
+          overrideAccess: true,
         }),
       ).resolves.toMatchObject({
         title: 'stored target',
@@ -2465,6 +3010,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         payload.findByID({
           id: target.id,
           collection: writeTargetsSlug,
+          overrideAccess: true,
         }),
       ).resolves.toMatchObject({
         title: 'stored target',
@@ -2482,6 +3028,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         payload.findByID({
           id: target.id,
           collection: writeTargetsSlug,
+          overrideAccess: true,
         }),
       ).resolves.toMatchObject({
         title: 'stored target',
@@ -2499,6 +3046,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         payload.findByID({
           id: target.id,
           collection: writeTargetsSlug,
+          overrideAccess: true,
         }),
       ).resolves.toMatchObject({
         title: 'stored target',
@@ -2511,6 +3059,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         data: {
           title: 'stored global target',
         },
+        overrideAccess: true,
       })
 
       await expect(runWriteAttempt('updateGlobal')).rejects.toThrow(
@@ -2520,6 +3069,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       await expect(
         payload.findGlobal({
           slug: validationWriteTargetGlobalSlug,
+          overrideAccess: true,
         }),
       ).resolves.toMatchObject({
         title: 'stored global target',
@@ -2536,10 +3086,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           title: 'latest target',
         },
         disableTransaction: true,
+        overrideAccess: true,
       })
 
       const versions = await payload.findVersions({
         collection: writeTargetsSlug,
+        overrideAccess: true,
         where: {
           parent: {
             equals: target.id,
@@ -2558,6 +3110,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         payload.findByID({
           id: target.id,
           collection: writeTargetsSlug,
+          overrideAccess: true,
         }),
       ).resolves.toMatchObject({
         title: 'latest target',
@@ -2570,16 +3123,19 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         data: {
           title: 'stored global target',
         },
+        overrideAccess: true,
       })
       await payload.updateGlobal({
         slug: validationWriteTargetGlobalSlug,
         data: {
           title: 'latest global target',
         },
+        overrideAccess: true,
       })
 
       const versions = await payload.findGlobalVersions({
         slug: validationWriteTargetGlobalSlug,
+        overrideAccess: true,
       })
       const originalVersion = versions.docs.find(
         ({ version }) => version.title === 'stored global target',
@@ -2594,6 +3150,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       await expect(
         payload.findGlobal({
           slug: validationWriteTargetGlobalSlug,
+          overrideAccess: true,
         }),
       ).resolves.toMatchObject({
         title: 'latest global target',
@@ -2607,7 +3164,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         'Payload writes are not allowed during validation',
       )
 
-      expect(await payload.count({ collection: validationUploadsSlug })).toEqual({ totalDocs: 0 })
+      expect(
+        await payload.count({ collection: validationUploadsSlug, overrideAccess: true }),
+      ).toEqual({ totalDocs: 0 })
       await expect(fs.stat(path.join(validationUploadsDir, 'blocked.txt'))).rejects.toThrow()
     })
 
@@ -2615,6 +3174,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       const target = await createWriteTarget()
       const versionsBefore = await payload.countVersions({
         collection: writeTargetsSlug,
+        overrideAccess: true,
         where: {
           parent: {
             equals: target.id,
@@ -2628,6 +3188,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
 
       const versionsAfter = await payload.countVersions({
         collection: writeTargetsSlug,
+        overrideAccess: true,
         where: {
           parent: {
             equals: target.id,
@@ -2638,13 +3199,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
     })
 
     test('should reject a job queue call that reuses the validation request before a job is written', async () => {
-      const jobsBefore = await payload.count({ collection: 'payload-jobs' })
+      const jobsBefore = await payload.count({
+        collection: 'payload-jobs',
+        overrideAccess: true,
+      })
 
       await expect(runWriteAttempt('jobsQueue')).rejects.toThrow(
         'Payload writes are not allowed during validation',
       )
 
-      expect(await payload.count({ collection: 'payload-jobs' })).toEqual(jobsBefore)
+      expect(await payload.count({ collection: 'payload-jobs', overrideAccess: true })).toEqual(
+        jobsBefore,
+      )
     })
 
     test('should reject schedule handling before job statistics are written', async () => {
@@ -2657,7 +3223,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
       }
 
       const originalSchedule = scheduleTask.schedule
-      const jobsBefore = await payload.count({ collection: 'payload-jobs' })
+      const jobsBefore = await payload.count({
+        collection: 'payload-jobs',
+        overrideAccess: true,
+      })
       const statsBefore = structuredClone(
         await payload.db.findGlobal({ slug: 'payload-jobs-stats' }),
       )
@@ -2676,7 +3245,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         )
 
         expect(await payload.db.findGlobal({ slug: 'payload-jobs-stats' })).toEqual(statsBefore)
-        expect(await payload.count({ collection: 'payload-jobs' })).toEqual(jobsBefore)
+        expect(await payload.count({ collection: 'payload-jobs', overrideAccess: true })).toEqual(
+          jobsBefore,
+        )
         expect(outcome.error).toHaveProperty(
           'message',
           'Payload writes are not allowed during validation.',
@@ -2694,6 +3265,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           email: 'validation-write-guard-forgot-password@example.com',
           password: 'correct-password',
         },
+        overrideAccess: true,
       })
 
       await payload.db.updateOne({
@@ -2712,12 +3284,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         const userAfter = await payload.findByID({
           id: user.id,
           collection: 'users',
+          overrideAccess: true,
           showHiddenFields: true,
         })
 
         expect(userAfter.resetPasswordRequestedAt).toEqual(originalRequestedAt)
       } finally {
-        await payload.delete({ id: user.id, collection: 'users' })
+        await payload.delete({ id: user.id, collection: 'users', overrideAccess: true })
       }
     })
 
@@ -2728,6 +3301,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
           email: 'validation-write-guard-login@example.com',
           password: 'correct-password',
         },
+        overrideAccess: true,
       })
 
       try {
@@ -2738,53 +3312,62 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('validate Local 
         const userAfter = await payload.findByID({
           id: user.id,
           collection: 'users',
+          overrideAccess: true,
           showHiddenFields: true,
         })
 
         expect(userAfter.loginAttempts).toEqual(0)
       } finally {
-        await payload.delete({ id: user.id, collection: 'users' })
+        await payload.delete({ id: user.id, collection: 'users', overrideAccess: true })
       }
     })
 
     test('should reject a logout that reuses the validation request before a session is removed', async () => {
-      const usersBefore = await payload.count({ collection: 'users' })
+      const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
 
       await expect(runWriteAttempt('logout')).rejects.toThrow(
         'Payload writes are not allowed during validation',
       )
 
-      expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
+      expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
+        usersBefore,
+      )
     })
 
     test('should reject a refresh that reuses the validation request before a session is written', async () => {
-      const usersBefore = await payload.count({ collection: 'users' })
+      const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
 
       await expect(runWriteAttempt('refresh')).rejects.toThrow(
         'Payload writes are not allowed during validation',
       )
 
-      expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
+      expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
+        usersBefore,
+      )
     })
 
     test('should reject a reset password that reuses the validation request before a password is written', async () => {
-      const usersBefore = await payload.count({ collection: 'users' })
+      const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
 
       await expect(runWriteAttempt('resetPassword')).rejects.toThrow(
         'Payload writes are not allowed during validation',
       )
 
-      expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
+      expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
+        usersBefore,
+      )
     })
 
     test('should reject a verify email that reuses the validation request before a user is written', async () => {
-      const usersBefore = await payload.count({ collection: 'users' })
+      const usersBefore = await payload.count({ collection: 'users', overrideAccess: true })
 
       await expect(runWriteAttempt('verifyEmail')).rejects.toThrow(
         'Payload writes are not allowed during validation',
       )
 
-      expect(await payload.count({ collection: 'users' })).toEqual(usersBefore)
+      expect(await payload.count({ collection: 'users', overrideAccess: true })).toEqual(
+        usersBefore,
+      )
     })
   })
 })
@@ -2796,6 +3379,7 @@ async function createWriteTarget() {
       title: 'stored target',
     },
     disableTransaction: true,
+    overrideAccess: true,
   })
 }
 
@@ -2899,6 +3483,7 @@ async function seedPublishCollection({
     },
     draft: true,
     locale: 'en',
+    overrideAccess: true,
   })
 
   await payload.update({
@@ -2907,6 +3492,7 @@ async function seedPublishCollection({
     data: getPublishCollectionLocaleData({ omit: omit?.es, title: es }),
     draft: true,
     locale: 'es',
+    overrideAccess: true,
     trash: Boolean(deletedAt),
   })
   await payload.update({
@@ -2915,6 +3501,7 @@ async function seedPublishCollection({
     data: getPublishCollectionLocaleData({ omit: omit?.de, title: de }),
     draft: true,
     locale: 'de',
+    overrideAccess: true,
     trash: Boolean(deletedAt),
   })
   if (fr !== undefined) {
@@ -2924,6 +3511,7 @@ async function seedPublishCollection({
       data: getPublishCollectionLocaleData({ title: fr }),
       draft: true,
       locale: 'fr',
+      overrideAccess: true,
       trash: Boolean(deletedAt),
     })
   }
@@ -2960,6 +3548,7 @@ async function seedPublishGlobal({
   await payload.updateGlobal({
     slug: publishGlobalSlug,
     data: {},
+    overrideAccess: true,
     unpublishAllLocales: true,
   })
   await payload.updateGlobal({
@@ -2970,6 +3559,7 @@ async function seedPublishGlobal({
     }),
     draft: true,
     locale: 'en',
+    overrideAccess: true,
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
@@ -2979,6 +3569,7 @@ async function seedPublishGlobal({
     }),
     draft: true,
     locale: 'es',
+    overrideAccess: true,
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
@@ -2988,6 +3579,7 @@ async function seedPublishGlobal({
     }),
     draft: true,
     locale: 'de',
+    overrideAccess: true,
   })
   if (fr !== undefined) {
     await payload.updateGlobal({
@@ -2997,6 +3589,7 @@ async function seedPublishGlobal({
       }),
       draft: true,
       locale: 'fr',
+      overrideAccess: true,
     })
   }
 }

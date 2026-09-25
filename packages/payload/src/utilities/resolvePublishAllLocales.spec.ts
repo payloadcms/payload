@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { resolvePublishAllLocales } from './resolvePublishAllLocales.js'
 
 describe('resolvePublishAllLocales', () => {
-  it('should win over draft when publishAllLocalesArg is explicitly true', () => {
+  it('should preserve draft behavior when publishAllLocalesArg is explicitly true', () => {
     expect(
       resolvePublishAllLocales({
         draft: true,
@@ -11,7 +11,7 @@ describe('resolvePublishAllLocales', () => {
         locale: 'en',
         publishAllLocalesArg: true,
       }),
-    ).toBe(true)
+    ).toBe(false)
   })
 
   it('should be false while saving a draft without an explicit publishAllLocalesArg', () => {

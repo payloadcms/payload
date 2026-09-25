@@ -50,6 +50,15 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       parentIsLocalized: false,
       parentName: formattedName,
     })
+    const validationMutationInputType = buildMutationInputType({
+      name: `${formattedName}Validation`,
+      config,
+      fields,
+      forceNullable: true,
+      graphqlResult,
+      parentIsLocalized: false,
+      parentName: `${formattedName}Validation`,
+    })
     graphqlResult.globals.graphQL[slug] = {
       type: buildObjectType({
         name: formattedName,
@@ -114,7 +123,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       graphqlResult.Mutation.fields[`validate${formattedName}`] = {
         type: graphqlResult.types.validationResultType,
         args: {
-          ...(updateMutationInputType ? { data: { type: updateMutationInputType } } : {}),
+          ...(validationMutationInputType ? { data: { type: validationMutationInputType } } : {}),
           draft: { type: GraphQLBoolean },
           ...(config.localization
             ? {

@@ -8,7 +8,13 @@ import type {
 
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import { logoutOperation, refreshOperation, saveVersion, ValidationError } from 'payload'
+import {
+  defaultUserCollection,
+  logoutOperation,
+  refreshOperation,
+  saveVersion,
+  ValidationError,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 // Direct internal import intentionally exercises the upload write guard.
@@ -37,6 +43,7 @@ export const validationPublishUploadsSlug = 'validation-publish-uploads'
 export const validationCustomButtonsCollectionSlug = 'validation-custom-buttons-items'
 export const validationDeniedCollectionSlug = 'validation-denied-items'
 export const validationNonLocalizedCollectionSlug = 'validation-non-localized-items'
+export const validationAuthCollectionSlug = 'validation-auth-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
 export const validationPublishUploadsDir = path.resolve(dirname, 'validation-publish-uploads')
 
@@ -457,10 +464,7 @@ const validationCollection: CollectionConfig = {
         source: 'entity',
       })
       await recordAndMutateIsolationState({ data, req, source: 'collection' })
-      return (
-        hasValidationOperation &&
-        (req.payloadAPI === 'REST' || req.context.allowValidation === true)
-      )
+      return hasValidationOperation && req.context.denyValidationAccess !== true
     },
   },
   fields: [
@@ -487,6 +491,18 @@ const validationCollection: CollectionConfig = {
               operation,
               requestOperation: req.operation,
             })
+
+            if (context.throwFieldValidationError === true) {
+              throw new ValidationError(
+                {
+                  collection: validationCollectionSlug,
+                  errors: [{ message: 'Collection field validation failure', path: 'title' }],
+                  req,
+                },
+                req.t,
+              )
+            }
+
             return value
           },
         ],
@@ -673,6 +689,20 @@ const validationCollection: CollectionConfig = {
           )
         }
 
+        if (req.context.throwMultipleValidationErrors === true) {
+          throw new ValidationError(
+            {
+              collection: validationCollectionSlug,
+              errors: [
+                { message: 'Summary failed the first check', path: 'summary' },
+                { message: 'Summary failed the second check', path: 'summary' },
+              ],
+              req,
+            },
+            req.t,
+          )
+        }
+
         return data
       },
       runWriteAttempt,
@@ -739,16 +769,31 @@ const validationGlobal: GlobalConfig = {
         source: 'entity',
       })
       await recordAndMutateIsolationState({ data, req, source: 'global' })
-      return (
-        hasValidationOperation &&
-        (req.payloadAPI === 'REST' || req.context.allowValidation === true)
-      )
+      return hasValidationOperation && req.context.denyValidationAccess !== true
     },
   },
   fields: [
     {
       name: 'title',
       type: 'text',
+      hooks: {
+        beforeValidate: [
+          ({ context, req, value }) => {
+            if (context.throwFieldValidationError === true) {
+              throw new ValidationError(
+                {
+                  errors: [{ message: 'Global field validation failure', path: 'title' }],
+                  global: validationGlobalSlug,
+                  req,
+                },
+                req.t,
+              )
+            }
+
+            return value
+          },
+        ],
+      },
       localized: true,
       required: true,
     },
@@ -756,6 +801,17 @@ const validationGlobal: GlobalConfig = {
       name: 'summary',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'metadata',
+      type: 'group',
+      fields: [
+        {
+          name: 'nestedTitle',
+          type: 'text',
+          required: true,
+        },
+      ],
     },
     {
       name: 'location',
@@ -939,6 +995,11 @@ const validationWhereCollection: CollectionConfig = {
       required: true,
     },
   ],
+  versions: {
+    drafts: {
+      validate: false,
+    },
+  },
 }
 
 const validationFallbackGlobal: GlobalConfig = {
@@ -1175,6 +1236,41 @@ const publishCollection: CollectionConfig = {
       required: true,
     },
     {
+      name: 'nestedLocalizedArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'value',
+          type: 'text',
+          localized: true,
+          required: true,
+        },
+      ],
+      hooks: {
+        beforeValidate: [
+          ({ context, req, value }) => {
+            if (context.throwStoredNestedLocalizedArrayValidationError === true) {
+              throw new ValidationError(
+                {
+                  collection: publishCollectionSlug,
+                  errors: [
+                    {
+                      message: 'Stored nested localized field validation failure',
+                      path: 'nestedLocalizedArray.0.value',
+                    },
+                  ],
+                  req,
+                },
+                req.t,
+              )
+            }
+
+            return value
+          },
+        ],
+      },
+    },
+    {
       name: 'localizedBlocks',
       type: 'blocks',
       blocks: [
@@ -1336,6 +1432,18 @@ const validationNonLocalizedCollection: CollectionConfig = {
   ],
 }
 
+const validationAuthCollection: CollectionConfig = {
+  slug: validationAuthCollectionSlug,
+  auth: {
+    loginWithUsername: {
+      allowEmailLogin: true,
+      requireEmail: false,
+      requireUsername: false,
+    },
+  },
+  fields: [],
+}
+
 export default buildConfigWithDefaults({
   config: {
     admin: {
@@ -1355,6 +1463,8 @@ export default buildConfigWithDefaults({
       validationCustomButtonsCollection,
       validationDeniedCollection,
       validationNonLocalizedCollection,
+      defaultUserCollection,
+      validationAuthCollection,
       {
         slug: writeTargetsSlug,
         fields: [

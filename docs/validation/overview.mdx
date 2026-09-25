@@ -113,8 +113,8 @@ if (!result.valid) {
 return { ready: true }
 ```
 
-The Local API skips access control by default. Set `overrideAccess: false` and pass `user` or `req`
-when validation should enforce access.
+The Local API enforces access control by default. Set `overrideAccess: true` only for trusted
+internal calls that must skip access control.
 
 ## REST API
 
@@ -224,10 +224,10 @@ same candidate into every selected locale, then aggregates the results. If a cus
 unsaved localized values for only its active locale, do not send those values as a flat
 multi-locale candidate.
 
-Publishing every locale at once has this same problem: the request only carries unsaved data for
-the locale being edited. Payload validates that locale with the submitted data, then validates
-every other locale using only its stored, non-localized-field-stripped candidate, so sibling
-locales are never checked against localized values that were never meant for them.
+Publish-all operations do not automatically run on-demand validation for every locale. When an
+application needs this check before publishing, call the Local or REST validation API with
+`locale: 'all'` first. Automatic validation of every locale during publish-all will be added in a
+follow-up change.
 
 Fallback locale values are disabled during on-demand validation. Missing data must pass validation
 in the locale being checked.

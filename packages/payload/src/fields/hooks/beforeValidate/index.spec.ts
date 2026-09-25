@@ -1,4 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field } from '../../config/types.js'
 
@@ -77,6 +78,62 @@ describe('beforeValidate', () => {
     expect(hookOperations).toEqual(['validate'])
     expect(accessOperations).toEqual(['validate'])
     expect(data).toEqual({})
+  })
+
+  it('should retain the stored value when validate access denies a field', async () => {
+    const data = { title: 'attempted replacement' }
+
+    await beforeValidate({
+      collection: {
+        fields: [
+          {
+            access: {
+              validate: () => false,
+            },
+            name: 'title',
+            required: true,
+            type: 'text',
+          } as Field,
+        ],
+      } as SanitizedCollectionConfig,
+      context: {},
+      data,
+      doc: { title: 'stored title' },
+      global: null,
+      operation: 'validate',
+      overrideAccess: false,
+      req: { context: {}, operation: 'validate', payload: {} } as PayloadRequest,
+    })
+
+    expect(data).toEqual({ title: 'stored title' })
+  })
+
+  it('should retain the stored global value when validate access denies a field', async () => {
+    const data = { title: 'attempted replacement' }
+
+    await beforeValidate({
+      collection: null,
+      context: {},
+      data,
+      doc: { title: 'stored global title' },
+      global: {
+        fields: [
+          {
+            access: {
+              validate: () => false,
+            },
+            name: 'title',
+            required: true,
+            type: 'text',
+          } as Field,
+        ],
+      } as SanitizedGlobalConfig,
+      operation: 'validate',
+      overrideAccess: false,
+      req: { context: {}, operation: 'validate', payload: {} } as PayloadRequest,
+    })
+
+    expect(data).toEqual({ title: 'stored global title' })
   })
 })
 

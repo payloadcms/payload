@@ -13,6 +13,7 @@ import { Forbidden } from '../../errors/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { deepMergeWithSourceArraysIgnoringUndefined } from '../../utilities/deepMerge.js'
 import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
 import { toValidationResult } from '../../utilities/toValidationResult.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -27,6 +28,7 @@ export type Arguments<TSlug extends GlobalSlug> = {
   dataIsLocaleKeyed?: boolean
   draft: boolean
   globalConfig: SanitizedGlobalConfig
+  onValidationData?: (data: JsonObject) => void
   overrideAccess: boolean
   req: PayloadRequest
   slug: string
@@ -51,6 +53,7 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   dataIsLocaleKeyed = false,
   draft,
   globalConfig,
+  onValidationData,
   overrideAccess,
   req,
 }: Arguments<TSlug>): Promise<ValidationResult> {
@@ -87,18 +90,21 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     locale: req.locale!,
   })
 
-  data = await beforeValidate({
-    collection: null,
-    context: req.context,
-    data,
-    doc: originalDoc,
-    global: globalConfig,
-    operation: 'validate',
-    overrideAccess,
-    req,
-  })
-
   try {
+    onValidationData?.(deepMergeWithSourceArraysIgnoringUndefined<JsonObject>(originalDoc, data))
+
+    data = await beforeValidate({
+      collection: null,
+      context: req.context,
+      data,
+      doc: originalDoc,
+      global: globalConfig,
+      operation: 'validate',
+      overrideAccess,
+      req,
+    })
+    onValidationData?.(data)
+
     if (globalConfig.hooks.beforeValidate?.length) {
       for (const hook of globalConfig.hooks.beforeValidate) {
         data =
@@ -227,24 +233,33 @@ async function resolveValidationGlobalSource({
     where: overrideAccess ? undefined : (accessResult as Where),
   })
 
-  if (accessible.hasMain || accessible.source !== accessible.base) {
-    return accessible.source
+  if (hasWhereAccessResult(accessResult)) {
+    const shouldCheckForDeniedSource =
+      !accessible.hasMain || (draft && accessible.source === accessible.base)
+
+    if (shouldCheckForDeniedSource) {
+      const unrestricted = await loadValidationGlobalCandidate({
+        slug,
+        accessResult: true,
+        draft,
+        globalConfig,
+        overrideAccess: true,
+        req,
+        where: undefined,
+      })
+
+      const hasDeniedMain = !accessible.hasMain && unrestricted.hasMain
+      const hasDeniedDraft =
+        draft && accessible.source === accessible.base && unrestricted.source !== unrestricted.base
+
+      if (hasDeniedMain || hasDeniedDraft) {
+        throw new Forbidden(req.t)
+      }
+    }
   }
 
-  if (hasWhereAccessResult(accessResult)) {
-    const unrestricted = await loadValidationGlobalCandidate({
-      slug,
-      accessResult: true,
-      draft,
-      globalConfig,
-      overrideAccess: true,
-      req,
-      where: undefined,
-    })
-
-    if (unrestricted.hasMain || unrestricted.source !== unrestricted.base) {
-      throw new Forbidden(req.t)
-    }
+  if (accessible.hasMain || accessible.source !== accessible.base) {
+    return accessible.source
   }
 
   return {}
