@@ -129,7 +129,7 @@ default, migrations will be named using a timestamp.
 npm run payload migrate:create optional-name-here
 ```
 
-When upgrading a SQL project to a Payload release that adds upload file versioning, generate a migration in that project after updating Payload and before deploying with `push: false`. Inspect the generated migration for each upload collection: it should add nullable `original` metadata and `_managedFiles` columns to both the collection and its versions table, if versions are enabled. Then run `npm run payload migrate` during deployment. Payload does not ship a single migration for these fields because upload collection tables are defined by each project's config. Existing rows retain null values until they are read or updated by the versioning flow.
+When upgrading a SQL project to a Payload release that adds upload file versioning, generate a migration in that project after updating Payload and before deploying with `push: false`. Inspect the generated migration for each upload collection: it should add nullable `original` metadata, `_managedFiles`, and `_fileRevision` columns to both the collection and its versions table, if versions are enabled. `_fileRevision` is a private text field used to reject conflicting file changes, including draft changes that leave the published file fields alone. Then run `npm run payload migrate` during deployment. Payload does not ship a single migration for these fields because upload collection tables are defined by each project's config. Existing rows retain null values until a later write persists versioning metadata or claims a file revision; reads alone do not change stored rows.
 
 Flags:
 

@@ -2,6 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { DraftMedia } from './collections/DraftMedia/index.js'
 import { LegacyMedia } from './collections/LegacyMedia/index.js'
 import { Media } from './collections/Media/index.js'
 
@@ -28,7 +29,8 @@ const migrationDb = migrationDir
 
 export default buildConfigWithDefaults({
   config: {
-    collections: [process.env.FILE_VERSIONING_LEGACY_SCHEMA === 'true' ? LegacyMedia : Media],
+    collections:
+      process.env.FILE_VERSIONING_LEGACY_SCHEMA === 'true' ? [LegacyMedia] : [Media, DraftMedia],
     ...(migrationDb ? { db: migrationDb } : {}),
     typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
   },

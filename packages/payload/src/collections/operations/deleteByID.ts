@@ -14,6 +14,11 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/coordinator.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -44,6 +49,11 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
   incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -291,9 +301,16 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result as TransformCollectionWithSelect<TSlug, TSelect>
   } catch (error: unknown) {
     await killTransaction(args.req)
+    if (hasFileOperationScope) {
+      abortFileOperationScope({ req: args.req })
+    }
     throw error
   }
 }

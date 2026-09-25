@@ -36,7 +36,12 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
   test('should ignore a client supplied original and manifest', async ({ payload }) => {
     const created = await payload.create({
       collection: mediaSlug,
-      data: { _managedFiles: managedFiles, alt: 'client data', original } as never,
+      data: {
+        _fileRevision: 'forged',
+        _managedFiles: managedFiles,
+        alt: 'client data',
+        original,
+      } as never,
     })
 
     const internal = await payload.findByID({
@@ -50,6 +55,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     expect(internal.original?.mimeType).toBeFalsy()
     expect(internal.original?.filesize).toBeFalsy()
     expect(internal._managedFiles).toBeFalsy()
+    expect(internal._fileRevision).toBeFalsy()
   })
 
   test('should retain trusted original and manifest data in a version snapshot', async ({

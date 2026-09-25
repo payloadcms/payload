@@ -2,6 +2,8 @@ import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { commitFileOperations } from '../uploads/fileVersioning/coordinator.js'
+
 /**
  * complete a transaction calling adapter db.commitTransaction and delete the transactionID from req
  */
@@ -12,4 +14,5 @@ export async function commitTransaction(
 
   await payload.db.commitTransaction(transactionID!)
   delete req.transactionID
+  await commitFileOperations({ req: req as PayloadRequest })
 }

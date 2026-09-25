@@ -2,6 +2,8 @@ import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
 
+import { rollbackFileOperations } from '../uploads/fileVersioning/coordinator.js'
+
 /**
  * Rollback the transaction from the req using the db adapter and removes it from the req
  *
@@ -19,6 +21,7 @@ export async function killTransaction(
   if (transactionID && !(transactionID instanceof Promise)) {
     try {
       await payload.db.rollbackTransaction(req.transactionID!)
+      await rollbackFileOperations({ req: req as PayloadRequest })
     } catch (ignore) {
       // swallow any errors while attempting to rollback
     }

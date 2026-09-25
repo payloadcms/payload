@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     'file-versioned-media': FileVersionedMedia;
+    'file-versioned-draft-media': FileVersionedDraftMedia;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -77,6 +78,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     'file-versioned-media': FileVersionedMediaSelect<false> | FileVersionedMediaSelect<true>;
+    'file-versioned-draft-media': FileVersionedDraftMediaSelect<false> | FileVersionedDraftMediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -144,7 +146,6 @@ export interface FileVersionedMedia {
     height?: number | null;
   };
   _managedFiles?: {
-    storageBackendId: string;
     key: string;
     roles: (
       | {
@@ -155,8 +156,53 @@ export interface FileVersionedMedia {
           type: 'original' | 'default' | 'thumbnail';
         }
     )[];
+    storageBackendId: string;
     [k: string]: unknown;
   }[];
+  _fileRevision?: string | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-versioned-draft-media".
+ */
+export interface FileVersionedDraftMedia {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
+  _managedFiles?: {
+    key: string;
+    roles: (
+      | {
+          type: 'size';
+          sizeKey: string;
+        }
+      | {
+          type: 'original' | 'default' | 'thumbnail';
+        }
+    )[];
+    storageBackendId: string;
+    [k: string]: unknown;
+  }[];
+  _fileRevision?: string | null;
   focalX?: number | null;
   focalY?: number | null;
 }
@@ -213,6 +259,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'file-versioned-media';
         value: string | FileVersionedMedia;
+      } | null)
+    | ({
+        relationTo: 'file-versioned-draft-media';
+        value: string | FileVersionedDraftMedia;
       } | null)
     | ({
         relationTo: 'users';
@@ -286,6 +336,38 @@ export interface FileVersionedMediaSelect<T extends boolean = true> {
         height?: T;
       };
   _managedFiles?: T;
+  _fileRevision?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-versioned-draft-media_select".
+ */
+export interface FileVersionedDraftMediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+      };
+  _managedFiles?: T;
+  _fileRevision?: T;
   focalX?: T;
   focalY?: T;
 }
@@ -369,7 +451,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'file-versioned-media' | 'users';
+    relatedCollection: 'file-versioned-media' | 'file-versioned-draft-media' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -391,7 +473,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('file-versioned-media' | 'users')[] | null;
+    excludedCollections?: ('file-versioned-media' | 'file-versioned-draft-media' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

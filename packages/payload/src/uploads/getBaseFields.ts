@@ -218,6 +218,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       hidden: true,
       jsonSchema: managedFileManifestJSONSchema,
     },
+    {
+      name: '_fileRevision',
+      type: 'text',
+      hidden: true,
+    },
   ]
 
   // Add focal point fields if not disabled

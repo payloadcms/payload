@@ -27,6 +27,11 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { saveVersion } from '../../index.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+} from '../../uploads/fileVersioning/coordinator.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getExternalUploadSource,
@@ -82,6 +87,11 @@ export const createOperation = async <
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
   let externalUploadSource: ReturnType<typeof getExternalUploadSource>
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -620,6 +630,10 @@ export const createOperation = async <
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     return result
   } catch (error: unknown) {
     await unlinkTempFiles({
@@ -630,6 +644,9 @@ export const createOperation = async <
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
     await killTransaction(args.req)
+    if (hasFileOperationScope) {
+      abortFileOperationScope({ req: args.req })
+    }
     throw error
   }
 }
