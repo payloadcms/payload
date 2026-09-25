@@ -208,6 +208,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Naršyti pagal aplanką',
     byFolder: 'Pagal aplanką',
     deleteFolder: 'Ištrinti aplanką',
+    folder: 'Aplankas',
     folderName: 'Aplanko pavadinimas',
     folders: 'Aplankai',
     folderTypeDescription:
@@ -267,7 +268,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Jūsų pakeitimai nebuvo išsaugoti. Jei dabar išeisite, prarasite savo pakeitimus.',
     clear: 'Aišku',
-    clearAll: 'Išvalyti viską',
     close: 'Uždaryti',
     collapse: 'Susikolimas',
     collections: 'Kolekcijos',
@@ -314,6 +314,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     deleting: 'Trinama...',
     depth: 'Gylis',
     descending: 'Mažėjantis',
+    deselectAll: 'Atžymėti visus',
     deselectAllRows: 'Atžymėkite visas eilutes',
     document: 'Dokumentas',
     documentIsTrashed: 'Šis {{label}} yra ištrintas ir yra tik skaitymui.',
@@ -438,6 +439,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Rodyti visus {{label}}',
     sorryNotFound: 'Atsiprašau - nėra nieko, atitinkančio jūsų užklausą.',
     sort: 'Rūšiuoti',
+    sortBy: 'Rūšiuoti pagal',
     sortByLabelDirection: 'Rūšiuoti pagal {{label}} {{direction}}',
     stayOnThisPage: 'Likite šiame puslapyje',
     submissionSuccessful: 'Pateikimas sėkmingas.',
