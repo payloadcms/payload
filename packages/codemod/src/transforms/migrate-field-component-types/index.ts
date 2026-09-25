@@ -91,6 +91,14 @@ const COMPONENT_TO_PROPS = new Map<string, string>([
   ['UIFieldDiffServerComponent', 'UIFieldDiffServerProps'],
 ])
 
+const COMPONENT_GENERIC_DEFAULTS = new Map<string, readonly string[]>([
+  ['FieldDiffClientComponent', ['ClientFieldWithOptionalType']],
+  ['FieldDiffServerComponent', ['Field', 'ClientFieldWithOptionalType']],
+  ['FieldErrorServerComponent', ['Field', 'ClientFieldWithOptionalType']],
+  ['FieldLabelClientComponent', ['ClientFieldWithOptionalType']],
+  ['FieldLabelServerComponent', ['Field', 'ClientFieldWithOptionalType']],
+])
+
 export const migrateFieldComponentTypes: Transform = {
   name: 'migrate-field-component-types',
   apply: ({ project }) => {
@@ -186,9 +194,15 @@ export const migrateFieldComponentTypes: Transform = {
             const typeArguments = typeReference
               .getTypeArguments()
               .map((typeArgument) => typeArgument.getText())
+            const propsTypeArguments = materializeGenericDefaults({
+              componentName,
+              file,
+              importDeclaration,
+              typeArguments,
+            })
             const propsType =
-              typeArguments.length > 0
-                ? `${propsImport.localName}<${typeArguments.join(', ')}>`
+              propsTypeArguments.length > 0
+                ? `${propsImport.localName}<${propsTypeArguments.join(', ')}>`
                 : propsImport.localName
 
             typeReference.replaceWithText(`${reactBinding.localName}.FC<${propsType}>`)
@@ -244,6 +258,83 @@ export const migrateFieldComponentTypes: Transform = {
 type ResolvePropsImportArgs = {
   file: SourceFile
   propsName: string
+}
+
+type MaterializeGenericDefaultsArgs = {
+  componentName: string
+  file: SourceFile
+  importDeclaration: ImportDeclaration
+  typeArguments: string[]
+}
+
+function materializeGenericDefaults({
+  componentName,
+  file,
+  importDeclaration,
+  typeArguments,
+}: MaterializeGenericDefaultsArgs): string[] {
+  const genericDefaults = COMPONENT_GENERIC_DEFAULTS.get(componentName)
+
+  if (!genericDefaults || typeArguments.length >= genericDefaults.length) {
+    return typeArguments
+  }
+
+  return [
+    ...typeArguments,
+    ...genericDefaults.slice(typeArguments.length).map((typeName) =>
+      resolvePayloadTypeImport({
+        file,
+        importDeclaration,
+        typeName,
+      }),
+    ),
+  ]
+}
+
+type ResolvePayloadTypeImportArgs = {
+  file: SourceFile
+  importDeclaration: ImportDeclaration
+  typeName: string
+}
+
+function resolvePayloadTypeImport({
+  file,
+  importDeclaration,
+  typeName,
+}: ResolvePayloadTypeImportArgs): string {
+  for (const declaration of file.getImportDeclarations()) {
+    if (declaration.getModuleSpecifierValue() !== 'payload') {
+      continue
+    }
+
+    const existing = declaration
+      .getNamedImports()
+      .find((namedImport) => namedImport.getName() === typeName)
+
+    if (existing) {
+      const localName = existing.getAliasNode()?.getText() ?? typeName
+
+      if (
+        !hasCompetingDeclaration({
+          file,
+          importDeclaration: declaration,
+          localName,
+        })
+      ) {
+        return localName
+      }
+    }
+  }
+
+  const localName = getAvailableName({ file, preferredName: typeName, suffix: 'Type' })
+
+  importDeclaration.addNamedImport({
+    name: typeName,
+    alias: localName === typeName ? undefined : localName,
+    isTypeOnly: !importDeclaration.isTypeOnly(),
+  })
+
+  return localName
 }
 
 type ResolvedPropsImport = {

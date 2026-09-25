@@ -240,18 +240,31 @@ const removedComponentToProps = [
   ['UploadFieldLabelServerComponent', 'UploadFieldLabelServerProps'],
 ] as const
 
+const canonicalGenericDefaults = new Map<string, readonly string[]>([
+  ['FieldDiffClientComponent', ['ClientFieldWithOptionalType']],
+  ['FieldDiffServerComponent', ['Field', 'ClientFieldWithOptionalType']],
+  ['FieldErrorServerComponent', ['Field', 'ClientFieldWithOptionalType']],
+  ['FieldLabelClientComponent', ['ClientFieldWithOptionalType']],
+  ['FieldLabelServerComponent', ['Field', 'ClientFieldWithOptionalType']],
+])
+
 describe('migrate-field-component-types', () => {
   it.each(removedComponentToProps)('should migrate %s to %s', async (componentName, propsName) => {
     const source = `import type { ${componentName} } from 'payload'
 
 const Component: ${componentName} = () => null`
+    const genericDefaults = canonicalGenericDefaults.get(componentName) ?? []
+    const importedTypes = [propsName, ...genericDefaults]
+    const propsType = `${propsName}${
+      genericDefaults.length > 0 ? `<${genericDefaults.join(', ')}>` : ''
+    }`
 
     expect(
       await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
-    ).toBe(`import type { ${propsName} } from 'payload'
+    ).toBe(`import type { ${importedTypes.join(', ')} } from 'payload'
 import type React from 'react'
 
-const Component: React.FC<${propsName}> = () => null`)
+const Component: React.FC<${propsType}> = () => null`)
   })
 
   it('should preserve generic type arguments inside the props type', async () => {
@@ -295,6 +308,65 @@ export = React`,
       `export type BlocksFieldLabelServerProps = Record<string, unknown>
 export type FieldErrorClientProps<T> = { field: T }
 export type TextFieldClient = { type: 'text' }`,
+    )
+    project.createSourceFile('/output.ts', output)
+
+    expect(
+      project.getPreEmitDiagnostics().map((diagnostic) => diagnostic.getMessageText()),
+    ).toEqual([])
+  })
+
+  it('should preserve omitted canonical generic defaults', async () => {
+    const source = `import type { FieldDiffClientComponent, FieldDiffServerComponent, FieldErrorServerComponent, FieldLabelClientComponent, FieldLabelServerComponent, TextField } from 'payload'
+
+const DiffClient: FieldDiffClientComponent = () => null
+const DiffServer: FieldDiffServerComponent = () => null
+const DiffServerWithField: FieldDiffServerComponent<TextField> = () => null
+const ErrorServer: FieldErrorServerComponent = () => null
+const ErrorServerWithField: FieldErrorServerComponent<TextField> = () => null
+const LabelClient: FieldLabelClientComponent = () => null
+const LabelServer: FieldLabelServerComponent = () => null
+const LabelServerWithField: FieldLabelServerComponent<TextField> = () => null`
+    const expected = `import type { FieldDiffClientProps, FieldDiffServerProps, FieldErrorServerProps, FieldLabelClientProps, FieldLabelServerProps, TextField, ClientFieldWithOptionalType, Field } from 'payload'
+import type React from 'react'
+
+const DiffClient: React.FC<FieldDiffClientProps<ClientFieldWithOptionalType>> = () => null
+const DiffServer: React.FC<FieldDiffServerProps<Field, ClientFieldWithOptionalType>> = () => null
+const DiffServerWithField: React.FC<FieldDiffServerProps<TextField, ClientFieldWithOptionalType>> = () => null
+const ErrorServer: React.FC<FieldErrorServerProps<Field, ClientFieldWithOptionalType>> = () => null
+const ErrorServerWithField: React.FC<FieldErrorServerProps<TextField, ClientFieldWithOptionalType>> = () => null
+const LabelClient: React.FC<FieldLabelClientProps<ClientFieldWithOptionalType>> = () => null
+const LabelServer: React.FC<FieldLabelServerProps<Field, ClientFieldWithOptionalType>> = () => null
+const LabelServerWithField: React.FC<FieldLabelServerProps<TextField, ClientFieldWithOptionalType>> = () => null`
+    const output = await runTransform({
+      filename: 'input.tsx',
+      source,
+      transform: migrateFieldComponentTypes,
+    })
+
+    expect(output).toBe(expected)
+
+    const project = new Project({
+      compilerOptions: { esModuleInterop: true, noEmit: true, strict: true },
+      useInMemoryFileSystem: true,
+    })
+
+    project.createSourceFile(
+      '/node_modules/react/index.d.ts',
+      `declare namespace React { type FC<Props> = (props: Props) => unknown }
+export = React`,
+    )
+    project.createSourceFile(
+      '/node_modules/payload/index.d.ts',
+      `export type Field = { name?: string }
+export type ClientField = { type: string }
+export type ClientFieldWithOptionalType = { type?: string }
+export type TextField = Field & { type: 'text' }
+export type FieldDiffClientProps<T extends ClientFieldWithOptionalType = ClientField> = { field: T }
+export type FieldDiffServerProps<TField extends Field = Field, TClient extends ClientFieldWithOptionalType = ClientField> = { clientField: TClient; field: TField }
+export type FieldErrorServerProps<TField extends Field, TClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType> = { clientField: TClient; field: TField }
+export type FieldLabelClientProps<T extends Partial<ClientFieldWithOptionalType> = Partial<ClientFieldWithOptionalType>> = { field?: T }
+export type FieldLabelServerProps<TField extends Field, TClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType> = { clientField: TClient; field: TField }`,
     )
     project.createSourceFile('/output.ts', output)
 
@@ -406,6 +478,25 @@ import type ReactType from 'react'
 type TextFieldClientProps = { custom: true }
 const React = 'local'
 const Field: ReactType.FC<TextFieldClientPropsType> = () => null`,
+    )
+  })
+
+  it('should avoid local generic-default type collisions', async () => {
+    const source = `import type { FieldDiffServerComponent } from 'payload'
+
+type Field = { custom: 'server' }
+type ClientFieldWithOptionalType = { custom: 'client' }
+const Diff: FieldDiffServerComponent = () => null`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(
+      `import type { FieldDiffServerProps, Field as FieldType, ClientFieldWithOptionalType as ClientFieldWithOptionalTypeType } from 'payload'
+import type React from 'react'
+
+type Field = { custom: 'server' }
+type ClientFieldWithOptionalType = { custom: 'client' }
+const Diff: React.FC<FieldDiffServerProps<FieldType, ClientFieldWithOptionalTypeType>> = () => null`,
     )
   })
 
