@@ -1,11 +1,11 @@
 import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
 export type Options<TSlug extends GlobalSlug> = {
@@ -81,7 +81,10 @@ export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(
     globalConfig,
     overrideAccess,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     showHiddenFields,
   })
 }

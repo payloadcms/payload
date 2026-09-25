@@ -4,7 +4,7 @@ import type { Field } from '../fields/config/types.js'
 import type { Payload, RequestContext, SanitizedConfig, User } from '../index.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
-import { createLocalReq } from './createLocalReq.js'
+import { createPayloadRequest } from './createPayloadRequest.js'
 import { isValidationErrorPathLocalized } from './isValidationErrorPathLocalized.js'
 import { projectNonLocalizedData } from './projectNonLocalizedData.js'
 import {
@@ -47,15 +47,13 @@ export async function runLocaleScopedValidation<TData>({
   user: null | undefined | User
   validationDataLocale: string | undefined
 }): Promise<ValidationResult> {
-  const baseReq = await createLocalReq(
-    {
-      context: cloneValidationValue(context),
-      fallbackLocale: false,
-      req: cloneValidationRequest(req),
-      user: cloneValidationValue(user),
-    },
+  const baseReq = await createPayloadRequest({
+    context: cloneValidationValue(context),
+    fallbackLocale: false,
     payload,
-  )
+    req: cloneValidationRequest(req),
+    user: cloneValidationValue(user),
+  })
   baseReq.operation = 'validate'
   const locales = await resolveValidationLocales({
     locale,
@@ -65,14 +63,12 @@ export async function runLocaleScopedValidation<TData>({
     concurrency: resolveValidationConcurrency(req),
     locales,
     validate: async (validationLocale) => {
-      const localeReq = await createLocalReq(
-        {
-          fallbackLocale: false,
-          locale: validationLocale ?? undefined,
-          req: cloneValidationRequest(baseReq),
-        },
+      const localeReq = await createPayloadRequest({
+        fallbackLocale: false,
+        locale: validationLocale ?? undefined,
         payload,
-      )
+        req: cloneValidationRequest(baseReq),
+      })
       const validationCandidateData = cloneValidationValue(data)
       const validationData: TData =
         validationDataLocale && validationLocale !== validationDataLocale && validationCandidateData

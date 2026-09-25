@@ -4,7 +4,7 @@ import { buildEditorState } from '@payloadcms/richtext-lexical'
 import { randomUUID } from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
-import { createLocalReq } from 'payload'
+import { createPayloadRequest } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { expect } from 'vitest'
 
@@ -369,15 +369,13 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
     })
 
     test('should expose fallback-derived entity and field validation permissions', async () => {
-      const req = await createLocalReq(
-        {
-          context: {
-            allowFieldUpdateFallback: true,
-            allowUpdateFallback: true,
-          },
+      const req = await createPayloadRequest({
+        context: {
+          allowFieldUpdateFallback: true,
+          allowUpdateFallback: true,
         },
         payload,
-      )
+      })
       const permissions = await getEntityPermissions({
         blockReferencesPermissions: {},
         entity: payload.collections[validationFallbackCollectionSlug]!.config,
@@ -527,14 +525,12 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
     })
 
     test('should isolate operation-sensitive entity and nested field permission discovery', async () => {
-      const req = await createLocalReq(
-        {
-          context: {
-            allowValidation: true,
-          },
+      const req = await createPayloadRequest({
+        context: {
+          allowValidation: true,
         },
         payload,
-      )
+      })
       req.operation = 'update'
 
       const authResult = await payload.auth({
@@ -1782,15 +1778,13 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
     })
 
     test('should expose fallback-derived global and field validation permissions', async () => {
-      const req = await createLocalReq(
-        {
-          context: {
-            allowFieldUpdateFallback: true,
-            allowUpdateFallback: true,
-          },
+      const req = await createPayloadRequest({
+        context: {
+          allowFieldUpdateFallback: true,
+          allowUpdateFallback: true,
         },
         payload,
-      )
+      })
       const permissions = await getEntityPermissions({
         blockReferencesPermissions: {},
         entity: payload.globals.config.find(({ slug }) => slug === validationFallbackGlobalSlug)!,

@@ -589,9 +589,9 @@ export type DocumentSlots = {
 }
 
 export type {
+  AdminContext,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
-  InitReqResult,
   ListQuery,
   ServerFunction,
   ServerFunctionArgs,

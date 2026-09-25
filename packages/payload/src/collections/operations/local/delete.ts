@@ -14,11 +14,11 @@ import type {
   Where,
 } from '../../../types/index.js'
 import type { SharedLocalAPIOptions } from '../../../types/operations.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type { BulkOperationResult, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { deleteOperation } from '../delete.js'
 import { deleteByIDOperation } from '../deleteByID.js'
 
@@ -176,7 +176,10 @@ async function deleteLocal<
     overrideAccess,
     overrideLock,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     trash,
