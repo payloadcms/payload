@@ -1700,6 +1700,8 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
+export interface EndpointCustom extends Record<string, any> {}
+
 export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 export {
   createClientBlocks,
