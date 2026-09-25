@@ -12,6 +12,10 @@ Access Control determines what a user can and cannot do with any given Document,
 
 Access Control functions are scoped to the _operation_, meaning you can have different rules for `create`, `read`, `update`, `delete`, etc. Access Control functions are executed _before_ any changes are made and _before_ any operations are completed. This allows you to determine if the user has the necessary permissions before fulfilling the request.
 
+[On-demand validation](../validation/overview#access-control-and-hooks) uses its own first-class
+`validate` operation for collection, global, and field access control. Its access policy falls back
+to the corresponding `update` function unless `validate` is configured explicitly.
+
 There are many use cases for Access Control, including:
 
 - Allowing anyone `read` access to all posts

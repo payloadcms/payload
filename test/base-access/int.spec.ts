@@ -111,6 +111,50 @@ test.suite('baseAccess', { config: './config.ts' }, () => {
     ).rejects.toThrow(Forbidden)
   })
 
+  test('should enforce base access for collection validate operation', async ({ payload }) => {
+    const req = await createRequest({
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
+    })
+
+    await expect(
+      payload.validate({
+        collection: postsSlug,
+        data: {
+          status: 'published',
+          tenant: 'tenant-1',
+          title: 'denied',
+        },
+        locale: null,
+        overrideAccess: false,
+        req,
+      }),
+    ).rejects.toThrow(Forbidden)
+  })
+
+  test('should enforce base access for globals validate operation', async ({ payload }) => {
+    const req = await createRequest({
+      headers: {
+        [denyHeader]: 'true',
+      },
+      payload,
+    })
+
+    await expect(
+      payload.validateGlobal({
+        slug: settingsSlug,
+        data: {
+          title: 'denied',
+        },
+        locale: null,
+        overrideAccess: false,
+        req,
+      }),
+    ).rejects.toThrow(Forbidden)
+  })
+
   test('should enforce base access for generated collections', async ({ payload }) => {
     const req = await createRequest({
       headers: {

@@ -2,6 +2,7 @@ import type { UpdateJobsArgs } from '../../database/types.js'
 import type { Job } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { jobAfterRead } from '../config/collection.js'
 import { getCurrentDate } from './getCurrentDate.js'
 
@@ -52,6 +53,8 @@ export async function updateJobs({
   sort,
   where: whereArg,
 }: RunJobsArgs): Promise<Job[] | null> {
+  assertNoValidationWrite(req)
+
   const limit = id ? 1 : limitArg
   const where = id ? { id: { equals: id } } : whereArg
 

@@ -13,6 +13,7 @@ import { findVersionByID } from '../resolvers/globals/findVersionByID.js'
 import { findVersions } from '../resolvers/globals/findVersions.js'
 import { restoreVersion } from '../resolvers/globals/restoreVersion.js'
 import { update } from '../resolvers/globals/update.js'
+import { validateResolver as validateGlobalResolver } from '../resolvers/globals/validate.js'
 import { formatName } from '../utilities/formatName.js'
 import { buildMutationInputType } from './buildMutationInputType.js'
 import { buildObjectType } from './buildObjectType.js'
@@ -48,6 +49,15 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       graphqlResult,
       parentIsLocalized: false,
       parentName: formattedName,
+    })
+    const validationMutationInputType = buildMutationInputType({
+      name: `${formattedName}Validation`,
+      config,
+      fields,
+      forceNullable: true,
+      graphqlResult,
+      parentIsLocalized: false,
+      parentName: `${formattedName}Validation`,
     })
     graphqlResult.globals.graphQL[slug] = {
       type: buildObjectType({
@@ -108,6 +118,20 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
             : {}),
         },
         resolve: update(global),
+      }
+
+      graphqlResult.Mutation.fields[`validate${formattedName}`] = {
+        type: graphqlResult.types.validationResultType,
+        args: {
+          ...(validationMutationInputType ? { data: { type: validationMutationInputType } } : {}),
+          draft: { type: GraphQLBoolean },
+          ...(config.localization
+            ? {
+                locale: { type: graphqlResult.types.localeInputType },
+              }
+            : {}),
+        },
+        resolve: validateGlobalResolver(global),
       }
     }
 

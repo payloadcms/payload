@@ -13,6 +13,7 @@ import { buildBeforeOperation } from '../../collections/operations/utilities/bui
 import { APIError } from '../../errors/index.js'
 import { Forbidden } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { getRequestOrigin } from '../../utilities/getRequestOrigin.js'
@@ -37,6 +38,8 @@ export type Result = string
 export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<null | string> => {
+  assertNoValidationWrite(incomingArgs.req)
+
   const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
   const { data, overrideAccess } = incomingArgs
 

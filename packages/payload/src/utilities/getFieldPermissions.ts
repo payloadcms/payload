@@ -10,7 +10,7 @@ import type { Operation } from '../types/index.js'
 /**
  * Gets read and operation-level permissions for a given field based on cascading field permissions.
  * @returns An object with the following properties:
- * - `operation`: Whether the user has permission to perform the operation on the field (`create` or `update`).
+ * - `operation`: Whether the user has permission to perform the operation on the field.
  * - `permissions`: The field-level permissions.
  * - `read`: Whether the user has permission to read the field.
  */
@@ -79,6 +79,8 @@ export const getFieldPermissions = ({
       collectionOperation = Boolean(collectionPermissions.create)
     } else if (operation === 'update') {
       collectionOperation = Boolean(collectionPermissions.update)
+    } else if (operation === 'validate') {
+      collectionOperation = Boolean(collectionPermissions.validate)
     }
 
     return {

@@ -1,6 +1,29 @@
-import type { ClientField, Field } from 'payload'
+import type { ClientBlock, ClientField, Field } from 'payload'
 
-export const traverseForLocalizedFields = (fields: ClientField[] | Field[]): boolean => {
+type TraverseForLocalizedFieldsOptions = {
+  blocksMap?: Record<string, ClientBlock>
+}
+
+export const traverseForLocalizedFields = (
+  fields: ClientField[] | Field[],
+  { blocksMap }: TraverseForLocalizedFieldsOptions = {},
+): boolean => {
+  return traverseFields({
+    blocksMap,
+    fields,
+    visitedBlockSlugs: new Set(),
+  })
+}
+
+const traverseFields = ({
+  blocksMap,
+  fields,
+  visitedBlockSlugs,
+}: {
+  blocksMap?: Record<string, ClientBlock>
+  fields: ClientField[] | Field[]
+  visitedBlockSlugs: Set<string>
+}): boolean => {
   for (const field of fields) {
     if ('localized' in field && field.localized) {
       return true
@@ -11,18 +34,39 @@ export const traverseForLocalizedFields = (fields: ClientField[] | Field[]): boo
       case 'collapsible':
       case 'group':
       case 'row':
-        if (field.fields && traverseForLocalizedFields(field.fields)) {
+        if (
+          field.fields &&
+          traverseFields({
+            blocksMap,
+            fields: field.fields,
+            visitedBlockSlugs,
+          })
+        ) {
           return true
         }
         break
 
       case 'blocks':
         if (field.blocks) {
-          for (const block of field.blocks) {
-            if (typeof block === 'string') {
+          for (const blockOrSlug of field.blocks) {
+            if (typeof blockOrSlug === 'string' && visitedBlockSlugs.has(blockOrSlug)) {
               continue
             }
-            if (block.fields && traverseForLocalizedFields(block.fields)) {
+
+            const block = typeof blockOrSlug === 'string' ? blocksMap?.[blockOrSlug] : blockOrSlug
+
+            if (typeof blockOrSlug === 'string') {
+              visitedBlockSlugs.add(blockOrSlug)
+            }
+
+            if (
+              block?.fields &&
+              traverseFields({
+                blocksMap,
+                fields: block.fields,
+                visitedBlockSlugs,
+              })
+            ) {
               return true
             }
           }
@@ -35,7 +79,15 @@ export const traverseForLocalizedFields = (fields: ClientField[] | Field[]): boo
             if ('localized' in tab && tab.localized) {
               return true
             }
-            if ('fields' in tab && tab.fields && traverseForLocalizedFields(tab.fields)) {
+            if (
+              'fields' in tab &&
+              tab.fields &&
+              traverseFields({
+                blocksMap,
+                fields: tab.fields,
+                visitedBlockSlugs,
+              })
+            ) {
               return true
             }
           }

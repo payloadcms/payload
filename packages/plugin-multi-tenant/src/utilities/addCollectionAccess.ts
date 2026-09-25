@@ -11,6 +11,7 @@ export const collectionAccessKeys: AllAccessKeys = [
   'delete',
   'readVersions',
   'unlock',
+  'validate',
 ] as const
 
 export type TenantAccessConfig = {
@@ -75,10 +76,15 @@ const getTenantAccessResult = ({
 
 const wrapCollectionAccess = (scope: TenantAccessConfig): void => {
   scope.collection.access ??= {}
+  const updateAccessFallback = scope.collection.access.update
 
   for (const accessKey of collectionAccessKeys) {
+    // A collection without its own `validate` access is governed by `update`, matching core's
+    // fallback contract, rather than the generic "any authenticated user" default below.
     const accessFunction =
-      scope.collection.access[accessKey] ?? (({ req }: AccessArgs) => Boolean(req.user))
+      scope.collection.access[accessKey] ??
+      (accessKey === 'validate' ? updateAccessFallback : undefined) ??
+      (({ req }: AccessArgs) => Boolean(req.user))
 
     scope.collection.access[accessKey] = async (args) =>
       getTenantAccessResult({

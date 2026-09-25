@@ -43,6 +43,7 @@ export function PublishButton({
   const locale = useLocale()
   const localeCode = locale?.code
   const {
+    blocksMap,
     localization,
     routes: { api },
   } = config
@@ -69,8 +70,11 @@ export function PublishButton({
     uploadStatus !== 'uploading'
 
   const hasLocalizedFields = React.useMemo(
-    () => Boolean(entityConfig?.fields && traverseForLocalizedFields(entityConfig.fields)),
-    [entityConfig?.fields],
+    () =>
+      Boolean(
+        entityConfig?.fields && traverseForLocalizedFields(entityConfig.fields, { blocksMap }),
+      ),
+    [blocksMap, entityConfig?.fields],
   )
 
   const isSpecificLocalePublishEnabled = localization && hasLocalizedFields && hasPublishPermission

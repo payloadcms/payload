@@ -7,6 +7,7 @@ import type {
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
+  Operation,
   PayloadRequest,
   SanitizedFieldsPermissions,
   SelectMode,
@@ -57,7 +58,7 @@ type Args = {
   /**
    * operation is only needed for validation
    */
-  operation: 'create' | 'update'
+  operation: Operation
   parentIndexPath: string
   parentPassesCondition?: boolean
   parentPath: string

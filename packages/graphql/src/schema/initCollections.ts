@@ -38,6 +38,7 @@ import { findVersionByIDResolver } from '../resolvers/collections/findVersionByI
 import { findVersionsResolver } from '../resolvers/collections/findVersions.js'
 import { restoreVersionResolver } from '../resolvers/collections/restoreVersion.js'
 import { updateResolver } from '../resolvers/collections/update.js'
+import { validateResolver } from '../resolvers/collections/validate.js'
 import { formatName } from '../utilities/formatName.js'
 import { buildMutationInputType, getCollectionIDType } from './buildMutationInputType.js'
 import { buildObjectType } from './buildObjectType.js'
@@ -192,6 +193,16 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       collection.graphQL.updateMutationInputType = new GraphQLNonNull(updateMutationInputType)
     }
 
+    const validationMutationInputType = buildMutationInputType({
+      name: `${singularName}Validation`,
+      config,
+      fields: mutationCreateInputFields,
+      forceNullable: true,
+      graphqlResult,
+      parentIsLocalized: false,
+      parentName: `${singularName}Validation`,
+    })
+
     const queriesEnabled =
       typeof collectionConfig.graphQL !== 'object' || !collectionConfig.graphQL.disableQueries
     const mutationsEnabled =
@@ -304,6 +315,21 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           trash: { type: GraphQLBoolean },
         },
         resolve: updateResolver(collection),
+      }
+
+      graphqlResult.Mutation.fields[`validate${singularName}`] = {
+        type: graphqlResult.types.validationResultType,
+        args: {
+          id: { type: idType },
+          ...(validationMutationInputType ? { data: { type: validationMutationInputType } } : {}),
+          draft: { type: GraphQLBoolean },
+          ...(config.localization
+            ? {
+                locale: { type: graphqlResult.types.localeInputType },
+              }
+            : {}),
+        },
+        resolve: validateResolver(collection),
       }
 
       graphqlResult.Mutation.fields[`delete${singularName}`] = {
