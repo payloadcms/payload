@@ -2,15 +2,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { DateField, DateFieldClient } from '../../fields/config/types.js'
 import type { DateFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
 import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type DateFieldClientWithoutType = MarkOptional<DateFieldClient, 'type'>
@@ -27,28 +27,22 @@ export type DateFieldClientProps = ClientFieldBase<DateFieldClientWithoutType> &
 
 export type DateFieldServerProps = DateFieldBaseServerProps &
   ServerFieldBase<DateField, DateFieldClientWithoutType>
-export type DateFieldLabelServerComponent = FieldLabelServerComponent<
+export type DateFieldLabelServerProps = FieldLabelServerProps<DateField, DateFieldClientWithoutType>
+
+export type DateFieldLabelClientProps = FieldLabelClientProps<DateFieldClientWithoutType>
+
+export type DateFieldDescriptionServerProps = FieldDescriptionServerProps<
   DateField,
   DateFieldClientWithoutType
 >
 
-export type DateFieldLabelClientComponent = FieldLabelClientComponent<DateFieldClientWithoutType>
+export type DateFieldDescriptionClientProps =
+  FieldDescriptionClientProps<DateFieldClientWithoutType>
 
-export type DateFieldDescriptionServerComponent = FieldDescriptionServerComponent<
-  DateField,
-  DateFieldClientWithoutType
->
+export type DateFieldErrorServerProps = FieldErrorServerProps<DateField, DateFieldClientWithoutType>
 
-export type DateFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<DateFieldClientWithoutType>
+export type DateFieldErrorClientProps = FieldErrorClientProps<DateFieldClientWithoutType>
 
-export type DateFieldErrorServerComponent = FieldErrorServerComponent<
-  DateField,
-  DateFieldClientWithoutType
->
+export type DateFieldDiffServerProps = FieldDiffServerProps<DateField, DateFieldClient>
 
-export type DateFieldErrorClientComponent = FieldErrorClientComponent<DateFieldClientWithoutType>
-
-export type DateFieldDiffServerComponent = FieldDiffServerComponent<DateField, DateFieldClient>
-
-export type DateFieldDiffClientComponent = FieldDiffClientComponent<DateFieldClient>
+export type DateFieldDiffClientProps = FieldDiffClientProps<DateFieldClient>

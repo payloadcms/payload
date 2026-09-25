@@ -3,8 +3,8 @@ import type { MarkOptional } from 'ts-essentials'
 import type { UIField, UIFieldClient } from '../../fields/config/types.js'
 import type {
   ClientFieldBase,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
   FieldPaths,
   ServerFieldBase,
 } from '../types.js'
@@ -21,6 +21,6 @@ export type UIFieldClientProps = ClientFieldBase<UIFieldClientWithoutType> & UIF
 
 export type UIFieldServerProps = ServerFieldBase<UIField, UIFieldClientWithoutType> &
   UIFieldBaseServerProps
-export type UIFieldDiffServerComponent = FieldDiffServerComponent<UIField, UIFieldClient>
+export type UIFieldDiffServerProps = FieldDiffServerProps<UIField, UIFieldClient>
 
-export type UIFieldDiffClientComponent = FieldDiffClientComponent<UIFieldClient>
+export type UIFieldDiffClientProps = FieldDiffClientProps<UIFieldClient>

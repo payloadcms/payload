@@ -139,13 +139,13 @@ describe('Types testing', () => {
   describe('field component props', () => {
     test('should expose standalone props for canonical and specialized field components', () => {
       const GenericClientField: FC<FieldClientProps> = () => null
-      const GenericServerError: FC<FieldErrorServerProps> = () => null
+      const GenericServerError: FC<FieldErrorServerProps<TextField>> = () => null
       const BlocksServerLabel: FC<BlocksFieldLabelServerProps> = () => null
       const TextClientDiff: FC<TextFieldDiffClientProps> = () => null
       const BlockServerRowLabel: FC<BlockRowLabelServerProps> = () => null
 
       expect(GenericClientField).type.toBe<FC<FieldClientProps>>()
-      expect(GenericServerError).type.toBe<FC<FieldErrorServerProps>>()
+      expect(GenericServerError).type.toBe<FC<FieldErrorServerProps<TextField>>>()
       expect(BlocksServerLabel).type.toBe<FC<BlocksFieldLabelServerProps>>()
       expect(TextClientDiff).type.toBe<FC<TextFieldDiffClientProps>>()
       expect(BlockServerRowLabel).type.toBe<FC<BlockRowLabelServerProps>>()

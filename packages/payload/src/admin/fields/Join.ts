@@ -1,15 +1,15 @@
 import type { MarkOptional } from 'ts-essentials'
 
 import type { JoinField, JoinFieldClient } from '../../fields/config/types.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
 import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type JoinFieldClientWithoutType = MarkOptional<JoinFieldClient, 'type'>
@@ -25,25 +25,22 @@ export type JoinFieldClientProps = ClientFieldBase<JoinFieldClientWithoutType> &
 
 export type JoinFieldServerProps = JoinFieldBaseServerProps &
   ServerFieldBase<JoinField, JoinFieldClientWithoutType>
-export type JoinFieldLabelServerComponent = FieldLabelServerComponent<JoinField>
+export type JoinFieldLabelServerProps = FieldLabelServerProps<JoinField>
 
-export type JoinFieldLabelClientComponent = FieldLabelClientComponent<JoinFieldClientWithoutType>
+export type JoinFieldLabelClientProps = FieldLabelClientProps<JoinFieldClientWithoutType>
 
-export type JoinFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type JoinFieldDescriptionServerProps = FieldDescriptionServerProps<
   JoinField,
   JoinFieldClientWithoutType
 >
 
-export type JoinFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<JoinFieldClientWithoutType>
+export type JoinFieldDescriptionClientProps =
+  FieldDescriptionClientProps<JoinFieldClientWithoutType>
 
-export type JoinFieldErrorServerComponent = FieldErrorServerComponent<
-  JoinField,
-  JoinFieldClientWithoutType
->
+export type JoinFieldErrorServerProps = FieldErrorServerProps<JoinField, JoinFieldClientWithoutType>
 
-export type JoinFieldErrorClientComponent = FieldErrorClientComponent<JoinFieldClientWithoutType>
+export type JoinFieldErrorClientProps = FieldErrorClientProps<JoinFieldClientWithoutType>
 
-export type JoinFieldDiffServerComponent = FieldDiffServerComponent<JoinField, JoinFieldClient>
+export type JoinFieldDiffServerProps = FieldDiffServerProps<JoinField, JoinFieldClient>
 
-export type JoinFieldDiffClientComponent = FieldDiffClientComponent<JoinFieldClient>
+export type JoinFieldDiffClientProps = FieldDiffClientProps<JoinFieldClient>

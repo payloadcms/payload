@@ -8,14 +8,14 @@ import type {
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldErrorClientComponent,
-  FieldErrorServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldErrorClientProps,
+  FieldErrorServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
@@ -26,28 +26,21 @@ export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
   RowFieldBaseClientProps
 
 export type RowFieldServerProps = ServerFieldBase<RowField, RowFieldClientWithoutType>
-export type RowFieldLabelServerComponent = FieldLabelServerComponent<
+export type RowFieldLabelServerProps = FieldLabelServerProps<RowField, RowFieldClientWithoutType>
+
+export type RowFieldLabelClientProps = FieldLabelClientProps<RowFieldClientWithoutType>
+
+export type RowFieldDescriptionServerProps = FieldDescriptionServerProps<
   RowField,
   RowFieldClientWithoutType
 >
 
-export type RowFieldLabelClientComponent = FieldLabelClientComponent<RowFieldClientWithoutType>
+export type RowFieldDescriptionClientProps = FieldDescriptionClientProps<RowFieldClientWithoutType>
 
-export type RowFieldDescriptionServerComponent = FieldDescriptionServerComponent<
-  RowField,
-  RowFieldClientWithoutType
->
+export type RowFieldErrorServerProps = FieldErrorServerProps<RowField, RowFieldClientWithoutType>
 
-export type RowFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<RowFieldClientWithoutType>
+export type RowFieldErrorClientProps = FieldErrorClientProps<RowFieldClientWithoutType>
 
-export type RowFieldErrorServerComponent = FieldErrorServerComponent<
-  RowField,
-  RowFieldClientWithoutType
->
+export type RowFieldDiffServerProps = FieldDiffServerProps<RowField, RowFieldClient>
 
-export type RowFieldErrorClientComponent = FieldErrorClientComponent<RowFieldClientWithoutType>
-
-export type RowFieldDiffServerComponent = FieldDiffServerComponent<RowField, RowFieldClient>
-
-export type RowFieldDiffClientComponent = FieldDiffClientComponent<RowFieldClient>
+export type RowFieldDiffClientProps = FieldDiffClientProps<RowFieldClient>

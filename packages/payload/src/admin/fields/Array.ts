@@ -2,15 +2,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { ArrayField, ArrayFieldClient } from '../../fields/config/types.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
 import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
@@ -26,25 +26,25 @@ export type ArrayFieldClientProps = ArrayFieldBaseClientProps &
 
 export type ArrayFieldServerProps = ArrayFieldBaseServerProps &
   ServerFieldBase<ArrayField, ArrayFieldClientWithoutType>
-export type ArrayFieldLabelServerComponent = FieldLabelServerComponent<
+export type ArrayFieldLabelServerProps = FieldLabelServerProps<
   ArrayField,
   ArrayFieldClientWithoutType
 >
 
-export type ArrayFieldLabelClientComponent = FieldLabelClientComponent<ArrayFieldClientWithoutType>
+export type ArrayFieldLabelClientProps = FieldLabelClientProps<ArrayFieldClientWithoutType>
 
-export type ArrayFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type ArrayFieldDescriptionServerProps = FieldDescriptionServerProps<
   ArrayField,
   ArrayFieldClientWithoutType
 >
-export type ArrayFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<ArrayFieldClientWithoutType>
+export type ArrayFieldDescriptionClientProps =
+  FieldDescriptionClientProps<ArrayFieldClientWithoutType>
 
-export type ArrayFieldErrorServerComponent = FieldErrorServerComponent<
+export type ArrayFieldErrorServerProps = FieldErrorServerProps<
   ArrayField,
   ArrayFieldClientWithoutType
 >
-export type ArrayFieldErrorClientComponent = FieldErrorClientComponent<ArrayFieldClientWithoutType>
+export type ArrayFieldErrorClientProps = FieldErrorClientProps<ArrayFieldClientWithoutType>
 
-export type ArrayFieldDiffServerComponent = FieldDiffServerComponent<ArrayField, ArrayFieldClient>
-export type ArrayFieldDiffClientComponent = FieldDiffClientComponent<ArrayFieldClient>
+export type ArrayFieldDiffServerProps = FieldDiffServerProps<ArrayField, ArrayFieldClient>
+export type ArrayFieldDiffClientProps = FieldDiffClientProps<ArrayFieldClient>

@@ -1,15 +1,15 @@
 import type { MarkOptional } from 'ts-essentials'
 
 import type { GroupField, GroupFieldClient } from '../../fields/config/types.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
 import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
@@ -23,28 +23,28 @@ export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType>
 
 export type GroupFieldServerProps = GroupFieldBaseServerProps &
   ServerFieldBase<GroupField, GroupFieldClientWithoutType>
-export type GroupFieldLabelServerComponent = FieldLabelServerComponent<
+export type GroupFieldLabelServerProps = FieldLabelServerProps<
   GroupField,
   GroupFieldClientWithoutType
 >
 
-export type GroupFieldLabelClientComponent = FieldLabelClientComponent<GroupFieldClientWithoutType>
+export type GroupFieldLabelClientProps = FieldLabelClientProps<GroupFieldClientWithoutType>
 
-export type GroupFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+export type GroupFieldDescriptionServerProps = FieldDescriptionServerProps<
   GroupField,
   GroupFieldClientWithoutType
 >
 
-export type GroupFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<GroupFieldClientWithoutType>
+export type GroupFieldDescriptionClientProps =
+  FieldDescriptionClientProps<GroupFieldClientWithoutType>
 
-export type GroupFieldErrorServerComponent = FieldErrorServerComponent<
+export type GroupFieldErrorServerProps = FieldErrorServerProps<
   GroupField,
   GroupFieldClientWithoutType
 >
 
-export type GroupFieldErrorClientComponent = FieldErrorClientComponent<GroupFieldClientWithoutType>
+export type GroupFieldErrorClientProps = FieldErrorClientProps<GroupFieldClientWithoutType>
 
-export type GroupFieldDiffServerComponent = FieldDiffServerComponent<GroupField, GroupFieldClient>
+export type GroupFieldDiffServerProps = FieldDiffServerProps<GroupField, GroupFieldClient>
 
-export type GroupFieldDiffClientComponent = FieldDiffClientComponent<GroupFieldClient>
+export type GroupFieldDiffClientProps = FieldDiffClientProps<GroupFieldClient>

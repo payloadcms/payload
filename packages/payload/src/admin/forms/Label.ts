@@ -32,12 +32,3 @@ export type SanitizedLabelProps<TFieldClient extends ClientFieldWithOptionalType
   FieldLabelClientProps<TFieldClient>,
   'label' | 'required'
 >
-
-export type FieldLabelClientComponent<
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldLabelClientProps<TFieldClient>>
-
-export type FieldLabelServerComponent<
-  TFieldServer extends Field = Field,
-  TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = React.ComponentType<FieldLabelServerProps<TFieldServer, TFieldClient>>

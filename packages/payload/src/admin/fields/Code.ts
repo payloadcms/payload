@@ -3,15 +3,15 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { CodeField, CodeFieldClient } from '../../fields/config/types.js'
 import type { CodeFieldValidation } from '../../fields/validations.js'
-import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
+import type { FieldErrorClientProps, FieldErrorServerProps } from '../forms/Error.js'
 import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
-  FieldDiffClientComponent,
-  FieldDiffServerComponent,
-  FieldLabelClientComponent,
-  FieldLabelServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldLabelClientProps,
+  FieldLabelServerProps,
 } from '../types.js'
 
 type CodeFieldClientWithoutType = MarkOptional<CodeFieldClient, 'type'>
@@ -30,28 +30,22 @@ export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &
 
 export type CodeFieldServerProps = CodeFieldBaseServerProps &
   ServerFieldBase<CodeField, CodeFieldClientWithoutType>
-export type CodeFieldLabelServerComponent = FieldLabelServerComponent<
+export type CodeFieldLabelServerProps = FieldLabelServerProps<CodeField, CodeFieldClientWithoutType>
+
+export type CodeFieldLabelClientProps = FieldLabelClientProps<CodeFieldClientWithoutType>
+
+export type CodeFieldDescriptionServerProps = FieldDescriptionServerProps<
   CodeField,
   CodeFieldClientWithoutType
 >
 
-export type CodeFieldLabelClientComponent = FieldLabelClientComponent<CodeFieldClientWithoutType>
+export type CodeFieldDescriptionClientProps =
+  FieldDescriptionClientProps<CodeFieldClientWithoutType>
 
-export type CodeFieldDescriptionServerComponent = FieldDescriptionServerComponent<
-  CodeField,
-  CodeFieldClientWithoutType
->
+export type CodeFieldErrorServerProps = FieldErrorServerProps<CodeField, CodeFieldClientWithoutType>
 
-export type CodeFieldDescriptionClientComponent =
-  FieldDescriptionClientComponent<CodeFieldClientWithoutType>
+export type CodeFieldErrorClientProps = FieldErrorClientProps<CodeFieldClientWithoutType>
 
-export type CodeFieldErrorServerComponent = FieldErrorServerComponent<
-  CodeField,
-  CodeFieldClientWithoutType
->
+export type CodeFieldDiffServerProps = FieldDiffServerProps<CodeField, CodeFieldClient>
 
-export type CodeFieldErrorClientComponent = FieldErrorClientComponent<CodeFieldClientWithoutType>
-
-export type CodeFieldDiffServerComponent = FieldDiffServerComponent<CodeField, CodeFieldClient>
-
-export type CodeFieldDiffClientComponent = FieldDiffClientComponent<CodeFieldClient>
+export type CodeFieldDiffClientProps = FieldDiffClientProps<CodeFieldClient>
