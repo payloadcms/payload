@@ -4,6 +4,7 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
 
 import { useAuth } from '../Auth/index.js'
+import { usePathname } from '../RouterAdapter/index.js'
 
 type CacheKey = `${string}:${string}:${number | string}`
 type BatchKey = `${string}:${string}`
@@ -70,6 +71,17 @@ export const RelationshipValueCacheProvider: React.FC<{
   // Tracks whether a microtask flush is scheduled
   const flushScheduledRef = useRef(false)
   const inFlightRef = useRef<Map<CacheKey, Promise<CachedDoc | undefined>>>(new Map())
+
+  // Clear on navigation so edits made elsewhere don't show stale labels. Done during render
+  // because child effects run before this provider's effects and would read the old cache.
+  const pathname = usePathname()
+  const cachedPathnameRef = useRef(pathname)
+
+  if (cachedPathnameRef.current !== pathname) {
+    cachedPathnameRef.current = pathname
+    cacheRef.current.clear()
+    inFlightRef.current.clear()
+  }
 
   const flushBatch = useCallback(async () => {
     flushScheduledRef.current = false

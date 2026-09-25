@@ -30,6 +30,7 @@ import {
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -288,6 +289,30 @@ describe('Relationship Field', () => {
     for (const extraDoc of extraDocs) {
       await payload.delete({ id: extraDoc.id, collection: relationOneSlug })
     }
+  })
+
+  test('should not show stale relationship labels after client-side navigation', async () => {
+    const label = page.locator('#field-relationshipWithTitle .relationship--single-value__text')
+
+    await page.goto(url.edit(docWithExistingRelations.id))
+    await expect(label).toHaveText(relationWithTitle.name as string)
+
+    const updatedName = 'updated-while-cached'
+
+    await payload.update({
+      id: relationWithTitle.id,
+      collection: relationWithTitleSlug,
+      data: { name: updatedName },
+      overrideAccess: true,
+    })
+
+    // Navigate away and back client-side so the root providers (and their caches) stay mounted
+    await openNav(page)
+    await page.locator(`#nav-${relationWithTitleSlug}`).click()
+    await expect.poll(() => page.url()).toContain(`/collections/${relationWithTitleSlug}`)
+    await page.goBack()
+
+    await expect(label).toHaveText(updatedName)
   })
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
