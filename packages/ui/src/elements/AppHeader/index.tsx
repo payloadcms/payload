@@ -17,6 +17,7 @@ import { Localizer } from '../Localizer/index.js'
 import { useNav } from '../Nav/context.js'
 import { StepNav } from '../StepNav/index.js'
 import { UserMenu } from '../UserMenu/index.js'
+import { SettingsMenu } from './SettingsMenu/index.js'
 import './index.css'
 
 const baseClass = 'app-header'
@@ -124,6 +125,7 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
                 )}
               />
             )}
+            {!isEmbedded && <SettingsMenu />}
           </div>
           {!isEmbedded && (
             <UserMenu

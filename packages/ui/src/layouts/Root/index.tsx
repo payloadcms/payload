@@ -12,6 +12,7 @@ import React, { Suspense } from 'react'
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { ProgressBar, RootProvider } from '../../exports/client/index.js'
+import { getEditViewWidth, getTypeSize } from '../../providers/Theme/shared.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getLanguageDir } from '../../utilities/getLanguageDir.js'
@@ -128,6 +129,17 @@ const RootLayoutContent = async ({
     headers,
   })
 
+  const editViewWidth = getEditViewWidth({
+    value: cookies.get(`${config.cookiePrefix || 'payload'}-edit-view-width`),
+  })
+
+  const shouldAlignEditViewHeader =
+    cookies.get(`${config.cookiePrefix || 'payload'}-edit-view-header-alignment`) === 'true'
+
+  const typeSize = getTypeSize({
+    value: cookies.get(`${config.cookiePrefix || 'payload'}-type-size`),
+  })
+
   const dir = getLanguageDir({ languageCode })
   const embed = getRequestEmbed({ config, cookies })
 
@@ -162,8 +174,10 @@ const RootLayoutContent = async ({
     <html
       {...htmlProps}
       className={[...fontClassNames, htmlProps?.className].filter(Boolean).join(' ')}
+      data-edit-view-width={editViewWidth}
       data-enhanced-contrast={highContrastMode ? '' : undefined}
       data-theme={theme}
+      data-type-size={typeSize}
       dir={dir}
       lang={languageCode}
       suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
@@ -177,6 +191,7 @@ const RootLayoutContent = async ({
         <RootProvider
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
+          editViewWidth={editViewWidth}
           embed={embed}
           fallbackLang={config.i18n.fallbackLanguage}
           highContrastMode={highContrastMode}
@@ -187,8 +202,10 @@ const RootLayoutContent = async ({
           permissions={user ? permissions : null}
           RouterAdapter={RouterAdapter}
           serverFunction={serverFunction}
+          shouldAlignEditViewHeader={shouldAlignEditViewHeader}
           theme={theme}
           translations={req.i18n.translations}
+          typeSize={typeSize}
           user={user}
         >
           <ProgressBar />

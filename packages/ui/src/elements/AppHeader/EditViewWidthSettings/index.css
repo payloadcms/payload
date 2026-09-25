@@ -1,0 +1,5 @@
+@layer payload-default {
+  .edit-view-width-settings__alignment {
+    padding: var(--spacer-2);
+  }
+}

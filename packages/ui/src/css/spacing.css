@@ -11,6 +11,7 @@
     --spacer-6: 2.5rem; /** 40px */
 
     /* Layout spacing */
+    --edit-view-max-width: 800px;
     --gutter-h: var(--spacer-5);
     --spacing-field: var(--spacer-3);
     --spacing-view-bottom: var(--gutter-h);
@@ -20,6 +21,14 @@
     --breakpoint-s-width: 768px;
     --breakpoint-m-width: 1024px;
     --breakpoint-l-width: 1440px;
+  }
+
+  :root[data-edit-view-width='640'] {
+    --edit-view-max-width: 640px;
+  }
+
+  :root[data-edit-view-width='960'] {
+    --edit-view-max-width: 960px;
   }
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */

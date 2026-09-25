@@ -1,26 +1,40 @@
 'use client'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
+import type { EditViewWidth, Theme, TypeSize } from './shared.js'
+
 import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
-import { defaultTheme, type Theme } from './shared.js'
+import { defaultTheme, getEditViewWidth, getTypeSize } from './shared.js'
 
 export { defaultTheme, type Theme }
 
 export type ThemeContext = {
   autoMode: boolean
+  editViewWidth: EditViewWidth
   highContrastMode: boolean
+  setEditViewHeaderAlignment: (args: { isEnabled: boolean }) => void
+  setEditViewWidth: (args: { editViewWidth: EditViewWidth }) => void
   setHighContrastMode: (isHighContrast: boolean, options?: { scoped?: boolean }) => void
   setTheme: (theme: 'auto' | Theme, options?: { scoped?: boolean }) => void
+  setTypeSize: (args: { typeSize: TypeSize }) => void
+  shouldAlignEditViewHeader: boolean
   theme: Theme
+  typeSize: TypeSize
 }
 
 const initialContext: ThemeContext = {
   autoMode: true,
+  editViewWidth: 'full',
   highContrastMode: false,
+  setEditViewHeaderAlignment: () => null,
+  setEditViewWidth: () => null,
   setHighContrastMode: () => null,
   setTheme: () => null,
+  setTypeSize: () => null,
+  shouldAlignEditViewHeader: false,
   theme: 'light',
+  typeSize: 'default',
 }
 
 const Context = createContext<ThemeContext | undefined>(undefined)
@@ -92,9 +106,19 @@ const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
  */
 export const ThemeProvider: React.FC<{
   children?: React.ReactNode
+  editViewWidth?: EditViewWidth
   highContrastMode?: boolean
+  shouldAlignEditViewHeader?: boolean
   theme?: Theme
-}> = ({ children, highContrastMode: initialHighContrastMode, theme: themeOverride }) => {
+  typeSize?: TypeSize
+}> = ({
+  children,
+  editViewWidth: initialEditViewWidth = 'full',
+  highContrastMode: initialHighContrastMode,
+  shouldAlignEditViewHeader: initialHeaderAlignment = false,
+  theme: themeOverride,
+  typeSize: initialTypeSize = 'default',
+}) => {
   const outerContext = use(Context)
   const isScoped = outerContext !== undefined
 
@@ -102,6 +126,99 @@ export const ThemeProvider: React.FC<{
   const preselectedTheme = config.admin.theme
   const themeCookieKey = `${config.cookiePrefix || 'payload'}-theme`
   const contrastCookieKey = `${config.cookiePrefix || 'payload'}-high-contrast-mode`
+
+  const editViewWidthCookieKey = `${config.cookiePrefix || 'payload'}-edit-view-width`
+  const [editViewWidth, setEditViewWidthState] = useState<EditViewWidth>(initialEditViewWidth)
+
+  const setEditViewWidth = useCallback(
+    ({ editViewWidth: nextEditViewWidth }: { editViewWidth: EditViewWidth }) => {
+      if (isScoped) {
+        outerContext.setEditViewWidth({ editViewWidth: nextEditViewWidth })
+        return
+      }
+
+      setEditViewWidthState(nextEditViewWidth)
+      setCookie(editViewWidthCookieKey, nextEditViewWidth, 365)
+      document.documentElement.setAttribute('data-edit-view-width', nextEditViewWidth)
+    },
+    [isScoped, outerContext, editViewWidthCookieKey],
+  )
+
+  useEffect(() => {
+    if (isScoped) {
+      return
+    }
+
+    const value = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${editViewWidthCookieKey}=`))
+      ?.split('=')[1]
+    const detectedEditViewWidth = getEditViewWidth({ value })
+
+    setEditViewWidthState(detectedEditViewWidth)
+    document.documentElement.setAttribute('data-edit-view-width', detectedEditViewWidth)
+  }, [isScoped, editViewWidthCookieKey])
+
+  const headerAlignmentCookieKey = `${config.cookiePrefix || 'payload'}-edit-view-header-alignment`
+  const [shouldAlignEditViewHeader, setHeaderAlignmentState] = useState(initialHeaderAlignment)
+
+  const setEditViewHeaderAlignment = useCallback(
+    ({ isEnabled }: { isEnabled: boolean }) => {
+      if (isScoped) {
+        outerContext.setEditViewHeaderAlignment({ isEnabled })
+        return
+      }
+
+      setHeaderAlignmentState(isEnabled)
+      setCookie(headerAlignmentCookieKey, String(isEnabled), 365)
+    },
+    [headerAlignmentCookieKey, isScoped, outerContext],
+  )
+
+  useEffect(() => {
+    if (isScoped) {
+      return
+    }
+
+    const value = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${headerAlignmentCookieKey}=`))
+      ?.split('=')[1]
+
+    setHeaderAlignmentState(value === 'true')
+  }, [headerAlignmentCookieKey, isScoped])
+
+  const typeSizeCookieKey = `${config.cookiePrefix || 'payload'}-type-size`
+  const [typeSize, setTypeSizeState] = useState<TypeSize>(initialTypeSize)
+
+  const setTypeSize = useCallback(
+    ({ typeSize: nextTypeSize }: { typeSize: TypeSize }) => {
+      if (isScoped) {
+        outerContext.setTypeSize({ typeSize: nextTypeSize })
+        return
+      }
+
+      setTypeSizeState(nextTypeSize)
+      setCookie(typeSizeCookieKey, nextTypeSize, 365)
+      document.documentElement.setAttribute('data-type-size', nextTypeSize)
+    },
+    [isScoped, outerContext, typeSizeCookieKey],
+  )
+
+  useEffect(() => {
+    if (isScoped) {
+      return
+    }
+
+    const value = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${typeSizeCookieKey}=`))
+      ?.split('=')[1]
+    const detectedTypeSize = getTypeSize({ value })
+
+    setTypeSizeState(detectedTypeSize)
+    document.documentElement.setAttribute('data-type-size', detectedTypeSize)
+  }, [isScoped, typeSizeCookieKey])
 
   const themeParam = useSearchParams().get('theme')?.toLowerCase()
 
@@ -190,10 +307,18 @@ export const ThemeProvider: React.FC<{
     <Context
       value={{
         autoMode: isScoped ? outerContext.autoMode : autoMode,
+        editViewWidth: isScoped ? outerContext.editViewWidth : editViewWidth,
         highContrastMode,
+        setEditViewHeaderAlignment,
+        setEditViewWidth,
         setHighContrastMode,
         setTheme,
+        setTypeSize,
+        shouldAlignEditViewHeader: isScoped
+          ? outerContext.shouldAlignEditViewHeader
+          : shouldAlignEditViewHeader,
         theme: isScoped ? outerContext.theme : theme,
+        typeSize: isScoped ? outerContext.typeSize : typeSize,
       }}
     >
       {children}

@@ -32,6 +32,7 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { useTheme } from '../../providers/Theme/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
@@ -41,6 +42,7 @@ import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
+import { useEditViewWidth } from './useEditViewWidth.js'
 import './index.css'
 
 const baseClass = 'collection-edit'
@@ -154,6 +156,11 @@ export function DefaultEditView({
     url: livePreviewURL,
   } = useLivePreviewContext()
   const { isPreviewEnabled, setPreviewURL } = usePreviewURL()
+
+  const mainRef = useRef<HTMLDivElement>(null)
+  const { editViewWidth, shouldAlignEditViewHeader } = useTheme()
+
+  useEditViewWidth({ editViewWidth, ref: mainRef, shouldAlignHeader: shouldAlignEditViewHeader })
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -812,6 +819,7 @@ export function DefaultEditView({
               className={[`${baseClass}__main`, isPopupOpen && `${baseClass}__main--popup-open`]
                 .filter(Boolean)
                 .join(' ')}
+              ref={mainRef}
             >
               <DocumentFields
                 AfterFields={AfterFields}

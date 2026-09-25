@@ -15,7 +15,7 @@ import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import React from 'react'
 
-import type { Theme } from '../Theme/index.js'
+import type { EditViewWidth, Theme, TypeSize } from '../Theme/shared.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
 import { DrawerStackProvider } from '../../elements/Drawer/index.js'
@@ -45,6 +45,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
+  readonly editViewWidth?: EditViewWidth
   readonly embed?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly highContrastMode: boolean
@@ -55,8 +56,10 @@ type Props = {
   readonly permissions: SanitizedPermissions
   readonly RouterAdapter: RouterAdapterComponent
   readonly serverFunction: ServerFunctionClient
+  readonly shouldAlignEditViewHeader?: boolean
   readonly theme: Theme
   readonly translations: I18nClient['translations']
+  readonly typeSize?: TypeSize
   readonly user: null | User
 }
 
@@ -64,6 +67,7 @@ export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
+  editViewWidth,
   embed,
   fallbackLang,
   highContrastMode,
@@ -74,8 +78,10 @@ export const RootProvider: React.FC<Props> = ({
   permissions,
   RouterAdapter,
   serverFunction,
+  shouldAlignEditViewHeader,
   theme,
   translations,
+  typeSize,
   user,
 }) => {
   const dndContextID = React.useId()
@@ -112,7 +118,13 @@ export const RootProvider: React.FC<Props> = ({
                             <AuthProvider permissions={permissions} user={user}>
                               <PreferencesProvider>
                                 <HierarchyProvider>
-                                  <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
+                                  <ThemeProvider
+                                    editViewWidth={editViewWidth}
+                                    highContrastMode={highContrastMode}
+                                    shouldAlignEditViewHeader={shouldAlignEditViewHeader}
+                                    theme={theme}
+                                    typeSize={typeSize}
+                                  >
                                     <EmbedProvider embed={embed}>
                                       <LocaleProvider locale={locale}>
                                         <StepNavProvider>
