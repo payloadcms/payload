@@ -1784,6 +1784,8 @@ If you inject a custom Sharp build or version, pass it the same way:
 + sharpTransformer({ sharp: myCustomSharp })
 ```
 
+`sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `imageSizes`, as in Payload 3.x. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
+
 ### Storage adapters always insert the `prefix` field now — `alwaysInsertFields` removed
 
 The `alwaysInsertFields` option (on `cloudStoragePlugin` and every `storage-*` adapter: `-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`) has been removed. The behavior it used to opt into — always inserting the hidden `prefix` field into the collection schema — is now unconditional, so the schema stays consistent whether or not a collection configures a `prefix` and whether or not the plugin is `enabled`.

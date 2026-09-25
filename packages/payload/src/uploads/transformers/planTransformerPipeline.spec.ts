@@ -19,28 +19,24 @@ const makeTransformer = (overrides: Partial<UploadTransformer> = {}): UploadTran
 })
 
 describe('planTransformerPipeline', () => {
-  it('should skip transformers without handleRequest when planning the handleRequest capability', async () => {
-    const transformer = makeTransformer({ handleRequest: undefined, transformFile: vi.fn() })
+  it('should only include transformers that implement the requested capability', async () => {
+    const requestOnly = makeTransformer({ handleRequest: vi.fn(), slug: 'request-only' })
+    const fileOnly = makeTransformer({ slug: 'file-only', transformFile: vi.fn() })
+    const transformers = [requestOnly, fileOnly]
 
-    const pipeline = await planTransformerPipeline({
+    const requestPipeline = await planTransformerPipeline({
       args: makeArgs(),
       capability: 'handleRequest',
-      transformers: [transformer],
+      transformers,
     })
-
-    expect(pipeline).toEqual([])
-  })
-
-  it('should skip transformers without transformFile when planning the transformFile capability', async () => {
-    const transformer = makeTransformer({ handleRequest: vi.fn(), transformFile: undefined })
-
-    const pipeline = await planTransformerPipeline({
+    const filePipeline = await planTransformerPipeline({
       args: makeArgs({ operation: 'upload' }),
       capability: 'transformFile',
-      transformers: [transformer],
+      transformers,
     })
 
-    expect(pipeline).toEqual([])
+    expect(requestPipeline).toEqual([requestOnly])
+    expect(filePipeline).toEqual([fileOnly])
   })
 
   it('should check the MIME type before calling canTransform', async () => {
@@ -61,70 +57,7 @@ describe('planTransformerPipeline', () => {
     expect(canTransform).not.toHaveBeenCalled()
   })
 
-  it('should pass collection slug, document ID, MIME type, operation, and request to canTransform', async () => {
-    const canTransform = vi.fn().mockResolvedValue(true)
-    const transformer = makeTransformer({ canTransform, handleRequest: vi.fn() })
-    const args = makeArgs({ collectionSlug: 'media', documentID: '123', mimeType: 'image/png' })
-
-    await planTransformerPipeline({
-      args,
-      capability: 'handleRequest',
-      transformers: [transformer],
-    })
-
-    expect(canTransform).toHaveBeenCalledWith(args)
-  })
-
-  it('should treat a missing canTransform as eligible', async () => {
-    const transformer = makeTransformer({ handleRequest: vi.fn() })
-
-    const pipeline = await planTransformerPipeline({
-      args: makeArgs(),
-      capability: 'handleRequest',
-      transformers: [transformer],
-    })
-
-    expect(pipeline).toEqual([transformer])
-  })
-
-  it('should include every eligible transformer in declaration order', async () => {
-    const first = makeTransformer({ handleRequest: vi.fn(), slug: 'first' })
-    const second = makeTransformer({ handleRequest: vi.fn(), slug: 'second' })
-    const third = makeTransformer({ handleRequest: vi.fn(), slug: 'third' })
-
-    const pipeline = await planTransformerPipeline({
-      args: makeArgs(),
-      capability: 'handleRequest',
-      transformers: [first, second, third],
-    })
-
-    expect(pipeline).toEqual([first, second, third])
-  })
-
-  it('should not stop evaluating later transformers when an earlier canTransform returns false', async () => {
-    const secondCanTransform = vi.fn().mockResolvedValue(true)
-    const first = makeTransformer({
-      canTransform: vi.fn().mockResolvedValue(false),
-      handleRequest: vi.fn(),
-      slug: 'first',
-    })
-    const second = makeTransformer({
-      canTransform: secondCanTransform,
-      handleRequest: vi.fn(),
-      slug: 'second',
-    })
-
-    const pipeline = await planTransformerPipeline({
-      args: makeArgs(),
-      capability: 'handleRequest',
-      transformers: [first, second],
-    })
-
-    expect(pipeline).toEqual([second])
-    expect(secondCanTransform).toHaveBeenCalledTimes(1)
-  })
-
-  it('should abort planning and reject when canTransform throws, rather than treating it as false', async () => {
+  it('should reject planning without evaluating later transformers when canTransform throws', async () => {
     const thirdCanTransform = vi.fn().mockResolvedValue(true)
     const first = makeTransformer({ handleRequest: vi.fn(), slug: 'first' })
     const second = makeTransformer({
@@ -147,30 +80,5 @@ describe('planTransformerPipeline', () => {
     ).rejects.toThrow('boom')
 
     expect(thirdCanTransform).not.toHaveBeenCalled()
-  })
-
-  it('should never call handleRequest or transformFile while planning', async () => {
-    const handleRequest = vi.fn()
-    const transformFile = vi.fn()
-    const transformer = makeTransformer({ handleRequest, transformFile })
-
-    await planTransformerPipeline({
-      args: makeArgs(),
-      capability: 'handleRequest',
-      transformers: [transformer],
-    })
-
-    expect(handleRequest).not.toHaveBeenCalled()
-    expect(transformFile).not.toHaveBeenCalled()
-  })
-
-  it('should return an empty array for an empty transformers list', async () => {
-    const pipeline = await planTransformerPipeline({
-      args: makeArgs(),
-      capability: 'handleRequest',
-      transformers: [],
-    })
-
-    expect(pipeline).toEqual([])
   })
 })

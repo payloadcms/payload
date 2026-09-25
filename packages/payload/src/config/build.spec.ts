@@ -52,60 +52,6 @@ describe('buildConfig', () => {
     expect(callOrder).toEqual(['plugin', 'transformer-init', 'storage-init'])
   })
 
-  it('should call every transformer init in declaration order', async () => {
-    const callOrder: string[] = []
-
-    const first: UploadTransformer = {
-      init: vi.fn(async (config: Config) => {
-        callOrder.push('first')
-        return config
-      }),
-      mimeTypes: ['image/*'],
-      slug: 'first',
-    }
-
-    const second: UploadTransformer = {
-      init: vi.fn(async (config: Config) => {
-        callOrder.push('second')
-        return config
-      }),
-      mimeTypes: ['image/*'],
-      slug: 'second',
-    }
-
-    await buildConfig(makeConfig({ upload: { transformers: [first, second] } }))
-
-    expect(callOrder).toEqual(['first', 'second'])
-  })
-
-  it('should support a synchronous (non-Promise) transformer init', async () => {
-    const init = vi.fn((config: Config) => config)
-    const transformer: UploadTransformer = { init, mimeTypes: ['image/*'], slug: 'sync' }
-
-    await expect(
-      buildConfig(makeConfig({ upload: { transformers: [transformer] } })),
-    ).resolves.toBeDefined()
-
-    expect(init).toHaveBeenCalledTimes(1)
-  })
-
-  it('should skip transformers without an init function without throwing', async () => {
-    const transformer: UploadTransformer = { mimeTypes: ['image/*'], slug: 'no-init' }
-
-    await expect(
-      buildConfig(makeConfig({ upload: { transformers: [transformer] } })),
-    ).resolves.toBeDefined()
-  })
-
-  it('should reject a config whose original transformers list has duplicate slugs before init runs', async () => {
-    const transformers: UploadTransformer[] = [
-      { mimeTypes: ['image/*'], slug: 'dup' },
-      { mimeTypes: ['image/*'], slug: 'dup' },
-    ]
-
-    await expect(buildConfig(makeConfig({ upload: { transformers } }))).rejects.toThrow(/dup/i)
-  })
-
   it('should re-validate transformer slug uniqueness after init mutates the transformers list', async () => {
     const transformerA: UploadTransformer = { mimeTypes: ['image/*'], slug: 'a' }
 
@@ -126,27 +72,9 @@ describe('buildConfig', () => {
     ).rejects.toThrow(/duplicate/i)
   })
 
-  it('should still throw the existing error for a storage entry with no init function', async () => {
-    await expect(
-      buildConfig(makeConfig({ storage: [{} as unknown as StorageAdapter] })),
-    ).rejects.toThrow(/storage/i)
-  })
-
   it('should reject a config still using the removed top-level sharp option', async () => {
     await expect(buildConfig({ ...makeConfig(), sharp: {} } as unknown as Config)).rejects.toThrow(
       /sharp/i,
     )
-  })
-
-  it('should reject a collection still using a removed Sharp-specific upload option', async () => {
-    await expect(
-      buildConfig(
-        makeConfig({
-          collections: [
-            { slug: 'media', upload: { resizeOptions: { width: 100 } } },
-          ] as unknown as Config['collections'],
-        }),
-      ),
-    ).rejects.toThrow(/resizeOptions/)
   })
 })

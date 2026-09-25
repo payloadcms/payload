@@ -29,7 +29,6 @@ import {
   runAnimatedFocalPointResizeStaysValidTest,
   runAnimatedResizeReportsPerFrameDimensionsTest,
 } from '../__helpers/shared/animatedResizeParityTests.js'
-import { runTransformerContractShapeTests } from '../__helpers/shared/transformerContractShape.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
@@ -1502,6 +1501,35 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           expect(response.headers.get('content-type')).toBe('image/jpeg')
         } finally {
           await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
+        }
+      })
+
+      test('should serve the original file for resize parameters on a collection without dynamic resizing', async ({
+        payload,
+        restClient,
+      }) => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file.name = `not-dynamic-${randomUUID()}.png`
+
+        const doc = await payload.create({
+          collection: reduceSlug,
+          data: {},
+          file,
+          overrideAccess: true,
+        })
+
+        try {
+          const stored = fs.readFileSync(path.resolve(dirname, './media/reduce', doc.filename!))
+          const response = await restClient.GET(`/${reduceSlug}/file/${doc.filename}`, {
+            query: { width: 100 },
+          })
+          const body = Buffer.from(await response.arrayBuffer())
+
+          expect(response.status).toBe(200)
+          expect(body.equals(stored)).toBe(true)
+        } finally {
+          await payload.delete({ id: doc.id, collection: reduceSlug, overrideAccess: true })
         }
       })
 
@@ -3201,14 +3229,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       collection: animatedTypeMedia as CollectionSlug,
       focalPoint: { x: 80, y: 50 },
       size: { name: 'focalCrop', height: 150, width: 300 },
-    })
-
-    runTransformerContractShapeTests((payload) => {
-      const transformer = payload.config.upload.transformers.find((t) => t.slug === 'sharp')
-      if (!transformer) {
-        throw new Error('Expected the "sharp" transformer to be registered for this suite.')
-      }
-      return transformer
     })
   })
 

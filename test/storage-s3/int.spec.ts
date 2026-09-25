@@ -1,11 +1,10 @@
-import { createHash } from 'crypto'
-import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { copyS3File } from '../../packages/storage-s3/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -151,33 +150,10 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
     expect(response.headers.get('Content-Type')).toBe('image/png')
   })
 
-  test('should read the real object body for a transform-source request instead of a signed-download redirect', async ({
-    payload,
-    restClient,
-  }) => {
-    const originalFilePath = path.resolve(dirname, '../uploads/image.png')
-    const originalHash = createHash('sha256')
-      .update(fs.readFileSync(originalFilePath))
-      .digest('hex')
-
-    const doc = await payload.create({
+  test.describe('transform source on a signed-downloads collection', () => {
+    runTransformReadsRealSourceTest({
       collection: mediaWithSignedDownloadsSlug,
-      data: {},
-      filePath: originalFilePath,
-      overrideAccess: true,
-    })
-
-    const response = await restClient.GET(
-      `/${mediaWithSignedDownloadsSlug}/file/${String(doc.filename)}?proveSourceHash=1`,
-    )
-
-    expect(response.status).toBe(200)
-    expect(response.headers.get('X-Source-Hash')).toBe(originalHash)
-
-    await payload.delete({
-      collection: mediaWithSignedDownloadsSlug,
-      id: doc.id,
-      overrideAccess: true,
+      etagRequestHeaders: { 'X-Disable-Signed-URL': 'true' },
     })
   })
 

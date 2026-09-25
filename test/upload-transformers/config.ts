@@ -4,10 +4,8 @@ import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { KitchenSinkMedia } from './collections/KitchenSinkMedia/index.js'
 import { ResizePreviewMedia } from './collections/ResizePreviewMedia/index.js'
 import { TransformerMedia } from './collections/TransformerMedia/index.js'
-import { kitchenSinkSharpTransformer } from './kitchenSinkSharpTransformer.js'
 import { testTransformers } from './transformerFixtures.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -16,17 +14,12 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   suite: 'upload-transformers',
   config: {
-    admin: {
-      importMap: {
-        baseDir: path.resolve(dirname),
-      },
-    },
-    collections: [TransformerMedia, ResizePreviewMedia, KitchenSinkMedia],
+    collections: [TransformerMedia, ResizePreviewMedia],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
     upload: {
-      transformers: [sharpTransformer(), kitchenSinkSharpTransformer, ...testTransformers],
+      transformers: [sharpTransformer({ dynamic: true }), ...testTransformers],
     },
   },
   seed: async (payload) => {

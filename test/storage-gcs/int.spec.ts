@@ -8,6 +8,7 @@ import { expect } from 'vitest'
 
 import { copyGcsFile } from '../../packages/storage-gcs/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -148,4 +149,6 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
     expect(upload.id).toBeTruthy()
     expect(upload.prefix).toBe('test')
   })
+
+  runTransformReadsRealSourceTest({ collection: mediaWithPrefixSlug })
 })

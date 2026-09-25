@@ -9,6 +9,7 @@ import { expect } from 'vitest'
 
 import { copyAzureFile } from '../../packages/storage-azure/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -172,4 +173,6 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
       }
     }
   }
+
+  runTransformReadsRealSourceTest({ collection: mediaWithPrefixSlug })
 })
