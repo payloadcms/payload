@@ -1,7 +1,11 @@
 import type { CollectionSlug, ServerProps, ViewTypes } from 'payload'
 
+import { createElement } from 'react'
+
 import type { MultiTenantPluginConfig } from '../../types.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Preserve the client boundary in production builds.
+import { GlobalViewRedirectClient } from '../../exports/client.js'
 import { getGlobalViewRedirect } from '../../utilities/getGlobalViewRedirect.js'
 
 type Args = {
@@ -43,7 +47,7 @@ export const GlobalViewRedirect = async (args: Args) => {
     })
 
     if (redirectRoute) {
-      args.server.redirect(redirectRoute)
+      return createElement(GlobalViewRedirectClient, { redirectRoute })
     }
   }
 }
