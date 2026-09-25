@@ -93,7 +93,17 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
           })
 
           return (
-            <FieldPathContext key={`${path}-${i}`} value={path}>
+            // The key must not contain `path`, which embeds the row indexes of
+            // every ancestor array or blocks field. Reordering or removing a
+            // row shifts those indexes, and a path-based key would then remount
+            // the field subtree of each sibling at or after it. Within one
+            // `RenderFields` call the schema fixes the length and order of
+            // `fields`, so name — or type, for presentational fields — plus
+            // index identifies a field without referring to its address.
+            <FieldPathContext
+              key={`${'name' in field ? field.name : field.type}-${i}`}
+              value={path}
+            >
               <RenderField
                 clientFieldConfig={field}
                 forceRender={forceRender}
