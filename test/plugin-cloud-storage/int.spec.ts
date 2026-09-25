@@ -53,6 +53,7 @@ async function verifyUploads({
   const uploadData = (await payload.findByID({
     id: uploadId,
     collection: collectionSlug,
+    overrideAccess: true,
   })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
   const sizes = uploadData.sizes ?? {}
@@ -106,7 +107,7 @@ export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
   return test.describe
 }
 
-test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => {
+test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => {
   test.describe('getFilePrefix', () => {
     const mockReq = {
       payload: {
@@ -123,9 +124,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test('should return a valid prefix unchanged', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          uploadReference: { prefix: 'media/images' },
           filename: 'test.png',
           req: mockReq,
+          uploadReference: { prefix: 'media/images' },
         })
         expect(result).toBe('media/images')
       })
@@ -133,9 +134,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test('should strip invalid segments from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          uploadReference: { prefix: '../other-collection/private' },
           filename: 'test.png',
           req: mockReq,
+          uploadReference: { prefix: '../other-collection/private' },
         })
         expect(result).toBe('other-collection/private')
         expect(result).not.toContain('..')
@@ -144,9 +145,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test('should handle deeply nested invalid segments', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          uploadReference: { prefix: 'a/../../outside' },
           filename: 'test.png',
           req: mockReq,
+          uploadReference: { prefix: 'a/../../outside' },
         })
         expect(result).toBe('a/outside')
         expect(result).not.toContain('..')
@@ -155,9 +156,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test('should strip leading slashes from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          uploadReference: { prefix: '/absolute/path' },
           filename: 'test.png',
           req: mockReq,
+          uploadReference: { prefix: '/absolute/path' },
         })
         expect(result).toBe('absolute/path')
         expect(result).not.toMatch(/^\//)
@@ -166,9 +167,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test('should strip dot segments from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          uploadReference: { prefix: './relative/./path' },
           filename: 'test.png',
           req: mockReq,
+          uploadReference: { prefix: './relative/./path' },
         })
         expect(result).toBe('relative/path')
       })
@@ -176,9 +177,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test('should normalize backslash separators', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          uploadReference: { prefix: '..\\..\\outside' },
           filename: 'test.png',
           req: mockReq,
+          uploadReference: { prefix: '..\\..\\outside' },
         })
         expect(result).not.toContain('..')
       })
@@ -186,9 +187,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test('should strip control characters from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          uploadReference: { prefix: 'media\x00/images' },
           filename: 'test.png',
           req: mockReq,
+          uploadReference: { prefix: 'media\x00/images' },
         })
         expect(result).toBe('media/images')
       })
@@ -196,9 +197,9 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test('should return empty string for a prefix of only invalid segments', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          uploadReference: { prefix: '../../..' },
           filename: 'test.png',
           req: mockReq,
+          uploadReference: { prefix: '../../..' },
         })
         expect(result).toBe('')
       })
@@ -303,6 +304,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -323,6 +325,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithPrefixSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -353,6 +356,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
               collection: restrictedMediaSlug,
               data: {},
               filePath: path.resolve(dirname, './test.json'),
+              overrideAccess: true,
             }),
           ).rejects.toThrow()
 
@@ -369,6 +373,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: restrictedMediaSlug,
             data: {},
             filePath: path.resolve(dirname, './image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -394,11 +399,13 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           const apiResponse = await payload.findByID({
             id: upload.id,
             collection: mediaSlug,
+            overrideAccess: true,
           })
           expect(apiResponse.sizes).toBeTruthy()
 
@@ -440,6 +447,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithPrefixSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.filename).toBeTruthy()
@@ -474,6 +482,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithCustomURLSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -501,6 +510,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           const apiResponse = await payload.findByID({
             id: upload.id,
             collection: mediaWithCustomURLSlug,
+            overrideAccess: true,
           })
 
           expect(apiResponse.url).toContain('test-cdn.example.com')
@@ -514,6 +524,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithGenerateFileURLSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           })
 
           expect(upload.id).toBeTruthy()
@@ -539,6 +550,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           const apiResponse = await payload.findByID({
             id: upload.id,
             collection: mediaWithGenerateFileURLSlug,
+            overrideAccess: true,
           })
 
           expect(apiResponse.url).toContain('cdn-proxied.example.com')
@@ -553,7 +565,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: testMetadataSlug })
+            await payload.delete({ id, collection: testMetadataSlug, overrideAccess: true })
           } catch (e) {
             // Ignore
           }
@@ -575,6 +587,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             testNote: 'Cleanup ownership',
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(upload.id)
@@ -598,7 +611,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
 
         expect(updateResponse.status).toBe(200)
 
-        await payload.delete({ id: upload.id, collection: testMetadataSlug })
+        await payload.delete({ id: upload.id, collection: testMetadataSlug, overrideAccess: true })
         createdIDs.length = 0
 
         expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(originalFilenames)
@@ -618,6 +631,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             testNote: 'Replacement cleanup ownership',
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(upload.id)
@@ -644,6 +658,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
         const preservedUpload = await payload.findByID({
           id: upload.id,
           collection: testMetadataSlug,
+          overrideAccess: true,
         })
 
         expect(preservedUpload.filename).toBe(upload.filename)
@@ -674,6 +689,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
         const replacement = await payload.findByID({
           id: upload.id,
           collection: testMetadataSlug,
+          overrideAccess: true,
         })
         const replacementFilenames = [
           replacement.filename,
@@ -684,7 +700,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
         expect(replacementFilenames).not.toContain('submitted-thumbnail.png')
 
         recordedCleanupTargets.length = 0
-        await payload.delete({ id: upload.id, collection: testMetadataSlug })
+        await payload.delete({ id: upload.id, collection: testMetadataSlug, overrideAccess: true })
         createdIDs.length = 0
 
         expect(recordedCleanupTargets.map(({ filename }) => filename)).toEqual(replacementFilenames)
@@ -701,6 +717,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           collection: testMetadataSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(original.id)
@@ -709,6 +726,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           collection: testMetadataSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
           select: {},
         })
 
@@ -719,6 +737,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
         const saved = await payload.findByID({
           id: upload.id,
           collection: testMetadataSlug,
+          overrideAccess: true,
         })
 
         expect(saved.filename).toBeTruthy()
@@ -746,6 +765,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           collection: testMetadataSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(upload.id)
@@ -756,6 +776,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           collection: testMetadataSlug,
           data: {},
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
           overwriteExistingFiles: true,
           select: {},
         })
@@ -784,6 +805,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             testNote: 'Testing automatic metadata persistence',
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(upload.id)
@@ -875,6 +897,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             testNote: 'Testing update metadata persistence',
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(upload.id)
@@ -889,6 +912,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             testNote: 'Updated test note',
           },
           filePath: path.resolve(dirname, './image.png'),
+          overrideAccess: true,
         })
 
         expect(updatedUpload.testNote).toBe('Updated test note')
@@ -925,7 +949,11 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: mediaWithThrowingHookSlug })
+            await payload.delete({
+              id,
+              collection: mediaWithThrowingHookSlug,
+              overrideAccess: true,
+            })
           } catch (_) {
             // Ignore
           }
@@ -941,6 +969,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithThrowingHookSlug,
             data: { shouldThrow: true },
             filePath: path.resolve(dirname, '../uploads/image.png'),
+            overrideAccess: true,
           }),
         ).rejects.toThrow('User afterChange hook throws error')
       })
@@ -960,6 +989,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           collection: mediaWithThrowingHookSlug,
           data: { shouldThrow: false },
           file: buildFile('initial.png'),
+          overrideAccess: true,
         })
 
         createdIDs.push(initial.id)
@@ -976,6 +1006,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             collection: mediaWithThrowingHookSlug,
             data: { shouldThrow: true },
             file: buildFile('replacement.png'),
+            overrideAccess: true,
           }),
         ).rejects.toThrow('User afterChange hook throws error')
 
@@ -992,7 +1023,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
       test.afterEach(async ({ payload }) => {
         for (const id of createdIDs) {
           try {
-            await payload.delete({ id, collection: mediaWithOverwriteSlug })
+            await payload.delete({ id, collection: mediaWithOverwriteSlug, overrideAccess: true })
           } catch (_) {
             // Ignore
           }
@@ -1015,6 +1046,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           collection: mediaWithOverwriteSlug,
           data: {},
           file: buildFile('overwrite.png'),
+          overrideAccess: true,
           overwriteExistingFiles: true,
         })) as unknown as {
           filename: string
@@ -1042,6 +1074,7 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
           collection: mediaWithOverwriteSlug,
           data: {},
           file: buildFile('overwrite.png'),
+          overrideAccess: true,
           overwriteExistingFiles: true,
         })) as unknown as {
           filename: string
@@ -1200,12 +1233,17 @@ test.suite({ config: './config.ts' })('@payloadcms/plugin-cloud-storage', () => 
             prefix: 'test',
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         expect(upload.id).toBeTruthy()
         expect(upload.prefix).toBe('test')
 
-        await payload.delete({ id: upload.id, collection: mediaWithDisabledPluginSlug })
+        await payload.delete({
+          id: upload.id,
+          collection: mediaWithDisabledPluginSlug,
+          overrideAccess: true,
+        })
       })
     })
   })

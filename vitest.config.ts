@@ -68,6 +68,7 @@ export default defineConfig({
     projects: [
       {
         test: {
+          exclude: ['**/*.rsc.spec.ts'],
           include: ['packages/**/*.spec.ts', 'tools/**/*.spec.ts', '.github/scripts/**/*.spec.mjs'],
           name: 'unit',
           environment: 'node',
@@ -86,6 +87,16 @@ export default defineConfig({
             provider: playwright({ launchOptions: { channel: 'chromium' } }),
             instances: [{ browser: 'chromium' }],
           },
+        },
+      },
+      {
+        resolve: {
+          conditions: ['react-server'],
+        },
+        test: {
+          include: ['packages/next/**/*.rsc.spec.ts'],
+          name: 'rsc',
+          environment: 'node',
         },
       },
       {

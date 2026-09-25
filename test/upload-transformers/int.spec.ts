@@ -25,10 +25,7 @@ const dirname = path.dirname(filename)
 let restClient: NextRESTClient
 let payload: Payload
 
-test.suite({
-  config: './config.ts',
-  resetBetweenTests: false,
-})('Upload transformers', () => {
+test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ payloadInstance, restClientInstance }) => {
     payload = payloadInstance
     restClient = restClientInstance
@@ -48,7 +45,11 @@ test.suite({
       resetTransformerCallCounts()
       for (const id of docIDs) {
         try {
-          await payload.delete({ id, collection: transformerMediaSlug as CollectionSlug })
+          await payload.delete({
+            id,
+            collection: transformerMediaSlug as CollectionSlug,
+            overrideAccess: true,
+          })
         } catch {
           // noop — file may already have been deleted
         }
@@ -63,6 +64,7 @@ test.suite({
         collection: transformerMediaSlug as CollectionSlug,
         data,
         file,
+        overrideAccess: true,
       })
       docIDs.push(doc.id)
       return doc as unknown as { filename: string; id: number | string }
@@ -207,6 +209,7 @@ test.suite({
       const afterRequest = await payload.findByID({
         id: doc.id,
         collection: transformerMediaSlug as CollectionSlug,
+        overrideAccess: true,
       })
 
       expect(afterRequest.filename).toBe(doc.filename)
@@ -261,7 +264,11 @@ test.suite({
     test.afterEach(async () => {
       for (const id of docIDs) {
         try {
-          await payload.delete({ id, collection: resizePreviewMediaSlug as CollectionSlug })
+          await payload.delete({
+            id,
+            collection: resizePreviewMediaSlug as CollectionSlug,
+            overrideAccess: true,
+          })
         } catch {
           // noop — file may already have been deleted
         }
@@ -276,6 +283,7 @@ test.suite({
         collection: resizePreviewMediaSlug as CollectionSlug,
         data: {},
         file,
+        overrideAccess: true,
       })
       docIDs.push(doc.id)
       return doc as unknown as { filename: string; id: number | string }

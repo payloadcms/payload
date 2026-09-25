@@ -103,6 +103,7 @@ async function autoLogin({
       fallbackLocale,
       limit: 1,
       locale,
+      overrideAccess: true,
       pagination: false,
       req,
       where,

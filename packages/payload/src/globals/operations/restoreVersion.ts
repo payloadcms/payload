@@ -5,12 +5,14 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getRestoredStatusesToAuthorize } from '../../versions/getRestoredStatusesToAuthorize.js'
 
 export type Arguments = {
@@ -61,11 +63,16 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       ? true
       : await executeAccess({ slug: globalConfig.slug, req }, globalConfig.access.readVersions)
 
+    const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
+    const where = combineQueries({ id: { equals: id } }, readVersionsAccessResult)
+
+    sanitizeWhereQuery({ fields: versionFields, payload, where })
+
     const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
       global: globalConfig.slug,
       limit: 1,
       req,
-      where: combineQueries({ id: { equals: id } }, readVersionsAccessResult),
+      where,
     })
 
     if (!versionDocs || versionDocs.length === 0) {
@@ -117,6 +124,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     const previousDoc = await payload.findGlobal({
       slug: globalConfig.slug,
       depth,
+      overrideAccess: true,
       req,
     })
 

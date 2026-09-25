@@ -1,4 +1,4 @@
-import { createLocalReq, Forbidden, getAccessResults } from 'payload'
+import { createPayloadRequest, Forbidden, getAccessResults } from 'payload'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
@@ -9,18 +9,16 @@ const createRequest = async ({
   payload,
 }: {
   headers: Record<string, string>
-  payload: Parameters<typeof createLocalReq>[1]
+  payload: Parameters<typeof createPayloadRequest>[0]['payload']
 }) =>
-  createLocalReq(
-    {
-      req: {
-        headers: new Headers(headers),
-      },
-    },
+  createPayloadRequest({
     payload,
-  )
+    req: {
+      headers: new Headers(headers),
+    },
+  })
 
-test.suite({ config: './config.ts' })('baseAccess', () => {
+test.suite('baseAccess', { config: './config.ts' }, () => {
   test('should combine base and collection query constraints', async ({ payload }) => {
     for (const data of [
       {
@@ -42,6 +40,7 @@ test.suite({ config: './config.ts' })('baseAccess', () => {
       await payload.create({
         collection: postsSlug,
         data,
+        overrideAccess: true,
       })
     }
     const req = await createRequest({
@@ -86,6 +85,7 @@ test.suite({ config: './config.ts' })('baseAccess', () => {
       collection: postsSlug,
       data,
       req,
+      overrideAccess: true,
     })
 
     expect(doc.title).toBe(data.title)

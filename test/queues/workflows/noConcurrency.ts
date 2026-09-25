@@ -31,6 +31,7 @@ export const noConcurrencyWorkflow: WorkflowConfig<'noConcurrency'> = {
           data: {
             title: `started:${job.input.resourceId}:${job.id}`,
           },
+          overrideAccess: true,
         })
 
         // Simulate some work
@@ -48,6 +49,7 @@ export const noConcurrencyWorkflow: WorkflowConfig<'noConcurrency'> = {
           data: {
             title: `completed:${job.input.resourceId}:${job.id}`,
           },
+          overrideAccess: true,
         })
 
         return { output: {} }

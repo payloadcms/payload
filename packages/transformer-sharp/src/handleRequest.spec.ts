@@ -7,6 +7,7 @@ import { createHandleRequest } from './handleRequest.js'
 import { resolveSharpDynamicDefaults } from './sharpTransformer.js'
 
 const makeFakePipeline = (outputBuffer: Buffer) => ({
+  metadata: vi.fn().mockResolvedValue({ height: 100, width: 100 }),
   resize: vi.fn().mockReturnThis(),
   toBuffer: vi.fn().mockResolvedValue(outputBuffer),
 })
@@ -38,6 +39,28 @@ const baseArgs = (overrides: Record<string, unknown> = {}) => ({
 })
 
 describe('createHandleRequest', () => {
+  it('should reject a width-only request whose aspect-ratio-derived output exceeds maxPixels', async () => {
+    const handleRequest = createHandleRequest({
+      dynamicDefaults: resolveSharpDynamicDefaults({ maxPixels: 10_000 }),
+      sharpDependency: sharp,
+    })
+    const tallImage = await sharp({
+      create: { background: { b: 0, g: 0, r: 255 }, channels: 3, height: 100, width: 10 },
+    })
+      .png()
+      .toBuffer()
+    const getSourceFile = vi.fn().mockResolvedValue(new Response(tallImage, { status: 200 }))
+
+    // 10x100 source at width=100 renders 100x1000 = 100,000 pixels, 10x the limit.
+    const result = await handleRequest({
+      ...baseArgs(),
+      getSourceFile,
+      req: makeReq({ query: 'width=100' }),
+    })
+
+    expect(result.response?.status).toBe(400)
+  })
+
   it('should return 400 without calling getSourceFile or Sharp for an invalid dynamic request', async () => {
     const { sharpFn } = makeFakeSharp()
     const handleRequest = createHandleRequest({
@@ -159,6 +182,7 @@ describe('createHandleRequest', () => {
 
   it('should let an unexpected Sharp error propagate uncaught', async () => {
     const pipeline = {
+      metadata: vi.fn().mockResolvedValue({ height: 100, width: 100 }),
       resize: vi.fn().mockReturnThis(),
       toBuffer: vi.fn().mockRejectedValue(new Error('sharp exploded')),
     }

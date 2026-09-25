@@ -110,6 +110,14 @@ export type SharpDynamicDefaults = {
 }
 
 /**
+ * Enables request-time resizing and tunes its limits. `collections` restricts it
+ * to the listed upload collections; omit it to allow every upload collection.
+ */
+export type SharpDynamicOptions = {
+  collections?: UploadCollectionSlug[]
+} & SharpDynamicDefaults
+
+/**
  * The result of parsing a request's dynamic resize query parameters.
  * `isRouted: false` means none of the recognized parameters were present at
  * all — an ordinary file read, not a dynamic transformation attempt.
@@ -134,8 +142,14 @@ export type DynamicResizeParseResult =
 export type SharpTransformerOptions = {
   /** Per-collection upload-time image processing settings. */
   collections?: Partial<Record<UploadCollectionSlug, SharpCollectionConfig>>
-  /** Configurable defaults for dynamic (request-time) resizing. */
-  dynamic?: SharpDynamicDefaults
+  /**
+   * Request-time resizing via `?width=`/`?height=` on the file endpoint. `true`
+   * enables it with default limits for every upload collection; an object enables
+   * it with custom limits, optionally restricted to specific collections.
+   *
+   * @default false
+   */
+  dynamic?: boolean | SharpDynamicOptions
   /** Inject a compatible custom Sharp build or version. Defaults to the bundled dependency. */
   sharp?: SharpDependency
   /** @default 'sharp' */

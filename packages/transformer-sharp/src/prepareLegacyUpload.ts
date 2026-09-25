@@ -60,36 +60,41 @@ export function createPrepareLegacyUpload({
     // Unreadable dimensions can't be cropped/resized — treat as non-resizable rather than failing the upload.
     const canProcessAsImage = fileSupportsResize && originalDimensions !== undefined
 
+    const crop =
+      cropData && originalDimensions
+        ? {
+            cropData,
+            heightInPixels: uploadEdits.heightInPixels!,
+            originalDimensions,
+            widthInPixels: uploadEdits.widthInPixels!,
+          }
+        : undefined
+
     const mainResultFile = await transform({
       fieldPath: 'filename',
-      options: {
-        collectionUpload,
-        crop:
-          cropData && originalDimensions
-            ? {
-                cropData,
-                heightInPixels: uploadEdits.heightInPixels!,
-                originalDimensions,
-                widthInPixels: uploadEdits.widthInPixels!,
-              }
-            : undefined,
-        kind: 'main',
-      } satisfies SharpUploadTaskOptions,
+      options: { collectionUpload, crop, kind: 'main' } satisfies SharpUploadTaskOptions,
     })
 
-    const results: PreparedUploadTransformation[] = [
-      await describeResult({
-        fieldPath: 'filename',
-        fileSupportsResize: canProcessAsImage,
-        resultFile: mainResultFile,
-        sharpDependency,
-      }),
-    ]
+    const mainResult = await describeResult({
+      fieldPath: 'filename',
+      fileSupportsResize: canProcessAsImage,
+      resultFile: mainResultFile,
+      sharpDependency,
+    })
+
+    const results: PreparedUploadTransformation[] = [mainResult]
+
+    // A cropped upload derives its sizes from the crop output, not the original.
+    const isCropped = Boolean(crop && mainResult.width && mainResult.height)
+    const sizeSourceFile = isCropped ? mainResultFile : undefined
+    const sizeSourceDimensions: ProbedImageSize | undefined = isCropped
+      ? { height: mainResult.height!, width: mainResult.width! }
+      : originalDimensions
 
     const focalPointEnabled = collectionUpload.focalPoint !== false
     const imageSizes = collectionUpload.imageSizes
 
-    if (canProcessAsImage && Array.isArray(imageSizes) && originalDimensions) {
+    if (canProcessAsImage && Array.isArray(imageSizes) && sizeSourceDimensions) {
       const focalPoint: FocalPoint | undefined =
         focalPointEnabled && uploadEdits?.focalPoint
           ? {
@@ -103,7 +108,7 @@ export function createPrepareLegacyUpload({
         const fieldPath = `sizes.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
-          dimensions: originalDimensions,
+          dimensions: sizeSourceDimensions,
           hasFocalPoint: Boolean(focalPoint),
           imageResizeConfig,
         })
@@ -114,12 +119,13 @@ export function createPrepareLegacyUpload({
 
         const sizeResultFile = await transform({
           fieldPath,
+          file: sizeSourceFile,
           options: {
             collectionUpload,
             focalPoint: resizeAction === 'resizeWithFocalPoint' ? focalPoint : undefined,
             imageResizeConfig,
             kind: 'size',
-            originalDimensions,
+            originalDimensions: sizeSourceDimensions,
           } satisfies SharpUploadTaskOptions,
         })
 

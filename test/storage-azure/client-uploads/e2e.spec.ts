@@ -78,6 +78,7 @@ test.describe('storage-azure client uploads E2E', () => {
     const result = await payloadSDK.find({
       collection: mediaWithDocPrefixSlug,
       where: { id: { equals: docId } },
+      overrideAccess: true,
     })
 
     const doc = result.docs[0]

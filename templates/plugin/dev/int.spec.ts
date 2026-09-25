@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import config from '@payload-config'
-import { createPayloadRequest, getPayload } from 'payload'
+import { createPayloadRequestFromWebRequest, getPayload } from 'payload'
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 
 import { customEndpointHandler } from '../src/endpoints/customEndpointHandler.js'
@@ -22,7 +22,7 @@ describe('Plugin integration tests', () => {
       method: 'GET',
     })
 
-    const payloadRequest = await createPayloadRequest({ config, request })
+    const payloadRequest = await createPayloadRequestFromWebRequest({ config, request })
     const response = await customEndpointHandler(payloadRequest)
     expect(response.status).toBe(200)
 
@@ -38,6 +38,7 @@ describe('Plugin integration tests', () => {
       data: {
         addedByPlugin: 'added by plugin',
       },
+      overrideAccess: true,
     })
     expect(post.addedByPlugin).toBe('added by plugin')
   })
@@ -45,7 +46,7 @@ describe('Plugin integration tests', () => {
   test('plugin creates and seeds plugin-collection', async () => {
     expect(payload.collections['plugin-collection']).toBeDefined()
 
-    const { docs } = await payload.find({ collection: 'plugin-collection' })
+    const { docs } = await payload.find({ collection: 'plugin-collection', overrideAccess: true })
 
     expect(docs).toHaveLength(1)
   })

@@ -6,6 +6,7 @@ import { Forbidden } from '../../errors/Forbidden.js'
 export type ResolvedUploadDocument = {
   filename: string
   mimeType: string
+  sizes?: Record<string, { filename?: null | string; mimeType?: null | string } | null>
 } & TypeWithID
 
 /**
@@ -30,6 +31,29 @@ export function buildFilenameWhere({
   })
 
   return filenameCondition
+}
+
+/**
+ * The `filename` and `mimeType` of the file a request actually targets: the
+ * primary file, or the legacy image size whose filename matched (a size can be
+ * stored in a different format than the primary file via `formatOptions`).
+ */
+export function getRequestedFile({
+  document,
+  filename,
+}: {
+  document: ResolvedUploadDocument
+  filename: string
+}): { filename: string; mimeType: string } {
+  if (document.filename !== filename) {
+    const size = Object.values(document.sizes ?? {}).find((size) => size?.filename === filename)
+
+    if (size?.filename && size.mimeType) {
+      return { filename: size.filename, mimeType: size.mimeType }
+    }
+  }
+
+  return { filename: document.filename, mimeType: document.mimeType }
 }
 
 /**

@@ -22,6 +22,55 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Payload request creation is consolidated
+
+Payload request creation now uses `createPayloadRequest` for local contexts and `createPayloadRequestFromWebRequest` to convert a Web `Request`. Admin context setup is exposed as `initAdminContext`.
+
+| Old name                                | New name                                    |
+| --------------------------------------- | ------------------------------------------- |
+| `createLocalReq`                        | `createPayloadRequest`                      |
+| `CreateLocalReqOptions` (internal type) | `Omit<CreatePayloadRequestArgs, 'payload'>` |
+| `createPayloadRequest`                  | `createPayloadRequestFromWebRequest`        |
+| `initReq`                               | `initAdminContext`                          |
+| `InitReqArgs`                           | `InitAdminContextArgs`                      |
+| `InitReqResult`                         | `AdminContext`                              |
+| `InitReqCache`                          | `AdminContextCache`                         |
+| `InitReqPartialResult`                  | `PartialAdminContext`                       |
+
+`initAdminContext` and its cache types are primarily contracts for framework adapters. Custom Root layout adapters must rename their injected `initReq` callback to `initAdminContext`.
+
+Local request creation now takes a single object argument containing `payload`. For a request without options:
+
+```diff
+-import { createLocalReq } from 'payload'
++import { createPayloadRequest } from 'payload'
+
+-const req = await createLocalReq({}, payload)
++const req = await createPayloadRequest({ payload })
+```
+
+`CreatePayloadRequestArgs` is exported from `payload` and requires `payload`. Options-only values should use `Omit<CreatePayloadRequestArgs, 'payload'>`. The old `CreateLocalReqOptions` type was declared in the internal request utility, not exported from the package root; relative/private imports of that type require manual migration. The codemod handles an existing named import of that type only when its source is `payload`.
+
+Web request conversion uses its new role-specific name:
+
+```diff
+-import { createPayloadRequest } from 'payload'
++import { createPayloadRequestFromWebRequest } from 'payload'
+
+-const req = await createPayloadRequest({ config, request })
++const req = await createPayloadRequestFromWebRequest({ config, request })
+```
+
+#### Codemod
+
+To migrate automatically, there's a codemod for this change available by running:
+
+```bash
+npx @payloadcms/codemod --transform migrate-payload-request-creation
+```
+
+Automatic call migration requires a plain identifier payload argument and either `{}` or an initialized local `const` options identifier. The options type must expose all seven old option properties, or be `any`. For that identifier form, the generated argument captures payload first and uses forwarding getters for `context`, `depth`, `fallbackLocale`, `locale`, `req`, `urlSuffix`, and `user`. This preserves inherited getters, their read order, and rejected promises from throwing getters without reading unrelated properties. Complex expressions, mutable/unresolved options bindings, narrow option types, collisions, and unsupported type usages are left unchanged with notes for manual migration.
+
 ### JWT authentication is versioned without moving token data
 
 Payload 4 keeps the decoded JWT payload flat, so integrations can continue reading `id`, `collection`, `sid`, `email`, and fields selected by `saveToJWT` from the same paths as Payload 3.
@@ -72,6 +121,40 @@ if (decodeProtectedHeader(token).authVersion !== JWT_AUTH_VERSION) {
 A token is also rejected if its `collection` is not auth-enabled or has `disableLocalStrategy` enabled.
 
 See [Token Data](../authentication/token-data) for the full token data shape.
+
+### `overrideAccess` now defaults to `false` on Local API operations
+
+Local API operations whose optional `overrideAccess` value previously defaulted to `true` now default it to `false`, so omitting it respects Access Control instead. Operations that do not expose `overrideAccess`, and operations such as `resetPassword` where it was already required or did not default to `true`, are unaffected by this change.
+
+```diff
+const posts = await payload.find({
+  collection: 'posts',
++ overrideAccess: true, // preserves the Payload 3 default
+})
+```
+
+- `overrideAccess: false` (the new default) — respect Access Control. Use this whenever the operation acts on behalf of a user, and pass `user` alongside it.
+- `overrideAccess: true` — bypass Access Control. Use this for trusted server-side work such as cron jobs, seeding, and migrations.
+
+The property stays optional on the affected operations, and there is no compile error for either TypeScript or JavaScript projects — a call that omitted `overrideAccess` before still compiles after upgrading, it just behaves differently: it now enforces Access Control instead of skipping it. Run the codemod to find every affected call site and restore the previous behavior explicitly:
+
+```bash
+npx @payloadcms/codemod
+```
+
+Review the results afterwards. Leave the property off, or set it to `overrideAccess: false`, wherever the operation acts on behalf of a user — that is the more secure outcome and is now the default.
+
+#### Cases the codemod leaves behind
+
+Run a typecheck after the codemod. Three patterns it cannot resolve:
+
+- **Spread arguments** — `payload.find({ ...args })`. The codemod cannot tell whether `args` already supplies the property.
+- **Aliased or cast receivers** — `const db = payload; db.find({ ... })` and `(payload as any).find({ ... })`. It matches `payload`, `.payload`, and their `.jobs` properties only.
+- **Non-literal arguments** — `payload.find(options)`. The codemod cannot safely modify the value at the call site.
+
+#### Jobs operations use the same default
+
+`payload.jobs.queue`, `run`, `runByID`, `cancel`, and `cancelByID` now also default `overrideAccess` to `false`. The option remains optional, but omitting it runs the corresponding `jobs.access.queue`, `jobs.access.run`, or `jobs.access.cancel` function. The codemod adds `overrideAccess: true` to these calls—including zero-argument `payload.jobs.run()` calls—to preserve Payload 3 behavior for review.
 
 ### Collection and Global Access Control callbacks receive `slug`
 
@@ -201,6 +284,7 @@ If your application relies on two populated levels, prefer specifying `depth: 2`
 ```ts
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   depth: 2,
 })
 ```
@@ -248,6 +332,23 @@ npx @payloadcms/codemod --transform remove-versions-true
 Run `migrate-versions-default` if you want zero schema changes — it adds `versions: false` to every `CollectionConfig` and `GlobalConfig` that does not already set `versions`. If you want to selectively keep versions on some configs, run the codemod and then delete `versions: false` from the ones you want to enable. Each config you opt into requires a database migration.
 
 Run `remove-versions-true` to clean up any bare `versions: true` that is now the default.
+
+### Version read access inherits collection and global read access
+
+When `readVersions` is not configured, version access now inherits the Collection or Global `read` Access Control instead of requiring an authenticated user by default.
+
+This means a public `read` function can make historical and unpublished versions publicly readable, while a query constraint returned by `read` is also applied to version documents. If you want to preserve the previous authenticated-only behavior, configure `readVersions` explicitly:
+
+```ts
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  access: {
+    read: () => true,
+    readVersions: ({ req: { user } }) => Boolean(user),
+  },
+  fields: [],
+}
+```
 
 ### List View Select API is now the default
 
@@ -344,20 +445,20 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 **Pass-through re-exports** — same name, new source:
 
-| Symbol                        | Old source                   | New source       |
-| ----------------------------- | ---------------------------- | ---------------- |
-| `Column`                      | `@payloadcms/ui`             | `payload`        |
-| `ListViewSlots`               | `@payloadcms/ui`             | `payload`        |
-| `ListViewClientProps`         | `@payloadcms/ui`             | `payload`        |
-| `EntityType`                  | `@payloadcms/ui/shared`      | `payload/shared` |
-| `formatAdminURL`              | `@payloadcms/ui/shared`      | `payload/shared` |
-| `mergeListSearchAndWhere`     | `@payloadcms/ui/shared`      | `payload/shared` |
-| `mergeHeaders`                | `@payloadcms/next/utilities` | `payload`        |
-| `headersWithCors`             | `@payloadcms/next/utilities` | `payload`        |
-| `createPayloadRequest`        | `@payloadcms/next/utilities` | `payload`        |
-| `addDataAndFileToRequest`     | `@payloadcms/next/utilities` | `payload`        |
-| `sanitizeLocales`             | `@payloadcms/next/utilities` | `payload`        |
-| `addLocalesToRequestFromData` | `@payloadcms/next/utilities` | `payload`        |
+| Symbol                        | Old source                   | New source                                        |
+| ----------------------------- | ---------------------------- | ------------------------------------------------- |
+| `Column`                      | `@payloadcms/ui`             | `payload`                                         |
+| `ListViewSlots`               | `@payloadcms/ui`             | `payload`                                         |
+| `ListViewClientProps`         | `@payloadcms/ui`             | `payload`                                         |
+| `EntityType`                  | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `formatAdminURL`              | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `mergeListSearchAndWhere`     | `@payloadcms/ui/shared`      | `payload/shared`                                  |
+| `mergeHeaders`                | `@payloadcms/next/utilities` | `payload`                                         |
+| `headersWithCors`             | `@payloadcms/next/utilities` | `payload`                                         |
+| `createPayloadRequest`        | `@payloadcms/next/utilities` | `createPayloadRequestFromWebRequest` in `payload` |
+| `addDataAndFileToRequest`     | `@payloadcms/next/utilities` | `payload`                                         |
+| `sanitizeLocales`             | `@payloadcms/next/utilities` | `payload`                                         |
+| `addLocalesToRequestFromData` | `@payloadcms/next/utilities` | `payload`                                         |
 
 **Renamed types** — use the new canonical name from `payload`:
 
@@ -376,7 +477,7 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 + import { headersWithCors, mergeHeaders } from 'payload'
 ```
 
-Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
+Running `npx @payloadcms/codemod --transform migrate-aliased-exports` preserves old local bindings by importing renamed symbols with an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'` or `import { createPayloadRequestFromWebRequest as createPayloadRequest } from 'payload'`). Run `migrate-payload-request-creation` to complete the request helper's identifier and call-site migration, or drop the other aliases and rename their usages manually if you want to fully commit to the new names.
 
 ### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
 
@@ -406,10 +507,9 @@ If you only use `DefaultValue` to type a `defaultValue` property passed into a C
 
 `SanitizedCollectionConfig` and its auth type no longer use `DeepRequired`. This reduces TypeScript checker work and makes optionality match runtime defaults.
 
-Properties Payload does not default, such as `access.readVersions`, `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
+Properties Payload does not default, such as `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
 
 ```ts
-if (collection.access.readVersions) await collection.access.readVersions(args)
 const useAPIKey = collection.auth.useAPIKey ?? false
 ```
 
@@ -430,12 +530,11 @@ Properties filled during sanitization, including `auth.jwtOrder`, root routes, G
 
 ### Sanitized global config types now match runtime defaults
 
-`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `access.readVersions`, `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
+`SanitizedGlobalConfig` no longer uses `DeepRequired`. This reduces TypeScript checker work and preserves optionality for values global sanitization does not populate, such as `admin.components`, `graphQL`, `lockDocuments`, and `typescript`.
 
 Code that consumes these properties may now need to handle `undefined`:
 
 ```ts
-if (global.access.readVersions) await global.access.readVersions(args)
 const views = global.admin.components?.views
 const interfaceName = global.typescript?.interface
 ```
@@ -1184,9 +1283,11 @@ And update any `$ref` pointers you wrote by hand to point at `$defs`:
 
 Do not keep your additions on `definitions` while new ones land on `$defs`.
 
-### Jobs: generic collection access is denied by default
+### Jobs: access is enforced by default
 
-The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations that use `overrideAccess: false`. Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, and `payload.jobs.cancel()` continue to work as before.
+The generated `payload-jobs` collection now denies generic create, read, update, and delete access by default. This affects REST and GraphQL CRUD, plus Local API collection operations because `overrideAccess` now defaults to `false`.
+
+Dedicated operations such as `payload.jobs.queue()`, `payload.jobs.run()`, `payload.jobs.runByID()`, `payload.jobs.cancel()`, and `payload.jobs.cancelByID()` also default `overrideAccess` to `false`. They now run the corresponding `jobs.access.queue`, `jobs.access.run`, or `jobs.access.cancel` function when the option is omitted. Add `overrideAccess: true` to trusted server-side calls that must preserve the Payload 3 behavior of bypassing Jobs access control.
 
 If your application intentionally exposes the internal payload-jobs collection, configure only the access it needs through `jobsCollectionOverrides`. For example, the following enables read-only Admin Panel access for trusted administrators:
 
@@ -1377,6 +1478,28 @@ The same change applies to `upload` fields with `hasMany: true`.
 
 - Remove the `compatibility` block from your config. If your MongoDB data still has the redundant nested-localized shape, flatten the config and run a data migration.
 - Replace any direct `field.localized` reads in custom code with `fieldShouldBeLocalized({ field, parentIsLocalized })` from `payload/shared`.
+
+### Admin UI Publish button now defaults to the active locale, and `localization.defaultLocalePublishOption` has been removed
+
+The Admin UI Publish button now always defaults to publishing only the active locale when a collection or global has localized fields and you have publish permission. "Publish all locales" is available as a secondary option in the Publish button's dropdown. This previously required opting in via `localization.defaultLocalePublishOption: 'active'`; the config option has been removed since active-locale-only is now the permanent default.
+
+**What changes:**
+
+- `localization.defaultLocalePublishOption` no longer exists as a config property or type — remove it from your config.
+- If you had it set to `'active'`, there is no change in Admin UI behavior.
+- If you had it set to `'all'`, or left it unset, the Publish button now publishes only the active locale by default. Use the "Publish all locales" option in the button's dropdown to publish every locale at once.
+
+```diff
+export default buildConfig({
+  localization: {
+    defaultLocale: 'en',
+-   defaultLocalePublishOption: 'active',
+    locales: ['en', 'es'],
+  },
+})
+```
+
+Run `npx @payloadcms/codemod --transform remove-default-locale-publish-option` to remove the property automatically. The codemod surfaces a note for any config that had it set to `'all'`, since that combination previously changed the default and now has no config equivalent.
 
 ### Storage adapters must be declared under `storage`, not `plugins` ([#16596](https://github.com/payloadcms/payload/pull/16596))
 
@@ -1658,6 +1781,8 @@ If you inject a custom Sharp build or version, pass it the same way:
 - buildConfig({ sharp: myCustomSharp })
 + sharpTransformer({ sharp: myCustomSharp })
 ```
+
+`sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `imageSizes`, as in Payload 3.x. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
 
 ### Storage adapters always insert the `prefix` field now — `alwaysInsertFields` removed
 

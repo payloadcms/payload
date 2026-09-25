@@ -36,6 +36,7 @@ export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, valu
     where: {
       and: constraints,
     },
+    overrideAccess: true,
   })
 
   if (findDuplicatePages.docs.length > 0 && req.user) {
@@ -46,6 +47,7 @@ export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, valu
       const attemptedTenantChange = await req.payload.findByID({
         id: tenantIDToMatch,
         collection: 'tenants',
+        overrideAccess: true,
       })
 
       throw new ValidationError({

@@ -12,6 +12,8 @@ export const uploadTransformerInternal = Symbol.for('payload.uploadTransformerIn
 
 export type UploadTransformTask<TOptions = unknown> = {
   fieldPath: 'filename' | `sizes.${string}`
+  /** Source file for this task. Defaults to the original upload (e.g. pass the cropped main output so sizes derive from the crop). */
+  file?: File
   options: TOptions
 }
 

@@ -1,7 +1,7 @@
 import type { CollectionSlug } from 'payload'
 
 import { buildDefaultEditorState } from '@payloadcms/richtext-lexical'
-import { createLocalReq } from 'payload'
+import { createPayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect, vitest } from 'vitest'
 
@@ -11,7 +11,7 @@ import { postDoc } from './config.js'
 
 let token: string
 
-test.suite({ config: './config.ts' })('dataloader', () => {
+test.suite('dataloader', { config: './config.ts' }, () => {
   test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
@@ -19,6 +19,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     if (loginResult.token) {
@@ -97,6 +98,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
         data: {
           richText: buildDefaultEditorState({ text: 'relation a' }),
         },
+        overrideAccess: true,
       })
 
       const relationB = await payload.create({
@@ -105,6 +107,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
           relationship: relationA.id,
           richText: buildDefaultEditorState({ text: 'relation b' }),
         },
+        overrideAccess: true,
       })
 
       expect(relationA.id).toBeDefined()
@@ -128,12 +131,14 @@ test.suite({ config: './config.ts' })('dataloader', () => {
             ],
           }),
         },
+        overrideAccess: true,
       })
 
       const relationANoDepth = await payload.findByID({
         id: relationA.id,
         collection: 'relation-a',
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(relationANoDepth.relationship).toStrictEqual(relationB.id)
@@ -142,6 +147,7 @@ test.suite({ config: './config.ts' })('dataloader', () => {
         id: relationA.id,
         collection: 'relation-a',
         depth: 4,
+        overrideAccess: true,
       })
 
       const innerMostRelationship =
@@ -155,13 +161,14 @@ test.suite({ config: './config.ts' })('dataloader', () => {
 
   test.describe('find', () => {
     test('should call the same query only once in a request', async ({ payload }) => {
-      const req = await createLocalReq({}, payload)
+      const req = await createPayloadRequest({ payload })
       const spy = vitest.spyOn(payload, 'find')
 
       const findArgs = {
         collection: 'items' as CollectionSlug,
         req,
         depth: 0,
+        overrideAccess: true,
         where: {
           name: { exists: true },
         },

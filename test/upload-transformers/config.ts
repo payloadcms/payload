@@ -26,7 +26,11 @@ export default buildConfigWithDefaults({
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
     upload: {
-      transformers: [sharpTransformer(), kitchenSinkSharpTransformer, ...testTransformers],
+      transformers: [
+        sharpTransformer({ dynamic: true }),
+        kitchenSinkSharpTransformer,
+        ...testTransformers,
+      ],
     },
   },
   seed: async (payload) => {
@@ -36,6 +40,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   },
 })

@@ -1551,7 +1551,9 @@ export default buildConfigWithDefaults({
       limits: {
         fileSize: 2_000_000, // 2MB
       },
-      transformers: [sharpTransformer({ collections: sharpCollections })],
+      transformers: [
+        sharpTransformer({ collections: sharpCollections, dynamic: { collections: [mediaSlug] } }),
+      ],
     },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),

@@ -1,10 +1,10 @@
-import type { TransformFileArgs, TransformFileResult, UploadTransformer } from 'payload'
+import type { Config, TransformFileArgs, TransformFileResult, UploadTransformer } from 'payload'
 import type { TransformerWithInternalBridge } from 'payload/internal'
 
 import { uploadTransformerInternal } from 'payload/internal'
 import bundledSharp from 'sharp'
 
-import type { SharpDynamicDefaults, SharpTransformerOptions } from './types.js'
+import type { SharpDynamicDefaults, SharpDynamicOptions, SharpTransformerOptions } from './types.js'
 
 import { createHandleRequest } from './handleRequest.js'
 import { initSharpCollections } from './initSharpCollections.js'
@@ -35,13 +35,28 @@ export function resolveSharpDynamicDefaults(
 }
 
 /**
- * Payload's official Sharp-based file transformer: request-time width/height/
- * `withoutEnlargement` resizing, plus upload-time image processing.
+ * Normalizes the `dynamic` option: `false`/omitted disables request-time
+ * resizing, `true` enables it with defaults for every upload collection.
+ */
+function resolveSharpDynamicOptions(
+  dynamic: SharpTransformerOptions['dynamic'],
+): false | SharpDynamicOptions {
+  if (!dynamic) {
+    return false
+  }
+
+  return dynamic === true ? {} : dynamic
+}
+
+/**
+ * Payload's official Sharp-based file transformer: upload-time image processing,
+ * plus opt-in (`dynamic`) request-time width/height/`withoutEnlargement` resizing.
  */
 export function sharpTransformer(
   options: SharpTransformerOptions = {},
 ): TransformerWithInternalBridge & UploadTransformer {
-  const dynamicDefaults = resolveSharpDynamicDefaults(options.dynamic)
+  const dynamicOptions = resolveSharpDynamicOptions(options.dynamic)
+  const dynamicDefaults = resolveSharpDynamicDefaults(dynamicOptions || undefined)
   const sharpDependency = options.sharp ?? bundledSharp
   const collections = options.collections ?? {}
 
@@ -54,6 +69,13 @@ export function sharpTransformer(
         return true
       }
 
+      if (
+        !dynamicOptions ||
+        (dynamicOptions.collections && !dynamicOptions.collections.includes(args.collectionSlug))
+      ) {
+        return false
+      }
+
       const result = parseDynamicResize({
         limits: dynamicDefaults,
         searchParams: args.req.searchParams ?? new URLSearchParams(),
@@ -62,7 +84,11 @@ export function sharpTransformer(
       return result.isRouted
     },
     handleRequest: createHandleRequest({ dynamicDefaults, sharpDependency }),
-    init: (config) => initSharpCollections({ collections, config }),
+    init: (config) => {
+      assertDynamicCollectionsExist({ config, dynamicOptions })
+
+      return initSharpCollections({ collections, config })
+    },
     mimeTypes: DEFAULT_MIME_TYPES,
     [uploadTransformerInternal]: {
       prepareUpload: createPrepareLegacyUpload({ collections, sharpDependency }),
@@ -72,5 +98,28 @@ export function sharpTransformer(
     transformFile: createTransformFile({ sharpDependency }) as (
       args: TransformFileArgs,
     ) => Promise<TransformFileResult>,
+  }
+}
+
+function assertDynamicCollectionsExist({
+  config,
+  dynamicOptions,
+}: {
+  config: Config
+  dynamicOptions: false | SharpDynamicOptions
+}): void {
+  if (!dynamicOptions || !dynamicOptions.collections) {
+    return
+  }
+
+  const invalidSlugs = dynamicOptions.collections.filter(
+    (slug) =>
+      !config.collections?.some((collection) => collection.slug === slug && collection.upload),
+  )
+
+  if (invalidSlugs.length > 0) {
+    throw new Error(
+      `Invalid \`sharpTransformer({ dynamic: { collections } })\` configuration: not an upload-enabled collection: ${invalidSlugs.map((slug) => `"${slug}"`).join(', ')}.`,
+    )
   }
 }

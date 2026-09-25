@@ -1,6 +1,6 @@
 # Sharp Transformer for Payload
 
-Payload's official [file transformer](https://payloadcms.com/docs/upload/transformers) for Sharp-based image processing: upload-time resizing/format conversion (the same behavior Payload has always provided) plus request-time dynamic resizing.
+Payload's official [file transformer](https://payloadcms.com/docs/upload/transformers) for Sharp-based image processing: upload-time resizing/format conversion (the same behavior Payload has always provided) plus opt-in request-time dynamic resizing.
 
 ## Installation
 
@@ -51,7 +51,14 @@ sharpTransformer({
 
 ### Dynamic (request-time) resizing
 
-Once registered for a collection, requesting a stored image with recognized query parameters resizes it on the fly, without storing the result:
+Dynamic resizing is **disabled by default** — resize query parameters are ignored and the original file is served. Enable it for every upload collection, or only the ones that need it:
+
+```ts
+sharpTransformer({ dynamic: true })
+sharpTransformer({ dynamic: { collections: ['media'] } })
+```
+
+Once enabled, requesting a stored image with recognized query parameters resizes it on the fly, without storing the result:
 
 ```
 GET /api/media/file/photo.png?width=400
@@ -59,11 +66,12 @@ GET /api/media/file/photo.png?width=400&height=300
 GET /api/media/file/photo.png?width=400&withoutEnlargement=true
 ```
 
-Configure defaults for these requests:
+Configure limits and defaults for these requests:
 
 ```ts
 sharpTransformer({
   dynamic: {
+    collections: ['media'], // omit to allow every upload collection
     fit: 'cover', // default
     position: 'center', // default
     maxWidth: 4096, // default
@@ -73,6 +81,8 @@ sharpTransformer({
   },
 })
 ```
+
+Resized output is not cached, and anyone who can read a file can request it at any size within these limits. Before enabling dynamic resizing on a public collection, see [Securing dynamic resizing](https://payloadcms.com/docs/upload/transformers#securing-dynamic-resizing) for how to restrict it with access control, tighten the limits, and cache the output.
 
 ### Injecting a custom Sharp build
 

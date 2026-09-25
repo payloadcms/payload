@@ -146,6 +146,7 @@ export const collectionsCodegenDataset: EvalCase[] = [
       const { docs } = await payload.find({
         collection: 'posts',
         where: { title: { equals: seededTitle } },
+        overrideAccess: true,
       })
       expect(docs).toHaveLength(1)
     },

@@ -256,7 +256,21 @@ See [Image Sizes](./overview#image-sizes) for what each Sharp-specific image siz
 
 ### Dynamic (request-time) resizing
 
-Once `sharpTransformer` is registered for a collection with image uploads, requesting a file with recognized query parameters resizes it on the fly, without storing the resized result:
+`sharpTransformer` can resize a stored image on the fly when it's requested with recognized query parameters, without storing the resized result. This is **disabled by default**: until you enable it, resize parameters are ignored and the original file is served, exactly as in Payload 3.x.
+
+Enable it with the `dynamic` option, either for every upload collection or only for the collections that need it:
+
+```ts
+// Every upload collection, with the default limits
+sharpTransformer({ dynamic: true })
+
+// Only the `media` collection
+sharpTransformer({ dynamic: { collections: ['media'] } })
+```
+
+A slug in `dynamic.collections` that isn't an upload-enabled collection throws at startup. For collections that aren't listed, resize parameters are ignored and the original file is served.
+
+Once enabled, request a file with any of these parameters:
 
 ```
 GET /api/media/file/photo.png?width=400
@@ -284,11 +298,12 @@ Recognized behavior:
 - `GET` and `HEAD` are both supported. A `Range` header on a recognized dynamic-resize request returns `416` — partial dynamic resizes are not supported.
 - `prefix` is core-owned routing context, used to locate the stored document. It is never a resize parameter.
 
-Configure defaults for every dynamic-resize request on this transformer instance:
+Passing an object enables dynamic resizing and configures the defaults for every dynamic-resize request on this transformer instance:
 
 ```ts
 sharpTransformer({
   dynamic: {
+    collections: ['media'], // omit to allow every upload collection
     fit: 'cover', // default
     position: 'center', // default
     maxWidth: 4096, // default
@@ -300,6 +315,49 @@ sharpTransformer({
 ```
 
 As with every transformer, dynamic-resize output is never written back to storage — it is generated for that one response and discarded.
+
+#### Securing dynamic resizing
+
+Every dynamic-resize request decodes the full source image and encodes a new one, and the output is not cached. Anyone who can read a file can ask for it at any size within your limits, so on a publicly readable collection an unbounded stream of distinct sizes costs you CPU and memory on every request. Before enabling it, especially on public collections:
+
+1. **Enable it only where it's needed.** Prefer `dynamic: { collections: [...] }` over `dynamic: true`.
+
+2. **Restrict transformed reads in access control.** `req.fileTransform` is `true` while `access.read` decides whether a dynamic-transform request may proceed (see [Access control](#access-control)), and the request's query is available on `req.searchParams`. Use it to require a signed-in user, or to allow only the sizes your frontend actually uses:
+
+   ```ts
+   const allowedWidths = new Set(['320', '640', '1280'])
+
+   export const Media: CollectionConfig = {
+     slug: 'media',
+     access: {
+       read: ({ req }) => {
+         // Ordinary reads are unaffected.
+         if (!req.fileTransform) {
+           return true
+         }
+
+         // Only a known set of widths, no arbitrary height or enlargement override.
+         const width = req.searchParams.get('width')
+
+         return (
+           width !== null &&
+           allowedWidths.has(width) &&
+           !req.searchParams.has('height') &&
+           !req.searchParams.has('withoutEnlargement')
+         )
+       },
+     },
+     upload: true,
+   }
+   ```
+
+   A denied transform request returns `403`, and the source file is never fetched.
+
+3. **Lower the limits to what you serve.** Set `maxWidth`, `maxHeight`, and `maxPixels` to your largest real rendition, and set `withoutEnlargement: true` so requests can't upscale small images. Limits apply per frame: animated GIF, WebP, and AVIF images are resized frame by frame, so a many-frame image costs far more than its dimensions suggest. If you accept animated uploads on a collection, keep its limits tight or leave dynamic resizing off for it.
+
+4. **Cache the output in front of Payload.** Dynamic-resize responses don't set `Cache-Control`. Add one with the collection's [`modifyResponseHeaders`](./overview#modifying-response-headers), which also applies to dynamic-resize responses, and serve the endpoint through a CDN or reverse proxy that caches by full URL. A fixed set of allowed sizes (step 2) keeps the cache effective. Only mark responses `public` for collections whose files are publicly readable, or a shared cache will serve access-controlled files to anyone.
+
+5. **Rate-limit at the edge.** Payload doesn't rate-limit file requests. If the endpoint is public, apply rate limits in your CDN, load balancer, or reverse proxy.
 
 ## `@payloadcms/transformer-cloudinary`
 

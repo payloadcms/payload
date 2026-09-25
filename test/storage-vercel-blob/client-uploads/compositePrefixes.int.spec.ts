@@ -16,14 +16,16 @@ dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emu
 
 const createdDocIDs: Array<number | string> = []
 
-test.suite({ config: './config.compositePrefixes.ts' })(
+test.suite(
   '@payloadcms/storage-vercel-blob clientUploads (composite prefixes)',
+  { config: './config.compositePrefixes.ts' },
   () => {
     test.afterEach(async ({ payload }) => {
       for (const id of createdDocIDs) {
         await payload.delete({
           id,
           collection: mediaWithCompositePrefixesSlug,
+          overrideAccess: true,
         })
       }
 

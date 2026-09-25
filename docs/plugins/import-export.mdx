@@ -384,7 +384,63 @@ All hooks receive:
 | `req`          | `PayloadRequest`            | The full request object.                                             |
 | `totalBatches` | number                      | Total number of batches in this operation.                           |
 
-`ImportAfterHook` additionally receives `result: ImportResult` (per-batch counts and errors) instead of `data`/`originalData`.
+Export hooks also receive `exportDoc`, and import hooks also receive `importDoc`. `ImportAfterHook` additionally receives `result: ImportResult` (per-batch counts and errors) instead of `data`/`originalData`.
+
+### exportDoc and importDoc
+
+`exportDoc` and `importDoc` give hooks the document that triggered the run, including any fields you added to the imports/exports collection with `overrideCollection`. Use this to read a value an editor set on the import/export form and apply it to every row. The admin preview updates as the editor types, so a field read this way is reflected in the preview table too.
+
+```ts
+importExportPlugin({
+  collections: [
+    {
+      slug: 'posts',
+      export: {
+        overrideCollection: ({ collection }) => {
+          collection.fields = [
+            ...collection.fields,
+            { name: 'batchRef', type: 'text' },
+          ]
+          return collection
+        },
+        hooks: {
+          before: ({ data, exportDoc }) => {
+            return data.map((row) => ({ ...row, batchRef: exportDoc.batchRef }))
+          },
+        },
+      },
+    },
+  ],
+})
+```
+
+Both are read once at the start of processing and reused for every batch. For queued operations, this is when the job starts, not when it is queued: edits saved before the job starts can be reflected in the document. Changes saved during processing are not reloaded. Hooks should treat this shared object as read-only.
+
+For queued exports, the built-in export options still come from the job input captured when the export was queued; `exportDoc` is the document read when processing starts.
+
+The `ExportDoc` and `ImportDoc` types are available from `@payloadcms/plugin-import-export/types`.
+
+<Banner type="warning">
+  `id` is optional on both, so check for it before using it. An `id` means the
+  document is saved. Exports run through the jobs queue have one; the
+  synchronous export path runs in `beforeOperation`, and the download and export
+  preview paths never save a document, so on those three `exportDoc` is the
+  submitted form data with no `id`, `createdAt` or `updatedAt`. For `importDoc`,
+  both real import paths pass a saved document; only the preview endpoint does
+  not.
+</Banner>
+
+<Banner type="warning">
+  On the paths without an `id`, this is the submitted request body — it has not
+  been through field validation or access control, so treat those values as
+  untrusted input. The plugin drops `id`, `createdAt` and `updatedAt` from the
+  body, so a caller cannot make an unsaved run look saved, but every other field
+  is whatever was sent. An `id` indicates persistence, not permission to perform
+  an action. Apply the appropriate authorization checks inside hooks that
+  perform privileged operations.
+</Banner>
+
+Previews always use the current submitted form values, including on a saved operation’s edit view. They omit the saved document’s `id` and timestamps.
 
 ### before hooks — modify data
 
@@ -735,8 +791,8 @@ There are four possible ways that the plugin allows for exporting documents, the
 
 1. Direct download - Using a `POST` to `/api/exports/download` and streams the response as a file download
 2. File storage - Goes to the `exports` collection as an uploads enabled collection
-3. Local API - A create call to the exports collection: `payload.create({ collection: 'exports', data: { collectionSlug: 'pages', format: 'json' } })`
-4. Jobs Queue - `payload.jobs.queue({ task: 'createCollectionExport', input: parameters })`
+3. Local API - A create call to the exports collection: `payload.create({ collection: 'exports', data: { collectionSlug: 'pages', format: 'json' }, overrideAccess: true })`
+4. Jobs Queue - `payload.jobs.queue({ task: 'createCollectionExport', input: parameters, overrideAccess: true })`
 
 In the Export drawer you can choose:
 
@@ -787,8 +843,8 @@ The plugin allows importing data from CSV or JSON files. There are several ways 
 
 1. **Admin UI** - Use the Import drawer from the list view of a collection
 2. **File storage** - Create an import document in the `imports` collection with an uploaded file
-3. **Local API** - Create an import document: `payload.create({ collection: 'imports', data: { collectionSlug: 'pages', importMode: 'create' }, file: { ... } })`
-4. **Jobs Queue** - `payload.jobs.queue({ task: 'createCollectionImport', input: parameters })`
+3. **Local API** - Create an import document: `payload.create({ collection: 'imports', data: { collectionSlug: 'pages', importMode: 'create' }, file: { ... }, overrideAccess: true })`
+4. **Jobs Queue** - `payload.jobs.queue({ task: 'createCollectionImport', input: parameters, overrideAccess: true })`
 
 ### Import Parameters
 
@@ -804,6 +860,7 @@ The `matchField` option allows you to match documents by a field other than `id`
 ```ts
 payload.create({
   collection: 'imports',
+  overrideAccess: true,
   data: {
     collectionSlug: 'users',
     importMode: 'upsert',
