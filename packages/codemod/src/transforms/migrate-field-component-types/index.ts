@@ -29,12 +29,67 @@ const FIELD_NAMES = [
   'Upload',
 ] as const
 
-const COMPONENT_TO_PROPS = new Map<string, string>(
-  FIELD_NAMES.flatMap((fieldName) => [
-    [`${fieldName}FieldClientComponent`, `${fieldName}FieldClientProps`],
-    [`${fieldName}FieldServerComponent`, `${fieldName}FieldServerProps`],
+const FIELDS_WITH_SPECIALIZED_COMPONENTS = [
+  'Array',
+  'Blocks',
+  'Checkbox',
+  'Code',
+  'Collapsible',
+  'Date',
+  'Email',
+  'Group',
+  'Join',
+  'JSON',
+  'Number',
+  'Point',
+  'Radio',
+  'Relationship',
+  'RichText',
+  'Row',
+  'Select',
+  'Tabs',
+  'Text',
+  'Textarea',
+  'Upload',
+] as const
+
+const SPECIALIZED_COMPONENT_NAMES = [
+  'FieldDescriptionClient',
+  'FieldDescriptionServer',
+  'FieldDiffClient',
+  'FieldDiffServer',
+  'FieldErrorClient',
+  'FieldErrorServer',
+  'FieldLabelClient',
+  'FieldLabelServer',
+] as const
+
+const COMPONENT_TO_PROPS = new Map<string, string>([
+  ['BlockRowLabelClientComponent', 'BlockRowLabelClientProps'],
+  ['BlockRowLabelServerComponent', 'BlockRowLabelServerProps'],
+  ['FieldClientComponent', 'FieldClientProps'],
+  ['FieldDescriptionClientComponent', 'FieldDescriptionClientProps'],
+  ['FieldDescriptionServerComponent', 'FieldDescriptionServerProps'],
+  ['FieldDiffClientComponent', 'FieldDiffClientProps'],
+  ['FieldDiffServerComponent', 'FieldDiffServerProps'],
+  ['FieldErrorClientComponent', 'FieldErrorClientProps'],
+  ['FieldErrorServerComponent', 'FieldErrorServerProps'],
+  ['FieldLabelClientComponent', 'FieldLabelClientProps'],
+  ['FieldLabelServerComponent', 'FieldLabelServerProps'],
+  ['FieldServerComponent', 'FieldServerProps'],
+  ...FIELD_NAMES.flatMap((fieldName) => [
+    [`${fieldName}FieldClientComponent`, `${fieldName}FieldClientProps`] as const,
+    [`${fieldName}FieldServerComponent`, `${fieldName}FieldServerProps`] as const,
   ]),
-)
+  ...FIELDS_WITH_SPECIALIZED_COMPONENTS.flatMap((fieldName) =>
+    SPECIALIZED_COMPONENT_NAMES.map(
+      (componentName) =>
+        [`${fieldName}${componentName}Component`, `${fieldName}${componentName}Props`] as const,
+    ),
+  ),
+  ['UIFieldDiffClientComponent', 'UIFieldDiffClientProps'],
+  ['UIFieldDiffServerComponent', 'UIFieldDiffServerProps'],
+])
 
 export const migrateFieldComponentTypes: Transform = {
   name: 'migrate-field-component-types',
@@ -127,7 +182,16 @@ export const migrateFieldComponentTypes: Transform = {
           reactBinding ??= resolveReactTypeBinding(file)
 
           for (const reference of references.reverse()) {
-            reference.replaceWithText(`${reactBinding.localName}.FC<${propsImport.localName}>`)
+            const typeReference = reference.getParentIfKindOrThrow(SyntaxKind.TypeReference)
+            const typeArguments = typeReference
+              .getTypeArguments()
+              .map((typeArgument) => typeArgument.getText())
+            const propsType =
+              typeArguments.length > 0
+                ? `${propsImport.localName}<${typeArguments.join(', ')}>`
+                : propsImport.localName
+
+            typeReference.replaceWithText(`${reactBinding.localName}.FC<${propsType}>`)
           }
 
           const currentSpecifier = importDeclaration
@@ -174,7 +238,7 @@ export const migrateFieldComponentTypes: Transform = {
     }
   },
   description:
-    'Replace concrete field client/server component aliases imported from `payload` with the corresponding props types wrapped in `React.FC`. Explicit class components and unsupported import forms are left unchanged with notes for manual migration.',
+    'Replace field component aliases imported from `payload` with the corresponding props types wrapped in `React.FC`. Generic arguments are preserved. Explicit class components and unsupported import forms are left unchanged with notes for manual migration.',
 }
 
 type ResolvePropsImportArgs = {
@@ -405,11 +469,20 @@ function collectUnsupportedImportNotes({ file, notes }: CollectUnsupportedImport
   }
 
   for (const importType of file.getDescendantsOfKind(SyntaxKind.ImportType)) {
-    const match = importType.getText().match(/^import\(['"]payload['"]\)\.([A-Za-z][A-Za-z0-9]*)$/)
+    const argument = importType.getArgument()
+    const literal = Node.isLiteralTypeNode(argument) ? argument.getLiteral() : undefined
+    const qualifier = importType.getQualifier()
 
-    if (match?.[1] && COMPONENT_TO_PROPS.has(match[1])) {
+    if (
+      Node.isStringLiteral(literal) &&
+      literal.getLiteralText() === 'payload' &&
+      qualifier &&
+      COMPONENT_TO_PROPS.has(qualifier.getText())
+    ) {
+      const componentName = qualifier.getText()
+
       notes.push(
-        `${file.getFilePath()}:${importType.getStartLineNumber()}: Unsupported inline import of \`${match[1]}\`. Replace it with the corresponding props type manually.`,
+        `${file.getFilePath()}:${importType.getStartLineNumber()}: Unsupported inline import of \`${componentName}\`. Replace it with the corresponding props type manually.`,
       )
     }
   }

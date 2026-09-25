@@ -11,7 +11,298 @@ import { migrateFieldComponentTypes } from './index.js'
 const here = dirname(fileURLToPath(import.meta.url))
 const fixture = (name: string) => readFile(join(here, name), 'utf8')
 
+const removedComponentToProps = [
+  ['FieldClientComponent', 'FieldClientProps'],
+  ['FieldServerComponent', 'FieldServerProps'],
+  ['FieldLabelClientComponent', 'FieldLabelClientProps'],
+  ['FieldLabelServerComponent', 'FieldLabelServerProps'],
+  ['FieldDescriptionClientComponent', 'FieldDescriptionClientProps'],
+  ['FieldDescriptionServerComponent', 'FieldDescriptionServerProps'],
+  ['FieldErrorClientComponent', 'FieldErrorClientProps'],
+  ['FieldErrorServerComponent', 'FieldErrorServerProps'],
+  ['FieldDiffClientComponent', 'FieldDiffClientProps'],
+  ['FieldDiffServerComponent', 'FieldDiffServerProps'],
+  ['BlockRowLabelClientComponent', 'BlockRowLabelClientProps'],
+  ['BlockRowLabelServerComponent', 'BlockRowLabelServerProps'],
+  ['ArrayFieldClientComponent', 'ArrayFieldClientProps'],
+  ['ArrayFieldServerComponent', 'ArrayFieldServerProps'],
+  ['BlocksFieldClientComponent', 'BlocksFieldClientProps'],
+  ['BlocksFieldServerComponent', 'BlocksFieldServerProps'],
+  ['CheckboxFieldClientComponent', 'CheckboxFieldClientProps'],
+  ['CheckboxFieldServerComponent', 'CheckboxFieldServerProps'],
+  ['CodeFieldClientComponent', 'CodeFieldClientProps'],
+  ['CodeFieldServerComponent', 'CodeFieldServerProps'],
+  ['CollapsibleFieldClientComponent', 'CollapsibleFieldClientProps'],
+  ['CollapsibleFieldServerComponent', 'CollapsibleFieldServerProps'],
+  ['DateFieldClientComponent', 'DateFieldClientProps'],
+  ['DateFieldServerComponent', 'DateFieldServerProps'],
+  ['EmailFieldClientComponent', 'EmailFieldClientProps'],
+  ['EmailFieldServerComponent', 'EmailFieldServerProps'],
+  ['GroupFieldClientComponent', 'GroupFieldClientProps'],
+  ['GroupFieldServerComponent', 'GroupFieldServerProps'],
+  ['JoinFieldClientComponent', 'JoinFieldClientProps'],
+  ['JoinFieldServerComponent', 'JoinFieldServerProps'],
+  ['JSONFieldClientComponent', 'JSONFieldClientProps'],
+  ['JSONFieldServerComponent', 'JSONFieldServerProps'],
+  ['NumberFieldClientComponent', 'NumberFieldClientProps'],
+  ['NumberFieldServerComponent', 'NumberFieldServerProps'],
+  ['PointFieldClientComponent', 'PointFieldClientProps'],
+  ['PointFieldServerComponent', 'PointFieldServerProps'],
+  ['RadioFieldClientComponent', 'RadioFieldClientProps'],
+  ['RadioFieldServerComponent', 'RadioFieldServerProps'],
+  ['RelationshipFieldClientComponent', 'RelationshipFieldClientProps'],
+  ['RelationshipFieldServerComponent', 'RelationshipFieldServerProps'],
+  ['RichTextFieldClientComponent', 'RichTextFieldClientProps'],
+  ['RichTextFieldServerComponent', 'RichTextFieldServerProps'],
+  ['RowFieldClientComponent', 'RowFieldClientProps'],
+  ['RowFieldServerComponent', 'RowFieldServerProps'],
+  ['SelectFieldClientComponent', 'SelectFieldClientProps'],
+  ['SelectFieldServerComponent', 'SelectFieldServerProps'],
+  ['TabsFieldClientComponent', 'TabsFieldClientProps'],
+  ['TabsFieldServerComponent', 'TabsFieldServerProps'],
+  ['TextFieldClientComponent', 'TextFieldClientProps'],
+  ['TextFieldServerComponent', 'TextFieldServerProps'],
+  ['TextareaFieldClientComponent', 'TextareaFieldClientProps'],
+  ['TextareaFieldServerComponent', 'TextareaFieldServerProps'],
+  ['UIFieldClientComponent', 'UIFieldClientProps'],
+  ['UIFieldServerComponent', 'UIFieldServerProps'],
+  ['UploadFieldClientComponent', 'UploadFieldClientProps'],
+  ['UploadFieldServerComponent', 'UploadFieldServerProps'],
+  ['ArrayFieldDescriptionClientComponent', 'ArrayFieldDescriptionClientProps'],
+  ['ArrayFieldDescriptionServerComponent', 'ArrayFieldDescriptionServerProps'],
+  ['ArrayFieldDiffClientComponent', 'ArrayFieldDiffClientProps'],
+  ['ArrayFieldDiffServerComponent', 'ArrayFieldDiffServerProps'],
+  ['ArrayFieldErrorClientComponent', 'ArrayFieldErrorClientProps'],
+  ['ArrayFieldErrorServerComponent', 'ArrayFieldErrorServerProps'],
+  ['ArrayFieldLabelClientComponent', 'ArrayFieldLabelClientProps'],
+  ['ArrayFieldLabelServerComponent', 'ArrayFieldLabelServerProps'],
+  ['BlocksFieldDescriptionClientComponent', 'BlocksFieldDescriptionClientProps'],
+  ['BlocksFieldDescriptionServerComponent', 'BlocksFieldDescriptionServerProps'],
+  ['BlocksFieldDiffClientComponent', 'BlocksFieldDiffClientProps'],
+  ['BlocksFieldDiffServerComponent', 'BlocksFieldDiffServerProps'],
+  ['BlocksFieldErrorClientComponent', 'BlocksFieldErrorClientProps'],
+  ['BlocksFieldErrorServerComponent', 'BlocksFieldErrorServerProps'],
+  ['BlocksFieldLabelClientComponent', 'BlocksFieldLabelClientProps'],
+  ['BlocksFieldLabelServerComponent', 'BlocksFieldLabelServerProps'],
+  ['CheckboxFieldDescriptionClientComponent', 'CheckboxFieldDescriptionClientProps'],
+  ['CheckboxFieldDescriptionServerComponent', 'CheckboxFieldDescriptionServerProps'],
+  ['CheckboxFieldDiffClientComponent', 'CheckboxFieldDiffClientProps'],
+  ['CheckboxFieldDiffServerComponent', 'CheckboxFieldDiffServerProps'],
+  ['CheckboxFieldErrorClientComponent', 'CheckboxFieldErrorClientProps'],
+  ['CheckboxFieldErrorServerComponent', 'CheckboxFieldErrorServerProps'],
+  ['CheckboxFieldLabelClientComponent', 'CheckboxFieldLabelClientProps'],
+  ['CheckboxFieldLabelServerComponent', 'CheckboxFieldLabelServerProps'],
+  ['CodeFieldDescriptionClientComponent', 'CodeFieldDescriptionClientProps'],
+  ['CodeFieldDescriptionServerComponent', 'CodeFieldDescriptionServerProps'],
+  ['CodeFieldDiffClientComponent', 'CodeFieldDiffClientProps'],
+  ['CodeFieldDiffServerComponent', 'CodeFieldDiffServerProps'],
+  ['CodeFieldErrorClientComponent', 'CodeFieldErrorClientProps'],
+  ['CodeFieldErrorServerComponent', 'CodeFieldErrorServerProps'],
+  ['CodeFieldLabelClientComponent', 'CodeFieldLabelClientProps'],
+  ['CodeFieldLabelServerComponent', 'CodeFieldLabelServerProps'],
+  ['CollapsibleFieldDescriptionClientComponent', 'CollapsibleFieldDescriptionClientProps'],
+  ['CollapsibleFieldDescriptionServerComponent', 'CollapsibleFieldDescriptionServerProps'],
+  ['CollapsibleFieldDiffClientComponent', 'CollapsibleFieldDiffClientProps'],
+  ['CollapsibleFieldDiffServerComponent', 'CollapsibleFieldDiffServerProps'],
+  ['CollapsibleFieldErrorClientComponent', 'CollapsibleFieldErrorClientProps'],
+  ['CollapsibleFieldErrorServerComponent', 'CollapsibleFieldErrorServerProps'],
+  ['CollapsibleFieldLabelClientComponent', 'CollapsibleFieldLabelClientProps'],
+  ['CollapsibleFieldLabelServerComponent', 'CollapsibleFieldLabelServerProps'],
+  ['DateFieldDescriptionClientComponent', 'DateFieldDescriptionClientProps'],
+  ['DateFieldDescriptionServerComponent', 'DateFieldDescriptionServerProps'],
+  ['DateFieldDiffClientComponent', 'DateFieldDiffClientProps'],
+  ['DateFieldDiffServerComponent', 'DateFieldDiffServerProps'],
+  ['DateFieldErrorClientComponent', 'DateFieldErrorClientProps'],
+  ['DateFieldErrorServerComponent', 'DateFieldErrorServerProps'],
+  ['DateFieldLabelClientComponent', 'DateFieldLabelClientProps'],
+  ['DateFieldLabelServerComponent', 'DateFieldLabelServerProps'],
+  ['EmailFieldDescriptionClientComponent', 'EmailFieldDescriptionClientProps'],
+  ['EmailFieldDescriptionServerComponent', 'EmailFieldDescriptionServerProps'],
+  ['EmailFieldDiffClientComponent', 'EmailFieldDiffClientProps'],
+  ['EmailFieldDiffServerComponent', 'EmailFieldDiffServerProps'],
+  ['EmailFieldErrorClientComponent', 'EmailFieldErrorClientProps'],
+  ['EmailFieldErrorServerComponent', 'EmailFieldErrorServerProps'],
+  ['EmailFieldLabelClientComponent', 'EmailFieldLabelClientProps'],
+  ['EmailFieldLabelServerComponent', 'EmailFieldLabelServerProps'],
+  ['GroupFieldDescriptionClientComponent', 'GroupFieldDescriptionClientProps'],
+  ['GroupFieldDescriptionServerComponent', 'GroupFieldDescriptionServerProps'],
+  ['GroupFieldDiffClientComponent', 'GroupFieldDiffClientProps'],
+  ['GroupFieldDiffServerComponent', 'GroupFieldDiffServerProps'],
+  ['GroupFieldErrorClientComponent', 'GroupFieldErrorClientProps'],
+  ['GroupFieldErrorServerComponent', 'GroupFieldErrorServerProps'],
+  ['GroupFieldLabelClientComponent', 'GroupFieldLabelClientProps'],
+  ['GroupFieldLabelServerComponent', 'GroupFieldLabelServerProps'],
+  ['JSONFieldDescriptionClientComponent', 'JSONFieldDescriptionClientProps'],
+  ['JSONFieldDescriptionServerComponent', 'JSONFieldDescriptionServerProps'],
+  ['JSONFieldDiffClientComponent', 'JSONFieldDiffClientProps'],
+  ['JSONFieldDiffServerComponent', 'JSONFieldDiffServerProps'],
+  ['JSONFieldErrorClientComponent', 'JSONFieldErrorClientProps'],
+  ['JSONFieldErrorServerComponent', 'JSONFieldErrorServerProps'],
+  ['JSONFieldLabelClientComponent', 'JSONFieldLabelClientProps'],
+  ['JSONFieldLabelServerComponent', 'JSONFieldLabelServerProps'],
+  ['JoinFieldDescriptionClientComponent', 'JoinFieldDescriptionClientProps'],
+  ['JoinFieldDescriptionServerComponent', 'JoinFieldDescriptionServerProps'],
+  ['JoinFieldDiffClientComponent', 'JoinFieldDiffClientProps'],
+  ['JoinFieldDiffServerComponent', 'JoinFieldDiffServerProps'],
+  ['JoinFieldErrorClientComponent', 'JoinFieldErrorClientProps'],
+  ['JoinFieldErrorServerComponent', 'JoinFieldErrorServerProps'],
+  ['JoinFieldLabelClientComponent', 'JoinFieldLabelClientProps'],
+  ['JoinFieldLabelServerComponent', 'JoinFieldLabelServerProps'],
+  ['NumberFieldDescriptionClientComponent', 'NumberFieldDescriptionClientProps'],
+  ['NumberFieldDescriptionServerComponent', 'NumberFieldDescriptionServerProps'],
+  ['NumberFieldDiffClientComponent', 'NumberFieldDiffClientProps'],
+  ['NumberFieldDiffServerComponent', 'NumberFieldDiffServerProps'],
+  ['NumberFieldErrorClientComponent', 'NumberFieldErrorClientProps'],
+  ['NumberFieldErrorServerComponent', 'NumberFieldErrorServerProps'],
+  ['NumberFieldLabelClientComponent', 'NumberFieldLabelClientProps'],
+  ['NumberFieldLabelServerComponent', 'NumberFieldLabelServerProps'],
+  ['PointFieldDescriptionClientComponent', 'PointFieldDescriptionClientProps'],
+  ['PointFieldDescriptionServerComponent', 'PointFieldDescriptionServerProps'],
+  ['PointFieldDiffClientComponent', 'PointFieldDiffClientProps'],
+  ['PointFieldDiffServerComponent', 'PointFieldDiffServerProps'],
+  ['PointFieldErrorClientComponent', 'PointFieldErrorClientProps'],
+  ['PointFieldErrorServerComponent', 'PointFieldErrorServerProps'],
+  ['PointFieldLabelClientComponent', 'PointFieldLabelClientProps'],
+  ['PointFieldLabelServerComponent', 'PointFieldLabelServerProps'],
+  ['RadioFieldDescriptionClientComponent', 'RadioFieldDescriptionClientProps'],
+  ['RadioFieldDescriptionServerComponent', 'RadioFieldDescriptionServerProps'],
+  ['RadioFieldDiffClientComponent', 'RadioFieldDiffClientProps'],
+  ['RadioFieldDiffServerComponent', 'RadioFieldDiffServerProps'],
+  ['RadioFieldErrorClientComponent', 'RadioFieldErrorClientProps'],
+  ['RadioFieldErrorServerComponent', 'RadioFieldErrorServerProps'],
+  ['RadioFieldLabelClientComponent', 'RadioFieldLabelClientProps'],
+  ['RadioFieldLabelServerComponent', 'RadioFieldLabelServerProps'],
+  ['RelationshipFieldDescriptionClientComponent', 'RelationshipFieldDescriptionClientProps'],
+  ['RelationshipFieldDescriptionServerComponent', 'RelationshipFieldDescriptionServerProps'],
+  ['RelationshipFieldDiffClientComponent', 'RelationshipFieldDiffClientProps'],
+  ['RelationshipFieldDiffServerComponent', 'RelationshipFieldDiffServerProps'],
+  ['RelationshipFieldErrorClientComponent', 'RelationshipFieldErrorClientProps'],
+  ['RelationshipFieldErrorServerComponent', 'RelationshipFieldErrorServerProps'],
+  ['RelationshipFieldLabelClientComponent', 'RelationshipFieldLabelClientProps'],
+  ['RelationshipFieldLabelServerComponent', 'RelationshipFieldLabelServerProps'],
+  ['RichTextFieldDescriptionClientComponent', 'RichTextFieldDescriptionClientProps'],
+  ['RichTextFieldDescriptionServerComponent', 'RichTextFieldDescriptionServerProps'],
+  ['RichTextFieldDiffClientComponent', 'RichTextFieldDiffClientProps'],
+  ['RichTextFieldDiffServerComponent', 'RichTextFieldDiffServerProps'],
+  ['RichTextFieldErrorClientComponent', 'RichTextFieldErrorClientProps'],
+  ['RichTextFieldErrorServerComponent', 'RichTextFieldErrorServerProps'],
+  ['RichTextFieldLabelClientComponent', 'RichTextFieldLabelClientProps'],
+  ['RichTextFieldLabelServerComponent', 'RichTextFieldLabelServerProps'],
+  ['RowFieldDescriptionClientComponent', 'RowFieldDescriptionClientProps'],
+  ['RowFieldDescriptionServerComponent', 'RowFieldDescriptionServerProps'],
+  ['RowFieldDiffClientComponent', 'RowFieldDiffClientProps'],
+  ['RowFieldDiffServerComponent', 'RowFieldDiffServerProps'],
+  ['RowFieldErrorClientComponent', 'RowFieldErrorClientProps'],
+  ['RowFieldErrorServerComponent', 'RowFieldErrorServerProps'],
+  ['RowFieldLabelClientComponent', 'RowFieldLabelClientProps'],
+  ['RowFieldLabelServerComponent', 'RowFieldLabelServerProps'],
+  ['SelectFieldDescriptionClientComponent', 'SelectFieldDescriptionClientProps'],
+  ['SelectFieldDescriptionServerComponent', 'SelectFieldDescriptionServerProps'],
+  ['SelectFieldDiffClientComponent', 'SelectFieldDiffClientProps'],
+  ['SelectFieldDiffServerComponent', 'SelectFieldDiffServerProps'],
+  ['SelectFieldErrorClientComponent', 'SelectFieldErrorClientProps'],
+  ['SelectFieldErrorServerComponent', 'SelectFieldErrorServerProps'],
+  ['SelectFieldLabelClientComponent', 'SelectFieldLabelClientProps'],
+  ['SelectFieldLabelServerComponent', 'SelectFieldLabelServerProps'],
+  ['TabsFieldDescriptionClientComponent', 'TabsFieldDescriptionClientProps'],
+  ['TabsFieldDescriptionServerComponent', 'TabsFieldDescriptionServerProps'],
+  ['TabsFieldDiffClientComponent', 'TabsFieldDiffClientProps'],
+  ['TabsFieldDiffServerComponent', 'TabsFieldDiffServerProps'],
+  ['TabsFieldErrorClientComponent', 'TabsFieldErrorClientProps'],
+  ['TabsFieldErrorServerComponent', 'TabsFieldErrorServerProps'],
+  ['TabsFieldLabelClientComponent', 'TabsFieldLabelClientProps'],
+  ['TabsFieldLabelServerComponent', 'TabsFieldLabelServerProps'],
+  ['TextFieldDescriptionClientComponent', 'TextFieldDescriptionClientProps'],
+  ['TextFieldDescriptionServerComponent', 'TextFieldDescriptionServerProps'],
+  ['TextFieldDiffClientComponent', 'TextFieldDiffClientProps'],
+  ['TextFieldDiffServerComponent', 'TextFieldDiffServerProps'],
+  ['TextFieldErrorClientComponent', 'TextFieldErrorClientProps'],
+  ['TextFieldErrorServerComponent', 'TextFieldErrorServerProps'],
+  ['TextFieldLabelClientComponent', 'TextFieldLabelClientProps'],
+  ['TextFieldLabelServerComponent', 'TextFieldLabelServerProps'],
+  ['TextareaFieldDescriptionClientComponent', 'TextareaFieldDescriptionClientProps'],
+  ['TextareaFieldDescriptionServerComponent', 'TextareaFieldDescriptionServerProps'],
+  ['TextareaFieldDiffClientComponent', 'TextareaFieldDiffClientProps'],
+  ['TextareaFieldDiffServerComponent', 'TextareaFieldDiffServerProps'],
+  ['TextareaFieldErrorClientComponent', 'TextareaFieldErrorClientProps'],
+  ['TextareaFieldErrorServerComponent', 'TextareaFieldErrorServerProps'],
+  ['TextareaFieldLabelClientComponent', 'TextareaFieldLabelClientProps'],
+  ['TextareaFieldLabelServerComponent', 'TextareaFieldLabelServerProps'],
+  ['UIFieldDiffClientComponent', 'UIFieldDiffClientProps'],
+  ['UIFieldDiffServerComponent', 'UIFieldDiffServerProps'],
+  ['UploadFieldDescriptionClientComponent', 'UploadFieldDescriptionClientProps'],
+  ['UploadFieldDescriptionServerComponent', 'UploadFieldDescriptionServerProps'],
+  ['UploadFieldDiffClientComponent', 'UploadFieldDiffClientProps'],
+  ['UploadFieldDiffServerComponent', 'UploadFieldDiffServerProps'],
+  ['UploadFieldErrorClientComponent', 'UploadFieldErrorClientProps'],
+  ['UploadFieldErrorServerComponent', 'UploadFieldErrorServerProps'],
+  ['UploadFieldLabelClientComponent', 'UploadFieldLabelClientProps'],
+  ['UploadFieldLabelServerComponent', 'UploadFieldLabelServerProps'],
+] as const
+
 describe('migrate-field-component-types', () => {
+  it.each(removedComponentToProps)('should migrate %s to %s', async (componentName, propsName) => {
+    const source = `import type { ${componentName} } from 'payload'
+
+const Component: ${componentName} = () => null`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { ${propsName} } from 'payload'
+import type React from 'react'
+
+const Component: React.FC<${propsName}> = () => null`)
+  })
+
+  it('should preserve generic type arguments inside the props type', async () => {
+    const source = `import type {
+  BlocksFieldLabelServerComponent,
+  FieldErrorClientComponent,
+  TextFieldClient,
+} from 'payload'
+
+const Error: FieldErrorClientComponent<TextFieldClient> = () => null
+const Label: BlocksFieldLabelServerComponent = async () => null`
+    const expected = `import type {
+  BlocksFieldLabelServerProps,
+  FieldErrorClientProps,
+  TextFieldClient,
+} from 'payload'
+import type React from 'react'
+
+const Error: React.FC<FieldErrorClientProps<TextFieldClient>> = () => null
+const Label: React.FC<BlocksFieldLabelServerProps> = async () => null`
+    const output = await runTransform({
+      filename: 'input.tsx',
+      source,
+      transform: migrateFieldComponentTypes,
+    })
+
+    expect(output).toBe(expected)
+
+    const project = new Project({
+      compilerOptions: { esModuleInterop: true, noEmit: true, strict: true },
+      useInMemoryFileSystem: true,
+    })
+
+    project.createSourceFile(
+      '/node_modules/react/index.d.ts',
+      `declare namespace React { type FC<Props> = (props: Props) => unknown }
+export = React`,
+    )
+    project.createSourceFile(
+      '/node_modules/payload/index.d.ts',
+      `export type BlocksFieldLabelServerProps = Record<string, unknown>
+export type FieldErrorClientProps<T> = { field: T }
+export type TextFieldClient = { type: 'text' }`,
+    )
+    project.createSourceFile('/output.ts', output)
+
+    expect(
+      project.getPreEmitDiagnostics().map((diagnostic) => diagnostic.getMessageText()),
+    ).toEqual([])
+  })
+
   it('should migrate arrow and function component annotations', async () => {
     const input = await fixture('basic.input.ts')
     const output = await fixture('basic.output.ts')
@@ -188,10 +479,28 @@ const Field: TextFieldClientComponent = CustomField`
     expect(result.notes?.join('\n')).toContain('class component')
   })
 
+  it('should leave generic class components unchanged and report manual work', async () => {
+    const source = `import React from 'react'
+import type { FieldErrorClientComponent, TextFieldClient } from 'payload'
+
+const Field: FieldErrorClientComponent<TextFieldClient> = class extends React.Component {}`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/generic-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes).toEqual([expect.stringContaining('/generic-class-component.tsx:4')])
+    expect(result.notes?.[0]).toContain('class component')
+  })
+
   it.each([
     `export type { TextFieldClientComponent } from 'payload'`,
     `import type * as Payload from 'payload'\ntype Field = Payload.TextFieldClientComponent`,
     `type Field = import('payload').TextFieldClientComponent`,
+    `type Field = import( 'payload' ).TextFieldClientComponent`,
+    `type Field = import(/* webpackIgnore: true */ 'payload').TextFieldClientComponent`,
     `import type { TextFieldClientComponent } from 'payload'\nexport type { TextFieldClientComponent }`,
   ])('should warn about unsupported import forms without changing source', async (source) => {
     const project = new Project({ useInMemoryFileSystem: true })
