@@ -62,22 +62,6 @@ describe('sanitizeUploadData', () => {
     })
   })
 
-  it.each(['create', 'update'] as const)(
-    'should discard client supplied original and managed-file data on %s',
-    (operation) => {
-      expect(
-        sanitizeUploadData(
-          {
-            alt: 'Safe text',
-            _managedFiles: [{ storageBackendId: 'forged', key: 'other.jpg' }],
-            original: { filename: 'other.jpg', url: 'https://example.com/other.jpg' },
-          },
-          operation,
-        ),
-      ).toEqual({ alt: 'Safe text' })
-    },
-  )
-
   it('should use a submitted prefix when writing a new file', () => {
     expect(getUploadDestination({ data: { prefix: 'articles' }, file: {} })).toEqual({
       prefix: 'articles',

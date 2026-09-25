@@ -56,7 +56,13 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const updated = await payload.update({
       id: created.id,
       collection: mediaSlug,
-      data: { alt: 'changed metadata' },
+      data: {
+        _managedFiles: [
+          { key: 'forged.jpg', roles: [{ type: 'original' }], storageBackendId: 'other' },
+        ],
+        alt: 'changed metadata',
+        original: { ...original, filename: 'forged.jpg' },
+      } as never,
     })
 
     expect(updated.original).toMatchObject(original)

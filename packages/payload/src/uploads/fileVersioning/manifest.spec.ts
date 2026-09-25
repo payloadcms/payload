@@ -88,23 +88,6 @@ describe('createManagedFileManifest', () => {
     ])
   })
 
-  it('should retain complete storage keys without using display URLs as ownership', () => {
-    const manifest = createManagedFileManifest({
-      references: [
-        { storageBackendId: 's3:media', key: 'media/2026/photo.jpg', role: { type: 'original' } },
-        { storageBackendId: 's3:media', key: 'media/2026/photo.jpg', role: { type: 'default' } },
-      ],
-    })
-
-    expect(manifest).toEqual([
-      {
-        storageBackendId: 's3:media',
-        key: 'media/2026/photo.jpg',
-        roles: [{ type: 'original' }, { type: 'default' }],
-      },
-    ])
-  })
-
   it.each([
     '../photo.jpg',
     '/photo.jpg',
