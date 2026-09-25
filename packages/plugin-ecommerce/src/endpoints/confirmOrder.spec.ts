@@ -19,7 +19,7 @@ type ConfirmArgs = Parameters<
 
 type State = {
   cart: Record<string, unknown>
-  inventoryUpdates: Array<{ collection: string; id: unknown; quantity: number }>
+  inventoryUpdates: Array<{ collection: string; fieldName: string; id: unknown; quantity: number }>
   order?: Record<string, unknown>
   reverseOrders?: Record<string, unknown>[]
   transaction: Record<string, unknown>
@@ -41,6 +41,7 @@ const createHarness = ({
     secret: 'cart-secret',
   },
   initialTransactionID,
+  inventory,
   transaction = {
     amount: 1000,
     currency: 'USD',
@@ -55,6 +56,7 @@ const createHarness = ({
   cart?: Record<string, unknown>
   data?: Record<string, unknown>
   initialTransactionID?: Request['transactionID']
+  inventory?: Parameters<typeof confirmOrderHandler>[0]['inventory']
   transaction?: Record<string, unknown>
   user?: null | Record<string, unknown>
 } = {}) => {
@@ -154,10 +156,13 @@ const createHarness = ({
         return { ...state.transaction }
       }
 
+      const [fieldName, mutation] = Object.entries(updateData)[0] as [string, { $inc: number }]
+
       state.inventoryUpdates.push({
         collection,
+        fieldName,
         id,
-        quantity: updateData.inventory.$inc,
+        quantity: mutation.$inc,
       })
 
       return { id }
@@ -185,6 +190,7 @@ const createHarness = ({
       defaultCurrency: 'USD',
       supportedCurrencies: [],
     },
+    inventory,
     paymentMethod: {
       confirmOrder,
     } as unknown as Parameters<typeof confirmOrderHandler>[0]['paymentMethod'],
@@ -343,7 +349,7 @@ describe('confirmOrderHandler', () => {
     })
     expect(harness.create).toHaveBeenCalledTimes(1)
     expect(harness.state.inventoryUpdates).toEqual([
-      { collection: 'products', id: 'product-123', quantity: -2 },
+      { collection: 'products', fieldName: 'inventory', id: 'product-123', quantity: -2 },
     ])
     expect(harness.state.transaction).toMatchObject({
       order: 'order-123',
@@ -543,5 +549,31 @@ describe('confirmOrderHandler', () => {
     for (const [args] of harness.updateOne.mock.calls) {
       expect(args.req).toBe(harness.req)
     }
+  })
+
+  it('should decrement the configured inventory field name', async () => {
+    const harness = createHarness({
+      adapter: coreAdapter,
+      inventory: { fieldName: 'stock' },
+    })
+
+    const { response } = await runHandler(harness)
+
+    expect(response.status).toBe(200)
+    expect(harness.state.inventoryUpdates).toEqual([
+      { collection: 'products', fieldName: 'stock', id: 'product-123', quantity: -2 },
+    ])
+  })
+
+  it('should not touch inventory when inventory tracking is disabled', async () => {
+    const harness = createHarness({
+      adapter: coreAdapter,
+      inventory: false,
+    })
+
+    const { response } = await runHandler(harness)
+
+    expect(response.status).toBe(200)
+    expect(harness.state.inventoryUpdates).toHaveLength(0)
   })
 })

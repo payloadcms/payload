@@ -9,6 +9,7 @@ import type {
 } from '../types/index.js'
 
 import { defaultProductsValidation } from '../utilities/defaultProductsValidation.js'
+import { getInventoryFieldName } from '../utilities/inventory.js'
 
 type Args = {
   /**
@@ -55,6 +56,7 @@ export const initiatePaymentHandler: InitiatePayment =
     cartsSlug = 'carts',
     currenciesConfig,
     customersSlug = 'users',
+    inventory,
     paymentMethod,
     productsSlug = 'products',
     productsValidation,
@@ -66,6 +68,7 @@ export const initiatePaymentHandler: InitiatePayment =
     const data = req.data
     const payload = req.payload
     const user = req.user as null | UserWithCart
+    const inventoryFieldName = inventory ? getInventoryFieldName({ inventory }) : false
 
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID
@@ -208,7 +211,7 @@ export const initiatePaymentHandler: InitiatePayment =
           depth: 0,
           overrideAccess: true,
           select: {
-            inventory: true,
+            ...(inventoryFieldName ? { [inventoryFieldName]: true } : {}),
             [priceField]: true,
           },
         })
@@ -226,11 +229,18 @@ export const initiatePaymentHandler: InitiatePayment =
 
         try {
           if (productsValidation) {
-            await productsValidation({ currenciesConfig, currency, product, quantity })
+            await productsValidation({
+              currenciesConfig,
+              currency,
+              inventoryFieldName,
+              product,
+              quantity,
+            })
           } else {
             await defaultProductsValidation({
               currenciesConfig,
               currency,
+              inventoryFieldName,
               product,
               quantity,
             })
@@ -261,7 +271,7 @@ export const initiatePaymentHandler: InitiatePayment =
             depth: 0,
             overrideAccess: true,
             select: {
-              inventory: true,
+              ...(inventoryFieldName ? { [inventoryFieldName]: true } : {}),
               [priceField]: true,
             },
           })
@@ -282,6 +292,7 @@ export const initiatePaymentHandler: InitiatePayment =
               await productsValidation({
                 currenciesConfig,
                 currency,
+                inventoryFieldName,
                 product: item.product,
                 quantity,
                 variant,
@@ -290,6 +301,7 @@ export const initiatePaymentHandler: InitiatePayment =
               await defaultProductsValidation({
                 currenciesConfig,
                 currency,
+                inventoryFieldName,
                 product: item.product,
                 quantity,
                 variant,
