@@ -62,18 +62,18 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E51C3FCC".
+ * via the `definition` "LexicalNodes_2BD2444B".
  */
-export type LexicalNodes_E51C3FCC =
+export type LexicalNodes_2BD2444B =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E51C3FCC>
-  | SerializedAutoLinkNode<LexicalNodes_E51C3FCC, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_E51C3FCC, LexicalLinkFields>
+  | SerializedParagraphNode<LexicalNodes_2BD2444B>
+  | SerializedAutoLinkNode<LexicalNodes_2BD2444B, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_2BD2444B, LexicalLinkFields>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'upload'>
-  | SerializedQuoteNode<LexicalNodes_E51C3FCC>
+  | SerializedQuoteNode<LexicalNodes_2BD2444B>
   | SerializedRelationshipNode<
       | 'posts'
       | 'localized-posts'
@@ -84,6 +84,7 @@ export type LexicalNodes_E51C3FCC =
       | 'force-select'
       | 'rels'
       | 'relationships-blocks'
+      | 'select-documents'
       | 'custom-ids'
       | 'users'
       | 'payload-kv'
@@ -91,9 +92,9 @@ export type LexicalNodes_E51C3FCC =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_E51C3FCC>
-  | SerializedListItemNode<LexicalNodes_E51C3FCC>
-  | SerializedHeadingNode<LexicalNodes_E51C3FCC>;
+  | SerializedListNode<LexicalNodes_2BD2444B>
+  | SerializedListItemNode<LexicalNodes_2BD2444B>
+  | SerializedHeadingNode<LexicalNodes_2BD2444B>;
 
 export interface Config {
   auth: {
@@ -111,6 +112,7 @@ export interface Config {
     upload: Upload;
     rels: Rel;
     'relationships-blocks': RelationshipsBlock;
+    'select-documents': SelectDocument;
     'custom-ids': CustomId;
     users: User;
     'payload-kv': PayloadKv;
@@ -130,6 +132,7 @@ export interface Config {
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
     'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
+    'select-documents': SelectDocumentsSelect<false> | SelectDocumentsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -259,6 +262,7 @@ export interface Rel {
  */
 export interface Upload {
   id: string;
+  link?: (string | null) | Rel;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -446,7 +450,7 @@ export interface Introduction {
       | null;
     label: string;
   };
-  richTextLexical?: LexicalRichText<LexicalNodes_E51C3FCC> | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_2BD2444B> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'introduction';
@@ -511,6 +515,27 @@ export interface Block_421D958C {
   id?: string | null;
   blockName?: string | null;
   blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-documents".
+ */
+export interface SelectDocument {
+  id: string;
+  blocks?: SelectRelationshipBlock[] | null;
+  upload?: (string | null) | Upload;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SelectRelationshipBlock".
+ */
+export interface SelectRelationshipBlock {
+  link?: (string | null) | Rel;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'select-relationship-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -612,6 +637,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships-blocks';
         value: string | RelationshipsBlock;
+      } | null)
+    | ({
+        relationTo: 'select-documents';
+        value: string | SelectDocument;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -952,6 +981,7 @@ export interface ForceSelectSelect<T extends boolean = true> {
  * via the `definition` "upload_select".
  */
 export interface UploadSelect<T extends boolean = true> {
+  link?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -992,6 +1022,29 @@ export interface RelationshipsBlocksSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-documents_select".
+ */
+export interface SelectDocumentsSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        'select-relationship-block'?: T | SelectRelationshipBlockSelect<T>;
+      };
+  upload?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SelectRelationshipBlock_select".
+ */
+export interface SelectRelationshipBlockSelect<T extends boolean = true> {
+  link?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
