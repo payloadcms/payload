@@ -1,9 +1,9 @@
-import type { RelationshipFieldServerComponent } from 'payload'
+import type { RelationshipFieldServerProps } from 'payload'
 import type React from 'react'
 
 import { RelationshipField } from '@payloadcms/ui'
 
-export const CustomRelationshipFieldServer: RelationshipFieldServerComponent = ({
+export const CustomRelationshipFieldServer: React.FC<RelationshipFieldServerProps> = ({
   clientField,
   path,
   schemaPath,

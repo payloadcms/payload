@@ -3,13 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { UploadField, UploadFieldClient } from '../../fields/config/types.js'
 import type { UploadFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -33,18 +27,6 @@ export type UploadFieldClientProps = ClientFieldBase<UploadFieldClientWithoutTyp
 
 export type UploadFieldServerProps = ServerFieldBase<UploadField, UploadFieldClientWithoutType> &
   UploadFieldBaseServerProps
-
-export type UploadFieldServerComponent = FieldServerComponent<
-  UploadField,
-  UploadFieldClientWithoutType,
-  UploadFieldBaseServerProps
->
-
-export type UploadFieldClientComponent = FieldClientComponent<
-  UploadFieldClientWithoutType,
-  UploadFieldBaseClientProps
->
-
 export type UploadFieldLabelServerComponent = FieldLabelServerComponent<
   UploadField,
   UploadFieldClientWithoutType

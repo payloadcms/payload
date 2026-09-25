@@ -3,13 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { DateField, DateFieldClient } from '../../fields/config/types.js'
 import type { DateFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -33,18 +27,6 @@ export type DateFieldClientProps = ClientFieldBase<DateFieldClientWithoutType> &
 
 export type DateFieldServerProps = DateFieldBaseServerProps &
   ServerFieldBase<DateField, DateFieldClientWithoutType>
-
-export type DateFieldServerComponent = FieldServerComponent<
-  DateField,
-  DateFieldClientWithoutType,
-  DateFieldBaseServerProps
->
-
-export type DateFieldClientComponent = FieldClientComponent<
-  DateFieldClientWithoutType,
-  DateFieldBaseClientProps
->
-
 export type DateFieldLabelServerComponent = FieldLabelServerComponent<
   DateField,
   DateFieldClientWithoutType

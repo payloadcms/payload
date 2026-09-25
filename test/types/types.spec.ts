@@ -13,6 +13,7 @@ import type {
   GeneratedTypes,
   Job,
   JobTaskStatus,
+  JoinFieldServerProps,
   JoinQuery,
   MeOperationResult,
   NamedGroupField,
@@ -20,12 +21,14 @@ import type {
   PaginatedDocs,
   PayloadRequest,
   PayloadTypesShape,
+  RowField,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-  RowField,
   SelectType,
   TabsField,
   TextField,
+  TextFieldClientProps,
+  TextFieldServerProps,
   TypedCollectionSelect,
   TypeWithVersion,
   UnnamedGroupField,
@@ -33,6 +36,7 @@ import type {
   UntypedPayloadTypes,
   Where,
 } from 'payload'
+import type { FC } from 'react'
 
 import {
   buildEditorState,
@@ -116,6 +120,115 @@ describe('Types testing', () => {
       expect<TabsField>().type.not.toHaveProperty('disableDuplicate')
       expect<UnnamedGroupField>().type.not.toHaveProperty('disableDuplicate')
       expect<UnnamedTab>().type.not.toHaveProperty('disableDuplicate')
+    })
+  })
+
+  describe('field component props', () => {
+    test('should use props types for field client and server components', () => {
+      const ClientField: FC<TextFieldClientProps> = () => null
+      const JoinServerField = ({ clientField }: JoinFieldServerProps) => clientField.collection
+      const ServerField: FC<TextFieldServerProps> = () => null
+
+      expect(ClientField).type.toBe<FC<TextFieldClientProps>>()
+      expect(JoinServerField).type.toBe<
+        (props: JoinFieldServerProps) => JoinFieldServerProps['clientField']['collection']
+      >()
+      expect(ServerField).type.toBe<FC<TextFieldServerProps>>()
+    })
+
+    test('should not export concrete field component aliases', () => {
+      type RemovedFieldComponentAliases = [
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').ArrayFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').BlocksFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CheckboxFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CodeFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CodeFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').CollapsibleFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').DateFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').DateFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').EmailFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').EmailFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').GroupFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').GroupFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JoinFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JoinFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JSONFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').JSONFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').NumberFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').NumberFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').PointFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').PointFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RadioFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RadioFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RelationshipFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RichTextFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RowFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').RowFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').SelectFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').SelectFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TabsFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TabsFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').TextareaFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UIFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UIFieldServerComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UploadFieldClientComponent,
+        // @ts-expect-error! -- Concrete field component aliases were removed in Payload 4.
+        import('payload').UploadFieldServerComponent,
+      ]
+
+      expect<RemovedFieldComponentAliases>().type.toBeAssignableTo<unknown[]>()
     })
   })
 

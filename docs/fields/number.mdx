@@ -107,9 +107,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { NumberField } from '@payloadcms/ui'
-import type { NumberFieldServerComponent } from 'payload'
+import type { NumberFieldServerProps } from 'payload'
 
-export const CustomNumberFieldServer: NumberFieldServerComponent = ({
+export const CustomNumberFieldServer: React.FC<NumberFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -132,9 +132,11 @@ export const CustomNumberFieldServer: NumberFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { NumberField } from '@payloadcms/ui'
-import type { NumberFieldClientComponent } from 'payload'
+import type { NumberFieldClientProps } from 'payload'
 
-export const CustomNumberFieldClient: NumberFieldClientComponent = (props) => {
+export const CustomNumberFieldClient: React.FC<NumberFieldClientProps> = (
+  props,
+) => {
   return <NumberField {...props} />
 }
 ```

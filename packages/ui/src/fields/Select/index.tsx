@@ -1,10 +1,5 @@
 'use client'
-import type {
-  Option,
-  OptionObject,
-  SelectFieldClientComponent,
-  SelectFieldClientProps,
-} from 'payload'
+import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
 
 import React, { useCallback, useMemo } from 'react'
 
@@ -28,7 +23,7 @@ export const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const SelectFieldComponent: SelectFieldClientComponent = (props) => {
+const SelectFieldComponent: React.FC<SelectFieldClientProps> = (props) => {
   const {
     field,
     field: {

@@ -128,9 +128,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { RadioGroupField } from '@payloadcms/ui'
-import type { RadioFieldServerComponent } from 'payload'
+import type { RadioFieldServerProps } from 'payload'
 
-export const CustomRadioFieldServer: RadioFieldServerComponent = ({
+export const CustomRadioFieldServer: React.FC<RadioFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -153,9 +153,11 @@ export const CustomRadioFieldServer: RadioFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { RadioGroupField } from '@payloadcms/ui'
-import type { RadioFieldClientComponent } from 'payload'
+import type { RadioFieldClientProps } from 'payload'
 
-export const CustomRadioFieldClient: RadioFieldClientComponent = (props) => {
+export const CustomRadioFieldClient: React.FC<RadioFieldClientProps> = (
+  props,
+) => {
   return <RadioGroupField {...props} />
 }
 ```

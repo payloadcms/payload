@@ -348,9 +348,9 @@ If you provide `admin.components.Label`, that component replaces both the name a
 ```tsx
 import type React from 'react'
 import { BlocksField } from '@payloadcms/ui'
-import type { BlocksFieldServerComponent } from 'payload'
+import type { BlocksFieldServerProps } from 'payload'
 
-export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
+export const CustomBlocksFieldServer: React.FC<BlocksFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -373,9 +373,11 @@ export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { BlocksField } from '@payloadcms/ui'
-import type { BlocksFieldClientComponent } from 'payload'
+import type { BlocksFieldClientProps } from 'payload'
 
-export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
+export const CustomBlocksFieldClient: React.FC<BlocksFieldClientProps> = (
+  props,
+) => {
   return <BlocksField {...props} />
 }
 ```

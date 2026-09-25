@@ -1,5 +1,5 @@
 'use client'
-import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
+import type { PointFieldClientProps, PointFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -18,7 +18,7 @@ import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'point'
 
-export const PointFieldComponent: PointFieldClientComponent = (props) => {
+export const PointFieldComponent: React.FC<PointFieldClientProps> = (props) => {
   const {
     field,
     field: {

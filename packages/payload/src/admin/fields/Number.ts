@@ -3,13 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { NumberField, NumberFieldClient } from '../../fields/config/types.js'
 import type { NumberFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -34,18 +28,6 @@ export type NumberFieldClientProps = ClientFieldBase<NumberFieldClientWithoutTyp
 
 export type NumberFieldServerProps = NumberFieldBaseServerProps &
   ServerFieldBase<NumberField, NumberFieldClientWithoutType>
-
-export type NumberFieldServerComponent = FieldServerComponent<
-  NumberField,
-  NumberFieldClientWithoutType,
-  NumberFieldBaseServerProps
->
-
-export type NumberFieldClientComponent = FieldClientComponent<
-  NumberFieldClientWithoutType,
-  NumberFieldBaseClientProps
->
-
 export type NumberFieldLabelServerComponent = FieldLabelServerComponent<
   NumberField,
   NumberFieldClientWithoutType

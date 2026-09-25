@@ -3,13 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 import type { RichTextField, RichTextFieldClient } from '../../fields/config/types.js'
 import type { RichTextFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
-import type {
-  ClientFieldBase,
-  FieldClientComponent,
-  FieldPaths,
-  FieldServerComponent,
-  ServerFieldBase,
-} from '../forms/Field.js'
+import type { ClientFieldBase, FieldPaths, ServerFieldBase } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
@@ -25,11 +19,7 @@ type RichTextFieldClientWithoutType<
   TExtraProperties = object,
 > = MarkOptional<RichTextFieldClient<TValue, TAdapterProps, TExtraProperties>, 'type'>
 
-type RichTextFieldBaseClientProps<
-  TValue extends object = any,
-  TAdapterProps = any,
-  TExtraProperties = object,
-> = {
+type RichTextFieldBaseClientProps = {
   readonly path: string
   readonly validate?: RichTextFieldValidation
 }
@@ -41,22 +31,10 @@ export type RichTextFieldClientProps<
   TAdapterProps = any,
   TExtraProperties = object,
 > = ClientFieldBase<RichTextFieldClientWithoutType<TValue, TAdapterProps, TExtraProperties>> &
-  RichTextFieldBaseClientProps<TValue, TAdapterProps, TExtraProperties>
+  RichTextFieldBaseClientProps
 
 export type RichTextFieldServerProps = RichTextFieldBaseServerProps &
   ServerFieldBase<RichTextField, RichTextFieldClientWithoutType>
-
-export type RichTextFieldServerComponent = FieldServerComponent<
-  RichTextField,
-  RichTextFieldClientWithoutType,
-  RichTextFieldBaseServerProps
->
-
-export type RichTextFieldClientComponent = FieldClientComponent<
-  RichTextFieldClientWithoutType,
-  RichTextFieldBaseClientProps
->
-
 export type RichTextFieldLabelServerComponent = FieldLabelServerComponent<
   RichTextField,
   RichTextFieldClientWithoutType

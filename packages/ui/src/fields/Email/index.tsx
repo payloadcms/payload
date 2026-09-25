@@ -1,9 +1,5 @@
 'use client'
-import type {
-  EmailFieldClientComponent,
-  EmailFieldClientProps,
-  EmailFieldValidation,
-} from 'payload'
+import type { EmailFieldClientProps, EmailFieldValidation } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
@@ -19,7 +15,7 @@ import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
-const EmailFieldComponent: EmailFieldClientComponent = (props) => {
+const EmailFieldComponent: React.FC<EmailFieldClientProps> = (props) => {
   const {
     field,
     field: {

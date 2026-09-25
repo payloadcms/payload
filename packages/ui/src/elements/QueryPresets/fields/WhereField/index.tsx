@@ -1,5 +1,5 @@
 'use client'
-import type { JSONFieldClientComponent, Where } from 'payload'
+import type { JSONFieldClientProps, Where } from 'payload'
 
 import React from 'react'
 
@@ -9,7 +9,7 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { WhereBuilder } from '../../../WhereBuilder/index.js'
 import '../fields.css'
 
-export const QueryPresetsWhereField: JSONFieldClientComponent = ({
+export const QueryPresetsWhereField: React.FC<JSONFieldClientProps> = ({
   field: { label, required },
 }) => {
   const { path, setValue, value } = useField<Where>()

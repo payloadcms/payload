@@ -24,10 +24,11 @@ To do so, import the `useField` hook as follows:
 
 ```tsx
 'use client'
-import type { TextFieldClientComponent } from 'payload'
+import type React from 'react'
+import type { TextFieldClientProps } from 'payload'
 import { useField } from '@payloadcms/ui'
 
-export const CustomTextField: TextFieldClientComponent = ({ path }) => {
+export const CustomTextField: React.FC<TextFieldClientProps> = ({ path }) => {
   const { value, setValue } = useField({ path }) // highlight-line
 
   return (
@@ -1154,6 +1155,7 @@ The `useStepNav` hook provides a way to change the step-nav breadcrumb links in 
 
 ```tsx
 'use client'
+import type React from 'react'
 import { type StepNavItem, useStepNav } from '@payloadcms/ui'
 import { useEffect } from 'react'
 

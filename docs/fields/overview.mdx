@@ -936,12 +936,10 @@ export const CustomTextField: React.FC = () => {
 
 ##### TypeScript#field-component-types
 
-When building Custom Field Components, you can import the client field props to ensure type safety in your component. There is an explicit type for the Field Component, one for every Field Type and server/client environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientComponent`:
+When building Custom Field Components, import the field props to ensure type safety in your component. There is an explicit props type for every Field Type and server/client environment. The convention is to prepend the field type onto the target type, i.e. `TextFieldClientProps`:
 
 ```tsx
 import type {
-  TextFieldClientComponent,
-  TextFieldServerComponent,
   TextFieldClientProps,
   TextFieldServerProps,
   // ...and so on for each Field Type

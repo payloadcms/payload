@@ -145,9 +145,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { DateTimeField } from '@payloadcms/ui'
-import type { DateFieldServerComponent } from 'payload'
+import type { DateFieldServerProps } from 'payload'
 
-export const CustomDateFieldServer: DateFieldServerComponent = ({
+export const CustomDateFieldServer: React.FC<DateFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -170,9 +170,11 @@ export const CustomDateFieldServer: DateFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { DateTimeField } from '@payloadcms/ui'
-import type { DateFieldClientComponent } from 'payload'
+import type { DateFieldClientProps } from 'payload'
 
-export const CustomDateFieldClient: DateFieldClientComponent = (props) => {
+export const CustomDateFieldClient: React.FC<DateFieldClientProps> = (
+  props,
+) => {
   return <DateTimeField {...props} />
 }
 ```

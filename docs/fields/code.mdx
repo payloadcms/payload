@@ -106,9 +106,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { CodeField } from '@payloadcms/ui'
-import type { CodeFieldServerComponent } from 'payload'
+import type { CodeFieldServerProps } from 'payload'
 
-export const CustomCodeFieldServer: CodeFieldServerComponent = ({
+export const CustomCodeFieldServer: React.FC<CodeFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -131,9 +131,11 @@ export const CustomCodeFieldServer: CodeFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { CodeField } from '@payloadcms/ui'
-import type { CodeFieldClientComponent } from 'payload'
+import type { CodeFieldClientProps } from 'payload'
 
-export const CustomCodeFieldClient: CodeFieldClientComponent = (props) => {
+export const CustomCodeFieldClient: React.FC<CodeFieldClientProps> = (
+  props,
+) => {
   return <CodeField {...props} />
 }
 ```

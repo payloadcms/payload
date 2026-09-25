@@ -99,9 +99,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { EmailField } from '@payloadcms/ui'
-import type { EmailFieldServerComponent } from 'payload'
+import type { EmailFieldServerProps } from 'payload'
 
-export const CustomEmailFieldServer: EmailFieldServerComponent = ({
+export const CustomEmailFieldServer: React.FC<EmailFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -124,9 +124,11 @@ export const CustomEmailFieldServer: EmailFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { EmailField } from '@payloadcms/ui'
-import type { EmailFieldClientComponent } from 'payload'
+import type { EmailFieldClientProps } from 'payload'
 
-export const CustomEmailFieldClient: EmailFieldClientComponent = (props) => {
+export const CustomEmailFieldClient: React.FC<EmailFieldClientProps> = (
+  props,
+) => {
   return <EmailField {...props} />
 }
 ```

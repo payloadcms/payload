@@ -139,9 +139,9 @@ payload.find({
 ```tsx
 import type React from 'react'
 import { PointField } from '@payloadcms/ui'
-import type { PointFieldServerComponent } from 'payload'
+import type { PointFieldServerProps } from 'payload'
 
-export const CustomPointFieldServer: PointFieldServerComponent = ({
+export const CustomPointFieldServer: React.FC<PointFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -164,9 +164,11 @@ export const CustomPointFieldServer: PointFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { PointField } from '@payloadcms/ui'
-import type { PointFieldClientComponent } from 'payload'
+import type { PointFieldClientProps } from 'payload'
 
-export const CustomPointFieldClient: PointFieldClientComponent = (props) => {
+export const CustomPointFieldClient: React.FC<PointFieldClientProps> = (
+  props,
+) => {
   return <PointField {...props} />
 }
 ```

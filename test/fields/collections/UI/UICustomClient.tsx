@@ -1,9 +1,9 @@
 'use client'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
 import React from 'react'
 
-export const UICustomClient: TextFieldClientComponent = ({
+export const UICustomClient: React.FC<TextFieldClientProps> = ({
   field: {
     name,
     admin: { custom },

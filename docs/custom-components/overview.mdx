@@ -388,9 +388,9 @@ Within Server Components, this prop is named `field`:
 
 ```tsx
 import React from 'react'
-import type { TextFieldServerComponent } from 'payload'
+import type { TextFieldServerProps } from 'payload'
 
-export const MyClientFieldComponent: TextFieldServerComponent = ({
+export const MyClientFieldComponent: React.FC<TextFieldServerProps> = ({
   field: { name },
 }) => {
   return <p>{`This field's name is ${name}`}</p>
@@ -402,9 +402,9 @@ Within Client Components, this prop is named `clientField` because its non-seria
 ```tsx
 'use client'
 import React from 'react'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientProps } from 'payload'
 
-export const MyClientFieldComponent: TextFieldClientComponent = ({
+export const MyClientFieldComponent: React.FC<TextFieldClientProps> = ({
   clientField: { name },
 }) => {
   return <p>{`This field's name is ${name}`}</p>
@@ -603,9 +603,11 @@ To do this, use the [`useFormFields`](../admin/react-hooks) hook instead of `use
 
 ```ts
 'use client'
+import type React from 'react'
 import { useFormFields } from '@payloadcms/ui'
+import type { TextFieldClientProps } from 'payload'
 
-const MyComponent: TextFieldClientComponent = ({ path }) => {
+const MyComponent: React.FC<TextFieldClientProps> = ({ path }) => {
   const value = useFormFields(([fields, dispatch]) => fields[path])
   // ...
 }

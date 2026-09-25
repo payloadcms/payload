@@ -150,9 +150,9 @@ export const ExampleCollection: CollectionConfig = {
 ```tsx
 import type React from 'react'
 import { ArrayField } from '@payloadcms/ui'
-import type { ArrayFieldServerComponent } from 'payload'
+import type { ArrayFieldServerProps } from 'payload'
 
-export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
+export const CustomArrayFieldServer: React.FC<ArrayFieldServerProps> = ({
   clientField,
   path,
   schemaPath,
@@ -175,9 +175,11 @@ export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
 'use client'
 import React from 'react'
 import { ArrayField } from '@payloadcms/ui'
-import type { ArrayFieldClientComponent } from 'payload'
+import type { ArrayFieldClientProps } from 'payload'
 
-export const CustomArrayFieldClient: ArrayFieldClientComponent = (props) => {
+export const CustomArrayFieldClient: React.FC<ArrayFieldClientProps> = (
+  props,
+) => {
   return <ArrayField {...props} />
 }
 ```

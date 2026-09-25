@@ -4,9 +4,7 @@ import type { RowField, RowFieldClient } from '../../fields/config/types.js'
 import type {
   ClientComponentProps,
   ClientFieldBase,
-  FieldClientComponent,
   FieldPaths,
-  FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
@@ -28,14 +26,6 @@ export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
   RowFieldBaseClientProps
 
 export type RowFieldServerProps = ServerFieldBase<RowField, RowFieldClientWithoutType>
-
-export type RowFieldServerComponent = FieldServerComponent<RowField, RowFieldClientWithoutType>
-
-export type RowFieldClientComponent = FieldClientComponent<
-  RowFieldClientWithoutType,
-  RowFieldBaseClientProps
->
-
 export type RowFieldLabelServerComponent = FieldLabelServerComponent<
   RowField,
   RowFieldClientWithoutType
