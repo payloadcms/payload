@@ -6,4 +6,5 @@ export const Users: CollectionConfig = {
   slug: usersSlug,
   auth: true,
   fields: [],
+  versions: false,
 }

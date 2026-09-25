@@ -1,3 +1,4 @@
+import type { Transformer } from '@lexical/markdown'
 import type {
   Klass,
   LexicalEditor,
@@ -11,8 +12,7 @@ import type { JSX } from 'react'
 
 import type { ClientEditorConfig } from '../lexical/config/types.js'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
-import type { Transformer } from '../packages/@lexical/markdown/index.js'
-import type { FeatureClientSchemaMap } from '../types.js'
+import type { FeatureClientSchemaMap } from '../types/index.js'
 import type { ToolbarGroup } from './toolbars/types.js'
 
 export type FeatureProviderProviderClient<

@@ -57,6 +57,7 @@ export const Uploads1: CollectionConfig = {
       name: 'richText',
     },
   ],
+  versions: false,
 }
 
 export const uploadsDoc = {

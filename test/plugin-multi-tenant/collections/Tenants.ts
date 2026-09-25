@@ -111,4 +111,5 @@ export const Tenants: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

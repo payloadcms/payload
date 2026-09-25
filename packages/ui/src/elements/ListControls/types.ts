@@ -3,6 +3,7 @@ import type {
   QueryPreset,
   ResolvedFilterOptions,
   SanitizedCollectionPermission,
+  ViewTypes,
   Where,
 } from 'payload'
 
@@ -27,9 +28,15 @@ export type ListControlsProps = {
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
+  readonly hasCreatePermission?: boolean
+  readonly hasDeletePermission?: boolean
+  readonly isWhereOpen?: boolean
   readonly listMenuItems?: React.ReactNode[]
+  readonly newDocumentURL?: string
+  readonly onWhereToggle?: () => void
   readonly queryPreset?: QueryPreset
   readonly queryPresetPermissions?: SanitizedCollectionPermission
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  readonly viewType?: ViewTypes
 }

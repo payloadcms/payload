@@ -1,6 +1,6 @@
 import type { PopulationPromise } from '../../typesServer.js'
-import type { SerializedLinkNode } from '../nodes/types.js'
 import type { LinkFeatureServerProps } from './index.js'
+import type { SerializedLinkNode } from './schema.js'
 
 import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
 

@@ -1,0 +1,6 @@
+# Makes test/ its own workspace root for the prod-test flow (`cd test && pnpm i`), without
+# `--ignore-workspace` (which v11 uses to skip this file). setupProd.ts overwrites this with the
+# full tarball overrides at prod-test time; the graphql override is the committed baseline.
+verifyDepsBeforeRun: false
+overrides:
+  graphql: '16.8.1'

@@ -4,18 +4,20 @@ import { expect } from '@playwright/test'
 
 import { openGroupBy } from './openGroupBy.js'
 
-export const clearGroupBy = async (page: Page): Promise<{ groupByContainer: Locator }> => {
-  const { groupByContainer } = await openGroupBy(page)
+export const clearGroupBy = async (page: Page): Promise<{ groupByContent: Locator }> => {
+  const { groupByContent } = await openGroupBy(page)
 
-  await groupByContainer.locator('#group-by--reset').click()
-  const field = groupByContainer.locator('#group-by--field-select')
+  // Click the trash/clear button in the header
+  const clearButton = groupByContent.locator(
+    '.group-by-control__header-actions button[aria-label="Clear"]',
+  )
+  await clearButton.click()
 
-  await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
-  await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
-  await expect(page).not.toHaveURL(/&groupBy=/)
-  await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
-  await expect(page.locator('.table-wrap')).toHaveCount(1)
-  await expect(page.locator('.group-by-header')).toHaveCount(0)
+  // Verify no groupBy in URL
+  await expect(page).not.toHaveURL(/groupBy=/)
 
-  return { groupByContainer }
+  // Verify grouped tables are gone
+  await expect(page.locator('.table-section__header')).toHaveCount(0)
+
+  return { groupByContent }
 }

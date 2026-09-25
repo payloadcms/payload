@@ -1,13 +1,9 @@
-import type { Payload } from 'payload'
-
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -23,36 +19,32 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated') })
 
-let payload: Payload
-let restClient: NextRESTClient
-
-describe('@payloadcms/storage-vercel-blob', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
+  test.beforeEach(async () => {
     await clearTestBlobs()
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  afterEach(async () => {
+  test.afterEach(async ({ payload }) => {
     await clearTestBlobs()
     await Promise.all([
-      payload.delete({ collection: mediaSlug, where: {} }),
-      payload.delete({ collection: mediaWithPrefixSlug, where: {} }),
-      payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} }),
-      payload.delete({ collection: mediaWithDirectAccessSlug, where: {} }),
-      payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {} }),
+      payload.delete({ collection: mediaSlug, where: {}, overrideAccess: true }),
+      payload.delete({ collection: mediaWithPrefixSlug, where: {}, overrideAccess: true }),
+      payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        where: {},
+        overrideAccess: true,
+      }),
+      payload.delete({ collection: mediaWithDirectAccessSlug, where: {}, overrideAccess: true }),
+      payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {}, overrideAccess: true }),
     ])
   })
 
-  it('can upload', async () => {
+  test('can upload', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -66,11 +58,12 @@ describe('@payloadcms/storage-vercel-blob', () => {
     expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
   })
 
-  it('can upload with prefix', async () => {
+  test('can upload with prefix', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -87,29 +80,34 @@ describe('@payloadcms/storage-vercel-blob', () => {
     )
   })
 
-  it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
+  test('has prefix field by default even when plugin is disabled', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithAlwaysInsertFieldsSlug,
       data: {
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
     expect(upload.prefix).toBe('test')
   })
 
-  it('should return 404 when the file is not found', async () => {
+  test('should return 404 when the file is not found', async ({ restClient }) => {
     const response = await restClient.GET(`/${mediaSlug}/file/missing.png`)
     expect(response.status).toBe(404)
   })
 
-  it('should serve file through static handler with correct headers', async () => {
+  test('should serve file through static handler with correct headers', async ({
+    payload,
+    restClient,
+  }) => {
     await payload.create({
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const response = await restClient.GET(`/${mediaSlug}/file/image.png`)
@@ -120,11 +118,12 @@ describe('@payloadcms/storage-vercel-blob', () => {
     expect(response.headers.get('X-Universal-Truth')).toBe('Set')
   })
 
-  it('should return 304 when ETag matches', async () => {
+  test('should return 304 when ETag matches', async ({ payload, restClient }) => {
     await payload.create({
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const first = await restClient.GET(`/${mediaSlug}/file/image.png`)
@@ -139,12 +138,13 @@ describe('@payloadcms/storage-vercel-blob', () => {
     expect(second.status).toBe(304)
   })
 
-  describe('disablePayloadAccessControl', () => {
-    it('should return direct blob URL when uploading', async () => {
+  test.describe('disablePayloadAccessControl', () => {
+    test('should return direct blob URL when uploading', async ({ payload }) => {
       const upload = await payload.create({
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -157,11 +157,12 @@ describe('@payloadcms/storage-vercel-blob', () => {
       expect(response.headers.get('Content-Type')).toBe('image/png')
     })
 
-    it('should store full blob URLs for image sizes in database', async () => {
+    test('should store full blob URLs for image sizes in database', async ({ payload }) => {
       const upload = await payload.create({
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.sizes?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
@@ -176,11 +177,14 @@ describe('@payloadcms/storage-vercel-blob', () => {
       expect(dbDoc?.sizes?.thumbnail?.url).not.toMatch(/^\/api\//)
     })
 
-    it('should return direct blob URL with encoded filename for file with spaces', async () => {
+    test('should return direct blob URL with encoded filename for file with spaces', async ({
+      payload,
+    }) => {
       const upload = await payload.create({
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -193,27 +197,33 @@ describe('@payloadcms/storage-vercel-blob', () => {
     })
   })
 
-  describe('prefix collision detection', () => {
-    beforeEach(async () => {
+  test.describe('prefix collision detection', () => {
+    test.beforeEach(async ({ payload }) => {
       await clearTestBlobs()
-      await payload.delete({ collection: mediaWithPrefixSlug, where: {} })
-      await payload.delete({ collection: mediaSlug, where: {} })
-      await payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} })
+      await payload.delete({ collection: mediaWithPrefixSlug, where: {}, overrideAccess: true })
+      await payload.delete({ collection: mediaSlug, where: {}, overrideAccess: true })
+      await payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        where: {},
+        overrideAccess: true,
+      })
     })
 
-    it('detects collision within same prefix', async () => {
+    test('detects collision within same prefix', async ({ payload }) => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       const upload1 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -222,63 +232,76 @@ describe('@payloadcms/storage-vercel-blob', () => {
       expect(upload2.prefix).toBe(prefix)
     })
 
-    it('works normally for collections without prefix', async () => {
+    test('works normally for collections without prefix', async ({ payload }) => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       const upload1 = await payload.create({
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image-1.png')
-      // @ts-expect-error prefix should never be set
-      expect(upload1.prefix).toBeUndefined()
-      // @ts-expect-error prefix should never be set
-      expect(upload2.prefix).toBeUndefined()
+      // The prefix field is always inserted by default, defaulting to an empty string
+      // for collections that don't configure a prefix.
+      expect(upload1.prefix).toBe('')
+      expect(upload2.prefix).toBe('')
     })
 
-    it('allows same filename under different prefixes', async () => {
+    test('allows same filename under different prefixes', async ({ payload }) => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       const upload1 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: { prefix: 'different-prefix' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image.png')
       expect(upload1.prefix).toBe(prefix)
-      expect(upload2.prefix).toBe('different-prefix')
+      // New uploads store the document prefix beneath the collection prefix.
+      expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
+      await verifyUploads({
+        collectionSlug: mediaWithPrefixSlug,
+        payload,
+        prefix: `${prefix}/different-prefix`,
+        uploadId: upload2.id,
+      })
     })
 
-    it('supports multi-tenant scenario with dynamic prefix from hook', async () => {
+    test('supports multi-tenant scenario with dynamic prefix from hook', async ({ payload }) => {
       const imageFile = path.resolve(dirname, '../uploads/image.png')
 
       const tenantAUpload = await payload.create({
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'a' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const tenantBUpload = await payload.create({
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'b' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(tenantAUpload.filename).toBe('image.png')

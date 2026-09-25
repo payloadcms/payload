@@ -26,6 +26,7 @@ export async function resolvePendingTargetKey(args: {
     id: targetID,
     collection: collectionSlug,
     depth: 0,
+    overrideAccess: true,
     req,
     select: { [orderableFieldName]: true },
   })

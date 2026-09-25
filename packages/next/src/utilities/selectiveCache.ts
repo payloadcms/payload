@@ -2,6 +2,13 @@ import { cache } from 'react'
 
 type CachedValue = object
 
+type GetCachedArgs<TValue extends object> = {
+  /** Creates the value when it is not cached. */
+  create: () => Promise<TValue>
+  /** Values that identify the cached value. */
+  key: unknown[]
+}
+
 // Module-scoped cache container that holds all cached, stable containers
 // - these may hold the stable value, or a promise to the stable value
 const globalCacheContainer: Record<
@@ -20,23 +27,18 @@ const globalCacheContainer: Record<
  * @returns A function that manages cached values within the specified namespace
  */
 export function selectiveCache<TValue extends object = CachedValue>(namespace: string) {
-  // Create a stable namespace container if it doesn't exist
   if (!globalCacheContainer[namespace]) {
-    globalCacheContainer[namespace] = cache((...args) => ({
+    globalCacheContainer[namespace] = cache((..._args) => ({
       value: null,
     }))
   }
 
   /**
    * Gets or creates a cached value for a specific key within the namespace
-   *
-   * @param key - The key to identify the cached value
-   * @param factory - A function that produces the value if not cached
-   * @returns The cached or newly created value
    */
-  const getCached = async (factory: () => Promise<TValue>, ...cacheArgs): Promise<TValue> => {
+  const getCached = async ({ create, key }: GetCachedArgs<TValue>): Promise<TValue> => {
     const stableObjectFn = globalCacheContainer[namespace]
-    const stableObject = stableObjectFn<TValue>(...cacheArgs)
+    const stableObject = stableObjectFn<TValue>(...key)
 
     if (
       stableObject?.value &&
@@ -46,7 +48,7 @@ export function selectiveCache<TValue extends object = CachedValue>(namespace: s
       return await stableObject.value
     }
 
-    stableObject.value = factory()
+    stableObject.value = create()
 
     return await stableObject.value
   }

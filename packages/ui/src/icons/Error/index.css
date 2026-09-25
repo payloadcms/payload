@@ -1,0 +1,11 @@
+@layer payload-default {
+  .icon--error {
+    .icon__circle {
+      fill: var(--color-bg-danger);
+    }
+
+    .icon__symbol {
+      stroke: var(--color-text-ondanger);
+    }
+  }
+}

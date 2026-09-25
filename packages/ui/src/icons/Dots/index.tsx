@@ -1,6 +1,6 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'dots'
 

@@ -24,9 +24,8 @@ export async function openNav(page: Page): Promise<{ nav: ReturnType<Page['locat
     }
   }
 
-  // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.nav--nav-animate[inert], .nav--nav-hydrated[inert]')).toBeHidden()
+  // desktop uses .app-header__sidebar-toggle, mobile uses .nav-toggler
+  await page.locator('.app-header__sidebar-toggle').click()
   await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 
   return {
@@ -43,7 +42,7 @@ export async function closeNav(page: Page): Promise<void> {
     return
   }
 
-  // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
-  await page.locator('.nav-toggler >> visible=true').click()
+  // desktop uses .app-header__sidebar-toggle, mobile uses .nav-toggler
+  await page.locator('.app-header__sidebar-toggle').click()
   await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
 }

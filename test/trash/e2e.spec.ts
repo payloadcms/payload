@@ -1,6 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { addListFilter } from '__helpers/e2e/filters/index.js'
-import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
 import { mapAsync, type RequiredDataFromCollectionSlug } from 'payload'
 import { wait } from 'payload/shared'
@@ -9,14 +7,13 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
-import {
-  changeLocale,
-  closeAllToasts,
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-} from '../__helpers/e2e/helpers.js'
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
+import { changeLocale, closeAllToasts } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
@@ -45,53 +42,43 @@ describe('Trash', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
     usersUrl = new AdminUrlUtil(serverURL, usersSlug)
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
-  beforeEach(async ({ page, context }) => {
+  beforeEach(async ({ context, page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'trash',
     })
     pagesDocOneID = (
       await payload.find({
         collection: 'pages',
-        limit: 1,
         depth: 0,
+        limit: 1,
         pagination: false,
+        overrideAccess: true,
       })
     ).docs[0]!.id
     postsDocOneID = (
-      await payload.find({
+      await payload.create({
         collection: 'posts',
-        limit: 1,
-        depth: 0,
-        pagination: false,
-        where: {
-          title: {
-            equals: 'Post 1',
-          },
+        data: {
+          _status: 'published',
+          title: 'Post 1',
         },
+        overrideAccess: true,
       })
-    ).docs[0]!.id
+    ).id
     postsDocTwoID = (
-      await payload.find({
+      await payload.create({
         collection: 'posts',
-        limit: 1,
-        depth: 0,
-        pagination: false,
-        where: {
-          title: {
-            equals: 'Post 2',
-          },
+        data: {
+          _status: 'published',
+          title: 'Post 2',
         },
+        overrideAccess: true,
       })
-    ).docs[0]!.id
-    initPageConsoleErrorCatch(page)
+    ).id
+    await initPage({ page, serverURL })
     //await throttleTest({ page, context, delay: 'Slow 4G' })
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Collection view', () => {
@@ -153,7 +140,7 @@ describe('Trash', () => {
         // Check the checkbox to delete permanently
         await page.locator('#delete-forever').check()
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Permanently deleted 1 Post successfully.',
@@ -167,7 +154,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -215,7 +202,7 @@ describe('Trash', () => {
         // Check the checkbox to delete permanently
         await page.locator('#delete-forever').check()
 
-        await page.locator('.delete-document #confirm-action').click()
+        await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Post "Post 1" successfully deleted.',
@@ -231,7 +218,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('.delete-document #confirm-action').click()
+        await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Post "Post 2" moved to trash.',
@@ -264,7 +251,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -311,9 +298,10 @@ describe('Trash', () => {
         await expect(page.locator('.list-selection__button[aria-label="Delete"]')).toBeVisible()
 
         await payload.delete({
-          collection: postsSlug,
           id: trashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -333,11 +321,11 @@ describe('Trash', () => {
         await page.locator('#empty-trash-button').click()
 
         await expect(page.locator('#confirm-empty-trash')).toBeVisible()
-        await expect(
-          page.locator('#confirm-empty-trash .confirmation-modal__content'),
-        ).toContainText('You are about to permanently delete 3 Posts from the trash. Are you sure?')
+        await expect(page.locator('#confirm-empty-trash .dialog__body')).toContainText(
+          'You are about to permanently delete 3 Posts from the trash. Are you sure?',
+        )
 
-        await page.locator('#confirm-empty-trash #confirm-action').click()
+        await page.locator('#confirm-empty-trash [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Permanently deleted 3 Posts successfully.',
@@ -363,11 +351,11 @@ describe('Trash', () => {
 
         await expect(page.locator('#confirm-restore-many-docs')).toBeVisible()
 
-        await expect(
-          page.locator('#confirm-restore-many-docs .confirmation-modal__content'),
-        ).toContainText('You are about to restore 2 Posts as draft')
+        await expect(page.locator('#confirm-restore-many-docs .dialog__body')).toContainText(
+          'You are about to restore 2 Posts as draft',
+        )
 
-        await page.locator('#confirm-restore-many-docs #confirm-action').click()
+        await page.locator('#confirm-restore-many-docs [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Restored 2 Posts successfully.',
@@ -390,6 +378,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -402,6 +391,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.every((doc) => doc._status === 'draft')
           })
@@ -414,6 +404,7 @@ describe('Trash', () => {
               equals: 'Ready for restore',
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -436,13 +427,13 @@ describe('Trash', () => {
 
         await expect(page.locator('#confirm-restore-many-docs')).toBeVisible()
 
-        await expect(
-          page.locator('#confirm-restore-many-docs .confirmation-modal__content'),
-        ).toContainText('You are about to restore 2 Posts as draft')
+        await expect(page.locator('#confirm-restore-many-docs .dialog__body')).toContainText(
+          'You are about to restore 2 Posts as draft',
+        )
 
         await page.locator('#restore-as-published-many').check()
 
-        await page.locator('#confirm-restore-many-docs #confirm-action').click()
+        await page.locator('#confirm-restore-many-docs [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Restored 2 Posts successfully.',
@@ -465,6 +456,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -477,6 +469,7 @@ describe('Trash', () => {
               where: {
                 title: { equals: 'Ready for restore' },
               },
+              overrideAccess: true,
             })
             return docs.every((doc) => doc._status === 'published')
           })
@@ -489,6 +482,7 @@ describe('Trash', () => {
               equals: 'Ready for restore',
             },
           },
+          overrideAccess: true,
         })
       })
 
@@ -513,11 +507,11 @@ describe('Trash', () => {
 
         await expect(page.locator('#confirm-delete-many-docs')).toBeVisible()
 
-        await expect(
-          page.locator('#confirm-delete-many-docs .confirmation-modal__content'),
-        ).toContainText('You are about to permanently delete 2 Posts from the trash. Are you sure?')
+        await expect(page.locator('#confirm-delete-many-docs .dialog__body')).toContainText(
+          'You are about to permanently delete 2 Posts from the trash. Are you sure?',
+        )
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Permanently deleted 2 Posts successfully.',
@@ -548,6 +542,7 @@ describe('Trash', () => {
                   },
                 ],
               },
+              overrideAccess: true,
             })
             return deletedPosts.docs.length
           })
@@ -576,9 +571,9 @@ describe('Trash', () => {
         await page.goto(postsUrl.trash)
 
         await addListFilter({
-          page,
           fieldLabel: 'Title',
           operatorLabel: 'is like',
+          page,
           value: 'Test',
         })
 
@@ -588,9 +583,10 @@ describe('Trash', () => {
         // Cleanup: permanently delete the created docs
         await mapAsync(createdDocs, async (doc) => {
           await payload.delete({
-            collection: postsSlug,
             id: doc.id,
+            collection: postsSlug,
             trash: true, // Force permanent delete
+            overrideAccess: true,
           })
         })
       })
@@ -630,6 +626,80 @@ describe('Trash', () => {
         await expect(page).toHaveURL(/\/admin\/collections\/posts\/trash/)
       })
 
+      test('Should collapse breadcrumbs into a popup menu when they do not fit the available width', async ({
+        page,
+      }) => {
+        // 320px (not 400px) puts the breadcrumbs unambiguously past the available
+        // width. At 400px the expanded breadcrumbs measure within ~1px of the
+        // available space, making the collapse decision a coin-flip in slower CI
+        // environments (e.g. tanstack-start).
+        await page.setViewportSize({ width: 320, height: 800 })
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        const collapsedToggle = page.locator('.step-nav__collapsed-toggle')
+        await expect(collapsedToggle).toBeVisible()
+        await expect(collapsedToggle).toHaveAccessibleName('More options')
+
+        await expect(page.locator('.step-nav.app-header__step-nav .step-nav__first')).toBeVisible()
+        await expect(page.locator('.step-nav.app-header__step-nav .step-nav__last')).toContainText(
+          'Trashed Post',
+        )
+
+        await collapsedToggle.click()
+
+        const collapsedList = page.locator('.step-nav__collapsed-list')
+        const trashItem = collapsedList.locator('.popup-button-list__button', {
+          hasText: 'Trash',
+        })
+        await expect(trashItem).toBeVisible()
+
+        await trashItem.click()
+
+        await expect(page).toHaveURL(/\/admin\/collections\/posts\/trash/)
+      })
+
+      test('Should collapse breadcrumbs once web fonts finish loading, without a viewport resize', async ({
+        page,
+      }) => {
+        // Simulate a web font swap widening the breadcrumb text after the initial paint, by
+        // controlling exactly when document.fonts.ready resolves and inflating the hidden
+        // measurer's width at a moment of our choosing, independent of that resolution.
+        await page.addInitScript(() => {
+          const fontsReady = new Promise<void>((resolve) => {
+            // @ts-expect-error - test-only global
+            window.resolveFontsReady = resolve
+          })
+          Object.defineProperty(document.fonts, 'ready', {
+            configurable: true,
+            get: () => fontsReady,
+          })
+        })
+
+        await page.setViewportSize({ width: 900, height: 800 })
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        const collapsedToggle = page.locator('.step-nav__collapsed-toggle')
+        await expect(collapsedToggle).toBeHidden()
+
+        // The document title loads asynchronously and, once it does, SetDocumentStepNav
+        // calls setStepNav again with the real title, changing the measurement effect's
+        // `stepNav` dependency and naturally re-triggering it. Wait for that to happen
+        // first, so it doesn't race with the font-load re-measure this test is targeting.
+        await expect(page.locator('.step-nav.app-header__step-nav .step-nav__last')).toContainText(
+          'Trashed Post',
+        )
+
+        await page.addStyleTag({ content: '.step-nav__measurer { padding-right: 5000px; }' })
+        await expect(collapsedToggle).toBeHidden()
+
+        await page.evaluate(() => {
+          // @ts-expect-error - test-only global
+          window.resolveFontsReady()
+        })
+
+        await expect(collapsedToggle).toBeVisible()
+      })
+
       test('Should not render dot menu popup', async ({ page }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
@@ -643,6 +713,22 @@ describe('Trash', () => {
         const statusBlock = page.locator('.doc-controls__status')
         await expect(statusBlock).toBeVisible()
         await expect(statusBlock).toContainText('Previously Published')
+      })
+
+      test('Should render rich text fields as read-only, including inside tabs', async ({
+        page,
+      }) => {
+        await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
+
+        for (const fieldPath of ['richText', 'richTextInTab']) {
+          const editor = page.locator(
+            `[data-field-path="${fieldPath}"] .ContentEditable__root[data-lexical-editor="true"]`,
+          )
+
+          await expect(editor).toBeVisible()
+          await expect(editor).toHaveAttribute('contenteditable', 'false')
+          await expect(editor).toHaveAttribute('aria-readonly', 'true')
+        }
       })
 
       test('Should render Permanently Delete and Restore buttons in doc controls', async ({
@@ -673,10 +759,12 @@ describe('Trash', () => {
 
         await expect(page.locator(`#perma-delete-${trashedPostDocOne.id}`)).toBeVisible()
         await expect(
-          page.locator(`#perma-delete-${trashedPostDocOne.id} .confirmation-modal__content`),
+          page.locator(`#perma-delete-${trashedPostDocOne.id} .dialog__body`),
         ).toContainText('You are about to permanently delete the Post')
 
-        await page.locator(`#perma-delete-${trashedPostDocOne.id} #confirm-action`).click()
+        await page
+          .locator(`#perma-delete-${trashedPostDocOne.id} [data-dialog-action="confirm"]`)
+          .click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Post "Trashed Post" successfully deleted.',
@@ -702,6 +790,7 @@ describe('Trash', () => {
                   },
                 ],
               },
+              overrideAccess: true,
             })
             return deletedPost.docs.length
           })
@@ -717,11 +806,13 @@ describe('Trash', () => {
         await restoreButton.click()
 
         await expect(page.locator(`#restore-${trashedPostDocOne.id}`)).toBeVisible()
-        await expect(
-          page.locator(`#restore-${trashedPostDocOne.id} .confirmation-modal__content`),
-        ).toContainText('You are about to restore the Post Trashed Post as a draft. Are you sure?')
+        await expect(page.locator(`#restore-${trashedPostDocOne.id} .dialog__body`)).toContainText(
+          'You are about to restore the Post Trashed Post as a draft. Are you sure?',
+        )
 
-        await page.locator(`#restore-${trashedPostDocOne.id} #confirm-action`).click()
+        await page
+          .locator(`#restore-${trashedPostDocOne.id} [data-dialog-action="confirm"]`)
+          .click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Post "Trashed Post" successfully restored.',
@@ -735,6 +826,7 @@ describe('Trash', () => {
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
+              overrideAccess: true,
             })
             return docs.length
           })
@@ -747,6 +839,7 @@ describe('Trash', () => {
               where: {
                 id: { equals: trashedPostDocOne.id },
               },
+              overrideAccess: true,
             })
             return docs[0]?._status === 'draft'
           })
@@ -765,8 +858,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -775,7 +868,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -807,9 +900,10 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -817,8 +911,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -827,7 +921,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -864,9 +958,10 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -874,8 +969,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -884,7 +979,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -923,16 +1018,17 @@ describe('Trash', () => {
           .toMatch(/\w+ \d{1,2}(st|nd|rd|th) \d{4}, \d{1,2}:\d{2} [AP]M/)
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
       test('Should allow viewing of the API tab view from trash edit view', async ({ page }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -941,7 +1037,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -972,9 +1068,10 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
 
@@ -982,8 +1079,8 @@ describe('Trash', () => {
         page,
       }) => {
         const incomingTrashedDoc = await createPostDoc({
-          title: 'Post 1',
           _status: 'published',
+          title: 'Post 1',
         })
 
         await page.goto(postsUrl.list)
@@ -992,7 +1089,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -1028,9 +1125,10 @@ describe('Trash', () => {
         )
 
         await payload.delete({
-          collection: postsSlug,
           id: incomingTrashedDoc.id,
+          collection: postsSlug,
           trash: true,
+          overrideAccess: true,
         })
       })
     })
@@ -1040,11 +1138,12 @@ describe('Trash', () => {
       // Ensure Dev user exists and store its ID
       const { docs } = await payload.find({
         collection: usersSlug,
-        limit: 1,
-        where: { name: { equals: 'Dev' } },
-        trash: true,
         depth: 0,
+        limit: 1,
         pagination: false,
+        trash: true,
+        where: { name: { equals: 'Dev' } },
+        overrideAccess: true,
       })
       if (docs.length === 0) {
         throw new Error('Dev user not found! Ensure test seed data includes a Dev user.')
@@ -1055,19 +1154,21 @@ describe('Trash', () => {
     async function ensureDevUserTrashed() {
       const { docs } = await payload.find({
         collection: usersSlug,
+        limit: 1,
+        trash: true,
         where: {
           and: [{ name: { equals: 'Dev' } }, { deletedAt: { exists: true } }],
         },
-        limit: 1,
-        trash: true,
+        overrideAccess: true,
       })
 
       if (docs.length === 0) {
         // Trash the user if it's not already trashed
         await payload.update({
-          collection: usersSlug,
           id: devUserID,
+          collection: usersSlug,
           data: { deletedAt: new Date().toISOString() },
+          overrideAccess: true,
         })
       }
     }
@@ -1089,7 +1190,7 @@ describe('Trash', () => {
       await page.locator('.list-selection__button[aria-label="Delete"]').click()
 
       // Skip the checkbox to delete permanently and default to trashing
-      await page.locator('#confirm-delete-many-docs #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         '1 User moved to trash.',
       )
@@ -1109,10 +1210,10 @@ describe('Trash', () => {
       const linkURL = await nameLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURL}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
     })
 
     test('Should properly disable auth fields in the trashed user edit view', async ({ page }) => {
@@ -1125,10 +1226,10 @@ describe('Trash', () => {
       const linkURL = await cellLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURL}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
 
       await expect(page.locator('input[name="email"]')).toBeDisabled()
       await expect(page.locator('#change-password')).toBeDisabled()
@@ -1148,19 +1249,21 @@ describe('Trash', () => {
       const linkURLRestore = await nameLink.getAttribute('href')
       await page.goto(`${serverURL}${linkURLRestore}`)
 
-      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await page.waitForURL(usersUrl.trashEdit(devUserID))
       await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
+      await expect(page).toHaveURL(usersUrl.trashEdit(devUserID))
 
       await page.locator('.doc-controls__controls #action-restore').click()
 
-      await expect(page.locator(`#restore-${devUserID} #confirm-action`)).toBeVisible()
       await expect(
-        page.locator(`#restore-${devUserID} .confirmation-modal__content`),
-      ).toContainText('You are about to restore the User')
+        page.locator(`#restore-${devUserID} [data-dialog-action="confirm"]`),
+      ).toBeVisible()
+      await expect(page.locator(`#restore-${devUserID} .dialog__body`)).toContainText(
+        'You are about to restore the User',
+      )
 
-      await page.locator(`#restore-${devUserID} #confirm-action`).click()
+      await page.locator(`#restore-${devUserID} [data-dialog-action="confirm"]`).click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'User "Dev" successfully restored.',
@@ -1177,31 +1280,34 @@ describe('Trash', () => {
     const draftPost = await payload.create({
       collection: postsSlug,
       data: {
+        _status: 'draft',
         title: 'Draft with Localized Field',
-        _status: 'draft',
       },
+      overrideAccess: true,
     })
 
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'en',
+      collection: postsSlug,
       data: {
+        _status: 'draft',
         localizedField: localizedFieldValueEN,
-        _status: 'draft',
       },
       draft: true,
+      locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'es',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueES,
         _status: 'draft',
+        localizedField: localizedFieldValueES,
       },
       draft: true,
+      locale: 'es',
+      overrideAccess: true,
     })
 
     await page.goto(postsUrl.edit(draftPost.id))
@@ -1212,7 +1318,7 @@ describe('Trash', () => {
 
     await page.locator('.popup__content #action-delete').click()
 
-    await page.locator('.delete-document #confirm-action').click()
+    await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Post "Draft with Localized Field" moved to trash.',
@@ -1240,34 +1346,37 @@ describe('Trash', () => {
     const draftPost = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'Draft with Localized Field',
         _status: 'draft',
+        title: 'Draft with Localized Field',
       },
+      overrideAccess: true,
     })
 
     // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
     // storing localized data only in the versions table
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'en',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueEN,
         _status: 'draft',
+        localizedField: localizedFieldValueEN,
       },
       draft: true,
+      locale: 'en',
+      overrideAccess: true,
     })
 
     // Update es locale as draft
     await payload.update({
-      collection: postsSlug,
       id: draftPost.id,
-      locale: 'es',
+      collection: postsSlug,
       data: {
-        localizedField: localizedFieldValueES,
         _status: 'draft',
+        localizedField: localizedFieldValueES,
       },
       draft: true,
+      locale: 'es',
+      overrideAccess: true,
     })
 
     await page.goto(postsUrl.list)
@@ -1284,7 +1393,7 @@ describe('Trash', () => {
     await postRow.locator('.cell-_select input').check()
     await page.locator('.list-selection__button[aria-label="Delete"]').click()
 
-    await page.locator('#confirm-delete-many-docs #confirm-action').click()
+    await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       '1 Post moved to trash.',
     )
@@ -1321,6 +1430,7 @@ async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Pro
   return payload.create({
     collection: postsSlug,
     data,
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -1332,5 +1442,6 @@ async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'
       _status: 'published',
       deletedAt: new Date().toISOString(), // Set the post as trashed
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }

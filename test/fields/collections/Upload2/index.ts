@@ -27,6 +27,7 @@ const Uploads2: CollectionConfig = {
       relationTo: uploads2Slug,
     },
   ],
+  versions: false,
 }
 
 export default Uploads2

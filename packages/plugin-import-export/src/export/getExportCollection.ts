@@ -8,6 +8,7 @@ import type {
 import type { ExportConfig, ImportExportPluginConfig, Limit } from '../types.js'
 import type { Export } from './createExport.js'
 
+import { getSubmittedFormValues } from '../utilities/getSubmittedFormValues.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
@@ -124,10 +125,11 @@ export const getExportCollection = ({
       batchSize,
       debug,
       exportCollection: collectionConfig.slug,
+      exportDoc: getSubmittedFormValues({ formData: exportData }),
       maxLimit,
       req,
-      userCollection: user?.collection || user?.user?.collection,
-      userID: user?.id || user?.user?.id,
+      userCollection: user?.collection,
+      userID: user?.id,
     })
   })
 
@@ -175,13 +177,14 @@ export const getExportCollection = ({
       maxLimit,
       page: doc.page,
       sort: doc.sort,
-      userCollection: user?.collection || user?.user?.collection,
-      userID: user?.id || user?.user?.id,
+      userCollection: user?.collection,
+      userID: user?.id,
       where: doc.where,
     }
 
     await req.payload.jobs.queue({
       input,
+      overrideAccess: true,
       task: 'createCollectionExport',
     })
   })

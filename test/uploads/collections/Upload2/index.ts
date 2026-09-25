@@ -35,6 +35,7 @@ export const Uploads2: CollectionConfig = {
       name: 'title',
     },
   ],
+  versions: false,
 }
 
 export const uploadsDoc = {

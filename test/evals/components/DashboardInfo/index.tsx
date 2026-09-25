@@ -28,13 +28,13 @@ export function DashboardInfo() {
       >
         {/* What are evals */}
         <Card
-          body="Evals are automated tests that ask an LLM questions about Payload (QA) or ask it to modify a real config file (Codegen)."
+          body="Evals are automated tests that ask an LLM to modify a real Payload config file and score how well the change matches the requested outcome."
           title="What are evals?"
         />
 
         {/* Eval Results */}
         <Card
-          body="Browse every cached result — filter by pass/fail, category, or type. Expand any row to read the full answer, scorer reasoning, and per-call token usage."
+          body="Browse every run result — filter by pass/fail, category, or type. Expand any row to read the full answer, scorer reasoning, and per-call token usage."
           title="Eval Results"
         />
 

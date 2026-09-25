@@ -1,16 +1,15 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,
-  GeneratedTypes,
   JoinQuery,
   Payload,
   PayloadTypes,
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
+  User,
 } from '../../../index.js'
 import type {
-  Document,
   DraftTransformCollectionWithSelect,
   PayloadRequest,
   PopulateType,
@@ -19,14 +18,12 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type {
-  DraftFlagFromCollectionSlug,
-  SelectFromCollectionSlug,
-} from '../../config/types.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
+import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { findOperation } from '../find.js'
 
 type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
@@ -77,12 +74,6 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
    * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
    */
   locale?: 'all' | TypedLocale
-  /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
   /**
    * Get a specific page number
    * @default 1
@@ -169,23 +160,27 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
    * @default false
    */
   trash?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  BaseFindOptions<TSlug, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseFindOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 // Backward compatibility export
-export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  Options<TSlug, TSelect>
+export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Options<
+  TSlug,
+  TSelect
+>
 
 export async function findLocal<
   TSlug extends CollectionSlug,
@@ -212,7 +207,7 @@ export async function findLocal<
     includeLockStatus,
     joins,
     limit,
-    overrideAccess = true,
+    overrideAccess = false,
     page,
     pagination = true,
     populate,
@@ -244,7 +239,10 @@ export async function findLocal<
     page,
     pagination,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     sort,

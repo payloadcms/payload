@@ -174,6 +174,7 @@ export interface FieldsRelationship {
       )[]
     | null;
   relationshipRestricted?: (string | null) | RelationRestricted;
+  relationshipRestrictedFiltered?: (string | null) | RelationRestricted;
   relationshipWithTitle?: (string | null) | RelationWithTitle;
   /**
    * This will filter the relationship options based on id, which is the same as the relationship field in this document
@@ -382,6 +383,7 @@ export interface VersionedRelationshipField {
         value: string | Collection1;
       }[]
     | null;
+  relatedVersionedDoc?: (string | null) | VersionedRelationshipField;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -548,6 +550,7 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
   relationshipMultiple?: T;
   relationshipHasManyMultiple?: T;
   relationshipRestricted?: T;
+  relationshipRestrictedFiltered?: T;
   relationshipWithTitle?: T;
   relationshipFilteredByID?: T;
   relationshipFilteredByField?: T;
@@ -689,6 +692,7 @@ export interface MixedMediaSelect<T extends boolean = true> {
 export interface VersionedRelationshipFieldSelect<T extends boolean = true> {
   title?: T;
   relationshipField?: T;
+  relatedVersionedDoc?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

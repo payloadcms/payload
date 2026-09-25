@@ -1,0 +1,33 @@
+/**
+ * Component-level theme tokens.
+ *
+ * Override any of these in your own :root block to restyle
+ * all matching components at once — no !important needed.
+ * User overrides win automatically since plain :root rules
+ * beat @layer rules without needing !important.
+ */
+
+@layer payload-default {
+  :root {
+    /* Fields — controls text inputs, selects, date pickers, code editors, etc. */
+    --field-min-height-large: var(--spacer-5);
+    --field-min-height-medium: var(--spacer-4);
+    --field-padding-inline: var(--spacer-2);
+    --field-border-radius: var(--radius-medium);
+
+    /* Buttons — also drives button-like elements (tabs, icon buttons, etc.) */
+    --button-height: var(--spacer-4);
+    --button-radius: var(--radius-medium);
+
+    /* Compact controls — search inputs, paginator inputs, toolbar inputs */
+    --control-height: var(--spacer-4);
+
+    /* Popup menus */
+    --popup-radius: var(--radius-large);
+    --popup-item-radius: var(--button-radius);
+
+    /* Stroke widths */
+    --stroke-width-small: 1px;
+    --stroke-width-medium: 2px;
+  }
+}

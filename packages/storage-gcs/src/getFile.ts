@@ -1,56 +1,57 @@
 import type { Storage } from '@google-cloud/storage'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
 import { ApiError } from '@google-cloud/storage'
 import {
+  buildStoragePathData,
   getFilePrefix as getDocPrefix,
-  getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
-import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
 
 interface GetFileArgs {
   bucket: string
   client: Storage
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
 export async function getFile({
   bucket,
   client,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
-      filename,
-      prefixQueryParam,
-      req,
-    })
-
-    const key = getFileKey({
       collectionPrefix,
-      docPrefix,
-      filename: sanitizeFilename(filename),
+      doc,
+      filename,
+      req,
+      uploadReference,
       useCompositePrefixes,
     })
 
-    const file = client.bucket(bucket).file(key)
+    const { storageFilePath } = buildStoragePathData({
+      collectionPrefix,
+      docPrefix,
+      filename,
+      useCompositePrefixes,
+    })
+
+    const file = client.bucket(bucket).file(storageFilePath)
 
     const [metadata] = await file.getMetadata()
 
@@ -79,9 +80,9 @@ export async function getFile({
     headers.append('Content-Type', String(metadata.contentType))
     headers.append('ETag', String(metadata.etag))
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (metadata.contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Apply a restrictive policy to XML-family responses served through Payload.
+    if (isXmlMimeType(metadata.contentType)) {
+      headers.append('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     if (

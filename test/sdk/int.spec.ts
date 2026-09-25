@@ -1,22 +1,17 @@
-import type { Payload } from 'payload'
-
 import { PayloadSDKError } from '@payloadcms/sdk'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import type { TypedPayloadSDK } from '../__helpers/shared/getSDK.js'
-import type { Email, Post } from './payload-types.js'
+import type { Post } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { emailsSlug } from './collections/Emails.js'
 
-let payload: Payload
 let post: Post
 let postTrash: Post
-let sdk: TypedPayloadSDK
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -26,46 +21,58 @@ const testUserCredentials = {
   password: '123456',
 }
 
-describe('@payloadcms/sdk', () => {
-  beforeAll(async () => {
-    ;({ payload, sdk } = await initPayloadInt(dirname))
-
-    post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 } })
+test.suite('@payloadcms/sdk', { config: './config.ts', resetBetweenTests: false }, () => {
+  test.beforeAll(async ({ payloadInstance: payload }) => {
+    post = await payload.create({
+      collection: 'posts',
+      data: { number: 1, number2: 3 },
+      overrideAccess: true,
+    })
     postTrash = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString(), text: 'fixture-trash' },
+      overrideAccess: true,
     })
     await payload.create({
       collection: 'users',
       data: { ...testUserCredentials },
+      overrideAccess: true,
     })
-    await payload.updateGlobal({ slug: 'global', data: { text: 'some-global' } })
+    await payload.updateGlobal({
+      slug: 'global',
+      data: { text: 'some-global' },
+      overrideAccess: true,
+    })
   })
 
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  it('should execute find', async () => {
+  test('should execute find', async ({ payload, sdk }) => {
     const result = await sdk.find({ collection: 'posts', where: { id: { equals: post.id } } })
 
     expect(result.docs[0].id).toBe(post.id)
 
     const ids = []
     for (let i = 0; i < 40; i++) {
-      const post = await payload.create({ collection: 'posts', data: {} })
+      const post = await payload.create({ collection: 'posts', data: {}, overrideAccess: true })
       ids.push(post.id)
     }
 
     const resultPaginationFalse = await sdk.find({ collection: 'posts', pagination: false })
     expect(resultPaginationFalse.docs).toHaveLength(41)
     expect(resultPaginationFalse.totalDocs).toBe(41)
-    await payload.delete({ collection: 'posts', where: { id: { in: ids } } })
+    await payload.delete({ collection: 'posts', overrideAccess: true, where: { id: { in: ids } } })
   })
 
-  it('should execute find with trash', async () => {
+  test('should return no docs for an empty array in `in` condition', async ({ sdk }) => {
+    const result = await sdk.find({
+      collection: 'posts',
+      where: { id: { in: [] } },
+    })
+
+    expect(result.docs).toHaveLength(0)
+    expect(result.totalDocs).toBe(0)
+  })
+
+  test('should execute find with trash', async ({ sdk }) => {
     const pairWhere = { id: { in: [post.id, postTrash.id] } }
 
     expect((await sdk.find({ collection: 'posts', where: pairWhere })).docs).toHaveLength(1)
@@ -74,7 +81,7 @@ describe('@payloadcms/sdk', () => {
     ).toHaveLength(2)
   })
 
-  it('should execute findVersions', async () => {
+  test('should execute findVersions', async ({ sdk }) => {
     const result = await sdk.findVersions({
       collection: 'posts',
       where: { parent: { equals: post.id } },
@@ -83,7 +90,7 @@ describe('@payloadcms/sdk', () => {
     expect(result.docs[0].parent).toBe(post.id)
   })
 
-  it('should execute findVersions with trash', async () => {
+  test('should execute findVersions with trash', async ({ sdk }) => {
     const pairWhere = { parent: { in: [post.id, postTrash.id] } }
 
     expect((await sdk.findVersions({ collection: 'posts', where: pairWhere })).docs).toHaveLength(1)
@@ -92,79 +99,84 @@ describe('@payloadcms/sdk', () => {
     ).toHaveLength(2)
   })
 
-  it('should execute findByID', async () => {
-    const result = await sdk.findByID({ collection: 'posts', id: post.id })
+  test('should execute findByID', async ({ sdk }) => {
+    const result = await sdk.findByID({ id: post.id, collection: 'posts' })
 
     expect(result.id).toBe(post.id)
   })
 
-  it('should execute findByID with trash', async () => {
+  test('should execute findByID with trash', async ({ sdk }) => {
     expect(
-      await sdk.findByID({ collection: 'posts', id: postTrash.id, disableErrors: true }),
+      await sdk.findByID({ id: postTrash.id, collection: 'posts', disableErrors: true }),
     ).toBeNull()
-    expect((await sdk.findByID({ collection: 'posts', id: postTrash.id, trash: true })).id).toEqual(
+    expect((await sdk.findByID({ id: postTrash.id, collection: 'posts', trash: true })).id).toEqual(
       postTrash.id,
     )
   })
 
-  it('should execute findByID with disableErrors: true', async () => {
+  test('should execute findByID with disableErrors: true', async ({ sdk }) => {
     const result = await sdk.findByID({
-      disableErrors: true,
-      collection: 'posts',
       id: typeof post.id === 'string' ? randomUUID() : 999,
+      collection: 'posts',
+      disableErrors: true,
     })
 
     expect(result).toBeNull()
   })
 
-  it('should execute findVersionByID', async () => {
+  test('should execute findVersionByID', async ({ payload, sdk }) => {
     const {
       docs: [version],
-    } = await payload.findVersions({ collection: 'posts', where: { parent: { equals: post.id } } })
+    } = await payload.findVersions({
+      collection: 'posts',
+      overrideAccess: true,
+      where: { parent: { equals: post.id } },
+    })
 
-    const result = await sdk.findVersionByID({ collection: 'posts', id: version.id })
+    const result = await sdk.findVersionByID({ id: version.id, collection: 'posts' })
 
     expect(result.id).toBe(version.id)
   })
 
-  it('should execute findVersionByID with trash', async () => {
+  test('should execute findVersionByID with trash', async ({ payload, sdk }) => {
     const {
       docs: [trashVersion],
     } = await payload.findVersions({
       collection: 'posts',
+      overrideAccess: true,
       trash: true,
       where: { parent: { equals: postTrash.id } },
     })
 
     expect(
-      await sdk.findVersionByID({ collection: 'posts', id: trashVersion.id, disableErrors: true }),
+      await sdk.findVersionByID({ id: trashVersion.id, collection: 'posts', disableErrors: true }),
     ).toBeNull()
     expect(
-      (await sdk.findVersionByID({ collection: 'posts', id: trashVersion.id, trash: true })).id,
+      (await sdk.findVersionByID({ id: trashVersion.id, collection: 'posts', trash: true })).id,
     ).toBe(trashVersion.id)
   })
 
-  it('should execute create', async () => {
+  test('should execute create', async ({ sdk }) => {
     const result = await sdk.create({ collection: 'posts', data: { text: 'text' } })
 
     expect(result.text).toBe('text')
   })
 
-  it('should execute create with file', async () => {
+  test('should execute create with file', async ({ sdk }) => {
     const filePath = path.join(dirname, './image.jpg')
     const { file, handle } = await createStreamableFile(filePath)
-    const res = await sdk.create({ collection: 'media', file, data: {} })
+    const res = await sdk.create({ collection: 'media', data: {}, file })
     expect(res.id).toBeTruthy()
     await handle.close()
   })
 
-  it('should execute count', async () => {
+  test('should execute count', async ({ sdk }) => {
     const result = await sdk.count({ collection: 'posts', where: { id: { equals: post.id } } })
 
     expect(result.totalDocs).toBe(1)
   })
 
-  it('should execute count with trash', async () => {
+  test('should execute count with trash', async ({ sdk }) => {
     expect(
       (
         await sdk.count({
@@ -176,20 +188,20 @@ describe('@payloadcms/sdk', () => {
     ).toBe(2)
   })
 
-  it('should execute update (by ID)', async () => {
+  test('should execute update (by ID)', async ({ sdk }) => {
     const result = await sdk.update({
-      collection: 'posts',
       id: post.id,
+      collection: 'posts',
       data: { text: 'updated-text' },
     })
 
     expect(result.text).toBe('updated-text')
   })
 
-  it('should execute update (by ID) with trash', async () => {
+  test('should execute update (by ID) with trash', async ({ sdk }) => {
     const result = await sdk.update({
-      collection: 'posts',
       id: postTrash.id,
+      collection: 'posts',
       data: { text: 'updated-trash-by-id' },
       trash: true,
     })
@@ -197,75 +209,89 @@ describe('@payloadcms/sdk', () => {
     expect(result.text).toBe('updated-trash-by-id')
   })
 
-  it('should execute update (bulk)', async () => {
+  test('should execute update (bulk)', async ({ sdk }) => {
     const result = await sdk.update({
       collection: 'posts',
-      where: { id: { equals: post.id } },
       data: { text: 'updated-text-bulk' },
+      where: { id: { equals: post.id } },
     })
 
     expect(result.docs[0].text).toBe('updated-text-bulk')
   })
 
-  it('should execute update (bulk) with trash', async () => {
+  test('should execute update (bulk) with trash', async ({ sdk }) => {
     const result = await sdk.update({
       collection: 'posts',
-      where: { id: { equals: postTrash.id } },
       data: { text: 'updated-trash-bulk' },
       trash: true,
+      where: { id: { equals: postTrash.id } },
     })
 
     expect(result.docs[0].text).toBe('updated-trash-bulk')
   })
 
-  it('should execute delete (by ID)', async () => {
-    const post = await payload.create({ collection: 'posts', data: {} })
+  test('should execute delete (by ID)', async ({ payload, sdk }) => {
+    const post = await payload.create({ collection: 'posts', data: {}, overrideAccess: true })
 
     const result = await sdk.delete({ id: post.id, collection: 'posts' })
 
     expect(result.id).toBe(post.id)
     expect(
-      await payload.findByID({ collection: 'posts', id: post.id, disableErrors: true }),
+      await payload.findByID({
+        id: post.id,
+        collection: 'posts',
+        disableErrors: true,
+        overrideAccess: true,
+      }),
     ).toBeNull()
   })
 
-  it('should execute delete (by ID) with trash', async () => {
+  test('should execute delete (by ID) with trash', async ({ payload, sdk }) => {
     const trashed = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString() },
+      overrideAccess: true,
     })
 
-    await sdk.delete({ collection: 'posts', id: trashed.id, trash: true })
+    await sdk.delete({ id: trashed.id, collection: 'posts', trash: true })
 
     expect(
       await payload.findByID({
+        id: trashed.id,
         collection: 'posts',
         disableErrors: true,
-        id: trashed.id,
+        overrideAccess: true,
         trash: true,
       }),
     ).toBeNull()
   })
 
-  it('should execute delete (bulk)', async () => {
-    const post = await payload.create({ collection: 'posts', data: {} })
+  test('should execute delete (bulk)', async ({ payload, sdk }) => {
+    const post = await payload.create({ collection: 'posts', data: {}, overrideAccess: true })
 
-    const result = await sdk.delete({ where: { id: { equals: post.id } }, collection: 'posts' })
+    const result = await sdk.delete({ collection: 'posts', where: { id: { equals: post.id } } })
 
     expect(result.docs[0].id).toBe(post.id)
     expect(
-      await payload.findByID({ collection: 'posts', id: post.id, disableErrors: true }),
+      await payload.findByID({
+        id: post.id,
+        collection: 'posts',
+        disableErrors: true,
+        overrideAccess: true,
+      }),
     ).toBeNull()
   })
 
-  it('should execute delete (bulk) with trash', async () => {
+  test('should execute delete (bulk) with trash', async ({ payload, sdk }) => {
     const trashedA = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString(), text: 'bulk-perma-a' },
+      overrideAccess: true,
     })
     const trashedB = await payload.create({
       collection: 'posts',
       data: { deletedAt: new Date().toISOString(), text: 'bulk-perma-b' },
+      overrideAccess: true,
     })
 
     await sdk.delete({
@@ -276,49 +302,68 @@ describe('@payloadcms/sdk', () => {
 
     expect(
       await payload.findByID({
+        id: trashedA.id,
         collection: 'posts',
         disableErrors: true,
-        id: trashedA.id,
+        overrideAccess: true,
         trash: true,
       }),
     ).toBeNull()
     expect(
       await payload.findByID({
+        id: trashedB.id,
         collection: 'posts',
         disableErrors: true,
-        id: trashedB.id,
+        overrideAccess: true,
         trash: true,
       }),
     ).toBeNull()
   })
 
-  it('should execute restoreVersion', async () => {
-    const post = await payload.create({ collection: 'posts', data: { text: 'old' } })
+  test('should execute restoreVersion', async ({ payload, sdk }) => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: { text: 'old' },
+      overrideAccess: true,
+    })
 
     const {
       docs: [currentVersion],
-    } = await payload.findVersions({ collection: 'posts', where: { parent: { equals: post.id } } })
+    } = await payload.findVersions({
+      collection: 'posts',
+      overrideAccess: true,
+      where: { parent: { equals: post.id } },
+    })
 
-    await payload.update({ collection: 'posts', id: post.id, data: { text: 'new' } })
+    await payload.update({
+      id: post.id,
+      collection: 'posts',
+      data: { text: 'new' },
+      overrideAccess: true,
+    })
 
     const result = await sdk.restoreVersion({
-      collection: 'posts',
       id: currentVersion.id,
+      collection: 'posts',
     })
 
     expect(result.text).toBe('old')
 
-    const resultDB = await payload.findByID({ collection: 'posts', id: post.id })
+    const resultDB = await payload.findByID({
+      id: post.id,
+      collection: 'posts',
+      overrideAccess: true,
+    })
 
     expect(resultDB.text).toBe('old')
   })
 
-  it('should execute findGlobal', async () => {
+  test('should execute findGlobal', async ({ sdk }) => {
     const result = await sdk.findGlobal({ slug: 'global' })
     expect(result.text).toBe('some-global')
   })
 
-  it('should execute findGlobalVersions', async () => {
+  test('should execute findGlobalVersions', async ({ sdk }) => {
     const result = await sdk.findGlobalVersions({
       slug: 'global',
     })
@@ -326,11 +371,12 @@ describe('@payloadcms/sdk', () => {
     expect(result.docs[0].version).toBeTruthy()
   })
 
-  it('should execute findGlobalVersionByID', async () => {
+  test('should execute findGlobalVersionByID', async ({ payload, sdk }) => {
     const {
       docs: [version],
     } = await payload.findGlobalVersions({
       slug: 'global',
+      overrideAccess: true,
     })
 
     const result = await sdk.findGlobalVersionByID({ id: version.id, slug: 'global' })
@@ -338,35 +384,36 @@ describe('@payloadcms/sdk', () => {
     expect(result.id).toBe(version.id)
   })
 
-  it('should execute updateGlobal', async () => {
+  test('should execute updateGlobal', async ({ sdk }) => {
     const result = await sdk.updateGlobal({ slug: 'global', data: { text: 'some-updated-global' } })
     expect(result.text).toBe('some-updated-global')
   })
 
-  it('should execute restoreGlobalVersion', async () => {
-    await payload.updateGlobal({ slug: 'global', data: { text: 'old' } })
+  test('should execute restoreGlobalVersion', async ({ payload, sdk }) => {
+    await payload.updateGlobal({ slug: 'global', data: { text: 'old' }, overrideAccess: true })
 
     const {
       docs: [currentVersion],
     } = await payload.findGlobalVersions({
       slug: 'global',
+      overrideAccess: true,
     })
 
-    await payload.updateGlobal({ slug: 'global', data: { text: 'new' } })
+    await payload.updateGlobal({ slug: 'global', data: { text: 'new' }, overrideAccess: true })
 
     const { version: result } = await sdk.restoreGlobalVersion({
-      slug: 'global',
       id: currentVersion.id,
+      slug: 'global',
     })
 
     expect(result.text).toBe('old')
 
-    const resultDB = await payload.findGlobal({ slug: 'global' })
+    const resultDB = await payload.findGlobal({ slug: 'global', overrideAccess: true })
 
     expect(resultDB.text).toBe('old')
   })
 
-  it('should execute login', async () => {
+  test('should execute login', async ({ sdk }) => {
     const res = await sdk.login({
       collection: 'users',
       data: { email: testUserCredentials.email, password: testUserCredentials.password },
@@ -375,7 +422,7 @@ describe('@payloadcms/sdk', () => {
     expect(res.user.email).toBe(testUserCredentials.email)
   })
 
-  it('should execute me', async () => {
+  test('should execute me', async ({ sdk }) => {
     const { token } = await sdk.login({
       collection: 'users',
       data: { email: testUserCredentials.email, password: testUserCredentials.password },
@@ -389,7 +436,7 @@ describe('@payloadcms/sdk', () => {
     expect(res.user.email).toBe(testUserCredentials.email)
   })
 
-  it('should execute refreshToken', async () => {
+  test('should execute refreshToken', async ({ sdk }) => {
     const { token } = await sdk.login({
       collection: 'users',
       data: { email: testUserCredentials.email, password: testUserCredentials.password },
@@ -403,10 +450,11 @@ describe('@payloadcms/sdk', () => {
     expect(res.user.email).toBe(testUserCredentials.email)
   })
 
-  it('should execute forgotPassword and resetPassword', async () => {
+  test('should execute forgotPassword and resetPassword', async ({ payload, sdk }) => {
     const user = await payload.create({
       collection: 'users',
       data: { email: 'new@payloadcms.com', password: 'HOW TO rEmeMber this password' },
+      overrideAccess: true,
     })
 
     const resForgotPassword = await sdk.forgotPassword({
@@ -417,9 +465,10 @@ describe('@payloadcms/sdk', () => {
     expect(resForgotPassword.message).toBeTruthy()
 
     const afterForgotPassword = await payload.findByID({
-      showHiddenFields: true,
-      collection: 'users',
       id: user.id,
+      collection: 'users',
+      overrideAccess: true,
+      showHiddenFields: true,
     })
 
     expect(afterForgotPassword.resetPasswordToken).toBeTruthy()
@@ -441,17 +490,21 @@ describe('@payloadcms/sdk', () => {
     expect(email).toBe(user.email)
   })
 
-  describe('Error Handling', () => {
-    afterEach(async () => {
+  test.describe('Error Handling', () => {
+    test.afterEach(async ({ payload }) => {
       await payload.db.deleteMany({ collection: 'emails', where: { id: { exists: true } } })
     })
 
-    it('should throw PayloadSDKError on validation error (duplicate unique field)', async () => {
+    test('should throw PayloadSDKError on validation error (duplicate unique field)', async ({
+      payload,
+      sdk,
+    }) => {
       const testEmail = 'unique-test@example.com'
 
       await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
+        overrideAccess: true,
       })
 
       let thrownError: null | PayloadSDKError = null
@@ -473,15 +526,17 @@ describe('@payloadcms/sdk', () => {
       expect(thrownError!.message).toBeTruthy()
     })
 
-    it('should throw PayloadSDKError on not found (findByID with invalid id)', async () => {
+    test('should throw PayloadSDKError on not found (findByID with invalid id)', async ({
+      sdk,
+    }) => {
       const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
 
       let thrownError: null | PayloadSDKError = null
 
       try {
         await sdk.findByID({
-          collection: 'posts',
           id: invalidId,
+          collection: 'posts',
         })
       } catch (err) {
         thrownError = err as PayloadSDKError
@@ -493,19 +548,19 @@ describe('@payloadcms/sdk', () => {
       expect(thrownError!.message).toBeTruthy()
     })
 
-    it('should return null with disableErrors: true on findByID not found', async () => {
+    test('should return null with disableErrors: true on findByID not found', async ({ sdk }) => {
       const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
 
       const result = await sdk.findByID({
-        disableErrors: true,
-        collection: 'posts',
         id: invalidId,
+        collection: 'posts',
+        disableErrors: true,
       })
 
       expect(result).toBeNull()
     })
 
-    it('should throw PayloadSDKError on update with invalid data', async () => {
+    test('should throw PayloadSDKError on update with invalid data', async ({ payload, sdk }) => {
       let thrownError: null | PayloadSDKError = null
       const testEmail = 'update-error-test@example.com'
       const testEmail2 = 'update-error-test2@example.com'
@@ -513,17 +568,19 @@ describe('@payloadcms/sdk', () => {
       await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
+        overrideAccess: true,
       })
 
       const doc2 = await payload.create({
         collection: emailsSlug,
         data: { email: testEmail2 },
+        overrideAccess: true,
       })
 
       try {
         await sdk.update({
-          collection: emailsSlug,
           id: doc2.id,
+          collection: emailsSlug,
           data: { email: testEmail },
         })
       } catch (err) {
@@ -535,15 +592,15 @@ describe('@payloadcms/sdk', () => {
       expect(thrownError!.errors).toBeDefined()
     })
 
-    it('should throw PayloadSDKError on delete with invalid id', async () => {
+    test('should throw PayloadSDKError on delete with invalid id', async ({ sdk }) => {
       const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
 
       let thrownError: null | PayloadSDKError = null
 
       try {
         await sdk.delete({
-          collection: 'posts',
           id: invalidId,
+          collection: 'posts',
         })
       } catch (err) {
         thrownError = err as PayloadSDKError
@@ -553,15 +610,15 @@ describe('@payloadcms/sdk', () => {
       expect(thrownError!.status).toBe(404)
     })
 
-    it('should include response object in PayloadSDKError', async () => {
+    test('should include response object in PayloadSDKError', async ({ sdk }) => {
       const invalidId = typeof post.id === 'string' ? randomUUID() : 999999
 
       let thrownError: null | PayloadSDKError = null
 
       try {
         await sdk.findByID({
-          collection: 'posts',
           id: invalidId,
+          collection: 'posts',
         })
       } catch (err) {
         thrownError = err as PayloadSDKError
@@ -572,12 +629,13 @@ describe('@payloadcms/sdk', () => {
       expect(thrownError!.response.status).toBe(404)
     })
 
-    it('should have error data for ValidationError', async () => {
+    test('should have error data for ValidationError', async ({ payload, sdk }) => {
       const testEmail = 'validation-data-test@example.com'
 
       await payload.create({
         collection: emailsSlug,
         data: { email: testEmail },
+        overrideAccess: true,
       })
 
       let thrownError: null | PayloadSDKError = null

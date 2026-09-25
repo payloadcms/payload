@@ -4,6 +4,6 @@ export async function openDocControls(
   page: Locator | Page,
   mainPage?: Locator | Page,
 ): Promise<void> {
-  await page.locator('.doc-controls__popup .popup-button').click()
+  await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
   await expect((mainPage ?? page).locator('.popup__content')).toBeVisible()
 }

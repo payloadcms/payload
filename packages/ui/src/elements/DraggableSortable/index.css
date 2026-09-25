@@ -1,0 +1,6 @@
+@layer payload-default {
+  body.is-dragging,
+  body.is-dragging * {
+    cursor: grabbing;
+  }
+}

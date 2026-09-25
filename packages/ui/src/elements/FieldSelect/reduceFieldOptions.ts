@@ -5,6 +5,7 @@ import {
   fieldHasSubFields,
   fieldIsHiddenOrDisabled,
   getFieldPermissions,
+  isFieldDisabled,
 } from 'payload/shared'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
@@ -24,7 +25,7 @@ export type FieldOption = {
 export const ignoreFromBulkEdit = (field: ClientField): boolean =>
   Boolean(
     (fieldAffectsData(field) || field.type === 'ui') &&
-      (field.admin.disableBulkEdit ||
+      (isFieldDisabled(field, 'bulkEdit') ||
         field.unique ||
         fieldIsHiddenOrDisabled(field) ||
         ('readOnly' in field && field.readOnly)),
@@ -72,7 +73,7 @@ export const reduceFieldOptions = ({
     // escape for a variety of reasons, include ui fields as they have `name`.
     if (
       (fieldAffectsData(field) || field.type === 'ui') &&
-      (field.admin?.disableBulkEdit ||
+      (isFieldDisabled(field, 'bulkEdit') ||
         field.unique ||
         fieldIsHiddenOrDisabled(field) ||
         ('readOnly' in field && field.readOnly) ||
@@ -83,11 +84,14 @@ export const reduceFieldOptions = ({
     }
 
     if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
+      const fieldHasLabel = 'label' in field && field.label
       return [
         ...fieldsToUse,
         ...reduceFieldOptions({
           fields: field.fields,
-          labelPrefix: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
+          labelPrefix: fieldHasLabel
+            ? combineFieldLabel({ CustomLabel, field, prefix: labelPrefix })
+            : labelPrefix,
           parentPath: path,
           path: createNestedClientFieldPath(path, field),
           permissions: fieldPermissions,
@@ -101,14 +105,26 @@ export const reduceFieldOptions = ({
         ...field.tabs.reduce((tabFields, tab) => {
           if ('fields' in tab) {
             const isNamedTab = 'name' in tab && tab.name
+
+            const namedTabPermissions =
+              isNamedTab && fieldPermissions && fieldPermissions !== true
+                ? fieldPermissions[tab.name]
+                : undefined
+
+            const tabPermissions = isNamedTab
+              ? namedTabPermissions === true
+                ? true
+                : (namedTabPermissions?.fields ?? fieldPermissions)
+              : fieldPermissions
+
             return [
               ...tabFields,
               ...reduceFieldOptions({
                 fields: tab.fields,
                 labelPrefix,
                 parentPath: path,
-                path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
-                permissions: fieldPermissions,
+                path: isNamedTab ? createNestedClientFieldPath(path, tab as ClientField) : path,
+                permissions: tabPermissions,
               }),
             ]
           }

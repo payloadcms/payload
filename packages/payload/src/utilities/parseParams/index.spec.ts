@@ -4,6 +4,16 @@ import { parseParams, booleanParams, numberParams } from './index.js'
 
 describe('parseParams', () => {
   describe('boolean parameters', () => {
+    it('should parse disabled all-locale publication flags as false', () => {
+      const result = parseParams({
+        publishAllLocales: 'false',
+        unpublishAllLocales: 'false',
+      })
+
+      expect(result.publishAllLocales).toBe(false)
+      expect(result.unpublishAllLocales).toBe(false)
+    })
+
     booleanParams.forEach((param) => {
       describe(param, () => {
         it('should parse string "true" to boolean true', () => {
@@ -195,14 +205,6 @@ describe('parseParams', () => {
       const selectedLocales = 'en,es,fr'
       const result = parseParams({ selectedLocales })
       expect(result.selectedLocales).toBe(selectedLocales)
-    })
-  })
-
-  describe('publishSpecificLocale parameter', () => {
-    it('should pass through publishSpecificLocale as-is', () => {
-      const publishSpecificLocale = 'en'
-      const result = parseParams({ publishSpecificLocale })
-      expect(result.publishSpecificLocale).toBe(publishSpecificLocale)
     })
   })
 

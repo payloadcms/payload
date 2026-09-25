@@ -1,11 +1,7 @@
 import type { Klass, LexicalNode, LexicalNodeReplacement } from 'lexical'
 
 import { createHeadlessEditor } from '@lexical/headless'
-
-import {
-  $convertToMarkdownString,
-  type Transformer,
-} from '../../../../packages/@lexical/markdown/index.js'
+import { $convertToMarkdownString, type Transformer } from '@lexical/markdown'
 
 export function getLexicalToMarkdown(
   allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>,

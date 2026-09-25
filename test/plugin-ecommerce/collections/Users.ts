@@ -10,4 +10,5 @@ export const Users: CollectionConfig = {
     read: () => true,
   },
   fields: [],
+  versions: false,
 }

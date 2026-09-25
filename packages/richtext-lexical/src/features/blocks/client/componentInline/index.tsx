@@ -11,7 +11,6 @@ import {
   EditDepthProvider,
   Form,
   formatDrawerSlug,
-  FormSubmit,
   RenderFields,
   ShimmerEffect,
   useConfig,
@@ -22,33 +21,35 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey } from 'lexical'
+import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 
-import './index.scss'
+import './index.css'
+import '../../../../utilities/fieldsDrawer/index.css'
 
 import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
-import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
+import type { ViewMapInlineBlockComponentProps } from '../../../../types/index.js'
+import type { InlineBlockFields } from '../../server/schema.js'
+import type { BlockComponentProps } from '../component/index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import {
+  RegisterFormSubmit,
+  useDrawerSubmit,
+} from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
-type Props = {
-  /**
-   * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
-   * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
-   * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
-   */
-  readonly cacheBuster: number
-  readonly className: string
-  readonly formData: InlineBlockFields
-  readonly nodeKey: string
-}
+export type InlineBlockComponentProps<
+  TFormData extends Record<string, unknown> = InlineBlockFields,
+> = {
+  readonly CustomBlock?: React.FC<ViewMapInlineBlockComponentProps>
+  readonly CustomLabel?: React.FC<ViewMapInlineBlockComponentProps>
+} & Pick<BlockComponentProps<TFormData>, 'cacheBuster' | 'className' | 'formData' | 'nodeKey'>
 
-type InlineBlockComponentContextType = {
+export type InlineBlockComponentContextType = {
   EditButton?: React.FC
   initialState: false | FormState | undefined
   InlineBlockContainer?: React.FC<{ children: React.ReactNode }>
@@ -63,8 +64,17 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
 
 export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
-export const InlineBlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, className: baseClass, formData, nodeKey } = props
+export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBlockFields>> = (
+  props,
+) => {
+  const {
+    cacheBuster,
+    className: baseClass,
+    CustomBlock: CustomBlockFromProps,
+    CustomLabel: CustomLabelFromProps,
+    formData,
+    nodeKey,
+  } = props
 
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
@@ -117,15 +127,59 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     }
   }, [cacheBuster])
 
-  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.BlockLabel,
-  )
+  const [formUuid] = React.useState(() => uuid())
 
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+  // Server-rendered custom components (from admin.components, NOT viewMap).
+  // When viewMap components exist, we render them directly with formData instead.
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomLabelFromProps) {
+      return undefined
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.Block,
-  )
+    return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
+  })
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      return undefined
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
+
+  const resolvedCustomBlock = useMemo(() => {
+    if (CustomBlockFromProps) {
+      return (
+        <CustomBlockFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useInlineBlockComponentContext={useInlineBlockComponentContext}
+        />
+      )
+    }
+    return CustomBlock
+  }, [CustomBlockFromProps, baseClass, formData, nodeKey, CustomBlock])
+
+  const resolvedCustomLabel = useMemo(() => {
+    if (CustomLabelFromProps) {
+      return (
+        <CustomLabelFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useInlineBlockComponentContext={useInlineBlockComponentContext}
+        />
+      )
+    }
+    return CustomLabel
+  }, [CustomLabelFromProps, baseClass, formData, nodeKey, CustomLabel])
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
@@ -141,15 +195,13 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap?.[
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
     componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient | undefined
 
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
+  const blockOrSlug = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
 
   const clientBlockFields = clientBlock?.fields ?? []
 
@@ -214,19 +266,28 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         ) as InlineBlockFields
 
         // Things like default values may come back from the server => update the node with the new data
-        editor.update(() => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && $isInlineBlockNode(node)) {
-            const newData = newFormStateData
-            newData.blockType = formData.blockType
+        editor.update(
+          () => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isInlineBlockNode(node)) {
+              const newData = newFormStateData
+              newData.blockType = formData.blockType
 
-            node.setFields(newData, true)
-          }
-        })
+              node.setFields(newData, true)
+            }
+          },
+          // Without this, the outer editor's reconciler resets DOM selection
+          // back into its own root, kicking focus out of any nested richText.
+          { tag: SKIP_DOM_SELECTION_TAG },
+        )
 
         setInitialState(state)
-        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        setCustomBlock(state['_components']?.customComponents?.Block)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state['_components']?.customComponents?.Block)
+        }
       }
     }
 
@@ -242,6 +303,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     editor,
     nodeKey,
     isEditable,
+    CustomLabelFromProps,
+    CustomBlockFromProps,
     schemaFieldsPath,
     id,
     formData,
@@ -287,8 +350,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       }
 
       if (submit) {
-        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        setCustomBlock(state['_components']?.customComponents?.Block)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state['_components']?.customComponents?.Block)
+        }
       }
 
       return state
@@ -302,6 +369,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       globalSlug,
       isEditable,
       schemaFieldsPath,
+      CustomBlockFromProps,
+      CustomLabelFromProps,
     ],
   )
   // cleanup effect
@@ -330,29 +399,37 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     (formState: FormState, newData: Data) => {
       newData.blockType = formData.blockType
 
-      editor.update(() => {
-        const node = $getNodeByKey(nodeKey)
-        if (node && $isInlineBlockNode(node)) {
-          node.setFields(newData as InlineBlockFields, true)
-        }
-      })
+      editor.update(
+        () => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isInlineBlockNode(node)) {
+            node.setFields(newData as InlineBlockFields, true)
+          }
+        },
+        // Without this, the outer editor's reconciler resets DOM selection
+        // back into its own root, kicking focus out of any nested richText.
+        { tag: SKIP_DOM_SELECTION_TAG },
+      )
     },
     [editor, nodeKey, formData],
   )
 
+  const { headerActions, submitRef } = useDrawerSubmit()
+
   const RemoveButton = useMemo(
     () => () => (
       <Button
-        buttonStyle="icon-label"
+        buttonStyle="ghost"
         className={`${baseClass}__removeButton`}
         disabled={!isEditable}
         icon="x"
         onClick={(e) => {
           e.preventDefault()
+          e.stopPropagation()
           removeInlineBlock()
         }}
         round
-        size="small"
+        size="medium"
         tooltip={t('lexical:blocks:inlineBlocks:remove', { label: blockDisplayName })}
       />
     ),
@@ -362,7 +439,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const EditButton = useMemo(
     () => () => (
       <Button
-        buttonStyle="icon-label"
+        buttonStyle="ghost"
         className={`${baseClass}__editButton`}
         disabled={!isEditable}
         el="button"
@@ -371,7 +448,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           toggleDrawer()
         }}
         round
-        size="small"
+        size="medium"
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),
@@ -385,23 +462,36 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           className={[`${baseClass}__container`, baseClass + '-' + formData.blockType, className]
             .filter(Boolean)
             .join(' ')}
+          {...(isEditable
+            ? {
+                onClick: () => toggleDrawer(),
+                onKeyDown: (e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    toggleDrawer()
+                  }
+                },
+                role: 'button',
+                tabIndex: 0,
+              }
+            : {})}
           ref={inlineBlockElemElemRef}
         >
           {children}
         </div>
       ),
-    [baseClass, formData.blockType],
+    [baseClass, formData.blockType, isEditable, toggleDrawer],
   )
 
   const Label = useMemo(() => {
-    if (CustomLabel) {
-      return () => CustomLabel
+    if (resolvedCustomLabel) {
+      return () => resolvedCustomLabel
     } else {
       return () => (
         <div>{clientBlock?.labels ? getTranslation(clientBlock?.labels.singular, i18n) : ''}</div>
       )
     }
-  }, [CustomLabel, clientBlock?.labels, i18n])
+  }, [resolvedCustomLabel, clientBlock?.labels, i18n])
 
   if (!clientBlock) {
     return (
@@ -433,18 +523,19 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         onFormSubmit(formState, data)
         toggleDrawer()
       }}
-      uuid={uuid()}
+      uuid={formUuid}
     >
       <EditDepthProvider>
         <Drawer
           className={''}
+          headerActions={headerActions}
           slug={drawerSlug}
           title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
           {initialState ? (
-            <>
+            <div className="fields-drawer">
               <RenderFields
                 fields={clientBlock?.fields}
                 forceRender
@@ -454,12 +545,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
                 permissions={true}
                 readOnly={!isEditable}
               />
-              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
-            </>
+              <RegisterFormSubmit submitRef={submitRef} />
+            </div>
           ) : null}
         </Drawer>
       </EditDepthProvider>
-      {CustomBlock ? (
+      {resolvedCustomBlock ? (
         <InlineBlockComponentContext
           value={{
             EditButton,
@@ -470,14 +561,13 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             RemoveButton,
           }}
         >
-          {CustomBlock}
+          {resolvedCustomBlock}
         </InlineBlockComponentContext>
       ) : (
         <InlineBlockContainer>
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
           {isEditable ? (
             <div className={`${baseClass}__actions`}>
-              <EditButton />
               <RemoveButton />
             </div>
           ) : null}

@@ -1,4 +1,4 @@
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, User } from 'payload'
 
 type Args = {
   collectionSlug?: string
@@ -11,7 +11,7 @@ type Args = {
 type Result = {
   isLocked: boolean
   lastEditedAt: string
-  user: TypedUser
+  user: User
 }
 
 const lockDurationDefault = 300 // Default 5 minutes in seconds

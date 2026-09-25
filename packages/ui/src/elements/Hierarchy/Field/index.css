@@ -1,0 +1,37 @@
+@layer payload-default {
+  .hierarchy-field .field-type__wrap {
+    gap: var(--spacer-2);
+    flex-direction: column;
+    display: flex;
+  }
+
+  .hierarchy-field .field-label {
+    display: flex;
+    font-family: var(--text-body-large-font-family);
+    font-size: var(--text-body-large-font-size);
+    font-weight: var(--text-body-large-font-weight);
+    line-height: var(--text-body-large-line-height);
+    letter-spacing: var(--text-body-large-letter-spacing);
+    margin: unset;
+  }
+
+  .hierarchy-field__label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .hierarchy-field__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2-5);
+  }
+
+  .hierarchy-field__manage-button {
+    align-self: flex-start;
+  }
+
+  .hierarchy-field--read-only .hierarchy-field__content {
+    opacity: 0.75;
+  }
+}

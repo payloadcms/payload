@@ -1,61 +1,62 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig, PayloadRequest, TypeWithID } from 'payload'
 
-import {
-  getFilePrefix as getDocPrefix,
-  getFileKey,
-} from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFilePrefix as getDocPrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
-import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
+import { getRangeRequestInfo, isXmlMimeType, uploadContentSecurityPolicy } from 'payload/internal'
+
+import { generateURL } from './generateURL.js'
 
 interface GetFileArgs {
   baseUrl: string
   cacheControlMaxAge: number
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  doc?: TypeWithID
   filename: string
   incomingHeaders?: Headers
-  prefixQueryParam?: string
   req: PayloadRequest
   token: string
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
 export async function getFile({
   baseUrl,
   cacheControlMaxAge,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
+  doc,
   filename,
   incomingHeaders,
-  prefixQueryParam,
   req,
   token,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
-      filename,
-      prefixQueryParam,
-      req,
-    })
-
-    const fileKey = getFileKey({
       collectionPrefix,
-      docPrefix,
-      filename: encodeURIComponent(sanitizeFilename(filename)),
+      doc,
+      filename,
+      req,
+      uploadReference,
       useCompositePrefixes,
     })
-    const fileUrl = `${baseUrl}/${fileKey}`
+
+    const fileUrl = generateURL({
+      baseUrl,
+      collectionPrefix,
+      filename,
+      prefix: docPrefix,
+      useCompositePrefixes,
+    })
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
     const blobMetadata = await head(fileUrl, { token })
     const { contentDisposition, contentType, size, uploadedAt } = blobMetadata
     const uploadedAtString = uploadedAt.toISOString()
-    const ETag = `"${fileKey}-${uploadedAtString}"`
+    const fileKeyForETag = fileUrl.replace(`${baseUrl}/`, '')
+    const ETag = `"${fileKeyForETag}-${uploadedAtString}"`
 
     // Handle range request
     const rangeHeader = req.headers.get('range')
@@ -80,9 +81,9 @@ export async function getFile({
     headers.append('Content-Type', contentType)
     headers.append('ETag', ETag)
 
-    // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (contentType === 'image/svg+xml') {
-      headers.append('Content-Security-Policy', "script-src 'none'")
+    // Apply a restrictive policy to XML-family responses served through Payload.
+    if (isXmlMimeType(contentType)) {
+      headers.append('Content-Security-Policy', uploadContentSecurityPolicy)
     }
 
     if (

@@ -1,0 +1,23 @@
+@layer payload-default {
+  .multi-value {
+    &.rs__multi-value {
+      display: flex;
+      padding: 0;
+      border: var(--stroke-width-small) solid var(--color-border);
+      border-radius: var(--radius-chip);
+      background: var(--color-bg);
+      height: 1.25rem;
+      margin: 0;
+
+      &:focus,
+      &:focus-visible {
+        outline: none;
+        border: var(--accessibility-outline);
+      }
+    }
+  }
+
+  .multi-value--is-dragging {
+    z-index: 2;
+  }
+}

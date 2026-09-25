@@ -6,7 +6,7 @@ import { useAuth, useRouteCache } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
 import { credentials } from '../../credentials.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'before-login'
 

@@ -12,7 +12,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { filterOutUploadFields } from '../../utilities/filterOutUploadFields.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import { reduceFieldOptions } from './reduceFieldOptions.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'field-select'
 

@@ -145,4 +145,5 @@ export const PostsCollection: CollectionConfig = {
       relationTo: ['rels'],
     },
   ],
+  versions: false,
 }

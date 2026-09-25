@@ -1,0 +1,8 @@
+export const categoriesSlug = 'categories'
+export const departmentsSlug = 'departments'
+export const divisionsSlug = 'divisions'
+export const foldersSlug = 'folders'
+export const organizationsSlug = 'organizations'
+export const pagesSlug = 'pages'
+export const productsSlug = 'products'
+export const regionsSlug = 'regions'

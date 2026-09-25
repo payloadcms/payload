@@ -1,0 +1,90 @@
+@layer payload-default {
+  .loading-overlay {
+    isolation: isolate;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    pointer-events: none;
+    z-index: calc(var(--z-status) + 1);
+    transition-property: left, width;
+    transition: 250ms ease;
+  }
+
+  .loading-overlay--entering {
+    opacity: 1;
+    animation: fade-in ease;
+    pointer-events: all;
+  }
+
+  .loading-overlay--exiting {
+    opacity: 0;
+    animation: fade-out ease;
+  }
+
+  /*
+   * Drawer variant: the overlay is just a calm, opaque backdrop shown while the
+   * drawer loads. It appears instantly (no fade-in ramp); the graceful reveal is
+   * handled by the content fading in once it's ready (.drawer__fade-in). The
+   * spinner is held back so quick (nested) drawer loads never flash it.
+   */
+  .loading-overlay--drawer::after {
+    opacity: 1;
+    background-color: var(--color-bg);
+  }
+
+  .loading-overlay--drawer.loading-overlay--entering {
+    animation: none;
+    opacity: 1;
+  }
+
+  .loading-overlay--drawer .spinner {
+    opacity: 0;
+    animation: fade-in 200ms ease 450ms forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-overlay--drawer .spinner {
+      animation: none;
+      opacity: 1;
+    }
+  }
+
+  .loading-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-bg);
+    opacity: 0.85;
+    z-index: -1;
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    0% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+}

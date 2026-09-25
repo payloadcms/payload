@@ -1,6 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { formsSlug, formSubmissionsSlug, pagesSlug } from '../shared.js'
+import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug, pagesSlug } from '../shared.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
@@ -14,6 +14,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         password: 'demo',
       },
       req,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -23,6 +24,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         title: 'Home page',
       },
       req,
+      overrideAccess: true,
     })
 
     const { id: formID } = await payload.create({
@@ -76,6 +78,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ],
         title: 'Contact Form',
       },
+      overrideAccess: true,
     })
 
     const { id: dateFormID } = await payload.create({
@@ -135,6 +138,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         ],
         title: 'Booking Form',
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -152,6 +156,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -161,6 +166,178 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         form: formID,
         title: 'Contact',
       },
+      overrideAccess: true,
+    })
+
+    // Create a form with upload field for e2e testing
+    await payload.create({
+      collection: formsSlug,
+      data: {
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Upload received',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+        fields: [
+          {
+            name: 'fullName',
+            blockType: 'text',
+            label: 'Full Name',
+            required: true,
+          },
+          {
+            name: 'avatar',
+            blockType: 'upload',
+            label: 'Avatar',
+            uploadCollection: mediaSlug,
+            required: true,
+          },
+        ],
+        title: 'Upload Form',
+      },
+      overrideAccess: true,
+    })
+
+    // Create a form with optional upload and MIME type restrictions
+    await payload.create({
+      collection: formsSlug,
+      data: {
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Document received',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+        fields: [
+          {
+            name: 'description',
+            blockType: 'text',
+            label: 'Description',
+          },
+          {
+            name: 'image',
+            blockType: 'upload',
+            label: 'Image (PNG/JPEG only)',
+            uploadCollection: mediaSlug,
+            mimeTypes: [{ mimeType: 'image/png' }, { mimeType: 'image/jpeg' }],
+            required: false,
+          },
+        ],
+        title: 'Image Upload Form',
+      },
+      overrideAccess: true,
+    })
+
+    // Create a form with multiple-file upload field (media) + single upload field (documents)
+    // Used to test hasMany + polymorphic submissionUploads coverage
+    await payload.create({
+      collection: formsSlug,
+      data: {
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Files received',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+        fields: [
+          {
+            name: 'photos',
+            blockType: 'upload',
+            label: 'Photos (multiple)',
+            uploadCollection: mediaSlug,
+            multiple: true,
+            required: false,
+          },
+          {
+            name: 'doc',
+            blockType: 'upload',
+            label: 'Document',
+            uploadCollection: documentsSlug,
+            required: false,
+          },
+        ],
+        title: 'Multi-File Upload Form',
+      },
+      overrideAccess: true,
     })
 
     return true

@@ -7,8 +7,8 @@ import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
-import { createPayloadRequest } from './createPayloadRequest.js'
-import { formatAdminURL } from './formatAdminURL.js'
+import { createPayloadRequestFromWebRequest } from './createPayloadRequestFromWebRequest.js'
+import { formatAdminURL, stripTrailingSlash } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
@@ -87,6 +87,12 @@ export const handleEndpoints = async ({
     (request.headers.get('X-Payload-HTTP-Method-Override') === 'GET' ||
       request.headers.get('X-HTTP-Method-Override') === 'GET')
   ) {
+    // Extract properties before consuming the body — srvx (TanStack Start) uses
+    // lazy property getters that reconstruct the underlying Request, which throws
+    // after the body has been read via .text() / .json().
+    const requestHeaders = request.headers
+    const requestSignal = request.signal
+
     let url = request.url
     let data: any = undefined
 
@@ -97,8 +103,7 @@ export const handleEndpoints = async ({
       // May not be supported by every endpoint
       data = await request.json()
 
-      // locale and fallbackLocale is read by createPayloadRequest to populate req.locale and req.fallbackLocale
-      // => add to searchParams
+      // createPayloadRequestFromWebRequest reads locale and fallbackLocale from searchParams.
       if (data?.locale) {
         url += `?locale=${data.locale}`
       }
@@ -108,12 +113,9 @@ export const handleEndpoints = async ({
     }
 
     const req = new Request(url, {
-      // @ts-expect-error // TODO: check if this is required
-      cache: request.cache,
-      credentials: request.credentials,
-      headers: request.headers,
+      headers: requestHeaders,
       method: 'GET',
-      signal: request.signal,
+      signal: requestSignal,
     })
 
     if (data) {
@@ -133,7 +135,7 @@ export const handleEndpoints = async ({
   }
 
   try {
-    req = await createPayloadRequest({
+    req = await createPayloadRequestFromWebRequest({
       canSetHeaders: true,
       config: incomingConfig,
       payloadInstanceCacheKey,
@@ -143,11 +145,13 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = path ?? new URL(req.url!).pathname
-    const baseAPIPath = formatAdminURL({
+    const rawPathname = path ?? new URL(req.url!).pathname
+    const pathname = stripTrailingSlash(rawPathname)
+    const rawBaseAPIPath = formatAdminURL({
       apiRoute: config.routes.api,
       path: '',
     })
+    const baseAPIPath = stripTrailingSlash(rawBaseAPIPath)
 
     if (!pathname.startsWith(baseAPIPath)) {
       return notFoundResponse(req, pathname)

@@ -34,6 +34,16 @@ import {
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
+  publicationAccessGlobalSlug,
+  publicationAccessSlug,
+  publicationAsyncFieldHookSlug,
+  publicationBeforeOperationGlobalSlug,
+  publicationBeforeOperationSanitizeGlobalSlug,
+  publicationBeforeOperationSlug,
+  publicationFieldAccessGlobalSlug,
+  publicationFieldAccessSlug,
+  publicationHookGlobalSlug,
+  publicationHookSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationshipLocalizedSlug,
@@ -58,471 +68,752 @@ const openAccess: CollectionConfig['access'] = {
   update: () => true,
 }
 
+const preventPublicationStatusChange = ({ data }: { data?: Record<string, unknown> }) => {
+  return typeof data?._status === 'undefined'
+}
+
+const localizedPublicationFields: CollectionConfig['fields'] = [
+  {
+    name: 'title',
+    type: 'text',
+    localized: true,
+  },
+]
+
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  experimental: {
-    localizeStatus: true,
-  },
-  collections: [
-    RichTextCollection,
-    BlocksCollection,
-    NestedArray,
-    NestedFields,
-    LocalizedDrafts,
-    LocalizedDateFields,
-    AllFieldsLocalized,
-    {
-      admin: {
-        listSearchableFields: 'name',
+  suite: 'localization',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      auth: true,
-      fields: [
-        {
-          name: 'name',
-          label: { en: 'Full name' },
-          type: 'text',
-        },
-        {
-          name: 'relation',
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-      ],
-      slug: 'users',
     },
-    {
-      slug: localizedPostsSlug,
-      access: openAccess,
-      admin: {
-        useAsTitle: 'title',
+    collections: [
+      RichTextCollection,
+      BlocksCollection,
+      NestedArray,
+      NestedFields,
+      LocalizedDrafts,
+      LocalizedDateFields,
+      AllFieldsLocalized,
+      {
+        slug: 'users',
+        admin: {
+          listSearchableFields: 'name',
+        },
+        auth: true,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+            label: { en: 'Full name' },
+          },
+          {
+            name: 'relation',
+            type: 'relationship',
+            relationTo: localizedPostsSlug,
+          },
+        ],
+        versions: false,
       },
-      fields: [
-        {
-          name: 'title',
-          label: { en: 'Full title' },
-          index: true,
-          localized: true,
-          type: 'text',
+      {
+        slug: localizedPostsSlug,
+        access: openAccess,
+        admin: {
+          useAsTitle: 'title',
         },
-        {
-          name: 'description',
-          type: 'text',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            index: true,
+            label: { en: 'Full title' },
+            localized: true,
+          },
+          {
+            name: 'description',
+            type: 'text',
+          },
+          {
+            name: 'localizedDescription',
+            type: 'text',
+            localized: true,
+          },
+          {
+            name: 'localizedCheckbox',
+            type: 'checkbox',
+            localized: true,
+          },
+          {
+            name: 'children',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: localizedPostsSlug,
+          },
+          {
+            name: 'group',
+            type: 'group',
+            fields: [
+              {
+                name: 'children',
+                type: 'text',
+              },
+            ],
+          },
+          {
+            name: 'unique',
+            type: 'text',
+            localized: true,
+            unique: true,
+          },
+        ],
+        versions: false,
+      },
+      NoLocalizedFieldsCollection,
+      ArrayCollection,
+      {
+        slug: withRequiredLocalizedFields,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            localized: true,
+            required: true,
+          },
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                fields: [
+                  {
+                    name: 'seoTitle',
+                    type: 'text',
+                    localized: true,
+                    unique: true,
+                  },
+                ],
+                label: 'SEO',
+              },
+              {
+                fields: [
+                  {
+                    name: 'nav',
+                    type: 'group',
+                    fields: [
+                      {
+                        name: 'layout',
+                        type: 'blocks',
+                        blocks: [
+                          {
+                            slug: 'text',
+                            fields: [
+                              {
+                                name: 'text',
+                                type: 'text',
+                              },
+                              {
+                                name: 'nestedArray',
+                                type: 'array',
+                                fields: [
+                                  {
+                                    name: 'text',
+                                    type: 'text',
+                                  },
+                                  {
+                                    name: 'l2',
+                                    type: 'array',
+                                    fields: [
+                                      {
+                                        name: 'l3',
+                                        type: 'array',
+                                        fields: [
+                                          {
+                                            name: 'l4',
+                                            type: 'array',
+                                            fields: [
+                                              {
+                                                name: 'superNestedText',
+                                                type: 'text',
+                                              },
+                                            ],
+                                          },
+                                        ],
+                                      },
+                                    ],
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                          {
+                            slug: 'number',
+                            fields: [
+                              {
+                                name: 'number',
+                                type: 'number',
+                              },
+                            ],
+                          },
+                        ],
+                        localized: true,
+                        required: true,
+                      },
+                    ],
+                  },
+                ],
+                label: 'Main Nav',
+              },
+              {
+                name: 'myTab',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                  {
+                    name: 'group',
+                    type: 'group',
+                    fields: [
+                      {
+                        name: 'nestedArray2',
+                        type: 'array',
+                        fields: [
+                          {
+                            name: 'nestedText',
+                            type: 'text',
+                          },
+                        ],
+                      },
+                      {
+                        name: 'nestedText',
+                        type: 'text',
+                      },
+                    ],
+                    localized: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: withLocalizedRelSlug,
+        access: openAccess,
+        fields: [
+          // Relationship
+          {
+            name: 'localizedRelationship',
+            type: 'relationship',
+            relationTo: localizedPostsSlug,
+          },
+          // Relation hasMany
+          {
+            name: 'localizedRelationHasManyField',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: localizedPostsSlug,
+          },
+          // Relation multiple relationTo
+          {
+            name: 'localizedRelationMultiRelationTo',
+            type: 'relationship',
+            relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
+          },
+          // Relation multiple relationTo hasMany
+          {
+            name: 'localizedRelationMultiRelationToHasMany',
+            type: 'relationship',
+            hasMany: true,
+            relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: relationshipLocalizedSlug,
+        fields: [
+          {
+            name: 'relationship',
+            type: 'relationship',
+            localized: true,
+            relationTo: localizedPostsSlug,
+          },
+          {
+            name: 'relationshipHasMany',
+            type: 'relationship',
+            hasMany: true,
+            localized: true,
+            relationTo: localizedPostsSlug,
+          },
+          {
+            name: 'relationMultiRelationTo',
+            type: 'relationship',
+            localized: true,
+            relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
+          },
+          {
+            name: 'relationMultiRelationToHasMany',
+            type: 'relationship',
+            hasMany: true,
+            localized: true,
+            relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
+          },
+          {
+            name: 'arrayField',
+            type: 'array',
+            fields: [
+              {
+                name: 'nestedRelation',
+                type: 'relationship',
+                label: 'Nested Relation',
+                relationTo: localizedPostsSlug,
+              },
+            ],
+            label: 'Array Field',
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: cannotCreateDefaultLocale,
+        access: {
+          ...openAccess,
+          create: ({ req }) => req.locale !== defaultLocale,
         },
-        {
-          name: 'localizedDescription',
-          localized: true,
-          type: 'text',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: localeRestrictedSlug,
+        access: {
+          ...openAccess,
+          update: ({ req }) => req.locale === spanishLocale,
         },
-        {
-          name: 'localizedCheckbox',
-          localized: true,
-          type: 'checkbox',
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      NestedToArrayAndBlock,
+      Group,
+      Tab,
+      {
+        slug: localizedSortSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+            index: true,
+            localized: true,
+          },
+          {
+            name: 'date',
+            type: 'date',
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: blocksWithLocalizedSameName,
+        fields: [
+          {
+            name: 'blocks',
+            type: 'blocks',
+            blocks: [
+              {
+                slug: 'block_first',
+                fields: [
+                  {
+                    name: 'title',
+                    type: 'text',
+                    localized: true,
+                  },
+                ],
+              },
+              {
+                slug: 'block_second',
+                fields: [
+                  {
+                    name: 'title',
+                    type: 'text',
+                    localized: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      LocalizedWithinLocalized,
+      ArrayWithFallbackCollection,
+      {
+        slug: publicationAccessSlug,
+        access: {
+          create: preventPublicationStatusChange,
+          update: preventPublicationStatusChange,
         },
-        {
-          name: 'children',
-          hasMany: true,
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
+        fields: localizedPublicationFields,
+        versions: {
+          drafts: {},
         },
-        {
-          name: 'group',
-          fields: [
-            {
-              name: 'children',
-              type: 'text',
+      },
+      {
+        slug: publicationFieldAccessSlug,
+        access: openAccess,
+        fields: [
+          ...localizedPublicationFields,
+          {
+            name: '_status',
+            access: {
+              create: () => false,
+              update: ({ data, doc, req }) =>
+                Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
             },
-          ],
-          type: 'group',
-        },
-        {
-          name: 'unique',
-          type: 'text',
-          localized: true,
-          unique: true,
-        },
-      ],
-    },
-    NoLocalizedFieldsCollection,
-    ArrayCollection,
-    {
-      fields: [
-        {
-          name: 'title',
-          localized: true,
-          required: true,
-          type: 'text',
-        },
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              label: 'Main Nav',
-              fields: [
-                {
-                  name: 'nav',
-                  type: 'group',
-                  fields: [
-                    {
-                      name: 'layout',
-                      blocks: [
-                        {
-                          fields: [
-                            {
-                              name: 'text',
-                              type: 'text',
-                            },
-                            {
-                              name: 'nestedArray',
-                              type: 'array',
-                              fields: [
-                                {
-                                  name: 'text',
-                                  type: 'text',
-                                },
-                                {
-                                  name: 'l2',
-                                  type: 'array',
-                                  fields: [
-                                    {
-                                      name: 'l3',
-                                      type: 'array',
-                                      fields: [
-                                        {
-                                          name: 'l4',
-                                          type: 'array',
-                                          fields: [
-                                            {
-                                              name: 'superNestedText',
-                                              type: 'text',
-                                            },
-                                          ],
-                                        },
-                                      ],
-                                    },
-                                  ],
-                                },
-                              ],
-                            },
-                          ],
-                          slug: 'text',
-                        },
-                        {
-                          fields: [
-                            {
-                              name: 'number',
-                              type: 'number',
-                            },
-                          ],
-                          slug: 'number',
-                        },
-                      ],
-                      localized: true,
-                      required: true,
-                      type: 'blocks',
-                    },
-                  ],
+            hooks: {
+              beforeValidate: [
+                ({ context, previousValue, value }) => {
+                  if (context.validatePublicationStatus && value !== previousValue) {
+                    throw new Error('Publication status validation is not allowed')
+                  }
+
+                  return value
                 },
               ],
             },
-            {
-              name: 'myTab',
-              fields: [
-                {
-                  name: 'text',
-                  type: 'text',
-                },
-                {
-                  name: 'group',
-                  type: 'group',
-                  localized: true,
-                  fields: [
-                    {
-                      name: 'nestedArray2',
-                      type: 'array',
-                      fields: [
-                        {
-                          name: 'nestedText',
-                          type: 'text',
-                        },
-                      ],
-                    },
-                    {
-                      name: 'nestedText',
-                      type: 'text',
-                    },
-                  ],
-                },
-              ],
+            type: 'select',
+            options: [],
+          },
+        ],
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationBeforeOperationSlug,
+        access: openAccess,
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeOperation: [
+            ({ args }) => {
+              if (args.data?._status === 'published') {
+                throw new Error('Publication is not allowed in beforeOperation')
+              }
+
+              return args
             },
           ],
         },
-      ],
-      slug: withRequiredLocalizedFields,
-    },
-    {
-      access: openAccess,
-      fields: [
-        // Relationship
-        {
-          name: 'localizedRelationship',
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
+        versions: {
+          drafts: {},
         },
-        // Relation hasMany
-        {
-          name: 'localizedRelationHasManyField',
-          hasMany: true,
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-        // Relation multiple relationTo
-        {
-          name: 'localizedRelationMultiRelationTo',
-          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
-          type: 'relationship',
-        },
-        // Relation multiple relationTo hasMany
-        {
-          name: 'localizedRelationMultiRelationToHasMany',
-          hasMany: true,
-          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
-          type: 'relationship',
-        },
-      ],
-      slug: withLocalizedRelSlug,
-    },
-    {
-      fields: [
-        {
-          name: 'relationship',
-          localized: true,
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-        {
-          name: 'relationshipHasMany',
-          hasMany: true,
-          localized: true,
-          relationTo: localizedPostsSlug,
-          type: 'relationship',
-        },
-        {
-          name: 'relationMultiRelationTo',
-          localized: true,
-          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
-          type: 'relationship',
-        },
-        {
-          name: 'relationMultiRelationToHasMany',
-          hasMany: true,
-          localized: true,
-          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
-          type: 'relationship',
-        },
-        {
-          name: 'arrayField',
-          fields: [
-            {
-              name: 'nestedRelation',
-              label: 'Nested Relation',
-              relationTo: localizedPostsSlug,
-              type: 'relationship',
-            },
-          ],
-          label: 'Array Field',
-          localized: true,
-          type: 'array',
-        },
-      ],
-      slug: relationshipLocalizedSlug,
-    },
-    {
-      access: {
-        ...openAccess,
-        create: ({ req }) => req.locale !== defaultLocale,
       },
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-        },
-      ],
-      slug: cannotCreateDefaultLocale,
-    },
-    {
-      access: {
-        ...openAccess,
-        update: ({ req }) => req.locale === spanishLocale,
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          localized: true,
-        },
-      ],
-      slug: localeRestrictedSlug,
-    },
-    NestedToArrayAndBlock,
-    Group,
-    Tab,
-    {
-      slug: localizedSortSlug,
-      access: openAccess,
-      fields: [
-        {
-          name: 'title',
-          index: true,
-          localized: true,
-          type: 'text',
-        },
-        {
-          name: 'date',
-          type: 'date',
-          localized: true,
-        },
-      ],
-    },
-    {
-      slug: blocksWithLocalizedSameName,
-      fields: [
-        {
-          type: 'blocks',
-          name: 'blocks',
-          blocks: [
-            {
-              slug: 'block_first',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
+      {
+        slug: publicationAsyncFieldHookSlug,
+        access: openAccess,
+        fields: [
+          {
+            name: 'title',
+            hooks: {
+              beforeChange: [
+                async ({ context, siblingData }) => {
+                  if (context.removePublicationIntent) {
+                    await new Promise((resolve) => setTimeout(resolve, 25))
+                    delete siblingData._status
+                  }
                 },
               ],
             },
-            {
-              slug: 'block_second',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
-                },
-              ],
+            type: 'text',
+            localized: true,
+          },
+        ],
+        hooks: {
+          beforeOperation: [
+            ({ args, context }) => {
+              if (context.saveAsDraft) {
+                args.draft = true
+                args.publishAllLocales = false
+              }
+
+              return args
             },
           ],
         },
-      ],
-    },
-    LocalizedWithinLocalized,
-    ArrayWithFallbackCollection,
-  ],
-  globals: [
-    {
-      fields: [
-        {
-          name: 'array',
-          fields: [
-            {
-              name: 'text',
-              localized: true,
-              type: 'text',
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationHookSlug,
+        access: openAccess,
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeChange: [
+            ({ context, data, operation, originalDoc }) => {
+              if (
+                !context.seedPublicationStatus &&
+                operation === 'update' &&
+                data?._status &&
+                data._status !== originalDoc?._status
+              ) {
+                throw new Error('Publication status changes are not allowed')
+              }
+
+              return data
             },
           ],
-          type: 'array',
         },
-      ],
-      slug: 'global-array',
-    },
-    {
-      fields: [
-        {
-          name: 'text',
-          localized: true,
-          type: 'text',
+        versions: {
+          drafts: {},
         },
-      ],
-      slug: 'global-text',
-    },
-    {
-      fields: [
-        {
-          name: 'text',
-          localized: true,
-          type: 'text',
-        },
-      ],
-      slug: globalWithDraftsSlug,
-      versions: {
-        drafts: {
-          localizeStatus: true,
-        },
-      },
-    },
-  ],
-  localization: {
-    filterAvailableLocales: ({ locales }) => {
-      return locales.filter((locale) => locale.code !== 'xx')
-    },
-    defaultLocale,
-    fallback: true,
-    locales: [
-      {
-        code: 'xx',
-        label: 'FILTERED',
-      },
-      {
-        code: defaultLocale,
-        label: {
-          de: 'Englisch',
-          en: 'English',
-          es: 'Inglés',
-        },
-        rtl: false,
-      },
-      {
-        code: spanishLocale,
-        label: {
-          de: 'Spanisch',
-          en: 'Spanish',
-          es: 'Español',
-        },
-        rtl: false,
-      },
-      {
-        code: portugueseLocale,
-        fallbackLocale: spanishLocale,
-        label: {
-          de: 'Portugiesisch',
-          en: 'Portuguese',
-          es: 'Portugués',
-        },
-      },
-      {
-        code: 'ar',
-        label: {
-          de: 'Arabisch',
-          en: 'Arabic',
-          es: 'Árabe',
-        },
-        rtl: true,
-      },
-      {
-        code: hungarianLocale,
-        label: {
-          de: 'Ungarische',
-          en: 'Hungarian',
-          es: 'Húngaro',
-        },
-        rtl: false,
       },
     ],
+    globals: [
+      {
+        slug: 'global-array',
+        fields: [
+          {
+            name: 'array',
+            type: 'array',
+            fields: [
+              {
+                name: 'text',
+                type: 'text',
+                localized: true,
+              },
+            ],
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: 'global-text',
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+            localized: true,
+          },
+        ],
+        versions: false,
+      },
+      {
+        slug: globalWithDraftsSlug,
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+            localized: true,
+          },
+        ],
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationAccessGlobalSlug,
+        access: {
+          update: preventPublicationStatusChange,
+        },
+        fields: localizedPublicationFields,
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationBeforeOperationGlobalSlug,
+        access: {
+          update: () => true,
+        },
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeOperation: [
+            ({ args }) => {
+              if (args.data?._status === 'published') {
+                throw new Error('Publication is not allowed in beforeOperation')
+              }
+
+              return args
+            },
+          ],
+        },
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationBeforeOperationSanitizeGlobalSlug,
+        access: {
+          update: () => true,
+        },
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeOperation: [
+            ({ args, context }) => {
+              if (context.sanitizePublicationIntent && args.data?._status === 'published') {
+                delete args.data._status
+                args.publishAllLocales = false
+              }
+
+              return args
+            },
+          ],
+        },
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationFieldAccessGlobalSlug,
+        access: {
+          update: () => true,
+        },
+        fields: [
+          ...localizedPublicationFields,
+          {
+            name: '_status',
+            access: {
+              create: () => false,
+              update: ({ data, doc, req }) =>
+                Boolean(req.context.comparePublicationStatus && data?._status === doc?._status),
+            },
+            hooks: {
+              beforeValidate: [
+                ({ context, previousValue, value }) => {
+                  if (context.validatePublicationStatus && value !== previousValue) {
+                    throw new Error('Publication status validation is not allowed')
+                  }
+
+                  return value
+                },
+              ],
+            },
+            type: 'select',
+            options: [],
+          },
+        ],
+        versions: {
+          drafts: {},
+        },
+      },
+      {
+        slug: publicationHookGlobalSlug,
+        access: {
+          update: () => true,
+        },
+        fields: localizedPublicationFields,
+        hooks: {
+          beforeChange: [
+            ({ context, data, originalDoc }) => {
+              if (
+                !context.seedPublicationStatus &&
+                data?._status &&
+                data._status !== originalDoc?._status
+              ) {
+                throw new Error('Publication status changes are not allowed')
+              }
+
+              return data
+            },
+          ],
+        },
+        versions: {
+          drafts: {},
+        },
+      },
+    ],
+    localization: {
+      defaultLocale,
+      fallback: true,
+      filterAvailableLocales: ({ locales }) => {
+        return locales.filter((locale) => locale.code !== 'xx')
+      },
+      locales: [
+        {
+          code: 'xx',
+          label: 'FILTERED',
+        },
+        {
+          code: defaultLocale,
+          label: {
+            de: 'Englisch',
+            en: 'English',
+            es: 'Inglés',
+          },
+          rtl: false,
+        },
+        {
+          code: spanishLocale,
+          label: {
+            de: 'Spanisch',
+            en: 'Spanish',
+            es: 'Español',
+          },
+          rtl: false,
+        },
+        {
+          code: portugueseLocale,
+          fallbackLocale: spanishLocale,
+          label: {
+            de: 'Portugiesisch',
+            en: 'Portuguese',
+            es: 'Portugués',
+          },
+        },
+        {
+          code: 'ar',
+          label: {
+            de: 'Arabisch',
+            en: 'Arabic',
+            es: 'Árabe',
+          },
+          rtl: true,
+        },
+        {
+          code: hungarianLocale,
+          label: {
+            de: 'Ungarische',
+            en: 'Hungarian',
+            es: 'Húngaro',
+          },
+          rtl: false,
+        },
+      ],
+    },
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
-  onInit: async (payload) => {
+  seed: async (payload) => {
+    // On a fresh database with autoIndex enabled, the first write to a collection (or its
+    // versions collection) kicks off async index builds. A subsequent seeding write can then
+    // race that catalog change and fail with a transient MongoDB "catalog changes" error.
+    // Awaiting Model.init() lets collection and index creation settle before the writes below.
+    // This is a no-op for non-Mongoose adapters, where these models are undefined.
+    const db = payload.db as any
+    if (db?.collections || db?.versions) {
+      await Promise.all([
+        ...payload.config.collections.map((coll) => db.collections?.[coll.slug]?.init?.()),
+        ...payload.config.collections.map((coll) => db.versions?.[coll.slug]?.init?.()),
+        db.globals?.init?.(),
+      ])
+    }
+
     const collection = localizedPostsSlug
 
     await payload.create({
@@ -530,6 +821,7 @@ export default buildConfigWithDefaults({
       data: {
         title: englishTitle,
       },
+      overrideAccess: true,
     })
 
     const localizedPost = await payload.create({
@@ -537,14 +829,16 @@ export default buildConfigWithDefaults({
       data: {
         title: englishTitle,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
       collection: localizedDateFieldsSlug,
       data: {
-        localizedDate: new Date().toISOString(),
         date: new Date().toISOString(),
+        localizedDate: new Date().toISOString(),
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -554,6 +848,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         relation: localizedPost.id,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -563,6 +858,7 @@ export default buildConfigWithDefaults({
         title: spanishTitle,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     const localizedRelation = await payload.create({
@@ -570,6 +866,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationEnglishTitle,
       },
+      overrideAccess: true,
     })
 
     await payload.update({
@@ -579,6 +876,7 @@ export default buildConfigWithDefaults({
         title: relationSpanishTitle,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     const localizedRelation2 = await payload.create({
@@ -586,6 +884,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationEnglishTitle2,
       },
+      overrideAccess: true,
     })
     await payload.update({
       id: localizedPost.id,
@@ -594,6 +893,7 @@ export default buildConfigWithDefaults({
         title: relationSpanishTitle2,
       },
       locale: spanishLocale,
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -607,6 +907,7 @@ export default buildConfigWithDefaults({
         ],
         relationship: localizedRelation.id,
       },
+      overrideAccess: true,
     })
     const relationshipLocalized = await payload.create({
       collection: relationshipLocalizedSlug,
@@ -625,18 +926,21 @@ export default buildConfigWithDefaults({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
       locale: 'en',
+      overrideAccess: true,
     })
 
     await payload.update({
-      collection: relationshipLocalizedSlug,
       id: relationshipLocalized.id,
+      collection: relationshipLocalizedSlug,
       data: {
         relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
       },
       locale: 'es',
+      overrideAccess: true,
     })
 
     const globalArray = await payload.updateGlobal({
+      slug: 'global-array',
       data: {
         array: [
           {
@@ -647,10 +951,11 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-      slug: 'global-array',
+      overrideAccess: true,
     })
 
     await payload.updateGlobal({
+      slug: 'global-array',
       data: {
         array: globalArray.array.map((row, i) => ({
           ...row,
@@ -658,10 +963,7 @@ export default buildConfigWithDefaults({
         })),
       },
       locale: 'es',
-      slug: 'global-array',
+      overrideAccess: true,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

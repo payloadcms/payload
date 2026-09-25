@@ -1,7 +1,11 @@
+import type { DefaultDocumentIDType } from 'payload'
+
 import Stripe from 'stripe'
 
 import type { PaymentAdapter } from '../../../types/index.js'
 import type { StripeAdapterArgs } from './index.js'
+
+import { normalizeEmail, validateSettlement } from './validateSettlement.js'
 
 type Props = {
   apiVersion?: Stripe.StripeConfig['apiVersion']
@@ -9,28 +13,25 @@ type Props = {
   secretKey: StripeAdapterArgs['secretKey']
 }
 
+type RecordValue = Record<string, unknown>
+
 export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confirmOrder'] =
   (props) =>
-  async ({
-    cartsSlug = 'carts',
-    data,
-    ordersSlug = 'orders',
-    req,
-    transactionsSlug = 'transactions',
-  }) => {
+  async ({ data, finalizeOrder, req, transactionsSlug = 'transactions' }) => {
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
-
-    const customerEmail = data.customerEmail
-
-    const paymentIntentID = data.paymentIntentID as string
+    const paymentIntentID = data.paymentIntentID
 
     if (!secretKey) {
       throw new Error('Stripe secret key is required')
     }
 
-    if (!paymentIntentID) {
+    if (typeof paymentIntentID !== 'string' || !paymentIntentID) {
       throw new Error('PaymentIntent ID is required')
+    }
+
+    if (typeof finalizeOrder !== 'function') {
+      throw new Error('Core order finalizer is required')
     }
 
     const stripe = new Stripe(secretKey, {
@@ -45,99 +46,157 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
     })
 
     try {
-      let customer = (
-        await stripe.customers.list({
-          email: customerEmail,
-        })
-      ).data[0]
+      const transaction = await findTransaction({ paymentIntentID, req, transactionsSlug })
+      const transactionID = requireDocumentID({
+        fieldName: 'transaction ID',
+        value: transaction.id,
+      })
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
+      const cartItemsSnapshot = parseRequiredMetadata({
+        fieldName: 'cartItemsSnapshot',
+        value: paymentIntent.metadata.cartItemsSnapshot,
+      })
+      const shippingAddress = parseOptionalMetadata({
+        fieldName: 'shippingAddress',
+        value: paymentIntent.metadata.shippingAddress,
+      })
+      const purchaser =
+        req.user === null || req.user === undefined
+          ? { customerEmail: normalizeEmail(data.customerEmail) }
+          : {
+              customer: requireDocumentID({
+                fieldName: 'authenticated customer ID',
+                value: req.user.id,
+              }),
+            }
 
-      if (!customer?.id) {
-        customer = await stripe.customers.create({
-          email: customerEmail,
-        })
-      }
-
-      // Find our existing transaction by the payment intent ID
-      const transactionsResults = await payload.find({
-        collection: transactionsSlug,
-        req,
-        where: {
-          'stripe.paymentIntentID': {
-            equals: paymentIntentID,
-          },
-        },
+      validateSettlement({
+        canonicalCartID: data.cartID,
+        cartItemsSnapshot,
+        customerEmail: data.customerEmail,
+        paymentIntent,
+        paymentIntentID,
+        transaction,
+        user: req.user,
       })
 
-      const transaction = transactionsResults.docs[0]
-
-      if (!transactionsResults.totalDocs || !transaction) {
-        throw new Error('No transaction found for the provided PaymentIntent ID')
-      }
-
-      // Verify the payment intent exists and retrieve it
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
-
-      const cartID = paymentIntent.metadata.cartID
-      const cartItemsSnapshot = paymentIntent.metadata.cartItemsSnapshot
-        ? JSON.parse(paymentIntent.metadata.cartItemsSnapshot)
-        : undefined
-
-      const shippingAddress = paymentIntent.metadata.shippingAddress
-        ? JSON.parse(paymentIntent.metadata.shippingAddress)
-        : undefined
-
-      if (!cartID) {
-        throw new Error('Cart ID not found in the PaymentIntent metadata')
-      }
-
-      if (!cartItemsSnapshot || !Array.isArray(cartItemsSnapshot)) {
-        throw new Error('Cart items snapshot not found or invalid in the PaymentIntent metadata')
-      }
-
-      const order = await payload.create({
-        collection: ordersSlug,
-        data: {
-          amount: paymentIntent.amount,
-          currency: paymentIntent.currency.toUpperCase(),
-          ...(req.user ? { customer: req.user.id } : { customerEmail }),
+      const order = await finalizeOrder({
+        orderData: {
+          amount: transaction.amount,
+          currency: transaction.currency,
+          ...purchaser,
           items: cartItemsSnapshot,
           shippingAddress,
           status: 'processing',
-          transactions: [transaction.id],
         },
-        req,
+        transactionID,
       })
 
-      const timestamp = new Date().toISOString()
-
-      await payload.update({
-        id: cartID,
-        collection: cartsSlug,
-        data: {
-          purchasedAt: timestamp,
-        },
-        req,
-      })
-
-      await payload.update({
-        id: transaction.id,
-        collection: transactionsSlug,
-        data: {
-          order: order.id,
-          status: 'succeeded',
-        },
-        req,
-      })
-
-      return {
-        message: 'Payment initiated successfully',
-        orderID: order.id,
-        transactionID: transaction.id,
-        ...(order.accessToken ? { accessToken: order.accessToken } : {}),
-      }
+      return createConfirmationResult({ order, transactionID })
     } catch (error) {
       payload.logger.error({ err: error, msg: 'Error confirming order with Stripe' })
 
       throw new Error(error instanceof Error ? error.message : 'Unknown error initiating payment')
     }
   }
+
+const createConfirmationResult = ({
+  order,
+  transactionID,
+}: {
+  order: RecordValue
+  transactionID: DefaultDocumentIDType
+}) => ({
+  message: 'Payment initiated successfully',
+  orderID: requireDocumentID({ fieldName: 'order ID', value: order.id }),
+  transactionID,
+  ...(typeof order.accessToken === 'string' ? { accessToken: order.accessToken } : {}),
+})
+
+const findTransaction = async ({
+  paymentIntentID,
+  req,
+  transactionsSlug,
+}: {
+  paymentIntentID: string
+  req: Parameters<NonNullable<PaymentAdapter>['confirmOrder']>[0]['req']
+  transactionsSlug: string
+}): Promise<RecordValue> => {
+  const result = await req.payload.find({
+    collection: transactionsSlug,
+    depth: 0,
+    limit: 2,
+    overrideAccess: true,
+    pagination: false,
+    req,
+    where: {
+      'stripe.paymentIntentID': {
+        equals: paymentIntentID,
+      },
+    },
+  })
+
+  if (result.totalDocs !== 1 || result.docs.length !== 1 || !result.docs[0]) {
+    throw new Error('Expected exactly one transaction for the provided PaymentIntent ID')
+  }
+
+  return result.docs[0] as RecordValue
+}
+
+const parseOptionalMetadata = ({
+  fieldName,
+  value,
+}: {
+  fieldName: string
+  value?: string
+}): RecordValue | undefined => {
+  if (value === undefined) {
+    return undefined
+  }
+
+  const parsedValue = parseRequiredMetadata({ fieldName, value })
+
+  if (!isRecord(parsedValue)) {
+    throw new Error(`${fieldName} metadata is invalid`)
+  }
+
+  return parsedValue
+}
+
+const parseRequiredMetadata = ({
+  fieldName,
+  value,
+}: {
+  fieldName: string
+  value?: string
+}): unknown => {
+  if (typeof value !== 'string' || !value) {
+    throw new Error(`${fieldName} metadata is missing or invalid`)
+  }
+
+  try {
+    return JSON.parse(value)
+  } catch {
+    throw new Error(`${fieldName} metadata is missing or invalid`)
+  }
+}
+
+const requireDocumentID = ({
+  fieldName,
+  value,
+}: {
+  fieldName: string
+  value: unknown
+}): DefaultDocumentIDType => {
+  if (
+    (typeof value !== 'number' || !Number.isFinite(value)) &&
+    (typeof value !== 'string' || !value.trim())
+  ) {
+    throw new Error(`${fieldName} is missing or invalid`)
+  }
+
+  return value
+}
+
+const isRecord = (value: unknown): value is RecordValue =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)

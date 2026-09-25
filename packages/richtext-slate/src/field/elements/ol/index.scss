@@ -1,9 +1,0 @@
-@import '~@payloadcms/ui/scss';
-
-@layer payload-default {
-  .rich-text-ol {
-    &[data-slate-node='element'] {
-      margin: base(0.625) 0;
-    }
-  }
-}

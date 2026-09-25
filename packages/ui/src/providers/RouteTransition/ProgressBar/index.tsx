@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react'
 
 import { useRouteTransition } from '../index.js'
-import './index.scss'
+import './index.css'
 
 const transitionDuration = 200
 const baseClass = 'progress-bar'
@@ -44,7 +44,7 @@ export const ProgressBar = () => {
 
       // Fast forward to 100% when the transition is complete
       // Then fade out the progress bar directly after
-      setProgressToShow(1)
+      setProgressToShow((currentProgress) => (currentProgress === null ? null : 1))
 
       // Wait for CSS transition to finish before hiding the progress bar
       // This includes both the fast-forward to 100% and the subsequent fade-out

@@ -1,0 +1,38 @@
+@layer payload-default {
+  .verify {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    min-height: 100vh;
+  }
+
+  .verify .template-minimal__wrap {
+    max-width: unset;
+  }
+
+  .verify__brand {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: var(--spacer-3);
+  }
+
+  .verify__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacer-2);
+    width: 100%;
+  }
+
+  .verify__content p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .verify__content p a {
+    color: inherit;
+    text-decoration: underline;
+  }
+}

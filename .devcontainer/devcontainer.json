@@ -1,0 +1,61 @@
+{
+  "name": "Payload Monorepo",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/payloadcms/devcontainer-features/mise-bootstrap:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true,
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "upgradePackages": true
+    }
+  },
+  // Runs before feature postCreateCommands so the named volume is writable
+  // by the time mise-bootstrap tries to install into node_modules.
+  "onCreateCommand": "sudo chown vscode:vscode ${containerWorkspaceFolder}/node_modules",
+  // setup.sh auto-detects bind-mount vs volume-clone mode and handles both.
+  "postCreateCommand": ".devcontainer/setup.sh",
+  // Only the Next.js dev server should be forwarded
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next Dev Server"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "hverlin.mise-vscode",
+        "stylelint.vscode-stylelint",
+        "vitest.explorer",
+        "ms-playwright.playwright"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "zsh"
+          }
+        },
+        // Stop VS Code from auto-forwarding every ephemeral port a process opens.
+        // Only ports in `forwardPorts` above are exposed.
+        "remote.autoForwardPorts": false
+      }
+    }
+  },
+  // Allows us to detect whether we are within a devcontainer
+  "containerEnv": {
+    "DEVCONTAINER": "true"
+  },
+  // node_modules volume: isolates linux-arm64 installs from darwin-arm64 host
+  // files in bind-mount mode.
+  "mounts": [
+    "source=${containerWorkspaceFolderBasename}-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
+  ]
+}

@@ -18,6 +18,10 @@ export const customParamViewPath = `${customParamViewPathBase}/:id`
 
 export const customViewTitle = 'Custom View'
 
+export const customCollectionViewTitle = 'Custom Collection View'
+
+export const customCollectionViewClientTitle = 'Custom Collection View (Client)'
+
 export const customParamViewTitle = 'Custom Param View'
 
 export const customNestedViewTitle = 'Custom Nested View'

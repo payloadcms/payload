@@ -1,6 +1,6 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -13,7 +13,7 @@ import { type ClientField, createClientFields } from '../../fields/config/client
 
 export type ServerOnlyGlobalProperties = keyof Pick<
   SanitizedGlobalConfig,
-  'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'flattenedFields' | 'hooks'
+  'access' | 'admin' | 'custom' | 'endpoints' | 'fields' | 'flattenedFields' | 'hooks' | 'select'
 >
 
 export type ServerOnlyGlobalAdminProperties = keyof Pick<
@@ -39,6 +39,7 @@ const serverOnlyProperties: Partial<ServerOnlyGlobalProperties>[] = [
   'endpoints',
   'custom',
   'flattenedFields',
+  'select',
   // `admin` is handled separately
 ]
 

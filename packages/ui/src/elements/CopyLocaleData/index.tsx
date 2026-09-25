@@ -2,7 +2,6 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -13,14 +12,15 @@ import { useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { DrawerHeader } from '../BulkUpload/Header/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
+import { DrawerHeader } from '../DrawerHeader/index.js'
 import { PopupList } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'copy-locale-data'
 
@@ -32,7 +32,8 @@ export const CopyLocaleData: React.FC = () => {
       routes: { admin },
     },
   } = useConfig()
-  const { code } = useLocale()
+  const locale = useLocale()
+  const code = locale?.code
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const { i18n, t } = useTranslation()
   const modified = useFormModified()
@@ -133,7 +134,6 @@ export const CopyLocaleData: React.FC = () => {
       </PopupList.Button>
       <Drawer
         className={baseClass}
-        gutter={false}
         Header={
           <DrawerHeader
             onClose={() => {

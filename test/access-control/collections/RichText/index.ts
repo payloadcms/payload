@@ -19,4 +19,5 @@ export const RichText: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

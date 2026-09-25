@@ -3,6 +3,8 @@ import type { Page, TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { expect } from '@playwright/test'
 
+import { waitForFormReady } from './helpers.js'
+
 type AxeResults = Awaited<ReturnType<AxeBuilder['analyze']>>
 
 export interface CheckFocusIndicatorsOptions {
@@ -129,6 +131,9 @@ export async function checkFocusIndicators(
   })
   await page.waitForTimeout(200)
 
+  // Wait for form hydration before interacting with elements
+  await waitForFormReady(page)
+
   if (verbose) {
     const hasFocus = await page.evaluate(() => document.hasFocus())
     console.log('Page has focus:', hasFocus)
@@ -162,6 +167,8 @@ export async function checkFocusIndicators(
   let cycleComplete = false
   let consecutiveBodyFocus = 0
   const maxConsecutiveBodyFocus = 3 // Stop if we focus body 3 times in a row
+  const visitedOutsideScopeElements: Set<string> = new Set()
+  let hasEnteredScope = false
 
   while (!cycleComplete) {
     // Press Tab to focus the next element
@@ -206,7 +213,7 @@ export async function checkFocusIndicators(
             tagName: string
             textContent: string
           }
-        | { outsideScope: true }
+        | { elementPath: string; outsideScope: true }
         | null => {
         const el = document.activeElement
         if (!el || el === document.body) {
@@ -216,15 +223,6 @@ export async function checkFocusIndicators(
         // Skip Next.js portal elements (dev mode only)
         if (el.closest('nextjs-portal')) {
           return null
-        }
-
-        // If we have a scope selector, check if the focused element is within scope
-        if (scopeSelector) {
-          const scopeElement = document.querySelector(scopeSelector)
-          if (scopeElement && !scopeElement.contains(el)) {
-            // Element is outside our scope, return special marker
-            return { outsideScope: true } as const
-          }
         }
 
         // Generate a unique identifier for this element
@@ -259,6 +257,15 @@ export async function checkFocusIndicators(
         }
 
         const elementPath = xpath(el)
+
+        // If we have a scope selector, check if the focused element is within scope
+        if (scopeSelector) {
+          const scopeElement = document.querySelector(scopeSelector)
+          if (scopeElement && !scopeElement.contains(el)) {
+            // Element is outside our scope, return special marker
+            return { elementPath, outsideScope: true } as const
+          }
+        }
 
         // Generate a useful CSS selector for this element
         const generateSelector = (): string => {
@@ -342,13 +349,13 @@ export async function checkFocusIndicators(
         const hasVisibleOutline = (style: string, width: string, color: string) =>
           Boolean(
             style &&
-            style !== 'none' &&
-            width &&
-            width !== '0px' &&
-            color &&
-            color !== 'transparent' &&
-            color !== 'rgba(0, 0, 0, 0)' &&
-            !color.includes('rgba(0, 0, 0, 0)'),
+              style !== 'none' &&
+              width &&
+              width !== '0px' &&
+              color &&
+              color !== 'transparent' &&
+              color !== 'rgba(0, 0, 0, 0)' &&
+              !color.includes('rgba(0, 0, 0, 0)'),
           )
 
         // Helper to check if a style has a visible box-shadow
@@ -383,13 +390,13 @@ export async function checkFocusIndicators(
         const hasVisibleBorderCheck = (bdr: string, width: string, color: string) =>
           Boolean(
             bdr &&
-            bdr !== 'none' &&
-            width &&
-            width !== '0px' &&
-            color &&
-            color !== 'transparent' &&
-            color !== 'rgba(0, 0, 0, 0)' &&
-            !color.includes('rgba(0, 0, 0, 0)'),
+              bdr !== 'none' &&
+              width &&
+              width !== '0px' &&
+              color &&
+              color !== 'transparent' &&
+              color !== 'rgba(0, 0, 0, 0)' &&
+              !color.includes('rgba(0, 0, 0, 0)'),
           )
 
         // Check if element has a visible focus indicator on the element itself
@@ -428,12 +435,46 @@ export async function checkFocusIndicators(
         // Note: We don't check background color change because we can't compare
         // the before/after state. Background color alone is not a reliable indicator.
 
-        // For elements with opacity: 0 (common for hidden checkboxes/radios),
-        // check parent and siblings for focus indicators
+        // Check parent for :focus-within patterns (e.g., Point field input-group wrapper)
+        // Only for form inputs without visible borders - they often rely on wrapper for focus
+        // Limit to direct parents that look like input wrappers:
+        // - Must be a typical wrapper element (div, span, label), not a semantic section
+        // - Must have few children (≤5, typical for input groups)
         let hasParentOrSiblingWithIndicator = false
+        const isFormInput = ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)
+        const hasOwnBorder = hasVisibleBorder
+
+        // Check parent for form inputs without their own border (input-group pattern)
+        const parent = el.parentElement
+        const wrapperElements = ['DIV', 'SPAN', 'LABEL']
+        const parentIsLikelyInputGroup =
+          parent && wrapperElements.includes(parent.tagName) && parent.children.length <= 5
+        if (isFormInput && !hasOwnBorder && parentIsLikelyInputGroup) {
+          const parentStyle = window.getComputedStyle(parent)
+          const parentBoxShadow = parentStyle.boxShadow
+          const parentFilter = parentStyle.filter
+          const parentOutlineStyle = parentStyle.outlineStyle
+          const parentOutlineWidth = parentStyle.outlineWidth
+          const parentOutlineColor = parentStyle.outlineColor
+          const parentBorder = parentStyle.border
+          const parentBorderWidth = parentStyle.borderWidth
+          const parentBorderColor = parentStyle.borderColor
+
+          if (
+            hasVisibleBoxShadow(parentBoxShadow) ||
+            hasVisibleDropShadow(parentFilter) ||
+            hasVisibleOutline(parentOutlineStyle, parentOutlineWidth, parentOutlineColor) ||
+            hasVisibleBorderCheck(parentBorder, parentBorderWidth, parentBorderColor)
+          ) {
+            hasParentOrSiblingWithIndicator = true
+          }
+        }
+
+        // For hidden elements (opacity: 0), check parent and siblings for focus indicators
+        // This handles custom checkbox/radio patterns where a visible element shows the focus
         if (opacity === '0') {
-          // Check parent element (common pattern: parent gets box-shadow when child input is focused)
-          if (el.parentElement) {
+          // Check parent first
+          if (!hasParentOrSiblingWithIndicator && el.parentElement) {
             const parentStyle = window.getComputedStyle(el.parentElement)
             const parentBoxShadow = parentStyle.boxShadow
             const parentFilter = parentStyle.filter
@@ -454,7 +495,7 @@ export async function checkFocusIndicators(
             }
           }
 
-          // Also check siblings if parent didn't have indicator
+          // Check siblings
           if (!hasParentOrSiblingWithIndicator && el.parentElement) {
             const siblings = Array.from(el.parentElement.children).slice(0, 10)
             for (const sibling of siblings) {
@@ -485,7 +526,7 @@ export async function checkFocusIndicators(
           }
         }
 
-        // Combine all checks: element itself + pseudo-elements + parent/siblings (for hidden inputs)
+        // Combine all checks: element itself + pseudo-elements + parent/siblings
         const hasAnyFocusIndicator =
           hasOutline ||
           hasBoxShadow ||
@@ -548,6 +589,13 @@ export async function checkFocusIndicators(
 
     // Check if element is outside scope (only relevant when selector is provided)
     if ('outsideScope' in focusInfo) {
+      if (!hasEnteredScope && !visitedOutsideScopeElements.has(focusInfo.elementPath)) {
+        if (verbose) {
+          console.log('Focused element is outside scope before scoped elements, continuing')
+        }
+        visitedOutsideScopeElements.add(focusInfo.elementPath)
+        continue
+      }
       if (verbose) {
         console.log('Focused element is outside scope, tab cycle complete')
       }
@@ -557,6 +605,7 @@ export async function checkFocusIndicators(
 
     // Reset body focus counter since we found a focusable element
     consecutiveBodyFocus = 0
+    hasEnteredScope = true
 
     // At this point, TypeScript knows focusInfo has the full element info
     // Skip if we've seen this element before (we've cycled through)

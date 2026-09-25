@@ -13,4 +13,5 @@ export const OnDemandForm: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

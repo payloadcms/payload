@@ -1,9 +1,9 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation.js'
 import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { usePathname, useRouter } from '../RouterAdapter/index.js'
 
 export type RouteCacheContext = {
   cachingEnabled: boolean

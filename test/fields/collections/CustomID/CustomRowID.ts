@@ -22,4 +22,5 @@ export const CustomRowID: CollectionConfig = {
     plural: 'Custom Row IDs',
     singular: 'Custom Row ID',
   },
+  versions: false,
 }

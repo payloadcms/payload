@@ -1,9 +1,11 @@
+import escapeHTML from 'escape-html'
 import { v4 as uuidv4 } from 'uuid'
 
-import type { SerializedListItemNode, SerializedListNode } from '../../../../../nodeTypes.js'
+import type { SerializedListItemNode, SerializedListNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConvertersAsync } from '../types.js'
 
-const ALLOWED_LIST_TAGS = new Set(['ol', 'ul'])
+import { ALLOWED_LIST_TAGS } from '../../../../lists/shared/constants.js'
+
 const ALLOWED_LIST_TYPES = new Set(['bullet', 'check', 'number'])
 
 export const ListHTMLConverterAsync: HTMLConvertersAsync<
@@ -38,7 +40,7 @@ export const ListHTMLConverterAsync: HTMLConvertersAsync<
           role="checkbox"
           style="list-style-type: none;${providedCSSString}"
           tabIndex="-1"
-          value="${node.value}"
+          value="${escapeHTML(String(node.value))}"
         >
           ${
             hasSubLists
@@ -52,7 +54,7 @@ export const ListHTMLConverterAsync: HTMLConvertersAsync<
       return `<li
           class="${hasSubLists ? 'nestedListItem' : ''}"
           style="${hasSubLists ? `list-style-type: none;${providedCSSString}` : providedCSSString}"
-          value="${node.value}"
+          value="${escapeHTML(String(node.value))}"
         >${children}</li>`
     }
   },

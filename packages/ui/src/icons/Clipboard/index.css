@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--clipboard {
+    flex-shrink: 0;
+  }
+}

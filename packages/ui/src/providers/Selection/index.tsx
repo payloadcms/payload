@@ -1,7 +1,6 @@
 'use client'
 import type { Where } from 'payload'
 
-import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -9,6 +8,7 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useAuth } from '../Auth/index.js'
 import { useListQuery } from '../ListQuery/index.js'
 import { useLocale } from '../Locale/index.js'
+import { useSearchParams } from '../RouterAdapter/index.js'
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -70,7 +70,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext)
   const { user } = useAuth()
 
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
     const rows = new Map()

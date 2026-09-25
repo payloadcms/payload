@@ -43,6 +43,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   placeholder: 'LexicalEditorTheme__placeholder',
   quote: 'LexicalEditorTheme__quote',
   relationship: 'LexicalEditorTheme__relationship',
+  root: 'LexicalEditorTheme',
   rtl: 'LexicalEditorTheme__rtl',
   tab: 'LexicalEditorTheme__tabNode',
   table: 'LexicalEditorTheme__table',

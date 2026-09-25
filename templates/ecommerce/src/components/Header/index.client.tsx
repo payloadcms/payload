@@ -6,7 +6,7 @@ import Link from 'next/link'
 import React, { Suspense } from 'react'
 
 import { MobileMenu } from './MobileMenu'
-import type { Header } from 'src/payload-types'
+import type { Header } from '@/payload-types'
 
 import { LogoIcon } from '@/components/icons/logo'
 import { usePathname } from 'next/navigation'

@@ -195,6 +195,7 @@ const TextFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default TextFields

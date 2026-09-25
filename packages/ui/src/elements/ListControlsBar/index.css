@@ -1,0 +1,21 @@
+@layer payload-default {
+  .list-controls-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    padding: var(--spacer-2-5) var(--gutter-h);
+  }
+
+  .list-controls-bar--border {
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
+  @media (max-width: 768px) {
+    .list-controls-bar {
+      padding: var(--spacer-2-5) var(--spacer-3);
+      flex-wrap: wrap;
+      row-gap: var(--spacer-2);
+    }
+  }
+}

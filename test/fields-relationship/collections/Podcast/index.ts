@@ -18,4 +18,5 @@ export const Podcast: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

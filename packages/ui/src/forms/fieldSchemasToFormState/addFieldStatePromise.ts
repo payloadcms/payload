@@ -64,6 +64,7 @@ export type AddFieldStatePromiseArgs = {
    */
   forceFullValue?: boolean
   fullData: Data
+  globalSlug?: string
   id: number | string
   /**
    * Whether the field schema should be included in the state
@@ -124,6 +125,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     filter,
     forceFullValue = false,
     fullData,
+    globalSlug,
     includeSchema = false,
     indexPath,
     mockRSCs,
@@ -184,6 +186,25 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
+  // Short-circuit hidden fields to prevent recursing and rendering. Two exclusions:
+  // - `tab`: visibility is keyed by `field.id` (not `path`); the tab branch owns that write.
+  // - presentational containers (row, collapsible, unnamed group): they hold no value, so
+  //   returning here drops their nested fields' values.
+  const isPresentationalWithSubFields = fieldHasSubFields(field) && !fieldAffectsData(field)
+
+  if (passesCondition === false && field.type !== 'tab' && !isPresentationalWithSubFields) {
+    if (fieldAffectsData(field) && data?.[field.name] !== undefined) {
+      fieldState.value = data[field.name]
+      fieldState.initialValue = data[field.name]
+    }
+
+    if (!filter || filter(args)) {
+      state[path] = fieldState
+    }
+
+    return
+  }
+
   if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field) && field.type !== 'tab') {
     fieldPermissions =
       parentPermissions === true
@@ -194,12 +215,20 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
+      const collection = collectionSlug
+        ? (req.payload.collections[collectionSlug]?.config ?? null)
+        : null
+      const global = globalSlug
+        ? (req.payload.globals.config.find((g) => g.slug === globalSlug) ?? null)
+        : null
+
       hasPermission = await field.access.read({
         id,
         blockData,
         data: fullData,
         req,
         siblingData: data,
+        ...(collection ? { collection } : { global }),
       })
     } else {
       hasPermission = true
@@ -435,7 +464,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             const block =
               req.payload.blocks[blockTypeToMatch] ??
-              ((field.blockReferences ?? field.blocks).find(
+              (field.blocks.find(
                 (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
               ) as FlattenedBlock | undefined)
 
@@ -456,6 +485,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
 
+              const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
+                (prevRow) => prevRow.id === row.id,
+              )
+
               if (!omitParents && (!filter || filter(args))) {
                 // Handle block `id` field
                 const idKey = rowPath + '.id'
@@ -463,6 +496,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state[idKey] = {
                   initialValue: row.id,
                   value: row.id,
+                }
+
+                if (!previousRow) {
+                  state[idKey].addedByServer = true
                 }
 
                 // If the blocks field fails filterOptions validation, add error paths to the individual blocks that are no longer allowed
@@ -499,8 +536,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   value: row.blockType,
                 }
 
-                if (addedByServer) {
-                  state[fieldKey].addedByServer = addedByServer
+                if (!previousRow) {
+                  state[fieldKey].addedByServer = true
                 }
 
                 if (includeSchema) {
@@ -513,6 +550,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 const blockNameKey = rowPath + '.blockName'
 
                 state[blockNameKey] = {}
+
+                if (!previousRow) {
+                  state[blockNameKey].addedByServer = true
+                }
 
                 if (row.blockName) {
                   state[blockNameKey].initialValue = row.blockName
@@ -568,11 +609,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 }),
               )
 
-              // First, check if `previousFormState` has a matching row
-              const previousRow: Row = (previousFormState?.[path]?.rows || []).find(
-                (prevRow) => prevRow.id === row.id,
-              )
-
               const newRow: Row = {
                 id: row.id,
                 blockType: row.blockType,
@@ -581,6 +617,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
               if (previousRow?.lastRenderedPath) {
                 newRow.lastRenderedPath = previousRow.lastRenderedPath
+              }
+
+              if (!previousRow) {
+                newRow.addedByServer = true
               }
 
               acc.rowMetadata.push(newRow)
@@ -767,7 +807,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       case 'select': {
         if (typeof field.filterOptions === 'function') {
-          fieldState.selectFilterOptions = field.filterOptions({
+          fieldState.selectFilterOptions = await field.filterOptions({
             data: fullData,
             options: field.options,
             req,
@@ -809,6 +849,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         disableFormData: true,
       }
 
+      // Presentational containers are hidden client-side via `withCondition`, which reads
+      // `passesCondition` from their own state entry. Must be set here since these fields
+      // are excluded from the short-circuit above (which would otherwise carry the flag).
       if (passesCondition === false) {
         state[path].passesCondition = false
       }
@@ -851,18 +894,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     })
   } else if (field.type === 'tab') {
     const isNamedTab = tabHasName(field)
-    let tabSelect: SelectType | undefined
-
-    const tabField: TabAsField = {
-      ...field,
-      type: 'tab',
-    }
-
-    let childPermissions: SanitizedFieldsPermissions = undefined
 
     if (isNamedTab) {
       const shouldContinue = stripUnselectedFields({
-        field: tabField,
+        field: { ...field, type: 'tab' },
         select,
         selectMode,
         siblingDoc: data?.[field.name] || {},
@@ -871,16 +906,34 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       if (!shouldContinue) {
         return
       }
+    }
 
+    // Tab visibility on the client is keyed by `field.id`, not `path` (like all other fields).
+    if (field?.id) {
+      state[field.id] = {
+        passesCondition,
+      }
+
+      // Flag newly added tab entries so the client accepts them during merge.
+      // Otherwise, tabs revealed after a hidden ancestor becomes visible would never make it into client form state.
+      if (!renderAllFields && !previousFormState?.[field.id]) {
+        state[field.id].addedByServer = true
+      }
+    }
+
+    if (!passesCondition) {
+      return
+    }
+
+    let childPermissions: SanitizedFieldsPermissions
+    let tabSelect: SelectType | undefined
+
+    if (isNamedTab) {
       if (parentPermissions === true) {
         childPermissions = true
       } else {
         const tabPermissions = parentPermissions?.[field.name]
-        if (tabPermissions === true) {
-          childPermissions = true
-        } else {
-          childPermissions = tabPermissions?.fields
-        }
+        childPermissions = tabPermissions === true ? true : tabPermissions?.fields
       }
 
       if (typeof select?.[field.name] === 'object') {
@@ -889,27 +942,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     } else {
       childPermissions = parentPermissions
       tabSelect = select
-    }
-
-    const pathSegments = path ? path.split('.') : []
-
-    // If passesCondition is false then this should always result to false
-    // If the tab has no admin.condition provided then fallback to passesCondition and let that decide the result
-    let tabPassesCondition = passesCondition
-
-    if (passesCondition && typeof field.admin?.condition === 'function') {
-      tabPassesCondition = field.admin.condition(fullData, data, {
-        blockData,
-        operation,
-        path: pathSegments,
-        user: req.user,
-      })
-    }
-
-    if (field?.id) {
-      state[field.id] = {
-        passesCondition: tabPassesCondition,
-      }
     }
 
     return iterateFields({
@@ -930,7 +962,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       omitParents,
       operation,
       parentIndexPath: indexPath,
-      parentPassesCondition: tabPassesCondition,
+      parentPassesCondition: passesCondition,
       parentPath: path,
       parentSchemaPath: schemaPath,
       permissions: childPermissions,
@@ -947,6 +979,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
+    if (!filter || filter(args)) {
+      state[path] = {
+        disableFormData: true,
+      }
+    }
+
     return iterateFields({
       id,
       addErrorPathToParent: addErrorPathToParentArg,
@@ -970,6 +1008,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       permissions: parentPermissions,
       preferences,
       previousFormState,
+      readOnly,
       renderAllFields,
       renderFieldFn,
       req,
