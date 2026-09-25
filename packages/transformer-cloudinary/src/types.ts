@@ -140,6 +140,14 @@ export type CloudinaryDynamicDefaults = {
 }
 
 /**
+ * Enables request-time transformation and tunes its defaults. `collections`
+ * restricts it to the listed upload collections; omit it to allow every upload collection.
+ */
+export type CloudinaryDynamicOptions = {
+  collections?: UploadCollectionSlug[]
+} & CloudinaryDynamicDefaults
+
+/**
  * How a transformed variant reaches the client.
  *
  * - `'proxy'` (default): Payload streams the bytes from Cloudinary, so neither the
@@ -195,8 +203,14 @@ export type CloudinaryTransformerOptions = {
   config?: ConfigOptions
   /** @default 'proxy' */
   delivery?: CloudinaryDeliveryMode
-  /** Configurable defaults for dynamic (request-time) transformation. */
-  dynamic?: CloudinaryDynamicDefaults
+  /**
+   * Request-time transformation via `?width=`/`?height=` on the file endpoint.
+   * `true` enables it with default settings for every upload collection; an object
+   * enables it with custom defaults, optionally restricted to specific collections.
+   *
+   * @default false
+   */
+  dynamic?: boolean | CloudinaryDynamicOptions
   /** @default 'cloudinary' */
   slug?: string
   /**

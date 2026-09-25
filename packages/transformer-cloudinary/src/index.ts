@@ -4,6 +4,7 @@ export type {
   CloudinaryCropMode,
   CloudinaryDeliveryMode,
   CloudinaryDynamicDefaults,
+  CloudinaryDynamicOptions,
   CloudinaryFormat,
   CloudinaryGravity,
   CloudinaryImageSizeOptions,

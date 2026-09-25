@@ -53,6 +53,7 @@ export default buildConfigWithDefaults({
               imageSizes: [{ name: 'portrait', height: 600, width: 300 }],
             },
           },
+          dynamic: true,
           url: process.env.CLOUDINARY_URL,
         }),
       ],

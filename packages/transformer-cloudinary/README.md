@@ -28,7 +28,14 @@ Credentials are read from `CLOUDINARY_URL` (`cloudinary://<api_key>:<api_secret>
 
 ## Dynamic (request-time) transformation
 
-Requesting a file with recognized query parameters transforms it on the fly, without storing the result:
+Request-time transformation is **disabled by default** — resize query parameters are ignored and the original file is served. Enable it for every upload collection, or only the ones that need it:
+
+```ts
+cloudinaryTransformer({ dynamic: true })
+cloudinaryTransformer({ dynamic: { collections: ['media'] } })
+```
+
+Once enabled, requesting a file with recognized query parameters transforms it on the fly, without storing the result:
 
 ```
 GET /api/media/file/photo.png?width=400
@@ -76,6 +83,7 @@ cloudinaryTransformer({ delivery: 'proxy' }) // default
 ```ts
 cloudinaryTransformer({
   dynamic: {
+    collections: ['media'], // omit to allow every upload collection
     crop: 'fill', // default, when both width and height are given
     gravity: 'center', // default — try 'auto' for content-aware cropping
     quality: 'auto', // default
@@ -87,6 +95,8 @@ cloudinaryTransformer({
   },
 })
 ```
+
+Every distinct size a client requests is a new Cloudinary derived asset, billed against your quotas. With `delivery: 'redirect'` the client gets an unsigned Cloudinary URL it can edit to request any other variant directly, bypassing Payload's limits and access control. See [Securing dynamic transformation](https://payloadcms.com/docs/upload/transformers#cloudinary-securing) before enabling it on a public collection.
 
 ## Upload-time image processing
 
@@ -119,13 +129,13 @@ Staged originals are written to `payload-transformer-tmp/` (configurable via `up
 
 ## Options
 
-| Option         | Description                                                 | Default                      |
-| -------------- | ----------------------------------------------------------- | ---------------------------- |
-| `collections`  | Per-collection upload-time image processing settings        |                              |
-| `config`       | Cloudinary client configuration                             |                              |
-| `delivery`     | `'proxy'` or `'redirect'`                                   | `'proxy'`                    |
-| `dynamic`      | Defaults for request-time transformation                    |                              |
-| `slug`         | Transformer slug, unique across `upload.transformers`       | `'cloudinary'`               |
-| `sourceURL`    | Overrides how the publicly reachable source URL is resolved | the file's `url`             |
-| `uploadFolder` | Folder for short-lived upload-time originals                | `'payload-transformer-tmp'`  |
-| `url`          | `cloudinary://<api_key>:<api_secret>@<cloud_name>`          | `process.env.CLOUDINARY_URL` |
+| Option         | Description                                                                               | Default                      |
+| -------------- | ----------------------------------------------------------------------------------------- | ---------------------------- |
+| `collections`  | Per-collection upload-time image processing settings                                      |                              |
+| `config`       | Cloudinary client configuration                                                           |                              |
+| `delivery`     | `'proxy'` or `'redirect'`                                                                 | `'proxy'`                    |
+| `dynamic`      | Enables request-time transformation (`true` or an object with `collections` and defaults) | `false`                      |
+| `slug`         | Transformer slug, unique across `upload.transformers`                                     | `'cloudinary'`               |
+| `sourceURL`    | Overrides how the publicly reachable source URL is resolved                               | the file's `url`             |
+| `uploadFolder` | Folder for short-lived upload-time originals                                              | `'payload-transformer-tmp'`  |
+| `url`          | `cloudinary://<api_key>:<api_secret>@<cloud_name>`                                        | `process.env.CLOUDINARY_URL` |
