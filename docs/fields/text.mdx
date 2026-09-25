@@ -145,13 +145,11 @@ export const CustomTextFieldClient: React.FC<TextFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { TextFieldLabelServerComponent } from 'payload'
+import type { TextFieldLabelServerProps } from 'payload'
 
-export const CustomTextFieldLabelServer: TextFieldLabelServerComponent = ({
-  clientField,
-  path,
-  required,
-}) => {
+export const CustomTextFieldLabelServer: React.FC<
+  TextFieldLabelServerProps
+> = ({ clientField, path, required }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -168,12 +166,11 @@ export const CustomTextFieldLabelServer: TextFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { TextFieldLabelClientComponent } from 'payload'
+import type { TextFieldLabelClientProps } from 'payload'
 
-export const CustomTextFieldLabelClient: TextFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomTextFieldLabelClient: React.FC<
+  TextFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

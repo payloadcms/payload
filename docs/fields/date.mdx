@@ -186,12 +186,11 @@ export const CustomDateFieldClient: React.FC<DateFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { DateFieldLabelServerComponent } from 'payload'
+import type { DateFieldLabelServerProps } from 'payload'
 
-export const CustomDateFieldLabelServer: DateFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomDateFieldLabelServer: React.FC<
+  DateFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -208,12 +207,11 @@ export const CustomDateFieldLabelServer: DateFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { DateFieldLabelClientComponent } from 'payload'
+import type { DateFieldLabelClientProps } from 'payload'
 
-export const CustomDateFieldLabelClient: DateFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomDateFieldLabelClient: React.FC<
+  DateFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

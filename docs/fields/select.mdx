@@ -236,12 +236,11 @@ export const CustomSelectFieldClient: React.FC<SelectFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { SelectFieldLabelServerComponent } from 'payload'
+import type { SelectFieldLabelServerProps } from 'payload'
 
-export const CustomSelectFieldLabelServer: SelectFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomSelectFieldLabelServer: React.FC<
+  SelectFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -258,12 +257,11 @@ export const CustomSelectFieldLabelServer: SelectFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { SelectFieldLabelClientComponent } from 'payload'
+import type { SelectFieldLabelClientProps } from 'payload'
 
-export const CustomSelectFieldLabelClient: SelectFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomSelectFieldLabelClient: React.FC<
+  SelectFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

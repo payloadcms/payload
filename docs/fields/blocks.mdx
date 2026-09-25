@@ -389,12 +389,11 @@ export const CustomBlocksFieldClient: React.FC<BlocksFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { BlocksFieldLabelServerComponent } from 'payload'
+import type { BlocksFieldLabelServerProps } from 'payload'
 
-export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomBlocksFieldLabelServer: React.FC<
+  BlocksFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -411,13 +410,11 @@ export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { BlocksFieldLabelClientComponent } from 'payload'
+import type { BlocksFieldLabelClientProps } from 'payload'
 
-export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
-  label,
-  path,
-  required,
-}) => {
+export const CustomBlocksFieldLabelClient: React.FC<
+  BlocksFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

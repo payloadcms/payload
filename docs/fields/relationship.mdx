@@ -424,18 +424,19 @@ export const CustomRelationshipFieldClient = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { RelationshipFieldLabelServerComponent } from 'payload'
+import type { RelationshipFieldLabelServerProps } from 'payload'
 
-export const CustomRelationshipFieldLabelServer: RelationshipFieldLabelServerComponent =
-  (clientField, path) => {
-    return (
-      <FieldLabel
-        label={clientField?.label || clientField?.name}
-        path={path}
-        required={clientField?.required}
-      />
-    )
-  }
+export const CustomRelationshipFieldLabelServer: React.FC<
+  RelationshipFieldLabelServerProps
+> = ({ clientField, path }) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
 ```
 
 #### Client Component
@@ -444,16 +445,17 @@ export const CustomRelationshipFieldLabelServer: RelationshipFieldLabelServerCom
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { RelationshipFieldLabelClientComponent } from 'payload'
+import type { RelationshipFieldLabelClientProps } from 'payload'
 
-export const CustomRelationshipFieldLabelClient: RelationshipFieldLabelClientComponent =
-  ({ field, path }) => {
-    return (
-      <FieldLabel
-        label={field?.label || field?.name}
-        path={path}
-        required={field?.required}
-      />
-    )
-  }
+export const CustomRelationshipFieldLabelClient: React.FC<
+  RelationshipFieldLabelClientProps
+> = ({ field, path }) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
 ```

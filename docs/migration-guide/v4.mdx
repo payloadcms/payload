@@ -481,9 +481,7 @@ Running `npx @payloadcms/codemod --transform migrate-aliased-exports` preserves 
 
 ### Field component types replaced by props types
 
-The concrete field component aliases named `<FieldType>FieldClientComponent` and `<FieldType>FieldServerComponent` have been removed. Use the corresponding `<FieldType>FieldClientProps` or `<FieldType>FieldServerProps` type instead.
-
-For a named component, apply the props type through React:
+Field component aliases that wrapped props in `React.ComponentType<Props>` have been removed. Import the props type directly so each component can use `React.FC<Props>` or a function declaration.
 
 ```diff
 - import type { TextFieldClientComponent } from 'payload'
@@ -496,20 +494,28 @@ For a named component, apply the props type through React:
   }
 ```
 
-Or annotate the function parameter directly:
+Generic type arguments move to the props type:
 
 ```diff
-- import type { TextFieldServerComponent } from 'payload'
-+ import type { TextFieldServerProps } from 'payload'
+- import type { FieldErrorClientComponent, TextFieldClient } from 'payload'
++ import type { FieldErrorClientProps, TextFieldClient } from 'payload'
++ import type React from 'react'
 
-- const CustomTextField: TextFieldServerComponent = async (props) => {
-+ export default async function (props: TextFieldServerProps) {
-    // ...
-  }
-- export default CustomTextField
+- const Error: FieldErrorClientComponent<TextFieldClient> = (props) => null
++ const Error: React.FC<FieldErrorClientProps<TextFieldClient>> = (props) => null
 ```
 
-This change covers the main client and server component types for every concrete field type. Admin-view types such as `AdminViewComponent` and `DocumentTabComponent` are tracked separately and are not part of this field-type migration.
+Function declarations can annotate their parameter without a component wrapper:
+
+```tsx
+import type { TextFieldServerProps } from 'payload'
+
+export default async function CustomTextField(props: TextFieldServerProps) {
+  // ...
+}
+```
+
+This covers main field components, labels, descriptions, errors, diffs, and block row labels. Admin-view types such as `AdminViewComponent` and `DocumentTabComponent` are separate.
 
 #### Codemod
 

@@ -140,12 +140,11 @@ export const CustomEmailFieldClient: React.FC<EmailFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { EmailFieldLabelServerComponent } from 'payload'
+import type { EmailFieldLabelServerProps } from 'payload'
 
-export const CustomEmailFieldLabelServer: EmailFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomEmailFieldLabelServer: React.FC<
+  EmailFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -162,12 +161,11 @@ export const CustomEmailFieldLabelServer: EmailFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { EmailFieldLabelClientComponent } from 'payload'
+import type { EmailFieldLabelClientProps } from 'payload'
 
-export const CustomEmailFieldLabelClient: EmailFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomEmailFieldLabelClient: React.FC<
+  EmailFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

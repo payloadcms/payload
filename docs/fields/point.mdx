@@ -180,12 +180,11 @@ export const CustomPointFieldClient: React.FC<PointFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { PointFieldLabelServerComponent } from 'payload'
+import type { PointFieldLabelServerProps } from 'payload'
 
-export const CustomPointFieldLabelServer: PointFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomPointFieldLabelServer: React.FC<
+  PointFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -202,12 +201,11 @@ export const CustomPointFieldLabelServer: PointFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { PointFieldLabelClientComponent } from 'payload'
+import type { PointFieldLabelClientProps } from 'payload'
 
-export const CustomPointFieldLabelClient: PointFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomPointFieldLabelClient: React.FC<
+  PointFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

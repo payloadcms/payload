@@ -147,12 +147,11 @@ export const CustomCodeFieldClient: React.FC<CodeFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { CodeFieldLabelServerComponent } from 'payload'
+import type { CodeFieldLabelServerProps } from 'payload'
 
-export const CustomCodeFieldLabelServer: CodeFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomCodeFieldLabelServer: React.FC<
+  CodeFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -169,12 +168,11 @@ export const CustomCodeFieldLabelServer: CodeFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { CodeFieldLabelClientComponent } from 'payload'
+import type { CodeFieldLabelClientProps } from 'payload'
 
-export const CustomCodeFieldLabelClient: CodeFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomCodeFieldLabelClient: React.FC<
+  CodeFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

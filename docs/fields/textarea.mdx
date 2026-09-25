@@ -143,18 +143,19 @@ export const CustomTextareaFieldClient: React.FC<TextareaFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { TextareaFieldLabelServerComponent } from 'payload'
+import type { TextareaFieldLabelServerProps } from 'payload'
 
-export const CustomTextareaFieldLabelServer: TextareaFieldLabelServerComponent =
-  ({ clientField, path }) => {
-    return (
-      <FieldLabel
-        label={clientField?.label || clientField?.name}
-        path={path}
-        required={clientField?.required}
-      />
-    )
-  }
+export const CustomTextareaFieldLabelServer: React.FC<
+  TextareaFieldLabelServerProps
+> = ({ clientField, path }) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
 ```
 
 #### Client Component
@@ -163,16 +164,17 @@ export const CustomTextareaFieldLabelServer: TextareaFieldLabelServerComponent =
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { TextareaFieldLabelClientComponent } from 'payload'
+import type { TextareaFieldLabelClientProps } from 'payload'
 
-export const CustomTextareaFieldLabelClient: TextareaFieldLabelClientComponent =
-  ({ field, path }) => {
-    return (
-      <FieldLabel
-        label={field?.label || field?.name}
-        path={path}
-        required={field?.required}
-      />
-    )
-  }
+export const CustomTextareaFieldLabelClient: React.FC<
+  TextareaFieldLabelClientProps
+> = ({ field, path }) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
 ```

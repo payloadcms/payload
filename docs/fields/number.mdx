@@ -148,12 +148,11 @@ export const CustomNumberFieldClient: React.FC<NumberFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { NumberFieldLabelServerComponent } from 'payload'
+import type { NumberFieldLabelServerProps } from 'payload'
 
-export const CustomNumberFieldLabelServer: NumberFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomNumberFieldLabelServer: React.FC<
+  NumberFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -170,12 +169,11 @@ export const CustomNumberFieldLabelServer: NumberFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { NumberFieldLabelClientComponent } from 'payload'
+import type { NumberFieldLabelClientProps } from 'payload'
 
-export const CustomNumberFieldLabelClient: NumberFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomNumberFieldLabelClient: React.FC<
+  NumberFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

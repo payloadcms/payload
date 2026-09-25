@@ -169,13 +169,11 @@ export const CustomRadioFieldClient: React.FC<RadioFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { RadioFieldLabelServerComponent } from 'payload'
+import type { RadioFieldLabelServerProps } from 'payload'
 
-export const CustomRadioFieldLabelServer: RadioFieldLabelServerComponent = ({
-  clientField,
-  path,
-  required,
-}) => {
+export const CustomRadioFieldLabelServer: React.FC<
+  RadioFieldLabelServerProps
+> = ({ clientField, path, required }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -192,12 +190,11 @@ export const CustomRadioFieldLabelServer: RadioFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { RadioFieldLabelClientComponent } from 'payload'
+import type { RadioFieldLabelClientProps } from 'payload'
 
-export const CustomRadioFieldLabelClient: RadioFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomRadioFieldLabelClient: React.FC<
+  RadioFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}

@@ -203,12 +203,11 @@ export const CustomJSONFieldClient: React.FC<JSONFieldClientProps> = (
 ```tsx
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { JSONFieldLabelServerComponent } from 'payload'
+import type { JSONFieldLabelServerProps } from 'payload'
 
-export const CustomJSONFieldLabelServer: JSONFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
+export const CustomJSONFieldLabelServer: React.FC<
+  JSONFieldLabelServerProps
+> = ({ clientField, path }) => {
   return (
     <FieldLabel
       label={clientField?.label || clientField?.name}
@@ -225,12 +224,11 @@ export const CustomJSONFieldLabelServer: JSONFieldLabelServerComponent = ({
 'use client'
 import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
-import type { JSONFieldLabelClientComponent } from 'payload'
+import type { JSONFieldLabelClientProps } from 'payload'
 
-export const CustomJSONFieldLabelClient: JSONFieldLabelClientComponent = ({
-  field,
-  path,
-}) => {
+export const CustomJSONFieldLabelClient: React.FC<
+  JSONFieldLabelClientProps
+> = ({ field, path }) => {
   return (
     <FieldLabel
       label={field?.label || field?.name}
