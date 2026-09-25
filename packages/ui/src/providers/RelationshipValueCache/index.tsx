@@ -21,6 +21,7 @@ type CachedDoc = {
 
 type PendingResolver = {
   cacheKey: CacheKey
+  promise: Promise<CachedDoc | undefined>
   resolve: (value: CachedDoc | undefined) => void
 }
 
@@ -72,6 +73,10 @@ export const RelationshipValueCacheProvider: React.FC<{
   const flushScheduledRef = useRef(false)
   const inFlightRef = useRef<Map<CacheKey, Promise<CachedDoc | undefined>>>(new Map())
 
+  // Incremented on every explicit cache change, so responses to requests started
+  // before it don't write outdated docs back into the cache
+  const cacheGenerationRef = useRef(0)
+
   // Clear on navigation so edits made elsewhere don't show stale labels. Done during render
   // because child effects run before this provider's effects and would read the old cache.
   const pathname = usePathname()
@@ -79,6 +84,7 @@ export const RelationshipValueCacheProvider: React.FC<{
 
   if (cachedPathnameRef.current !== pathname) {
     cachedPathnameRef.current = pathname
+    cacheGenerationRef.current++
     cacheRef.current.clear()
     inFlightRef.current.clear()
   }
@@ -87,6 +93,7 @@ export const RelationshipValueCacheProvider: React.FC<{
     flushScheduledRef.current = false
     const batch = new Map(pendingBatchRef.current)
     pendingBatchRef.current.clear()
+    const generation = cacheGenerationRef.current
 
     await Promise.all(
       Array.from(batch.values()).map(async (pending) => {
@@ -98,6 +105,8 @@ export const RelationshipValueCacheProvider: React.FC<{
           }
           return
         }
+
+        const fetchedDocs = new Map<CacheKey, CachedDoc>()
 
         const query = {
           depth: 0,
@@ -134,15 +143,14 @@ export const RelationshipValueCacheProvider: React.FC<{
             const data = await response.json()
 
             for (const doc of data.docs) {
-              const key = toCacheKey(collection, locale, doc.id)
-              cacheRef.current.set(key, { id: doc.id, doc })
+              fetchedDocs.set(toCacheKey(collection, locale, doc.id), { id: doc.id, doc })
             }
 
             // For IDs not found in the response, cache a placeholder to avoid refetching
             for (const id of ids) {
               const key = toCacheKey(collection, locale, id)
-              if (!cacheRef.current.has(key)) {
-                cacheRef.current.set(key, { id, doc: { id } })
+              if (!fetchedDocs.has(key)) {
+                fetchedDocs.set(key, { id, doc: { id } })
               }
             }
           }
@@ -150,14 +158,18 @@ export const RelationshipValueCacheProvider: React.FC<{
           // On error, don't cache — allow retry on next request
         }
 
-        // Clean up in-flight entries for all IDs in this batch
-        for (const id of ids) {
-          inFlightRef.current.delete(toCacheKey(collection, locale, id))
+        if (generation === cacheGenerationRef.current) {
+          for (const [key, cachedDoc] of fetchedDocs) {
+            cacheRef.current.set(key, cachedDoc)
+          }
         }
 
-        // Resolve all waiting callers individually
-        for (const { cacheKey, resolve } of resolvers) {
-          resolve(cacheRef.current.get(cacheKey))
+        for (const { cacheKey, promise, resolve } of resolvers) {
+          if (inFlightRef.current.get(cacheKey) === promise) {
+            inFlightRef.current.delete(cacheKey)
+          }
+
+          resolve(fetchedDocs.get(cacheKey))
         }
       }),
     )
@@ -215,10 +227,12 @@ export const RelationshipValueCacheProvider: React.FC<{
 
       pending.ids.add(id)
 
-      const promise = new Promise<CachedDoc | undefined>((resolve) => {
-        pending.resolvers.push({ cacheKey: key, resolve })
+      let resolve!: PendingResolver['resolve']
+      const promise = new Promise<CachedDoc | undefined>((res) => {
+        resolve = res
       })
 
+      pending.resolvers.push({ cacheKey: key, promise, resolve })
       inFlightRef.current.set(key, promise)
       scheduleBatchFlush()
       return promise
@@ -232,18 +246,21 @@ export const RelationshipValueCacheProvider: React.FC<{
 
   const invalidateDoc = useCallback((collection: string, locale: string, id: number | string) => {
     const key = toCacheKey(collection, locale, id)
+    cacheGenerationRef.current++
     cacheRef.current.delete(key)
     inFlightRef.current.delete(key)
   }, [])
 
   const updateDoc = useCallback(
     (collection: string, locale: string, id: number | string, doc: Record<string, unknown>) => {
+      cacheGenerationRef.current++
       cacheRef.current.set(toCacheKey(collection, locale, id), { id, doc: { ...doc, id } })
     },
     [],
   )
 
   const clearAll = useCallback(() => {
+    cacheGenerationRef.current++
     cacheRef.current.clear()
     inFlightRef.current.clear()
   }, [])
