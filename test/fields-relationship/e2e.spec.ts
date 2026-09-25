@@ -221,6 +221,7 @@ describe('Relationship Field', () => {
         payload.create({
           collection: relationOneSlug,
           data: { name: `batch-test-${i}` },
+          overrideAccess: true,
         }),
       ),
     )
@@ -238,6 +239,7 @@ describe('Relationship Field', () => {
         relationship: relationOneDoc.id,
         relationshipHasMany: allRelationIds,
       },
+      overrideAccess: true,
     })
 
     // Navigate to the edit page of this doc and assert that only a single
@@ -284,10 +286,10 @@ describe('Relationship Field', () => {
     expect(batchRequest).toBeDefined()
 
     // Clean up
-    await payload.delete({ id: doc.id, collection: slug })
+    await payload.delete({ id: doc.id, collection: slug, overrideAccess: true })
 
     for (const extraDoc of extraDocs) {
-      await payload.delete({ id: extraDoc.id, collection: relationOneSlug })
+      await payload.delete({ id: extraDoc.id, collection: relationOneSlug, overrideAccess: true })
     }
   })
 
