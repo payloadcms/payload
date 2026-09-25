@@ -5,6 +5,7 @@ import type {
   RelationshipField,
   SelectIncludeType,
   TypedCollectionSelect,
+  UploadField,
 } from 'payload'
 
 import { getNamedType, isInterfaceType, isObjectType, isUnionType, Kind } from 'graphql'
@@ -51,13 +52,17 @@ export function resolveSelect(
     | JoinField
     | RelationshipField
     | undefined
+    | UploadField
   const fieldSelect = buildSelect(info)
 
   if (field?.type === 'join') {
     return fieldSelect?.docs as SelectType
   }
 
-  if (field?.type === 'relationship' && Array.isArray(field.relationTo)) {
+  if (
+    (field?.type === 'relationship' || field?.type === 'upload') &&
+    Array.isArray(field.relationTo)
+  ) {
     return fieldSelect?.value as SelectType
   }
 
