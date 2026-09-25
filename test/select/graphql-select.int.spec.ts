@@ -43,6 +43,47 @@ test.suite('GraphQL select projection', { config: './config.ts' }, () => {
     })
   })
 
+  test('should merge block relationship selections from named and inline fragments', async ({
+    payload,
+    restClient,
+  }) => {
+    const relation = await payload.create({
+      collection: 'rels',
+      data: { text: 'merged fragments' },
+      overrideAccess: true,
+    })
+    const document = await payload.create({
+      collection: 'select-documents',
+      data: {
+        blocks: [{ blockType: 'select-relationship-block', link: relation.id }],
+      },
+      overrideAccess: true,
+    })
+
+    const query = `query {
+      SelectDocument(id: ${formatGraphQLID({ id: document.id })}, select: true) {
+        blocks {
+          ...SelectRelationshipBlockFields
+          ... on SelectRelationshipBlock { link { text } }
+        }
+      }
+    }
+
+    fragment SelectRelationshipBlockFields on SelectRelationshipBlock {
+      link { id }
+    }`
+
+    const { data, errors } = await restClient
+      .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+      .then((response) => response.json())
+
+    expect(errors).toBeUndefined()
+    expect(data.SelectDocument.blocks[0].link).toMatchObject({
+      id: relation.id,
+      text: 'merged fragments',
+    })
+  })
+
   test('should keep a block relationship selection from a named fragment', async ({
     payload,
     restClient,
