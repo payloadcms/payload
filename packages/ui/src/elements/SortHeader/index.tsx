@@ -37,7 +37,7 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
 
   useAriaSort({
     ref: buttonRef,
-    value: isActive ? (isAscending ? 'ascending' : 'descending') : 'none',
+    value: isActive ? (isAscending ? 'ascending' : 'descending') : undefined,
   })
 
   return (

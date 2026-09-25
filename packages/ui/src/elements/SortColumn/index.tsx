@@ -47,7 +47,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   useAriaSort({
     labelledBy: labelId,
     ref: rootRef,
-    value: sort === asc ? 'ascending' : sort === desc ? 'descending' : 'none',
+    value: sort === asc ? 'ascending' : sort === desc ? 'descending' : undefined,
   })
 
   const descLabel = t('general:sortByLabelDirection', {

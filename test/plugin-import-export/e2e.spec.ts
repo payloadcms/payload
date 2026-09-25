@@ -126,6 +126,7 @@ test.describe('Import Export Plugin', () => {
         exact: true,
       })
       await expect(createExportButton).toBeVisible()
+      await expect(createExportButton.locator('button')).toHaveCount(0)
 
       await createExportButton.click()
 
@@ -805,6 +806,7 @@ test.describe('Import Export Plugin', () => {
         exact: true,
       })
       await expect(createImportButton).toBeVisible()
+      await expect(createImportButton.locator('button')).toHaveCount(0)
 
       await createImportButton.click()
 

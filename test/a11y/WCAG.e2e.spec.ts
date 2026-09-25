@@ -92,6 +92,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       const ascendingButton = header.locator('.sort-column__asc')
       const descendingButton = header.locator('.sort-column__desc')
 
+      await expect(header).not.toHaveAttribute('aria-sort', /.+/)
+
       await ascendingButton.click()
       await expect(header).toHaveAccessibleName(label)
       await expect(header).toHaveAttribute('aria-sort', 'ascending')
@@ -400,6 +402,46 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(languageOption).toBeFocused()
       await languageOption.press('Escape')
       await expect(language).toBeFocused()
+    })
+
+    test('should close the full User menu chain when tabbing from a nested menu', async () => {
+      // Additional coverage for PYLD-3645 and PYLD-3697.
+      await page.goto(`${serverURL}/admin`)
+      const trigger = page.locator('.user-menu__trigger')
+
+      await trigger.focus()
+      await trigger.press('Enter')
+      const language = page.getByRole('menuitem', { name: /language/i })
+      await language.focus()
+      await language.press('Enter')
+      const languageOption = page.getByRole('menuitemradio').first()
+      await expect(languageOption).toBeFocused()
+
+      await page.keyboard.press('Tab')
+
+      await expect(languageOption).toBeHidden()
+      await expect(language).toBeHidden()
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    test('should move focus into a mobile User menu submenu', async () => {
+      // Additional coverage for PYLD-3645 and PYLD-3697.
+      await page.setViewportSize({ height: 720, width: 320 })
+      await page.goto(`${serverURL}/admin`)
+      const trigger = page.locator('.user-menu__trigger')
+
+      await trigger.focus()
+      await trigger.press('Enter')
+      const language = page.getByRole('menuitem', { name: /language/i })
+      await expect(language).not.toHaveAttribute('aria-haspopup')
+      await language.focus()
+      await language.press('Enter')
+
+      const back = page.getByRole('menuitem', { name: 'Language', exact: true })
+      await expect(back).toBeFocused()
+      await page.keyboard.press('ArrowDown')
+      await expect(page.getByRole('menuitemradio').first()).toBeFocused()
+      await page.setViewportSize({ height: 720, width: 1280 })
     })
 
     test('should move keyboard focus into and through the Group by dialog', async () => {

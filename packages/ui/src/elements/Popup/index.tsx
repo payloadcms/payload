@@ -13,6 +13,7 @@ import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.
 const baseClass = 'popup'
 
 type PopupContextValue = {
+  closePopupChain: () => void
   popupRef: React.RefObject<HTMLDivElement | null>
   popupRole?: AriaRole
 }
@@ -49,29 +50,14 @@ export type PopupProps = {
   backgroundColor?: CSSProperties['backgroundColor']
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
-  /**
-   * Accessible label for the trigger button.
-   * Necessary when the button has an icon-only content,
-   * so the button has an accessible name for screen readers.
-   */
   buttonAriaLabel?: string
-  /**
-   * The class name to apply to the button that triggers the popup.
-   */
   buttonClassName?: string
   buttonSize?: 'large' | 'medium'
   buttonType?: 'custom' | 'default'
   caret?: boolean
   children?: React.ReactNode
-  /**
-   * The class name to apply to the popup container containing the trigger.
-   * This wraps both the trigger and its popup content.
-   */
   className?: string
   disabled?: boolean
-  /**
-   * Force control the open state of the popup, regardless of the trigger.
-   */
   forceOpen?: boolean
   /**
    * Preferred horizontal alignment of the popup, if there is enough space available.
@@ -84,13 +70,8 @@ export type PopupProps = {
   noBackground?: boolean
   onToggleClose?: () => void
   onToggleOpen?: (active: boolean) => void
-  /** Accessible name for popup content with a landmark role such as `dialog`. */
   popupAriaLabel?: string
-  /** The semantic type exposed by the trigger. Omit for non-menu popup content. */
   popupType?: AriaAttributes['aria-haspopup']
-  /**
-   * Class name to apply to the popup content.
-   */
   portalClassName?: string
   render?: (args: { close: () => void }) => React.ReactNode
   /**
@@ -213,6 +194,10 @@ export const Popup: React.FC<PopupProps> = (props) => {
     [setActive],
   )
   const close = useCallback(() => closePopup(), [closePopup])
+  const closePopupChain = useCallback(() => {
+    closePopup({ restoreFocus: false })
+    parentPopup?.closePopupChain()
+  }, [closePopup, parentPopup])
 
   // /////////////////////////////////////
   // Position Calculation
@@ -430,7 +415,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
 
     if (e.key === 'Tab' && popupRole === 'menu') {
-      setTimeout(() => closePopup({ restoreFocus: false }))
+      setTimeout(closePopupChain)
       return
     }
 
@@ -645,7 +630,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
         )}
       </div>
 
-      <PopupContext value={{ popupRef, popupRole }}>
+      <PopupContext value={{ closePopupChain, popupRef, popupRole }}>
         <div
           aria-label={popupAriaLabel}
           className={

@@ -11,7 +11,7 @@ export const useAriaSort = <TElement extends HTMLElement>({
 }: {
   labelledBy?: string
   ref: RefObject<null | TElement>
-  value: AriaAttributes['aria-sort']
+  value?: AriaAttributes['aria-sort']
 }) => {
   const owner = useId()
 
@@ -23,7 +23,11 @@ export const useAriaSort = <TElement extends HTMLElement>({
     }
 
     header.dataset.ariaSortOwner = owner
-    header.setAttribute('aria-sort', value)
+    if (value) {
+      header.setAttribute('aria-sort', value)
+    } else {
+      header.removeAttribute('aria-sort')
+    }
     if (labelledBy) {
       header.setAttribute('aria-labelledby', labelledBy)
     }

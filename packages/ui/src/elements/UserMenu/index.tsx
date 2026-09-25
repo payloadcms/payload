@@ -1,7 +1,7 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { formatAdminURL } from 'payload/shared'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { UserMenuSettingsGroup } from './SettingsMenu/index.js'
 
@@ -55,6 +55,22 @@ export const UserMenu: React.FC<UserMenuProps> = ({
     'language' | 'settings' | 'theme' | null
   >(null)
 
+  const setMobileSubmenuRef = useCallback((element: HTMLDivElement | null) => {
+    if (!element) {
+      return
+    }
+
+    setTimeout(() => {
+      const firstMenuItem = element.querySelector<HTMLElement>(
+        '[role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]',
+      )
+      if (firstMenuItem) {
+        firstMenuItem.tabIndex = 0
+        firstMenuItem.focus()
+      }
+    })
+  }, [])
+
   useEffect(() => {
     if (!isMobile) {
       setActiveMobileSubmenu(null)
@@ -101,7 +117,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
     >
       {isMobile && activeMobileSubmenu ? (
         // Mobile submenu panel
-        <>
+        <div ref={setMobileSubmenuRef}>
           {activeMobileSubmenu === 'theme' && (
             <>
               <SubMenuHeader
@@ -129,7 +145,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               <SettingsMenuContent groups={settingsItemGroups} />
             </>
           )}
-        </>
+        </div>
       ) : (
         // Normal menu content (desktop always; mobile when no active submenu)
         <>
