@@ -350,6 +350,39 @@ export const Posts: CollectionConfig = {
 }
 ```
 
+### Authorship (`createdBy` / `updatedBy`) is now enabled by default
+
+Collections and globals now track authorship by default: Payload injects `createdBy` and `updatedBy` polymorphic relationship fields (related to every auth-enabled collection) and stamps them from `req.user` on each write. Previously there was no authorship tracking; you now opt out with `authorship: false`.
+
+**What changes:**
+
+- Every non-internal collection and global gains `createdBy` and `updatedBy` when your config has at least one auth collection. On SQL adapters this adds relationship rows (stored in each entity's `_rels` table), so existing projects need a database migration. In development the schema is pushed automatically; in production, generate a migration with `payload migrate:create` and run `payload migrate`. Existing documents are backfilled with `null`.
+- `createdBy` is only derived on a document's first write, so editing a document whose `createdBy` is `null` (for example a migrated or anonymously created document) does not backfill the editor as the creator.
+- Payload's internal system collections and globals are excluded automatically: `payload-jobs`, `payload-jobs-stats`, `payload-preferences`, `payload-locked-documents`, `payload-migrations`, `payload-query-presets`, and the KV collection.
+
+**Plugins:** plugin-injected collections also receive authorship unless the plugin opts out. In this release:
+
+- **Opted out** (no authorship): `@payloadcms/plugin-search`, `@payloadcms/payload-cloud`, and all `@payloadcms/plugin-ecommerce` collections.
+- **Kept on** (they gain `createdBy` / `updatedBy`): `@payloadcms/plugin-redirects`, `@payloadcms/plugin-form-builder` (forms and form submissions), and `@payloadcms/plugin-import-export` (imports and exports). Existing projects using these plugins on a SQL adapter need a migration for those collections too. To opt one out, set `authorship: false` through that plugin's collection-override option.
+
+**To opt out for an existing collection or global:**
+
+```diff
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [],
++ authorship: false,
+}
+```
+
+**A codemod is available** to preserve the previous behaviour:
+
+```bash
+npx @payloadcms/codemod --transform migrate-authorship-default
+```
+
+`migrate-authorship-default` adds `authorship: false` to every `CollectionConfig` and `GlobalConfig` in your source that does not already set `authorship`, so your own collections have zero schema changes. It only rewrites your config files — it cannot reach plugin-injected collections, so any plugin that keeps authorship on (above) still gains the fields and requires a migration (or an explicit `authorship: false` override).
+
 ### List View Select API is now the default
 
 The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.

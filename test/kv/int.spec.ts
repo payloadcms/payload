@@ -52,6 +52,14 @@ test.suite('KV Adapters', { config: './config.ts' }, () => {
     return true
   }
 
+  test('should not inject authorship fields into the internal KV collection', ({ payload }) => {
+    const fields = payload.collections['payload-kv'].config.fields
+    const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
+
+    expect(names).not.toContain('createdBy')
+    expect(names).not.toContain('updatedBy')
+  })
+
   test('databaseKVAdapter', async ({ payload }) => {
     // default
     expect(await testKVAdapter(payload)).toBeTruthy()

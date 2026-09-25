@@ -2156,6 +2156,8 @@ test.suite('Auth', { config: './config.ts', resetBetweenTests: false }, () => {
         .map((field) => (field as FieldAffectingData).name)
 
       expect(authFields).toMatchObject([
+        'createdBy',
+        'updatedBy',
         'updatedAt',
         'createdAt',
         'email',

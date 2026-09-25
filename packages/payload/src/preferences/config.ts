@@ -40,6 +40,7 @@ export const getPreferencesCollection = (config: Config): CollectionConfig => ({
   admin: {
     hidden: true,
   },
+  authorship: false,
   endpoints: [
     {
       handler: findByIDHandler,

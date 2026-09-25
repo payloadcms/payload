@@ -223,6 +223,7 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
       group: 'Ecommerce',
       useAsTitle: 'createdAt',
     },
+    authorship: false,
     endpoints: [
       addItemEndpoint({ cartItemMatcher, cartsSlug }),
       clearCartEndpoint({ cartsSlug }),
