@@ -1625,9 +1625,15 @@ importers:
 
   packages/storage-r2:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.614.0
+        version: 3.1080.0
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
+      '@payloadcms/storage-s3':
+        specifier: workspace:*
+        version: link:../storage-s3
     devDependencies:
       '@cloudflare/workers-types':
         specifier: 4.20260218.0

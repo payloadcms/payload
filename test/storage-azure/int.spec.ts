@@ -7,6 +7,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { copyAzureFile } from '../../packages/storage-azure/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
@@ -56,6 +57,27 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
     ).json()
     const response = await restClient.GET(newMedia.doc.url.replace(/^\/api/, '') as `/${string}`)
     expect(response.headers.get('content-type')).toEqual('image/png')
+  })
+
+  test('should copy a private blob without replacing an existing destination', async () => {
+    const source = client.getBlockBlobClient('copy-source.txt')
+    const destination = client.getBlockBlobClient('copy-destination.txt')
+    await source.uploadData(Buffer.from('copy source'), {
+      blobHTTPHeaders: { blobContentType: 'text/plain' },
+      metadata: { owner: 'payload' },
+      tags: { role: 'original' },
+    })
+
+    await copyAzureFile({ client, from: source.name, to: destination.name })
+
+    expect((await destination.getProperties()).contentType).toBe('text/plain')
+    expect((await destination.getProperties()).metadata).toEqual({ owner: 'payload' })
+    expect((await destination.getTags()).tags).toEqual({ role: 'original' })
+    expect((await source.getProperties()).contentLength).toBe(11)
+    await expect(
+      copyAzureFile({ client, from: source.name, to: destination.name }),
+    ).rejects.toThrow()
+    expect((await destination.getProperties()).contentLength).toBe(11)
   })
 
   test('can upload', async ({ payload }) => {

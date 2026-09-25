@@ -5,6 +5,7 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { copyAzureFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
@@ -33,6 +34,8 @@ export function createAzureAdapter({
 }: CreateAzureAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
+
+    copyFile: ({ from, to }) => copyAzureFile({ client: getStorageClient(), from, to }),
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

@@ -32,6 +32,11 @@ export function createS3Adapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
 
+    copyFile: async ({ from, to }) => {
+      const { copyS3File } = await import('./copyFile.js')
+      await copyS3File({ acl, bucket, client: getStorageClient(), from, to })
+    },
+
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
         bucket,

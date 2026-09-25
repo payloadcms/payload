@@ -92,6 +92,7 @@ function buildUploadConfig(skipSafeFetch?: UploadConfig['skipSafeFetch']): Uploa
     collections: {
       [collectionSlug]: {
         adapter: () => ({
+          copyFile: async () => undefined,
           handleDelete: async () => undefined,
           handleUpload: async () => undefined,
           name: 'test-adapter',
@@ -143,6 +144,7 @@ async function fetchExternalFile({
 }
 
 const adapter = () => ({
+  copyFile: async () => undefined,
   handleDelete: () => undefined,
   handleUpload: () => undefined,
   name: 'test-adapter',

@@ -1589,6 +1589,8 @@ If you typed `clientUploads.access`, replace `ClientUploadsAccess` with `UploadI
 
 #### If you maintain a custom storage adapter
 
+File versioning adds a required `GeneratedAdapter.copyFile` method. It receives `collection`, `req`, complete `from` and `to` storage keys, and an optional `mimeType`. Implement it using the provider's copy operation or a safe authenticated stream: keep the source, reject an occupied destination, and wait until the destination is readable before returning. `moveFile` is optional. This is a 4.0 adapter contract change; custom adapters must implement the new method to support the updated interface. Path-addressed keys cannot be assumed for adapters whose provider assigns opaque object IDs. See [Custom Storage Adapters](../upload/storage-adapters) for the contract and first-party provider requirements.
+
 Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
 
 Set `uploadInstructions.enabled`. When false, Payload adds `adminHandler` to the import map without rendering it. When true, Payload also renders it and exposes the instructions and supporting endpoint.

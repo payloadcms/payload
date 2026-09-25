@@ -1,8 +1,10 @@
+import { head, put } from '@vercel/blob'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { copyVercelBlobFile } from '../../packages/storage-vercel-blob/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
@@ -37,6 +39,36 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
       payload.delete({ collection: mediaWithDirectAccessSlug, where: {}, overrideAccess: true }),
       payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {}, overrideAccess: true }),
     ])
+  })
+
+  test('should copy a blob to an exact unused pathname and preserve content type', async () => {
+    const token = process.env.BLOB_READ_WRITE_TOKEN!
+    await put('copy-source.txt', Buffer.from('copy source'), {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'text/plain',
+      token,
+    })
+
+    await copyVercelBlobFile({
+      access: 'public',
+      cacheControlMaxAge: 60,
+      from: 'copy-source.txt',
+      to: 'copy-destination.txt',
+      token,
+    })
+
+    expect((await head('copy-destination.txt', { token })).contentType).toBe('text/plain')
+    expect((await head('copy-source.txt', { token })).size).toBe(11)
+    await expect(
+      copyVercelBlobFile({
+        access: 'public',
+        cacheControlMaxAge: 60,
+        from: 'copy-source.txt',
+        to: 'copy-destination.txt',
+        token,
+      }),
+    ).rejects.toThrow()
   })
 
   test('can upload', async ({ payload }) => {

@@ -4,6 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { copyS3File } from '../../packages/storage-s3/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
@@ -17,6 +18,7 @@ import {
 import {
   clearTestBucket,
   createTestBucket,
+  getAWSClient,
   getTestBucketName,
   verifyUploads,
 } from './test-utils.js'
@@ -31,6 +33,33 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
   })
   test.afterEach(async () => {
     await clearTestBucket()
+  })
+
+  test('should copy an S3 object without removing its source or overwriting a destination', async () => {
+    const client = getAWSClient()
+    const bucket = getTestBucketName()
+    await client.putObject({
+      Body: 'copy source',
+      Bucket: bucket,
+      ContentType: 'text/plain',
+      Key: 'copy-source.txt',
+      Metadata: { owner: 'payload' },
+    })
+
+    await copyS3File({ bucket, client, from: 'copy-source.txt', to: 'copy-destination.txt' })
+
+    expect(
+      (await client.headObject({ Bucket: bucket, Key: 'copy-source.txt' })).ContentLength,
+    ).toBe(11)
+    expect(
+      (await client.headObject({ Bucket: bucket, Key: 'copy-destination.txt' })).ContentType,
+    ).toBe('text/plain')
+    expect(
+      (await client.headObject({ Bucket: bucket, Key: 'copy-destination.txt' })).Metadata,
+    ).toEqual({ owner: 'payload' })
+    await expect(
+      copyS3File({ bucket, client, from: 'copy-source.txt', to: 'copy-destination.txt' }),
+    ).rejects.toThrow()
   })
 
   test('can upload', async ({ payload }) => {

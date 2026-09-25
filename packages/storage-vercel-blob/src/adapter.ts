@@ -15,6 +15,7 @@ import { assertClientUploadAllowed, createClientUploadReceipt } from 'payload/in
 import type { VercelBlobCollectionSource } from './authorizeFileOverwrite.js'
 
 import { authorizeClientOverwrite } from './authorizeFileOverwrite.js'
+import { copyVercelBlobFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -45,6 +46,8 @@ export function createVercelBlobAdapter({
 
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
+
+    copyFile: ({ from, to }) => copyVercelBlobFile({ access, cacheControlMaxAge, from, to, token }),
 
     uploadInstructions: {
       adminHandler: {

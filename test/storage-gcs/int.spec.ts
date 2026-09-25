@@ -6,6 +6,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
+import { copyGcsFile } from '../../packages/storage-gcs/src/copyFile.js'
 import { test } from '../__helpers/int/vitest.js'
 import {
   mediaSlug,
@@ -42,6 +43,27 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
 
   test.afterEach(async () => {
     await clearBucket()
+  })
+
+  test('should copy a GCS object without replacing an existing destination', async () => {
+    const source = bucket.file('copy-source.txt')
+    const destination = bucket.file('copy-destination.txt')
+    await source.save(Buffer.from('copy source'))
+    await source.setMetadata({ contentType: 'text/plain' })
+    expect((await source.getMetadata())[0].contentType).toBe('text/plain')
+    const client = new Storage({
+      apiEndpoint: process.env.GCS_ENDPOINT,
+      projectId: process.env.GCS_PROJECT_ID,
+    })
+
+    await copyGcsFile({ bucket: bucket.name, client, from: source.name, to: destination.name })
+
+    expect((await destination.download())[0].toString()).toBe('copy source')
+    expect((await destination.getMetadata())[0].contentType).toBe('text/plain')
+    expect((await source.download())[0].toString()).toBe('copy source')
+    await expect(
+      copyGcsFile({ bucket: bucket.name, client, from: source.name, to: destination.name }),
+    ).rejects.toThrow()
   })
 
   async function verifyUploads({

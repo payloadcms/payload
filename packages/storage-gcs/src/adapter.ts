@@ -5,6 +5,7 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { copyGcsFile } from './copyFile.js'
 import { deleteFile } from './deleteFile.js'
 import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
@@ -28,6 +29,8 @@ export function createGcsAdapter({
 }: CreateGcsAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'gcs',
+
+    copyFile: ({ from, to }) => copyGcsFile({ acl, bucket, client: getStorageClient(), from, to }),
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

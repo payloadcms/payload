@@ -179,6 +179,16 @@ export function buildPluginCloudStorageIntConfig({
     collections: {
       [testMetadataSlug]: {
         adapter: () => ({
+          copyFile: ({ from, to }) => {
+            const source = uploadedTestFiles.get(from)
+
+            if (!source || uploadedTestFiles.has(to)) {
+              throw new Error('Cannot copy test storage file')
+            }
+
+            uploadedTestFiles.set(to, { ...source, filename: to })
+            return Promise.resolve()
+          },
           name: 'test-metadata-adapter',
           handleDelete: ({ doc, filename }) => {
             recordedCleanupTargets.push({ filename, prefix: doc.prefix })

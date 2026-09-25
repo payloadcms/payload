@@ -21,6 +21,13 @@ export interface R2StorageOptions {
    * Collection options to apply the R2 adapter to.
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
+  /** S3 API credentials required only for copy-dependent file versioning operations. */
+  copyCredentials?: {
+    accessKeyId: string
+    accountId: string
+    bucket: string
+    secretAccessKey: string
+  }
   enabled?: boolean
   /**
    * When true, the collection-level prefix and document-level prefix are combined
@@ -51,6 +58,7 @@ export const r2Storage: R2StorageFactory = (
       bucket: r2StorageOptions.bucket,
       clientUploads: r2StorageOptions.clientUploads,
       collections: r2StorageOptions.collections,
+      copyCredentials: r2StorageOptions.copyCredentials,
       useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })
 

@@ -446,7 +446,16 @@ If you need to create a custom storage adapter, you can use the [`@payloadcms/pl
 Reference any of the existing storage adapters for guidance on how this should be structured. Create an adapter following the `GeneratedAdapter` interface. Then, pass the adapter to the `cloudStorage` plugin.
 
 ```ts
+type FileOperationArgs = {
+  collection: SanitizedCollectionConfig
+  from: string
+  to: string
+  mimeType?: string
+  req: PayloadRequest
+}
+
 export interface GeneratedAdapter {
+  copyFile: (args: FileOperationArgs) => Promise<void>
   /**
    * Additional fields to be injected into the base
    * collection and image sizes
@@ -460,10 +469,15 @@ export interface GeneratedAdapter {
   handleUpload: HandleUpload
   name: string
   onInit?: () => void
+  moveFile?: (args: FileOperationArgs) => Promise<void>
   staticHandler: StaticHandler
   uploadInstructions?: UploadInstructionsCapability
 }
 ```
+
+`from` and `to` are complete storage keys, including prefixes. `copyFile` must leave the source in place, reject an occupied destination, and resolve only after the destination can be read. If you implement `moveFile`, preserve the source until the copy has succeeded and the destination is readable. The core file versioning path can perform copy, verify, then delete when `moveFile` is absent. The key-based contract applies to path-addressed storage; an adapter using provider-assigned IDs needs a compatible mapping before it can support file versioning.
+
+The first-party S3 adapter uses single or multipart server-side copy. The R2 Workers binding supports ordinary uploads and reads without S3 credentials, but copy-dependent file versioning operations require `copyCredentials` with an R2 account ID, bucket, S3 access key ID, and secret. Azure copies through authenticated source and destination streams, so private sources work but copy traffic passes through the Payload server. GCS uses its provider copy API; Vercel Blob uses its provider copy API with exact destination pathnames. Grant each adapter read and write access to the source and destination, plus object metadata and tag access where used. S3 multipart copy also needs permission to abort incomplete multipart uploads; KMS-encrypted S3 objects need the corresponding decrypt and encrypt permissions.
 
 When providing upload instructions, set `uploadInstructions.useInAdmin` to `true` when the Admin panel should use them instead of attaching the whole file to the document request. This is useful for direct-to-storage uploads and for flows such as chunked uploads that still pass through Payload.
 
