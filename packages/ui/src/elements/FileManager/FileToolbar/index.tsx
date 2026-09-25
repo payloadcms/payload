@@ -57,6 +57,7 @@ export const FileToolbar: React.FC<Props> = ({
             }
             buttonType="custom"
             horizontalAlign="left"
+            popupType="menu"
             portalClassName={`${baseClass}__filename-popup`}
             size="fit-content"
             verticalAlign="bottom"

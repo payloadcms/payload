@@ -5,7 +5,6 @@ import React, { useCallback, useState } from 'react'
 
 import type { HierarchySearchProps } from './types.js'
 
-import { CheckIcon } from '../../../icons/Check/index.js'
 import { FilterIcon } from '../../../icons/Filter/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -105,14 +104,14 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
             buttonClassName={`${baseClass}__filter`}
             caret={false}
             horizontalAlign="right"
+            popupType="menu"
             render={() => (
-              <PopupList.RadioGroup>
+              <PopupList.CheckboxGroup>
                 {collectionSpecificOptions.map(({ label, value }) => {
                   const isActive = selectedFilters?.includes(value)
                   return (
-                    <PopupList.Button
+                    <PopupList.CheckboxGroupItem
                       active={isActive}
-                      icon={isActive ? <CheckIcon size={16} /> : undefined}
                       key={value}
                       onClick={() => {
                         const newSelectedValues = isActive
@@ -122,13 +121,14 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
                       }}
                     >
                       {label}
-                    </PopupList.Button>
+                    </PopupList.CheckboxGroupItem>
                   )
                 })}
-              </PopupList.RadioGroup>
+              </PopupList.CheckboxGroup>
             )}
-            renderButton={({ active, onClick, onKeyDown }) => (
+            renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
               <Button
+                {...ariaProps}
                 aria-label={t('general:filter')}
                 buttonStyle="secondary"
                 className={`${baseClass}__filter`}

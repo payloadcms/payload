@@ -18,6 +18,7 @@ export type PerPageProps = {
   readonly limit: number
   readonly limits: number[]
   readonly resetPage?: boolean
+  readonly tableId?: string
 }
 
 export const PerPage: React.FC<PerPageProps> = ({
@@ -25,6 +26,7 @@ export const PerPage: React.FC<PerPageProps> = ({
   handleChange,
   limit,
   limits = defaultLimits,
+  tableId,
 }) => {
   const { t } = useTranslation()
 
@@ -35,6 +37,7 @@ export const PerPage: React.FC<PerPageProps> = ({
       <span className={`${baseClass}__label`}>{t('general:perPageLabel')}</span>
       <Popup
         horizontalAlign="right"
+        popupType="menu"
         render={({ close }) => (
           <PopupList.RadioGroup>
             {limits.map((limitNumber, i) => (
@@ -56,9 +59,13 @@ export const PerPage: React.FC<PerPageProps> = ({
         renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
           <Button
             {...ariaProps}
+            aria-label={`${t('general:perPageLabel')}: ${limitToUse}`}
             buttonStyle="secondary"
             className={[active && `${baseClass}--active`].filter(Boolean).join(' ')}
-            extraButtonProps={{ onKeyDown }}
+            extraButtonProps={{
+              'aria-controls': [ariaProps['aria-controls'], tableId].filter(Boolean).join(' '),
+              onKeyDown,
+            }}
             icon={<ChevronIcon className={`${baseClass}__icon`} size={16} />}
             iconPosition="right"
             onClick={onClick}

@@ -1,4 +1,4 @@
-import type { ElementType, MouseEvent } from 'react'
+import type { AriaAttributes, ElementType, KeyboardEventHandler, MouseEvent } from 'react'
 import type React from 'react'
 
 type secondaryAction = {
@@ -7,7 +7,11 @@ type secondaryAction = {
 }
 
 export type Props = {
-  'aria-label'?: string
+  'aria-controls'?: AriaAttributes['aria-controls']
+  'aria-expanded'?: AriaAttributes['aria-expanded']
+  'aria-haspopup'?: AriaAttributes['aria-haspopup']
+  'aria-label'?: AriaAttributes['aria-label']
+  'aria-pressed'?: AriaAttributes['aria-pressed']
   buttonId?: string
   buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
   children?: React.ReactNode
@@ -29,6 +33,7 @@ export type Props = {
   margin?: boolean
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
+  onKeyDown?: KeyboardEventHandler
   onMouseDown?: (event: MouseEvent) => void
   /**
    * Size of the chevron icon in the split-button popup trigger.

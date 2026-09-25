@@ -126,6 +126,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   return (
     <div>
       <Popup
+        popupType="menu"
         render={({ close }) => (
           <PopupList.ButtonGroup>
             {searchCollections.map((collectionSlug) => (

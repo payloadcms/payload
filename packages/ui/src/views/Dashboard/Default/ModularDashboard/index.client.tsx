@@ -299,6 +299,7 @@ function WidgetWidthDropdown({
     <Popup
       onToggleClose={() => onOpenChange(false)}
       onToggleOpen={onOpenChange}
+      popupType="menu"
       render={({ close }) => (
         <PopupList.ButtonGroup>
           {validOptions.map((option) => {

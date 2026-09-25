@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback } from 'react'
+import React, { useCallback, useId } from 'react'
 
 import type { ReducedField } from '../WhereBuilder/types.js'
 
@@ -40,6 +40,9 @@ export const GroupByPopup: React.FC<GroupByPopupProps> = ({
   value,
 }) => {
   const { t } = useTranslation()
+  const generatedId = useId()
+  const fieldTriggerId = `group-by-field-trigger-${generatedId}`
+  const sortTriggerId = `group-by-sort-trigger-${generatedId}`
 
   const directionValue =
     !value || typeof value !== 'string' ? 'asc' : value.startsWith('-') ? 'desc' : 'asc'
@@ -93,11 +96,14 @@ export const GroupByPopup: React.FC<GroupByPopupProps> = ({
       </div>
       <div className={`${baseClass}__body`}>
         <div className={`${baseClass}__row`}>
-          <label className={`${baseClass}__label`}>{t('general:field')}</label>
+          <label className={`${baseClass}__label`} htmlFor={fieldTriggerId}>
+            {t('general:field')}
+          </label>
           <div className={`${baseClass}__input`} data-popup-prevent-close>
             <Popup
               className={`${baseClass}__select-popup`}
               horizontalAlign="right"
+              popupType="menu"
               render={({ close: closeFieldPopup }) => (
                 <PopupList.RadioGroup>
                   {filteredFields.map((field, i) => (
@@ -114,11 +120,12 @@ export const GroupByPopup: React.FC<GroupByPopupProps> = ({
                   ))}
                 </PopupList.RadioGroup>
               )}
-              renderButton={({ active, onClick, onKeyDown }) => (
+              renderButton={({ active, ...buttonProps }) => (
                 <button
+                  {...buttonProps}
+                  aria-label={t('general:field')}
                   className={`${baseClass}__select-trigger`}
-                  onClick={onClick}
-                  onKeyDown={onKeyDown}
+                  id={fieldTriggerId}
                   type="button"
                 >
                   <span className={`${baseClass}__select-value`}>
@@ -132,12 +139,15 @@ export const GroupByPopup: React.FC<GroupByPopupProps> = ({
           </div>
         </div>
         <div className={`${baseClass}__row`}>
-          <label className={`${baseClass}__label`}>{t('general:sort')}</label>
+          <label className={`${baseClass}__label`} htmlFor={sortTriggerId}>
+            {t('general:sort')}
+          </label>
           <div className={`${baseClass}__input`} data-popup-prevent-close>
             <Popup
               className={`${baseClass}__select-popup`}
               disabled={!groupByFieldName}
               horizontalAlign="right"
+              popupType="menu"
               render={({ close: closeSortPopup }) => (
                 <PopupList.RadioGroup>
                   <PopupList.RadioGroupItem
@@ -160,17 +170,34 @@ export const GroupByPopup: React.FC<GroupByPopupProps> = ({
                   </PopupList.RadioGroupItem>
                 </PopupList.RadioGroup>
               )}
-              renderButton={({ active, onClick, onKeyDown }) => (
+              renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
                 <button
+                  {...ariaProps}
+                  aria-disabled={!groupByFieldName}
+                  aria-label={t('general:sort')}
                   className={[
                     `${baseClass}__select-trigger`,
                     !groupByFieldName && `${baseClass}__select-trigger--disabled`,
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  disabled={!groupByFieldName}
-                  onClick={onClick}
-                  onKeyDown={onKeyDown}
+                  id={sortTriggerId}
+                  onClick={(event) => {
+                    if (!groupByFieldName) {
+                      event.preventDefault()
+                      return
+                    }
+                    onClick(event)
+                  }}
+                  onKeyDown={(event) => {
+                    if (!groupByFieldName) {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                      }
+                      return
+                    }
+                    onKeyDown(event)
+                  }}
                   type="button"
                 >
                   <span className={`${baseClass}__select-value`}>

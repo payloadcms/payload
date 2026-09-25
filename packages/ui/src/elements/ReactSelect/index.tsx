@@ -2,7 +2,7 @@
 import type { KeyboardEventHandler } from 'react'
 import type { GroupBase, MenuListProps, MenuProps } from 'react-select'
 
-import { arrayMove } from '@dnd-kit/sortable'
+import { arrayMove, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import Select from 'react-select'
@@ -26,6 +26,7 @@ import { Input } from './Input/index.js'
 import { generateMultiValueDraggableID, MultiValue } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
+import { Option as SelectOption } from './Option/index.js'
 import { SingleValue } from './SingleValue/index.js'
 import { ValueContainer } from './ValueContainer/index.js'
 import './index.css'
@@ -127,6 +128,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       MultiValue,
       MultiValueLabel,
       MultiValueRemove,
+      Option: SelectOption,
       SingleValue,
       ValueContainer,
       ...components,
@@ -295,6 +297,7 @@ const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
         }
         onChange(sorted)
       }}
+      sortingStrategy={horizontalListSortingStrategy}
     >
       <SelectAdapter {...props} />
     </DraggableSortable>

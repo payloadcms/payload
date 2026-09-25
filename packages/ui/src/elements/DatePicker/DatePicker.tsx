@@ -18,6 +18,46 @@ import './index.css'
 
 const baseClass = 'date-time-picker'
 
+type AccessibleCalendarContainerProps = React.PropsWithChildren<{
+  className?: string
+  dialogLabel: string
+  monthLabel: string
+  yearLabel: string
+}>
+
+const AccessibleCalendarContainer: React.FC<AccessibleCalendarContainerProps> = ({
+  children,
+  className,
+  dialogLabel,
+  monthLabel,
+  yearLabel,
+}) => {
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useLayoutEffect(() => {
+    containerRef.current
+      ?.querySelector<HTMLSelectElement>('.react-datepicker__month-select')
+      ?.setAttribute('aria-label', monthLabel)
+    containerRef.current
+      ?.querySelector<HTMLSelectElement>('.react-datepicker__year-select')
+      ?.setAttribute('aria-label', yearLabel)
+  })
+
+  return (
+    <div aria-label={dialogLabel} className={className} ref={containerRef} role="dialog">
+      {children}
+    </div>
+  )
+}
+
+const getDateTimeFieldLabel = ({ field, locale }: { field: 'month' | 'year'; locale: string }) => {
+  try {
+    return new Intl.DisplayNames(locale, { type: 'dateTimeField' }).of(field) || field
+  } catch (_error) {
+    return field
+  }
+}
+
 const DatePicker: React.FC<Props> = (props) => {
   const {
     id,
@@ -38,7 +78,22 @@ const DatePicker: React.FC<Props> = (props) => {
   } = props
 
   // Use the user's AdminUI language preference for the locale
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const monthLabel = getDateTimeFieldLabel({ field: 'month', locale: i18n.language })
+  const yearLabel = getDateTimeFieldLabel({ field: 'year', locale: i18n.language })
+  const calendarContainer = React.useCallback(
+    ({ children, className }) => (
+      <AccessibleCalendarContainer
+        className={className}
+        dialogLabel={`${t('general:selectValue')}: ${monthLabel}, ${yearLabel}`}
+        monthLabel={monthLabel}
+        yearLabel={yearLabel}
+      >
+        {children}
+      </AccessibleCalendarContainer>
+    ),
+    [monthLabel, t, yearLabel],
+  )
 
   let dateFormat = customDisplayFormat
 
@@ -82,6 +137,7 @@ const DatePicker: React.FC<Props> = (props) => {
     DatePickerProps,
     { selectsMultiple?: never; selectsRange?: never }
   > = {
+    calendarContainer,
     customInputRef: 'ref',
     dateFormat,
     disabled: readOnly,
