@@ -38,7 +38,7 @@ if (hot) {
  * dropped - which would otherwise leave the instance serving the old config
  * indefinitely.
  */
-export function createConfigChangedStrategy({ hot }: { hot: ViteHotContext }): {
+function createConfigChangedStrategy({ hot }: { hot: ViteHotContext }): {
   connect: (onReload: () => void) => () => void
 } {
   const listeners = new Set<() => void>()
