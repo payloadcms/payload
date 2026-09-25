@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  assertStorageDestinationAvailable,
+  assertPlannedStorageDestinationAvailable,
   getArchivedFilename,
   getBaseFilenameFromOriginal,
   getOriginalFilename,
-  joinStorageKey,
 } from './naming.js'
 
 describe('file version naming', () => {
@@ -35,12 +34,6 @@ describe('file version naming', () => {
     expect(archived).not.toBe(getArchivedFilename({ filename: 'photo.jpg', versionID: 'a_b' }))
   })
 
-  it('should normalize a storage prefix once', () => {
-    expect(joinStorageKey({ filename: 'café.jpg', prefix: 'media//2026/' })).toBe(
-      'media/2026/café.jpg',
-    )
-  })
-
   it.each(['../photo.jpg', '/photo.jpg', 'nested/photo.jpg', 'nested\\photo.jpg', ''])(
     'should reject an unsafe display filename %s',
     (filename) => {
@@ -50,17 +43,17 @@ describe('file version naming', () => {
 
   it('should reject a destination collision in the same storage location', () => {
     expect(() =>
-      assertStorageDestinationAvailable({
+      assertPlannedStorageDestinationAvailable({
         storageBackendId: 's3:media',
         destination: 'media/photo.jpg',
-        occupied: [{ storageBackendId: 's3:media', key: 'media//photo.jpg' }],
+        occupied: [{ storageBackendId: 's3:media', key: 'media/photo.jpg' }],
       }),
     ).toThrow()
   })
 
   it('should permit the same key in another storage location', () => {
     expect(() =>
-      assertStorageDestinationAvailable({
+      assertPlannedStorageDestinationAvailable({
         storageBackendId: 's3:public',
         destination: 'media/photo.jpg',
         occupied: [{ storageBackendId: 's3:private', key: 'media/photo.jpg' }],

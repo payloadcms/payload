@@ -1,35 +1,18 @@
 import type { ManagedFileIdentity } from './types.js'
 
+/** Validates and returns a complete, canonical key supplied by the storage path builder or provider. */
 export const normalizeStorageKey = ({ key }: { key: string }): string => {
   if (
     !key ||
     key.startsWith('/') ||
     key.includes('\\') ||
     key.includes('\0') ||
-    key.split('/').some((segment) => segment === '.' || segment === '..')
+    key.split('/').some((segment) => !segment || segment === '.' || segment === '..')
   ) {
     throw new Error('Unsafe managed storage key')
   }
 
-  const normalizedKey = key.split('/').filter(Boolean).join('/')
-
-  if (!normalizedKey) {
-    throw new Error('Unsafe managed storage key')
-  }
-
-  return normalizedKey
-}
-
-export const joinStorageKey = ({
-  filename,
-  prefix,
-}: {
-  filename: string
-  prefix?: string
-}): string => {
-  assertSafeFilename({ filename })
-
-  return normalizeStorageKey({ key: prefix ? `${prefix}/${filename}` : filename })
+  return key
 }
 
 export const getOriginalFilename = ({ filename }: { filename: string }): string =>
@@ -63,7 +46,8 @@ export const getArchivedFilename = ({
   return insertSuffix({ filename, suffix: safeID })
 }
 
-export const assertStorageDestinationAvailable = ({
+/** Checks known managed objects; the adapter must also verify provider-side availability. */
+export const assertPlannedStorageDestinationAvailable = ({
   destination,
   occupied,
   storageBackendId,

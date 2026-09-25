@@ -88,10 +88,10 @@ describe('createManagedFileManifest', () => {
     ])
   })
 
-  it('should normalize complete keys without using display URLs as ownership', () => {
+  it('should retain complete storage keys without using display URLs as ownership', () => {
     const manifest = createManagedFileManifest({
       references: [
-        { storageBackendId: 's3:media', key: 'media//2026/photo.jpg', role: { type: 'original' } },
+        { storageBackendId: 's3:media', key: 'media/2026/photo.jpg', role: { type: 'original' } },
         { storageBackendId: 's3:media', key: 'media/2026/photo.jpg', role: { type: 'default' } },
       ],
     })
@@ -105,14 +105,17 @@ describe('createManagedFileManifest', () => {
     ])
   })
 
-  it.each(['../photo.jpg', '/photo.jpg', 'media/../../photo.jpg', 'media\\photo.jpg'])(
-    'should reject unsafe managed key %s',
-    (key) => {
-      expect(() =>
-        createManagedFileManifest({
-          references: [{ storageBackendId: 'local:media', key, role: { type: 'original' } }],
-        }),
-      ).toThrow()
-    },
-  )
+  it.each([
+    '../photo.jpg',
+    '/photo.jpg',
+    'media//photo.jpg',
+    'media/../../photo.jpg',
+    'media\\photo.jpg',
+  ])('should reject unsafe managed key %s', (key) => {
+    expect(() =>
+      createManagedFileManifest({
+        references: [{ storageBackendId: 'local:media', key, role: { type: 'original' } }],
+      }),
+    ).toThrow()
+  })
 })
