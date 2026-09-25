@@ -356,7 +356,7 @@ export function DefaultListView(props: ListViewClientProps) {
                     ) : null
                   }
                   collectionConfig={collectionConfig}
-                  tableId={`payload-table-${collectionConfig.slug}`}
+                  tableId={hierarchyData ? undefined : `payload-table-${collectionConfig.slug}`}
                 />
               )}
             </SelectionProvider>

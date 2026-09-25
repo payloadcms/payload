@@ -27,6 +27,11 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
         event.stopPropagation()
         clearValue()
       }}
+      onKeyDown={(event) => {
+        if (event.key === ' ') {
+          event.stopPropagation()
+        }
+      }}
       onMouseDown={(event) => event.stopPropagation()}
       type="button"
     >

@@ -354,6 +354,34 @@ test.describe('WCAG 2.2 Level AA', () => {
       expect(menuBox!.y).toBeGreaterThanOrEqual(0)
       expect(menuBox!.y + menuBox!.height).toBeLessThanOrEqual(720)
     })
+
+    test('should remove a selected value with Space', async () => {
+      // Additional coverage for PYLD-3768.
+      await gotoCreatePost({ page, postsURL })
+      const select = page.locator('#field-accessibilitySortableSelect')
+      const removeButton = select.locator('.multi-value-remove').first()
+
+      await expect(select.locator('.rs__multi-value')).toHaveCount(2)
+      await removeButton.focus()
+      await page.keyboard.press('Space')
+
+      await expect(select.locator('.rs__multi-value')).toHaveCount(1)
+      await expect(page.locator('.rs__menu')).toBeHidden()
+    })
+
+    test('should clear a select value with Space', async () => {
+      // Additional coverage for PYLD-3755.
+      await gotoCreatePost({ page, postsURL })
+      const select = page.locator('#field-accessibilitySelect')
+      const clearButton = select.locator('.clear-indicator')
+
+      await expect(select.locator('.rs__single-value')).toContainText('Value One')
+      await clearButton.focus()
+      await page.keyboard.press('Space')
+
+      await expect(select.locator('.rs__single-value')).toHaveCount(0)
+      await expect(page.locator('.rs__menu')).toBeHidden()
+    })
   })
 
   test.describe('2.1.4 Character Key Shortcuts (A)', () => {
@@ -421,6 +449,27 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(languageOption).toBeHidden()
       await expect(language).toBeHidden()
+      await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    test('should restore visible focus when shift-tabbing from a nested User menu', async () => {
+      // Additional coverage for PYLD-3645 and PYLD-3697.
+      await page.goto(`${serverURL}/admin`)
+      const trigger = page.locator('.user-menu__trigger')
+
+      await trigger.focus()
+      await trigger.press('Enter')
+      const language = page.getByRole('menuitem', { name: /language/i })
+      await language.focus()
+      await language.press('Enter')
+      const languageOption = page.getByRole('menuitemradio').first()
+      await expect(languageOption).toBeFocused()
+
+      await page.keyboard.press('Shift+Tab')
+
+      await expect(languageOption).toBeHidden()
+      await expect(language).toBeHidden()
+      await expect(trigger).toBeFocused()
       await expect(trigger).toHaveAttribute('aria-expanded', 'false')
     })
 
