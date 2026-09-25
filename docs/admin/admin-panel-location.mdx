@@ -215,14 +215,14 @@ Not all files in the `(payload)` folder are auto-generated. Here's what you need
 
 ### About the "DO NOT MODIFY" Warning
 
-You may see this warning in `layout.tsx`:
+Projects created from older templates may include this warning in `layout.tsx`:
 
 ```ts
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 ```
 
-**This warning is misleading.** The file was generated during initial project setup by `create-payload-app`, but it is **never regenerated** by Payload. It is completely safe to modify this file, especially when customizing your folder structure.
+**This warning is misleading.** The file is created during initial project setup by `create-payload-app`, but it is **never regenerated** by Payload. Current templates say "MODIFY AT YOUR OWN RISK." You can modify the file, for example to update import paths when customizing your folder structure, but changes to the required Payload integration may break the Admin Panel.
 
 ## Editing layout.tsx Safely
 
