@@ -169,7 +169,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
       >
         {isLoading ? (
           <ShimmerEffect />
-        ) : (
+        ) : row.collapsed ? null : (
           <RenderFields
             className={`${baseClass}__fields`}
             fields={fields}
