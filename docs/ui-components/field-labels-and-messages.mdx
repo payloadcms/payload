@@ -30,34 +30,34 @@ This example places `FieldLabel` above a native input to show how it fits into a
 
 ### FieldLabel
 
-| Prop         | Type                | Default   | Description                                       |
-| ------------ | ------------------- | --------- | ------------------------------------------------- |
-| `label`      | `StaticLabel`       | —         | Supplies the translated visible label.            |
-| `htmlFor`    | `string`            | Generated | Associates the label with an input.               |
-| `path`       | `string`            | —         | Generates the input ID when `htmlFor` is omitted. |
-| `required`   | `boolean`           | `false`   | Displays Payload's required marker.               |
-| `localized`  | `boolean`           | `false`   | Displays the active locale beside the label.      |
-| `hideLocale` | `boolean`           | `false`   | Hides the active locale label.                    |
-| `as`         | `React.ElementType` | `'label'` | Changes the rendered element.                     |
-| `unstyled`   | `boolean`           | `false`   | Removes Payload's label presentation.             |
+| Prop         | Type                        | Default   | Description                                       |
+| ------------ | --------------------------- | --------- | ------------------------------------------------- |
+| `label`      | `StaticLabel`               | —         | Supplies the translated visible label.            |
+| `htmlFor`    | `string`                    | Generated | Associates the label with an input.               |
+| `path`       | `string`                    | —         | Generates the input ID when `htmlFor` is omitted. |
+| `required`   | `boolean`                   | `false`   | Displays Payload's required marker.               |
+| `localized`  | `boolean`                   | `false`   | Displays the active locale beside the label.      |
+| `hideLocale` | `boolean`                   | `false`   | Hides the active locale label.                    |
+| `as`         | `'h3' \| 'label' \| 'span'` | `'label'` | Changes the rendered element.                     |
+| `unstyled`   | `boolean`                   | `false`   | Removes Payload's label presentation.             |
 
 ### FieldDescription
 
 | Prop              | Type                | Default | Description                                   |
 | ----------------- | ------------------- | ------- | --------------------------------------------- |
-| `description` \*  | `StaticDescription` | —       | Supplies translated helper content.           |
-| `path`            | `string`            | —       | Adds the field-specific description class.    |
+| `description`     | `StaticDescription` | —       | Supplies translated helper content.           |
+| `path` \*         | `string`            | —       | Adds the field-specific description class.    |
 | `className`       | `string`            | —       | Adds a custom class.                          |
 | `marginPlacement` | `'bottom' \| 'top'` | —       | Applies Payload's standard description space. |
 
 ### FieldError
 
-| Prop         | Type                | Default   | Description                                |
-| ------------ | ------------------- | --------- | ------------------------------------------ |
-| `path` \*    | `string`            | —         | Reads validation state for this form path. |
-| `message`    | `string`            | Form      | Overrides the message from form state.     |
-| `showError`  | `boolean`           | Form      | Forces the validation message to render.   |
-| `alignCaret` | `'left' \| 'right'` | `'right'` | Positions the validation tooltip caret.    |
+| Prop         | Type                            | Default   | Description                                |
+| ------------ | ------------------------------- | --------- | ------------------------------------------ |
+| `path`       | `string`                        | —         | Reads validation state for this form path. |
+| `message`    | `string`                        | Form      | Overrides the message from form state.     |
+| `showError`  | `boolean`                       | Form      | Forces the validation message to render.   |
+| `alignCaret` | `'center' \| 'left' \| 'right'` | `'right'` | Positions the validation tooltip caret.    |
 
 _\* An asterisk denotes that a prop is required._
 
