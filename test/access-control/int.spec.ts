@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { AuthenticationError, createLocalReq, Forbidden } from 'payload'
+import { AuthenticationError, createLocalReq, docAccessOperation, Forbidden } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
@@ -255,6 +255,76 @@ describe('Access Control', () => {
           await payload.delete({ id, collection: authSlug })
         }
         createdAuthIDs.length = 0
+      })
+
+      it('should allow a user to update their own password based on the document id', async () => {
+        const originalPassword = 'OriginalPassword123!'
+        const replacementPassword = 'ReplacementPassword123!'
+
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'password-owner@example.com',
+            password: originalPassword,
+            roles: ['user'],
+          },
+        })
+
+        createdAuthIDs.push(account.id)
+
+        await payload.update({
+          id: account.id,
+          collection: authSlug,
+          data: {
+            password: replacementPassword,
+          },
+          overrideAccess: false,
+          user: account,
+        })
+
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: replacementPassword,
+            },
+          }),
+        ).resolves.toMatchObject({ user: { id: account.id } })
+
+        await expect(
+          payload.login({
+            collection: authSlug,
+            data: {
+              email: account.email,
+              password: originalPassword,
+            },
+          }),
+        ).rejects.toThrow(AuthenticationError)
+      })
+
+      it('should pass the document id to password field update access', async () => {
+        const account = await payload.create({
+          collection: authSlug,
+          data: {
+            _verified: true,
+            email: 'password-permissions@example.com',
+            password: 'OriginalPassword123!',
+            roles: ['user'],
+          },
+        })
+
+        createdAuthIDs.push(account.id)
+
+        const req = await createLocalReq({ user: account }, payload)
+        const permissions = await docAccessOperation({
+          collection: payload.collections[authSlug],
+          id: account.id,
+          req,
+        })
+
+        expect(permissions.fields?.password).toBe(true)
       })
 
       it('should preserve credentials when password update access is denied', async () => {
