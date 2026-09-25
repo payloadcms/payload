@@ -1,4 +1,5 @@
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { buildStoragePathData } from '@payloadcms/plugin-cloud-storage/utilities'
+import path from 'path'
 
 interface GenerateURLArgs {
   baseUrl: string
@@ -8,6 +9,19 @@ interface GenerateURLArgs {
   useCompositePrefixes?: boolean
 }
 
+// Builds the public blob URL for a storage path, URL-encoding only the filename segment.
+export function buildBlobUrl(baseUrl: string, storageFilePath: string): string {
+  // example: "my-collection/my-doc/my file.jpg" -> "my-collection/my-doc"
+  const dir = path.posix.dirname(storageFilePath)
+  // example: "my file.jpg" -> "my%20file.jpg"
+  const encodedFilename = encodeURIComponent(path.posix.basename(storageFilePath))
+  // example: "my-collection/my-doc/my%20file.jpg"
+  const storageFilePathWithEncodedFilename =
+    dir === '.' ? encodedFilename : path.posix.join(dir, encodedFilename)
+
+  return `${baseUrl}/${storageFilePathWithEncodedFilename}`
+}
+
 export function generateURL({
   baseUrl,
   collectionPrefix = '',
@@ -15,12 +29,12 @@ export function generateURL({
   prefix,
   useCompositePrefixes = false,
 }: GenerateURLArgs): string {
-  const fileKey = getFileKey({
+  const { storageFilePath } = buildStoragePathData({
     collectionPrefix,
     docPrefix: prefix,
-    filename: encodeURIComponent(filename),
+    filename,
     useCompositePrefixes,
   })
 
-  return `${baseUrl}/${fileKey}`
+  return buildBlobUrl(baseUrl, storageFilePath)
 }

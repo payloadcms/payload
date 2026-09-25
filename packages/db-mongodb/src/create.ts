@@ -31,7 +31,8 @@ export const create: Create = async function create(
   if (customIDType) {
     data._id = data.id
   } else if (customID) {
-    if (Types.ObjectId.isValid(customID)) {
+    // Mongoose 9 no longer treats numbers as valid ObjectIDs, so only strings are worth casting
+    if (typeof customID === 'string' && Types.ObjectId.isValid(customID)) {
       data._id = new Types.ObjectId(customID)
     } else {
       data._id = customID

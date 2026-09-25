@@ -60,6 +60,11 @@ export const promise = async <T>({
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
   if (fieldAffectsData(field)) {
+    if ('disableDuplicate' in field && field.disableDuplicate) {
+      delete siblingDoc[field.name]
+      return
+    }
+
     let fieldData = siblingDoc?.[field.name!]
     const fieldIsLocalized = localization && fieldShouldBeLocalized({ field, parentIsLocalized })
 
@@ -190,7 +195,7 @@ export const promise = async <T>({
 
                   const block: Block | undefined =
                     req.payload.blocks[blockTypeToMatch] ??
-                    ((field.blockReferences ?? field.blocks).find(
+                    (field.blocks.find(
                       (curBlock) =>
                         typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
                     ) as Block | undefined)
@@ -292,7 +297,7 @@ export const promise = async <T>({
 
               const block: Block | undefined =
                 req.payload.blocks[blockTypeToMatch] ??
-                ((field.blockReferences ?? field.blocks).find(
+                (field.blocks.find(
                   (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
                 ) as Block | undefined)
 

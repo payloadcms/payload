@@ -1,0 +1,47 @@
+@layer payload-default {
+  .doc-tab {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    color: var(--color-text-secondary);
+  }
+
+  .doc-tab:hover {
+    color: var(--color-text);
+  }
+
+  .doc-tab:hover .pill-version-count {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  .doc-tab--active {
+    color: var(--color-text);
+  }
+
+  .doc-tab--active .pill-version-count {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  .doc-tab--active:hover .pill-version-count {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  .doc-tab--active.btn--disabled {
+    color: var(--color-text);
+    cursor: default;
+  }
+
+  .doc-tab__label {
+    display: flex;
+    position: relative;
+    align-items: center;
+    gap: var(--spacer-1);
+    width: 100%;
+    height: 100%;
+    line-height: var(--spacer-3);
+  }
+}

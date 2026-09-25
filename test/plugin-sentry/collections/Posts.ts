@@ -12,4 +12,5 @@ export const Posts: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

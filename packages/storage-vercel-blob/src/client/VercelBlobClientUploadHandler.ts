@@ -1,42 +1,28 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
-import { upload } from '@vercel/blob/client'
-import { formatAdminURL } from 'payload/shared'
+import { put } from '@vercel/blob/client'
 
-export type VercelBlobClientUploadHandlerExtra = {
-  addRandomSuffix: boolean
-  baseURL: string
-  prefix: string
+/** Last path segment only (POSIX), for keys like `folder/sub/file.png`. */
+function posixBasename(key: string): string {
+  const normalized = key.replace(/^\/+/, '')
+  const lastSlash = normalized.lastIndexOf('/')
+  return lastSlash === -1 ? normalized : normalized.slice(lastSlash + 1)
 }
 
-export const VercelBlobClientUploadHandler =
-  createClientUploadHandler<VercelBlobClientUploadHandlerExtra>({
-    handler: async ({
-      apiRoute,
-      collectionSlug,
-      extra: { addRandomSuffix, baseURL, prefix = '' },
-      file,
-      serverHandlerPath,
-      serverURL,
-      updateFilename,
-    }) => {
-      const endpointRoute = formatAdminURL({
-        apiRoute,
-        path: serverHandlerPath,
-        serverURL,
-      })
-      const result = await upload(`${prefix}${file.name}`, file, {
-        access: 'public',
-        clientPayload: collectionSlug,
-        contentType: file.type,
-        handleUploadUrl: endpointRoute,
-      })
+export const VercelBlobClientUploadHandler = createClientUploadHandler({
+  name: 'uploadToVercelBlob',
+  handler: async ({ data, file, updateFilename }) => {
+    const { pathname, token } = data as { pathname: string; token: string }
 
-      // Update filename with suffix from returned url
-      if (addRandomSuffix) {
-        updateFilename(result.url.replace(`${baseURL}/`, ''))
-      }
+    const result = await put(pathname, file, {
+      access: 'public',
+      contentType: file.type,
+      token,
+    })
 
-      return { prefix }
-    },
-  })
+    const filename = decodeURIComponent(posixBasename(result.pathname.replace(/^\/+/, '')))
+    if (filename !== file.name) {
+      updateFilename(filename)
+    }
+  },
+})

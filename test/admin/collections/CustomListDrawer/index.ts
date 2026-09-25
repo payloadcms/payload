@@ -13,4 +13,5 @@ export const CustomListDrawer: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

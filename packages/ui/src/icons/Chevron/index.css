@@ -1,0 +1,7 @@
+@layer payload-default {
+  .icon--chevron {
+    .fill {
+      fill: currentColor;
+    }
+  }
+}

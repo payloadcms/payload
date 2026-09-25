@@ -1,0 +1,85 @@
+@layer payload-default {
+  .LexicalEditorTheme__inlineBlock {
+    --inline-block-max-width: 18rem;
+    --inline-block-not-found-max-width: 25rem;
+    display: inline-block;
+
+    &.decorator-selected {
+      box-shadow: unset !important;
+      outline: unset !important;
+
+      .LexicalEditorTheme__inlineBlock__container {
+        box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected);
+        outline: none;
+      }
+    }
+
+    &::selection {
+      background: transparent;
+    }
+  }
+
+  .LexicalEditorTheme__inlineBlock__container {
+    box-shadow: var(--elevation-100-canvas);
+    margin-inline-end: var(--spacer-1);
+    margin-inline-start: var(--spacer-1);
+    padding: 0;
+    padding-inline-start: var(--spacer-2);
+    background: var(--color-bg);
+    outline: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    max-width: var(--inline-block-max-width);
+    font-family: var(--font-body);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    &:hover {
+      outline: var(--stroke-width-small) solid var(--color-border);
+    }
+  }
+
+  .LexicalEditorTheme__inlineBlock-not-found {
+    max-width: var(--inline-block-not-found-max-width);
+    color: var(--color-text-danger);
+  }
+
+  .LexicalEditorTheme__inlineBlock__wrap {
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .LexicalEditorTheme__inlineBlock__actions {
+    display: flex;
+    align-items: center;
+
+    & > .btn {
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+      margin: calc(var(--spacer-1) / 2);
+
+      &:not(:disabled):hover {
+        background: var(--color-bg-hover);
+      }
+
+      & > * {
+        height: 100%;
+      }
+    }
+  }
+
+  .LexicalEditorTheme__inlineBlock__removeButton.btn {
+    padding: 0;
+    margin: calc(var(--spacer-1) / 2);
+    color: var(--color-icon-secondary);
+
+    line {
+      stroke-width: var(--stroke-width-small);
+    }
+
+    &:disabled {
+      color: var(--color-icon-tertiary);
+      pointer-events: none;
+    }
+  }
+}

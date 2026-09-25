@@ -19,7 +19,7 @@ export const FocusIndicatorsView = () => {
           <Button buttonStyle="secondary" id="payload-button-2">
             Payload Button 2
           </Button>
-          <Button buttonStyle="icon-label" icon="plus" id="payload-button-3">
+          <Button buttonStyle="ghost" icon="plus" id="payload-button-3">
             Add Item
           </Button>
         </div>

@@ -122,6 +122,7 @@ const Hooks: CollectionConfig = {
       type: 'checkbox',
     },
   ],
+  versions: false,
 }
 
 const writeHooksOrder = [

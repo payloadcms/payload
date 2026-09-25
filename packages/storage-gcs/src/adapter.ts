@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/plugin-cloud-storage/types'
 
 import { deleteFile } from './deleteFile.js'
+import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
 import { uploadFile } from './uploadFile.js'
@@ -27,7 +28,6 @@ export function createGcsAdapter({
 }: CreateGcsAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'gcs',
-    clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -39,46 +39,50 @@ export function createGcsAdapter({
         useCompositePrefixes,
       }),
 
-    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+    uploadInstructions: {
+      enabled: Boolean(clientUploads),
+      generate: generateUploadInstructions({
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        bucket,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
+      requiresUploadReceipt: true,
+      useInAdmin: true,
+    },
+
+    handleDelete: ({ storageFilePath }) =>
       deleteFile({
         bucket,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix,
-        filename,
-        useCompositePrefixes,
+        storageFilePath,
       }),
 
-    handleUpload: async ({ data, file }) => {
+    handleUpload: async ({ data, file, storageFilePath }) => {
       await uploadFile({
         acl,
         bucket,
         buffer: file.buffer,
         client: getStorageClient(),
-        collectionPrefix: prefix,
-        docPrefix: data.prefix,
-        filename: file.filename,
         mimeType: file.mimeType,
-        useCompositePrefixes,
+        storageFilePath,
       })
 
       return data
     },
 
-    staticHandler: (
-      req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
-    ) =>
+    staticHandler: (req, { doc, headers, params: { filename, uploadReference } }) =>
       getFile({
         bucket,
         client: getStorageClient(),
-        clientUploadContext,
         collection,
         collectionPrefix: prefix,
+        doc,
         filename,
         incomingHeaders: headers,
-        prefixQueryParam,
         req,
+        uploadReference,
         useCompositePrefixes,
       }),
   })

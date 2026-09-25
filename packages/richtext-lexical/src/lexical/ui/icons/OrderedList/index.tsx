@@ -1,27 +1,25 @@
 'use client'
 import React from 'react'
 
-export const OrderedListIcon: React.FC = () => (
+const paths = {
+  16: 'M5.6 9.01a.5.5 0 0 1 .4.49v1a.5.5 0 0 1-.276.447L4 11.81V12h1.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5v-1l.005-.07a.5.5 0 0 1 .271-.377L5 10.19V10H3.5a.5.5 0 0 1 0-1h2zM12.5 12a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1zm0-4.5a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1zM4.6 3.01a.5.5 0 0 1 .4.49v3a.5.5 0 0 1-1 0V4h-.5a.5.5 0 0 1 0-1h1zM12.5 3a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1z',
+  24: 'M11 7a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6A.5.5 0 0 1 11 7M6 7a.5.5 0 0 1 .5-.5h1A.5.5 0 0 1 8 7v3.5a.5.5 0 1 1-1 0v-3h-.5A.5.5 0 0 1 6 7m0 6.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5V15a.5.5 0 0 1-.276.447L7 16.31v.191h1.5a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 6 17v-1a.5.5 0 0 1 .276-.447L8 14.69V14H6.5a.5.5 0 0 1-.5-.5m5.5 3a.5.5 0 1 0 0 1h6a.5.5 0 0 0 0-1zm0-5a.5.5 0 1 0 0 1h6a.5.5 0 0 0 0-1z',
+}
+
+export const OrderedListIcon: React.FC<{
+  readonly className?: string
+  readonly size?: 16 | 24
+}> = ({ className, size = 24 }) => (
   <svg
     aria-hidden="true"
-    className="icon"
+    className={['icon', className].filter(Boolean).join(' ')}
     fill="none"
     focusable="false"
-    height="20"
-    viewBox="0 0 20 20"
-    width="20"
+    height={size}
+    viewBox={`0 0 ${size} ${size}`}
+    width={size}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      d="M5.89284 12.479C5.89284 13.368 5.26284 13.788 4.38084 14.236C3.75084 14.558 3.43584 14.789 3.40784 15.062H5.89984V16H2.06384V15.573C2.06384 14.523 2.92484 13.935 3.66684 13.501C4.38084 13.088 4.75184 12.878 4.75184 12.458C4.75184 12.08 4.52084 11.835 4.06584 11.835C3.58984 11.835 3.30984 12.199 3.28184 12.654H2.11284C2.18984 11.681 2.87584 10.918 4.07284 10.918C5.15784 10.918 5.89284 11.555 5.89284 12.479Z"
-      fill="currentColor"
-    />
-    <path
-      d="M2.68608 4.535V3.737C3.54008 3.737 3.90408 3.513 4.02308 2.995H4.89108V8H3.68008L3.68008 4.535H2.68608Z"
-      fill="currentColor"
-    />
-    <path d="M8 15L17 15" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M8 10L17 10" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M8 5L17 5" stroke="currentColor" strokeWidth="1.5" />
+    <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
   </svg>
 )

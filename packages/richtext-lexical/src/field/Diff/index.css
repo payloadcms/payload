@@ -1,0 +1,156 @@
+@layer payload-default {
+  .lexical-diff .field-diff-content {
+    .html-diff {
+      font-family: var(--text-body-large-font-family);
+      font-size: var(--text-body-large-font-size);
+      font-weight: var(--text-body-large-font-weight);
+      line-height: var(--text-body-large-line-height);
+      letter-spacing: -0.0325px;
+    }
+
+    blockquote {
+      font-size: var(--text-body-large-font-size);
+      line-height: 1.5;
+      letter-spacing: normal;
+      margin-inline: var(--spacer-1);
+      padding-inline-start: var(--spacer-2-5);
+      padding-block: var(--spacer-1);
+      position: relative;
+      border-inline-start: var(--stroke-width-medium) solid currentColor;
+    }
+
+    .html-diff:has([data-match-type='create']) blockquote {
+      color: var(--diff-create-pill-color);
+    }
+
+    .html-diff:has([data-match-type='delete']) blockquote {
+      color: var(--diff-delete-pill-color);
+    }
+
+    a {
+      color: var(--color-text-brand);
+      text-decoration: underline;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-weight: 550;
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: -0.544px;
+    }
+    h2 {
+      font-size: 1.5rem;
+      line-height: 2rem;
+      letter-spacing: var(--text-heading-large-letter-spacing);
+    }
+    h3 {
+      font-size: 1.25rem;
+      letter-spacing: -0.34px;
+    }
+    h4 {
+      font-size: 1rem;
+      letter-spacing: -0.272px;
+    }
+    h5 {
+      font-size: 0.8125rem;
+      letter-spacing: -0.221px;
+    }
+    h6 {
+      font-size: 0.6875rem;
+      letter-spacing: -0.187px;
+    }
+
+    > .html-diff > :first-child {
+      margin-top: 0;
+    }
+
+    > .html-diff > :last-child {
+      margin-bottom: 0;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    code {
+      border: var(--stroke-width-small) solid var(--color-border);
+      color: var(--color-text);
+      padding: var(--spacer-1);
+      font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      border-radius: var(--radius-small);
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
+    hr {
+      margin: 0;
+      border: none;
+      border-top: var(--stroke-width-small) solid currentColor;
+    }
+
+    .html-diff:has([data-match-type='create']) hr {
+      color: var(--diff-create-pill-color);
+    }
+
+    .html-diff:has([data-match-type='delete']) hr {
+      color: var(--diff-delete-pill-color);
+    }
+
+    ul {
+      list-style: disc;
+      padding: 0;
+      margin: 0;
+    }
+
+    ol {
+      list-style: decimal;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      font-family: var(--text-body-large-font-family);
+      font-size: var(--text-body-large-font-size);
+      margin-block: 0 var(--spacer-1);
+      margin-inline-start: var(--spacer-4);
+      position: relative;
+      z-index: 0;
+
+      &:has(> [data-match-type='create'])::before,
+      &:has(> [data-match-type='delete'])::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        inset-inline-start: calc(var(--spacer-4) * -1);
+        border-radius: var(--radius-medium);
+        z-index: -1;
+      }
+
+      &:has(> [data-match-type='create'])::before {
+        background-color: var(--diff-create-pill-bg);
+      }
+
+      &:has(> [data-match-type='delete'])::before {
+        background-color: var(--diff-delete-pill-bg);
+      }
+
+      &.nestedListItem:last-child {
+        margin-block-end: 0;
+      }
+
+      &:last-child {
+        margin-block-end: 0;
+      }
+    }
+  }
+}

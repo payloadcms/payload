@@ -1,9 +1,8 @@
-import type { Config, Payload } from 'payload'
+import { addDefaultsToConfig, type Config, type Payload } from 'payload'
 import { describe, beforeAll, beforeEach, it, expect, test, vitest, Mock } from 'vitest'
 
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
-import { defaults } from 'payload'
 
 // TO-DO: this would be needed for the TO-DO tests below.
 // maybe we have to use jest.unstable_mockModule? (already tried)
@@ -39,7 +38,7 @@ describe('plugin', () => {
   })
 
   beforeEach(() => {
-    createTransportSpy = vitest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
+    createTransportSpy = vitest.spyOn(nodemailer, 'createTransport').mockImplementation(() => {
       return {
         transporter: {
           name: 'Nodemailer - SMTP',
@@ -150,28 +149,21 @@ describe('plugin', () => {
       it('should allow setting fromName and fromAddress', async () => {
         const defaultFromName = 'Test'
         const defaultFromAddress = 'test@test.com'
-        const configWithPartialEmail = createConfig({
-          email: await nodemailerAdapter({
+        const plugin = payloadCloudPlugin({
+          email: {
             defaultFromAddress,
             defaultFromName,
             skipVerify,
-          }),
+          },
         })
 
-        const plugin = payloadCloudPlugin()
-        const config = await plugin(configWithPartialEmail)
+        const config = await plugin(createConfig())
         const emailConfig = config.email as Awaited<ReturnType<typeof nodemailerAdapter>>
 
         const initializedEmail = emailConfig({ payload: mockedPayload })
 
         expect(initializedEmail.defaultFromName).toStrictEqual(defaultFromName)
         expect(initializedEmail.defaultFromAddress).toStrictEqual(defaultFromAddress)
-
-        expect(createTransportSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            host: 'smtp.resend.com',
-          }),
-        )
       })
     })
   })
@@ -258,8 +250,9 @@ function assertNoCloudStorage(config: Config) {
 }
 
 function createConfig(overrides?: Partial<Config>): Config {
-  return {
-    ...defaults,
+  return addDefaultsToConfig({
+    db: { defaultIDType: 'text', init: () => ({}) as any },
+    secret: '',
     ...overrides,
-  } as Config
+  })
 }

@@ -6,13 +6,20 @@ import { ValidationError } from '../errors/ValidationError.js'
 export const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResult => {
   if (incoming) {
     // Payload 'ValidationError' and 'APIError'
-    if ((incoming instanceof ValidationError || incoming instanceof APIError) && incoming.data) {
+    // Use duck-typing fallback alongside instanceof to handle bundlers (e.g. Vite)
+    // that may load duplicate module instances, causing instanceof to fail.
+    if (
+      (incoming instanceof ValidationError ||
+        incoming instanceof APIError ||
+        ('isOperational' in incoming && incoming.isOperational === true)) &&
+      incoming.data
+    ) {
       return {
         errors: [
           {
-            name: incoming.name,
+            name: incoming.name as string | undefined,
             data: incoming.data as Record<string, unknown>,
-            message: incoming.message,
+            message: incoming.message as string | undefined,
           },
         ],
       }

@@ -1,7 +1,6 @@
 import type { Collection, Endpoint } from 'payload'
 
-import { headersWithCors } from '@payloadcms/next/utilities'
-import { APIError, generatePayloadCookie } from 'payload'
+import { APIError, generatePayloadCookie, headersWithCors } from 'payload'
 
 // A custom endpoint that can be reached by POST request
 // at: /api/users/external-users/login
@@ -36,6 +35,7 @@ export const externalUsersLogin: Endpoint = {
                 equals: tenantSlug,
               },
             },
+        overrideAccess: true,
       })
     ).docs[0]
 
@@ -73,6 +73,7 @@ export const externalUsersLogin: Endpoint = {
           },
         ],
       },
+      overrideAccess: true,
     })
 
     if (foundUser.totalDocs > 0) {
@@ -84,6 +85,7 @@ export const externalUsersLogin: Endpoint = {
             password,
           },
           req,
+          overrideAccess: true,
         })
 
         if (loginAttempt?.token) {

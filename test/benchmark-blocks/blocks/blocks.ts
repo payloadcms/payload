@@ -50,9 +50,9 @@ export const generateBlockFields = (
     }
 
     if (useReferences) {
-      block.blockReferences = generateBlocks(blockCount, true)
+      block.blocks = generateBlocks(blockCount, true)
     } else {
-      block.blocks = generateBlocks(blockCount) as any
+      block.blocks = generateBlocks(blockCount)
     }
     fields.push(block)
   }

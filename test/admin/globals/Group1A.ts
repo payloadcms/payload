@@ -14,4 +14,5 @@ export const GlobalGroup1A: GlobalConfig = {
     },
   ],
   label: 'Group Globals 1',
+  versions: false,
 }

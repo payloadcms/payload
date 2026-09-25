@@ -5,22 +5,20 @@ import type {
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
+  User,
 } from '../../../index.js'
 import type {
-  Document,
   PayloadRequest,
   PopulateType,
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type {
-  DraftFlagFromGlobalSlug,
-  SelectFromGlobalSlug,
-} from '../../config/types.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
+import type { DraftFlagFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { findOneOperation, type GlobalFindOneArgs } from '../findOne.js'
 
 type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
@@ -61,12 +59,6 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    */
   locale?: 'all' | TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -84,16 +76,19 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    * the Global slug to operate against.
    */
   slug: TSlug
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindOptions<string, SelectType>, 'select'> &
-  Pick<GlobalFindOneArgs, 'flattenLocales'>
+  Pick<GlobalFindOneArgs, 'flattenLocales'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> =
-  BaseFindOneOptions<TSlug, TSelect> & DraftFlagFromGlobalSlug<TSlug>
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseFindOneOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromGlobalSlug<TSlug>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
@@ -110,7 +105,7 @@ export async function findOneGlobalLocal<
     draft = false,
     flattenLocales,
     includeLockStatus,
-    overrideAccess = true,
+    overrideAccess = false,
     populate,
     select,
     showHiddenFields,
@@ -133,7 +128,10 @@ export async function findOneGlobalLocal<
     includeLockStatus,
     overrideAccess,
     populate,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
   })

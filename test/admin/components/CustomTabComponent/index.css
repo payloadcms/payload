@@ -1,0 +1,13 @@
+.custom-doc-tab {
+  a {
+    text-decoration: none;
+    background-color: var(--color-bg-secondary);
+    padding: 2px 6px;
+    border-radius: var(--radius-small);
+    white-space: nowrap;
+
+    &:hover {
+      background-color: var(--color-bg-secondary-hover);
+    }
+  }
+}

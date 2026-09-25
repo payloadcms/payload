@@ -10,6 +10,7 @@ export const defaultESLintIgnores = [
   '**/.pnp.*',
   '**/.svn',
   '**/playwright.config.ts',
+  '**/vite.tanstack.config.ts',
   '**/vitest.config.ts',
   '**/vitest.setup.ts',
   '**/tsconfig.tsbuildinfo',
@@ -21,12 +22,20 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
-  'packages/**/*.spec.ts',
+  'packages/**/*.spec.*',
   'next-env.d.ts',
   '**/app',
-  'src/**/*.spec.ts',
+  // The TanStack app dirs (shippable `app-tanstack` + its test duplicates) are
+  // thin app wiring; their `app/` routes are already ignored above, and these
+  // dirs carry no tsconfig of their own. The adapter logic lives in
+  // `packages/tanstack-start` and is linted there.
+  '**/app-tanstack/components/**',
+  '**/app-tanstack/router.tsx',
+  'src/**/*.spec.*',
+  'tools/**/*.spec.*',
   'packages/payload/rollup.dts.config.mjs',
   'scripts/**/*.js',
+  'packages/plugin-mcp/bin.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -45,10 +54,17 @@ export const rootEslintConfig = [
       ...defaultESLintIgnores,
       'packages/eslint-*/**',
       'test/live-preview/next-app',
-      'packages/**/*.spec.ts',
+      'packages/**/*.spec.*',
       'templates/**',
       'examples/**',
       'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
+      'packages/drizzle/src/postgres/predefinedMigrations/localize-status/**',
+      'packages/drizzle/src/sqlite/predefinedMigrations/localize-status/**',
+      'packages/codemod/src/transforms/**/*.input.ts',
+      'packages/codemod/src/transforms/**/*.output.ts',
+      'packages/codemod/scripts/**',
+      'packages/tanstack-start/scripts/**',
+      'packages/tanstack-start/test/**',
     ],
   },
   {
@@ -67,6 +83,25 @@ export const rootEslintConfig = [
     files: ['packages/ui/**/*.{ts,tsx}'],
     rules: {
       'no-console': 'error',
+    },
+  },
+  {
+    files: [
+      'packages/tanstack-start/src/elements/RouterAdapter/**/*.{ts,tsx}',
+      'packages/tanstack-start/src/routes/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              message: 'Import from a targeted @payloadcms/ui subpath in the TanStack route graph.',
+              name: '@payloadcms/ui',
+            },
+          ],
+        },
+      ],
     },
   },
   {

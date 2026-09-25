@@ -12,7 +12,6 @@ import {
 import * as qs from 'qs-esm'
 
 import { devUser } from '../../credentials.js'
-import { getFormDataSize } from './getFormDataSize.js'
 
 type ValidPath = `/${string}`
 type RequestOptions = {
@@ -79,7 +78,7 @@ export class NextRESTClient {
 
   private token: string
 
-  serverURL: string = 'http://localhost:3000'
+  serverURL: string = `http://localhost:${process.env.PORT || 3000}`
 
   constructor(config: SanitizedConfig) {
     this.config = config
@@ -106,10 +105,6 @@ export class NextRESTClient {
 
     if (options?.file) {
       headers.set('Content-Length', options.file.size.toString())
-    }
-
-    if (isFormData) {
-      headers.set('Content-Length', getFormDataSize(options.body as FormData).toString())
     }
 
     if (!isFormData && !headers.has('Content-Type')) {

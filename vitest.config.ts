@@ -1,12 +1,17 @@
 import { createRequire } from 'module'
 import path from 'path'
 import fs from 'fs'
+import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
 
 // Use process.cwd() to be safe in both CJS and ESM contexts within Vitest
 const ROOT_DIR = process.cwd()
-const figmaPath = path.resolve(ROOT_DIR, '../enterprise-plugins/packages/figma/src/index.ts')
+const figmaPath =
+  process.env.PAYLOAD_FIGMA_PLUGIN_PATH ??
+  path.resolve(ROOT_DIR, '../figma/payload/payload-plugin/src/index.ts')
 const hasFigma = fs.existsSync(figmaPath)
+const evalFixturesDir = path.resolve(ROOT_DIR, 'test/evals/fixtures')
+const shouldWriteEvalReport = process.env.VITEST_EVAL_REPORT === 'true'
 
 // Resolve graphql to a single copy to avoid duplicate-instance issues (instanceof checks fail).
 // pnpm's isolated linker means graphql isn't hoisted to root node_modules, so we resolve
@@ -23,16 +28,39 @@ if (hasFigma) {
 }
 
 export default defineConfig({
+  // Vite 8 / oxc reads `jsx: preserve` from the workspace tsconfig (needed by Next.js)
+  // and refuses to transform JSX. Set jsx explicitly here so oxc transforms it.
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+      importSource: 'react',
+    },
+  },
   resolve: {
     alias: {
       ...(hasFigma ? { '@payloadcms/figma': figmaPath } : {}),
     },
   },
   test: {
+    reporters: shouldWriteEvalReport
+      ? [
+          'default',
+          [
+            'html',
+            {
+              outputDir: 'test/evals/eval-results',
+              singleFile: true,
+            },
+          ],
+        ]
+      : ['default'],
     watch: false, // too troublesome especially with the in memory DB setup
     // Retry failed tests up to 2 times in CI to handle flaky tests (e.g. due to timing-sensitive int tests like job queues, installation failures due to temporary network issues)
     retry: process.env.CI ? 2 : 0,
     server: {
+      // Without this, @payloadcms/figma (used by PAYLOAD_DATABASE=content-api) is
+      // externalized, and its static `import ... from 'payload'` falls to
+      // Node's loader, which cannot read payload's .ts source exports.
       deps: {
         inline: [/@payloadcms\/figma/],
       },
@@ -40,8 +68,34 @@ export default defineConfig({
     projects: [
       {
         test: {
-          include: ['packages/**/*.spec.ts'],
+          exclude: ['**/*.rsc.spec.ts'],
+          include: ['packages/**/*.spec.ts', 'tools/**/*.spec.ts', '.github/scripts/**/*.spec.mjs'],
           name: 'unit',
+          environment: 'node',
+        },
+      },
+      {
+        resolve: {
+          dedupe: ['react', 'react-dom'],
+        },
+        test: {
+          include: ['packages/**/*.spec.tsx'],
+          name: 'components',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({ launchOptions: { channel: 'chromium' } }),
+            instances: [{ browser: 'chromium' }],
+          },
+        },
+      },
+      {
+        resolve: {
+          conditions: ['react-server'],
+        },
+        test: {
+          include: ['packages/next/**/*.rsc.spec.ts'],
+          name: 'rsc',
           environment: 'node',
         },
       },
@@ -50,7 +104,6 @@ export default defineConfig({
           alias: [
             { find: /^graphql\/(.*)/, replacement: graphqlDir + '/$1' },
             { find: /^graphql$/, replacement: path.join(graphqlDir, 'index.js') },
-            ...(hasFigma ? [{ find: '@payloadcms/figma', replacement: figmaPath }] : []),
           ],
         },
         test: {
@@ -64,12 +117,21 @@ export default defineConfig({
         },
       },
       {
+        resolve: {
+          // Eval fixture configs use `@/db-stub.js` as a fixture-local alias.
+          // TSC knows that from `test/evals/fixtures/tsconfig.json`, but runtime
+          // `verify({ config })` imports generated fixture configs through Vite,
+          // so this project needs the same alias for those imports to resolve.
+          alias: [{ find: /^@\//, replacement: `${evalFixturesDir}/` }],
+        },
         test: {
           include: ['test/evals/**/*.spec.ts'],
           name: 'eval',
           environment: 'node',
           fileParallelism: false,
           globalSetup: ['test/evals/globalSetup.ts'],
+          // Loads .env
+          setupFiles: ['./test/evals/vitest.setup.ts'],
           // 10 minutes per test: LLM call (~60-120s) + tsc wait + scorer + buffer.
           testTimeout: 600000,
         },

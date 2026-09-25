@@ -13,21 +13,28 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'email',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [PostsCollection, MediaCollection],
+    email: nodemailerAdapter(),
+    globals: [MenuGlobal],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [PostsCollection, MediaCollection],
-  email: nodemailerAdapter(),
-  globals: [MenuGlobal],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -35,6 +42,7 @@ export default buildConfigWithDefaults({
       data: {
         text: 'example post',
       },
+      overrideAccess: true,
     })
 
     const email = await payload.sendEmail({
@@ -50,9 +58,7 @@ export default buildConfigWithDefaults({
       collection: 'media',
       data: {},
       file: imageFile,
+      overrideAccess: true,
     })
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

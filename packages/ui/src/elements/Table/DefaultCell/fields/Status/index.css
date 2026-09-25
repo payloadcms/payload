@@ -1,0 +1,34 @@
+@layer payload-default {
+  .status-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacer-1);
+    border-radius: var(--radius-medium);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    white-space: nowrap;
+  }
+
+  .status-cell--published {
+    background: var(--color-bg-selected);
+    color: var(--color-text-brand);
+  }
+
+  .status-cell--draft {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  .status-cell--changed {
+    background: var(--color-bg-warning-tertiary);
+    color: var(--color-text-warning);
+  }
+
+  .status-cell--previously-published {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+}

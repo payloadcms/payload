@@ -6,8 +6,8 @@ import React, { useMemo } from 'react'
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'
 import { useField } from '../../../../forms/useField/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
-import { GroupByBuilder } from '../../../GroupByBuilder/index.js'
-import './index.scss'
+import { GroupByButton } from '../../../GroupBy/index.js'
+import '../fields.css'
 
 export const QueryPresetsGroupByField: TextFieldClientComponent = ({
   field: { label, required },
@@ -15,18 +15,14 @@ export const QueryPresetsGroupByField: TextFieldClientComponent = ({
   const { path, setValue, value } = useField<string>()
   const relatedCollectionField = useField({ path: 'relatedCollection' })
   const relatedCollection = relatedCollectionField.value as string | undefined
-  const { config } = useConfig()
+  const { getEntityConfig } = useConfig()
 
-  const collectionConfig = useMemo(() => {
-    if (!relatedCollection) {
-      return null
-    }
-    return config.collections?.find((col) => col.slug === relatedCollection)
-  }, [relatedCollection, config.collections])
+  const collectionConfig = useMemo(
+    () => (relatedCollection ? getEntityConfig({ collectionSlug: relatedCollection }) : null),
+    [relatedCollection, getEntityConfig],
+  )
 
-  const fields = collectionConfig?.fields ?? []
-
-  if (!relatedCollection) {
+  if (!relatedCollection || !collectionConfig) {
     return (
       <div className="field-type query-preset-group-by-field">
         <FieldLabel as="h3" label={label} path={path} required={required} />
@@ -39,12 +35,11 @@ export const QueryPresetsGroupByField: TextFieldClientComponent = ({
 
   return (
     <div className="field-type query-preset-group-by-field">
-      <FieldLabel as="h3" label={label} path={path} required={required} />
-      <GroupByBuilder
+      <GroupByButton
         collectionSlug={relatedCollection}
-        fields={fields}
+        fields={collectionConfig.fields}
         onChange={(groupBy) => setValue(groupBy || null)}
-        value={value ?? undefined}
+        value={value ?? ''}
       />
     </div>
   )

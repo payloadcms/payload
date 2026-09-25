@@ -1,4 +1,4 @@
-import type { FlattenedField } from 'payload'
+import type { FlattenedBlock, FlattenedField } from 'payload'
 
 type Args = {
   doc: Record<string, unknown>
@@ -53,7 +53,8 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
               localeRows.forEach((row, i) => {
                 // Can ignore string blocks, as those were added in v3 and don't need to be migrated
                 const matchedBlock = field.blocks.find(
-                  (block) => typeof block !== 'string' && block.slug === row.blockType,
+                  (block): block is FlattenedBlock =>
+                    typeof block !== 'string' && block.slug === row.blockType,
                 )
 
                 if (matchedBlock) {
@@ -74,7 +75,8 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
           rowData.forEach((row, i) => {
             // Can ignore string blocks, as those were added in v3 and don't need to be migrated
             const matchedBlock = field.blocks.find(
-              (block) => typeof block !== 'string' && block.slug === row.blockType,
+              (block): block is FlattenedBlock =>
+                typeof block !== 'string' && block.slug === row.blockType,
             )
 
             if (matchedBlock) {

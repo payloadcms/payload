@@ -14,6 +14,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { TabsList } from '../../elements/Tabs/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -25,7 +26,7 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { TabsProvider } from './provider.js'
 import { TabComponent } from './Tab/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'tabs-field'
 
@@ -120,12 +121,22 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
           ? existingPreferences?.fields?.[path]?.tabIndex
           : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
 
-        const newIndex = typeof initialIndex === 'number' && initialIndex < tabStates.length ? initialIndex : 0
+        const newIndex =
+          typeof initialIndex === 'number' && initialIndex < tabStates.length ? initialIndex : 0
         setActiveTabIndex(newIndex)
       }
       void getInitialPref()
     }
-  }, [path, getPreference, preferencesKey, tabsPrefKey, tabs, parentPath, parentSchemaPath])
+  }, [
+    path,
+    getPreference,
+    preferencesKey,
+    tabsPrefKey,
+    tabs,
+    parentPath,
+    parentSchemaPath,
+    tabStates.length,
+  ])
 
   useEffect(() => {
     if (activeTabInfo?.passesCondition === false) {
@@ -149,22 +160,23 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
         .join(' ')}
     >
       <TabsProvider>
-        <div className={`${baseClass}__tabs-wrap`}>
-          <div className={`${baseClass}__tabs`}>
-            {tabStates.map(({ index, passesCondition, tab }) => (
-              <TabComponent
-                hidden={!passesCondition}
-                isActive={activeTabIndex === index}
-                key={index}
-                parentPath={path}
-                setIsActive={() => {
-                  void handleTabChange(index)
-                }}
-                tab={tab}
-              />
-            ))}
-          </div>
-        </div>
+        <TabsList
+          tabsClassName={`${baseClass}__tabs`}
+          tabsWrapClassName={`${baseClass}__tabs-wrap`}
+        >
+          {tabStates.map(({ index, passesCondition, tab }) => (
+            <TabComponent
+              hidden={!passesCondition}
+              isActive={activeTabIndex === index}
+              key={index}
+              parentPath={path}
+              setIsActive={() => {
+                void handleTabChange(index)
+              }}
+              tab={tab}
+            />
+          ))}
+        </TabsList>
         <div className={`${baseClass}__content-wrap`}>
           {activeTabConfig && (
             <TabContent

@@ -1,7 +1,9 @@
 import type { PayloadRequest } from '../types/index.js'
+import type { UploadInstructions } from '../uploads/types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
+import { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -14,6 +16,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
   if (method && ['PATCH', 'POST', 'PUT'].includes(method.toUpperCase()) && body) {
     const [contentType] = (headers.get('Content-Type') || '').split(';', 1)
     const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
+    const hasBodyStream = req.body !== null
 
     if (contentType === 'application/json') {
       try {
@@ -29,7 +32,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         req.payload.logger.error(error)
         throw error
       }
-    } else if (bodyByteSize && contentType?.includes('multipart/')) {
+    } else if ((bodyByteSize || hasBodyStream) && contentType?.includes('multipart/')) {
       const { error, fields, files } = await processMultipartFormdata({
         options: {
           ...(payload.config.bodyParser || {}),
@@ -42,8 +45,14 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         throw new APIError(error.message)
       }
 
-      if (files?.file) {
-        req.file = files.file
+      // Set all files on req.files for access by hooks
+      if (files) {
+        req.files = files
+        // Backwards compatibility: set req.file for standard upload collections
+        // Guard: if multiple files share the field name "file", files.file is an array — skip
+        if (files.file && !Array.isArray(files.file)) {
+          req.file = files.file
+        }
       }
 
       if (fields?._payload && typeof fields._payload === 'string') {
@@ -51,57 +60,29 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let clientUploadContext, collectionSlug, filename, mimeType, size
+        let uploadedFile: UploadInstructions['file']
         try {
-          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-            fields.file,
-          ))
+          uploadedFile = JSON.parse(fields.file)
         } catch {
           throw new APIError('A file name is required.', 400)
         }
-        const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
+        // The collection must come from the route, never from the request body: the body
+        // is client-controlled and would select another collection's upload handlers.
+        const collectionSlug =
+          typeof req.routeParams?.collection === 'string' ? req.routeParams.collection : undefined
+        const uploadConfig = collectionSlug
+          ? req.payload.collections[collectionSlug]?.config.upload
+          : undefined
 
-        if (!uploadConfig.handlers) {
-          throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
+        if (!collectionSlug || !uploadConfig) {
+          throw new APIError('Invalid upload collection.', 400)
         }
 
-        let response: null | Response = null
-        let error: unknown
-
-        for (const handler of uploadConfig.handlers) {
-          try {
-            const result = await handler(req, {
-              doc: null!,
-              params: {
-                clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
-                collection: collectionSlug,
-                filename,
-              },
-            })
-            if (result) {
-              response = result
-            }
-            // If we couldn't get the file from that handler, save the error and try other.
-          } catch (err) {
-            error = err
-          }
-        }
-
-        if (!response) {
-          if (error) {
-            payload.logger.error(error)
-          }
-
-          throw new APIError('Expected response from the upload handler.')
-        }
-
-        req.file = {
-          name: filename,
-          clientUploadContext,
-          data: Buffer.from(await response.arrayBuffer()),
-          mimetype: response.headers.get('Content-Type') || mimeType,
-          size,
-        }
+        req.file = await getFileFromUploadInstructions({
+          collectionSlug,
+          file: uploadedFile,
+          req,
+        })
       }
     }
   }

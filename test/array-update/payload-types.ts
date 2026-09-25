@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     arrays: Array;
+    complex: Complex;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -77,6 +78,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     arrays: ArraysSelect<false> | ArraysSelect<true>;
+    complex: ComplexSelect<false> | ComplexSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -86,10 +88,13 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -136,6 +141,54 @@ export interface Array {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "complex".
+ */
+export interface Complex {
+  id: string;
+  localizedArray?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  group?: {
+    groupArray?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  localizedGroup?: {
+    localizedGroupArray?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  blocks?: Content[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Content".
+ */
+export interface Content {
+  text?: string | null;
+  innerArray?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -189,6 +242,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'arrays';
         value: string | Array;
+      } | null)
+    | ({
+        relationTo: 'complex';
+        value: string | Complex;
       } | null)
     | ({
         relationTo: 'users';
@@ -260,6 +317,57 @@ export interface ArraysSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "complex_select".
+ */
+export interface ComplexSelect<T extends boolean = true> {
+  localizedArray?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  group?:
+    | T
+    | {
+        groupArray?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+      };
+  localizedGroup?:
+    | T
+    | {
+        localizedGroupArray?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+      };
+  blocks?:
+    | T
+    | {
+        content?:
+          | T
+          | {
+              text?: T;
+              innerArray?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -319,6 +427,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,13 +1,13 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type {
-  Document,
   PayloadRequest,
   PopulateType,
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
+import type { CreatePayloadRequestArgs } from '../../../utilities/createPayloadRequest.js'
 import type {
   DataFromGlobalSlug,
   DraftFlagFromGlobalSlug,
@@ -22,8 +22,9 @@ import {
   type Payload,
   type RequestContext,
   type TypedLocale,
+  type User,
 } from '../../../index.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { updateOperation } from '../update.js'
 
 type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
@@ -51,12 +52,6 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   locale?: 'all' | TypedLocale
   /**
-   * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
-   * @default true
-   */
-  overrideAccess?: boolean
-  /**
    * If you are uploading a file and would like to replace
    * the existing file instead of generating a new filename,
    * you can set the following property to `true`
@@ -67,15 +62,12 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
-   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Publish the document / documents in all locales. Only applies when localization is enabled
+   * and the global has localized fields.
    *
    * @default undefined
    */
   publishAllLocales?: boolean
-  /**
-   * Publish the document / documents with a specific locale.
-   */
-  publishSpecificLocale?: TypedLocale
   /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
@@ -91,18 +83,22 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   slug: TSlug
   /**
-   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Unpublish the document / documents in all locales. Only applies when localization is enabled
+   * and the global has localized fields.
    */
   unpublishAllLocales?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
-} & Pick<FindOptions<string, SelectType>, 'select'>
+  user?: null | User
+} & Pick<FindOptions<string, SelectType>, 'select'> &
+  Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> =
-  BaseOptions<TSlug, TSelect> & DraftFlagFromGlobalSlug<TSlug>
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromGlobalSlug<TSlug>
 
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
@@ -116,11 +112,10 @@ export async function updateGlobalLocal<
     data,
     depth,
     draft,
-    overrideAccess = true,
+    overrideAccess = false,
     overrideLock,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     select,
     showHiddenFields,
     unpublishAllLocales,
@@ -142,8 +137,10 @@ export async function updateGlobalLocal<
     overrideLock,
     populate,
     publishAllLocales,
-    publishSpecificLocale: publishSpecificLocale!,
-    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    req: await createPayloadRequest({
+      ...(options as Omit<CreatePayloadRequestArgs, 'payload'>),
+      payload,
+    }),
     select,
     showHiddenFields,
     unpublishAllLocales,

@@ -1,12 +1,14 @@
-import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
+import { ResourceTemplate } from '@modelcontextprotocol/server'
+import { defineCollectionTool, definePrompt, defineTool, mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
+import { definePlugin } from 'payload'
 import { fileURLToPath } from 'url'
-import { z } from 'zod'
+import * as z from 'zod'
 
+import { testRBACPlugin } from '../__helpers/plugins/rbac/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { FieldTypes } from './collections/FieldTypes.js'
-import { Media } from './collections/Media.js'
+import { DispatchMedia, Media } from './collections/Media.js'
 import { ModifiedPrompts } from './collections/ModifiedPrompts.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
@@ -20,204 +22,187 @@ import { seed } from './seed/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const capturedMcpEvents: unknown[] = []
-
 export default buildConfigWithDefaults({
-  endpoints: [
-    {
-      handler: () => Response.json({ status: 'ok' }),
-      method: 'get',
-      path: '/health',
-    },
-  ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
-  collections: [
-    Users,
-    Media,
-    Posts,
-    Products,
-    Rolls,
-    ModifiedPrompts,
-    ReturnedResources,
-    Pages,
-    FieldTypes,
-  ],
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: [
+  suite: 'plugin-mcp',
+  config: {
+    endpoints: [
       {
-        code: 'en',
-        label: 'English',
-      },
-      {
-        code: 'es',
-        label: 'Spanish',
-      },
-      {
-        code: 'fr',
-        label: 'French',
+        handler: () => Response.json({ status: 'ok' }),
+        method: 'get',
+        path: '/health',
       },
     ],
-  },
-  globals: [SiteSettings],
-  onInit: seed,
-  plugins: [
-    mcpPlugin({
-      /**
-       * Override the authentication method.
-       * This allows you to use a custom authentication method instead of the default API key authentication.
-       * @param req - The request object.
-       * @returns The MCP access settings.
-       */
-      // overrideAuth: (req) => {
-      //   const { payload } = req
-
-      //   payload.logger.info('[Override MCP auth]:')
-
-      //   return {
-      //     posts: {
-      //       find: true,
-      //     },
-      //     products: {
-      //       find: true,
-      //       update: true,
-      //     },
-      //     'payload-mcp-tool': {
-      //       diceRoll: true,
-      //     },
-      //     'payload-mcp-prompt': {
-      //       echo: true,
-      //     },
-      //     'payload-mcp-resource': {
-      //       data: true,
-      //       dataByID: true,
-      //     },
-      //   } as MCPAccessSettings
-      // },
-      overrideApiKeyCollection: (collection) => {
-        collection.fields.push({
-          name: 'override',
-          type: 'text',
-          admin: {
-            description: 'This field added by overrideApiKeyCollection',
-          },
-          defaultValue: 'This field added by overrideApiKeyCollection',
-        })
-        return collection
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
       },
-      collections: {
-        [Products.slug]: {
-          enabled: true,
-        },
-        'field-types': {
-          enabled: {
-            find: true,
-            create: true,
-            update: true,
-            delete: true,
-          },
-          description: 'A collection covering all Payload field types for MCP schema testing.',
-        },
-        pages: {
-          enabled: {
-            find: true,
-            create: true,
-            update: true,
-            delete: true,
-          },
-          description: 'Pages with block-based layouts.',
-        },
-        posts: {
-          enabled: {
-            find: true,
-            create: true,
-            update: true,
-            delete: true,
-          },
-          description: 'This is a Payload collection with Post documents.',
-          overrideResponse: (response, doc, req) => {
-            req.payload.logger.info('[Override MCP response for Posts]:')
-            response.content.push({
-              type: 'text',
-              text: `Override MCP response for Posts!`,
-            })
-            return response
-          },
-        },
-        media: {
-          enabled: {
-            find: true,
-            create: false,
-            update: true,
-            delete: false,
-          },
-          description: 'This is a Payload collection with Media documents.',
-        },
-      },
-      globals: {
-        'site-settings': {
-          enabled: {
-            find: true,
-            update: true,
-          },
-          description: 'Site-wide configuration settings.',
-        },
-      },
-      mcp: {
-        handlerOptions: {
-          verboseLogs: true,
-          maxDuration: 60,
-          onEvent: (event: unknown) => {
-            capturedMcpEvents.push(event)
-          },
-        },
-        serverOptions: {
-          serverInfo: {
-            name: 'My Custom MCP Server',
-            version: '1.0.0',
-          },
-        },
-        tools: [
-          {
-            name: 'diceRoll',
-            description: 'Rolls a virtual dice with a specified number of sides',
-            handler: async (args: Record<string, unknown>, req) => {
-              const sides = (args.sides as number) || 6
-              const result = Math.floor(Math.random() * sides) + 1
-              const payload = req.payload
+    },
+    collections: [
+      Users,
+      Media,
+      DispatchMedia,
+      Posts,
+      Products,
+      Rolls,
+      ModifiedPrompts,
+      ReturnedResources,
+      Pages,
+      FieldTypes,
+    ],
+    localization: {
+      defaultLocale: 'en',
+      fallback: true,
+      locales: [
+        { code: 'en', label: 'English' },
+        { code: 'es', label: 'Spanish' },
+        { code: 'fr', label: 'French' },
+      ],
+    },
+    globals: [SiteSettings],
+    plugins: [
+      testRBACPlugin(),
 
-              payload.logger.info(
-                `Dice Roll MCP Tool rolled a ${args.sides} sided die and got a ${result}`,
-              )
+      // Plugin listed BEFORE mcp in the array — injects a tool via slug + options
+      definePlugin({
+        order: 1,
+        slug: 'before-mcp',
+        plugin: ({ config, plugins }) => {
+          const mcp = plugins['@payloadcms/plugin-mcp']
+          if (mcp?.options) {
+            const opts = mcp.options
+            opts.tools ??= {}
+            opts.tools.injectedBefore = {
+              description: 'Tool injected by a plugin listed before mcp',
+              handler: () => ({
+                content: [{ type: 'text' as const, text: 'injected-before' }],
+              }),
+              input: { type: 'object', properties: {} },
+            }
+          }
+          return config
+        },
+      })(),
 
-              await payload.create({
-                collection: 'rolls',
-                data: {
-                  sides,
-                  result,
-                  user: req.user?.id,
-                },
-                req,
-                overrideAccess: false,
-                user: req.user,
-                draft: true,
-              })
-
-              return Promise.resolve({
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: `# Dice Roll Result\n\n**Sides:** ${sides}\n**Result:** ${result}\n\n🎲 You rolled a **${result}** on a ${sides}-sided die!`,
-                  },
-                ],
-              })
+      mcpPlugin({
+        collections: {
+          users: {
+            description: 'User accounts.',
+            // Opt-in auth ops: enabling these exposes login/verify/etc. via MCP.
+            tools: {
+              auth: true,
+              forgotPassword: true,
+              login: true,
+              resetPassword: true,
+              unlock: true,
+              verify: true,
             },
-            parameters: z.object({
+          },
+          'field-types': {
+            description: 'A collection covering all Payload field types for MCP schema testing.',
+          },
+          pages: {
+            description: 'Pages with block-based layouts.',
+          },
+          posts: {
+            description: 'This is a Payload collection with Post documents.',
+            overrideResponse: (response, doc, req) => {
+              req.payload.logger.info('[Override MCP response for Posts]:')
+              response.content.push({
+                type: 'text',
+                text: `Override MCP response for Posts!`,
+              })
+              return response
+            },
+            tools: {
+              // Built-in override — keep `findDocuments` enabled, just tighten its
+              // client-facing description. (Built-in keys autocomplete here.)
+              find: {
+                annotations: { title: 'Find Posts' },
+                description:
+                  'Find blog posts. Pass an `id` to fetch one; omit it to list with pagination.',
+              },
+
+              // Custom collection-scoped tool — exposed once as `publish`, with
+              // slug deciding which collection it acts on.
+              publish: defineCollectionTool({
+                annotations: {
+                  title: 'Publish Post',
+                  destructiveHint: false,
+                  idempotentHint: false,
+                  openWorldHint: false,
+                  readOnlyHint: false,
+                },
+                description: 'Publish a draft post by ID.',
+                input: z.object({
+                  id: z.string().describe('The post ID to publish.'),
+                }),
+              }).handler(async ({ slug, input, authorizedMCP, req }) => {
+                const result = await req.payload.update({
+                  id: input.id,
+                  collection: slug,
+                  data: { _status: 'published' },
+                  req,
+                  overrideAccess: authorizedMCP.overrideAccess,
+                })
+                return {
+                  content: [
+                    {
+                      type: 'text' as const,
+                      text: `Published ${slug} ${input.id}.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+                    },
+                  ],
+                }
+              }),
+            },
+          },
+          media: {
+            description: 'This is a Payload collection with Media documents.',
+            // Partial-disable — all default tools except delete remain enabled.
+            tools: {
+              delete: false,
+            },
+          },
+          rolls: {
+            tools: {
+              create: false,
+            },
+          },
+        },
+        globals: {
+          'site-settings': {
+            description: 'Site-wide configuration settings.',
+            tools: {
+              find: {
+                annotations: { title: 'Find Site Settings' },
+              },
+            },
+          },
+        },
+        mcp: {
+          serverOptions: {
+            serverInfo: {
+              name: 'My Custom MCP Server',
+              version: '1.0.0',
+            },
+          },
+        },
+        tools: {
+          hiddenTool: defineTool({
+            access: () => false,
+            description: 'This tool should be hidden by its access callback',
+          }).handler(() => ({
+            content: [{ type: 'text' as const, text: 'hidden' }],
+          })),
+          diceRoll: defineTool({
+            annotations: {
+              title: 'Dice Roll',
+              destructiveHint: false,
+              idempotentHint: false,
+              openWorldHint: false,
+              readOnlyHint: false,
+            },
+            description: 'Rolls a virtual dice with a specified number of sides',
+            input: z.object({
               sides: z
                 .number()
                 .int()
@@ -226,62 +211,82 @@ export default buildConfigWithDefaults({
                 .optional()
                 .default(6)
                 .describe('Number of sides on the dice (default: 6)'),
-            }).shape,
-          },
-        ],
-        prompts: [
-          {
-            name: 'echo',
-            argsSchema: { message: z.string() },
+            }),
+          }).handler(async ({ input, authorizedMCP, req }) => {
+            const sides = input.sides
+            const result = Math.floor(Math.random() * sides) + 1
+
+            req.payload.logger.info(
+              `Dice Roll MCP Tool rolled a ${sides} sided die and got a ${result}`,
+            )
+
+            await req.payload.create({
+              collection: 'rolls',
+              data: {
+                sides,
+                result,
+                user: req.user?.id,
+              },
+              req,
+              draft: true,
+              overrideAccess: authorizedMCP.overrideAccess,
+            })
+
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `# Dice Roll Result\n\n**Sides:** ${sides}\n**Result:** ${result}\n\n🎲 You rolled a **${result}** on a ${sides}-sided die!`,
+                },
+              ],
+            }
+          }),
+        },
+        prompts: {
+          echo: definePrompt({
+            argsSchema: z.object({ message: z.string() }),
             description: 'Creates a prompt to process a message',
             title: 'Echo Prompt',
-            handler: async ({ message }, req) => {
-              const { payload } = req
+          }).handler(async ({ input: { message }, req }) => {
+            const { payload } = req
 
-              payload.logger.info(`Echo Prompt was sent: ${message}`)
+            payload.logger.info(`Echo Prompt was sent: ${message}`)
 
-              const modifiedPrompt = `This prompt was sent: ${message}`
+            const modifiedPrompt = `This prompt was sent: ${message}`
 
-              await payload.create({
-                collection: 'modified-prompts',
-                data: {
-                  original: message as string,
-                  modified: modifiedPrompt,
-                  user: req.user?.id,
+            await payload.create({
+              collection: 'modified-prompts',
+              data: {
+                original: message,
+                modified: modifiedPrompt,
+                user: req.user?.id,
+              },
+              req,
+              draft: true,
+              overrideAccess: false,
+            })
+
+            return {
+              messages: [
+                {
+                  content: { type: 'text', text: modifiedPrompt },
+                  role: 'user',
                 },
-                req,
-                overrideAccess: false,
-                user: req.user,
-                draft: true,
-              })
-
-              return {
-                messages: [
-                  {
-                    content: {
-                      type: 'text',
-                      text: modifiedPrompt,
-                    },
-                    role: 'user',
+                {
+                  content: {
+                    type: 'text',
+                    text: `This prompt was sent by userId: ${req.user?.id}`,
                   },
-                  {
-                    content: {
-                      type: 'text',
-                      text: `This prompt was sent by userId: ${req.user?.id}`,
-                    },
-                    role: 'assistant',
-                  },
-                ],
-              }
-            },
-          },
-        ],
-        resources: [
-          // Resource with a static URI
-          {
-            name: 'data',
+                  role: 'assistant',
+                },
+              ],
+            }
+          }),
+        },
+        resources: {
+          data: {
             description: 'Data is a resource that contains special data.',
-            handler: async (uri, req) => {
+            handler: async ({ req, uri }) => {
               const payload = req.payload
 
               payload.logger.info(`Data resource was requested`)
@@ -295,21 +300,14 @@ export default buildConfigWithDefaults({
                   user: req.user?.id,
                 },
                 req,
-                overrideAccess: false,
-                user: req.user,
                 draft: true,
+                overrideAccess: false,
               })
 
               return {
                 contents: [
-                  {
-                    uri: uri.href,
-                    text,
-                  },
-                  {
-                    uri: uri.href,
-                    text: `This was requested by user: ${req.user?.id}`,
-                  },
+                  { uri: uri.href, text },
+                  { uri: uri.href, text: `This was requested by user: ${req.user?.id}` },
                 ],
               }
             },
@@ -317,11 +315,9 @@ export default buildConfigWithDefaults({
             title: 'Data',
             uri: 'data://app',
           },
-          // Resource with a template
-          {
-            name: 'dataByID',
+          dataByID: {
             description: 'Data is a resource that contains special data.',
-            handler: async (uri, { id }, req) => {
+            handler: async ({ params: { id }, req, uri }) => {
               const payload = req.payload
 
               payload.logger.info(`Data by ID resource was requested`)
@@ -335,21 +331,14 @@ export default buildConfigWithDefaults({
                   user: req.user?.id,
                 },
                 req,
-                overrideAccess: false,
-                user: req.user,
                 draft: true,
+                overrideAccess: false,
               })
 
               return {
                 contents: [
-                  {
-                    uri: uri.href,
-                    text,
-                  },
-                  {
-                    uri: uri.href,
-                    text: `This was requested by user: ${req.user?.id}`,
-                  },
+                  { uri: uri.href, text },
+                  { uri: uri.href, text: `This was requested by user: ${req.user?.id}` },
                 ],
               }
             },
@@ -357,32 +346,32 @@ export default buildConfigWithDefaults({
             title: 'Data By ID',
             uri: new ResourceTemplate('data://app/{id}', { list: undefined }),
           },
-        ],
-      },
-
-      // Experimental MCP tools
-      experimental: {
-        tools: {
-          collections: {
-            collectionsDirPath: 'test/plugin-mcp/collections',
-            enabled: true,
-          },
-          config: {
-            configFilePath: path.resolve(dirname, 'test/plugin-mcp/config.ts'),
-            enabled: true,
-          },
-          jobs: {
-            enabled: true,
-            jobsDirPath: 'dev/jobs',
-          },
-          auth: {
-            enabled: true,
-          },
         },
-      },
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+      }),
+      // Plugin listed AFTER mcp in the array — also injects a tool via slug + options
+      definePlugin({
+        order: 1,
+        slug: 'after-mcp',
+        plugin: ({ config, plugins }) => {
+          const mcp = plugins['@payloadcms/plugin-mcp']
+          if (mcp?.options) {
+            const opts = mcp.options
+            opts.tools ??= {}
+            opts.tools.injectedAfter = {
+              description: 'Tool injected by a plugin listed after mcp',
+              handler: () => ({
+                content: [{ type: 'text' as const, text: 'injected-after' }],
+              }),
+              input: { type: 'object', properties: {} },
+            }
+          }
+          return config
+        },
+      })(),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
   },
+  seed,
 })

@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--variable-color {
+    flex-shrink: 0;
+  }
+}

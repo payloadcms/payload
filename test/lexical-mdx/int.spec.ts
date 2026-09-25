@@ -4,15 +4,15 @@ import type {
   SanitizedServerEditorConfig,
   SerializedBlockNode,
 } from '@payloadcms/richtext-lexical'
-import type { RichTextField, SanitizedConfig } from 'payload'
+import type { RichTextField } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
 import { writeFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
 import { codeTest1 } from './tests/code1.test.js'
@@ -20,7 +20,6 @@ import { defaultTests } from './tests/default.test.js'
 import { restExamplesTest1 } from './tests/restExamples.test.js'
 import { restExamplesTest2 } from './tests/restExamples2.test.js'
 
-let config: SanitizedConfig
 let editorConfig: SanitizedServerEditorConfig
 
 const filename = fileURLToPath(import.meta.url)
@@ -44,14 +43,11 @@ export type Test = {
 }
 type Tests = Array<Test>
 
-describe('Lexical MDX', () => {
+test.suite('Lexical MDX', { config: './config.ts' }, () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
-  beforeAll(async () => {
-    const { config: incomingConfig } = await initPayloadInt(dirname, undefined, false)
-    config = incomingConfig
-
+  test.beforeEach(async ({ config }) => {
     const richTextField: RichTextField = config.collections
       .find((collection) => collection.slug === postsSlug)
       .fields.find(
@@ -106,7 +102,7 @@ describe('Lexical MDX', () => {
     }
 
     if (convertToEditorJSON !== false) {
-      it(`can convert to editor JSON: ${description ?? sanitizedInput}"`, () => {
+      test(`can convert to editor JSON: ${description ?? sanitizedInput}"`, () => {
         const result = mdxToEditorJSON({
           mdxWithFrontmatter: sanitizedInput,
           editorConfig,
@@ -119,6 +115,7 @@ describe('Lexical MDX', () => {
         if (blockNode) {
           const receivedBlockNode: SerializedBlockNode = result.editorState.root
             .children[0] as unknown as SerializedBlockNode
+
           expect(receivedBlockNode).not.toBeNull()
 
           // By doing it like this, the blockNode defined in the test does not need to have all the top-level properties. We only wanna compare keys that are defined in the test
@@ -144,7 +141,7 @@ describe('Lexical MDX', () => {
     }
 
     if (convertFromEditorJSON !== false) {
-      it(`can convert from editor JSON: ${description ?? sanitizedInput}"`, () => {
+      test(`can convert from editor JSON: ${description ?? sanitizedInput}"`, () => {
         const editorState = {
           root: {
             children: blockNode
@@ -178,11 +175,11 @@ describe('Lexical MDX', () => {
     }
   }
 
-  describe('upload markdown: Markdown → Lexical (import)', () => {
+  test.describe('upload markdown: Markdown → Lexical (import)', () => {
     function countUploadNodes(node: {
-      type?: string
-      children?: unknown[]
       [key: string]: unknown
+      children?: unknown[]
+      type?: string
     }): number {
       let n = node.type === 'upload' ? 1 : 0
       const children =
@@ -196,11 +193,11 @@ describe('Lexical MDX', () => {
     }
 
     function collectUploadNodes(node: {
-      type?: string
-      relationTo?: string
-      value?: unknown
-      children?: unknown[]
       [key: string]: unknown
+      children?: unknown[]
+      relationTo?: string
+      type?: string
+      value?: unknown
     }): { relationTo: string; value: unknown }[] {
       const out: { relationTo: string; value: unknown }[] = []
       if (node.type === 'upload' && node.relationTo != null) {
@@ -216,13 +213,13 @@ describe('Lexical MDX', () => {
       return out
     }
 
-    it('imports upload placeholder as upload node and verifies it is there', () => {
+    test('imports upload placeholder as upload node and verifies it is there', () => {
       const markdown = '![uploads:123]()'
       const result = mdxToEditorJSON({ mdxWithFrontmatter: markdown, editorConfig })
       const rootChildren = result.editorState.root?.children ?? []
       const uploads = rootChildren.flatMap((child) =>
         collectUploadNodes(
-          child as { type?: string; relationTo?: string; value?: unknown; [key: string]: unknown },
+          child as { [key: string]: unknown; relationTo?: string; type?: string; value?: unknown },
         ),
       )
       expect(uploads).toHaveLength(1)
@@ -230,7 +227,7 @@ describe('Lexical MDX', () => {
       expect(uploads[0].value).toBe(123)
     })
 
-    it('imports image markdown without creating upload node and preserves content', () => {
+    test('imports image markdown without creating upload node and preserves content', () => {
       const markdown = '![alt](/uploads/image.jpg)'
       const result = mdxToEditorJSON({ mdxWithFrontmatter: markdown, editorConfig })
       const rootChildren = result.editorState.root?.children ?? []
@@ -239,7 +236,7 @@ describe('Lexical MDX', () => {
         (sum, child) =>
           sum +
           countUploadNodes(
-            child as { type?: string; children?: unknown[]; [key: string]: unknown },
+            child as { [key: string]: unknown; children?: unknown[]; type?: string },
           ),
         0,
       )
@@ -249,8 +246,8 @@ describe('Lexical MDX', () => {
     })
   })
 
-  describe('link markdown: should not match image markdown', () => {
-    it('should not parse image markdown as a link node', () => {
+  test.describe('link markdown: should not match image markdown', () => {
+    test('should not parse image markdown as a link node', () => {
       const markdown = '![Alt text](https://example.com/image.jpg)'
       const result = mdxToEditorJSON({ mdxWithFrontmatter: markdown, editorConfig })
       const serialized = JSON.stringify(result.editorState)

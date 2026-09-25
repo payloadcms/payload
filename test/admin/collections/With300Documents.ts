@@ -18,4 +18,5 @@ export const with300Documents: CollectionConfig = {
       relationTo: with300DocumentsSlug,
     },
   ],
+  versions: false,
 }

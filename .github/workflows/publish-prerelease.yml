@@ -1,13 +1,15 @@
 name: publish-prerelease
 
 on:
-  schedule:
-    # Run nightly at 10pm EST
-    - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
       debug_build:
         description: 'Enable debug build (uses internal-debug tag and pnpm build:debug)'
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: 'Dry run: build and run pnpm publish --dry-run (nothing published to npm)'
         required: false
         default: false
         type: boolean
@@ -34,21 +36,24 @@ jobs:
 
       - name: Determine release type and debug flag
         id: determine_release_type
-        # Use 'internal-debug' if debug mode, 'canary' for main branch, 'internal' for others
+        # Canary releases use the tag-driven release-bump workflow.
         run: |
           if [[ "${{ inputs.debug_build }}" == "true" ]]; then
             echo "release_type=internal-debug" >> $GITHUB_OUTPUT
             echo "debug_flag=--debug" >> $GITHUB_OUTPUT
-          elif [[ ${{ github.ref_name }} == "main" ]]; then
-            echo "release_type=canary" >> $GITHUB_OUTPUT
-            echo "debug_flag=" >> $GITHUB_OUTPUT
           else
             echo "release_type=internal" >> $GITHUB_OUTPUT
             echo "debug_flag=" >> $GITHUB_OUTPUT
           fi
 
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "dry_run_flag=--dry-run" >> $GITHUB_OUTPUT
+          else
+            echo "dry_run_flag=" >> $GITHUB_OUTPUT
+          fi
+
       - name: Release
-        run: pnpm publish-prerelease --tag ${{ steps.determine_release_type.outputs.release_type }} ${{ steps.determine_release_type.outputs.debug_flag }}
+        run: pnpm publish-prerelease --tag ${{ steps.determine_release_type.outputs.release_type }} ${{ steps.determine_release_type.outputs.debug_flag }} ${{ steps.determine_release_type.outputs.dry_run_flag }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true

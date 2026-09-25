@@ -30,6 +30,7 @@ const Uploads: CollectionConfig = {
       admin: { allowCreate: false },
     },
   ],
+  versions: false,
 }
 
 export default Uploads

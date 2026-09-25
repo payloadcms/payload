@@ -12,4 +12,5 @@ export const Points: CollectionConfig = {
       name: 'point',
     },
   ],
+  versions: false,
 }

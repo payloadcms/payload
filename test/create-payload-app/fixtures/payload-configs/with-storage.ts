@@ -5,7 +5,7 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   collections: [],
   db: mongooseAdapter({ url: process.env.DATABASE_URL || '' }),
-  plugins: [
+  storage: [
     s3Storage({
       bucket: process.env.S3_BUCKET || '',
       collections: {

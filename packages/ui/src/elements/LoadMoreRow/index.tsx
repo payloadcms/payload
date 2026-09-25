@@ -1,0 +1,61 @@
+'use client'
+
+import React from 'react'
+
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
+import './index.css'
+
+const baseClass = 'load-more-row'
+
+export type LoadMoreRowProps = {
+  className?: string
+  currentCount: number
+  hasMore: boolean
+  isLoading?: boolean
+  /** Custom button element - if provided, onLoadMore and isLoading are ignored */
+  loadMoreButton?: React.ReactNode
+  onLoadMore?: () => void
+  style?: React.CSSProperties
+  totalDocs: number
+}
+
+export const LoadMoreRow: React.FC<LoadMoreRowProps> = ({
+  className,
+  currentCount,
+  hasMore,
+  isLoading = false,
+  loadMoreButton,
+  onLoadMore,
+  style,
+  totalDocs,
+}) => {
+  const { t } = useTranslation()
+  const defaultButton = onLoadMore && (
+    <Button
+      buttonStyle="ghost"
+      className={`${baseClass}__button`}
+      disabled={isLoading}
+      margin={false}
+      onClick={onLoadMore}
+    >
+      {isLoading ? t('general:loading') : t('general:loadMore')}
+    </Button>
+  )
+
+  return (
+    <div className={[baseClass, className].filter(Boolean).join(' ')} style={style}>
+      <p className={`${baseClass}__text`}>
+        {hasMore ? (
+          <>
+            Showing {currentCount} of {totalDocs} — {loadMoreButton || defaultButton}
+          </>
+        ) : (
+          <>
+            Showing {totalDocs} of {totalDocs}
+          </>
+        )}
+      </p>
+    </div>
+  )
+}

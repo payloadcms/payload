@@ -3,6 +3,13 @@ import type { CollectionConfig } from 'payload'
 export const FormatDocURL: CollectionConfig = {
   slug: 'format-doc-url',
   admin: {
+    components: {
+      beforeListTable: [
+        {
+          path: '/components/BeforeList/index.js#SelectFormatDocURLButton',
+        },
+      ],
+    },
     // Custom formatDocURL function to control linking behavior
     formatDocURL: ({ doc, defaultURL, req, collectionSlug, viewType }) => {
       // Disable linking for documents with title 'no-link'

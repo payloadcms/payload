@@ -17,8 +17,10 @@ export interface Args extends arg.Spec {
   '--local-example': StringConstructor
   '--local-template': StringConstructor
   '--name': StringConstructor
+  '--no-agent': BooleanConstructor
   '--no-deps': BooleanConstructor
   '--no-git': BooleanConstructor
+  '--payload-version': StringConstructor
   '--secret': StringConstructor
   '--template': StringConstructor
   '--use-bun': BooleanConstructor
@@ -77,8 +79,6 @@ export type DbDetails = {
   type: DbType
 }
 
-export type EditorType = 'lexical' | 'slate'
-
 export type NextAppDetails = {
   hasTopLevelLayout: boolean
   isPayloadInstalled?: boolean
@@ -91,5 +91,23 @@ export type NextAppDetails = {
 }
 
 export type NextConfigType = 'cjs' | 'esm' | 'ts'
+
+export type TanStackAppKind = 'router-only' | 'start'
+
+export type TanStackAppDetails = {
+  isPayloadInstalled: boolean
+  kind: TanStackAppKind
+  projectDir: string
+  rootRoutePath: string
+  routerPath: string
+  routesDir: string
+  sourceDir: string
+  viteConfigPath: string
+}
+
+export type TanStackDetectionResult =
+  | { compatible: false; detected: true; reason: string }
+  | { compatible: true; details: TanStackAppDetails; detected: true }
+  | { detected: false }
 
 export type StorageAdapterType = (typeof ALL_STORAGE_ADAPTERS)[number]

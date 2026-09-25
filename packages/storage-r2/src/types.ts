@@ -3,7 +3,8 @@
  * R2Range is sourced from Cloudflare so it cannot drift; other types are our own
  * so Node's Blob/Buffer/Headers are accepted and we avoid strict Workers-only types.
  */
-import type { R2Range } from '@cloudflare/workers-types/2023-07-01'
+import type { R2Range } from '@cloudflare/workers-types/2023-07-01/index.js'
+import type { UploadReference } from '@payloadcms/plugin-cloud-storage/types'
 
 export type { R2Range }
 
@@ -65,19 +66,18 @@ export interface R2UploadedPart {
   partNumber: number
 }
 
-export interface R2StorageClientUploadContext {
-  key: string
-}
+export type R2StorageUploadReference = UploadReference
 export type R2StorageClientUploadHandlerParams = {
   chunkSize?: number
-  prefix: string
 }
 
 export type R2StorageMultipartUploadHandlerParams = {
   collection: string
+  docPrefix?: string
   fileName: string
   fileType: string
   multipartId?: string
   multipartKey?: string
   multipartNumber?: string
+  signedReceipt?: string
 }

@@ -2,17 +2,16 @@ import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
 import { serialize } from 'object-to-formdata'
-import path from 'path'
 import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
+import { test } from '../__helpers/int/vitest.js'
 import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,
@@ -23,38 +22,38 @@ import {
   pointSlug,
   postsSlug,
   relationSlug,
+  updateShapesSlug,
 } from './config.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const createdInputBoundaryRecords: Array<{
+  collection: string
+  id: number | string
+}> = []
 
-let restClient: NextRESTClient
-let payload: Payload
-
-describe('collections-rest', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+test.suite('collections-rest', { config: './config.ts', resetBetweenTests: false }, () => {
+  test.beforeEach(async ({ payload }) => {
+    await clearDocs({ payload })
   })
 
-  afterAll(async () => {
-    await payload.destroy()
+  test.afterEach(async ({ payload }) => {
+    for (const { id, collection } of createdInputBoundaryRecords.reverse()) {
+      await payload.delete({ id, collection: collection as any, overrideAccess: true })
+    }
+
+    createdInputBoundaryRecords.length = 0
   })
 
-  beforeEach(async () => {
-    await clearDocs()
-  })
-
-  describe('CRUD', () => {
-    it('should create', async () => {
+  test.describe('CRUD', () => {
+    test('should create', async ({ restClient }) => {
       const data = {
         title: 'title',
       }
-      const doc = await createPost(data)
+      const doc = await createPost({ restClient }, data)
 
       expect(doc).toMatchObject(data)
     })
 
-    it('should return 400 when request body contains malformed JSON', async () => {
+    test('should return 400 when request body contains malformed JSON', async ({ restClient }) => {
       const response = await restClient.POST(`/${postsSlug}`, {
         body: '{ invalid json',
       })
@@ -66,9 +65,9 @@ describe('collections-rest', () => {
       expect(result.errors[0].message).toEqual('Invalid JSON')
     })
 
-    it('should find', async () => {
-      const post1 = await createPost()
-      const post2 = await createPost()
+    test('should find', async ({ restClient }) => {
+      const post1 = await createPost({ restClient })
+      const post2 = await createPost({ restClient })
       const response = await restClient.GET(`/${postsSlug}`)
       const result = await response.json()
 
@@ -79,9 +78,9 @@ describe('collections-rest', () => {
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
     })
 
-    it('should count', async () => {
-      await createPost()
-      await createPost()
+    test('should count', async ({ restClient }) => {
+      await createPost({ restClient })
+      await createPost({ restClient })
       const response = await restClient.GET(`/${postsSlug}/count`)
       const result = await response.json()
 
@@ -89,9 +88,9 @@ describe('collections-rest', () => {
       expect(result).toEqual({ totalDocs: 2 })
     })
 
-    it('should find where id', async () => {
-      const post1 = await createPost()
-      await createPost()
+    test('should find where id', async ({ restClient }) => {
+      const post1 = await createPost({ restClient })
+      await createPost({ restClient })
       const response = await restClient.GET(`/${postsSlug}`, {
         query: {
           where: { id: { equals: post1.id } },
@@ -104,9 +103,9 @@ describe('collections-rest', () => {
       expect(result.docs[0].id).toEqual(post1.id)
     })
 
-    it('should find with pagination false', async () => {
-      const post1 = await createPost()
-      const post2 = await createPost()
+    test('should find with pagination false', async ({ payload, restClient }) => {
+      const post1 = await createPost({ restClient })
+      const post2 = await createPost({ restClient })
 
       const { docs, totalDocs } = await payload.find({
         collection: postsSlug,
@@ -121,8 +120,8 @@ describe('collections-rest', () => {
       expect(totalDocs).toEqual(2)
     })
 
-    it('should update existing', async () => {
-      const { id, description } = await createPost({ description: 'desc' })
+    test('should update existing', async ({ restClient }) => {
+      const { id, description } = await createPost({ restClient }, { description: 'desc' })
       const updatedTitle = 'updated-title'
 
       const response = await restClient.PATCH(`/${postsSlug}/${id}`, {
@@ -135,10 +134,239 @@ describe('collections-rest', () => {
       expect(doc.description).toEqual(description) // Check was not modified
     })
 
-    it('can handle REST API requests with over 1mb of multipart/form-data', async () => {
+    test('should reject invalid array update shapes', async ({ payload, restClient }) => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          items: [],
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
+        body: JSON.stringify({
+          items: {
+            $push: {
+              publicField: 'updated',
+              restrictedField: 'managed',
+            },
+          },
+        }),
+      })
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: updateShapesSlug as any,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      expect(response.status).toBe(400)
+      expect(updated.items).toEqual([])
+    })
+
+    test('should accept valid array update shapes', async ({ payload, restClient }) => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          items: [],
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}`, {
+        body: JSON.stringify({
+          items: [
+            {
+              publicField: 'updated',
+            },
+          ],
+        }),
+      })
+      const { doc: updated } = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(updated.items).toMatchObject([
+        {
+          publicField: 'updated',
+        },
+      ])
+    })
+
+    test('should reject invalid blocks update shapes', async ({ payload, restClient }) => {
+      const initialBlock = {
+        blockType: 'update-shape-block',
+        publicField: 'initial',
+        restrictedField: 'initial-managed',
+      }
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          content: [initialBlock],
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          content: {
+            blockType: 'update-shape-block',
+            publicField: 'updated',
+            restrictedField: 'updated-managed',
+          },
+        }),
+      })
+      const updated = await payload.findByID({
+        id: doc.id,
+        collection: updateShapesSlug as any,
+        depth: 0,
+        draft: true,
+        overrideAccess: true,
+      })
+
+      expect(updated.content).toHaveLength(1)
+      expect(updated.content[0]).toMatchObject(initialBlock)
+      expect(response.status).toBe(400)
+    })
+
+    test('should accept valid blocks update shapes', async ({ payload, restClient }) => {
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {
+          content: [],
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          content: [
+            {
+              blockType: 'update-shape-block',
+              publicField: 'updated',
+            },
+          ],
+        }),
+      })
+      const { doc: updated } = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(updated.content).toMatchObject([
+        {
+          blockType: 'update-shape-block',
+          publicField: 'updated',
+        },
+      ])
+    })
+
+    test('should accept supported numeric and relationship update shapes', async ({
+      payload,
+      restClient,
+    }) => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: {
+          name: 'related',
+        },
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: relation.id, collection: relationSlug })
+      const doc = await payload.create({
+        collection: updateShapesSlug as any,
+        data: {},
+        overrideAccess: true,
+      })
+      createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+
+      const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+        body: JSON.stringify({
+          numbers: [1, 2],
+          polymorphicRelations: {
+            relationTo: relationSlug,
+            value: relation.id,
+          },
+        }),
+      })
+
+      expect(response.status).toBe(200)
+    })
+
+    for (const shape of [
+      'number object',
+      'relationship object',
+      'polymorphic relationship object',
+      'polymorphic relationship value types',
+      'hooked polymorphic relationship object',
+    ]) {
+      test(`should reject invalid ${shape} draft update shapes`, async ({
+        payload,
+        restClient,
+      }) => {
+        const relation = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'related',
+          },
+          overrideAccess: true,
+        })
+        createdInputBoundaryRecords.push({ id: relation.id, collection: relationSlug })
+        const doc = await payload.create({
+          collection: updateShapesSlug as any,
+          data: {
+            number: 1,
+            relations: [relation.id],
+          },
+          overrideAccess: true,
+        })
+        createdInputBoundaryRecords.push({ id: doc.id, collection: updateShapesSlug })
+        let data
+
+        if (shape === 'number object') {
+          data = { number: { value: 2 } }
+        } else if (shape === 'relationship object') {
+          data = { relations: { value: relation.id } }
+        } else if (shape === 'polymorphic relationship object') {
+          data = {
+            polymorphicRelations: {
+              $push: { relationTo: relationSlug, value: relation.id },
+              relationTo: relationSlug,
+              value: relation.id,
+            },
+          }
+        } else if (shape === 'polymorphic relationship value types') {
+          data = {
+            polymorphicRelations: {
+              relationTo: {},
+              value: {},
+            },
+          }
+        } else {
+          data = {
+            hookedPolymorphicRelations: {
+              relationTo: relationSlug,
+              value: relation.id,
+            },
+          }
+        }
+        const response = await restClient.PATCH(`/${updateShapesSlug}/${doc.id}?draft=true`, {
+          body: JSON.stringify(data),
+        })
+
+        expect(response.status).toBe(400)
+      })
+    }
+
+    test('can handle REST API requests with over 1mb of multipart/form-data', async ({
+      payload,
+      restClient,
+    }) => {
       const doc = await payload.create({
         collection: largeDocumentsCollectionSlug,
         data: {},
+        overrideAccess: true,
       })
 
       const arrayData = new Array(500).fill({ text: randomUUID().repeat(100) })
@@ -176,10 +404,10 @@ describe('collections-rest', () => {
       expect(res.doc.array[0].text).toEqual(arrayData[0].text)
     })
 
-    describe('Bulk operations', () => {
-      it('should bulk update', async () => {
+    test.describe('Bulk operations', () => {
+      test('should bulk update', async ({ restClient }) => {
         for (let i = 0; i < 11; i++) {
-          await createPost({ description: `desc ${i}` })
+          await createPost({ restClient }, { description: `desc ${i}` })
         }
 
         const description = 'updated'
@@ -198,10 +426,10 @@ describe('collections-rest', () => {
         expect(docs.pop().description).toEqual(description)
       })
 
-      it('should bulk update with limit', async () => {
+      test('should bulk update with limit', async ({ payload, restClient }) => {
         const ids = []
         for (let i = 0; i < 3; i++) {
-          const post = await createPost({ description: `to-update` })
+          const post = await createPost({ restClient }, { description: `to-update` })
           ids.push(post.id)
         }
 
@@ -221,16 +449,17 @@ describe('collections-rest', () => {
         expect(docs.pop().description).toEqual(description)
 
         const { docs: resDocs } = await payload.find({
-          limit: 10,
           collection: postsSlug,
+          limit: 10,
+          overrideAccess: true,
           where: { id: { in: ids } },
         })
         expect(resDocs.at(-1).description).toEqual('to-update')
       })
 
-      it('should not bulk update with a bad query', async () => {
+      test('should not bulk update with a bad query', async ({ payload, restClient }) => {
         for (let i = 0; i < 2; i++) {
-          await createPost({ description: `desc ${i}` })
+          await createPost({ restClient }, { description: `desc ${i}` })
         }
 
         const description = 'updated'
@@ -249,15 +478,19 @@ describe('collections-rest', () => {
 
         const { docs } = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(docs[0].description).not.toEqual(description)
         expect(docs.pop().description).not.toEqual(description)
       })
 
-      it('should not bulk update with a bad relationship query', async () => {
+      test('should not bulk update with a bad relationship query', async ({
+        payload,
+        restClient,
+      }) => {
         for (let i = 0; i < 2; i++) {
-          await createPost({ description: `desc ${i}` })
+          await createPost({ restClient }, { description: `desc ${i}` })
         }
 
         const description = 'updated'
@@ -279,18 +512,23 @@ describe('collections-rest', () => {
 
         const { docs } = await payload.find({
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(docs[0].description).not.toEqual(description)
         expect(docs.pop().description).not.toEqual(description)
       })
 
-      it('should not bulk update with a read restricted field query', async () => {
+      test('should not bulk update with a read restricted field query', async ({
+        payload,
+        restClient,
+      }) => {
         const { id } = await payload.create({
           collection: postsSlug,
           data: {
             restrictedField: 'restricted',
           },
+          overrideAccess: true,
         })
 
         const description = 'description'
@@ -305,6 +543,7 @@ describe('collections-rest', () => {
         const doc = await payload.findByID({
           id,
           collection: postsSlug,
+          overrideAccess: true,
         })
 
         expect(response.status).toEqual(400)
@@ -315,7 +554,7 @@ describe('collections-rest', () => {
         expect(doc.description).toBeFalsy()
       })
 
-      it('should return formatted errors for bulk updates', async () => {
+      test('should return formatted errors for bulk updates', async ({ payload, restClient }) => {
         const text = 'bulk-update-test-errors'
         const errorDoc = await payload.create({
           collection: errorOnHookSlug,
@@ -323,6 +562,7 @@ describe('collections-rest', () => {
             errorBeforeChange: true,
             text,
           },
+          overrideAccess: true,
         })
         const successDoc = await payload.create({
           collection: errorOnHookSlug,
@@ -330,6 +570,7 @@ describe('collections-rest', () => {
             errorBeforeChange: false,
             text,
           },
+          overrideAccess: true,
         })
 
         const update = 'update'
@@ -350,10 +591,10 @@ describe('collections-rest', () => {
         expect(result.docs[0].text).toEqual(update)
       })
 
-      it('should bulk delete', async () => {
+      test('should bulk delete', async ({ restClient }) => {
         const count = 11
         for (let i = 0; i < count; i++) {
-          await createPost({ description: `desc ${i}` })
+          await createPost({ restClient }, { description: `desc ${i}` })
         }
 
         const response = await restClient.DELETE(`/${postsSlug}`, {
@@ -366,13 +607,54 @@ describe('collections-rest', () => {
         expect(docs).toHaveLength(count)
       })
 
-      it('should return formatted errors for bulk deletes', async () => {
+      test('should use the configured bulk delete strategy', async ({ payload, restClient }) => {
+        const deleteOneSpy = vi.spyOn(payload.db, 'deleteOne')
+        const deleteManySpy = vi.spyOn(payload.db, 'deleteMany')
+
+        const countDeleteCalls = async (count: number) => {
+          await createPosts({ restClient }, count)
+
+          deleteOneSpy.mockClear()
+          deleteManySpy.mockClear()
+
+          const { docs, errors } = await payload.delete({
+            collection: postsSlug,
+            overrideAccess: true,
+            where: { title: { equals: 'title' } },
+          })
+
+          expect(errors).toHaveLength(0)
+          expect(docs).toHaveLength(count)
+
+          return {
+            deleteMany: deleteManySpy.mock.calls.length,
+            deleteOne: deleteOneSpy.mock.calls.length,
+          }
+        }
+
+        const few = await countDeleteCalls(2)
+        const many = await countDeleteCalls(20)
+
+        deleteOneSpy.mockRestore()
+        deleteManySpy.mockRestore()
+
+        const isPerDocument = payload.db.bulkOperationsSingleTransaction
+
+        expect(few.deleteOne).toBe(isPerDocument ? 2 : 0)
+        expect(many.deleteOne).toBe(isPerDocument ? 20 : 0)
+        // When batched writes are enabled, deleting ten times as many documents must not cost ten
+        // times as many deleteMany calls.
+        expect(isPerDocument || many.deleteMany === few.deleteMany).toBe(true)
+      })
+
+      test('should return formatted errors for bulk deletes', async ({ payload, restClient }) => {
         await payload.create({
           collection: errorOnHookSlug,
           data: {
             errorAfterDelete: true,
             text: 'test',
           },
+          overrideAccess: true,
         })
         await payload.create({
           collection: errorOnHookSlug,
@@ -380,6 +662,7 @@ describe('collections-rest', () => {
             errorAfterDelete: false,
             text: 'test',
           },
+          overrideAccess: true,
         })
 
         const response = await restClient.DELETE(`/${errorOnHookSlug}`, {
@@ -395,9 +678,9 @@ describe('collections-rest', () => {
       })
     })
 
-    describe('Custom ID', () => {
-      describe('string', () => {
-        it('should create', async () => {
+    test.describe('Custom ID', () => {
+      test.describe('string', () => {
+        test('should create', async ({ restClient }) => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const customIdName = 'custom-id-name'
           const { doc } = await restClient
@@ -409,7 +692,7 @@ describe('collections-rest', () => {
           expect(doc.name).toEqual(customIdName)
         })
 
-        it('should find', async () => {
+        test('should find', async ({ restClient }) => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const { doc } = await restClient
             .POST(`/${customIdSlug}`, {
@@ -423,7 +706,7 @@ describe('collections-rest', () => {
           expect(id).toEqual(doc.id)
         })
 
-        it('should query - equals', async () => {
+        test('should query - equals', async ({ restClient }) => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const { doc } = await restClient
             .POST(`/${customIdSlug}`, {
@@ -441,7 +724,7 @@ describe('collections-rest', () => {
           expect(docs.map(({ id }) => id)).toContain(doc.id)
         })
 
-        it('should query - like', async () => {
+        test('should query - like', async ({ restClient }) => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const { doc } = await restClient
             .POST(`/${customIdSlug}`, {
@@ -459,7 +742,7 @@ describe('collections-rest', () => {
           expect(docs.map(({ id }) => id)).toContain(doc.id)
         })
 
-        it('should update', async () => {
+        test('should update', async ({ restClient }) => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const { doc } = await restClient
             .POST(`/${customIdSlug}`, {
@@ -476,8 +759,8 @@ describe('collections-rest', () => {
         })
       })
 
-      describe('number', () => {
-        it('should create', async () => {
+      test.describe('number', () => {
+        test('should create', async ({ restClient }) => {
           const customId = Math.floor(Math.random() * 1_000_000) + 1
           const { doc } = await restClient
             .POST(`/${customIdNumberSlug}`, {
@@ -487,7 +770,7 @@ describe('collections-rest', () => {
           expect(doc.id).toEqual(customId)
         })
 
-        it('should find', async () => {
+        test('should find', async ({ restClient }) => {
           const customId = Math.floor(Math.random() * 1_000_000) + 1
           const { doc } = await restClient
             .POST(`/${customIdNumberSlug}`, {
@@ -500,7 +783,7 @@ describe('collections-rest', () => {
           expect(id).toEqual(doc.id)
         })
 
-        it('should update', async () => {
+        test('should update', async ({ restClient }) => {
           const customId = Math.floor(Math.random() * 1_000_000) + 1
           const { doc } = await restClient
             .POST(`/${customIdNumberSlug}`, {
@@ -515,7 +798,7 @@ describe('collections-rest', () => {
           expect(updatedDoc.name).toEqual('updated')
         })
 
-        it('should allow querying by in', async () => {
+        test('should allow querying by in', async ({ restClient }) => {
           const id = 98234698237
           await restClient.POST(`/${customIdNumberSlug}`, {
             body: JSON.stringify({ id, name: 'query using in operator' }),
@@ -533,8 +816,8 @@ describe('collections-rest', () => {
       })
     })
 
-    it('should delete', async () => {
-      const { id } = await createPost()
+    test('should delete', async ({ restClient }) => {
+      const { id } = await createPost({ restClient })
 
       const response = await restClient.DELETE(`/${postsSlug}/${id}`)
       const { doc } = await response.json()
@@ -543,8 +826,8 @@ describe('collections-rest', () => {
       expect(doc.id).toEqual(id)
     })
 
-    it('should include metadata', async () => {
-      await createPosts(11)
+    test('should include metadata', async ({ restClient }) => {
+      await createPosts({ restClient }, 11)
 
       const result = await restClient.GET(`/${postsSlug}`).then((res) => res.json())
 
@@ -559,16 +842,16 @@ describe('collections-rest', () => {
     })
   })
 
-  describe('Querying', () => {
-    it.todo('should allow querying by a field within a group')
-    describe('Relationships', () => {
+  test.describe('Querying', () => {
+    test.todo('should allow querying by a field within a group')
+    test.describe('Relationships', () => {
       let post: Post
       let relation: Relation
       let relation2: Relation
       const nameToQuery = 'name'
       const nameToQuery2 = 'name2'
 
-      beforeEach(async () => {
+      test.beforeEach(async ({ restClient }) => {
         ;({ doc: relation } = await restClient
           .POST(`/${relationSlug}`, {
             body: JSON.stringify({ name: nameToQuery }),
@@ -580,15 +863,18 @@ describe('collections-rest', () => {
           })
           .then((res) => res.json()))
 
-        post = await createPost({
-          relationField: relation.id,
-        })
+        post = await createPost(
+          { restClient },
+          {
+            relationField: relation.id,
+          },
+        )
 
-        await createPost() // Extra post to allow asserting totalDoc count
+        await createPost({ restClient }) // Extra post to allow asserting totalDoc count
       })
 
-      describe('regular relationship', () => {
-        it('query by property value', async () => {
+      test.describe('regular relationship', () => {
+        test('query by property value', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
               where: { relationField: { equals: relation.id } },
@@ -601,7 +887,7 @@ describe('collections-rest', () => {
           expect(result.totalDocs).toEqual(1)
         })
 
-        it('should count query by property value', async () => {
+        test('should count query by property value', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}/count`, {
             query: {
               where: { relationField: { equals: relation.id } },
@@ -613,7 +899,7 @@ describe('collections-rest', () => {
           expect(result).toEqual({ totalDocs: 1 })
         })
 
-        it('query by id', async () => {
+        test('query by id', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
               where: { relationField: { equals: relation.id } },
@@ -626,12 +912,13 @@ describe('collections-rest', () => {
           expect(result.totalDocs).toEqual(1)
         })
 
-        it('should query LIKE by ID', async () => {
+        test('should query LIKE by ID', async ({ payload, restClient }) => {
           const post = await payload.create({
             collection: postsSlug,
             data: {
               title: 'find me buddy',
             },
+            overrideAccess: true,
           })
 
           const response = await restClient.GET(`/${postsSlug}`, {
@@ -650,10 +937,13 @@ describe('collections-rest', () => {
         })
       })
 
-      it('should query nested relationship - hasMany', async () => {
-        const post1 = await createPost({
-          relationHasManyField: [relation.id, relation2.id],
-        })
+      test('should query nested relationship - hasMany', async ({ restClient }) => {
+        const post1 = await createPost(
+          { restClient },
+          {
+            relationHasManyField: [relation.id, relation2.id],
+          },
+        )
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -679,12 +969,15 @@ describe('collections-rest', () => {
         expect(result2.totalDocs).toEqual(1)
       })
 
-      describe('relationTo multi', () => {
-        it('nested by id', async () => {
-          const post1 = await createPost({
-            relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
-          })
-          await createPost()
+      test.describe('relationTo multi', () => {
+        test('nested by id', async ({ restClient }) => {
+          const post1 = await createPost(
+            { restClient },
+            {
+              relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
+            },
+          )
+          await createPost({ restClient })
 
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
@@ -699,11 +992,14 @@ describe('collections-rest', () => {
         })
       })
 
-      it('should query relationships by not_equals', async () => {
-        const ogPost = await createPost({
-          relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
-        })
-        await createPost()
+      test('should query relationships by not_equals', async ({ restClient }) => {
+        const ogPost = await createPost(
+          { restClient },
+          {
+            relationMultiRelationTo: { relationTo: relationSlug, value: relation.id },
+          },
+        )
+        await createPost({ restClient })
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -723,15 +1019,18 @@ describe('collections-rest', () => {
         expect(foundExcludedDoc).toBe(false)
       })
 
-      describe('relationTo multi hasMany', () => {
-        it('nested by id', async () => {
-          const post1 = await createPost({
-            relationMultiRelationToHasMany: [
-              { relationTo: relationSlug, value: relation.id },
-              { relationTo: relationSlug, value: relation2.id },
-            ],
-          })
-          await createPost()
+      test.describe('relationTo multi hasMany', () => {
+        test('nested by id', async ({ restClient }) => {
+          const post1 = await createPost(
+            { restClient },
+            {
+              relationMultiRelationToHasMany: [
+                { relationTo: relationSlug, value: relation.id },
+                { relationTo: relationSlug, value: relation2.id },
+              ],
+            },
+          )
+          await createPost({ restClient })
 
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
@@ -757,14 +1056,16 @@ describe('collections-rest', () => {
           expect(result2.totalDocs).toEqual(1)
         })
 
-        it.todo('nested by property value')
+        test.todo('nested by property value')
       })
     })
 
-    describe('Edge cases', () => {
-      it('should query a localized field without localization configured', async () => {
+    test.describe('Edge cases', () => {
+      test('should query a localized field without localization configured', async ({
+        restClient,
+      }) => {
         const test = 'test'
-        await createPost({ fakeLocalization: test })
+        await createPost({ restClient }, { fakeLocalization: test })
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -777,7 +1078,9 @@ describe('collections-rest', () => {
         expect(result.docs).toHaveLength(1)
       })
 
-      it('should not error when attempting to sort on a field that does not exist', async () => {
+      test('should not error when attempting to sort on a field that does not exist', async ({
+        restClient,
+      }) => {
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             sort: 'fake',
@@ -788,11 +1091,11 @@ describe('collections-rest', () => {
       })
     })
 
-    describe('Operators', () => {
-      it('equals', async () => {
+    test.describe('Operators', () => {
+      test('equals', async ({ restClient }) => {
         const valueToQuery = 'valueToQuery'
-        const post1 = await createPost({ title: valueToQuery })
-        await createPost()
+        const post1 = await createPost({ restClient }, { title: valueToQuery })
+        await createPost({ restClient })
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: { title: { equals: valueToQuery } },
@@ -805,10 +1108,10 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post1])
       })
 
-      it('not_equals', async () => {
-        const post1 = await createPost({ title: 'not-equals' })
-        const post2 = await createPost()
-        const post3 = await createPost({ title: undefined })
+      test('not_equals', async ({ restClient }) => {
+        const post1 = await createPost({ restClient }, { title: 'not-equals' })
+        const post2 = await createPost({ restClient })
+        const post3 = await createPost({ restClient }, { title: undefined })
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: { title: { not_equals: post1.title } },
@@ -821,9 +1124,9 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post3, post2])
       })
 
-      it('in', async () => {
-        const post1 = await createPost({ title: 'my-title' })
-        await createPost()
+      test('in', async ({ restClient }) => {
+        const post1 = await createPost({ restClient }, { title: 'my-title' })
+        await createPost({ restClient })
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: { title: { in: [post1.title] } },
@@ -836,9 +1139,9 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
-      it('not_in', async () => {
-        const post1 = await createPost({ title: 'not-me' })
-        const post2 = await createPost()
+      test('not_in', async ({ restClient }) => {
+        const post1 = await createPost({ restClient }, { title: 'not-me' })
+        const post2 = await createPost({ restClient })
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: { title: { not_in: [post1.title] } },
@@ -851,15 +1154,16 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
-      it('not_in (relationships)', async () => {
+      test('not_in (relationships)', async ({ payload, restClient }) => {
         const relationship = await payload.create({
           collection: relationSlug,
           data: {},
+          overrideAccess: true,
         })
 
-        await createPost({ relationField: relationship.id, title: 'not-me' })
+        await createPost({ restClient }, { relationField: relationship.id, title: 'not-me' })
         // await createPost({ relationMultiRelationTo: relationship.id, title: 'not-me' })
-        const post2 = await createPost({ title: 'me' })
+        const post2 = await createPost({ restClient }, { title: 'me' })
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: { relationField: { not_in: [relationship.id] } },
@@ -881,15 +1185,19 @@ describe('collections-rest', () => {
         expect(emptyNotInResponse.status).toEqual(200)
       })
 
-      it('in (relationships)', async () => {
+      test('in (relationships)', async ({ payload, restClient }) => {
         const relationship = await payload.create({
           collection: relationSlug,
           data: {},
+          overrideAccess: true,
         })
 
-        const post1 = await createPost({ relationField: relationship.id, title: 'me' })
+        const post1 = await createPost(
+          { restClient },
+          { relationField: relationship.id, title: 'me' },
+        )
         // await createPost({ relationMultiRelationTo: relationship.id, title: 'not-me' })
-        await createPost({ title: 'not-me' })
+        await createPost({ restClient }, { title: 'not-me' })
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: { relationField: { in: [relationship.id] } },
@@ -911,8 +1219,42 @@ describe('collections-rest', () => {
         expect(emptyNotInResponse.status).toEqual(200)
       })
 
-      it('like', async () => {
-        const post1 = await createPost({ title: 'prefix-value' })
+      test.describe('text matching values', () => {
+        for (const operator of ['like', 'not_like', 'contains'] as const) {
+          test(`rejects object values for ${operator}`, async ({ restClient }) => {
+            const response = await restClient.GET(`/${postsSlug}`, {
+              query: {
+                where: {
+                  title: {
+                    [operator]: {
+                      pattern: 'title',
+                    },
+                  },
+                },
+              },
+            })
+
+            expect(response.status).toEqual(400)
+          })
+        }
+
+        test('rejects arrays containing object values', async ({ restClient }) => {
+          const response = await restClient.GET(`/${postsSlug}`, {
+            query: {
+              where: {
+                title: {
+                  like: [{ pattern: 'title' }],
+                },
+              },
+            },
+          })
+
+          expect(response.status).toEqual(400)
+        })
+      })
+
+      test('like', async ({ restClient }) => {
+        const post1 = await createPost({ restClient }, { title: 'prefix-value' })
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -926,15 +1268,18 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
-      describe('like - special characters', () => {
+      test.describe('like - special characters', () => {
         const specialCharacters = '~!@#$%^&*()_+-+[]{}|;:"<>,.?/})'
 
-        it.each(specialCharacters.split(''))(
+        test.for(specialCharacters.split(''))(
           'like - special characters - %s',
-          async (character) => {
-            const post1 = await createPost({
-              title: specialCharacters,
-            })
+          async (character, { restClient }) => {
+            const post1 = await createPost(
+              { restClient },
+              {
+                title: specialCharacters,
+              },
+            )
 
             const response = await restClient.GET(`/${postsSlug}`, {
               query: {
@@ -954,8 +1299,8 @@ describe('collections-rest', () => {
         )
       })
 
-      it('like - cyrillic characters', async () => {
-        const post1 = await createPost({ title: 'Тест' })
+      test('like - cyrillic characters', async ({ restClient }) => {
+        const post1 = await createPost({ restClient }, { title: 'Тест' })
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -973,8 +1318,11 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
-      it('like - cyrillic characters in multiple words', async () => {
-        const post1 = await createPost({ title: 'привет, это тест полезной нагрузки' })
+      test('like - cyrillic characters in multiple words', async ({ restClient }) => {
+        const post1 = await createPost(
+          { restClient },
+          { title: 'привет, это тест полезной нагрузки' },
+        )
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -992,8 +1340,11 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
-      it('like - partial word match', async () => {
-        const post = await createPost({ title: 'separate words should partially match' })
+      test('like - partial word match', async ({ restClient }) => {
+        const post = await createPost(
+          { restClient },
+          { title: 'separate words should partially match' },
+        )
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: {
@@ -1010,8 +1361,8 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
-      it('like - id should not crash', async () => {
-        const post = await createPost({ title: 'post' })
+      test('like - id should not crash', async ({ restClient }) => {
+        const post = await createPost({ restClient }, { title: 'post' })
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -1026,9 +1377,9 @@ describe('collections-rest', () => {
         expect(response.status).toEqual(200)
       })
 
-      it('exists - true', async () => {
-        const postWithDesc = await createPost({ description: 'exists' })
-        await createPost({ description: undefined })
+      test('exists - true', async ({ restClient }) => {
+        const postWithDesc = await createPost({ restClient }, { description: 'exists' })
+        await createPost({ restClient }, { description: undefined })
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: {
@@ -1045,9 +1396,9 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([postWithDesc])
       })
 
-      it('exists - false', async () => {
-        const postWithoutDesc = await createPost({ description: undefined })
-        await createPost({ description: 'exists' })
+      test('exists - false', async ({ restClient }) => {
+        const postWithoutDesc = await createPost({ restClient }, { description: undefined })
+        await createPost({ restClient }, { description: 'exists' })
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
             where: {
@@ -1064,15 +1415,15 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([postWithoutDesc])
       })
 
-      describe('numbers', () => {
+      test.describe('numbers', () => {
         let post1: Post
         let post2: Post
-        beforeEach(async () => {
-          post1 = await createPost({ number: 1 })
-          post2 = await createPost({ number: 2 })
+        test.beforeEach(async ({ restClient }) => {
+          post1 = await createPost({ restClient }, { number: 1 })
+          post2 = await createPost({ restClient }, { number: 2 })
         })
 
-        it('greater_than', async () => {
+        test('greater_than', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
               where: {
@@ -1089,7 +1440,7 @@ describe('collections-rest', () => {
           expect(result.docs).toEqual([post2])
         })
 
-        it('greater_than_equal', async () => {
+        test('greater_than_equal', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
               where: {
@@ -1108,7 +1459,7 @@ describe('collections-rest', () => {
           expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
         })
 
-        it('less_than', async () => {
+        test('less_than', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
               where: {
@@ -1125,7 +1476,7 @@ describe('collections-rest', () => {
           expect(result.docs).toEqual([post1])
         })
 
-        it('less_than_equal', async () => {
+        test('less_than_equal', async ({ restClient }) => {
           const response = await restClient.GET(`/${postsSlug}`, {
             query: {
               where: {
@@ -1145,10 +1496,10 @@ describe('collections-rest', () => {
         })
       })
 
-      describe('near', () => {
+      test.describe('near', () => {
         const point = [10, 20]
         const [lat, lng] = point
-        it('should return a document near a point', async () => {
+        test('should return a document near a point', async ({ payload, restClient }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1183,7 +1534,10 @@ describe('collections-rest', () => {
           expect(resultCount.totalDocs).toBe(1)
         })
 
-        it('should omit maxDistance and return a document from minDistance', async () => {
+        test('should omit maxDistance and return a document from minDistance', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1204,7 +1558,10 @@ describe('collections-rest', () => {
           expect(result.docs).toHaveLength(1)
         })
 
-        it('should omit maxDistance and not return a document because exceeds minDistance', async () => {
+        test('should omit maxDistance and not return a document because exceeds minDistance', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1226,7 +1583,10 @@ describe('collections-rest', () => {
         })
 
         // https://github.com/payloadcms/payload/issues/14471 - ensure geospatial queries use true geodetic meters, not the distorted meters of EPSG:3857
-        it('should use true geodetic meters at high latitudes', async () => {
+        test('should use true geodetic meters at high latitudes', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1241,6 +1601,7 @@ describe('collections-rest', () => {
             const created = await payload.create({
               collection: pointSlug,
               data: { point: [queryLng, pointLat] },
+              overrideAccess: true,
             })
 
             createdId = created.id
@@ -1263,12 +1624,12 @@ describe('collections-rest', () => {
             expect(result.docs.map((d: { id: number | string }) => d.id)).toContain(createdId)
           } finally {
             if (createdId !== undefined) {
-              await payload.delete({ collection: pointSlug, id: createdId })
+              await payload.delete({ id: createdId, collection: pointSlug, overrideAccess: true })
             }
           }
         })
 
-        it('should not return a point far away', async () => {
+        test('should not return a point far away', async ({ payload, restClient }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1289,7 +1650,7 @@ describe('collections-rest', () => {
           expect(result.docs).toHaveLength(0)
         })
 
-        it('should sort find results by nearest distance', async () => {
+        test('should sort find results by nearest distance', async ({ payload, restClient }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1306,6 +1667,7 @@ describe('collections-rest', () => {
                     // only randomize longitude to make distance comparison easy
                     point: [Math.random(), 0],
                   },
+                  overrideAccess: true,
                 }),
               )
             }, Math.random())
@@ -1335,7 +1697,7 @@ describe('collections-rest', () => {
         })
       })
 
-      describe('within', () => {
+      test.describe('within', () => {
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -1344,7 +1706,10 @@ describe('collections-rest', () => {
           [11.0, 19.0], // bottom-right
           [9.0, 19.0], // back to starting point to close the polygon
         ]
-        it('should return a document with the point inside the polygon', async () => {
+        test('should return a document with the point inside the polygon', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1367,7 +1732,10 @@ describe('collections-rest', () => {
           expect(result.docs).toHaveLength(1)
         })
 
-        it('should not return a document with the point outside a smaller polygon', async () => {
+        test('should not return a document with the point outside a smaller polygon', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1390,7 +1758,7 @@ describe('collections-rest', () => {
         })
       })
 
-      describe('intersects', () => {
+      test.describe('intersects', () => {
         type Point = [number, number]
         const polygon: Point[] = [
           [9.0, 19.0], // bottom-left
@@ -1400,7 +1768,10 @@ describe('collections-rest', () => {
           [9.0, 19.0], // back to starting point to close the polygon
         ]
 
-        it('should return a document with the point intersecting the polygon', async () => {
+        test('should return a document with the point intersecting the polygon', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1423,7 +1794,10 @@ describe('collections-rest', () => {
           expect(result.docs).toHaveLength(1)
         })
 
-        it('should not return a document with the point not intersecting a smaller polygon', async () => {
+        test('should not return a document with the point not intersecting a smaller polygon', async ({
+          payload,
+          restClient,
+        }) => {
           if (payload.db.name === 'sqlite') {
             return
           }
@@ -1446,10 +1820,10 @@ describe('collections-rest', () => {
         })
       })
 
-      it('or', async () => {
-        const post1 = await createPost({ title: 'post1' })
-        const post2 = await createPost({ title: 'post2' })
-        await createPost()
+      test('or', async ({ restClient }) => {
+        const post1 = await createPost({ restClient }, { title: 'post1' })
+        const post2 = await createPost({ restClient }, { title: 'post2' })
+        await createPost({ restClient })
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -1477,9 +1851,9 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
       })
 
-      it('or - 1 result', async () => {
-        const post1 = await createPost({ title: 'post1' })
-        await createPost()
+      test('or - 1 result', async ({ restClient }) => {
+        const post1 = await createPost({ restClient }, { title: 'post1' })
+        await createPost({ restClient })
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -1507,11 +1881,11 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
       })
 
-      it('and', async () => {
+      test('and', async ({ restClient }) => {
         const description = 'description'
-        const post1 = await createPost({ description, title: 'post1' })
-        await createPost({ description, title: 'post2' }) // Diff title, same desc
-        await createPost()
+        const post1 = await createPost({ restClient }, { description, title: 'post1' })
+        await createPost({ restClient }, { description, title: 'post2' }) // Diff title, same desc
+        await createPost({ restClient })
 
         const response = await restClient.GET(`/${postsSlug}`, {
           query: {
@@ -1538,26 +1912,30 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post1])
       })
 
-      describe('pagination', () => {
+      test.describe('pagination', () => {
         let relatedDoc
 
-        beforeEach(async () => {
+        test.beforeEach(async ({ payload, restClient }) => {
           relatedDoc = await payload.create({
             collection: relationSlug,
             data: {
               name: 'test',
             },
+            overrideAccess: true,
           })
           for (let i = 0; i < 10; i++) {
-            await createPost({
-              number: i,
-              relationField: relatedDoc.id,
-              title: 'paginate-test',
-            })
+            await createPost(
+              { restClient },
+              {
+                number: i,
+                relationField: relatedDoc.id,
+                title: 'paginate-test',
+              },
+            )
           }
         })
 
-        it('should paginate with where query', async () => {
+        test('should paginate with where query', async ({ restClient }) => {
           const query = {
             limit: 4,
             where: {
@@ -1606,7 +1984,7 @@ describe('collections-rest', () => {
           expect(page3.totalPages).toStrictEqual(3)
         })
 
-        it('should paginate with where query on relationships', async () => {
+        test('should paginate with where query on relationships', async ({ restClient }) => {
           const query = {
             limit: 4,
             where: {
@@ -1655,14 +2033,14 @@ describe('collections-rest', () => {
           expect(page3.totalPages).toStrictEqual(3)
         })
 
-        describe('limit', () => {
-          beforeEach(async () => {
+        test.describe('limit', () => {
+          test.beforeEach(async ({ restClient }) => {
             for (let i = 0; i < 50; i++) {
-              await createPost({ number: i, title: 'limit-test' })
+              await createPost({ restClient }, { number: i, title: 'limit-test' })
             }
           })
 
-          it('should query a limited set of docs', async () => {
+          test('should query a limited set of docs', async ({ restClient }) => {
             const response = await restClient.GET(`/${postsSlug}`, {
               query: {
                 limit: 15,
@@ -1679,7 +2057,7 @@ describe('collections-rest', () => {
             expect(result.docs).toHaveLength(15)
           })
 
-          it('should query all docs when limit=0', async () => {
+          test('should query all docs when limit=0', async ({ restClient }) => {
             const response = await restClient.GET(`/${postsSlug}`, {
               query: {
                 limit: 0,
@@ -1699,10 +2077,15 @@ describe('collections-rest', () => {
         })
       })
 
-      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
-        const withDeeplyNestedField = await createPost({
-          D1: { D2: { D3: { D4: 'nested message' } } },
-        })
+      test('can query deeply nested fields within rows, tabs, collapsibles', async ({
+        restClient,
+      }) => {
+        const withDeeplyNestedField = await createPost(
+          { restClient },
+          {
+            D1: { D2: { D3: { D4: 'nested message' } } },
+          },
+        )
 
         const result = await restClient
           .GET(`/${postsSlug}`, {
@@ -1722,8 +2105,10 @@ describe('collections-rest', () => {
     })
   })
 
-  describe('Error Handler', () => {
-    it('should return the minimum allowed information about internal errors', async () => {
+  test.describe('Error Handler', () => {
+    test('should return the minimum allowed information about internal errors', async ({
+      restClient,
+    }) => {
       const response = await restClient.GET('/internal-error-here')
       const result = await response.json()
       expect(response.status).toBe(500)
@@ -1731,7 +2116,10 @@ describe('collections-rest', () => {
       expect(result.errors[0].message).toStrictEqual('Something went wrong.')
     })
 
-    it('should execute afterError hook on root level and modify result/status', async () => {
+    test('should execute afterError hook on root level and modify result/status', async ({
+      payload,
+      restClient,
+    }) => {
       let err: unknown
       let errResult: any
 
@@ -1740,7 +2128,7 @@ describe('collections-rest', () => {
           err = error
           errResult = result
 
-          return { status: 400, response: { modified: true } }
+          return { response: { modified: true }, status: 400 }
         },
       ]
 
@@ -1762,13 +2150,16 @@ describe('collections-rest', () => {
       payload.config.hooks.afterError = []
     })
 
-    it('should execute afterError hook on collection level and modify result', async () => {
+    test('should execute afterError hook on collection level and modify result', async ({
+      payload,
+      restClient,
+    }) => {
       let err: unknown
       let errResult: any
       let collection: SanitizedCollectionConfig
 
       payload.collections.posts.config.hooks.afterError = [
-        ({ error, result, collection: incomingCollection }) => {
+        ({ collection: incomingCollection, error, result }) => {
           err = error
           errResult = result
           collection = incomingCollection
@@ -1777,7 +2168,7 @@ describe('collections-rest', () => {
         },
       ]
 
-      const post = await createPost({})
+      const post = await createPost({ restClient }, {})
 
       const response = await restClient.GET(
         `/${postsSlug}/${typeof post.id === 'number' ? 1000 : randomUUID()}`,
@@ -1801,26 +2192,31 @@ describe('collections-rest', () => {
     })
   })
 
-  describe('Local', () => {
-    it('findByID should throw NotFound if the doc was not found, if disableErrors: true then return null', async () => {
-      const post = await createPost()
+  test.describe('Local', () => {
+    test('findByID should throw NotFound if the doc was not found, if disableErrors: true then return null', async ({
+      payload,
+      restClient,
+    }) => {
+      const post = await createPost({ restClient })
       const id = typeof post.id === 'string' ? randomUUID() : 999
-      await expect(payload.findByID({ collection: 'posts', id })).rejects.toBeInstanceOf(NotFound)
       await expect(
-        payload.findByID({ collection: 'posts', id, disableErrors: true }),
+        payload.findByID({ id, collection: 'posts', overrideAccess: true }),
+      ).rejects.toBeInstanceOf(NotFound)
+      await expect(
+        payload.findByID({ id, collection: 'posts', disableErrors: true, overrideAccess: true }),
       ).resolves.toBeNull()
     })
   })
 
-  describe('Custom endpoints', () => {
-    it('should execute custom root endpoints', async () => {
+  test.describe('Custom endpoints', () => {
+    test('should execute custom root endpoints', async ({ restClient }) => {
       for (const method of methods) {
         const response = await restClient[method.toUpperCase()](`/${method}-test`, {})
         await expect(response.text()).resolves.toBe(`${method} response`)
       }
     })
 
-    it('should execute custom collection endpoints', async () => {
+    test('should execute custom collection endpoints', async ({ restClient }) => {
       for (const method of methods) {
         const response = await restClient[method.toUpperCase()](
           `/${endpointsSlug}/${method}-test`,
@@ -1831,7 +2227,7 @@ describe('collections-rest', () => {
     })
   })
 
-  it('should not mount auth endpoints for collection without auth', async () => {
+  test('should not mount auth endpoints for collection without auth', async ({ restClient }) => {
     const authEndpoints = [
       {
         method: 'post',
@@ -1875,7 +2271,7 @@ describe('collections-rest', () => {
     }
   })
 
-  it('should not mount upload endpoints for collection without auth', async () => {
+  test('should not mount upload endpoints for collection without auth', async ({ restClient }) => {
     const uploadEndpoints = [
       {
         method: 'get',
@@ -1898,30 +2294,75 @@ describe('collections-rest', () => {
     }
   })
 
-  it('should disable bulk edit for the collection with disableBulkEdit: true', async () => {
+  test('should disable bulk edit for the collection with disableBulkEdit: true', async ({
+    payload,
+    restClient,
+  }) => {
     const res = await restClient.PATCH('/disabled-bulk-edit-docs?where[id][equals]=0', {})
     expect(res.status).toBe(403)
 
     await expect(
       payload.update({
         collection: 'disabled-bulk-edit-docs',
-        where: {},
         data: {},
         overrideAccess: false,
+        where: {},
       }),
     ).rejects.toBeInstanceOf(APIError)
 
     await expect(
       payload.update({
         collection: 'disabled-bulk-edit-docs',
-        where: {},
         data: {},
+        overrideAccess: true,
+        where: {},
+      }),
+    ).resolves.toBeTruthy()
+  })
+
+  test('should disable bulk delete for the collection with disableBulkDelete: true', async ({
+    payload,
+    restClient,
+  }) => {
+    const res = await restClient.DELETE('/disabled-bulk-delete-docs?where[id][equals]=0')
+    expect(res.status).toBe(403)
+
+    await expect(
+      payload.delete({
+        collection: 'disabled-bulk-delete-docs',
+        overrideAccess: false,
+        where: {},
+      }),
+    ).rejects.toBeInstanceOf(APIError)
+
+    const doc = await payload.create({
+      collection: 'disabled-bulk-delete-docs',
+      data: { text: 'should be deletable by id' },
+      overrideAccess: true,
+    })
+
+    await expect(
+      payload.delete({
+        id: doc.id,
+        collection: 'disabled-bulk-delete-docs',
+        overrideAccess: true,
+      }),
+    ).resolves.toBeTruthy()
+
+    await expect(
+      payload.delete({
+        collection: 'disabled-bulk-delete-docs',
+        overrideAccess: true,
+        where: {},
       }),
     ).resolves.toBeTruthy()
   })
 })
 
-async function createPost(overrides?: Partial<Post>) {
+async function createPost(
+  { restClient }: { restClient: NextRESTClient },
+  overrides?: Partial<Post>,
+) {
   const { doc } = await restClient
     .POST(`/${postsSlug}`, {
       body: JSON.stringify({ title: 'title', ...overrides }),
@@ -1930,15 +2371,16 @@ async function createPost(overrides?: Partial<Post>) {
   return doc
 }
 
-async function createPosts(count: number) {
+async function createPosts({ restClient }: { restClient: NextRESTClient }, count: number) {
   for (let i = 0; i < count; i++) {
-    await createPost()
+    await createPost({ restClient })
   }
 }
 
-async function clearDocs(): Promise<void> {
+async function clearDocs({ payload }: { payload: Payload }): Promise<void> {
   await payload.delete({
     collection: postsSlug,
+    overrideAccess: true,
     where: { id: { exists: true } },
   })
 }

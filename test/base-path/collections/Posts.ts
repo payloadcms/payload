@@ -16,4 +16,5 @@ export const Posts: CollectionConfig = {
       type: 'textarea',
     },
   ],
+  versions: false,
 }

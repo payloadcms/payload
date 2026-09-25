@@ -21,10 +21,11 @@ const leaveWithoutSavingModalSlug = 'leave-without-saving'
 
 export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
   disablePreventLeave = false,
+  modalSlug: modalSlugProp,
   onConfirm,
   onPrevent,
 }) => {
-  const modalSlug = leaveWithoutSavingModalSlug
+  const modalSlug = modalSlugProp ?? leaveWithoutSavingModalSlug
   const { closeModal, openModal } = useModal()
   const modified = useFormModified()
   const { isValid } = useForm()

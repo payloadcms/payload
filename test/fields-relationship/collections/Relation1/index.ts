@@ -6,4 +6,5 @@ import { relationOneSlug } from '../../slugs.js'
 export const Relation1: CollectionConfig = {
   fields: baseRelationshipFields,
   slug: relationOneSlug,
+  versions: false,
 }

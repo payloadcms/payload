@@ -1,7 +1,7 @@
-import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
+import type { CookieStore } from 'payload'
 
 type GetRequestLanguageArgs = {
-  cookies: Map<string, string> | ReadonlyRequestCookies
+  cookies: CookieStore | Map<string, string>
   defaultLanguage?: string
   headers: Request['headers']
 }
