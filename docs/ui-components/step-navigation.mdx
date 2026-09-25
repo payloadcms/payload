@@ -1,0 +1,87 @@
+---
+title: Step Navigation
+label: Step Navigation
+order: 245
+desc: Set the Admin Panel's header breadcrumbs from a Payload Custom View.
+keywords: ui, components, custom view, step nav, breadcrumb, navigation, setstepnav, usestepnav
+---
+
+Step navigation is the breadcrumb trail rendered in the Admin Panel header. In a Custom View, use `SetStepNav` or `useStepNav` to populate that existing interface—you do not need to render another breadcrumb component.
+
+## Import
+
+```tsx
+import { SetStepNav, type StepNavItem, useStepNav } from '@payloadcms/ui'
+```
+
+## Custom View usage
+
+Use `SetStepNav` when the complete breadcrumb trail is known while rendering the Custom View.
+
+<ComponentPreview component="StepNavigation" example="customView" />
+
+`SetStepNav` renders no visible element itself. It updates the step navigation provider that surrounds Admin Panel views, and the header displays the resulting items.
+
+Define a static `nav` array outside the component when its contents do not change. This keeps the array reference stable and avoids updating the context after every render.
+
+## Dynamic navigation
+
+Use `useStepNav` when breadcrumb items depend on state that changes while the view remains mounted.
+
+```tsx
+'use client'
+
+import { useEffect } from 'react'
+import { useStepNav } from '@payloadcms/ui'
+
+export function OrderView({ orderNumber }: { orderNumber: string }) {
+  const { setStepNav } = useStepNav()
+
+  useEffect(() => {
+    setStepNav([
+      { label: 'Orders', url: '/admin/collections/orders' },
+      { label: `Order #${orderNumber}` },
+    ])
+  }, [orderNumber, setStepNav])
+
+  return <h1>Order #{orderNumber}</h1>
+}
+```
+
+Prefer `SetStepNav` unless you need direct access to the current `stepNav` value or need to update it in response to local state.
+
+## StepNavItem
+
+Each item contains a `label` and may contain a `url`.
+
+| Property   | Type                                          | Description                                                 |
+| ---------- | --------------------------------------------- | ----------------------------------------------------------- |
+| `label` \* | `StaticLabel \| LabelFunction \| JSX.Element` | Displays the translated or custom breadcrumb label.         |
+| `url`      | `string`                                      | Makes a non-current breadcrumb item navigable when present. |
+
+The final item represents the current location and is rendered as text. Earlier items with a `url` are rendered as links.
+
+_\* An asterisk denotes that a property is required._
+
+## SetStepNav props
+
+These are the props accepted by `SetStepNav`.
+
+| Prop     | Type            | Default | Description                                       |
+| -------- | --------------- | ------- | ------------------------------------------------- |
+| `nav` \* | `StepNavItem[]` | —       | Replaces the items displayed in the Admin header. |
+
+_\* An asterisk denotes that a prop is required._
+
+## Accessibility
+
+- Use short labels that identify each level in the current hierarchy.
+- Keep the current location as the final item.
+- Provide URLs for earlier items when users can safely return to those views.
+- Avoid duplicating the current page heading in every breadcrumb level.
+
+## Provider requirements
+
+`SetStepNav` and `useStepNav` depend on the step navigation provider already included in the Payload Admin Panel. Use them within an Admin Panel Custom Component or Custom View. Outside that context, setting the navigation is a no-op.
+
+See [Custom Views](/docs/custom-components/custom-views) for configuring a view in the Admin Panel.

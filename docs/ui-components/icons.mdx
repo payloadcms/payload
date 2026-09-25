@@ -1,0 +1,54 @@
+---
+title: Icons
+label: Icons
+order: 135
+desc: Use Payload's exported icons in Custom Views, controls, and other Admin Panel UI.
+keywords: ui, component, icon, graphic, svg, custom view
+---
+
+Payload exports the icons used throughout the Admin Panel so custom UI can use the same visual language.
+
+## Import
+
+```tsx
+import { CopyIcon, EditIcon, PlusIcon, SearchIcon } from '@payloadcms/ui'
+```
+
+## Available icons
+
+<ComponentPreview component="Icons" example="gallery" />
+
+Icons inherit their color from the surrounding text. Their default dimensions vary according to where each icon is used in the Admin Panel; apply a shared class to the surrounding element when your layout requires a consistent size.
+
+The client export includes:
+
+- `CalendarIcon`, `CheckIcon`, `ChevronIcon`, `CloseMenuIcon`, and `CodeBlockIcon`
+- `CopyIcon`, `DocumentIcon`, `DragHandleIcon`, `EditIcon`, and `ExternalLinkIcon`
+- `FolderIcon`, `GearIcon`, `GridViewIcon`, `LineIcon`, and `LinkIcon`
+- `ListViewIcon`, `LogOutIcon`, `MenuIcon`, `MinimizeMaximizeIcon`, and `MoreIcon`
+- `MoveFolderIcon`, `PlusIcon`, `SearchIcon`, `SwapIcon`, and `XIcon`
+- `ErrorIcon`, `InfoIcon`, `SuccessIcon`, and `WarningIcon` for notification states
+
+## Configurable icons
+
+Most icons render without props. These exports expose additional options:
+
+| Component              | Props                                         | Description                                          |
+| ---------------------- | --------------------------------------------- | ---------------------------------------------------- |
+| `ChevronIcon`          | `direction`, `size`, `ariaLabel`, `className` | Sets its direction, preset size, label, or class.    |
+| `GearIcon`             | `ariaLabel`, `className`                      | Adds an accessible label or custom class.            |
+| `MinimizeMaximizeIcon` | `isMinimized`, `className`                    | Switches between the minimize and maximize graphics. |
+| `DragHandleIcon`       | `className`                                   | Adds a custom class.                                 |
+| `EditIcon`             | `className`                                   | Adds a custom class.                                 |
+| `ExternalLinkIcon`     | `className`                                   | Adds a custom class.                                 |
+| `FolderIcon`           | `className`                                   | Adds a custom class.                                 |
+| `MoreIcon`             | `className`                                   | Adds a custom class.                                 |
+| `XIcon`                | `className`                                   | Adds a custom class.                                 |
+
+## Accessibility
+
+- Treat an icon as decorative when adjacent text already describes the action.
+- Give an icon-only button or link an accessible name on the interactive element.
+- Do not use color alone to communicate a state or outcome.
+
+The icons use SVG markup and require no Payload providers.
