@@ -287,15 +287,14 @@ const slugifyTitle: PostTitleHook = ({
 
   // Generate slug from title if not provided
   if (!siblingData.slug && value) {
-    const slug = value
+    return value
+      .trim()
+      .replace(/ /g, '-')
+      .replace(/[^\w-]+/g, '')
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-
-    return slug
   }
 
-  return value
+  return value ?? ''
 }
 
 // Hook for a relationship field
