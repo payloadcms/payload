@@ -1714,6 +1714,16 @@ importers:
         specifier: '>=8.0.0'
         version: 8.1.0(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
+  packages/transformer-cloudinary:
+    dependencies:
+      cloudinary:
+        specifier: ^2.11.0
+        version: 2.11.0
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/transformer-sharp:
     dependencies:
       file-type:
@@ -2606,6 +2616,9 @@ importers:
       '@payloadcms/tanstack-start':
         specifier: workspace:*
         version: link:../packages/tanstack-start
+      '@payloadcms/transformer-cloudinary':
+        specifier: workspace:*
+        version: link:../packages/transformer-cloudinary
       '@payloadcms/transformer-sharp':
         specifier: workspace:*
         version: link:../packages/transformer-sharp
@@ -10105,6 +10118,10 @@ packages:
 
   cloudflare@4.5.0:
     resolution: {integrity: sha512-fPcbPKx4zF45jBvQ0z7PCdgejVAPBBCZxwqk1k7krQNfpM07Cfj97/Q6wBzvYqlWXx/zt1S9+m8vnfCe06umbQ==}
+
+  cloudinary@2.11.0:
+    resolution: {integrity: sha512-o2pAkDDqrzPFE/mn9GCfFjBIGQmPs++Ts6rtkFl4vY528DNHiMovKWjH16HBjeGa9iwI7eAad24aWN2emT0aww==}
+    engines: {node: '>=9'}
 
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
@@ -24448,6 +24465,10 @@ snapshots:
       node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
+
+  cloudinary@2.11.0:
+    dependencies:
+      lodash: 4.18.1
 
   clsx@2.1.1: {}
 
