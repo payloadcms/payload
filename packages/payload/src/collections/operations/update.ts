@@ -445,21 +445,13 @@ export const updateOperation = async <
       return null
     }
 
-    // Upload processing may mutate its temp file while cropping, so each document must finish
-    // before the next document starts. This only applies when an actual file is being written
-    // (`req.file`); metadata-only bulk updates use isolated per-document request state and can
-    // stay parallel. Other bulk updates retain their existing parallel behavior.
-    const processSequentially =
-      req.payload.db.bulkOperationsSingleTransaction ||
-      Boolean(collectionConfig.upload && !overrideAccess && req.file)
-    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
-    if (processSequentially) {
-      awaitedDocs = []
-      for (const doc of docs) {
-        awaitedDocs.push(await processDocument(doc))
-      }
-    } else {
-      awaitedDocs = await Promise.all(docs.map(processDocument))
+    // Every document uses the transaction client attached to this request. Running document
+    // pipelines concurrently interleaves queries on that client, which can lose writes and is
+    // rejected by pg 9. Upload processing also mutates shared temp-file state.
+    type ProcessedDocument = Awaited<ReturnType<typeof processDocument>>
+    const awaitedDocs: ProcessedDocument[] = []
+    for (const doc of docs) {
+      awaitedDocs.push(await processDocument(doc))
     }
 
     await unlinkTempFiles({
@@ -469,7 +461,7 @@ export const updateOperation = async <
     })
 
     let result = {
-      docs: awaitedDocs.filter(Boolean),
+      docs: awaitedDocs.filter((doc): doc is NonNullable<ProcessedDocument> => doc !== null),
       errors,
     }
 
@@ -482,7 +474,6 @@ export const updateOperation = async <
       collection: collectionConfig,
       operation: 'update',
       overrideAccess,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })
 

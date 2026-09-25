@@ -41,6 +41,7 @@ import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
+  bulkOperationsSequentialSlug,
   customIDsSlug,
   customSchemaSlug,
   defaultValuesSlug,
@@ -2535,51 +2536,79 @@ describe('database', () => {
       expect(worldDocs).toHaveLength(5)
     })
 
-    it('should bulk update with bulkOperationsSingleTransaction: true', async () => {
-      const originalValue = payload.db.bulkOperationsSingleTransaction
-      payload.db.bulkOperationsSingleTransaction = true
+    for (const [transactionMode, bulkOperationsSingleTransaction] of [
+      ['default transaction mode', false],
+      ['bulkOperationsSingleTransaction enabled', true],
+    ] as const) {
+      describe(`bulk operations in ${transactionMode}`, () => {
+        const createdIDs: (number | string)[] = []
+        let originalBulkOperationsSingleTransaction: boolean
 
-      try {
-        const posts = await Promise.all([
-          payload.create({ collection, data: { title: 'test1' } }),
-          payload.create({ collection, data: { title: 'test2' } }),
-          payload.create({ collection, data: { title: 'test3' } }),
-        ])
-
-        const result = await payload.update({
-          collection,
-          data: { title: 'updated' },
-          where: { id: { in: posts.map((p) => p.id) } },
+        beforeEach(() => {
+          originalBulkOperationsSingleTransaction = payload.db.bulkOperationsSingleTransaction
+          payload.db.bulkOperationsSingleTransaction = bulkOperationsSingleTransaction
         })
 
-        expect(result.docs).toHaveLength(3)
-        expect(result.errors).toHaveLength(0)
-      } finally {
-        payload.db.bulkOperationsSingleTransaction = originalValue
-      }
-    })
+        afterEach(async () => {
+          payload.db.bulkOperationsSingleTransaction = originalBulkOperationsSingleTransaction
 
-    it('should bulk delete with bulkOperationsSingleTransaction: true', async () => {
-      const originalValue = payload.db.bulkOperationsSingleTransaction
-      payload.db.bulkOperationsSingleTransaction = true
+          const { docs: remainingDocs } = await payload.find({
+            collection: bulkOperationsSequentialSlug,
+            pagination: false,
+            where: { id: { in: createdIDs } },
+          })
 
-      try {
-        const posts = await Promise.all([
-          payload.create({ collection, data: { title: 'toDelete1' } }),
-          payload.create({ collection, data: { title: 'toDelete2' } }),
-        ])
-
-        const result = await payload.delete({
-          collection,
-          where: { id: { in: posts.map((p) => p.id) } },
+          for (const { id } of remainingDocs) {
+            await payload.delete({
+              id,
+              collection: bulkOperationsSequentialSlug,
+            })
+          }
+          createdIDs.length = 0
         })
 
-        expect(result.docs).toHaveLength(2)
-        expect(result.errors).toHaveLength(0)
-      } finally {
-        payload.db.bulkOperationsSingleTransaction = originalValue
-      }
-    })
+        async function seedBulkOperationDocuments(): Promise<(number | string)[]> {
+          const docs = await Promise.all(
+            Array.from({ length: 5 }, (_, index) =>
+              payload.create({
+                collection: bulkOperationsSequentialSlug,
+                data: { text: `bulk-${index}` },
+              }),
+            ),
+          )
+          const ids = docs.map((doc) => doc.id)
+
+          createdIDs.push(...ids)
+
+          return ids
+        }
+
+        it('should run bulk update document hooks sequentially', async () => {
+          const ids = await seedBulkOperationDocuments()
+
+          const result = await payload.update({
+            collection: bulkOperationsSequentialSlug,
+            data: { text: 'updated' },
+            where: { id: { in: ids } },
+          })
+
+          expect(result.docs).toHaveLength(5)
+          expect(result.errors).toHaveLength(0)
+        })
+
+        it('should run bulk delete document hooks sequentially', async () => {
+          const ids = await seedBulkOperationDocuments()
+
+          const result = await payload.delete({
+            collection: bulkOperationsSequentialSlug,
+            where: { id: { in: ids } },
+          })
+
+          expect(result.docs).toHaveLength(5)
+          expect(result.errors).toHaveLength(0)
+        })
+      })
+    }
 
     it('should CRUD point field', async () => {
       const result = await payload.create({
