@@ -1,13 +1,7 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
-import {
-  PopupList,
-  Translation,
-  useConfig,
-  useDocumentDrawer,
-  useTranslation,
-} from '@payloadcms/ui'
+import { useConfig, useDocumentDrawer, useTranslation } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import type {
@@ -31,6 +25,10 @@ export const ImportListMenuItem: React.FC<{
   >()
 
   const currentCollectionConfig = getEntityConfig({ collectionSlug })
+  const collectionLabel = getTranslation(currentCollectionConfig.labels.plural, i18n)
+  const actionLabel = t('plugin-import-export:importDocumentLabel', {
+    label: collectionLabel,
+  })
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     collectionSlug: importCollectionSlug,
@@ -43,19 +41,16 @@ export const ImportListMenuItem: React.FC<{
   }, [currentCollectionConfig, setCollection])
 
   return (
-    <PopupList.Button className={baseClass}>
-      <DocumentDrawerToggler>
-        <Translation
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          i18nKey="plugin-import-export:importDocumentLabel"
-          t={t}
-          variables={{
-            label: getTranslation(currentCollectionConfig.labels.plural, i18n),
-          }}
-        />
+    <>
+      <DocumentDrawerToggler
+        aria-label={actionLabel}
+        className={`popup-button-list__button ${baseClass}`}
+        role="menuitem"
+        tabIndex={-1}
+      >
+        <span className="popup-button-list__label">{actionLabel}</span>
       </DocumentDrawerToggler>
       <DocumentDrawer initialData={{ collectionSlug }} />
-    </PopupList.Button>
+    </>
   )
 }

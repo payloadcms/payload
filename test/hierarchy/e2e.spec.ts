@@ -641,7 +641,7 @@ test.describe('Hierarchy Sidebar', () => {
       await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
       // Select "Folder" from the popup menu
-      await page.getByRole('button', { name: 'Folder', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Folder', exact: true }).click()
 
       // Wait for drawer to open
       const drawer = page.locator('.drawer__content')
@@ -707,7 +707,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       const listControls = page.locator('.hierarchy-list__controls')
       await listControls.getByRole('button', { name: 'Create New' }).first().click()
-      await page.getByRole('button', { name: 'Folder', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Folder', exact: true }).click()
 
       const drawer = page.locator('.drawer__content')
       await expect(drawer).toBeVisible()

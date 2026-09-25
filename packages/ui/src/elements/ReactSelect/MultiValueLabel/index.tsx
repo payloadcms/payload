@@ -58,6 +58,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
         <button
           {...dragActivatorProps}
           className={`${baseClass}__drag-button`}
+          onKeyDown={dragActivatorOnKeyDown}
           ref={dragActivatorRef}
           type="button"
         >

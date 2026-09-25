@@ -216,7 +216,10 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.getByRole('menuitem', { name: 'Export', exact: true })
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts No Jobs Queues',
+        exact: true,
+      })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
 
@@ -266,7 +269,10 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.getByRole('menuitem', { name: 'Export', exact: true })
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts Exports Only',
+        exact: true,
+      })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
 
@@ -341,7 +347,10 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.getByRole('menuitem', { name: 'Export', exact: true })
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
+        })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
 
@@ -457,7 +466,10 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.getByRole('menuitem', { name: 'Export', exact: true })
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
+        })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
 
@@ -557,7 +569,10 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.getByRole('menuitem', { name: 'Export', exact: true })
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
+        })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
 
