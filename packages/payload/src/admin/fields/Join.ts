@@ -25,7 +25,7 @@ export type JoinFieldClientProps = ClientFieldBase<JoinFieldClientWithoutType> &
 
 export type JoinFieldServerProps = JoinFieldBaseServerProps &
   ServerFieldBase<JoinField, JoinFieldClientWithoutType>
-export type JoinFieldLabelServerProps = FieldLabelServerProps<JoinField>
+export type JoinFieldLabelServerProps = FieldLabelServerProps<JoinField, JoinFieldClientWithoutType>
 
 export type JoinFieldLabelClientProps = FieldLabelClientProps<JoinFieldClientWithoutType>
 

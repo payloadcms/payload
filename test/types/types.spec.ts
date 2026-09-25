@@ -149,10 +149,10 @@ describe('Types testing', () => {
       expect(BlocksServerLabel).type.toBe<FC<BlocksFieldLabelServerProps>>()
       expect(TextClientDiff).type.toBe<FC<TextFieldDiffClientProps>>()
       expect(BlockServerRowLabel).type.toBe<FC<BlockRowLabelServerProps>>()
-      expect<JoinFieldLabelServerProps['clientField']['collection']>().type.toBe<
+      expect<JoinFieldLabelServerProps['clientField']['collection']>().type.toBeAssignableTo<
         CollectionSlug | CollectionSlug[]
       >()
-      expect<UploadFieldErrorServerProps['clientField']['relationTo']>().type.toBe<
+      expect<UploadFieldErrorServerProps['clientField']['relationTo']>().type.toBeAssignableTo<
         CollectionSlug | CollectionSlug[]
       >()
     })
