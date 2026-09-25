@@ -69,13 +69,20 @@ export const reduceFields = ({
       }
 
       if (!isArrayOrBlocks && fieldHasSubFields(field)) {
+        const affectsData = fieldAffectsData(field)
+
         return [
           ...fieldsToUse,
           ...reduceFields({
             disabledFields,
             excludeUnsortable,
             fields: field.fields,
-            labelPrefix: combineLabel({ field, prefix: labelPrefix }),
+            labelPrefix: affectsData
+              ? combineLabel({
+                  field,
+                  prefix: labelPrefix,
+                })
+              : labelPrefix,
             path: createNestedClientFieldPath(path, field),
           }),
         ]
