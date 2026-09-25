@@ -1,5 +1,5 @@
 'use client'
-import type { TextFieldDiffClientComponent } from 'payload'
+import type { TextFieldDiffClientProps } from 'payload'
 
 import React from 'react'
 
@@ -47,7 +47,7 @@ function formatValue(value: unknown): {
   }
 }
 
-export const Text: TextFieldDiffClientComponent = ({
+export const Text: React.FC<TextFieldDiffClientProps> = ({
   comparisonValue: valueFrom,
   field,
   locale,
