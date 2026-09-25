@@ -53,7 +53,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: '水平線',
   },
   ko: {
-    label: '수평 규칙',
+    label: '수평선',
   },
   my: {
     label: 'Peraturan Mendatar',
