@@ -78,6 +78,7 @@ async function build() {
     minify: true,
     outdir: 'dist-styles',
     packages: 'external',
+    loader: { '.svg': 'dataurl' },
     plugins: [sassPlugin({ css: 'external' })],
   })
 
