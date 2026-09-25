@@ -128,6 +128,8 @@ export const sanitizeUploadData = <T>(data: T, operation: Operation): T => {
   delete sanitizedData.url
   // Server-owned; never accepted from the caller.
   delete sanitizedData._objectKey
+  delete sanitizedData._managedFiles
+  delete sanitizedData.original
 
   // On update, `prefix` is restored from the stored document (file identity); kept on create.
   if (operation === 'update') {
@@ -154,7 +156,7 @@ export const mergeUploadDataWithDocument = <T>(
 
   const mergedData: Record<string, unknown> = { ...data }
 
-  for (const property of ['_objectKey', 'filename', 'prefix', 'url']) {
+  for (const property of ['_managedFiles', '_objectKey', 'filename', 'original', 'prefix', 'url']) {
     if (!hasOwnProperty(data, property) && hasOwnProperty(document, property)) {
       mergedData[property] = getDocumentProperty(document, property, options)
     }
@@ -180,6 +182,7 @@ export const mergeUploadDataWithDocument = <T>(
 }
 
 const uploadDerivedProperties = [
+  '_managedFiles',
   '_objectKey',
   'filename',
   'filesize',
@@ -187,6 +190,7 @@ const uploadDerivedProperties = [
   'focalY',
   'height',
   'mimeType',
+  'original',
   'prefix',
   'sizes',
   'thumbnailURL',

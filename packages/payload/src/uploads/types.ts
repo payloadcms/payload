@@ -2,6 +2,16 @@ import type { CollectionConfig, TypeWithID } from '../collections/config/types.j
 import type { PayloadComponent } from '../config/types.js'
 import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
+import type { ManagedFileManifest } from './fileVersioning/types.js'
+
+export type OriginalFileData = {
+  filename: string
+  filesize: number
+  height?: null | number
+  mimeType: string
+  url: string
+  width?: null | number
+}
 
 export type FileSize = {
   filename: null | string
@@ -17,12 +27,14 @@ export type FileSizes = {
 }
 
 export type FileData = {
+  _managedFiles?: ManagedFileManifest | null
   filename: string
   filesize: number
   focalX?: number
   focalY?: number
   height: number
   mimeType: string
+  original?: null | OriginalFileData
   sizes: FileSizes
   tempFilePath?: string
   url?: string

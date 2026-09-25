@@ -129,6 +129,8 @@ default, migrations will be named using a timestamp.
 npm run payload migrate:create optional-name-here
 ```
 
+When upgrading a SQL project to a Payload release that adds upload file versioning, generate a migration in that project after updating Payload and before deploying with `push: false`. Inspect the generated migration for each upload collection: it should add nullable `original` metadata and `_managedFiles` columns to both the collection and its versions table, if versions are enabled. Then run `npm run payload migrate` during deployment. Payload does not ship a single migration for these fields because upload collection tables are defined by each project's config. Existing rows retain null values until they are read or updated by the versioning flow.
+
 Flags:
 
 - `--skip-empty`: with Postgres, it skips the "no schema changes detected. Would you like to create a blank migration file?" prompt which can be useful for generating migration in CI.

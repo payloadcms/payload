@@ -3,6 +3,7 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { UploadConfig } from './types.js'
 
+import { managedFileManifestJSONSchema } from './fileVersioning/manifestJSONSchema.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 import { validateUploadFilename } from './validateUploadFilename.js'
@@ -169,6 +170,54 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     filesize,
     width,
     height,
+    {
+      name: 'original',
+      type: 'group',
+      admin: {
+        hidden: true,
+        readOnly: true,
+      },
+      fields: [
+        { ...filename, index: false, unique: false },
+        {
+          ...url,
+          hooks: {
+            afterRead: [
+              ({ data, originalDoc, req, value }) =>
+                generateFilePathOrURL({
+                  collectionSlug: collection.slug,
+                  config,
+                  filename: data?.original?.filename || originalDoc?.original?.filename,
+                  relative: false,
+                  serverURL: req.payload.config.serverURL,
+                  urlOrPath: value,
+                }),
+            ],
+            beforeChange: [
+              ({ data, originalDoc, req, value }) =>
+                generateFilePathOrURL({
+                  collectionSlug: collection.slug,
+                  config,
+                  filename: data?.original?.filename || originalDoc?.original?.filename,
+                  relative: true,
+                  serverURL: req.payload.config.serverURL,
+                  urlOrPath: value,
+                }),
+            ],
+          },
+        },
+        mimeType,
+        filesize,
+        width,
+        height,
+      ],
+    },
+    {
+      name: '_managedFiles',
+      type: 'json',
+      hidden: true,
+      jsonSchema: managedFileManifestJSONSchema,
+    },
   ]
 
   // Add focal point fields if not disabled
