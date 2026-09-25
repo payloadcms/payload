@@ -30,10 +30,27 @@ export const optimizeDepsExcludeDefaults: string[] = [
   '@azure/storage-blob',
   // Preserve RSC client boundaries on storage admin upload handlers.
   '@payloadcms/storage-azure',
+  '@payloadcms/storage-r2',
   '@payloadcms/storage-vercel-blob',
   '@aws-sdk/client-s3',
   '@aws-sdk/s3-request-presigner',
   '@google-cloud/storage',
+  // Packages whose admin component barrel re-exports `'use client'` modules
+  // without carrying the directive itself. Pre-bundling one puts those modules
+  // in the optimized dep chunk *and* in the `rsc` environment as client
+  // references, which `@vitejs/plugin-rsc` warns about ("client component
+  // dependency is inconsistently optimized") once per component. Barrels that
+  // start with `'use client'` (e.g. `richtext-lexical`, `plugin-stripe`) don't
+  // warn and stay pre-bundled. Only shows up in published installs; workspace
+  // source is never pre-bundled.
+  '@payloadcms/plugin-cloud-storage',
+  '@payloadcms/plugin-ecommerce',
+  '@payloadcms/plugin-form-builder',
+  '@payloadcms/plugin-import-export',
+  '@payloadcms/plugin-multi-tenant',
+  '@payloadcms/plugin-search',
+  '@payloadcms/plugin-sentry',
+  '@payloadcms/plugin-seo',
 ]
 
 /**
