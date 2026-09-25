@@ -1505,6 +1505,35 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         }
       })
 
+      test('should serve the original file for resize parameters on a collection without dynamic resizing', async ({
+        payload,
+        restClient,
+      }) => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file.name = `not-dynamic-${randomUUID()}.png`
+
+        const doc = await payload.create({
+          collection: reduceSlug,
+          data: {},
+          file,
+          overrideAccess: true,
+        })
+
+        try {
+          const stored = fs.readFileSync(path.resolve(dirname, './media/reduce', doc.filename!))
+          const response = await restClient.GET(`/${reduceSlug}/file/${doc.filename}`, {
+            query: { width: 100 },
+          })
+          const body = Buffer.from(await response.arrayBuffer())
+
+          expect(response.status).toBe(200)
+          expect(body.equals(stored)).toBe(true)
+        } finally {
+          await payload.delete({ id: doc.id, collection: reduceSlug, overrideAccess: true })
+        }
+      })
+
       test('should serve files with hash characters in filename', async ({
         payload,
         restClient,

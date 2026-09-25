@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload'
+import type { Config, PayloadRequest, UploadCollectionSlug } from 'payload'
 
 import { describe, expect, it, vi } from 'vitest'
 
@@ -47,36 +47,65 @@ describe('sharpTransformer', () => {
   })
 
   describe('canTransform', () => {
-    it('should return false when no recognized dynamic parameter is present', async () => {
+    it('should not route resize requests by default', async () => {
       const transformer = sharpTransformer()
+      await expect(
+        Promise.resolve(transformer.canTransform!(makeCanTransformArgs('width=500'))),
+      ).resolves.toBe(false)
+    })
+
+    it('should not route resize requests when dynamic is false', async () => {
+      const transformer = sharpTransformer({ dynamic: false })
+      await expect(
+        Promise.resolve(transformer.canTransform!(makeCanTransformArgs('width=500'))),
+      ).resolves.toBe(false)
+    })
+
+    it('should route resize requests only for collections listed in dynamic.collections', async () => {
+      const transformer = sharpTransformer({ dynamic: { collections: ['media'] } })
+      await expect(
+        Promise.resolve(transformer.canTransform!(makeCanTransformArgs('width=500'))),
+      ).resolves.toBe(true)
+      await expect(
+        Promise.resolve(
+          transformer.canTransform!({
+            ...makeCanTransformArgs('width=500'),
+            collectionSlug: 'docs',
+          }),
+        ),
+      ).resolves.toBe(false)
+    })
+
+    it('should return false when no recognized dynamic parameter is present', async () => {
+      const transformer = sharpTransformer({ dynamic: true })
       await expect(
         Promise.resolve(transformer.canTransform!(makeCanTransformArgs())),
       ).resolves.toBe(false)
     })
 
     it('should return true for a valid resize request', async () => {
-      const transformer = sharpTransformer()
+      const transformer = sharpTransformer({ dynamic: true })
       await expect(
         Promise.resolve(transformer.canTransform!(makeCanTransformArgs('width=500'))),
       ).resolves.toBe(true)
     })
 
     it('should return true for an invalid/malformed resize request, deferring the 400 to handleRequest', async () => {
-      const transformer = sharpTransformer()
+      const transformer = sharpTransformer({ dynamic: true })
       await expect(
         Promise.resolve(transformer.canTransform!(makeCanTransformArgs('width=not-a-number'))),
       ).resolves.toBe(true)
     })
 
     it('should ignore unrelated query keys', async () => {
-      const transformer = sharpTransformer()
+      const transformer = sharpTransformer({ dynamic: true })
       await expect(
         Promise.resolve(transformer.canTransform!(makeCanTransformArgs('draft=true&depth=1'))),
       ).resolves.toBe(false)
     })
 
     it('should treat a request with no searchParams as not routed', async () => {
-      const transformer = sharpTransformer()
+      const transformer = sharpTransformer({ dynamic: true })
       const args = {
         ...makeCanTransformArgs(),
         req: {} as PayloadRequest,
@@ -99,6 +128,30 @@ describe('sharpTransformer', () => {
           transformer.canTransform!({ ...makeCanTransformArgs(), operation: 'upload' }),
         ),
       ).resolves.toBe(true)
+    })
+  })
+
+  describe('init', () => {
+    const makeConfig = () =>
+      ({
+        collections: [
+          { slug: 'media', fields: [], upload: true },
+          { slug: 'posts', fields: [] },
+        ],
+      }) as unknown as Config
+
+    it('should accept dynamic.collections that are upload-enabled', async () => {
+      const transformer = sharpTransformer({ dynamic: { collections: ['media'] } })
+      await expect(Promise.resolve(transformer.init!(makeConfig()))).resolves.toBeDefined()
+    })
+
+    it('should reject dynamic.collections that are unknown or not upload-enabled', () => {
+      const transformer = sharpTransformer({
+        dynamic: { collections: ['posts', 'missing'] as unknown as UploadCollectionSlug[] },
+      })
+      expect(() => transformer.init!(makeConfig())).toThrow(
+        /not an upload-enabled collection: "posts", "missing"/,
+      )
     })
   })
 

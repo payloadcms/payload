@@ -4,5 +4,6 @@ export type {
   SharpCollectionConfig,
   SharpDependency,
   SharpDynamicDefaults,
+  SharpDynamicOptions,
   SharpTransformerOptions,
 } from './types.js'
