@@ -23,6 +23,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
     devMode,
     divProps,
     editProps,
+    labels,
     logo,
     logoProps,
     logoutProps,
@@ -34,6 +35,19 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
     unstyled,
     userProps,
   } = props
+
+  const singular = collectionLabels?.singular
+  const editLabel =
+    typeof labels?.edit === 'function'
+      ? labels.edit({ singular })
+      : (labels?.edit ?? `Edit ${singular || 'page'}`)
+  const createLabel =
+    typeof labels?.create === 'function'
+      ? labels.create({ singular })
+      : (labels?.create ?? `New ${singular || 'page'}`)
+  const exitPreviewLabel = labels?.exitPreview ?? 'Exit preview mode'
+  const logoutLabel = labels?.logout ?? 'Logout'
+  const profileLabel = labels?.profile ?? 'Profile'
 
   const [user, setUser] = useState<PayloadMeUser>()
 
@@ -165,7 +179,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
                 : {}),
             }}
           >
-            {email || 'Profile'}
+            {email || profileLabel}
           </span>
         </a>
         <div
@@ -227,7 +241,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
                     : {}),
                 }}
               >
-                {`Edit ${collectionLabels?.singular || 'page'}`}
+                {editLabel}
               </span>
             </a>
           )}
@@ -268,7 +282,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
                     : {}),
                 }}
               >
-                {`New ${collectionLabels?.singular || 'page'}`}
+                {createLabel}
               </span>
             </a>
           )}
@@ -298,7 +312,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
               }}
               type="button"
             >
-              Exit preview mode
+              {exitPreviewLabel}
             </button>
           )}
         </div>
@@ -338,7 +352,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
                 : {}),
             }}
           >
-            Logout
+            {logoutLabel}
           </span>
         </a>
       </div>
