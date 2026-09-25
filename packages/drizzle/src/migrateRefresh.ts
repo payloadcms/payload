@@ -2,7 +2,7 @@ import type { MigrationResult } from 'payload'
 
 import {
   commitTransaction,
-  createLocalReq,
+  createPayloadRequest,
   getMigrations,
   initTransaction,
   killTransaction,
@@ -35,7 +35,7 @@ export async function migrateRefresh(this: DrizzleAdapter): Promise<MigrationRes
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  const req = await createLocalReq({}, payload)
+  const req = await createPayloadRequest({ payload })
   const migrated: string[] = []
   const rolledBack: string[] = []
 

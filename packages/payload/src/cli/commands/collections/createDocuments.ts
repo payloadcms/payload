@@ -1,7 +1,7 @@
 import type { EntityInputSchema } from '../../../utilities/entityInputSchema/types.js'
 
 import { createDocumentsLocalInputSchema } from '../../../collections/operations/inputSchemas.js'
-import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../../utilities/createPayloadRequest.js'
 import { hasDraftValidationEnabled } from '../../../utilities/getVersionsConfig.js'
 import { defineCLICommand } from '../../defineCLICommand.js'
 import {
@@ -40,7 +40,7 @@ export const createCreateDocumentsCommand = defineCLICommand({
     const docs: Array<{ doc: unknown; index: number } | { id: number | string; index: number }> = []
     const errors: Array<{ index: number; issues?: unknown[]; message: string }> = []
     let schema: EntityInputSchema | undefined
-    const req = await createLocalReq({}, payload)
+    const req = await createPayloadRequest({ payload })
     const shouldUsePartialSchema =
       args.draft === true &&
       collectionConfig !== undefined &&

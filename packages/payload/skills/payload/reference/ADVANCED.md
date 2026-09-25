@@ -20,6 +20,7 @@ const response = await fetch('/api/users/login', {
 // Local API
 const result = await payload.login({
   collection: 'users',
+  overrideAccess: false, // intentionally run the collection's login access control
   data: {
     email: 'user@example.com',
     password: 'password',
@@ -32,6 +33,7 @@ const result = await payload.login({
 ```ts
 await payload.forgotPassword({
   collection: 'users',
+  overrideAccess: true,
   data: {
     email: 'user@example.com',
   },
@@ -115,13 +117,14 @@ export default buildConfig({
 ### Queueing Jobs
 
 ```ts
-// In a hook or endpoint
+// In a trusted hook or other system operation
 await req.payload.jobs.queue({
   task: 'sendWelcomeEmail',
   input: {
     userEmail: 'user@example.com',
     userName: 'John',
   },
+  overrideAccess: true,
   waitUntil: new Date('2024-12-31'), // Optional: schedule for future
 })
 ```
@@ -200,6 +203,8 @@ const featuredEndpoint: Endpoint = {
   handler: async (req) => {
     const posts = await req.payload.find({
       collection: 'posts',
+      overrideAccess: false,
+      req,
       where: { featured: { equals: true } },
     })
     return Response.json(posts)
@@ -361,6 +366,7 @@ const localizedField: TextField = {
 // Query with locale
 const posts = await payload.find({
   collection: 'posts',
+  overrideAccess: true,
   locale: 'es',
 })
 ```

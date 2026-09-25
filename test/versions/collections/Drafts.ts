@@ -5,7 +5,17 @@ import { draftCollectionSlug, secondaryAdminUserCollectionSlug } from '../slugs.
 const DraftPosts: CollectionConfig = {
   slug: draftCollectionSlug,
   access: {
-    read: ({ req: { user } }) => {
+    read: ({ req }) => {
+      if (typeof req.context.draftAccessDescription === 'string') {
+        return {
+          description: {
+            equals: req.context.draftAccessDescription,
+          },
+        }
+      }
+
+      const { user } = req
+
       if (user) {
         return true
       }
