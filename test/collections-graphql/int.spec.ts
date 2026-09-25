@@ -1493,6 +1493,70 @@ test.suite('collections-graphql', { config: './config.ts' }, () => {
       expect(errors[0].extensions.name).toEqual('Error')
     })
   })
+
+  test.describe('select projection', () => {
+    test('should keep the sub-selection for an aliased relationship', async ({
+      payload,
+      restClient,
+    }) => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'aliased' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: slug,
+        data: { relationField: relation.id, title: 'post' },
+        overrideAccess: true,
+      })
+
+      const query = `query {
+        Post(id: ${formatID(post.id)}, select: true) {
+          aliased: relationField { id name }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(errors).toBeUndefined()
+      expect(data.Post.aliased).toMatchObject({ id: relation.id, name: 'aliased' })
+    })
+
+    test('should keep concurrent root field selections separate', async ({
+      payload,
+      restClient,
+    }) => {
+      const relation = await payload.create({
+        collection: relationSlug,
+        data: { name: 'concurrent' },
+        overrideAccess: true,
+      })
+      const post = await payload.create({
+        collection: slug,
+        data: { relationField: relation.id, title: 'post' },
+        overrideAccess: true,
+      })
+
+      const query = `query {
+        first: Post(id: ${formatID(post.id)}, select: true) {
+          relationField { name }
+        }
+        second: Post(id: ${formatID(post.id)}, select: true) {
+          relationField { id }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(errors).toBeUndefined()
+      expect(data.first.relationField.name).toBe('concurrent')
+      expect(data.second.relationField.id).toBe(relation.id)
+    })
+  })
 })
 
 async function createPost({ payload }: { payload: Payload }, overrides?: Partial<Post>) {
