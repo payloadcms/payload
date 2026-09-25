@@ -82,6 +82,7 @@ describe('Lexical Fully Featured - database', () => {
       const uploadedImage = await payload.find({
         collection: 'uploads',
         where: { filename: { equals: expectedFileName || 'payload-1.jpg' } },
+        overrideAccess: true,
       })
       expect(uploadedImage.totalDocs).toBe(1)
     }
@@ -126,6 +127,7 @@ describe('Lexical Fully Featured - database', () => {
       const lexicalFullyFeatured = await payload.find({
         collection: lexicalFullyFeaturedSlug,
         limit: 1,
+        overrideAccess: true,
       })
       const richText = lexicalFullyFeatured?.docs?.[0]?.richText
 
@@ -231,6 +233,7 @@ describe('Lexical Fully Featured - database', () => {
           ],
         }),
       },
+      overrideAccess: true,
     })
 
     /**

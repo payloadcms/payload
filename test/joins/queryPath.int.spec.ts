@@ -5,8 +5,9 @@ import { expect, vi } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
 
-test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' })(
+test.suite(
   'mongodb read path selection',
+  { db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atlas' },
   () => {
     const createdIDs: (number | string)[] = []
 
@@ -52,6 +53,7 @@ test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atla
         collection: 'categories',
         // @ts-expect-error not generated
         data: { title: 'a' },
+        overrideAccess: true,
       })
       createdIDs.push(category.id)
 
@@ -68,7 +70,7 @@ test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atla
       const payload = await getPayloadInstance()
 
       for (const id of createdIDs) {
-        await payload.delete({ collection: 'categories', id })
+        await payload.delete({ collection: 'categories', id, overrideAccess: true })
       }
 
       createdIDs.length = 0
@@ -87,6 +89,7 @@ test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atla
         // @ts-expect-error not generated
         select: { title: true },
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
@@ -106,6 +109,7 @@ test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atla
         joins: { posts: false },
         limit: 20,
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
@@ -124,6 +128,7 @@ test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atla
         id: category.id,
         // @ts-expect-error not generated
         select: { title: true },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).not.toHaveBeenCalled()
@@ -141,6 +146,7 @@ test.suite({ db: (adapter) => adapter === 'mongodb' || adapter === 'mongodb-atla
         collection: 'categories',
         limit: 20,
         where: { title: { equals: 'a' } },
+        overrideAccess: true,
       })
 
       expect(aggregateSpy).toHaveBeenCalledTimes(1)

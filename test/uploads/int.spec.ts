@@ -52,7 +52,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const stat = promisify(fs.stat)
 
-test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - Uploads', () => {
+test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: false }, () => {
   test.beforeAll(async ({ restClientInstance: restClient }) => {
     await restClient.login({ slug: usersSlug })
   })
@@ -257,7 +257,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIDs) {
-        await payload.delete({ id, collection: fileAccessMediaSlug as CollectionSlug })
+        await payload.delete({
+          id,
+          collection: fileAccessMediaSlug as CollectionSlug,
+          overrideAccess: true,
+        })
       }
       createdIDs.length = 0
       fs.rmSync(staticDir, { force: true, recursive: true })
@@ -274,6 +278,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: fileAccessMediaSlug as CollectionSlug,
         data: { prefix: 'restricted', visibility: 'restricted' },
         file: restrictedFile,
+        overrideAccess: true,
       })
 
       createdIDs.push(restrictedDoc.id)
@@ -285,6 +290,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: fileAccessMediaSlug as CollectionSlug,
         data: { prefix: 'public', visibility: 'public' },
         file: readableFile,
+        overrideAccess: true,
       })
 
       createdIDs.push(readableDoc.id)
@@ -309,6 +315,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       const updatedDoc = await payload.findByID({
         id: readableDoc.id,
         collection: fileAccessMediaSlug as CollectionSlug,
+        overrideAccess: true,
       })
 
       expect(updatedDoc.filename).toBe(readableDoc.filename)
@@ -331,6 +338,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: fileAccessMediaSlug as CollectionSlug,
         data: { prefix: 'public', visibility: 'public' },
         file,
+        overrideAccess: true,
       })
       createdIDs.push(doc.id)
 
@@ -355,6 +363,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: fileAccessMediaSlug as CollectionSlug,
         data: { prefix: 'public', visibility: 'public' },
         file,
+        overrideAccess: true,
       })
       createdIDs.push(doc.id)
 
@@ -366,6 +375,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       const updatedDoc = await payload.findByID({
         id: doc.id,
         collection: fileAccessMediaSlug as CollectionSlug,
+        overrideAccess: true,
       })
 
       expect(updatedDoc.filename).toBe(doc.filename)
@@ -389,6 +399,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             collection: fileAccessMediaSlug as CollectionSlug,
             data: { prefix: name, visibility: 'public' },
             file,
+            overrideAccess: true,
           })
           createdIDs.push(doc.id)
           return doc
@@ -410,6 +421,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         const updatedDoc = await payload.findByID({
           id: doc.id,
           collection: fileAccessMediaSlug as CollectionSlug,
+          overrideAccess: true,
         })
 
         expect(updatedDoc.filename).toBe(doc.filename)
@@ -433,6 +445,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             collection: fileAccessMediaSlug as CollectionSlug,
             data: { prefix: name, visibility: 'public' },
             file,
+            overrideAccess: true,
           })
           createdIDs.push(doc.id)
           return doc
@@ -468,7 +481,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
         const updatedDocs = await Promise.all(
           docs.map(({ id }) =>
-            payload.findByID({ id, collection: fileAccessMediaSlug as CollectionSlug }),
+            payload.findByID({
+              id,
+              collection: fileAccessMediaSlug as CollectionSlug,
+              overrideAccess: true,
+            }),
           ),
         )
         expect(new Set(updatedDocs.map(({ filename }) => filename)).size).toBe(2)
@@ -501,6 +518,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: fileAccessMediaSlug as CollectionSlug,
         data: { prefix: 'public', visibility: 'public' },
         file,
+        overrideAccess: true,
       })
       createdIDs.push(doc.id)
 
@@ -520,6 +538,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       const updatedDoc = await payload.findByID({
         id: doc.id,
         collection: fileAccessMediaSlug as CollectionSlug,
+        overrideAccess: true,
       })
 
       expect(updatedDoc.filename).not.toBe(doc.filename)
@@ -535,6 +554,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: fileAccessMediaSlug as CollectionSlug,
         data: { prefix: 'current', visibility: 'public' },
         file,
+        overrideAccess: true,
       })
       createdIDs.push(doc.id)
 
@@ -555,6 +575,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       const updatedDoc = await payload.findByID({
         id: doc.id,
         collection: fileAccessMediaSlug as CollectionSlug,
+        overrideAccess: true,
       })
 
       expect(updatedDoc.filename).not.toBe(doc.filename)
@@ -572,6 +593,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: fileAccessMediaSlug as CollectionSlug,
         data: { prefix: 'current', visibility: 'public' },
         file: currentFile,
+        overrideAccess: true,
       })
       createdIDs.push(currentDoc.id)
 
@@ -585,6 +607,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       currentDoc = await payload.findByID({
         id: currentDoc.id,
         collection: fileAccessMediaSlug as CollectionSlug,
+        overrideAccess: true,
       })
 
       const otherFile = await getFileByPath(path.resolve(dirname, './test-image.png'))
@@ -593,11 +616,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: fileAccessMediaSlug as CollectionSlug,
         data: { prefix: 'other', visibility: 'restricted' },
         file: otherFile,
+        overrideAccess: true,
       })
       createdIDs.push(otherDoc.id)
 
       const { docs: versions } = await payload.findVersions({
         collection: fileAccessMediaSlug as CollectionSlug,
+        overrideAccess: true,
         where: { parent: { equals: currentDoc.id } },
       })
       const version = versions[0]!
@@ -629,6 +654,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       const restoredDoc = await payload.findByID({
         id: currentDoc.id,
         collection: fileAccessMediaSlug as CollectionSlug,
+        overrideAccess: true,
       })
       const restoredStoredDoc = await payload.db.findOne({
         collection: fileAccessMediaSlug,
@@ -702,7 +728,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(doc.width).toBeDefined()
         expect(doc.sizes.tablet.filename).toBeDefined()
 
-        await payload.delete({ id: doc.id, collection: mediaSlug })
+        await payload.delete({ id: doc.id, collection: mediaSlug, overrideAccess: true })
       })
 
       /**
@@ -901,6 +927,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: skipSafeFetchMediaSlug as CollectionSlug,
           data: {},
           file: originalFile,
+          overrideAccess: true,
         })
         createdIDs.push(originalDoc.id)
 
@@ -937,7 +964,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         } finally {
           await Promise.all(
             createdIDs.map((id) =>
-              payload.delete({ collection: skipSafeFetchMediaSlug as CollectionSlug, id }),
+              payload.delete({
+                id,
+                collection: skipSafeFetchMediaSlug as CollectionSlug,
+                overrideAccess: true,
+              }),
             ),
           )
           await new Promise((resolve) => sourceServer.close(resolve))
@@ -955,6 +986,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         expect(mediaDoc.url).toBeDefined()
@@ -970,7 +1002,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(mediaDoc.sizes?.icon?.url).toContain('%20')
         expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       })
 
       test('creates from form data given an svg', async ({ restClient }) => {
@@ -1231,6 +1263,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file: await getFileByPath(path.resolve(dirname, './image.png')),
+          overrideAccess: true,
         })) as unknown as Media
 
         const response = await restClient.PATCH(`/${mediaSlug}/${mediaDoc.id}`, {
@@ -1249,12 +1282,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         const unchangedDoc = (await payload.findByID({
           id: mediaDoc.id,
           collection: mediaSlug,
+          overrideAccess: true,
         })) as unknown as Media
 
         expect(unchangedDoc.filename).toBe(mediaDoc.filename)
         expect(unchangedDoc.sizes.icon.filename).toBe(mediaDoc.sizes.icon.filename)
 
-        await payload.delete({ id: mediaDoc.id, collection: mediaSlug })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       })
 
       test('should replace image and delete old files - by ID', async ({ payload, restClient }) => {
@@ -1266,6 +1300,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         const formData = new FormData()
@@ -1301,6 +1336,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         const formData = new FormData()
@@ -1339,6 +1375,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file: await getFileByPath(path.resolve(dirname, './image.png')),
+          overrideAccess: true,
         })) as unknown as Media
         const outsideFilename = `retained-${randomUUID()}.txt`
         const outsidePath = path.join(dirname, outsideFilename)
@@ -1351,7 +1388,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           data: { filename: path.join('..', outsideFilename) },
         })
 
-        await expect(payload.delete({ id: mediaDoc.id, collection: mediaSlug })).rejects.toThrow()
+        await expect(
+          payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true }),
+        ).rejects.toThrow()
         expect(await fileExists(outsidePath)).toBe(true)
 
         await payload.db.updateOne({
@@ -1359,7 +1398,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: { filename: mediaDoc.filename },
         })
-        await payload.delete({ id: mediaDoc.id, collection: mediaSlug })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
         fs.rmSync(outsidePath)
       })
 
@@ -1432,6 +1471,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })
 
         expect(mediaDoc.url).toContain('%23')
@@ -1445,7 +1485,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(response.status).toBe(200)
         expect(response.headers.get('content-type')).toContain('image/png')
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       })
 
       test('should return the media document with the correct file type', async ({
@@ -1460,6 +1500,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         const response = await restClient.GET(`/${mediaSlug}/file/${mediaDoc.filename}`)
@@ -1468,7 +1509,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
         expect(response.headers.get('content-type')).toContain('image/png')
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       })
     })
   })
@@ -1483,6 +1524,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: svgOnlySlug as CollectionSlug,
           data: {},
           filePath: svgFilePath,
+          overrideAccess: true,
         })
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
@@ -1497,16 +1539,21 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: anyImagesSlug as CollectionSlug,
           data: {},
           file: {
+            name: 'svgWithXml.svg',
             data: fileBuffer,
             mimetype: 'image/svg+xml',
-            name: 'svgWithXml.svg',
             size: fileBuffer.length,
           },
+          overrideAccess: true,
         })
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
 
-        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
+        await payload.delete({
+          id: doc.id,
+          collection: anyImagesSlug as CollectionSlug,
+          overrideAccess: true,
+        })
       })
 
       test('should create documents for JPEG XL files, which sharp cannot decode', async ({
@@ -1522,11 +1569,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: anyImagesSlug as CollectionSlug,
           data: {},
           file: {
+            name: 'test-image.jxl',
             data: fileBuffer,
             mimetype: 'image/jxl',
-            name: 'test-image.jxl',
             size: fileBuffer.length,
           },
+          overrideAccess: true,
         })
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
@@ -1534,7 +1582,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(doc.width).toEqual(800)
         expect(doc.height).toEqual(800)
 
-        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
+        await payload.delete({
+          id: doc.id,
+          collection: anyImagesSlug as CollectionSlug,
+          overrideAccess: true,
+        })
       })
 
       test('should upload svg files', async ({ payload }) => {
@@ -1545,6 +1597,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: anyImagesSlug as CollectionSlug,
           data: {},
           filePath: svgFilePath,
+          overrideAccess: true,
         })
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
         expect(doc.mimeType).toEqual('image/svg+xml')
@@ -1559,11 +1612,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: adminThumbnailSizeSlug as CollectionSlug,
           data: {},
           file: {
+            name: 'test-thumbnail.svg',
             data: fileBuffer,
             mimetype: 'image/svg+xml',
-            name: 'test-thumbnail.svg',
             size: fileBuffer.length,
           },
+          overrideAccess: true,
         })
 
         expect(doc.id).toBeDefined()
@@ -1572,8 +1626,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
         // Clean up
         await payload.delete({
-          collection: adminThumbnailSizeSlug as CollectionSlug,
           id: doc.id,
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          overrideAccess: true,
         })
       })
     })
@@ -1595,12 +1650,14 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             collection: mediaSlug,
             data: {},
             file: sourceFile,
+            overrideAccess: true,
           })
           createdDocIDs.push(sourceDoc.id)
           const targetDoc = await payload.create({
             collection: mediaSlug,
             data: {},
             file: targetFile,
+            overrideAccess: true,
           })
           createdDocIDs.push(targetDoc.id)
           const targetPath = path.join(dirname, './media', targetDoc.filename)
@@ -1632,7 +1689,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           expect(doc.filename).toBe(sourceDoc.filename)
         } finally {
           await Promise.all(
-            createdDocIDs.map((id) => payload.delete({ collection: mediaSlug, id })),
+            createdDocIDs.map((id) =>
+              payload.delete({ id, collection: mediaSlug, overrideAccess: true }),
+            ),
           )
         }
       })
@@ -1650,6 +1709,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             collection: mediaSlug,
             data: {},
             file: sourceFile,
+            overrideAccess: true,
           })
           createdDocIDs.push(sourceDoc.id)
           const sourcePath = path.join(dirname, './media', sourceDoc.filename)
@@ -1681,7 +1741,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           expect(metadata).toMatchObject({ height: 40, width: 40 })
         } finally {
           await Promise.all(
-            createdDocIDs.map((id) => payload.delete({ collection: mediaSlug, id })),
+            createdDocIDs.map((id) =>
+              payload.delete({ id, collection: mediaSlug, overrideAccess: true }),
+            ),
           )
         }
       })
@@ -1739,6 +1801,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                 collection: mediaSlug,
                 data: {},
                 file,
+                overrideAccess: true,
               })
               createdDocIDs.push(doc.id)
               return doc
@@ -1750,6 +1813,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             data: {
               alt: observationValue,
             },
+            overrideAccess: true,
             req: {
               query: {
                 uploadEdits: {
@@ -1783,7 +1847,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         } finally {
           collectionHooks.beforeChange = originalBeforeChange
           await Promise.all(
-            createdDocIDs.map((id) => payload.delete({ collection: mediaSlug, id })),
+            createdDocIDs.map((id) =>
+              payload.delete({ id, collection: mediaSlug, overrideAccess: true }),
+            ),
           )
         }
       })
@@ -1798,6 +1864,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         const expectedPath = path.join(dirname, './media')
@@ -1811,17 +1878,22 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         newFile.name = 'temp-renamed.png'
 
         const updatedMediaDoc = (await payload.update({
-          collection: mediaSlug,
           id: mediaDoc.id,
-          file: newFile,
+          collection: mediaSlug,
           data: {},
+          file: newFile,
+          overrideAccess: true,
         })) as unknown as Media
 
         // Check that the replacement file was created and the old one was removed
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true)
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
 
-        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.id })
+        await payload.delete({
+          id: updatedMediaDoc.id,
+          collection: mediaSlug,
+          overrideAccess: true,
+        })
       })
 
       test('should remove existing media on re-upload - where query', async ({ payload }) => {
@@ -1834,6 +1906,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         const expectedPath = path.join(dirname, './media')
@@ -1848,11 +1921,12 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
         const updatedMediaDoc = (await payload.update({
           collection: mediaSlug,
+          data: {},
+          file: newFile,
+          overrideAccess: true,
           where: {
             id: { equals: mediaDoc.id },
           },
-          file: newFile,
-          data: {},
         })) as unknown as { docs: Media[] }
 
         // Check that the replacement file was created and the old one was removed
@@ -1862,7 +1936,11 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         )
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
 
-        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.docs[0].id })
+        await payload.delete({
+          id: updatedMediaDoc.docs[0].id,
+          collection: mediaSlug,
+          overrideAccess: true,
+        })
       })
 
       test('should remove sizes that do not pertain to the new image - by ID', async ({
@@ -1876,13 +1954,15 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })
 
         const doc = (await payload.update({
-          collection: mediaSlug,
           id,
+          collection: mediaSlug,
           data: {},
           file: small,
+          overrideAccess: true,
         })) as unknown as Media
 
         expect(doc.sizes.icon).toBeDefined()
@@ -1900,15 +1980,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })
 
         const doc = (await payload.update({
           collection: mediaSlug,
+          data: {},
+          file: small,
+          overrideAccess: true,
           where: {
             id: { equals: id },
           },
-          data: {},
-          file: small,
         })) as unknown as { docs: Media[] }
 
         expect(doc.docs[0].sizes.icon).toBeDefined()
@@ -1926,6 +2008,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })
 
         const related = await payload.create({
@@ -1933,14 +2016,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           data: {
             image: id,
           },
+          overrideAccess: true,
         })
 
         const doc = await payload.update({
-          collection: relationSlug,
           id: related.id,
+          collection: relationSlug,
           data: {
             image: null,
           },
+          overrideAccess: true,
         })
 
         expect(doc.image).toBeFalsy()
@@ -1955,6 +2040,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })
 
         const related = await payload.create({
@@ -1962,15 +2048,17 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           data: {
             image: id,
           },
+          overrideAccess: true,
         })
 
         const doc = await payload.update({
           collection: relationSlug,
-          where: {
-            id: { equals: related.id },
-          },
           data: {
             image: null,
+          },
+          overrideAccess: true,
+          where: {
+            id: { equals: related.id },
           },
         })
 
@@ -1985,17 +2073,18 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })
 
         const { id: id_2 } = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })
 
         const res = await payload.create({
           collection: 'relation',
-          depth: 0,
           data: {
             blocks: [
               {
@@ -2005,15 +2094,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
               },
             ],
           },
+          depth: 0,
+          overrideAccess: true,
         })
 
         expect(res.blocks[0]?.media).toBe(id)
         expect(res.blocks[0]?.relatedMedia).toEqual([id])
 
         const res_2 = await payload.update({
-          collection: 'relation',
           id: res.id,
-          depth: 0,
+          collection: 'relation',
           data: {
             blocks: [
               {
@@ -2024,6 +2114,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
               },
             ],
           },
+          depth: 0,
+          overrideAccess: true,
         })
 
         expect(res_2.blocks[0]?.media).toBe(id_2)
@@ -2047,6 +2139,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             filename: 'fat-head-nate.png',
             url: 'https://www.payload.marketing/fat-head-nate.png',
           },
+          overrideAccess: true,
           req: {
             headers: new Headers({
               cookie: testCookies,
@@ -2335,6 +2428,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             filename: 'fat-head-nate.png',
             url: 'https://www.payload.marketing/fat-head-nate.png',
           },
+          overrideAccess: true,
           req: {
             headers: new Headers({
               cookie: testCookies,
@@ -2410,63 +2504,63 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
     test.describe('filters', () => {
       test.for([
-        { url: 'http://127.0.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
-        { url: 'http://[::1]/file.png', collection: mediaSlug, errorContains: 'unsafe' },
-        { url: 'http://10.0.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
-        { url: 'http://192.168.1.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
-        { url: 'http://172.16.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
-        { url: 'http://169.254.1.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
-        { url: 'http://224.0.0.1/file.png', collection: mediaSlug, errorContains: 'unsafe' },
-        { url: 'http://0.0.0.0/file.png', collection: mediaSlug, errorContains: 'unsafe' },
-        { url: 'http://255.255.255.255/file.png', collection: mediaSlug, errorContains: 'unsafe' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://127.0.0.1/file.png' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://[::1]/file.png' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://10.0.0.1/file.png' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://192.168.1.1/file.png' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://172.16.0.1/file.png' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://169.254.1.1/file.png' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://224.0.0.1/file.png' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://0.0.0.0/file.png' },
+        { collection: mediaSlug, errorContains: 'unsafe', url: 'http://255.255.255.255/file.png' },
         {
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
           url: 'http://127.0.0.1/file.png',
-          collection: allowListMediaSlug,
-          errorContains: 'There was a problem while uploading the file.',
         },
         {
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
           url: 'http://[::1]/file.png',
-          collection: allowListMediaSlug,
-          errorContains: 'There was a problem while uploading the file.',
         },
         {
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
           url: 'http://10.0.0.1/file.png',
-          collection: allowListMediaSlug,
-          errorContains: 'There was a problem while uploading the file.',
         },
         {
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
           url: 'http://192.168.1.1/file.png',
-          collection: allowListMediaSlug,
-          errorContains: 'There was a problem while uploading the file.',
         },
         {
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
           url: 'http://172.16.0.1/file.png',
-          collection: allowListMediaSlug,
-          errorContains: 'There was a problem while uploading the file.',
         },
         {
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
           url: 'http://169.254.1.1/file.png',
-          collection: allowListMediaSlug,
-          errorContains: 'There was a problem while uploading the file.',
         },
         {
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
           url: 'http://224.0.0.1/file.png',
-          collection: allowListMediaSlug,
-          errorContains: 'There was a problem while uploading the file.',
         },
         {
+          collection: allowListMediaSlug,
+          errorContains: 'There was a problem while uploading the file.',
           url: 'http://0.0.0.0/file.png',
-          collection: allowListMediaSlug,
-          errorContains: 'There was a problem while uploading the file.',
         },
         {
-          url: 'http://255.255.255.255/file.png',
           collection: allowListMediaSlug,
           errorContains: 'There was a problem while uploading the file.',
+          url: 'http://255.255.255.255/file.png',
         },
       ])(
         'should block or filter uploading from $collection with URL: $url',
-        async ({ url, collection, errorContains }, { payload }) => {
+        async ({ collection, errorContains, url }, { payload }) => {
           const globalCachedFn = _internal_safeFetchGlobal.lookup
 
           let hostname = new URL(url).hostname
@@ -2494,6 +2588,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                 // to return the IP address we want to test.
                 url: 'https://www.payloadcms.com/test.png',
               },
+              overrideAccess: true,
             }),
           ).rejects.toThrow(
             expect.objectContaining({
@@ -2511,8 +2606,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                   message: expect.not.stringContaining('unsafe'),
                 }
               : {
-                  message: expect.stringContaining(errorContains),
                   name: 'FileRetrievalError',
+                  message: expect.stringContaining(errorContains),
                 }
 
           await expect(
@@ -2522,6 +2617,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                 filename: 'test.png',
                 url,
               },
+              overrideAccess: true,
             }),
           ).rejects.toThrow(expect.objectContaining(directURLFailure))
         },
@@ -2534,6 +2630,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
               filename: 'test.png',
               url: 'http://127.0.0.1/file.png',
             },
+            overrideAccess: true,
           }),
           // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
         ).rejects.toThrow(
@@ -2552,6 +2649,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
               filename: 'test.png',
               url: 'http://127.0.0.1/file.png',
             },
+            overrideAccess: true,
           }),
           // We're expecting this to throw because the file doesn't exist -- not because the url is unsafe
         ).rejects.toThrow(
@@ -2576,6 +2674,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             collection: restrictFileTypesSlug as CollectionSlug,
             data: {},
             file,
+            overrideAccess: true,
           }),
         ).rejects.toThrow(
           expect.objectContaining({
@@ -2593,6 +2692,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             collection: noRestrictFileTypesSlug as CollectionSlug,
             data: {},
             file,
+            overrideAccess: true,
           }),
         ).resolves.not.toThrow()
       })
@@ -2605,6 +2705,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             collection: noRestrictFileMimeTypesSlug as CollectionSlug,
             data: {},
             file,
+            overrideAccess: true,
           }),
         ).resolves.not.toThrow()
       })
@@ -2615,7 +2716,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         const mockReq = {
           payload: {
             config: { upload: { useTempFiles: true } },
-            logger: { warn: () => {}, error: () => {} },
+            logger: { error: () => {}, warn: () => {} },
           },
         } as unknown as PayloadRequest
 
@@ -2643,9 +2744,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                 upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
               } as any,
               file: {
+                name: 'malicious.html',
                 data: Buffer.alloc(0),
                 mimetype: 'text/html',
-                name: 'malicious.html',
                 size: htmlContent.length,
                 tempFilePath: tmpFile,
               },
@@ -2669,9 +2770,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                 upload: { mimeTypes: ['image/svg+xml', 'image/*'], staticDir: '/tmp' },
               } as any,
               file: {
+                name: 'malicious.svg',
                 data: Buffer.alloc(0),
                 mimetype: 'image/svg+xml',
-                name: 'malicious.svg',
                 size: svgContent.length,
                 tempFilePath: tmpFile,
               },
@@ -2693,9 +2794,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                 upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
               } as any,
               file: {
+                name: 'valid.png',
                 data: Buffer.alloc(0),
                 mimetype: 'image/png',
-                name: 'valid.png',
                 size: pngData.length,
                 tempFilePath: tmpFile,
               },
@@ -2713,9 +2814,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                 upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
               } as any,
               file: {
+                name: 'malicious.html',
                 data: Buffer.alloc(0),
                 mimetype: 'text/html',
-                name: 'malicious.html',
                 size: 0,
               },
               req: mockReq,
@@ -2736,9 +2837,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
                 upload: { mimeTypes: ['application/pdf'], staticDir: '/tmp' },
               } as any,
               file: {
+                name: 'invalid.pdf',
                 data: Buffer.alloc(0),
                 mimetype: 'application/pdf',
-                name: 'invalid.pdf',
                 size: invalidPdfContent.length,
                 tempFilePath: tmpFile,
               },
@@ -2768,34 +2869,37 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           focalY: 5,
         },
         file,
+        overrideAccess: true,
       })
 
       expect(doc.focalX).toEqual(5)
       expect(doc.focalY).toEqual(5)
 
       const updatedFocal = await payload.update({
-        collection: focalOnlySlug,
         id: doc.id,
+        collection: focalOnlySlug,
         data: {
           focalX: 10,
           focalY: 10,
         },
+        overrideAccess: true,
       })
 
       expect(updatedFocal.focalX).toEqual(10)
       expect(updatedFocal.focalY).toEqual(10)
 
       const updateWithoutFocal = await payload.update({
-        collection: focalOnlySlug,
         id: doc.id,
+        collection: focalOnlySlug,
         data: {},
+        overrideAccess: true,
       })
 
       // Expect focal point to be the same
       expect(updateWithoutFocal.focalX).toEqual(10)
       expect(updateWithoutFocal.focalY).toEqual(10)
 
-      await payload.delete({ collection: focalOnlySlug, id: doc.id })
+      await payload.delete({ id: doc.id, collection: focalOnlySlug, overrideAccess: true })
     })
 
     test('should default focal point to 50, 50', async ({ payload }) => {
@@ -2805,21 +2909,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           // No focal point
         },
         file,
+        overrideAccess: true,
       })
 
       expect(doc.focalX).toEqual(50)
       expect(doc.focalY).toEqual(50)
 
       const updateWithoutFocal = await payload.update({
-        collection: focalOnlySlug,
         id: doc.id,
+        collection: focalOnlySlug,
         data: {},
+        overrideAccess: true,
       })
 
       expect(updateWithoutFocal.focalX).toEqual(50)
       expect(updateWithoutFocal.focalY).toEqual(50)
 
-      await payload.delete({ collection: focalOnlySlug, id: doc.id })
+      await payload.delete({ id: doc.id, collection: focalOnlySlug, overrideAccess: true })
     })
 
     test('should set focal point even if no sizes defined', async ({ payload }) => {
@@ -2829,12 +2935,13 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           // No focal point
         },
         file,
+        overrideAccess: true,
       })
 
       expect(doc.focalX).toEqual(50)
       expect(doc.focalY).toEqual(50)
 
-      await payload.delete({ collection: focalNoSizesSlug, id: doc.id })
+      await payload.delete({ id: doc.id, collection: focalNoSizesSlug, overrideAccess: true })
     })
   })
 
@@ -2848,6 +2955,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: enlargeSlug,
         data: {},
         file: small,
+        overrideAccess: true,
       })
 
       expect(result).toBeTruthy()
@@ -2880,8 +2988,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
 
       await payload.delete({
-        collection: enlargeSlug,
         id: result.id,
+        collection: enlargeSlug,
+        overrideAccess: true,
       })
     })
 
@@ -2895,6 +3004,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: enlargeSlug,
         data: {},
         file: small,
+        overrideAccess: true,
       })) as unknown as Enlarge
 
       expect(result).toBeTruthy()
@@ -2910,8 +3020,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       expect(sizes.widthLowerHeightLarger.mimeType).toBe('image/png')
       expect(sizes.widthLowerHeightLarger.filename).toBe('small-300x300.png')
       await payload.delete({
-        collection: enlargeSlug,
         id: result.id,
+        collection: enlargeSlug,
+        overrideAccess: true,
       })
     })
 
@@ -2924,6 +3035,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: reduceSlug,
         data: {},
         file: small,
+        overrideAccess: true,
       })
 
       expect(result).toBeTruthy()
@@ -2955,7 +3067,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
 
-      await payload.delete({ collection: reduceSlug, id: result.id })
+      await payload.delete({ id: result.id, collection: reduceSlug, overrideAccess: true })
     })
 
     test('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async ({
@@ -2967,6 +3079,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: enlargeSlug,
         data: {},
         file: small,
+        overrideAccess: true,
       })
 
       expect(result).toBeTruthy()
@@ -2983,8 +3096,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       })
 
       await payload.delete({
-        collection: enlargeSlug,
         id: result.id,
+        collection: enlargeSlug,
+        overrideAccess: true,
       })
     })
   })
@@ -2996,6 +3110,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       const successfulCreate = await payload.create({
         collection: 'optional-file',
         data: {},
+        overrideAccess: true,
       })
 
       expect(successfulCreate.id).toBeDefined()
@@ -3008,6 +3123,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         payload.create({
           collection: 'required-file',
           data: {},
+          overrideAccess: true,
         }),
       ).rejects.toThrow(
         expect.objectContaining({
@@ -3023,6 +3139,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         payload.create({
           collection: mediaSlug,
           data: {},
+          overrideAccess: true,
         }),
       ).rejects.toThrow(
         expect.objectContaining({
@@ -3043,21 +3160,23 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: 'media',
         data: {},
         file,
+        overrideAccess: true,
       })
 
       expect(mediaDoc).toBeDefined()
 
       const duplicatedDoc = await payload.duplicate({
-        collection: 'media',
         id: mediaDoc.id,
+        collection: 'media',
+        overrideAccess: true,
       })
 
       const expectedPath = path.join(dirname, './media')
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
 
-      await payload.delete({ collection: 'media', id: mediaDoc.id })
-      await payload.delete({ collection: 'media', id: duplicatedDoc.id })
+      await payload.delete({ id: mediaDoc.id, collection: 'media', overrideAccess: true })
+      await payload.delete({ id: duplicatedDoc.id, collection: 'media', overrideAccess: true })
     })
 
     test('should not leak req.file between sequential duplicate() calls on a shared req', async ({
@@ -3075,26 +3194,30 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: mediaSlug,
         data: {},
         file: file1,
+        overrideAccess: true,
       })
 
       const doc2 = await payload.create({
         collection: mediaSlug,
         data: {},
         file: file2,
+        overrideAccess: true,
       })
 
       // Use a shared req object to simulate batch operations within a transaction
       const req = {} as PayloadRequest
 
       const dup1 = await payload.duplicate({
-        collection: mediaSlug,
         id: doc1.id,
+        collection: mediaSlug,
+        overrideAccess: true,
         req,
       })
 
       const dup2 = await payload.duplicate({
-        collection: mediaSlug,
         id: doc2.id,
+        collection: mediaSlug,
+        overrideAccess: true,
         req,
       })
 
@@ -3104,10 +3227,10 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       expect(dup2.filename).toContain('bravo-leak-test')
 
       // Clean up created docs
-      await payload.delete({ collection: mediaSlug, id: doc1.id })
-      await payload.delete({ collection: mediaSlug, id: doc2.id })
-      await payload.delete({ collection: mediaSlug, id: dup1.id })
-      await payload.delete({ collection: mediaSlug, id: dup2.id })
+      await payload.delete({ id: doc1.id, collection: mediaSlug, overrideAccess: true })
+      await payload.delete({ id: doc2.id, collection: mediaSlug, overrideAccess: true })
+      await payload.delete({ id: dup1.id, collection: mediaSlug, overrideAccess: true })
+      await payload.delete({ id: dup2.id, collection: mediaSlug, overrideAccess: true })
     })
   })
 
@@ -3130,6 +3253,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         expect(mediaDoc).toBeDefined()
@@ -3164,7 +3288,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -3189,14 +3313,16 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         expect(mediaDoc).toBeDefined()
 
         // Duplicate the upload (this will pass full URLs from afterRead hooks)
         const duplicatedDoc = (await payload.duplicate({
-          collection: mediaSlug,
           id: mediaDoc.id,
+          collection: mediaSlug,
+          overrideAccess: true,
         })) as unknown as Media
 
         expect(duplicatedDoc).toBeDefined()
@@ -3227,8 +3353,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
-        await payload.delete({ collection: mediaSlug, id: duplicatedDoc.id })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
+        await payload.delete({ id: duplicatedDoc.id, collection: mediaSlug, overrideAccess: true })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -3253,18 +3379,20 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           collection: mediaSlug,
           data: {},
           file,
+          overrideAccess: true,
         })) as unknown as Media
 
         expect(mediaDoc).toBeDefined()
 
         // Update the upload (changing focal point triggers a re-upload)
         const updatedDoc = (await payload.update({
-          collection: mediaSlug,
           id: mediaDoc.id,
+          collection: mediaSlug,
           data: {
             focalX: 75,
             focalY: 25,
           },
+          overrideAccess: true,
         })) as unknown as Media
 
         expect(updatedDoc).toBeDefined()
@@ -3291,7 +3419,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
 
-        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -3313,6 +3441,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: mediaSlug,
         data: {},
         file,
+        overrideAccess: true,
       })) as unknown as Media
 
       uploadedFilename = uploadedDoc.filename
@@ -3417,8 +3546,9 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
       for (const id of docIDs) {
         try {
           await payloadInstance.delete({
-            collection: noRestrictFileTypesSlug as CollectionSlug,
             id,
+            collection: noRestrictFileTypesSlug as CollectionSlug,
+            overrideAccess: true,
           })
         } catch {
           // ignore
@@ -3437,6 +3567,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: noRestrictFileTypesSlug as CollectionSlug,
         data: {},
         file,
+        overrideAccess: true,
       })) as unknown as Media
 
       docIDs.push(svgDoc.id)
@@ -3460,6 +3591,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: svgOnlySlug as CollectionSlug,
         data: {},
         file,
+        overrideAccess: true,
       })) as unknown as Media
 
       docIDs.push(safeDoc.id)
@@ -3488,6 +3620,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           mimetype: 'application/xml',
           size: data.length,
         },
+        overrideAccess: true,
       })) as unknown as Media
 
       docIDs.push(xmlDoc.id)
@@ -3543,6 +3676,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
               filename: 'malicious.jpg',
               url: `http://127.0.0.1:${attackerServerPort}/image.jpg`,
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow()
       } finally {
@@ -3554,8 +3688,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
     test('should allow legitimate redirects within allowlist', async ({ payload }) => {
       const edgeServer = createServer((req, res) => {
         res.writeHead(200, {
-          'Content-Type': 'image/png',
           'Content-Length': validPNG.length.toString(),
+          'Content-Type': 'image/png',
         })
         res.end(validPNG)
       })
@@ -3576,6 +3710,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
             filename: 'cdn-image.png',
             url: `http://127.0.0.1:${cdnServerPort}/image.png`,
           },
+          overrideAccess: true,
         })
 
         expect(doc.filename).toBe('cdn-image.png')
@@ -3603,6 +3738,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
               filename: 'redirect-test.png',
               url: `http://127.0.0.1:${redirectServerPort}/image.png`,
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow()
       } finally {
@@ -3629,6 +3765,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
               filename: 'loop.png',
               url: `http://127.0.0.1:${redirectServerPort}/loop`,
             },
+            overrideAccess: true,
           }),
         ).rejects.toThrow(/Too many redirects/)
       } finally {
@@ -3686,8 +3823,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
     test('should require authentication', async ({ restClient }) => {
       const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
-        query: { src: 'http://127.0.0.1/file.png' },
         auth: false,
+        query: { src: 'http://127.0.0.1/file.png' },
       })
       expect(response.status).toBe(403)
     })
@@ -3700,8 +3837,8 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
   test.describe('tempFileDir', () => {
     test.each([
-      { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
-      { dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp'), description: 'relative path' },
+      { description: 'absolute path like /tmp', dir: '/tmp', expectedPrefix: '/tmp' },
+      { description: 'relative path', dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp') },
     ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
       const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
       const filePath = handler.getFilePath()
@@ -3717,7 +3854,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
     test.afterEach(async ({ payload }) => {
       for (const id of docIDs) {
         try {
-          await payload.delete({ collection: prefixMediaSlug, id })
+          await payload.delete({ id, collection: prefixMediaSlug, overrideAccess: true })
         } catch {
           // noop — file may already have been deleted
         }
@@ -3736,6 +3873,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: prefixMediaSlug,
         data: { prefix: 'abc123' },
         file,
+        overrideAccess: true,
       })
 
       docIDs.push(doc.id)
@@ -3758,6 +3896,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: prefixMediaSlug,
         data: { prefix: 'abc123' },
         file,
+        overrideAccess: true,
       })
 
       docIDs.push(doc.id)
@@ -3780,6 +3919,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: prefixMediaSlug,
         data: {},
         file,
+        overrideAccess: true,
       })
 
       docIDs.push(doc.id)
@@ -3800,6 +3940,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
         collection: prefixMediaSlug,
         data: {},
         file,
+        overrideAccess: true,
       })
 
       docIDs.push(doc.id)
@@ -3825,7 +3966,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: clientUploadTempFileSlug })
+        await payload.delete({ id, collection: clientUploadTempFileSlug, overrideAccess: true })
       }
       createdIds.length = 0
     })
@@ -3892,7 +4033,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaSlug })
+        await payload.delete({ id, collection: mediaSlug, overrideAccess: true })
       }
       createdIds.length = 0
 
@@ -3925,6 +4066,7 @@ test.suite({ config: './config.ts', resetBetweenTests: false })('Collections - U
           size: fileContents.length,
           tempFilePath,
         },
+        overrideAccess: true,
       })
 
       createdIds.push(doc.id)

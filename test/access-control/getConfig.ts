@@ -1240,7 +1240,7 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'test',
       access: {
         read: async ({ req: { payload } }) => {
-          const access = await payload.findGlobal({ slug: 'settings' })
+          const access = await payload.findGlobal({ slug: 'settings', overrideAccess: true })
           return Boolean(access.test)
         },
       },
@@ -1302,6 +1302,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1310,6 +1311,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: nonAdminEmail,
       password: 'test',
     },
+    overrideAccess: true,
   })
 
   // Regular user - can access admin panel but has limited delete permissions
@@ -1320,6 +1322,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       password: 'test',
       roles: ['user'],
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1328,6 +1331,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: publicUserEmail,
       password: 'test',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1335,6 +1339,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       restrictedField: 'restricted',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1342,6 +1347,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'read-only',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1390,6 +1396,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       },
       title: 'Blocks Field Access Test Document',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1397,6 +1404,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'versioned',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1413,6 +1421,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         },
       ],
     },
+    overrideAccess: true,
   })
 
   await payload.updateGlobal({
@@ -1420,6 +1429,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
     data: {
       name: 'dev@payloadcms.com',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1457,6 +1467,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         richText2: buildEditorState<DefaultNodeTypes>({ text: 'Text8' }),
       },
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1472,6 +1483,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
         text: 'Text2',
       },
     },
+    overrideAccess: true,
   })
 
   // Seed read-restricted collection
@@ -1484,6 +1496,7 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       _status: 'published',
       title: 'Differentiated Doc 1',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -1492,5 +1505,6 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       _status: 'published',
       title: 'Restricted Doc 1',
     },
+    overrideAccess: true,
   })
 }

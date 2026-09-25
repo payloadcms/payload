@@ -32,6 +32,7 @@ export const seed = async (payload: Payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   // Create image
@@ -42,9 +43,15 @@ export const seed = async (payload: Payload) => {
     collection: mediaSlug,
     data: {},
     file: imageFile,
+    overrideAccess: true,
   })
 
-  await payload.create({ collection: mediaWithoutDeleteAccessSlug, data: {}, file: imageFile })
+  await payload.create({
+    collection: mediaWithoutDeleteAccessSlug,
+    data: {},
+    file: imageFile,
+    overrideAccess: true,
+  })
 
   const { id: versionedImage } = await payload.create({
     collection: versionSlug,
@@ -53,6 +60,7 @@ export const seed = async (payload: Payload) => {
       title: 'upload',
     },
     file: imageFile,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -61,6 +69,7 @@ export const seed = async (payload: Payload) => {
       image: uploadedImage,
       versionedImage,
     },
+    overrideAccess: true,
   })
 
   // Create animated type images
@@ -71,6 +80,7 @@ export const seed = async (payload: Payload) => {
     collection: animatedTypeMedia,
     data: {},
     file: animatedImageFile,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -80,6 +90,7 @@ export const seed = async (payload: Payload) => {
       title: 'upload',
     },
     file: animatedImageFile,
+    overrideAccess: true,
   })
 
   const nonAnimatedImageFilePath = path.resolve(seedDir, './non-animated.webp')
@@ -89,6 +100,7 @@ export const seed = async (payload: Payload) => {
     collection: animatedTypeMedia,
     data: {},
     file: nonAnimatedImageFile,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -98,6 +110,7 @@ export const seed = async (payload: Payload) => {
       title: 'upload',
     },
     file: nonAnimatedImageFile,
+    overrideAccess: true,
   })
 
   // Create audio
@@ -108,6 +121,7 @@ export const seed = async (payload: Payload) => {
     collection: mediaSlug,
     data: {},
     file: audioFile,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -115,6 +129,7 @@ export const seed = async (payload: Payload) => {
     data: {
       audio: file.id,
     },
+    overrideAccess: true,
   })
 
   // Create admin thumbnail media
@@ -125,6 +140,7 @@ export const seed = async (payload: Payload) => {
       ...audioFile,
       name: 'audio-thumbnail.mp3', // Override to avoid conflicts
     } as File,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -134,6 +150,7 @@ export const seed = async (payload: Payload) => {
       ...imageFile,
       name: `thumb-${imageFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -143,6 +160,7 @@ export const seed = async (payload: Payload) => {
       ...imageFile,
       name: `function-image-${imageFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -152,6 +170,7 @@ export const seed = async (payload: Payload) => {
       ...imageFile,
       name: `searchQueries-image-${imageFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   // Create media with and without relation preview
@@ -159,6 +178,7 @@ export const seed = async (payload: Payload) => {
     collection: 'media-with-relation-preview',
     data: {},
     file: imageFile,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -168,12 +188,14 @@ export const seed = async (payload: Payload) => {
       ...imageFile,
       name: `withoutCacheTags-image-${imageFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   const { id: uploadedImageWithoutPreview } = await payload.create({
     collection: 'media-without-relation-preview',
     data: {},
     file: imageFile,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -186,6 +208,7 @@ export const seed = async (payload: Payload) => {
       imageWithPreview2: uploadedImageWithPreview,
       imageWithPreview3: uploadedImageWithoutPreview,
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -194,6 +217,7 @@ export const seed = async (payload: Payload) => {
       alt: 'alt-1',
     },
     file: imageFile,
+    overrideAccess: true,
   })
 
   for (let i = 0; i < 20; i++) {
@@ -209,6 +233,7 @@ export const seed = async (payload: Payload) => {
     await payload.create({
       collection: 'list-view-preview',
       data,
+      overrideAccess: true,
     })
   }
 
@@ -223,6 +248,7 @@ export const seed = async (payload: Payload) => {
     collection: mediaSlug,
     data: {},
     file: pdfFile,
+    overrideAccess: true,
   })
 
   const videoFilePath = path.resolve(seedDir, './christmas-mariachi-in-guadalajara.mp4')
@@ -232,6 +258,7 @@ export const seed = async (payload: Payload) => {
     collection: mediaSlug,
     data: {},
     file: videoFile,
+    overrideAccess: true,
   })
 
   // Seed media-with-fields with one of each supported file type, every field filled in and the
@@ -398,6 +425,7 @@ export const seed = async (payload: Payload) => {
       collection: mediaWithFieldsSlug,
       data,
       file: { ...file, name: `with-fields-${file?.name}` } as File,
+      overrideAccess: true,
     })
   }
 
@@ -408,6 +436,7 @@ export const seed = async (payload: Payload) => {
       ...imageFile,
       name: `single-preview-image-${imageFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -417,6 +446,7 @@ export const seed = async (payload: Payload) => {
       ...audioFile,
       name: `single-preview-audio-${audioFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   // Seed filePreview map collection — one image (no match), one PDF (exact), one audio (category
@@ -428,6 +458,7 @@ export const seed = async (payload: Payload) => {
       ...imageFile,
       name: `map-preview-image-${imageFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -437,6 +468,7 @@ export const seed = async (payload: Payload) => {
       ...pdfFile,
       name: `map-preview-pdf-${pdfFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -446,6 +478,7 @@ export const seed = async (payload: Payload) => {
       ...audioFile,
       name: `map-preview-audio-${audioFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -455,6 +488,7 @@ export const seed = async (payload: Payload) => {
       ...videoFile,
       name: `map-preview-video-${videoFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   // Seed file-preview collection — image and audio to exercise the switch-case component
@@ -465,6 +499,7 @@ export const seed = async (payload: Payload) => {
       ...imageFile,
       name: `file-preview-image-${imageFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -474,5 +509,6 @@ export const seed = async (payload: Payload) => {
       ...audioFile,
       name: `file-preview-audio-${audioFile?.name}`,
     } as File,
+    overrideAccess: true,
   })
 }

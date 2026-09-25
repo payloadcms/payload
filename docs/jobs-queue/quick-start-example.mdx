@@ -81,6 +81,7 @@ This defines a reusable task with a unique `slug`, an `inputSchema` that validat
               userEmail: doc.email,
               userName: doc.name,
             },
+            overrideAccess: true,
           })
         }
       },
@@ -162,6 +163,7 @@ export default buildConfig({
 
           const analytics = await req.payload.find({
             collection: 'analytics',
+            overrideAccess: true,
             where: {
               createdAt: {
                 greater_than_equal: yesterday.toISOString(),
@@ -172,6 +174,7 @@ export default buildConfig({
           // Save the report
           const report = await req.payload.create({
             collection: 'reports',
+            overrideAccess: true,
             data: {
               date: new Date().toISOString(),
               totalEvents: analytics.totalDocs,
@@ -290,6 +293,7 @@ export default buildConfig({
 await payload.jobs.queue({
   task: 'publishPost',
   input: { postId: '123' },
+  overrideAccess: true,
   waitUntil: new Date('2024-12-25T15:00:00Z'), // Runs once at this time
 })
 ```

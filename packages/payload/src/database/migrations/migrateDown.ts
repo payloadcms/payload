@@ -48,6 +48,7 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<MigrationR
       await payload.delete({
         id: migration.id!,
         collection: 'payload-migrations',
+        overrideAccess: true,
         req,
       })
 

@@ -48,6 +48,7 @@ import type { Payload } from 'payload'
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    overrideAccess: true,
     // highlight-start
     depth: 2,
     // highlight-end

@@ -1,3 +1,4 @@
+import type { SharedLocalAPIOptions } from '../types/operations.js'
 import type { JobFromTask } from './config/types/workflowTypes.js'
 
 import {
@@ -56,19 +57,10 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
     TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] | keyof TypedJobs['workflows'],
   >(
-    args:
+    args: (
       | {
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
           meta?: Job['meta']
-          /**
-           * If set to false, access control as defined in jobsConfig.access.queue will be run.
-           * By default, this is true and no access control will be run.
-           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
-           * run (which is a function that returns `true` if the user is logged in).
-           *
-           * @default true
-           */
-          overrideAccess?: boolean
           /**
            * The queue to add the job to.
            * If not specified, the job will be added to the default queue.
@@ -85,15 +77,6 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
           meta?: Job['meta']
           /**
-           * If set to false, access control as defined in jobsConfig.access.queue will be run.
-           * By default, this is true and no access control will be run.
-           * If you set this to false and do not have jobsConfig.access.queue defined, the default access control will be
-           * run (which is a function that returns `true` if the user is logged in).
-           *
-           * @default true
-           */
-          overrideAccess?: boolean
-          /**
            * The queue to add the job to.
            * If not specified, the job will be added to the default queue.
            *
@@ -106,13 +89,15 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           workflow: TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
             ? TTaskOrWorkflowSlug
             : never
-        },
+        }
+    ) &
+      Pick<SharedLocalAPIOptions, 'overrideAccess'>,
   ): Promise<
     TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? Job<TTaskOrWorkflowSlug>
       : JobFromTask<TTaskOrWorkflowSlug>
   > => {
-    const overrideAccess = args?.overrideAccess !== false
+    const overrideAccess = args.overrideAccess ?? false
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
     assertNoValidationWrite(req)
@@ -224,64 +209,57 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     }) as unknown as ReturnType
   },
 
-  run: async (args?: {
-    /**
-     * If you want to run jobs from all queues, set this to true.
-     * If you set this to true, the `queue` property will be ignored.
-     *
-     * @default false
-     */
-    allQueues?: boolean
-    /**
-     * The maximum number of jobs to run in this invocation
-     *
-     * @default 10
-     */
-    limit?: number
-    /**
-     * If set to false, access control as defined in jobsConfig.access.run will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
-     *
-     * @default true
-     */
-    overrideAccess?: boolean
-    /**
-     * Adjust the job processing order using a Payload sort string.
-     *
-     * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
-     */
-    processingOrder?: Sort
-    /**
-     * If you want to run jobs from a specific queue, set this to the queue name.
-     *
-     * @default jobs from the `default` queue will be executed.
-     */
-    queue?: string
-    req?: PayloadRequest
-    /**
-     * By default, jobs are run in parallel.
-     * If you want to run them in sequence, set this to true.
-     */
-    sequential?: boolean
-    /**
-     * If set to true, the job system will not log any output to the console (for both info and error logs).
-     * Can be an option for more granular control over logging.
-     *
-     * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
-     *
-     * @default false
-     */
-    silent?: RunJobsSilent
-    where?: Where
-  }): Promise<ReturnType<typeof runJobs>> => {
+  run: async (
+    args?: {
+      /**
+       * If you want to run jobs from all queues, set this to true.
+       * If you set this to true, the `queue` property will be ignored.
+       *
+       * @default false
+       */
+      allQueues?: boolean
+      /**
+       * The maximum number of jobs to run in this invocation
+       *
+       * @default 10
+       */
+      limit?: number
+      /**
+       * Adjust the job processing order using a Payload sort string.
+       *
+       * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+       */
+      processingOrder?: Sort
+      /**
+       * If you want to run jobs from a specific queue, set this to the queue name.
+       *
+       * @default jobs from the `default` queue will be executed.
+       */
+      queue?: string
+      req?: PayloadRequest
+      /**
+       * By default, jobs are run in parallel.
+       * If you want to run them in sequence, set this to true.
+       */
+      sequential?: boolean
+      /**
+       * If set to true, the job system will not log any output to the console (for both info and error logs).
+       * Can be an option for more granular control over logging.
+       *
+       * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+       *
+       * @default false
+       */
+      silent?: RunJobsSilent
+      where?: Where
+    } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
+  ): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
     return await runJobs({
       allQueues: args?.allQueues,
       limit: args?.limit,
-      overrideAccess: args?.overrideAccess !== false,
+      overrideAccess: args?.overrideAccess ?? false,
       processingOrder: args?.processingOrder,
       queue: args?.queue,
       req: newReq,
@@ -291,55 +269,41 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     })
   },
 
-  runByID: async (args: {
-    id: number | string
-    /**
-     * If set to false, access control as defined in jobsConfig.access.run will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.run defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
-     *
-     * @default true
-     */
-    overrideAccess?: boolean
-    req?: PayloadRequest
-    /**
-     * If set to true, the job system will not log any output to the console (for both info and error logs).
-     * Can be an option for more granular control over logging.
-     *
-     * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
-     *
-     * @default false
-     */
-    silent?: RunJobsSilent
-  }): Promise<ReturnType<typeof runJobs>> => {
+  runByID: async (
+    args: {
+      id: number | string
+      req?: PayloadRequest
+      /**
+       * If set to true, the job system will not log any output to the console (for both info and error logs).
+       * Can be an option for more granular control over logging.
+       *
+       * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+       *
+       * @default false
+       */
+      silent?: RunJobsSilent
+    } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
+  ): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
     return await runJobs({
       id: args.id,
-      overrideAccess: args.overrideAccess !== false,
+      overrideAccess: args.overrideAccess ?? false,
       req: newReq,
       silent: args.silent,
     })
   },
 
-  cancel: async (args: {
-    /**
-     * If set to false, access control as defined in jobsConfig.access.cancel will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
-     *
-     * @default true
-     */
-    overrideAccess?: boolean
-    queue?: string
-    req?: PayloadRequest
-    where: Where
-  }): Promise<void> => {
+  cancel: async (
+    args: {
+      queue?: string
+      req?: PayloadRequest
+      where: Where
+    } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
+  ): Promise<void> => {
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
-    const overrideAccess = args.overrideAccess !== false
+    const overrideAccess = args.overrideAccess ?? false
     if (!overrideAccess) {
       /**
        * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.
@@ -389,22 +353,15 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     })
   },
 
-  cancelByID: async (args: {
-    id: number | string
-    /**
-     * If set to false, access control as defined in jobsConfig.access.cancel will be run.
-     * By default, this is true and no access control will be run.
-     * If you set this to false and do not have jobsConfig.access.cancel defined, the default access control will be
-     * run (which is a function that returns `true` if the user is logged in).
-     *
-     * @default true
-     */
-    overrideAccess?: boolean
-    req?: PayloadRequest
-  }): Promise<void> => {
+  cancelByID: async (
+    args: {
+      id: number | string
+      req?: PayloadRequest
+    } & Pick<SharedLocalAPIOptions, 'overrideAccess'>,
+  ): Promise<void> => {
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
-    const overrideAccess = args.overrideAccess !== false
+    const overrideAccess = args.overrideAccess ?? false
     if (!overrideAccess) {
       /**
        * By default, jobsConfig.access.cancel will be `defaultAccess` which is a function that returns `true` if the user is logged in.

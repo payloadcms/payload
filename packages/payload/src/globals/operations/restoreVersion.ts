@@ -127,6 +127,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     const previousDoc = await payload.findGlobal({
       slug: globalConfig.slug,
       depth,
+      overrideAccess: true,
       req,
     })
 

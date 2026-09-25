@@ -35,7 +35,7 @@ const uploadMetadata = (collectionSlug?: string, filesize = 1) => ({
   mimeType: 'image/png',
 })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob clientUploads', () => {
+test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     const { blobs } = await list()
     if (blobs.length > 0) {
