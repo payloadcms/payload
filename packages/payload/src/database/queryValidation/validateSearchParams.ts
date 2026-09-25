@@ -83,7 +83,7 @@ export async function validateSearchParam({
       incomingPath: sanitizedPath,
       locale: req.locale!,
       overrideAccess,
-      parentIsLocalized,
+      parentIsLocalized: parentIsLocalized ?? false,
       payload: req.payload,
       showHiddenFields,
     })
