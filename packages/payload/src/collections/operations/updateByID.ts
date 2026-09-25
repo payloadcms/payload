@@ -25,7 +25,7 @@ import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
-} from '../../uploads/fileVersioning/coordinator.js'
+} from '../../uploads/fileVersioning/fileOperationManager.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,

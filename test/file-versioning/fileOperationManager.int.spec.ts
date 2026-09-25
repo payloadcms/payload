@@ -2,8 +2,8 @@
 import { createPayloadRequest } from 'payload'
 import { expect } from 'vitest'
 
-// eslint-disable-next-line payload/no-relative-monorepo-imports -- The coordinator is internal until upload writers use it.
-import { runFileOperationPlan } from '../../packages/payload/src/uploads/fileVersioning/coordinator.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- The file operation manager is internal until upload writers use it.
+import { runFileOperationPlan } from '../../packages/payload/src/uploads/fileVersioning/fileOperationManager.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Transaction helpers are internal.
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports -- Transaction helpers are internal.
@@ -13,7 +13,7 @@ import { killTransaction } from '../../packages/payload/src/utilities/killTransa
 import { test } from '../__helpers/int/vitest.js'
 import { draftMediaSlug, mediaSlug } from './shared.js'
 
-test.suite('File operation coordinator', { config: './config.ts' }, () => {
+test.suite('File operation manager', { config: './config.ts' }, () => {
   test.skipIf(process.env.PAYLOAD_DATABASE === 'sqlite')(
     'should stage before the write and defer cleanup until commit',
     async ({ payload }) => {

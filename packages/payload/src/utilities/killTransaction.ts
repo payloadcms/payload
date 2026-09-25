@@ -2,7 +2,7 @@ import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'
 
-import { rollbackFileOperations } from '../uploads/fileVersioning/coordinator.js'
+import { rollbackFileOperations } from '../uploads/fileVersioning/fileOperationManager.js'
 
 /**
  * Rollback the transaction from the req using the db adapter and removes it from the req

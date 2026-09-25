@@ -18,7 +18,7 @@ import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
-} from '../../uploads/fileVersioning/coordinator.js'
+} from '../../uploads/fileVersioning/fileOperationManager.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
