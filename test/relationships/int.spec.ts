@@ -1210,6 +1210,8 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           })
 
           expect(movie_1.select).toStrictEqual([])
+          // An omitted hasMany select should be returned as [] by every adapter.
+          expect(movie_2.select).toStrictEqual([])
 
           const res_1 = await payload.find({
             collection: 'movies',
