@@ -95,8 +95,9 @@ const withoutID = (row: unknown): unknown => {
  * `id`s back to the client as-is: if that fallback-populated value is then submitted for the
  * locale that fell back (e.g. publishing that locale from the admin UI), the row `id`s collide
  * with the rows they were copied from, which belong to a different locale. Stripping the `id`s
- * here - recursively, since blocks/arrays can nest inside a block - makes those rows read as new
- * rows to create rather than existing rows to reassign.
+ * here - recursively, since blocks/arrays can nest inside a block (directly, or behind a row,
+ * collapsible, tab or group) - makes those rows read as new rows to create rather than existing
+ * rows to reassign.
  */
 const stripBlockFallbackRowIDs = (
   rows: unknown[],
@@ -140,6 +141,40 @@ const stripNestedFallbackRowIDs = (
   payload: PayloadRequest['payload'],
 ): void => {
   for (const subField of fields) {
+    // Presentational fields (row, collapsible, unnamed tabs, unnamed groups) don't nest their
+    // own value - their sub-fields live directly on this same row - so recurse in place instead
+    // of skipping them for lacking a `name`.
+    if (subField.type === 'row' || subField.type === 'collapsible') {
+      stripNestedFallbackRowIDs(row, subField.fields, payload)
+      continue
+    }
+
+    if (subField.type === 'tabs') {
+      for (const tab of subField.tabs) {
+        if (tabHasName(tab)) {
+          const tabRow = row[tab.name]
+          if (tabRow && typeof tabRow === 'object') {
+            stripNestedFallbackRowIDs(tabRow as JsonObject, tab.fields, payload)
+          }
+        } else {
+          stripNestedFallbackRowIDs(row, tab.fields, payload)
+        }
+      }
+      continue
+    }
+
+    if (subField.type === 'group') {
+      if (fieldAffectsData(subField) && subField.name) {
+        const groupRow = row[subField.name]
+        if (groupRow && typeof groupRow === 'object') {
+          stripNestedFallbackRowIDs(groupRow as JsonObject, subField.fields, payload)
+        }
+      } else {
+        stripNestedFallbackRowIDs(row, subField.fields, payload)
+      }
+      continue
+    }
+
     if (!fieldAffectsData(subField) || !subField.name) {
       continue
     }
@@ -279,6 +314,15 @@ export const promise = async ({
 
       if (fallbackValue) {
         switch (field.type) {
+          case 'array': {
+            if (isNullOrUndefined) {
+              hoistedValue = Array.isArray(fallbackValue)
+                ? stripArrayFallbackRowIDs(fallbackValue, field, req.payload)
+                : fallbackValue
+            }
+            break
+          }
+
           case 'blocks': {
             if (isNullOrUndefined) {
               hoistedValue = Array.isArray(fallbackValue)

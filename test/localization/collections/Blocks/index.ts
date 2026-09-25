@@ -86,6 +86,47 @@ export const BlocksCollection: CollectionConfig = {
             },
           ],
         },
+        {
+          // Covers array/blocks fields nested inside presentational wrappers
+          // (row, collapsible) and a named group, all within a block's own
+          // fields - not to be confused with `array`/`content` above, which
+          // are direct children of the block.
+          slug: 'nestedContainers',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'rowItems',
+                  type: 'array',
+                  fields: [{ name: 'label', type: 'text' }],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Collapsible',
+              fields: [
+                {
+                  name: 'collapsibleItems',
+                  type: 'array',
+                  fields: [{ name: 'label', type: 'text' }],
+                },
+              ],
+            },
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                {
+                  name: 'groupItems',
+                  type: 'array',
+                  fields: [{ name: 'label', type: 'text' }],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
   ],
