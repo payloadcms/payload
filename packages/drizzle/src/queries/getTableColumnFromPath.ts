@@ -210,13 +210,13 @@ export const getTableColumnFromPath = ({
 
             newTableName = resolveBlockTableName(
               block,
-              adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
+              adapter.tableNameMap.get(`${rootTableName}_blocks_${toSnakeCase(block.slug)}`),
             )
 
             const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
 
             joins.push({
-              condition: eq(adapter.tables[tableName].id, newAliasTable._parentID),
+              condition: eq(adapter.tables[rootTableName].id, newAliasTable._parentID),
               table: newAliasTable,
             })
             constraints.push({
@@ -233,15 +233,25 @@ export const getTableColumnFromPath = ({
           }
         }
 
+        // Captured once, before the loop: each block type is tried against the same starting
+        // path, so this must not accumulate across iterations of `.some()` below.
+        const blockPathPrefix = constraintPath
+
         const hasBlockField = (field.blockReferences ?? field.blocks).some((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
           newTableName = resolveBlockTableName(
             block,
-            adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
+            adapter.tableNameMap.get(`${rootTableName}_blocks_${toSnakeCase(block.slug)}`),
           )
 
-          constraintPath = `${constraintPath}${field.name}.%.`
+          // Block tables are always created under the root/collection table, never under an
+          // intermediate array's table, so their `_parent_id` always points at the root document.
+          // Scope to the right array index (when nested inside an array) via a `_path` constraint,
+          // mirroring the blockType branch above.
+          const blockPath = `${blockPathPrefix}${field.name}`
+
+          const nestedConstraintPath = `${blockPathPrefix}${field.name}.%.`
 
           let result: TableColumn
           const blockConstraints = []
@@ -251,9 +261,10 @@ export const getTableColumnFromPath = ({
           if (isFieldLocalized && adapter.payload.config.localization) {
             const conditions = [
               eq(
-                (aliasTable || adapter.tables[tableName]).id,
+                (aliasTable || adapter.tables[rootTableName]).id,
                 adapter.tables[newTableName]._parentID,
               ),
+              like(adapter.tables[newTableName]._path, blockPath),
             ]
 
             if (locale !== 'all') {
@@ -266,9 +277,12 @@ export const getTableColumnFromPath = ({
             }
           } else {
             blockJoin = {
-              condition: eq(
-                (aliasTable || adapter.tables[tableName]).id,
-                adapter.tables[newTableName]._parentID,
+              condition: and(
+                eq(
+                  (aliasTable || adapter.tables[rootTableName]).id,
+                  adapter.tables[newTableName]._parentID,
+                ),
+                like(adapter.tables[newTableName]._path, blockPath),
               ),
               table: adapter.tables[newTableName],
             }
@@ -281,7 +295,7 @@ export const getTableColumnFromPath = ({
             result = getTableColumnFromPath({
               adapter,
               collectionPath,
-              constraintPath,
+              constraintPath: nestedConstraintPath,
               constraints: blockConstraints,
               fields: block.flattenedFields,
               joins: newJoins,
