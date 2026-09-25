@@ -23,6 +23,10 @@ import { defaultNumber } from './collections/Number/index.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
 import {
+  slugFieldAsyncAutosaveSlug,
+  slugFieldAsyncSlug,
+} from './collections/SlugFieldAsync/shared.js'
+import {
   localizedTextValue,
   namedTabDefaultValue,
   namedTabText,
@@ -1981,6 +1985,66 @@ describe('Fields', () => {
       })
       expect(existsTrue.totalDocs).toBe(1)
       expect(existsTrue.docs[0]?.id).toEqual(existsTrueDoc.id)
+    })
+  })
+
+  describe('slug', () => {
+    // An async `slugify` must be awaited before its result is assigned. Without the await the
+    // field receives a pending promise, which serializes to `{}` and fails required validation.
+    it('should await an async slugify on create', async () => {
+      const doc = await payload.create({
+        collection: slugFieldAsyncSlug,
+        data: { title: 'My Title' },
+      })
+
+      expect(typeof doc.slug).toBe('string')
+      expect(doc.slug).toBe('async-my-title')
+    })
+
+    it('should await an async slugify for a user-provided slug on create', async () => {
+      const doc = await payload.create({
+        collection: slugFieldAsyncSlug,
+        data: { slug: 'Custom Value', title: 'My Title' },
+      })
+
+      expect(typeof doc.slug).toBe('string')
+      expect(doc.slug).toBe('async-custom-value')
+    })
+
+    it('should await an async slugify on update when autosave is disabled', async () => {
+      // Creating without a source leaves the slug unset, which keeps the generate checkbox on
+      // so the update branch below actually regenerates.
+      const created = await payload.create({
+        collection: slugFieldAsyncSlug,
+        data: {},
+      })
+
+      const updated = await payload.update({
+        id: created.id,
+        collection: slugFieldAsyncSlug,
+        data: { title: 'Updated Title' },
+      })
+
+      expect(typeof updated.slug).toBe('string')
+      expect(updated.slug).toBe('async-updated-title')
+    })
+
+    it('should await an async slugify on update when autosave is enabled', async () => {
+      const created = await payload.create({
+        collection: slugFieldAsyncAutosaveSlug,
+        data: { _status: 'draft' },
+        draft: true,
+      })
+
+      const updated = await payload.update({
+        id: created.id,
+        collection: slugFieldAsyncAutosaveSlug,
+        data: { _status: 'draft', title: 'Autosaved Title' },
+        draft: true,
+      })
+
+      expect(typeof updated.slug).toBe('string')
+      expect(updated.slug).toBe('async-autosaved-title')
     })
   })
 
