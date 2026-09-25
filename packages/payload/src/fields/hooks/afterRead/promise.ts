@@ -9,7 +9,7 @@ import type {
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
-import type { Block, Field, TabAsField } from '../../config/types.js'
+import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../../config/types.js'
 import type { AfterReadArgs } from './index.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -70,6 +70,128 @@ type Args = {
   triggerAccessControl?: boolean
   triggerHooks?: boolean
 } & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
+
+const resolveBlock = (
+  blockTypeToMatch: string,
+  field: BlocksField,
+  payload: PayloadRequest['payload'],
+): Block | undefined =>
+  payload.blocks[blockTypeToMatch] ??
+  ((field.blockReferences ?? field.blocks).find(
+    (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+  ) as Block | undefined)
+
+const withoutID = (row: unknown): unknown => {
+  if (!row || typeof row !== 'object') {
+    return row
+  }
+
+  const { id: _id, ...rest } = row as JsonObject
+  return rest
+}
+
+/**
+ * A locale falling back to another locale's `blocks`/`array` rows must not hand those rows'
+ * `id`s back to the client as-is: if that fallback-populated value is then submitted for the
+ * locale that fell back (e.g. publishing that locale from the admin UI), the row `id`s collide
+ * with the rows they were copied from, which belong to a different locale. Stripping the `id`s
+ * here - recursively, since blocks/arrays can nest inside a block (directly, or behind a row,
+ * collapsible, tab or group) - makes those rows read as new rows to create rather than existing
+ * rows to reassign.
+ */
+const stripBlockFallbackRowIDs = (
+  rows: unknown[],
+  field: BlocksField,
+  payload: PayloadRequest['payload'],
+): unknown[] =>
+  rows.map((row) => {
+    const strippedRow = withoutID(row)
+
+    if (!strippedRow || typeof strippedRow !== 'object') {
+      return strippedRow
+    }
+
+    const block = resolveBlock((row as JsonObject).blockType as string, field, payload)
+
+    if (block) {
+      stripNestedFallbackRowIDs(strippedRow as JsonObject, block.fields, payload)
+    }
+
+    return strippedRow
+  })
+
+const stripArrayFallbackRowIDs = (
+  rows: unknown[],
+  field: ArrayField,
+  payload: PayloadRequest['payload'],
+): unknown[] =>
+  rows.map((row) => {
+    const strippedRow = withoutID(row)
+
+    if (strippedRow && typeof strippedRow === 'object') {
+      stripNestedFallbackRowIDs(strippedRow as JsonObject, field.fields, payload)
+    }
+
+    return strippedRow
+  })
+
+const stripNestedFallbackRowIDs = (
+  row: JsonObject,
+  fields: Field[],
+  payload: PayloadRequest['payload'],
+): void => {
+  for (const subField of fields) {
+    // Presentational fields (row, collapsible, unnamed tabs, unnamed groups) don't nest their
+    // own value - their sub-fields live directly on this same row - so recurse in place instead
+    // of skipping them for lacking a `name`.
+    if (subField.type === 'row' || subField.type === 'collapsible') {
+      stripNestedFallbackRowIDs(row, subField.fields, payload)
+      continue
+    }
+
+    if (subField.type === 'tabs') {
+      for (const tab of subField.tabs) {
+        if (tabHasName(tab)) {
+          const tabRow = row[tab.name]
+          if (tabRow && typeof tabRow === 'object') {
+            stripNestedFallbackRowIDs(tabRow as JsonObject, tab.fields, payload)
+          }
+        } else {
+          stripNestedFallbackRowIDs(row, tab.fields, payload)
+        }
+      }
+      continue
+    }
+
+    if (subField.type === 'group') {
+      if (fieldAffectsData(subField) && subField.name) {
+        const groupRow = row[subField.name]
+        if (groupRow && typeof groupRow === 'object') {
+          stripNestedFallbackRowIDs(groupRow as JsonObject, subField.fields, payload)
+        }
+      } else {
+        stripNestedFallbackRowIDs(row, subField.fields, payload)
+      }
+      continue
+    }
+
+    if (!fieldAffectsData(subField) || !subField.name) {
+      continue
+    }
+
+    const subRows = row[subField.name]
+
+    if (!Array.isArray(subRows)) {
+      continue
+    }
+
+    if (subField.type === 'array') {
+      row[subField.name] = stripArrayFallbackRowIDs(subRows, subField, payload)
+    } else if (subField.type === 'blocks') {
+      row[subField.name] = stripBlockFallbackRowIDs(subRows, subField, payload)
+    }
+  }
+}
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
@@ -192,6 +314,24 @@ export const promise = async ({
 
       if (fallbackValue) {
         switch (field.type) {
+          case 'array': {
+            if (isNullOrUndefined) {
+              hoistedValue = Array.isArray(fallbackValue)
+                ? stripArrayFallbackRowIDs(fallbackValue, field, req.payload)
+                : fallbackValue
+            }
+            break
+          }
+
+          case 'blocks': {
+            if (isNullOrUndefined) {
+              hoistedValue = Array.isArray(fallbackValue)
+                ? stripBlockFallbackRowIDs(fallbackValue, field, req.payload)
+                : fallbackValue
+            }
+            break
+          }
+
           case 'text':
           case 'textarea': {
             if (value === '' || isNullOrUndefined) {

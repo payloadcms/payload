@@ -1345,8 +1345,12 @@ describe('Localization', () => {
           // The join only has 2 states, undefined or the localized value of the requested locale.
           // If the localized value is not in the DB, there is no way to know if the value should fallback or not so we fallback if fallbackLocale is truthy.
           // In MongoDB the value can be set to null, which allows us to know that the value should fallback.
-          // eslint-disable-next-line vitest/no-conditional-expect
-          expect(docWithoutFallback.items).toStrictEqual(englishDoc.items)
+          // Fallback rows get new ids so they don't collide with the ids of the locale they were copied from
+          /* eslint-disable vitest/no-conditional-expect */
+          expect(docWithoutFallback.items).toHaveLength(1)
+          expect(docWithoutFallback.items![0].text).toStrictEqual(englishDoc.items![0].text)
+          expect(docWithoutFallback.items![0].id).not.toStrictEqual(englishDoc.items![0].id)
+          /* eslint-enable vitest/no-conditional-expect */
         }
       })
 
@@ -2227,6 +2231,148 @@ describe('Localization', () => {
 
         expect(retrieved.content.es[0].array[0].link.label).toStrictEqual('Spanish 1')
         expect(retrieved.content.es[0].array[1].link.label).toStrictEqual('Spanish 2')
+      })
+    })
+
+    describe('publish individual locale - blocks fallback', () => {
+      it("should publish a locale that fell back to another locale's blocks without an id collision", async () => {
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          data: {
+            _status: 'published',
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                text: 'hello en',
+              },
+            ],
+          },
+        })
+
+        // Spanish has no blocks of its own yet, so reading it falls back to
+        // the English blocks - this is what the admin UI shows while editing
+        // in Spanish before anything has been translated.
+        const fallbackToEnglish = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'es',
+        })
+
+        expect(fallbackToEnglish.content[0].blockType).toBe('blockInsideBlock')
+
+        // Publishing Spanish with that fallback-populated data is exactly
+        // what clicking "Publish in Spanish" submits from the admin UI, and
+        // should not fail.
+        await payload.update({
+          id: doc.id,
+          collection: 'blocks-fields',
+          data: {
+            _status: 'published',
+            content: fallbackToEnglish.content,
+          },
+          locale: 'es',
+          publishSpecificLocale: 'es',
+        })
+
+        const allLocales = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'all',
+        })
+
+        expect(allLocales.content.en[0].blockType).toBe('blockInsideBlock')
+        expect(allLocales.content.es[0].blockType).toBe('blockInsideBlock')
+      })
+
+      it("should publish a locale that fell back to another locale's top-level array rows without an id collision", async () => {
+        const doc = await payload.create({
+          collection: relationshipLocalizedSlug,
+          data: {
+            arrayField: [{}, {}],
+          },
+        })
+
+        // Spanish has no array rows of its own yet, so reading it falls back
+        // to the English rows.
+        const fallbackToEnglish = await payload.findByID({
+          id: doc.id,
+          collection: relationshipLocalizedSlug,
+          locale: 'es',
+        })
+
+        expect(fallbackToEnglish.arrayField).toHaveLength(2)
+
+        // Submitting that fallback-populated value for Spanish should not
+        // fail with a duplicate id - the fallback rows still carry English's
+        // row ids.
+        await payload.update({
+          id: doc.id,
+          collection: relationshipLocalizedSlug,
+          data: {
+            arrayField: fallbackToEnglish.arrayField,
+          },
+          locale: 'es',
+        })
+
+        const allLocales = await payload.findByID({
+          id: doc.id,
+          collection: relationshipLocalizedSlug,
+          locale: 'all',
+        })
+
+        expect(allLocales.arrayField.en).toHaveLength(2)
+        expect(allLocales.arrayField.es).toHaveLength(2)
+      })
+
+      it("should publish a locale that fell back to another locale's blocks, stripping row ids nested inside a row, collapsible and group within the block", async () => {
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          data: {
+            _status: 'published',
+            content: [
+              {
+                blockType: 'nestedContainers',
+                rowItems: [{ label: 'row en' }],
+                collapsibleItems: [{ label: 'collapsible en' }],
+                group: {
+                  groupItems: [{ label: 'group en' }],
+                },
+              },
+            ],
+          },
+        })
+
+        const fallbackToEnglish = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'es',
+        })
+
+        expect(fallbackToEnglish.content[0].blockType).toBe('nestedContainers')
+
+        await payload.update({
+          id: doc.id,
+          collection: 'blocks-fields',
+          data: {
+            _status: 'published',
+            content: fallbackToEnglish.content,
+          },
+          locale: 'es',
+          publishSpecificLocale: 'es',
+        })
+
+        const allLocales = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'all',
+        })
+
+        expect(allLocales.content.en[0].rowItems[0].label).toBe('row en')
+        expect(allLocales.content.es[0].rowItems[0].label).toBe('row en')
+        expect(allLocales.content.en[0].collapsibleItems[0].label).toBe('collapsible en')
+        expect(allLocales.content.es[0].collapsibleItems[0].label).toBe('collapsible en')
+        expect(allLocales.content.en[0].group.groupItems[0].label).toBe('group en')
+        expect(allLocales.content.es[0].group.groupItems[0].label).toBe('group en')
       })
     })
 
