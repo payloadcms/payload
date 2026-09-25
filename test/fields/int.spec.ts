@@ -1610,6 +1610,45 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
       await payload.delete({ collection: 'text-fields', id: miss.id, overrideAccess: true })
     })
 
+    test('should match LIKE wildcards literally in hasMany contains - array value', async ({
+      payload,
+    }) => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['a_b'],
+          text: 'required',
+        },
+        overrideAccess: true,
+      })
+
+      // Matches only if the database reads _ as a wildcard
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['axb'],
+          text: 'required',
+        },
+        overrideAccess: true,
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            contains: ['a_b'],
+          },
+        },
+        overrideAccess: true,
+      })
+
+      expect(docs.find(({ id }) => id === hit.id)).toBeDefined()
+      expect(docs.find(({ id }) => id === miss.id)).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit.id, overrideAccess: true })
+      await payload.delete({ collection: 'text-fields', id: miss.id, overrideAccess: true })
+    })
+
     test('should query like on value', async ({ payload }) => {
       const miss = await payload.create({
         collection: 'text-fields',
