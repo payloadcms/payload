@@ -956,6 +956,20 @@ describe('Relationship Field', () => {
       await expect(options).toHaveCount(1) // None + 1 Unitled ID
     })
 
+    test('should show untitled ID without edit button for a deleted relation', async () => {
+      await payload.delete({
+        id: relationOneDoc.id,
+        collection: relationOneSlug,
+        overrideAccess: true,
+      })
+
+      await page.goto(url.edit(docWithExistingRelations.id))
+      const field = page.locator('#field-relationship')
+
+      await expect(field).toContainText(`Untitled - ID: ${relationOneDoc.id}`)
+      await expect(field.locator('.relationship--single-value__drawer-toggler')).toHaveCount(0)
+    })
+
     test('should search within the relationship field', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
       await wait(300)

@@ -145,14 +145,6 @@ export const RelationshipValueCacheProvider: React.FC<{
             for (const doc of data.docs) {
               fetchedDocs.set(toCacheKey(collection, locale, doc.id), { id: doc.id, doc })
             }
-
-            // For IDs not found in the response, cache a placeholder to avoid refetching
-            for (const id of ids) {
-              const key = toCacheKey(collection, locale, id)
-              if (!fetchedDocs.has(key)) {
-                fetchedDocs.set(key, { id, doc: { id } })
-              }
-            }
           }
         } catch {
           // On error, don't cache — allow retry on next request
