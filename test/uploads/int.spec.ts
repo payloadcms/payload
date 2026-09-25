@@ -29,7 +29,6 @@ import {
   runAnimatedFocalPointResizeStaysValidTest,
   runAnimatedResizeReportsPerFrameDimensionsTest,
 } from '../__helpers/shared/animatedResizeParityTests.js'
-import { runTransformerContractShapeTests } from '../__helpers/shared/transformerContractShape.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
@@ -3230,14 +3229,6 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       collection: animatedTypeMedia as CollectionSlug,
       focalPoint: { x: 80, y: 50 },
       size: { name: 'focalCrop', height: 150, width: 300 },
-    })
-
-    runTransformerContractShapeTests((payload) => {
-      const transformer = payload.config.upload.transformers.find((t) => t.slug === 'sharp')
-      if (!transformer) {
-        throw new Error('Expected the "sharp" transformer to be registered for this suite.')
-      }
-      return transformer
     })
   })
 

@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { proveSourceHashTransformer } from '../__helpers/shared/transformSourceTests.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -22,7 +23,6 @@ import {
   mediaWithSignedDownloadsSlug,
   prefix,
 } from './shared.js'
-import { proveSourceHashTransformer } from './transformerFixtures.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

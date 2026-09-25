@@ -38,7 +38,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
     let originalPdfText: string
 
     test.beforeAll(() => {
-      originalPdfText = fs.readFileSync(path.resolve(dirname, './test-pdf.pdf'), 'utf-8')
+      originalPdfText = fs.readFileSync(path.resolve(dirname, '../uploads/test-pdf.pdf'), 'utf-8')
     })
 
     test.afterEach(async () => {
@@ -58,7 +58,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
     })
 
     const uploadTransformerFixture = async (data: Record<string, unknown> = {}) => {
-      const filePath = path.resolve(dirname, './test-pdf.pdf')
+      const filePath = path.resolve(dirname, '../uploads/test-pdf.pdf')
       const file = await getFileByPath(filePath)
       const doc = await payload.create({
         collection: transformerMediaSlug as CollectionSlug,
@@ -144,6 +144,29 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
 
       expect(response.status).toBe(500)
       expect(transformerCallCounts.sourceConsumingError).toBe(1)
+    })
+
+    test('should abort the pipeline with 500 when a transformer consumes its source but returns no response', async () => {
+      const doc = await uploadTransformerFixture()
+
+      const response = await restClient.GET(
+        `/${transformerMediaSlug}/file/${doc.filename}?consumenoresponse=1`,
+      )
+
+      expect(response.status).toBe(500)
+      expect(transformerCallCounts.consumeWithoutResponse).toBe(1)
+    })
+
+    test('should give a transformer the full source file even when the request has a Range header', async () => {
+      const doc = await uploadTransformerFixture()
+
+      const response = await restClient.GET(
+        `/${transformerMediaSlug}/file/${doc.filename}?suffix=1`,
+        { headers: { Range: 'bytes=0-9' } },
+      )
+
+      expect(response.status).toBe(200)
+      expect(await response.text()).toBe(`${originalPdfText}-suffix`)
     })
 
     test('should return 404 for a filename with no matching upload document', async () => {
@@ -277,7 +300,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
     })
 
     const uploadFixture = async (fixtureFilename: string) => {
-      const filePath = path.resolve(dirname, `./${fixtureFilename}`)
+      const filePath = path.resolve(dirname, `../uploads/${fixtureFilename}`)
       const file = await getFileByPath(filePath)
       const doc = await payload.create({
         collection: resizePreviewMediaSlug as CollectionSlug,
@@ -328,6 +351,21 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       expect(metadata.height).toBe(150)
     })
 
+    test('should replace the source representation headers on a resized response', async () => {
+      const doc = await uploadFixture('image.png')
+
+      const response = await restClient.GET(
+        `/${resizePreviewMediaSlug}/file/${doc.filename}?width=200`,
+      )
+      const body = await response.arrayBuffer()
+
+      expect(response.headers.get('content-type')).toBe('image/png')
+      expect(response.headers.get('content-length')).toBe(String(body.byteLength))
+      expect(response.headers.get('etag')).toBeNull()
+      expect(response.headers.get('last-modified')).toBeNull()
+      expect(response.headers.get('accept-ranges')).toBeNull()
+    })
+
     test('should return 400 for an invalid resize parameter', async () => {
       const doc = await uploadFixture('image.png')
 
@@ -339,7 +377,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
     })
 
     // A repeated `?width=` query parameter is covered at the unit level
-    // (parseDynamicResize.spec.ts, handleRequest.spec.ts) — NextRESTClient's
+    // (parseDynamicResize.spec.ts) — NextRESTClient's
     // qs-based query parsing collapses duplicate keys to the last value before
     // the request is ever sent, so it cannot be exercised through this client.
 

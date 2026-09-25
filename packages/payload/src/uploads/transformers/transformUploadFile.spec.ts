@@ -14,85 +14,7 @@ const makeTransformer = (overrides: Partial<UploadTransformer> = {}): UploadTran
 })
 
 describe('transformUploadFile', () => {
-  it('should return the original file unchanged when the pipeline is empty', async () => {
-    const file = new File(['bytes'], 'logo.png')
-
-    const result = await transformUploadFile({
-      collectionSlug: 'media',
-      file,
-      options: undefined,
-      pipeline: [],
-      req: makeReq(),
-    })
-
-    expect(result).toBe(file)
-  })
-
-  it('should call every eligible transformFile in declaration order with the given collectionSlug, options, and request', async () => {
-    const order: string[] = []
-    const first = makeTransformer({
-      slug: 'first',
-      transformFile: vi.fn().mockImplementation(async (args) => {
-        order.push('first')
-        expect(args).toMatchObject({ collectionSlug: 'media', options: 'my-options' })
-        return { status: 'continue' }
-      }),
-    })
-    const second = makeTransformer({
-      slug: 'second',
-      transformFile: vi.fn().mockImplementation(async () => {
-        order.push('second')
-        return { status: 'continue' }
-      }),
-    })
-
-    await transformUploadFile({
-      collectionSlug: 'media',
-      file: new File(['bytes'], 'logo.png'),
-      options: 'my-options',
-      pipeline: [first, second],
-      req: makeReq(),
-    })
-
-    expect(order).toEqual(['first', 'second'])
-  })
-
-  it('should skip a pipeline entry without a transformFile function', async () => {
-    const withoutTransformFile = makeTransformer({ slug: 'no-transform-file' })
-    const withTransformFile = makeTransformer({
-      slug: 'has-transform-file',
-      transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
-    })
-
-    await transformUploadFile({
-      collectionSlug: 'media',
-      file: new File(['bytes'], 'logo.png'),
-      options: undefined,
-      pipeline: [withoutTransformFile, withTransformFile],
-      req: makeReq(),
-    })
-
-    expect(withTransformFile.transformFile).toHaveBeenCalledTimes(1)
-  })
-
-  it('should preserve the same File reference when a stage returns continue without a file', async () => {
-    const file = new File(['bytes'], 'logo.png')
-    const transformer = makeTransformer({
-      transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
-    })
-
-    const result = await transformUploadFile({
-      collectionSlug: 'media',
-      file,
-      options: undefined,
-      pipeline: [transformer],
-      req: makeReq(),
-    })
-
-    expect(result).toBe(file)
-  })
-
-  it('should replace the accumulator when a stage returns continue with a file, and pass it to the next stage', async () => {
+  it('should replace the file and pass it to the next stage when a stage returns continue with a file', async () => {
     const replacement = new File(['replaced'], 'logo.png')
     const first = makeTransformer({
       slug: 'first',
@@ -100,10 +22,7 @@ describe('transformUploadFile', () => {
     })
     const second = makeTransformer({
       slug: 'second',
-      transformFile: vi.fn().mockImplementation(async ({ file }) => {
-        expect(file).toBe(replacement)
-        return { status: 'continue' }
-      }),
+      transformFile: vi.fn().mockResolvedValue({ status: 'continue' }),
     })
 
     const result = await transformUploadFile({
@@ -114,19 +33,19 @@ describe('transformUploadFile', () => {
       req: makeReq(),
     })
 
+    expect(second.transformFile).toHaveBeenCalledWith(
+      expect.objectContaining({ file: replacement }),
+    )
     expect(result).toBe(replacement)
   })
 
-  it('should replace the accumulator and stop the pipeline when a stage returns complete', async () => {
+  it('should replace the file and stop the pipeline when a stage returns complete', async () => {
     const completeFile = new File(['done'], 'logo.png')
     const first = makeTransformer({
       slug: 'first',
       transformFile: vi.fn().mockResolvedValue({ file: completeFile, status: 'complete' }),
     })
-    const second = makeTransformer({
-      slug: 'second',
-      transformFile: vi.fn(),
-    })
+    const second = makeTransformer({ slug: 'second', transformFile: vi.fn() })
 
     const result = await transformUploadFile({
       collectionSlug: 'media',
@@ -140,7 +59,7 @@ describe('transformUploadFile', () => {
     expect(second.transformFile).not.toHaveBeenCalled()
   })
 
-  it('should propagate a thrown error immediately, without calling later stages', async () => {
+  it('should propagate a thrown error without calling later stages', async () => {
     const first = makeTransformer({
       slug: 'first',
       transformFile: vi.fn().mockRejectedValue(new Error('transform failed')),

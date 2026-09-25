@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { proveSourceHashTransformer } from '../__helpers/shared/transformSourceTests.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -21,6 +22,7 @@ const dirname = path.dirname(filename)
 
 const uploadOptions = {
   transformers: [
+    proveSourceHashTransformer,
     sharpTransformer({
       collections: {
         [mediaSlug]: {

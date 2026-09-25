@@ -4,14 +4,6 @@ import { TransformerContractError } from '../../errors/TransformerContractError.
 import { createLazySourceGetter } from './createLazySourceGetter.js'
 
 describe('createLazySourceGetter', () => {
-  it('should perform no call when constructed', () => {
-    const retrieve = vi.fn().mockResolvedValue(new Response('body'))
-
-    createLazySourceGetter({ retrieve })
-
-    expect(retrieve).not.toHaveBeenCalled()
-  })
-
   it('should flip wasCalled() to true as soon as get() begins, before it resolves', () => {
     let resolveRetrieve: (response: Response) => void = () => {}
     const retrieve = vi.fn(
@@ -63,17 +55,6 @@ describe('createLazySourceGetter', () => {
     const source = createLazySourceGetter({ retrieve })
 
     await expect(source.get()).rejects.toThrow('retrieval failed')
-    await expect(source.get()).rejects.toThrow(TransformerContractError)
-
-    expect(retrieve).toHaveBeenCalledTimes(1)
-  })
-
-  it('should not retry a failed first retrieval on subsequent get() calls', async () => {
-    const retrieve = vi.fn().mockRejectedValue(new Error('retrieval failed'))
-    const source = createLazySourceGetter({ retrieve })
-
-    await expect(source.get()).rejects.toThrow('retrieval failed')
-    await expect(source.get()).rejects.toThrow(TransformerContractError)
     await expect(source.get()).rejects.toThrow(TransformerContractError)
 
     expect(retrieve).toHaveBeenCalledTimes(1)

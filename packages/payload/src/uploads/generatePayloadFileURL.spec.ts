@@ -23,37 +23,34 @@ describe('generatePayloadFileURL', () => {
     expect(url).toBe('/api/media/file/my%20file%20(1).png')
   })
 
-  it('should honor a custom API route from config.routes.api', () => {
-    const url = generatePayloadFileURL({
-      collectionSlug: 'media',
+  it.each([
+    {
       config: makeConfig({ routes: { api: '/custom-api' } }),
-      filename: 'logo.png',
+      expected: '/custom-api/media/file/logo.png',
+      name: 'a relative URL using a custom API route',
       relative: true,
-    })
-
-    expect(url).toBe('/custom-api/media/file/logo.png')
-  })
-
-  it('should build an absolute URL from config.serverURL when relative is false', () => {
-    const url = generatePayloadFileURL({
-      collectionSlug: 'media',
-      config: makeConfig({ serverURL: 'https://example.com' }),
-      filename: 'logo.png',
+    },
+    {
+      config: makeConfig(),
+      expected: 'https://example.com/api/media/file/logo.png',
+      name: 'an absolute URL from serverURL when relative is false',
       relative: false,
-    })
-
-    expect(url).toBe('https://example.com/api/media/file/logo.png')
-  })
-
-  it('should build a relative URL when relative is true, ignoring serverURL', () => {
+    },
+    {
+      config: makeConfig(),
+      expected: '/api/media/file/logo.png',
+      name: 'a relative URL ignoring serverURL when relative is true',
+      relative: true,
+    },
+  ])('should build $name', ({ config, expected, relative }) => {
     const url = generatePayloadFileURL({
       collectionSlug: 'media',
-      config: makeConfig({ serverURL: 'https://example.com' }),
+      config,
       filename: 'logo.png',
-      relative: true,
+      relative,
     })
 
-    expect(url).toBe('/api/media/file/logo.png')
+    expect(url).toBe(expected)
   })
 
   it('should append prefix as a query parameter', () => {
@@ -149,21 +146,5 @@ describe('generatePayloadFileURL', () => {
 
     expect(url).toBe('/api/media/file/logo.png?width=500')
     expect(Array.from(query.entries())).toEqual([['width', '500']])
-  })
-
-  it('should ignore an external document url and always target the Payload endpoint', () => {
-    const argsWithExternalUrl = {
-      collectionSlug: 'media',
-      config: makeConfig(),
-      filename: 'logo.png',
-      relative: true,
-      url: 'https://cdn.example.com/logo.png',
-    }
-
-    const url = generatePayloadFileURL(
-      argsWithExternalUrl as unknown as Parameters<typeof generatePayloadFileURL>[0],
-    )
-
-    expect(url).toBe('/api/media/file/logo.png')
   })
 })

@@ -35,29 +35,12 @@ describe('assertNoLegacySharpConfig', () => {
     },
   )
 
-  it('should not throw for a config with no legacy Sharp options', () => {
-    const config = {
-      collections: [{ slug: 'media', upload: { imageSizes: [] } }],
-    } as unknown as Config
-
-    expect(() => assertNoLegacySharpConfig({ config })).not.toThrow()
-  })
-
   it('should throw when a collection declares imageSizes but no transformer is registered', () => {
     const config = {
       collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }],
     } as unknown as Config
 
     expect(() => assertNoLegacySharpConfig({ config })).toThrow(/imageSizes/)
-  })
-
-  it('should not throw when a collection declares imageSizes and a transformer is registered', () => {
-    const config = {
-      collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }],
-      upload: { transformers: [{ mimeTypes: ['image/*'], slug: 'sharp' }] },
-    } as unknown as Config
-
-    expect(() => assertNoLegacySharpConfig({ config })).not.toThrow()
   })
 
   it('should report every violation across multiple collections in a single error', () => {
@@ -82,20 +65,17 @@ describe('assertNoLegacySharpConfig', () => {
     expect(thrownMessage).toContain('formatOptions')
   })
 
-  it('should not throw when a collection has no upload config', () => {
-    const config = { collections: [{ slug: 'pages' }] } as unknown as Config
-
-    expect(() => assertNoLegacySharpConfig({ config })).not.toThrow()
-  })
-
-  it('should not throw when a collection upload is a boolean', () => {
-    const config = { collections: [{ slug: 'media', upload: true }] } as unknown as Config
-
-    expect(() => assertNoLegacySharpConfig({ config })).not.toThrow()
-  })
-
-  it('should not throw when there are no collections', () => {
-    const config = {} as unknown as Config
+  it.each([
+    { collections: [{ slug: 'media', upload: { imageSizes: [] } }] },
+    {
+      collections: [{ slug: 'media', upload: { imageSizes: [{ name: 'thumbnail' }] } }],
+      upload: { transformers: [{ mimeTypes: ['image/*'], slug: 'sharp' }] },
+    },
+    { collections: [{ slug: 'pages' }] },
+    { collections: [{ slug: 'media', upload: true }] },
+    {},
+  ])('should not throw for a config without legacy Sharp options (%#)', (rawConfig) => {
+    const config = rawConfig as unknown as Config
 
     expect(() => assertNoLegacySharpConfig({ config })).not.toThrow()
   })

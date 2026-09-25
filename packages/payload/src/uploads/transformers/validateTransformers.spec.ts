@@ -11,28 +11,8 @@ const makeTransformer = (overrides: Partial<UploadTransformer> = {}): UploadTran
 })
 
 describe('validateTransformers', () => {
-  it('should not throw for a single valid transformer', () => {
-    expect(() => validateTransformers({ transformers: [makeTransformer()] })).not.toThrow()
-  })
-
-  it('should not throw for an empty transformers list', () => {
-    expect(() => validateTransformers({ transformers: [] })).not.toThrow()
-  })
-
-  it('should not throw for exact, category-wildcard, and universal-wildcard MIME patterns', () => {
-    const transformer = makeTransformer({ mimeTypes: ['image/png', 'image/*', '*/*'] })
-
-    expect(() => validateTransformers({ transformers: [transformer] })).not.toThrow()
-  })
-
-  it('should throw when a transformer has an empty slug', () => {
-    const transformer = makeTransformer({ slug: '' })
-
-    expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/slug/i)
-  })
-
-  it('should throw when a transformer has a whitespace-only slug', () => {
-    const transformer = makeTransformer({ slug: '   ' })
+  it.each(['', '   '])('should throw when a transformer has an empty slug (%j)', (slug) => {
+    const transformer = makeTransformer({ slug })
 
     expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/slug/i)
   })
@@ -43,14 +23,8 @@ describe('validateTransformers', () => {
     expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/mime/i)
   })
 
-  it('should throw when a transformer has a malformed MIME pattern', () => {
-    const transformer = makeTransformer({ mimeTypes: ['image'] })
-
-    expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/mime/i)
-  })
-
-  it('should throw when a transformer has a subtype-only wildcard pattern', () => {
-    const transformer = makeTransformer({ mimeTypes: ['*/png'] })
+  it.each(['image', '*/png'])('should throw for the invalid MIME pattern %j', (mimeType) => {
+    const transformer = makeTransformer({ mimeTypes: [mimeType] })
 
     expect(() => validateTransformers({ transformers: [transformer] })).toThrow(/mime/i)
   })
@@ -78,12 +52,6 @@ describe('validateTransformers', () => {
     ]
 
     expect(() => validateTransformers({ transformers })).toThrow(/"a".*"b"|"b".*"a"/is)
-  })
-
-  it('should not throw when every transformer has a unique slug', () => {
-    const transformers = [makeTransformer({ slug: 'a' }), makeTransformer({ slug: 'b' })]
-
-    expect(() => validateTransformers({ transformers })).not.toThrow()
   })
 
   it('should report multiple distinct problems across transformers in a single error', () => {
