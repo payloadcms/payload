@@ -149,9 +149,19 @@ export function cloneValidationRequest(
     return {}
   }
 
-  const clonedRequest: Record<string, unknown> = {}
+  const payloadRequest: Partial<PayloadRequest> = request
+  const fetchRequest: Request | undefined =
+    typeof Request !== 'undefined' && request instanceof Request ? request : undefined
+  const canCloneFetchRequest = fetchRequest && !fetchRequest.bodyUsed
+  let clonedRequest: Record<string, unknown>
 
-  for (const [key, value] of Object.entries(request)) {
+  if (canCloneFetchRequest) {
+    clonedRequest = fetchRequest.clone() as unknown as Record<string, unknown>
+  } else {
+    clonedRequest = {}
+  }
+
+  for (const [key, value] of Object.entries(payloadRequest)) {
     if (key === 'payloadDataLoader') {
       continue
     }
@@ -164,19 +174,23 @@ export function cloneValidationRequest(
   // `context`/`query`/`routeParams` default to an empty object even when the source request never
   // set them, since downstream code reads their properties without checking for `undefined` first.
   Object.assign(clonedRequest, {
-    context: cloneValidationValue(request.context ?? {}),
-    query: cloneValidationValue(request.query ?? {}),
-    routeParams: cloneValidationValue(request.routeParams ?? {}),
+    context: cloneValidationValue(payloadRequest.context ?? {}),
+    query: cloneValidationValue(payloadRequest.query ?? {}),
+    routeParams: cloneValidationValue(payloadRequest.routeParams ?? {}),
   })
 
-  // `headers`/`method`/`signal`/`url` come from the underlying Fetch `Request` prototype as
-  // getters rather than own properties, so the loop above never sees them to clone or share.
-  Object.assign(clonedRequest, {
-    headers: cloneValidationValue(request.headers),
-    method: request.method,
-    signal: request.signal,
-    url: request.url,
-  })
+  if (!canCloneFetchRequest) {
+    // `headers`/`method`/`signal`/`url` can also come from a Request-like object's prototype, so
+    // copy them explicitly when there is no usable native Fetch Request clone to preserve them.
+    // REST request bodies have already been consumed, but cached own methods such as `json` were
+    // copied by the loop above and remain available to hooks.
+    Object.assign(clonedRequest, {
+      headers: cloneValidationValue(payloadRequest.headers),
+      method: payloadRequest.method,
+      signal: payloadRequest.signal,
+      url: payloadRequest.url,
+    })
+  }
 
   return clonedRequest as Partial<PayloadRequest>
 }

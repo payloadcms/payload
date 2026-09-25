@@ -7,7 +7,7 @@ import {
 } from 'graphql'
 
 const validationFieldErrorType = new GraphQLObjectType({
-  name: 'ValidationFieldError',
+  name: 'PayloadValidationFieldError',
   fields: {
     locale: { type: GraphQLString },
     message: { type: new GraphQLNonNull(GraphQLString) },
@@ -17,7 +17,7 @@ const validationFieldErrorType = new GraphQLObjectType({
 
 export const buildValidationResultType = (): GraphQLObjectType => {
   return new GraphQLObjectType({
-    name: 'ValidationResult',
+    name: 'PayloadValidationResult',
     fields: {
       errors: {
         type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(validationFieldErrorType))),

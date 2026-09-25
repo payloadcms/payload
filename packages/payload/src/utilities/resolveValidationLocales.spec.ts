@@ -209,21 +209,72 @@ describe('cloneValidationRequest', () => {
     expect(cloneValidationRequest(undefined)).toEqual({})
   })
 
-  it('should clone headers into a new instance while sharing the abort signal', () => {
+  it('should clone headers and preserve abort behaviour', () => {
+    const controller = new AbortController()
     const request = new Request('https://example.com/api/posts', {
       headers: { 'x-test': 'value' },
       method: 'POST',
+      signal: controller.signal,
     }) as unknown as PayloadRequest
 
     const cloned = cloneValidationRequest(request)
 
     expect(cloned.url).toBe('https://example.com/api/posts')
     expect(cloned.method).toBe('POST')
-    // `Request` derives its own `.signal` rather than exposing the one passed to its constructor
-    // by reference, so this compares against the request's own signal, not a controller's.
-    expect(cloned.signal).toBe(request.signal)
+    expect(cloned.signal).not.toBe(request.signal)
+    expect(cloned.signal?.aborted).toBe(false)
     expect(cloned.headers).not.toBe(request.headers)
     expect((cloned.headers as unknown as Headers).get('x-test')).toBe('value')
+
+    controller.abort()
+
+    expect(request.signal.aborted).toBe(true)
+    expect(cloned.signal?.aborted).toBe(true)
+  })
+
+  it('should preserve Fetch Request methods and isolate the body for each locale clone', async () => {
+    const request = Object.assign(
+      new Request('https://example.com/api/posts', {
+        body: JSON.stringify({ title: 'Candidate title' }),
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+      }),
+      {
+        context: { marker: 'original' },
+      },
+    ) as unknown as PayloadRequest
+
+    const firstClone = cloneValidationRequest(request)
+    const secondClone = cloneValidationRequest(request)
+
+    expect(firstClone).toBeInstanceOf(Request)
+    expect(secondClone).toBeInstanceOf(Request)
+    await expect(firstClone.json!()).resolves.toEqual({ title: 'Candidate title' })
+    await expect(secondClone.text!()).resolves.toBe('{"title":"Candidate title"}')
+    expect(request.bodyUsed).toBe(false)
+    expect(firstClone.context).toEqual({ marker: 'original' })
+    expect(firstClone.context).not.toBe(request.context)
+    expect(firstClone.context).not.toBe(secondClone.context)
+  })
+
+  it('should preserve cached body methods after a Fetch Request body has been consumed', async () => {
+    const request = Object.assign(
+      new Request('https://example.com/api/posts', {
+        body: JSON.stringify({ title: 'Candidate title' }),
+        method: 'POST',
+      }),
+      {
+        data: { title: 'Candidate title' },
+        json: () => Promise.resolve({ title: 'Candidate title' }),
+      },
+    ) as unknown as PayloadRequest
+
+    await request.text()
+
+    const cloned = cloneValidationRequest(request)
+
+    expect(cloned).not.toBeInstanceOf(Request)
+    await expect(cloned.json!()).resolves.toEqual({ title: 'Candidate title' })
   })
 
   it('should clone own enumerable properties independently of the source request', () => {
