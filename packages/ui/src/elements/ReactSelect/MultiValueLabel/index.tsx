@@ -40,9 +40,14 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const titleText = typeof labelText === 'string' ? labelText : ''
   const labelID = getMultiValueLabelID({ data, selectProps: props.selectProps })
   const dragActivator = use(MultiValueDragActivatorContext)
-  const { ref: dragActivatorRef, ...dragActivatorProps } = dragActivator || {}
+  const {
+    onKeyDown: dragActivatorOnKeyDown,
+    ref: dragActivatorRef,
+    ...dragActivatorProps
+  } = dragActivator || {}
   const editableInnerProps =
     (editableProps && editableProps(data, className, props.selectProps)) || {}
+  const { onKeyDown: editableOnKeyDown, ...restEditableInnerProps } = editableInnerProps
 
   return (
     <div
@@ -66,9 +71,16 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
           innerProps={{
             id: labelID,
             className,
-            ...editableInnerProps,
+            ...restEditableInnerProps,
             ...(draggableProps || {}),
             ...(dragActivatorProps || {}),
+            onKeyDown: (event) => {
+              if (event.currentTarget.isContentEditable) {
+                editableOnKeyDown?.(event)
+              } else {
+                dragActivatorOnKeyDown?.(event)
+              }
+            },
             ref: dragActivatorRef,
           }}
         />

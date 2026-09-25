@@ -99,7 +99,7 @@ export async function openSelectMenu({
 }): Promise<void> {
   const menu = getSelectMenu({ page })
   if (await menu.isHidden()) {
-    await selectLocator.locator('.rs__control').click()
+    await selectLocator.locator('.dropdown-indicator').click()
   }
   await menu.waitFor({ state: 'visible', timeout: 2000 })
 }

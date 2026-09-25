@@ -499,9 +499,11 @@ test.describe('Hierarchy Sidebar', () => {
         const listControls = page.locator('.hierarchy-list__controls')
         await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
-        await expect(page.getByRole('button', { name: 'Organization', exact: true })).toBeVisible()
-        await expect(page.getByRole('button', { name: 'Product', exact: true })).toBeVisible()
-        await page.getByRole('button', { name: 'Organization', exact: true }).click()
+        await expect(
+          page.getByRole('menuitem', { name: 'Organization', exact: true }),
+        ).toBeVisible()
+        await expect(page.getByRole('menuitem', { name: 'Product', exact: true })).toBeVisible()
+        await page.getByRole('menuitem', { name: 'Organization', exact: true }).click()
 
         const drawer = page.locator('#hierarchy-create-folders')
         const titleInput = drawer.locator('#field-title')

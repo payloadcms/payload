@@ -429,7 +429,7 @@ describe('Dashboard', () => {
     await d.editWidget(2, 'Open Tickets')
     await expect(secondWidgetTitle).toHaveText('Open Tickets')
 
-    await d.stepNavLast.locator('button').nth(1).click()
+    await d.stepNavButtons.nth(1).click()
     await expect(secondWidgetTitle).toHaveText('Open Tickets')
 
     // Re-enter edit mode without page refresh and edit again.
