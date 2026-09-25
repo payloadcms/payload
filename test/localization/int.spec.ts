@@ -2230,6 +2230,57 @@ describe('Localization', () => {
       })
     })
 
+    describe('publish individual locale - blocks fallback', () => {
+      it("should publish a locale that fell back to another locale's blocks without an id collision", async () => {
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          data: {
+            _status: 'published',
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                text: 'hello en',
+              },
+            ],
+          },
+        })
+
+        // Spanish has no blocks of its own yet, so reading it falls back to
+        // the English blocks - this is what the admin UI shows while editing
+        // in Spanish before anything has been translated.
+        const fallbackToEnglish = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'es',
+        })
+
+        expect(fallbackToEnglish.content[0].blockType).toBe('blockInsideBlock')
+
+        // Publishing Spanish with that fallback-populated data is exactly
+        // what clicking "Publish in Spanish" submits from the admin UI, and
+        // should not fail.
+        await payload.update({
+          id: doc.id,
+          collection: 'blocks-fields',
+          data: {
+            _status: 'published',
+            content: fallbackToEnglish.content,
+          },
+          locale: 'es',
+          publishSpecificLocale: 'es',
+        })
+
+        const allLocales = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'all',
+        })
+
+        expect(allLocales.content.en[0].blockType).toBe('blockInsideBlock')
+        expect(allLocales.content.es[0].blockType).toBe('blockInsideBlock')
+      })
+    })
+
     describe('nested arrays', () => {
       it('should not duplicate block rows for blocks within localized array fields', async () => {
         const randomDoc = (
