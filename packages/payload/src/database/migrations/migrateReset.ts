@@ -1,7 +1,7 @@
 import type { BaseDatabaseAdapter, MigrationResult } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
@@ -18,7 +18,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<Migration
     return { migrated: [], rolledBack: [] }
   }
 
-  const req = await createLocalReq({}, payload)
+  const req = await createPayloadRequest({ payload })
 
   migrationFiles.reverse()
   const rolledBack: string[] = []
@@ -38,6 +38,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<Migration
         await migration.down({ payload, req, session })
         await payload.delete({
           collection: 'payload-migrations',
+          overrideAccess: true,
           req,
           where: {
             id: {
@@ -60,6 +61,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<Migration
   try {
     await payload.delete({
       collection: 'payload-migrations',
+      overrideAccess: true,
       where: {
         batch: {
           equals: -1,

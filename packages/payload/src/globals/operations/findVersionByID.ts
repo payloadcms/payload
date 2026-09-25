@@ -59,6 +59,13 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     return null!
   }
 
+  const isValidID =
+    (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && Number.isFinite(id))
+
+  if (!isValidID) {
+    throw new NotFound(req.t)
+  }
+
   const hasWhereAccess = typeof accessResults === 'object'
 
   const versionFields = buildVersionGlobalFields(payload.config, globalConfig, true)
@@ -89,10 +96,6 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
   // /////////////////////////////////////
   // Find by ID
   // /////////////////////////////////////
-
-  if (!findGlobalVersionsArgs.where?.and?.[0]?.id) {
-    throw new NotFound(req.t)
-  }
 
   const { docs: results } = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
   if (!results || results?.length === 0) {

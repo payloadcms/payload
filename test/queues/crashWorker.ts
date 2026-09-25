@@ -23,6 +23,7 @@ try {
   await payload.jobs.runByID({
     id: jobID,
     silent: true,
+    overrideAccess: true,
   })
 } finally {
   await payload.destroy()

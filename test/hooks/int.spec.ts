@@ -1184,7 +1184,7 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
       expect(result.afterReadOverrideAccess).toBe(false)
     })
 
-    test('should default to true when overrideAccess is not specified in Local API', async ({
+    test('should default to false when overrideAccess is not specified in Local API', async ({
       payload,
     }) => {
       const doc = await payload.create({
@@ -1203,8 +1203,8 @@ test.suite('Hooks', { config: './config.ts', resetBetweenTests: false }, () => {
 
       expect(result.beforeReadCalled).toBe(true)
       expect(result.afterReadCalled).toBe(true)
-      expect(result.beforeReadOverrideAccess).toBe(true)
-      expect(result.afterReadOverrideAccess).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(false)
+      expect(result.afterReadOverrideAccess).toBe(false)
     })
   })
 })

@@ -6,7 +6,11 @@ import fs from 'fs'
 import { createServer } from 'http'
 import os from 'os'
 import path from 'path'
-import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
+import {
+  _internal_safeFetchGlobal,
+  createPayloadRequestFromWebRequest,
+  getFileByPath,
+} from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
@@ -1491,7 +1495,10 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           const body = Buffer.from(await response.arrayBuffer())
 
           expect(response.status).toBe(200)
-          await expect(sharp(body).metadata()).resolves.toMatchObject({ format: 'jpeg', width: 100 })
+          await expect(sharp(body).metadata()).resolves.toMatchObject({
+            format: 'jpeg',
+            width: 100,
+          })
           expect(response.headers.get('content-type')).toBe('image/jpeg')
         } finally {
           await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
@@ -2223,7 +2230,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const configuredOrigin = `http://localhost:${configuredPort}`
         const alternateOrigin = `http://localhost:${alternatePort}`
 
-        const req = await createPayloadRequest({
+        const req = await createPayloadRequestFromWebRequest({
           config: payload.config,
           request: new Request(configuredOrigin, {
             headers: new Headers({
@@ -2268,7 +2275,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
 
         const port = (server.address() as AddressInfo).port
         const requestOrigin = `http://localhost:${port}`
-        const req = await createPayloadRequest({
+        const req = await createPayloadRequestFromWebRequest({
           config: payload.config,
           request: new Request(requestOrigin, {
             headers: new Headers({
@@ -2345,7 +2352,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         const configuredPort = (configuredServer.address() as AddressInfo).port
         const configuredOrigin = `http://localhost:${configuredPort}`
 
-        const req = await createPayloadRequest({
+        const req = await createPayloadRequestFromWebRequest({
           config: payload.config,
           request: new Request(configuredOrigin, {
             headers: new Headers({ cookie: testCookies, origin: configuredOrigin }),
@@ -2406,7 +2413,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
               status: 200,
             }),
           )
-          const req = await createPayloadRequest({
+          const req = await createPayloadRequestFromWebRequest({
             config: payload.config,
             request: new Request('https://app.example.com', {
               headers: new Headers({ cookie: 'payload-token=123; other-cookie=456' }),
@@ -2437,7 +2444,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       test.for(['http://[', 'ftp://files.example.com/image.png', 'data:text/plain,image'])(
         'should reject unsupported file URL %s',
         async (url, { payload }) => {
-          const req = await createPayloadRequest({
+          const req = await createPayloadRequestFromWebRequest({
             config: payload.config,
             request: new Request('https://app.example.com'),
           })
@@ -2504,7 +2511,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         })
         await new Promise((res) => configuredServer.listen(0, undefined, undefined, res))
         const configuredOrigin = `http://localhost:${(configuredServer.address() as AddressInfo).port}`
-        const req = await createPayloadRequest({
+        const req = await createPayloadRequestFromWebRequest({
           config: payload.config,
           request: new Request(configuredOrigin, {
             headers: new Headers({ cookie: 'payload-token=123; other-cookie=456' }),

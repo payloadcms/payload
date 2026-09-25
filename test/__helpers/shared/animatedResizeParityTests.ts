@@ -41,9 +41,12 @@ export function runAnimatedResizeReportsPerFrameDimensionsTest({
     }) => {
       const file = await getFileByPath(animatedWebpFixturePath)
 
-      const createArgs = { collection, data: {}, file } as unknown as Parameters<
-        Payload['create']
-      >[0]
+      const createArgs = {
+        collection,
+        data: {},
+        file,
+        overrideAccess: true,
+      } as unknown as Parameters<Payload['create']>[0]
       const result = (await payload.create(createArgs)) as unknown as AnimatedUploadResult
 
       expect(result.height).toBe(mainDimensions.height)
@@ -80,6 +83,7 @@ export function runAnimatedFocalPointResizeStaysValidTest({
         collection,
         data: { focalX: focalPoint.x, focalY: focalPoint.y },
         file,
+        overrideAccess: true,
       } as unknown as Parameters<Payload['create']>[0]
       const result = (await payload.create(createArgs)) as unknown as AnimatedUploadResult
 

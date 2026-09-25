@@ -45,15 +45,19 @@ First, let's create our server function. Here are some key points for this proce
 ```ts
 'use server'
 
+import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
 export async function createPost(data) {
   const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: await headers() })
 
   try {
     const post = await payload.create({
       collection: 'posts',
+      overrideAccess: false,
+      user,
       data,
     })
     return post
@@ -104,15 +108,19 @@ Here's how the server function would look:
 ```ts
 'use server'
 
+import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
 export async function updatePost(id, data) {
   const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: await headers() })
 
   try {
     const post = await payload.update({
       collection: 'posts',
+      overrideAccess: false,
+      user,
       id, // the document id is required
       data,
     })
@@ -227,11 +235,13 @@ This example demonstrates how to write a server function that creates a document
 ```ts
 'use server'
 
+import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
 export async function createPostWithUpload(data, upload) {
   const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: await headers() })
 
   try {
     // Prepare the data with the file
@@ -242,6 +252,8 @@ export async function createPostWithUpload(data, upload) {
 
     const post = await payload.create({
       collection: 'posts',
+      overrideAccess: false,
+      user,
       data: postData,
     })
 
@@ -330,7 +342,14 @@ Example of good error handling:
 export async function createPost(data) {
   try {
     const payload = await getPayload({ config })
-    return await payload.create({ collection: 'posts', data })
+    const { user } = await payload.auth({ headers: await headers() })
+
+    return await payload.create({
+      collection: 'posts',
+      data,
+      overrideAccess: false,
+      user,
+    })
   } catch (error) {
     console.error('Error creating post:', error)
     return { error: 'Failed to create post' }
@@ -351,14 +370,23 @@ Using server functions helps prevent direct exposure of Local API operations to 
 Example of restricting access based on user role:
 
 ```ts
-import { UnauthorizedError } from 'payload'
+import { headers } from 'next/headers'
+import { getPayload, UnauthorizedError } from 'payload'
+import config from '@payload-config'
 
-export async function deletePost(postId, user) {
+export async function deletePost(postId) {
+  const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: await headers() })
+
   if (!user || user.role !== 'admin') {
     throw new UnauthorizedError()
   }
 
-  const payload = await getPayload({ config })
-  return await payload.delete({ collection: 'posts', id: postId })
+  return await payload.delete({
+    collection: 'posts',
+    id: postId,
+    overrideAccess: false,
+    user,
+  })
 }
 ```

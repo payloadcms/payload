@@ -135,6 +135,7 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
       collection: mediaWithSignedDownloadsSlug,
       data: {},
       filePath: originalFilePath,
+      overrideAccess: true,
     })
 
     const response = await restClient.GET(
@@ -144,7 +145,11 @@ test.suite('@payloadcms/storage-s3', { config: './config.ts' }, () => {
     expect(response.status).toBe(200)
     expect(response.headers.get('X-Source-Hash')).toBe(originalHash)
 
-    await payload.delete({ collection: mediaWithSignedDownloadsSlug, id: doc.id })
+    await payload.delete({
+      collection: mediaWithSignedDownloadsSlug,
+      id: doc.id,
+      overrideAccess: true,
+    })
   })
 
   test('should return 404 when the file is not found', async ({ restClient }) => {

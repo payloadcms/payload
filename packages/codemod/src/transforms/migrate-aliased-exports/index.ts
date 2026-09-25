@@ -11,7 +11,7 @@ const SOURCE_MAP: Record<string, Record<string, Migration>> = {
   '@payloadcms/next/utilities': {
     addDataAndFileToRequest: { to: 'payload' },
     addLocalesToRequestFromData: { to: 'payload' },
-    createPayloadRequest: { to: 'payload' },
+    createPayloadRequest: { rename: 'createPayloadRequestFromWebRequest', to: 'payload' },
     headersWithCors: { to: 'payload' },
     mergeHeaders: { to: 'payload' },
     sanitizeLocales: { to: 'payload' },
@@ -85,6 +85,7 @@ export const migrateAliasedExports: Transform = {
           const aliasNode = spec.getAliasNode()
           const localName = aliasNode?.getText() ?? spec.getName()
           const canonicalName = migration.rename ?? spec.getName()
+          const originalName = spec.getName()
           const alias = localName !== canonicalName ? localName : undefined
 
           spec.remove()
@@ -97,9 +98,7 @@ export const migrateAliasedExports: Transform = {
           })
 
           if (migration.rename) {
-            notes.push(
-              renameNote({ filePath: file.getFilePath(), migration, originalName: spec.getName() }),
-            )
+            notes.push(renameNote({ filePath: file.getFilePath(), migration, originalName }))
           }
         }
 
@@ -126,7 +125,7 @@ export const migrateAliasedExports: Transform = {
     }
   },
   description:
-    'Move imports of aliased re-exports from @payloadcms/ui and @payloadcms/next/utilities to their canonical sources in `payload` / `payload/shared`. Renamed names (`ListPreferences` → `CollectionPreferences`, `ListComponentClientProps` → `ListViewClientProps`, `ListComponentServerProps` → `ListViewServerProps`) are imported using an `as` alias so existing usages keep compiling.',
+    'Move imports of aliased re-exports from @payloadcms/ui and @payloadcms/next/utilities to their canonical sources in `payload` / `payload/shared`. Renamed names (`createPayloadRequest` → `createPayloadRequestFromWebRequest`, `ListPreferences` → `CollectionPreferences`, `ListComponentClientProps` → `ListViewClientProps`, `ListComponentServerProps` → `ListViewServerProps`) are imported using an `as` alias so existing usages keep compiling.',
 }
 
 type ApplyRenameArgs = {

@@ -6,7 +6,14 @@ import {
 } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import fs from 'fs'
 import path from 'path'
-import { createLocalReq, Forbidden, getFileByPath, saveVersion, ValidationError } from 'payload'
+import {
+  createPayloadRequest,
+  Forbidden,
+  getFileByPath,
+  NotFound,
+  saveVersion,
+  ValidationError,
+} from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -89,6 +96,22 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
   })
 
   test.describe('Collections - Local', () => {
+    test('should reject invalid IDs before finding a draft collection document', async ({
+      payload,
+    }) => {
+      const invalidIDs: unknown[] = [undefined, null, '', Number.NaN, Number.POSITIVE_INFINITY, {}]
+
+      for (const invalidID of invalidIDs) {
+        await expect(
+          payload.findByID({
+            id: invalidID as string,
+            collection: draftCollectionSlug,
+            draft: true,
+          }),
+        ).rejects.toBeInstanceOf(NotFound)
+      }
+    })
+
     test.describe('Create', () => {
       test('should allow creating a draft with missing required field data', async ({
         payload,
@@ -818,6 +841,117 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
           where: { parent: { equals: doc.id } },
         })
         expect(res.docs).toHaveLength(101)
+      })
+    })
+
+    test.describe('Draft read access', () => {
+      const createdDocumentIDs: (number | string)[] = []
+
+      test.afterEach(async ({ payload }) => {
+        for (const id of createdDocumentIDs) {
+          await payload.delete({ id, collection: draftCollectionSlug, overrideAccess: true })
+        }
+        createdDocumentIDs.length = 0
+      })
+
+      test('should return a base document without versions when reading drafts', async ({
+        payload,
+      }) => {
+        const document = await payload.db.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Document created before drafts were enabled',
+          },
+        })
+        createdDocumentIDs.push(document.id)
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result).toMatchObject({
+          id: document.id,
+          description: 'Document created before drafts were enabled',
+        })
+      })
+
+      test('should evaluate findByID access against the latest draft when the base document is denied', async ({
+        payload,
+      }) => {
+        const document = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'base denied',
+            title: 'Draft access allowed',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+        createdDocumentIDs.push(document.id)
+
+        await payload.update({
+          id: document.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'draft allowed',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'draft allowed',
+          },
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result?.description).toBe('draft allowed')
+      })
+
+      test('should deny findByID access when only the base document matches', async ({
+        payload,
+      }) => {
+        const document = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'base allowed',
+            title: 'Draft access denied',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+        createdDocumentIDs.push(document.id)
+
+        await payload.update({
+          id: document.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'draft denied',
+          },
+          draft: true,
+          overrideAccess: true,
+        })
+
+        const result = await payload.findByID({
+          id: document.id,
+          collection: draftCollectionSlug,
+          context: {
+            draftAccessDescription: 'base allowed',
+          },
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+        })
+
+        expect(result).toBeNull()
       })
     })
 
@@ -3693,6 +3827,26 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
     })
 
     test.describe('Read', () => {
+      test('should reject invalid IDs before finding a global version', async ({ payload }) => {
+        const invalidIDs: unknown[] = [
+          undefined,
+          null,
+          '',
+          Number.NaN,
+          Number.POSITIVE_INFINITY,
+          {},
+        ]
+
+        for (const invalidID of invalidIDs) {
+          await expect(
+            payload.findGlobalVersionByID({
+              id: invalidID as string,
+              slug: autoSaveGlobalSlug,
+            }),
+          ).rejects.toBeInstanceOf(NotFound)
+        }
+      })
+
       test('should allow a version to be retrieved by ID', async ({ payload }) => {
         const version = await payload.findGlobalVersionByID({
           id: globalVersionID,
@@ -4638,11 +4792,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
         id: draft.id,
@@ -4688,11 +4843,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      const res = await payload.jobs.run()
+      const res = await payload.jobs.run({ overrideAccess: true })
 
       expect(res.jobStatus[Object.keys(res.jobStatus)[0]].status).toBe('error-reached-max-retries')
 
@@ -4723,7 +4879,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         overrideAccess: true,
       })
 
-      const req = await createLocalReq({ user: secondaryAdminUser }, payload)
+      const req = await createPayloadRequest({ payload, user: secondaryAdminUser })
       const currentDate = new Date()
 
       await schedulePublishHandler({
@@ -4756,7 +4912,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('success')
 
@@ -4784,7 +4940,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         overrideAccess: true,
       })
 
-      const req = await createLocalReq({ user: secondaryAdminUser }, payload)
+      const req = await createPayloadRequest({ payload, user: secondaryAdminUser })
       const currentDate = new Date()
 
       await schedulePublishHandler({
@@ -4812,7 +4968,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
 
@@ -4850,6 +5006,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -4866,7 +5023,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       expect(runResponse.jobStatus?.[queuedJob.id]?.status).toBe('error-reached-max-retries')
 
@@ -4908,6 +5065,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       const queuedJob = (
@@ -4924,7 +5082,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       await wait(4000)
 
-      const runResponse = await payload.jobs.run()
+      const runResponse = await payload.jobs.run({ overrideAccess: true })
 
       // A `0` id must reach findByID (which fails here) rather than being dropped to an
       // overrideAccess publish, so the doc stays a draft.
@@ -4965,11 +5123,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findByID({
         id: published.id,
@@ -5010,6 +5169,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5063,6 +5223,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await payload.delete({
@@ -5110,11 +5271,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findGlobal({
         slug: draftGlobalSlug,
@@ -5146,11 +5308,12 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
+        overrideAccess: true,
       })
 
       await wait(4000)
 
-      await payload.jobs.run()
+      await payload.jobs.run({ overrideAccess: true })
 
       const retrieved = await payload.findGlobal({
         slug: draftGlobalSlug,
@@ -5177,7 +5340,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
 
       // Create a request without a user (simulating unauthenticated request)
       // Access control on draftGlobalSlug requires published status when no user
-      const req = await createLocalReq({}, payload)
+      const req = await createPayloadRequest({ payload })
       req.user = null
 
       const result = await payload.findGlobal({
@@ -5218,7 +5381,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should create using schedule-publish', async ({ payload }) => {
         const currentDate = new Date()
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         // use server action to create the event
         await schedulePublishHandler({
@@ -5251,7 +5414,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should get upcoming scheduled publish events without reading the jobs collection', async ({
         payload,
       }) => {
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         await schedulePublishHandler({
           type: 'publish',
@@ -5284,7 +5447,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should not get scheduled publish events without publish permission', async ({
         payload,
       }) => {
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         await payload.update({
           id: draftDoc.id,
@@ -5307,7 +5470,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       test('should delete using schedule-publish', async ({ payload }) => {
         const currentDate = new Date()
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         // use server action to create the event
         await schedulePublishHandler({
@@ -5364,7 +5527,7 @@ test.suite('Versions', { config: './config.ts', resetBetweenTests: false }, () =
       })
 
       test('should not delete a job that is not a scheduled publish', async ({ payload }) => {
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
         const unrelatedJob = await payload.db.create({
           collection: 'payload-jobs',
           data: {

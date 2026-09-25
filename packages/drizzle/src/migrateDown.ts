@@ -2,7 +2,7 @@ import type { MigrationResult } from 'payload'
 
 import {
   commitTransaction,
-  createLocalReq,
+  createPayloadRequest,
   getMigrations,
   initTransaction,
   killTransaction,
@@ -42,7 +42,7 @@ export async function migrateDown(this: DrizzleAdapter): Promise<MigrationResult
     }
 
     const start = Date.now()
-    const req = await createLocalReq({}, payload)
+    const req = await createPayloadRequest({ payload })
 
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })

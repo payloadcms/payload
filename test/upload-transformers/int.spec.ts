@@ -45,7 +45,11 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       resetTransformerCallCounts()
       for (const id of docIDs) {
         try {
-          await payload.delete({ id, collection: transformerMediaSlug as CollectionSlug })
+          await payload.delete({
+            id,
+            collection: transformerMediaSlug as CollectionSlug,
+            overrideAccess: true,
+          })
         } catch {
           // noop — file may already have been deleted
         }
@@ -60,6 +64,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
         collection: transformerMediaSlug as CollectionSlug,
         data,
         file,
+        overrideAccess: true,
       })
       docIDs.push(doc.id)
       return doc as unknown as { filename: string; id: number | string }
@@ -204,6 +209,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
       const afterRequest = await payload.findByID({
         id: doc.id,
         collection: transformerMediaSlug as CollectionSlug,
+        overrideAccess: true,
       })
 
       expect(afterRequest.filename).toBe(doc.filename)
@@ -258,7 +264,11 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
     test.afterEach(async () => {
       for (const id of docIDs) {
         try {
-          await payload.delete({ id, collection: resizePreviewMediaSlug as CollectionSlug })
+          await payload.delete({
+            id,
+            collection: resizePreviewMediaSlug as CollectionSlug,
+            overrideAccess: true,
+          })
         } catch {
           // noop — file may already have been deleted
         }
@@ -273,6 +283,7 @@ test.suite('Upload transformers', { config: './config.ts', resetBetweenTests: fa
         collection: resizePreviewMediaSlug as CollectionSlug,
         data: {},
         file,
+        overrideAccess: true,
       })
       docIDs.push(doc.id)
       return doc as unknown as { filename: string; id: number | string }
