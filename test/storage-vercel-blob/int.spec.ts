@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../__helpers/int/vitest.js'
+import { runTransformReadsRealSourceTest } from '../__helpers/shared/transformSourceTests.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -310,4 +311,6 @@ test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
       expect(tenantBUpload.prefix).toBe('tenant-b')
     })
   })
+
+  runTransformReadsRealSourceTest({ collection: mediaWithPrefixSlug })
 })

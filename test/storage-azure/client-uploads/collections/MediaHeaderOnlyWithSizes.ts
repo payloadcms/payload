@@ -5,12 +5,13 @@ import { existsSync } from 'node:fs'
 export const mediaHeaderOnlyWithSizesSlug = 'media-header-only-with-sizes'
 
 /**
- * Like `MediaHeaderOnly`, but with `imageSizes` configured and no other adjustments -
- * `getFileContentRequirement` must still choose the `'full'` content requirement here, since
- * `createImageSizes` needs the complete file to generate thumbnails from. A client upload larger
- * than `HEADER_PROBE_BYTE_LENGTH` is a regression test for a bug where the missing `imageSizes`
- * check let this collection take the `'header'` path instead, handing a truncated buffer to
- * `createImageSizes` and crashing.
+ * Like `MediaHeaderOnly`, but with `imageSizes` configured (through `sharpTransformer`, which
+ * projects them back onto this collection's sanitized `upload` config) and no other
+ * adjustments - `getFileContentRequirement` must still choose the `'full'` content requirement
+ * here, since the transformer needs the complete file to generate thumbnails from. A client
+ * upload larger than `HEADER_PROBE_BYTE_LENGTH` is a regression test for a bug where the
+ * missing `imageSizes` check let this collection take the `'header'` path instead, handing a
+ * truncated buffer to the transformer and crashing.
  */
 export const MediaHeaderOnlyWithSizes: CollectionConfig = {
   slug: mediaHeaderOnlyWithSizesSlug,
@@ -32,13 +33,6 @@ export const MediaHeaderOnlyWithSizes: CollectionConfig = {
   },
   upload: {
     disableLocalStorage: true,
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        height: 300,
-        width: 400,
-      },
-    ],
   },
   versions: false,
 }

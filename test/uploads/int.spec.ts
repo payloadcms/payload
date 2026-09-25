@@ -11,6 +11,7 @@ import {
   createPayloadRequestFromWebRequest,
   getFileByPath,
 } from 'payload'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { expect, vitest } from 'vitest'
@@ -24,10 +25,15 @@ import { downloadFileToBuffer } from '../../packages/payload/src/uploads/downloa
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
 import { test } from '../__helpers/int/vitest.js'
+import {
+  runAnimatedFocalPointResizeStaysValidTest,
+  runAnimatedResizeReportsPerFrameDimensionsTest,
+} from '../__helpers/shared/animatedResizeParityTests.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
   allowListMediaSlug,
+  animatedTypeMedia,
   anyImagesSlug,
   clientUploadTempFileSlug,
   enlargeSlug,
@@ -456,7 +462,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         }),
       )
       const replacementPath = path.resolve(dirname, './test-image.png')
-      const metadata = await payload.config.sharp!(replacementPath).metadata()
+      const metadata = await sharp(replacementPath).metadata()
       const height = Math.floor(metadata.height! / 2)
       const width = Math.floor(metadata.width! / 2)
       const { file, handle } = await createStreamableFile(replacementPath)
@@ -499,7 +505,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
           updatedDocs.map(({ filename }) => fs.promises.readFile(path.join(staticDir, filename))),
         )
         for (const output of outputBuffers) {
-          await expect(payload.config.sharp!(output).metadata()).resolves.toMatchObject({
+          await expect(sharp(output).metadata()).resolves.toMatchObject({
             height,
             width,
           })
@@ -1463,6 +1469,70 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
       })
     })
     test.describe('read', () => {
+      test('should use the image size mime type when dynamically resizing a size with a different format', async ({
+        payload,
+        restClient,
+      }) => {
+        const file = await getFileByPath(path.resolve(dirname, './image.png'))
+        file.name = `size-mime-${randomUUID()}.png`
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+          overrideAccess: true,
+        })) as unknown as Media
+
+        try {
+          const size = mediaDoc.sizes!.differentFormatFromMainImage!
+
+          expect(size.mimeType).toBe('image/jpeg')
+
+          const response = await restClient.GET(`/${mediaSlug}/file/${size.filename}`, {
+            query: { width: 100 },
+          })
+          const body = Buffer.from(await response.arrayBuffer())
+
+          expect(response.status).toBe(200)
+          await expect(sharp(body).metadata()).resolves.toMatchObject({
+            format: 'jpeg',
+            width: 100,
+          })
+          expect(response.headers.get('content-type')).toBe('image/jpeg')
+        } finally {
+          await payload.delete({ id: mediaDoc.id, collection: mediaSlug, overrideAccess: true })
+        }
+      })
+
+      test('should serve the original file for resize parameters on a collection without dynamic resizing', async ({
+        payload,
+        restClient,
+      }) => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file.name = `not-dynamic-${randomUUID()}.png`
+
+        const doc = await payload.create({
+          collection: reduceSlug,
+          data: {},
+          file,
+          overrideAccess: true,
+        })
+
+        try {
+          const stored = fs.readFileSync(path.resolve(dirname, './media/reduce', doc.filename!))
+          const response = await restClient.GET(`/${reduceSlug}/file/${doc.filename}`, {
+            query: { width: 100 },
+          })
+          const body = Buffer.from(await response.arrayBuffer())
+
+          expect(response.status).toBe(200)
+          expect(body.equals(stored)).toBe(true)
+        } finally {
+          await payload.delete({ id: doc.id, collection: reduceSlug, overrideAccess: true })
+        }
+      })
+
       test('should serve files with hash characters in filename', async ({
         payload,
         restClient,
@@ -1739,7 +1809,7 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
               },
             },
           })
-          const metadata = await payload.config.sharp!(sourcePath).metadata()
+          const metadata = await sharp(sourcePath).metadata()
 
           expect(response.status).toBe(200)
           expect(metadata).toMatchObject({ height: 40, width: 40 })
@@ -2950,6 +3020,45 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
   })
 
   test.describe('Image Manipulation', () => {
+    test('should generate image sizes from the cropped image', async ({ payload, restClient }) => {
+      const sourceFile = await getFileByPath(path.resolve(dirname, './image.png'))
+      sourceFile.name = `crop-sizes-${randomUUID()}.png`
+
+      const sourceDoc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: sourceFile,
+        overrideAccess: true,
+      })
+
+      try {
+        const response = await restClient.PATCH(`/${mediaSlug}/${sourceDoc.id}`, {
+          body: JSON.stringify({}),
+          query: {
+            uploadEdits: {
+              crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+              heightInPixels: 800,
+              widthInPixels: 800,
+            },
+          },
+        })
+        const { doc } = (await response.json()) as { doc: Media }
+
+        expect(response.status).toBe(200)
+        expect(doc).toMatchObject({ height: 800, width: 800 })
+        expect(doc.sizes?.maintainedImageSize).toMatchObject({ height: 800, width: 800 })
+
+        const sizePath = path.join(dirname, './media', doc.sizes!.maintainedImageSize!.filename!)
+
+        await expect(sharp(sizePath).metadata()).resolves.toMatchObject({
+          height: 800,
+          width: 800,
+        })
+      } finally {
+        await payload.delete({ id: sourceDoc.id, collection: mediaSlug, overrideAccess: true })
+      }
+    })
+
     test('should enlarge images if resize options `withoutEnlargement` is set to false', async ({
       payload,
     }) => {
@@ -3104,6 +3213,22 @@ test.suite('Collections - Uploads', { config: './config.ts', resetBetweenTests: 
         collection: enlargeSlug,
         overrideAccess: true,
       })
+    })
+
+    runAnimatedResizeReportsPerFrameDimensionsTest({
+      collection: animatedTypeMedia as CollectionSlug,
+      mainDimensions: { height: 200, width: 200 },
+      sizes: [
+        // A real enlargement (200x200 -> 480x480), not a no-op — a wrong
+        // per-frame height would show up here instead of being masked.
+        { name: 'squareSmall', height: 480, width: 480 },
+      ],
+    })
+
+    runAnimatedFocalPointResizeStaysValidTest({
+      collection: animatedTypeMedia as CollectionSlug,
+      focalPoint: { x: 80, y: 50 },
+      size: { name: 'focalCrop', height: 150, width: 300 },
     })
   })
 

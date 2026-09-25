@@ -82,7 +82,10 @@ export function createS3Adapter({
       return data
     },
 
-    staticHandler: async (req, { doc, headers, params: { filename, uploadReference } }) => {
+    staticHandler: async (
+      req,
+      { doc, headers, params: { filename, operation, uploadReference } },
+    ) => {
       const { getFile } = await import('./getFile.js')
       return getFile({
         bucket,
@@ -92,6 +95,7 @@ export function createS3Adapter({
         doc,
         filename,
         incomingHeaders: headers,
+        operation,
         req,
         signedDownloads,
         uploadReference,

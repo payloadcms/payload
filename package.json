@@ -65,6 +65,7 @@
     "build:storage-vercel-blob": "turbo build --filter \"@payloadcms/storage-vercel-blob\"",
     "build:tests": "pnpm --filter payload-test-suite run typecheck",
     "build:tools": "turbo build --filter=./tools/*",
+    "build:transformer-sharp": "turbo build --filter \"@payloadcms/transformer-sharp\"",
     "build:translations": "turbo build --filter \"@payloadcms/translations\"",
     "build:ui": "turbo build --filter \"@payloadcms/ui\"",
     "clean": "turbo clean",

@@ -6,6 +6,7 @@ import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { azureStorage } from '@payloadcms/storage-azure'
 import { gcsStorage } from '@payloadcms/storage-gcs'
 import { s3Storage } from '@payloadcms/storage-s3'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -234,7 +235,41 @@ export function buildPluginCloudStorageIntConfig({
       typescript: {
         outputFile: path.resolve(dirname, 'payload-types.ts'),
       },
-      upload: uploadOptions,
+      upload: {
+        ...uploadOptions,
+        transformers: [
+          sharpTransformer({
+            collections: {
+              [mediaSlug]: {
+                imageSizes: [
+                  { height: 400, width: 400, crop: 'center', name: 'square' },
+                  { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+                ],
+                resizeOptions: {
+                  position: 'center',
+                  width: 200,
+                  height: 200,
+                },
+              },
+              [mediaWithOverwriteSlug]: {
+                imageSizes: [
+                  { height: 400, width: 400, crop: 'center', name: 'square' },
+                  { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+                ],
+                resizeOptions: {
+                  position: 'center',
+                  width: 200,
+                  height: 200,
+                },
+              },
+              [testMetadataSlug]: {
+                formatOptions: { format: 'webp' },
+                imageSizes: [{ name: 'thumbnail', width: 300 }],
+              },
+            },
+          }),
+        ],
+      },
     },
     seed: async (payload) => {
       await payload.create({

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { azureStorage } from '@payloadcms/storage-azure'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -73,6 +74,23 @@ export default buildConfigWithDefaults({
     ],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
+    upload: {
+      transformers: [
+        sharpTransformer({
+          collections: {
+            [mediaHeaderOnlyWithSizesSlug]: {
+              imageSizes: [
+                {
+                  name: 'thumbnail',
+                  height: 300,
+                  width: 400,
+                },
+              ],
+            },
+          },
+        }),
+      ],
     },
   },
   seed: async (payload) => {

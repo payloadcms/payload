@@ -1,4 +1,5 @@
 import { s3Storage } from '@payloadcms/storage-s3'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -73,6 +74,21 @@ export default buildConfigWithDefaults({
       limits: {
         fileSize: 10 * 1024 * 1024, // 10 MB
       },
+      transformers: [
+        sharpTransformer({
+          collections: {
+            [mediaHeaderOnlyWithSizesSlug]: {
+              imageSizes: [
+                {
+                  name: 'thumbnail',
+                  height: 300,
+                  width: 400,
+                },
+              ],
+            },
+          },
+        }),
+      ],
     },
   },
   seed: async (payload) => {

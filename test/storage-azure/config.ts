@@ -1,8 +1,10 @@
 import { azureStorage } from '@payloadcms/storage-azure'
+import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { proveSourceHashTransformer } from '../__helpers/shared/transformSourceTests.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
@@ -18,7 +20,26 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let uploadOptions
+const uploadOptions = {
+  transformers: [
+    proveSourceHashTransformer,
+    sharpTransformer({
+      collections: {
+        [mediaSlug]: {
+          imageSizes: [
+            { height: 400, width: 400, crop: 'center', name: 'square' },
+            { width: 900, height: 450, crop: 'center', name: 'sixteenByNineMedium' },
+          ],
+          resizeOptions: {
+            position: 'center',
+            width: 200,
+            height: 200,
+          },
+        },
+      },
+    }),
+  ],
+}
 
 // Load config to work with emulated services
 dotenv.config({

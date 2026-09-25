@@ -18,11 +18,11 @@ export type FileContentRequirement = 'full' | 'header' | 'none'
  * so a client upload (e.g. Azure's chunkLargeFiles) only pays for what post-processing
  * actually reads instead of always being re-downloaded in full.
  *
- * - `full`: local storage needs the real bytes, or the file will be resized/reformatted/
- *   trimmed/animated, or additional image sizes will be generated from it, or the collection
- *   restricts mime types (which also runs SVG/PDF content-safety checks that must see the
- *   whole file), or the request itself carries a crop/resize edit (`uploadEdits`) that will
- *   run sharp against the fetched bytes.
+ * - `full`: local storage needs the real bytes, or a registered file transformer will adjust
+ *   the image (`upload.hasImageAdjustments`), or the file is animated, or additional image
+ *   sizes will be generated from it, or the collection restricts mime types (which also runs
+ *   SVG/PDF content-safety checks that must see the whole file), or the request itself carries
+ *   a crop/resize edit (`uploadEdits`) that will be applied to the fetched bytes.
  * - `header`: the file is an image and only its dimensions are needed.
  * - `none`: nothing downstream reads file content at all.
  */
@@ -52,11 +52,12 @@ export function getFileContentRequirement({
   }
 
   const isResizableImage = canResizeImage(mimeType)
+  // `hasImageAdjustments` and `imageSizes` are the transformer-agnostic projection a file
+  // transformer writes back onto the sanitized upload config at startup (see
+  // `@payloadcms/transformer-sharp`'s `initSharpCollections`), so core can make this decision
+  // without knowing which transformer is registered or how it is configured.
   const hasConfiguredAdjustments = Boolean(
-    uploadConfig.resizeOptions ||
-      uploadConfig.formatOptions ||
-      uploadConfig.trimOptions ||
-      uploadConfig.constructorOptions ||
+    uploadConfig.hasImageAdjustments ||
       (Array.isArray(uploadConfig.imageSizes) && uploadConfig.imageSizes.length > 0),
   )
 

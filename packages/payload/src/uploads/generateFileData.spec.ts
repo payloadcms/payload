@@ -164,19 +164,27 @@ describe('generateFileData', () => {
     expect(result.data).toMatchObject({ height: 1, mimeType: 'image/svg+xml', width: 1 })
   })
 
-  it('still runs sharp processing when resize options are configured', async () => {
-    const { sharp, toBufferMock } = createSharpMock()
+  it('still runs the transformer pipeline when a transformer handles the file type', async () => {
+    const { sharp } = createSharpMock()
+    const transformFile = vi
+      .fn()
+      .mockResolvedValue({ file: new File([PNG_SIGNATURE], 'photo.png'), status: 'complete' })
+
+    const req = createReq(sharp)
+    req.payload.config.upload = {
+      transformers: [{ slug: 'test', mimeTypes: ['image/*'], transformFile }],
+    } as unknown as PayloadRequest['payload']['config']['upload']
 
     await generateFileData({
-      collection: createCollection({ resizeOptions: { width: 100 } }),
+      collection: createCollection(),
       config: {} as SanitizedConfig,
       data: {},
       operation: 'create',
       overwriteExistingFiles: true,
-      req: createReq(sharp),
+      req,
     })
 
-    expect(toBufferMock).toHaveBeenCalledTimes(1)
+    expect(transformFile).toHaveBeenCalledTimes(1)
   })
 
   it('does not overwrite req.file with a truncated header-only buffer', async () => {

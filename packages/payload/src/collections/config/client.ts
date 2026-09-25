@@ -42,7 +42,6 @@ export type ServerOnlyUploadProperties = keyof Pick<
   | 'handlers'
   | 'modifyResponseHeaders'
   | 'uploadInstructions'
-  | 'withMetadata'
 >
 
 type ClientUploadConfig = {
@@ -103,7 +102,6 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
   'handlers',
   'modifyResponseHeaders',
   'uploadInstructions',
-  'withMetadata',
 ]
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [

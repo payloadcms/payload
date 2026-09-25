@@ -112,6 +112,7 @@ export {
 } from '../types/constants.js'
 export type { HasManyRelationshipOperator } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
+export { generatePayloadFileURL } from '../uploads/generatePayloadFileURL.js'
 export {
   getSanitizedUploadFilename,
   uploadRequiresServerValidation,

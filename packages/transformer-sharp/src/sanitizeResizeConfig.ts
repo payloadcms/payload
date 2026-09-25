@@ -1,4 +1,4 @@
-import type { ImageSize } from '../types.js'
+import type { ImageSize } from 'payload'
 
 /**
  * Sanitize the resize config. If the resize config has the `withoutReduction`

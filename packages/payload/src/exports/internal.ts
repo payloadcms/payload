@@ -26,6 +26,16 @@ export { getSafeFileName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { externalURLInputSchema, resolveURLUploadInput } from '../uploads/resolveURLUploadInput.js'
 export type { ExternalURLInput } from '../uploads/resolveURLUploadInput.js'
+export {
+  getUploadTransformerInternal,
+  uploadTransformerInternal,
+} from '../uploads/transformers/uploadTransformerBridge.js'
+export type {
+  PreparedUploadTransformation,
+  TransformerWithInternalBridge,
+  UploadTransformerInternal,
+  UploadTransformTask,
+} from '../uploads/transformers/uploadTransformerBridge.js'
 export { uploadContentSecurityPolicy } from '../uploads/uploadContentSecurityPolicy.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 export { isURLAllowed } from '../utilities/isURLAllowed.js'
