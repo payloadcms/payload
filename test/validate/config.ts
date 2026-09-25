@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
   GlobalConfig,
   PayloadRequest,
+  TextFieldSingleValidation,
 } from 'payload'
 
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -44,6 +45,8 @@ export const validationCustomButtonsCollectionSlug = 'validation-custom-buttons-
 export const validationDeniedCollectionSlug = 'validation-denied-items'
 export const validationNonLocalizedCollectionSlug = 'validation-non-localized-items'
 export const validationAuthCollectionSlug = 'validation-auth-items'
+export const validationCustomIDCollectionSlug = 'validation-custom-id-items'
+export const validationEmptyCollectionSlug = 'validation-empty-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
 export const validationPublishUploadsDir = path.resolve(dirname, 'validation-publish-uploads')
 
@@ -85,6 +88,11 @@ export const validationRuntimeIdentityEvents: {
   payload: PayloadRequest['payload']
   transactionID: PayloadRequest['transactionID']
 }[] = []
+export const graphqlValidationTransactionEvents: {
+  marker: string
+  source: 'collection' | 'global'
+  transactionID: PayloadRequest['transactionID']
+}[] = []
 const localePassRequests = new Set<PayloadRequest>()
 export const localePassEvents: {
   localeAtEnd?: string
@@ -99,6 +107,7 @@ export function clearValidationEvents(): void {
   accessEvents.length = 0
   fallbackAccessEvents.length = 0
   globalValidationSourceEvents.length = 0
+  graphqlValidationTransactionEvents.length = 0
   hookEvents.length = 0
   isolationEvents.length = 0
   localeFilterOperationEvents.length = 0
@@ -109,6 +118,32 @@ export function clearValidationEvents(): void {
   permissionOperationEvents.length = 0
   scheduledValidationEvents.length = 0
   validationRuntimeIdentityEvents.length = 0
+}
+
+function recordGraphQLValidationTransaction({
+  data,
+  req,
+  source,
+}: {
+  data: Record<string, unknown>
+  req: PayloadRequest
+  source: 'collection' | 'global'
+}): void {
+  const marker = data.transactionMarker
+
+  if (marker !== 'observe' && marker !== 'set') {
+    return
+  }
+
+  graphqlValidationTransactionEvents.push({
+    marker,
+    source,
+    transactionID: req.transactionID,
+  })
+
+  if (marker === 'set') {
+    req.transactionID = `${source}-validation-transaction`
+  }
 }
 
 export function getLocalePassRequestCount(): number {
@@ -130,6 +165,21 @@ function recordHook({ context, hook, operation, requestOperation }: HookEvent): 
 
 function getIsolationMarker(value: unknown): unknown {
   return (value as { isolation?: { marker?: unknown } } | null | undefined)?.isolation?.marker
+}
+
+const validateAfterReadPreviousValue: TextFieldSingleValidation = (
+  _value,
+  { operation, previousValue, req },
+) => {
+  if (
+    operation === 'validate' &&
+    req.context.requireAfterReadPreviousValue === true &&
+    previousValue !== 'after-read:stored'
+  ) {
+    return 'Validation must use the after-read previous value'
+  }
+
+  return true
 }
 
 function recordPermissionOperation({
@@ -538,12 +588,55 @@ const validationCollection: CollectionConfig = {
       required: true,
     },
     {
+      name: 'transactionMarker',
+      type: 'text',
+    },
+    {
       name: 'location',
       type: 'point',
       validate: (value) =>
         value === undefined || (Array.isArray(value) && value.length === 2)
           ? true
           : 'Location must use the public point tuple representation',
+    },
+    {
+      name: 'afterReadValue',
+      type: 'text',
+      hooks: {
+        afterRead: [
+          ({ value }) =>
+            typeof value === 'string' && !value.startsWith('after-read:')
+              ? `after-read:${value}`
+              : value,
+        ],
+      },
+      validate: validateAfterReadPreviousValue,
+    },
+    {
+      name: 'hookReplacedBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'sharedValidationBlock',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'localizedValidationBlock',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+              localized: true,
+              required: true,
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'writeAttempt',
@@ -572,6 +665,11 @@ const validationCollection: CollectionConfig = {
     {
       name: 'targetID',
       type: 'text',
+    },
+    {
+      name: 'emptyCollectionRelation',
+      type: 'relationship',
+      relationTo: validationEmptyCollectionSlug,
     },
     {
       name: 'user',
@@ -703,12 +801,25 @@ const validationCollection: CollectionConfig = {
           )
         }
 
+        if (operation === 'validate' && req.context.replaceSharedBlockWithLocalizedBlock === true) {
+          return {
+            ...data,
+            hookReplacedBlocks: [
+              {
+                blockType: 'localizedValidationBlock',
+                value: '',
+              },
+            ],
+          }
+        }
+
         return data
       },
       runWriteAttempt,
     ],
     beforeValidate: [
       async ({ context, data, operation, req }) => {
+        recordGraphQLValidationTransaction({ data, req, source: 'collection' })
         recordHook({
           context,
           hook: 'collectionBeforeValidate',
@@ -803,6 +914,10 @@ const validationGlobal: GlobalConfig = {
       required: true,
     },
     {
+      name: 'transactionMarker',
+      type: 'text',
+    },
+    {
       name: 'metadata',
       type: 'group',
       fields: [
@@ -820,6 +935,45 @@ const validationGlobal: GlobalConfig = {
         value === undefined || (Array.isArray(value) && value.length === 2)
           ? true
           : 'Location must use the public point tuple representation',
+    },
+    {
+      name: 'afterReadValue',
+      type: 'text',
+      hooks: {
+        afterRead: [
+          ({ value }) =>
+            typeof value === 'string' && !value.startsWith('after-read:')
+              ? `after-read:${value}`
+              : value,
+        ],
+      },
+      validate: validateAfterReadPreviousValue,
+    },
+    {
+      name: 'hookReplacedBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'sharedGlobalValidationBlock',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'localizedGlobalValidationBlock',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+              localized: true,
+              required: true,
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'permissionProbe',
@@ -884,11 +1038,24 @@ const validationGlobal: GlobalConfig = {
           )
         }
 
+        if (operation === 'validate' && req.context.replaceSharedBlockWithLocalizedBlock === true) {
+          return {
+            ...data,
+            hookReplacedBlocks: [
+              {
+                blockType: 'localizedGlobalValidationBlock',
+                value: '',
+              },
+            ],
+          }
+        }
+
         return data
       },
     ],
     beforeValidate: [
       ({ context, data, operation, req }) => {
+        recordGraphQLValidationTransaction({ data, req, source: 'global' })
         recordHook({
           context,
           hook: 'globalBeforeValidate',
@@ -1444,6 +1611,42 @@ const validationAuthCollection: CollectionConfig = {
   fields: [],
 }
 
+const validationCustomIDCollection: CollectionConfig = {
+  slug: validationCustomIDCollectionSlug,
+  fields: [
+    {
+      name: 'id',
+      type: 'text',
+      validate: (value) =>
+        value === 'candidate-custom-id' ? true : 'The custom ID does not match the candidate',
+    },
+  ],
+  graphQL: {
+    pluralName: 'ValidationCustomIDItems',
+    singularName: 'ValidationCustomIDItem',
+  },
+  timestamps: false,
+  versions: false,
+}
+
+const validationEmptyCollection: CollectionConfig = {
+  slug: validationEmptyCollectionSlug,
+  fields: [
+    {
+      name: 'relatedValidationItems',
+      type: 'join',
+      collection: validationCollectionSlug,
+      on: 'emptyCollectionRelation',
+    },
+  ],
+  graphQL: {
+    pluralName: 'ValidationEmptyItems',
+    singularName: 'ValidationEmptyItem',
+  },
+  timestamps: false,
+  versions: false,
+}
+
 export default buildConfigWithDefaults({
   config: {
     admin: {
@@ -1465,6 +1668,8 @@ export default buildConfigWithDefaults({
       validationNonLocalizedCollection,
       defaultUserCollection,
       validationAuthCollection,
+      validationCustomIDCollection,
+      validationEmptyCollection,
       {
         slug: writeTargetsSlug,
         fields: [

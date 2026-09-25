@@ -11,6 +11,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -138,12 +139,22 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
     docWithLocales = deepCopyObjectSimple(storedDocument)
   }
 
-  const originalDoc = flattenDataByLocale({
-    configBlockReferences: req.payload.config.blocks,
-    docWithLocales,
-    fields: collectionConfig.fields,
-    locale: req.locale!,
-  })
+  const originalDoc =
+    id === undefined
+      ? docWithLocales
+      : await afterRead({
+          collection: collectionConfig,
+          context: req.context,
+          depth: 0,
+          doc: deepCopyObjectSimple(docWithLocales),
+          draft,
+          fallbackLocale: null,
+          global: null,
+          locale: req.locale!,
+          overrideAccess: true,
+          req,
+          showHiddenFields: true,
+        })
 
   let data = flattenDataByLocale({
     configBlockReferences: req.payload.config.blocks,
@@ -217,6 +228,8 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
           })) || data
       }
     }
+
+    onValidationData?.(data)
 
     await beforeChange({
       id,

@@ -19,6 +19,7 @@ import {
   getLocalePassRequestCount,
   getMaximumActiveLocalePasses,
   globalValidationSourceEvents,
+  graphqlValidationTransactionEvents,
   hookEvents,
   isolationEvents,
   localeFilterOperationEvents,
@@ -1382,6 +1383,69 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       })
     })
 
+    test('should use after-read values from a stored collection document', async () => {
+      const stored = await payload.create({
+        collection: validationCollectionSlug,
+        data: {
+          afterReadValue: 'stored',
+          summary: 'stored summary',
+          title: 'Stored title',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      const result = await payload.validate({
+        id: stored.id,
+        collection: validationCollectionSlug,
+        context: {
+          requireAfterReadPreviousValue: true,
+        },
+        data: {
+          summary: 'candidate summary',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
+    test('should classify errors using data returned from collection hooks', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context: {
+          replaceSharedBlockWithLocalizedBlock: true,
+        },
+        data: {
+          hookReplacedBlocks: [
+            {
+              blockType: 'sharedValidationBlock',
+              value: 'shared value',
+            },
+          ],
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: ['en', 'es'],
+        overrideAccess: true,
+      })
+
+      expect(result.errors).toEqual([
+        expect.objectContaining({
+          locale: 'en',
+          path: 'hookReplacedBlocks.0.value',
+        }),
+        expect.objectContaining({
+          locale: 'es',
+          path: 'hookReplacedBlocks.0.value',
+        }),
+      ])
+    })
+
     test('should keep collection creates as drafts when publishAllLocales is requested', async () => {
       const draft = await payload.create({
         collection: publishCollectionSlug,
@@ -2125,6 +2189,68 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
         errors: [],
         valid: true,
       })
+    })
+
+    test('should use after-read values from a stored global document', async () => {
+      await payload.updateGlobal({
+        slug: validationGlobalSlug,
+        data: {
+          afterReadValue: 'stored',
+          summary: 'stored global summary',
+          title: 'Stored global title',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      const result = await payload.validateGlobal({
+        slug: validationGlobalSlug,
+        context: {
+          requireAfterReadPreviousValue: true,
+        },
+        data: {
+          summary: 'candidate global summary',
+        },
+        locale: 'en',
+        overrideAccess: true,
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
+    test('should classify errors using data returned from global hooks', async () => {
+      const result = await payload.validateGlobal({
+        slug: validationGlobalSlug,
+        context: {
+          replaceSharedBlockWithLocalizedBlock: true,
+        },
+        data: {
+          hookReplacedBlocks: [
+            {
+              blockType: 'sharedGlobalValidationBlock',
+              value: 'shared value',
+            },
+          ],
+          summary: 'candidate global summary',
+          title: 'Candidate global title',
+        },
+        locale: ['en', 'es'],
+        overrideAccess: true,
+      })
+
+      expect(result.errors).toEqual([
+        expect.objectContaining({
+          locale: 'en',
+          path: 'hookReplacedBlocks.0.value',
+        }),
+        expect.objectContaining({
+          locale: 'es',
+          path: 'hookReplacedBlocks.0.value',
+        }),
+      ])
     })
 
     test('should keep global updates as drafts when publishAllLocales is requested', async () => {
@@ -2896,6 +3022,44 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
       expect(data.validateValidationWriteTarget).toEqual({ errors: [], valid: true })
     })
 
+    test('should validate a collection create candidate with a custom ID', async () => {
+      const query = `mutation {
+        validateValidationCustomIDItem(data: { id: "candidate-custom-id" }) {
+          valid
+          errors {
+            path
+            message
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(response.errors).toBeUndefined()
+      expect(response.data.validateValidationCustomIDItem).toEqual({ errors: [], valid: true })
+    })
+
+    test('should validate an empty collection create candidate without a data argument', async () => {
+      const query = `mutation {
+        validateValidationEmptyItem {
+          valid
+          errors {
+            path
+            message
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(response.errors).toBeUndefined()
+      expect(response.data.validateValidationEmptyItem).toEqual({ errors: [], valid: true })
+    })
+
     test('should validate a stored collection document by id without persisting the candidate', async () => {
       const target = await createWriteTarget()
 
@@ -2961,6 +3125,58 @@ test.suite('validate Local API', { config: './config.ts', resetBetweenTests: fal
 
       expect(response.errors).toBeUndefined()
       expect(response.data.validateValidationSetting).toEqual({ errors: [], valid: true })
+    })
+
+    test('should isolate transaction IDs between GraphQL validation resolvers', async () => {
+      clearValidationEvents()
+
+      const collectionQuery = `mutation {
+        setCollection: validateValidationItem(data: {
+          summary: "Candidate summary"
+          title: "Candidate title"
+          transactionMarker: "set"
+        }) {
+          valid
+        }
+        observeGlobal: validateValidationSetting(data: { transactionMarker: "observe" }) {
+          valid
+        }
+      }`
+
+      const collectionResponse = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: collectionQuery }) })
+        .then((res) => res.json())
+
+      expect(collectionResponse.errors).toBeUndefined()
+      expect(graphqlValidationTransactionEvents).toEqual([
+        { marker: 'set', source: 'collection', transactionID: undefined },
+        { marker: 'observe', source: 'global', transactionID: undefined },
+      ])
+
+      clearValidationEvents()
+
+      const globalQuery = `mutation {
+        setGlobal: validateValidationSetting(data: { transactionMarker: "set" }) {
+          valid
+        }
+        observeCollection: validateValidationItem(data: {
+          summary: "Candidate summary"
+          title: "Candidate title"
+          transactionMarker: "observe"
+        }) {
+          valid
+        }
+      }`
+
+      const globalResponse = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: globalQuery }) })
+        .then((res) => res.json())
+
+      expect(globalResponse.errors).toBeUndefined()
+      expect(graphqlValidationTransactionEvents).toEqual([
+        { marker: 'set', source: 'global', transactionID: undefined },
+        { marker: 'observe', source: 'collection', transactionID: undefined },
+      ])
     })
   })
 

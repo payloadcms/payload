@@ -10,6 +10,7 @@ import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { Forbidden } from '../../errors/index.js'
+import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
@@ -75,11 +76,18 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     delete docWithLocales._id
   }
 
-  const originalDoc = flattenDataByLocale({
-    configBlockReferences: req.payload.config.blocks,
-    docWithLocales,
-    fields: globalConfig.fields,
+  const originalDoc = await afterRead({
+    collection: null,
+    context: req.context,
+    depth: 0,
+    doc: deepCopyObjectSimple(docWithLocales),
+    draft,
+    fallbackLocale: req.fallbackLocale!,
+    global: globalConfig,
     locale: req.locale!,
+    overrideAccess: true,
+    req,
+    showHiddenFields: true,
   })
 
   let data = flattenDataByLocale({
@@ -134,6 +142,8 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
           })) || data
       }
     }
+
+    onValidationData?.(data)
 
     await beforeChange({
       collection: null,

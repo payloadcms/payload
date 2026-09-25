@@ -18,7 +18,6 @@ describe('createClientConfig', () => {
       } as SanitizedConfig,
       i18n: {} as I18nClient,
       importMap: {},
-      user: true,
     })
 
     expect(clientConfig).not.toHaveProperty('baseAccess')

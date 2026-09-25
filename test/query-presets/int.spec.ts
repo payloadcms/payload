@@ -841,4 +841,27 @@ test.suite('Query Presets', { config: './config.ts', resetBetweenTests: false },
       expect(fetched.columns == null).toBe(true)
     })
   })
+
+  test('should normalise shared access before on-demand validation', async ({ payload }) => {
+    const result = await payload.validate({
+      collection: queryPresetsCollectionSlug,
+      data: {
+        access: {
+          read: {
+            constraint: 'everyone',
+          },
+        },
+        isShared: false,
+        relatedCollection: 'pages',
+        title: 'Shared validation candidate',
+      },
+      locale: null,
+      overrideAccess: true,
+    })
+
+    expect(result).toEqual({
+      errors: [],
+      valid: true,
+    })
+  })
 })

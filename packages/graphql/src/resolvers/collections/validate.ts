@@ -40,7 +40,7 @@ export function validateResolver<TSlug extends CollectionSlug>(
     if (args.id === undefined) {
       return req.payload.validate({
         collection: collectionSlug,
-        data: args.data,
+        data: args.data ?? {},
         draft: args.draft,
         locale,
         overrideAccess: false,
