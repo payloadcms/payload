@@ -9,6 +9,7 @@ import type { UploadTransformer } from 'payload'
  */
 export const transformerCallCounts = {
   appendSuffix: 0,
+  consumeWithoutResponse: 0,
   noop: 0,
   redirect: 0,
   sourceConsumingError: 0,
@@ -117,6 +118,17 @@ export const sourceConsumingErrorTransformer: UploadTransformer = {
   mimeTypes: ['application/pdf'],
 }
 
+export const consumeWithoutResponseTransformer: UploadTransformer = {
+  slug: 'consume-without-response',
+  canTransform: hasQueryParam('consumenoresponse'),
+  handleRequest: async ({ getSourceFile }) => {
+    transformerCallCounts.consumeWithoutResponse += 1
+    await getSourceFile()
+    return { status: 'continue' }
+  },
+  mimeTypes: ['application/pdf'],
+}
+
 export const testTransformers: UploadTransformer[] = [
   appendSuffixTransformer,
   uppercaseTransformer,
@@ -124,4 +136,5 @@ export const testTransformers: UploadTransformer[] = [
   noopTransformer,
   throwingTransformer,
   sourceConsumingErrorTransformer,
+  consumeWithoutResponseTransformer,
 ]

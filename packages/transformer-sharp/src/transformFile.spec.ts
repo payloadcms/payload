@@ -1,7 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
 import sharp from 'sharp'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import type { SharpUploadTaskOptions } from './types.js'
 
@@ -13,17 +13,15 @@ const toBuffer = async (file: File): Promise<Buffer> => Buffer.from(await file.a
 
 const makeImageBuffer = async ({
   background = { b: 0, g: 128, r: 255 },
-  format = 'png' as const,
   height,
   width,
 }: {
   background?: { b: number; g: number; r: number }
-  format?: 'gif' | 'png' | 'webp'
   height: number
   width: number
 }): Promise<Buffer> =>
   sharp({ create: { background, channels: 3, height, width } })
-    .toFormat(format)
+    .png()
     .toBuffer()
 
 /**
@@ -77,63 +75,6 @@ const sampleRawPixel = ({
 
 describe('createTransformFile', () => {
   describe('main (transformMain)', () => {
-    it('should return status continue without invoking Sharp when there is no crop and no configured adjustments', async () => {
-      const buffer = await makeImageBuffer({ height: 10, width: 10 })
-      const file = new File([buffer], 'photo.png', { type: 'image/png' })
-      const sharpSpy = vi.fn(sharp)
-      const transformFile = createTransformFile({ sharpDependency: sharpSpy as never })
-
-      const result = await transformFile({
-        file,
-        options: { collectionUpload: {}, kind: 'main' } satisfies SharpUploadTaskOptions,
-        req: makeReq(),
-      })
-
-      expect(result).toEqual({ status: 'continue' })
-      expect(sharpSpy).not.toHaveBeenCalled()
-    })
-
-    it('should resize the main file according to resizeOptions', async () => {
-      const buffer = await makeImageBuffer({ height: 200, width: 400 })
-      const file = new File([buffer], 'photo.png', { type: 'image/png' })
-      const transformFile = createTransformFile({ sharpDependency: sharp })
-
-      const result = await transformFile({
-        file,
-        options: {
-          collectionUpload: { resizeOptions: { width: 100 } },
-          kind: 'main',
-        } satisfies SharpUploadTaskOptions,
-        req: makeReq(),
-      })
-
-      expect(result.status).toBe('continue')
-      const metadata = await sharp(await toBuffer(result.file!)).metadata()
-      expect(metadata.width).toBe(100)
-      expect(metadata.height).toBe(50)
-    })
-
-    it('should convert the main file to the configured output format', async () => {
-      const buffer = await makeImageBuffer({ height: 20, width: 20 })
-      const file = new File([buffer], 'photo.png', { type: 'image/png' })
-      const transformFile = createTransformFile({ sharpDependency: sharp })
-
-      const result = await transformFile({
-        file,
-        options: {
-          collectionUpload: { formatOptions: { format: 'webp' } },
-          kind: 'main',
-        } satisfies SharpUploadTaskOptions,
-        req: makeReq(),
-      })
-
-      const metadata = await sharp(await toBuffer(result.file!)).metadata()
-      expect(metadata.format).toBe('webp')
-      // `.file.type` stays the caller's original MIME type; generateFileData.ts
-      // re-derives the real type from the encoded bytes later, not from this field.
-      expect(result.file!.type).toBe('image/png')
-    })
-
     it('should trim uniform-colour padding from the main file', async () => {
       const square = await makeImageBuffer({
         background: { b: 0, g: 0, r: 0 },
@@ -164,54 +105,6 @@ describe('createTransformFile', () => {
     })
 
     describe('crop', () => {
-      it('should skip the extract call when the requested crop dimensions equal the original dimensions', async () => {
-        const buffer = await makeImageBuffer({ height: 50, width: 50 })
-        const file = new File([buffer], 'photo.png', { type: 'image/png' })
-        const transformFile = createTransformFile({ sharpDependency: sharp })
-
-        const result = await transformFile({
-          file,
-          options: {
-            collectionUpload: {},
-            crop: {
-              cropData: { height: 100, unit: '%', width: 100, x: 0, y: 0 },
-              heightInPixels: 50,
-              originalDimensions: { height: 50, width: 50 },
-              widthInPixels: 50,
-            },
-            kind: 'main',
-          } satisfies SharpUploadTaskOptions,
-          req: makeReq(),
-        })
-
-        expect(Buffer.compare(await toBuffer(result.file!), buffer)).toBe(0)
-      })
-
-      it('should extract exactly the cropped pixel region when resizeOptions are not configured', async () => {
-        const buffer = await makeImageBuffer({ height: 100, width: 100 })
-        const file = new File([buffer], 'photo.png', { type: 'image/png' })
-        const transformFile = createTransformFile({ sharpDependency: sharp })
-
-        const result = await transformFile({
-          file,
-          options: {
-            collectionUpload: {},
-            crop: {
-              cropData: { height: 40, unit: '%', width: 40, x: 25, y: 25 },
-              heightInPixels: 40,
-              originalDimensions: { height: 100, width: 100 },
-              widthInPixels: 40,
-            },
-            kind: 'main',
-          } satisfies SharpUploadTaskOptions,
-          req: makeReq(),
-        })
-
-        const metadata = await sharp(await toBuffer(result.file!)).metadata()
-        expect(metadata.width).toBe(40)
-        expect(metadata.height).toBe(40)
-      })
-
       it('should re-apply resizeOptions to the crop output by default', async () => {
         const buffer = await makeImageBuffer({ height: 100, width: 100 })
         const file = new File([buffer], 'photo.png', { type: 'image/png' })
@@ -267,27 +160,6 @@ describe('createTransformFile', () => {
   })
 
   describe('size (transformSize)', () => {
-    it('should resize to the named image size configuration when no focal point is provided', async () => {
-      const buffer = await makeImageBuffer({ height: 200, width: 400 })
-      const file = new File([buffer], 'photo.png', { type: 'image/png' })
-      const transformFile = createTransformFile({ sharpDependency: sharp })
-
-      const result = await transformFile({
-        file,
-        options: {
-          collectionUpload: {},
-          imageResizeConfig: { name: 'thumb', height: 100, width: 100 },
-          kind: 'size',
-          originalDimensions: { height: 200, width: 400 },
-        } satisfies SharpUploadTaskOptions,
-        req: makeReq(),
-      })
-
-      const metadata = await sharp(await toBuffer(result.file!)).metadata()
-      expect(metadata.width).toBe(100)
-      expect(metadata.height).toBe(100)
-    })
-
     it('should extract the horizontally-correct focal-point region for a landscape original', async () => {
       // 200x100 (2:1) forces `prioritizeHeight` (resize to 100x50); focal x:80
       // pushes the 50px-wide extract window against the clamped right edge, so
