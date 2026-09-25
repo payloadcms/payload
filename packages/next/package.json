@@ -96,14 +96,11 @@
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/modifiers": "9.0.0",
     "@dnd-kit/sortable": "10.0.0",
-    "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "busboy": "^1.6.0",
     "dequal": "2.0.3",
     "file-type": "22.0.1",
-    "graphql-http": "1.22.4",
-    "graphql-playground-html": "1.6.30",
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
@@ -118,19 +115,39 @@
     "@babel/preset-typescript": "7.27.1",
     "@next/eslint-plugin-next": "16.3.3",
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/graphql": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
+    "graphql-http": "1.22.4",
+    "graphql-playground-html": "1.6.30",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
+    "@payloadcms/graphql": "workspace:*",
     "graphql": "^16.8.1",
+    "graphql-http": "^1.22.4",
+    "graphql-playground-html": "^1.6.30",
     "next": ">=16.2.6 <17.0.0",
     "payload": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@payloadcms/graphql": {
+      "optional": true
+    },
+    "graphql": {
+      "optional": true
+    },
+    "graphql-http": {
+      "optional": true
+    },
+    "graphql-playground-html": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=24.15.0"

@@ -1,8 +1,6 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
 import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload'
 
-import { configToSchema } from '@payloadcms/graphql'
-import { createHandler } from 'graphql-http/lib/use/fetch'
 import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
@@ -12,6 +10,8 @@ import {
   logError,
   mergeHeaders,
 } from 'payload'
+
+import { importConfigToSchema, importCreateHandler } from './importGraphQL.js'
 
 const handleError = async ({
   err,
@@ -79,10 +79,11 @@ export const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedCon
 
   if (!cached.promise) {
     const resolvedConfig = await config
-    cached.promise = new Promise((resolve) => {
-      const schema = configToSchema(resolvedConfig)
-      resolve(cached.graphql || schema)
-    })
+    cached.promise = (async () => {
+      const configToSchema = await importConfigToSchema()
+
+      return cached.graphql || configToSchema(resolvedConfig)
+    })()
   }
 
   try {
@@ -117,28 +118,22 @@ export const POST =
 
     const { schema, validationRules } = await getGraphql(config)
 
+    const createHandler = await importCreateHandler()
+
     const headers = {}
     const apiResponse = await createHandler({
       context: { headers, req },
-      onOperation: async (request, args, result) => {
-        const response =
-          typeof payload.extensions === 'function'
-            ? await payload.extensions({
-                args,
-                req: request,
-                result,
-              })
-            : result
-        if (response.errors) {
+      onOperation: async (_request, _args, result) => {
+        if (result.errors) {
           const errors = (await Promise.all(
             result.errors.map((error) => {
               return handleError({ err: error, payload, req })
             }),
           )) as GraphQLError[]
           // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult
-          return { ...response, errors }
+          return { ...result, errors }
         }
-        return response
+        return result
       },
       schema,
       validationRules: (_, args, defaultRules) => defaultRules.concat(validationRules(args)),
