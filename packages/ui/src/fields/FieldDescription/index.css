@@ -2,6 +2,11 @@
   .field-description {
     display: flex;
     color: var(--field-color-description);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
   .field-description--margin-bottom {

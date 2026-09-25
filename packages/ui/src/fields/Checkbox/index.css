@@ -1,6 +1,14 @@
 @layer payload-default {
   .checkbox {
     position: relative;
+
+    .checkbox-input {
+      padding-block: var(--spacer-1);
+    }
+
+    .field-label:not(.unstyled) {
+      font-weight: var(--text-body-medium-font-weight);
+    }
   }
 
   .checkbox-input {

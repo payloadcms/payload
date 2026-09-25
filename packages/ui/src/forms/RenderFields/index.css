@@ -13,7 +13,7 @@
   .render-fields {
     /* Reset per nesting level so an ancestor's zeroed value (e.g. a row) does
        not leak into nested fields. */
-    --spacing-field: var(--spacer-3);
+    --spacing-field: var(--spacer-4);
 
     & > .field-type {
       margin-bottom: var(--spacing-field);
@@ -63,13 +63,6 @@
       &.group-field--within-group {
         margin-top: var(--spacing-field);
       }
-    }
-  }
-
-  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
-  @media (max-width: 768px) {
-    .render-fields {
-      --spacing-field: var(--spacer-2-5);
     }
   }
 }

@@ -40,7 +40,7 @@
     ul {
       display: flex;
       flex-direction: column;
-      gap: var(--spacer-2);
+      gap: var(--spacer-1);
     }
   }
 

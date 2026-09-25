@@ -256,8 +256,8 @@
        form fields at once
        ————————————————————————————————————————————— */
 
-    --field-color-bg: var(--color-bg);
-    --field-color-border: var(--special-border-translucent);
+    --field-color-bg: var(--color-bg-secondary);
+    --field-color-border: transparent;
     --field-color-text: var(--color-text);
     --field-color-placeholder: var(--color-text-tertiary);
 
@@ -276,14 +276,14 @@
     --field-color-border-error: var(--color-border-danger-strong);
 
     --field-color-label: var(--color-text);
-    --field-color-label-required: var(--color-text-danger);
+    --field-color-label-required: var(--color-text-secondary);
 
     --field-color-description: var(--color-text-secondary);
 
     --field-color-error-bg: var(--color-bg-danger);
     --field-color-error-text: var(--color-text-ondanger);
 
-    --field-color-toggle-border: var(--color-border-strong);
+    --field-color-toggle-border: var(--color-icon);
     --field-color-toggle-border-hover: var(--color-border-selected-strong);
     --field-color-toggle-bg-checked: var(--color-bg-brand);
     --field-color-toggle-border-checked: var(--color-border-selected);
@@ -446,8 +446,8 @@
        form fields at once
        ——————————————————————————————————————————————— */
 
-    --field-color-bg: var(--color-bg);
-    --field-color-border: var(--special-border-translucent);
+    --field-color-bg: var(--color-bg-secondary);
+    --field-color-border: transparent;
     --field-color-text: var(--color-text);
     --field-color-placeholder: var(--color-text-tertiary);
 
@@ -466,14 +466,14 @@
     --field-color-border-error: var(--color-border-danger-strong);
 
     --field-color-label: var(--color-text);
-    --field-color-label-required: var(--color-text-danger);
+    --field-color-label-required: var(--color-text-secondary);
 
     --field-color-description: var(--color-text-secondary);
 
     --field-color-error-bg: var(--color-bg-danger);
     --field-color-error-text: var(--color-text-ondanger);
 
-    --field-color-toggle-border: var(--color-border-strong);
+    --field-color-toggle-border: var(--color-icon);
     --field-color-toggle-border-hover: var(--color-border-selected-strong);
     --field-color-toggle-bg-checked: var(--color-bg-brand);
     --field-color-toggle-border-checked: var(--color-border-selected);
