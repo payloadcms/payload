@@ -6,6 +6,7 @@ import type { TextareaFieldClientProps } from 'payload'
 import {
   FieldLabel,
   TextareaInput,
+  toast,
   useConfig,
   useDocumentInfo,
   useDocumentTitle,
@@ -102,6 +103,12 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       method: 'POST',
     })
 
+    if (!genDescriptionResponse.ok) {
+      const error = await genDescriptionResponse.json().catch(() => null)
+      toast.error(error?.errors?.[0]?.message || t('error:unknown'))
+      return
+    }
+
     const { result: generatedDescription } = await genDescriptionResponse.json()
 
     setValue(generatedDescription || '')
@@ -120,6 +127,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     getData,
     locale,
     setValue,
+    t,
     title,
   ])
 
