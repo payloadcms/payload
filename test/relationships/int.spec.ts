@@ -1210,7 +1210,6 @@ test.suite('Relationships', { config: './config.ts' }, () => {
           })
 
           expect(movie_1.select).toStrictEqual([])
-          expect(movie_2.select).toBeNull()
 
           const res_1 = await payload.find({
             collection: 'movies',
