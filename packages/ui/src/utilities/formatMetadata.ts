@@ -62,13 +62,7 @@ export const formatMetadata = async (
   args: { serverURL?: string } & MetaConfig,
 ): Promise<MetaConfig> => {
   const { defaultOGImageType, serverURL, titleSuffix, ...rest } = args
-
-  /**
-   * @todo find a way to remove the type assertion here.
-   * It is a result of needing to `DeepCopy` the `MetaConfig` type from Payload.
-   * This is required for the `DeepRequired` from `Config` to `SanitizedConfig`.
-   */
-  const incomingMetadata = rest as MetaConfig
+  const incomingMetadata: MetaConfig = rest
 
   const faviconDark = payloadFaviconDark as { src: string } | string
   const faviconLight = payloadFaviconLight as { src: string } | string

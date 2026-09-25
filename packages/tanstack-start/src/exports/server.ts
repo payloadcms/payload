@@ -3,11 +3,9 @@ export { logout } from '../auth/logout.js'
 export { refresh } from '../auth/refresh.js'
 export { payloadApiHandlers } from '../routes/apiRoute.js'
 export { getRequestI18n } from '../utilities/getRequestI18n.server.js'
-export { getRequestLocale } from '../utilities/getRequestLocale.js'
 export { handleGraphQL } from '../utilities/graphqlHandler.server.js'
 export { handleAPIRoute } from '../utilities/handleAPIRoute.server.js'
 export { handleServerFunctions } from '../utilities/handleServerFunctions.js'
-export { initReq } from '../utilities/initReq.server.js'
 export {
   loadAdminPage,
   type LoadAdminPageArgs,
@@ -20,5 +18,5 @@ export {
   type PageNavIntent,
   tanstackServerAdapter,
 } from '../utilities/serverAdapter.server.js'
-export { toSerializable } from '../utilities/toSerializable.js'
+export { type SerializableRecord, toSerializable } from '../utilities/toSerializable.js'
 export { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'

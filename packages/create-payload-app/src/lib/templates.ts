@@ -22,6 +22,12 @@ export function getValidTemplates(): ProjectTemplate[] {
       url: `https://github.com/payloadcms/payload/templates/blank#main`,
     },
     {
+      name: 'blank-tanstack',
+      type: 'starter',
+      description: 'Blank TanStack Start Template',
+      url: 'https://github.com/payloadcms/payload/templates/blank-tanstack#main',
+    },
+    {
       name: 'website',
       type: 'starter',
       description: 'Website Template',

@@ -1,34 +1,25 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { CollectionSlug } from 'payload'
 
 import { buildDefaultEditorState } from '@payloadcms/richtext-lexical'
-import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
+import { expect, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { postDoc } from './config.js'
 
-let restClient: NextRESTClient
-let payload: Payload
 let token: string
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('dataloader', () => {
-  beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
-
+test.suite('dataloader', { config: './config.ts' }, () => {
+  test.beforeEach(async ({ payload }) => {
     const loginResult = await payload.login({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     if (loginResult.token) {
@@ -36,12 +27,8 @@ describe('dataloader', () => {
     }
   })
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  describe('graphql', () => {
-    it('should allow multiple parallel queries', async () => {
+  test.describe('graphql', () => {
+    test('should allow multiple parallel queries', async ({ restClient }) => {
       for (let i = 0; i < 100; i++) {
         const query = `
           query {
@@ -80,7 +67,7 @@ describe('dataloader', () => {
       }
     })
 
-    it('should allow querying via graphql', async () => {
+    test('should allow querying via graphql', async ({ restClient }) => {
       const query = `query {
         Posts {
           docs {
@@ -105,12 +92,13 @@ describe('dataloader', () => {
       expect(docs[0].title).toStrictEqual(postDoc.title)
     })
 
-    it('should avoid infinite loops', async () => {
+    test('should avoid infinite loops', async ({ payload }) => {
       const relationA = await payload.create({
         collection: 'relation-a',
         data: {
           richText: buildDefaultEditorState({ text: 'relation a' }),
         },
+        overrideAccess: true,
       })
 
       const relationB = await payload.create({
@@ -119,6 +107,7 @@ describe('dataloader', () => {
           relationship: relationA.id,
           richText: buildDefaultEditorState({ text: 'relation b' }),
         },
+        overrideAccess: true,
       })
 
       expect(relationA.id).toBeDefined()
@@ -142,12 +131,14 @@ describe('dataloader', () => {
             ],
           }),
         },
+        overrideAccess: true,
       })
 
       const relationANoDepth = await payload.findByID({
         id: relationA.id,
         collection: 'relation-a',
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(relationANoDepth.relationship).toStrictEqual(relationB.id)
@@ -156,6 +147,7 @@ describe('dataloader', () => {
         id: relationA.id,
         collection: 'relation-a',
         depth: 4,
+        overrideAccess: true,
       })
 
       const innerMostRelationship =
@@ -167,8 +159,8 @@ describe('dataloader', () => {
     })
   })
 
-  describe('find', () => {
-    it('should call the same query only once in a request', async () => {
+  test.describe('find', () => {
+    test('should call the same query only once in a request', async ({ payload }) => {
       const req = await createLocalReq({}, payload)
       const spy = vitest.spyOn(payload, 'find')
 
@@ -176,6 +168,7 @@ describe('dataloader', () => {
         collection: 'items' as CollectionSlug,
         req,
         depth: 0,
+        overrideAccess: true,
         where: {
           name: { exists: true },
         },

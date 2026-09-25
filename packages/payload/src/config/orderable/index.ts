@@ -6,7 +6,9 @@ import type { Field, TextField } from '../../fields/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { APIError } from '../../errors/index.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { combineQueries } from '../../database/combineQueries.js'
+import { APIError, Forbidden } from '../../errors/index.js'
 import { sanitizeField } from '../../fields/config/sanitize.js'
 import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -87,6 +89,7 @@ export const addOrderableFieldsAndHook = (
           collection: collection.slug,
           depth: 0,
           limit: 1,
+          overrideAccess: true,
           pagination: false,
           req,
           select: { [orderableFieldName]: true },
@@ -163,6 +166,53 @@ export const addOrderableEndpoint = (
       })
     }
 
+    const isConfiguredOrderableField =
+      (collection.orderable && orderableFieldName === '_order') ||
+      joinFieldPathsByCollection.get(collection.slug)?.has(orderableFieldName)
+
+    if (!isConfiguredOrderableField) {
+      return new Response(
+        JSON.stringify({ error: `${orderableFieldName} is not configured for ordering` }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+          status: 400,
+        },
+      )
+    }
+
+    const assertUpdateAccess = async (
+      updates: { data: Record<string, unknown>; id: number | string }[],
+    ) => {
+      if (!collection.access?.update) {
+        return
+      }
+
+      for (const { id, data } of updates) {
+        const accessResult = await executeAccess(
+          { id, slug: collection.slug, data, req },
+          collection.access.update,
+        )
+
+        if (hasWhereAccessResult(accessResult)) {
+          const accessibleDoc = await getLatestCollectionVersion({
+            id,
+            config: collection,
+            payload: req.payload,
+            query: {
+              collection: collection.slug,
+              req,
+              where: combineQueries({ id: { equals: id } }, accessResult),
+            },
+            req,
+          })
+
+          if (!accessibleDoc) {
+            throw new Forbidden(req.t)
+          }
+        }
+      }
+    }
+
     const { joinScopeWhere, targetDoc } = await getJoinScopeContext({
       collectionSlug: collection.slug,
       joinFieldPathsByCollection,
@@ -171,19 +221,6 @@ export const addOrderableEndpoint = (
       target,
     })
 
-    // Prevent reordering if user doesn't have editing permissions
-    if (collection.access?.update) {
-      await executeAccess(
-        {
-          // Currently only one doc can be moved at a time. We should review this if we want to allow
-          // multiple docs to be moved at once in the future.
-          id: docsToMove[0],
-          data: {},
-          req,
-        },
-        collection.access.update,
-      )
-    }
     /**
      * If there is no target.key, we can assume the user enabled `orderable`
      * on a collection with existing documents, and that this is the first
@@ -198,6 +235,7 @@ export const addOrderableEndpoint = (
         collection: collection.slug,
         depth: 0,
         limit: 0,
+        overrideAccess: true,
         req,
         select: { [orderableFieldName]: true },
         where: combineWhereConstraints([
@@ -209,7 +247,12 @@ export const addOrderableEndpoint = (
           joinScopeWhere ?? undefined,
         ]),
       })
-      await initTransaction(req)
+      const shouldCommit = await initTransaction(req)
+      const hasTransaction = Boolean(await req.transactionID)
+
+      if (!hasTransaction) {
+        await assertUpdateAccess(docs.map(({ id }) => ({ id, data: {} })))
+      }
       // We cannot update all documents in a single operation with `payload.update`,
       // because they would all end up with the same order key (`a0`).
       try {
@@ -221,12 +264,18 @@ export const addOrderableEndpoint = (
               // no data needed since the order hooks will handle this
             },
             depth: 0,
+            overrideAccess: false,
             req,
           })
+        }
+        if (shouldCommit || !hasTransaction) {
           await commitTransaction(req)
         }
       } catch (e) {
         await killTransaction(req)
+        if (e instanceof APIError) {
+          throw e
+        }
         if (e instanceof Error) {
           throw new APIError(e.message, httpStatus.INTERNAL_SERVER_ERROR)
         }
@@ -266,6 +315,7 @@ export const addOrderableEndpoint = (
       collection: collection.slug,
       depth: 0,
       limit: 1,
+      overrideAccess: true,
       pagination: false,
       select: { [orderableFieldName]: true },
       sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
@@ -280,12 +330,17 @@ export const addOrderableEndpoint = (
     })
     const adjacentDocKey = adjacentDoc.docs?.[0]?.[orderableFieldName] || null
 
-    // Currently N (= docsToMove.length) is always 1. Maybe in the future we will
-    // allow dragging and reordering multiple documents at once via the UI.
     const orderValues =
       newKeyWillBe === 'greater'
         ? generateNKeysBetween(targetKey, adjacentDocKey, docsToMove.length)
         : generateNKeysBetween(adjacentDocKey, targetKey, docsToMove.length)
+
+    await assertUpdateAccess(
+      docsToMove.map((id, index) => ({
+        id,
+        data: { [orderableFieldName]: orderValues[index] },
+      })),
+    )
 
     const draftsEnabled = hasDraftsEnabled(collection)
 
@@ -317,6 +372,7 @@ export const addOrderableEndpoint = (
         },
         depth: 0,
         draft,
+        overrideAccess: false,
         req,
       })
     }

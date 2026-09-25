@@ -78,6 +78,14 @@ Note that this is different than running `next dev`. Generally, Next.js apps com
 You should be using an SSL certificate for production Payload instances, which means you
 can [enable secure cookies](/docs/authentication/overview) in your Authentication-enabled Collection configs.
 
+### HTTP Security Headers
+
+Payload does not automatically configure application-specific HTTP security headers because the appropriate values depend on your customizations, embedding requirements, domains, and deployment environment. Before deploying to production, evaluate headers such as `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, and `Strict-Transport-Security` for your application.
+
+For implementation guidance, see the official [Next.js headers](https://nextjs.org/docs/app/api-reference/config/next-config-js/headers) and [Content Security Policy](https://nextjs.org/docs/app/guides/content-security-policy) documentation. TanStack Start users can configure response headers with [middleware](https://tanstack.com/start/latest/docs/framework/react/guide/middleware) or [server function utilities](https://tanstack.com/start/latest/docs/framework/react/guide/server-functions).
+
+CSP and framing restrictions can affect custom Admin components and applications that embed the Admin Panel. If your frontend is displayed inside the Admin Panel, also review the [Live Preview CSP guidance](/docs/live-preview/client#iframe-refuses-to-connect). HSTS applies to the entire hostname and is commonly configured by your production host, proxy, or CDN.
+
 ### Preventing API Abuse
 
 Payload comes with a robust set of built-in anti-abuse measures, such as locking out users after X amount of failed

@@ -1,7 +1,7 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { ImportMap } from '../../cli/commands/generateImportMap/generateImportMap.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
 import type {
@@ -19,7 +19,7 @@ import type { Data, StaticDescription } from '../types.js'
 import type { DocumentSubViewTypes } from './document.js'
 
 export type AdminViewConfig = {
-  Component: PayloadComponent
+  Component: PayloadComponent<AdminViewServerProps>
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig

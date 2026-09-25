@@ -10,12 +10,13 @@ import { readMigrationFiles } from './readMigrationFiles.js'
 export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
   this: BaseDatabaseAdapter,
   args,
-): Promise<void> {
+) {
   const { payload } = this
   const migrationFiles = args?.migrations || (await readMigrationFiles({ payload }))
   const { existingMigrations, latestBatch } = await getMigrations({ payload })
 
   const newBatch = latestBatch + 1
+  const migrated: string[] = []
 
   // Execute 'up' function for each migration sequentially
   for (const migration of migrationFiles) {
@@ -44,13 +45,21 @@ export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
           name: migration.name,
           batch: newBatch,
         },
+        overrideAccess: true,
         req,
       })
       await commitTransaction(req)
+      migrated.push(migration.name)
     } catch (err: unknown) {
       await killTransaction(req)
       payload.logger.error({ err, msg: `Error running migration ${migration.name}` })
       throw err
     }
+  }
+
+  return {
+    ...(migrated.length ? { batch: newBatch } : {}),
+    migrated,
+    rolledBack: [],
   }
 }

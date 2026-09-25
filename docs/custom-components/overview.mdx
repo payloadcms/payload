@@ -163,7 +163,7 @@ The import map is **never regenerated** during:
   **Important:** The import map file should never be manually edited. However,
   the `layout.tsx` file that imports it is safe to modify when customizing your
   folder structure. See [Customizing Admin Panel
-  Location](../admin/customizing-location) for details.
+  Location](../admin/admin-panel-location) for details.
 </Banner>
 
 #### Overriding Import Map Location
@@ -232,15 +232,16 @@ Here is an example:
 
 ```tsx
 import React from 'react'
-import type { Payload } from 'payload'
+import type { ServerProps } from 'payload'
 
 async function MyServerComponent({
   payload, // highlight-line
-}: {
-  payload: Payload
-}) {
+  user, // highlight-line
+}: Pick<ServerProps, 'payload' | 'user'>) {
   const page = await payload.findByID({
     collection: 'pages',
+    overrideAccess: false,
+    user,
     id: '123',
   })
 
@@ -250,10 +251,11 @@ async function MyServerComponent({
 
 Each Custom Component receives the following props by default:
 
-| Prop      | Description                                 |
-| --------- | ------------------------------------------- |
-| `payload` | The [Payload](../local-api/overview) class. |
-| `i18n`    | The [i18n](../configuration/i18n) object.   |
+| Prop      | Description                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------- |
+| `payload` | The [Payload](../local-api/overview) class.                                                 |
+| `i18n`    | The [i18n](../configuration/i18n) object.                                                   |
+| `user`    | The current user with [field read access](#server-principal-vs-read-filtered-user) applied. |
 
 <Banner type="warning">
   **Reminder:** All Custom Components also receive various other props that are
@@ -263,6 +265,19 @@ Each Custom Component receives the following props by default:
   Components](../configuration/globals#custom-components), or [Field
   Components](../fields/overview#custom-components) for a complete list of all
   default props per component.
+</Banner>
+
+#### Server principal vs. read-filtered user
+
+Server Components that render an authenticated user receive two representations of that user, and choosing the wrong one either leaks data or breaks access checks:
+
+- **`user`** (the top-level prop, e.g. on views and field components) is the authenticated user with **field read access applied** — read-restricted fields are removed and relationships are populated according to read access. Use it for anything passed toward Client Components or rendered to the page, so restricted data never reaches the client.
+- **`req.user`** (from the `req` prop, or `initPageResult.req.user` in views) is the **complete server principal** with access bypassed. Use it for access-control checks, Local API queries, and role/authorization gating — `user` may omit fields your access logic relies on (for example a role stored in a read-restricted field).
+
+<Banner type="warning">
+  **Security:** Never pass `req.user` toward a Client Component or into client
+  React state — use `user`. Conversely, never rely on `user` for authorization
+  decisions — use `req.user`.
 </Banner>
 
 ### Custom Props
@@ -449,9 +464,11 @@ All Server Components automatically receive the `locale` object as a prop by def
 ```tsx
 import React from 'react'
 
-export default async function MyServerComponent({ payload, locale }) {
+export default async function MyServerComponent({ payload, locale, user }) {
   const localizedPage = await payload.findByID({
     collection: 'pages',
+    overrideAccess: false,
+    user,
     id: '123',
     locale,
   })
@@ -460,7 +477,7 @@ export default async function MyServerComponent({ payload, locale }) {
 }
 ```
 
-The best way to do this within a Client Component is to import the `useLocale` hook from `@payloadcms/ui`:
+The best way to do this within a Client Component is to import the `useLocale` hook from `@payloadcms/ui`. The hook returns `null` when localization is disabled or configured without any locales:
 
 ```tsx
 'use client'
@@ -469,6 +486,10 @@ import { useLocale } from '@payloadcms/ui'
 
 function Greeting() {
   const locale = useLocale() // highlight-line
+
+  if (!locale) {
+    return null
+  }
 
   const trans = {
     en: 'Hello',

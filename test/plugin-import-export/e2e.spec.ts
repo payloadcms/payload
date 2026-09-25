@@ -12,19 +12,16 @@ const __dirname = path.dirname(__filename)
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  runJobsQueue,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { runJobsQueue, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { setPerPageLimit } from '../__helpers/e2e/setPerPageLimit.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readCSV } from './helpers.js'
 import {
+  batchRefFieldName,
   postsWithColumnMapSlug,
   postsWithHooksSlug,
   postsWithS3ExportSlug,
@@ -38,6 +35,7 @@ test.describe('Import Export Plugin', () => {
   let importsURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
   let customIdPagesURL: AdminUrlUtil
+  let postsWithHooksURL: AdminUrlUtil
   let s3ExportsURL: AdminUrlUtil
   let s3ImportsURL: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
@@ -45,6 +43,7 @@ test.describe('Import Export Plugin', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true })
     const { payload: payloadFromInit, serverURL: url } = await initPayloadE2ENoConfig<Config>({
       dirname: __dirname,
     })
@@ -53,16 +52,14 @@ test.describe('Import Export Plugin', () => {
     importsURL = new AdminUrlUtil(serverURL, 'imports')
     postsURL = new AdminUrlUtil(serverURL, 'posts')
     customIdPagesURL = new AdminUrlUtil(serverURL, 'custom-id-pages')
+    postsWithHooksURL = new AdminUrlUtil(serverURL, postsWithHooksSlug)
     s3ExportsURL = new AdminUrlUtil(serverURL, postsWithS3ExportSlug)
     s3ImportsURL = new AdminUrlUtil(serverURL, postsWithS3ImportSlug)
 
     payload = payloadFromInit
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.describe('Export', () => {
@@ -149,6 +146,7 @@ test.describe('Import Export Plugin', () => {
 
       // Open export from list menu
       const listMenuButton = page.locator('#list-menu')
+
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
@@ -313,12 +311,14 @@ test.describe('Import Export Plugin', () => {
           where: {
             'input.collectionSlug': { equals: 'custom-id-pages' },
           },
+          overrideAccess: true,
         })
         await payload.delete({
           collection: 'exports' as any,
           where: {
             collectionSlug: { equals: 'custom-id-pages' },
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -327,6 +327,7 @@ test.describe('Import Export Plugin', () => {
             id: `e2e-export-${uniqueId}-1`,
             title: 'E2E Export Custom Page 1',
           },
+          overrideAccess: true,
         })
 
         await payload.create({
@@ -335,6 +336,7 @@ test.describe('Import Export Plugin', () => {
             id: `e2e-export-${uniqueId}-2`,
             title: 'E2E Export Custom Page 2',
           },
+          overrideAccess: true,
         })
 
         await page.goto(customIdPagesURL.list)
@@ -391,6 +393,7 @@ test.describe('Import Export Plugin', () => {
               equals: exportId,
             },
           },
+          overrideAccess: true,
         })
         expect(docs.length).toBe(1)
         expect(docs[0].collectionSlug).toBe('custom-id-pages')
@@ -440,6 +443,7 @@ test.describe('Import Export Plugin', () => {
             id: `preview-export-${uniqueId}-1`,
             title: 'Preview Export Test 1',
           },
+          overrideAccess: true,
         })
         createdPages.push(`preview-export-${uniqueId}-1`)
 
@@ -449,6 +453,7 @@ test.describe('Import Export Plugin', () => {
             id: `preview-export-${uniqueId}-2`,
             title: 'Preview Export Test 2',
           },
+          overrideAccess: true,
         })
         createdPages.push(`preview-export-${uniqueId}-2`)
 
@@ -504,6 +509,7 @@ test.describe('Import Export Plugin', () => {
           await payload.delete({
             id,
             collection: 'custom-id-pages' as any,
+            overrideAccess: true,
           })
         }
       })
@@ -642,6 +648,7 @@ test.describe('Import Export Plugin', () => {
           where: {
             title: { contains: pattern },
           },
+          overrideAccess: true,
         })
       }
       createdPageTitlePatterns.length = 0
@@ -650,6 +657,7 @@ test.describe('Import Export Plugin', () => {
         await payload.delete({
           id,
           collection: 'pages',
+          overrideAccess: true,
         })
       }
       createdPageIDs.length = 0
@@ -666,7 +674,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import a CSV file successfully', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       const csvContent =
         'title,excerpt\n"E2E Import Test 1","Test excerpt 1"\n"E2E Import Test 2","Test excerpt 2"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-test-import.csv')
@@ -698,13 +705,13 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Import Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
     })
 
     test('should import a JSON file successfully', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       const jsonContent = JSON.stringify([
         { excerpt: 'JSON excerpt 1', title: 'E2E JSON Import 1' },
         { excerpt: 'JSON excerpt 2', title: 'E2E JSON Import 2' },
@@ -738,6 +745,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E JSON Import' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
@@ -807,6 +815,7 @@ test.describe('Import Export Plugin', () => {
           excerpt: 'Original excerpt',
           title: 'E2E Update Test Original',
         },
+        overrideAccess: true,
       })
 
       createdPageIDs.push(existingDoc.id)
@@ -824,9 +833,12 @@ test.describe('Import Export Plugin', () => {
       // one-shot native event with no auto-retry.
       await expect(async () => {
         await page.setInputFiles('input[type="file"]', csvPath)
-        await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-update-test.csv', {
-          timeout: 2000,
-        })
+        await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+          'e2e-update-test.csv',
+          {
+            timeout: 2000,
+          },
+        )
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const collectionField = page.locator('#field-collectionSlug')
@@ -851,6 +863,7 @@ test.describe('Import Export Plugin', () => {
             equals: existingDoc.id,
           },
         },
+        overrideAccess: true,
       })
 
       expect(updatedDoc?.title).toBe('E2E Update Test Modified')
@@ -858,7 +871,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should import documents as published by default', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       const csvContent =
         'title,excerpt\n"E2E Published Status Test 1","Test excerpt 1"\n"E2E Published Status Test 2","Test excerpt 2"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-published-status-test.csv')
@@ -893,6 +905,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Published Status Test' },
         },
+        overrideAccess: true,
       })
 
       expect(importedDocs.docs.length).toBe(2)
@@ -902,7 +915,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should respect explicit _status column values in CSV', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       const csvContent =
         'title,excerpt,_status\n"E2E Explicit Draft Test","Draft excerpt","draft"\n"E2E Explicit Published Test","Published excerpt","published"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-explicit-status-test.csv')
@@ -938,6 +950,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { equals: 'E2E Explicit Draft Test' },
         },
+        overrideAccess: true,
       })
 
       expect(draftDocs.docs.length).toBe(1)
@@ -949,6 +962,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { equals: 'E2E Explicit Published Test' },
         },
+        overrideAccess: true,
       })
 
       expect(publishedDocs.docs.length).toBe(1)
@@ -1021,6 +1035,7 @@ test.describe('Import Export Plugin', () => {
           where: {
             id: { contains: `e2e-custom-${uniqueId}` },
           },
+          overrideAccess: true,
         })
 
         expect(importedPages.totalDocs).toBe(2)
@@ -1078,7 +1093,6 @@ test.describe('Import Export Plugin', () => {
 
   test.describe('S3 Storage', () => {
     test('should import CSV file stored in S3 via jobs queue', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       const uniqueId = Date.now()
       const csvFilename = `s3-e2e-import-${uniqueId}.csv`
       const csvPath = path.join(__dirname, 'uploads', csvFilename)
@@ -1106,6 +1120,7 @@ test.describe('Import Export Plugin', () => {
           limit: 1,
           sort: '-createdAt',
           where: {},
+          overrideAccess: true,
         })
         expect(docs[0]?.status).toBe('completed')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -1115,6 +1130,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'S3 E2E Import' },
         },
+        overrideAccess: true,
       })
 
       expect(posts.totalDocs).toBeGreaterThanOrEqual(3)
@@ -1124,10 +1140,12 @@ test.describe('Import Export Plugin', () => {
       await payload.create({
         collection: postsWithS3Slug,
         data: { title: 'S3 E2E Export 1' },
+        overrideAccess: true,
       })
       await payload.create({
         collection: postsWithS3Slug,
         data: { title: 'S3 E2E Export 2' },
+        overrideAccess: true,
       })
 
       await page.goto(s3ExportsURL.create)
@@ -1242,7 +1260,7 @@ test.describe('Import Export Plugin', () => {
     test.beforeAll(async () => {
       pagesURL = new AdminUrlUtil(serverURL, 'pages')
 
-      const users = await payload.find({ collection: 'users', limit: 1 })
+      const users = await payload.find({ collection: 'users', limit: 1, overrideAccess: true })
       const userId = users.docs[0]!.id
 
       await payload.create({
@@ -1254,6 +1272,7 @@ test.describe('Import Export Plugin', () => {
           customRelNameEmail: userId,
           title: 'E2E beforeExport Preview Test',
         },
+        overrideAccess: true,
       })
     })
 
@@ -1261,6 +1280,7 @@ test.describe('Import Export Plugin', () => {
       await payload.delete({
         collection: 'pages',
         where: { title: { equals: 'E2E beforeExport Preview Test' } },
+        overrideAccess: true,
       })
     })
 
@@ -1317,6 +1337,7 @@ test.describe('Import Export Plugin', () => {
         await payload.create({
           collection: 'posts-with-limits',
           data: { title: `E2E Limit Test Post ${i}` },
+          overrideAccess: true,
         })
       }
     })
@@ -1328,6 +1349,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Limit Test Post' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -1476,12 +1498,14 @@ test.describe('Import Export Plugin', () => {
       const devUsers = await payload.find({
         collection: 'users',
         where: { email: { equals: 'dev@payloadcms.com' } },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: devUsers.docs[0]!.id,
         collection: 'users',
         data: { limit: 7 },
+        overrideAccess: true,
       })
 
       // Create 10 test documents (more than both limits)
@@ -1489,6 +1513,7 @@ test.describe('Import Export Plugin', () => {
         await payload.create({
           collection: 'posts-with-limits',
           data: { title: `E2E Dynamic Limit Post ${i}` },
+          overrideAccess: true,
         })
       }
     })
@@ -1498,12 +1523,14 @@ test.describe('Import Export Plugin', () => {
       const devUsers = await payload.find({
         collection: 'users',
         where: { email: { equals: 'dev@payloadcms.com' } },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: devUsers.docs[0]!.id,
         collection: 'users',
         data: { limit: null as unknown as number },
+        overrideAccess: true,
       })
 
       // Clean up test documents
@@ -1512,6 +1539,7 @@ test.describe('Import Export Plugin', () => {
         where: {
           title: { contains: 'E2E Dynamic Limit Post' },
         },
+        overrideAccess: true,
       })
     })
 
@@ -1666,13 +1694,13 @@ test.describe('Import Export Plugin', () => {
         await payload.delete({
           collection: postsWithColumnMapSlug,
           where: { title: { equals: title } },
+          overrideAccess: true,
         })
       }
       createdTitles.length = 0
     })
 
     test('should import a CSV with foreign column headers through the admin UI', async () => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       const csvContent =
         '"Post Title","Summary","View Count"\n' +
         '"E2E Foreign A","e2e summary a","11"\n' +
@@ -1701,6 +1729,7 @@ test.describe('Import Export Plugin', () => {
         const { docs } = await payload.find({
           collection: postsWithColumnMapSlug,
           where: { title: { in: ['E2E Foreign A', 'E2E Foreign B'] } },
+          overrideAccess: true,
         })
         expect(docs).toHaveLength(2)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -1709,6 +1738,7 @@ test.describe('Import Export Plugin', () => {
         collection: postsWithColumnMapSlug,
         sort: 'title',
         where: { title: { in: ['E2E Foreign A', 'E2E Foreign B'] } },
+        overrideAccess: true,
       })
 
       expect(imported.docs[0]!.title).toBe('E2E Foreign A')
@@ -1722,6 +1752,7 @@ test.describe('Import Export Plugin', () => {
       await payload.create({
         collection: postsWithColumnMapSlug,
         data: { count: 99, excerpt: 'exported summary', title: 'E2E Export Rename' },
+        overrideAccess: true,
       })
       createdTitles.push('E2E Export Rename')
 
@@ -1742,12 +1773,16 @@ test.describe('Import Export Plugin', () => {
         collection: 'posts-with-column-map-export',
         limit: 1,
         sort: '-createdAt',
+        overrideAccess: true,
       })
 
       expect(exports.docs).toHaveLength(1)
       const exportDoc = exports.docs[0]! as unknown as { filename: string; id: number | string }
-      const csvPath = path.join(__dirname, 'uploads', exportDoc.filename)
-      const rows = await readCSV(csvPath)
+      const response = await page.request.get(
+        `${serverURL}/api/posts-with-column-map-export/file/${encodeURIComponent(exportDoc.filename)}`,
+      )
+      expect(response.ok()).toBe(true)
+      const rows = await readCSV(await response.body())
 
       const matching = rows.find((row) => row['Post Title'] === 'E2E Export Rename')
       expect(matching).toBeDefined()
@@ -1758,6 +1793,7 @@ test.describe('Import Export Plugin', () => {
       await payload.delete({
         id: exportDoc.id,
         collection: 'posts-with-column-map-export',
+        overrideAccess: true,
       })
     })
   })
@@ -1771,6 +1807,7 @@ test.describe('Import Export Plugin', () => {
         const doc = await payload.create({
           collection: postsWithHooksSlug,
           data: { count: i, secret: `secret-${i}`, title: `Hook Preview Post ${i}` },
+          overrideAccess: true,
         })
         createdPostIds.push(doc.id)
       }
@@ -1778,7 +1815,9 @@ test.describe('Import Export Plugin', () => {
 
     test.afterAll(async () => {
       for (const id of createdPostIds) {
-        await payload.delete({ id, collection: postsWithHooksSlug }).catch(() => null)
+        await payload
+          .delete({ id, collection: postsWithHooksSlug, overrideAccess: true })
+          .catch(() => null)
       }
     })
 
@@ -1888,6 +1927,112 @@ test.describe('Import Export Plugin', () => {
 
       // import.hooks.before appends '_imported' to the title
       expect(body.docs[0].title).toBe('Hook Preview Import JSON_imported')
+    })
+  })
+
+  // Drive the browser to verify that preview components forward custom fields.
+  test.describe('Hooks — custom fields on the preview forms', () => {
+    const createdPostIDs: (number | string)[] = []
+    const tempFiles: string[] = []
+
+    test.beforeAll(async () => {
+      const doc = await payload.create({
+        collection: postsWithHooksSlug,
+        data: { count: 1, secret: 'custom-field-secret', title: 'Custom Field Preview Post' },
+      })
+
+      createdPostIDs.push(doc.id)
+    })
+
+    test.afterAll(async () => {
+      for (const filePath of tempFiles) {
+        fs.rmSync(filePath, { force: true })
+      }
+      tempFiles.length = 0
+
+      for (const id of createdPostIDs) {
+        await payload.delete({ id, collection: postsWithHooksSlug })
+      }
+      createdPostIDs.length = 0
+    })
+
+    test('should send a custom export field to the preview endpoint for the before hook to read', async () => {
+      await page.goto(postsWithHooksURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      const previewTable = page.locator('.export-preview table')
+
+      await expect(async () => {
+        await expect(previewTable).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const batchRefHeader = previewTable.locator('thead th').filter({ hasText: batchRefFieldName })
+
+      await expect(batchRefHeader).toHaveCount(0)
+
+      await page.locator(`#field-${batchRefFieldName}`).fill('E2E-EXPORT-REF')
+
+      await expect(async () => {
+        await expect(batchRefHeader).toHaveCount(1)
+        await expect(previewTable).toContainText('E2E-EXPORT-REF')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should send a custom import field to the preview endpoint for the before hook to read', async () => {
+      const csvContent = 'title,count\n"Custom Field Preview Import","1"'
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-import-doc-custom-field.csv')
+
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+
+      await page.goto(postsWithHooksURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createImportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Import',
+      })
+      await expect(createImportButton).toBeVisible()
+      await createImportButton.click()
+
+      // See the note on the update-mode import test: setInputFiles fires a one-shot native
+      // change event, so retry until the upload field's React onChange is hydrated.
+      await expect(async () => {
+        await page.setInputFiles('input[type="file"]', csvPath)
+        await expect(page.locator('#field-filemanager-filename')).toHaveValue(
+          'e2e-import-doc-custom-field.csv',
+          { timeout: 2000 },
+        )
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const previewTable = page.locator('.import-preview table')
+
+      await expect(async () => {
+        await expect(previewTable).toContainText('Custom Field Preview Import_imported')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      await page.locator(`#field-${batchRefFieldName}`).fill('E2E-IMPORT-REF')
+
+      // import.hooks.before appends the reference it reads from importDoc to every title
+      await expect(async () => {
+        await expect(previewTable).toContainText(
+          'Custom Field Preview Import_imported_E2E-IMPORT-REF',
+        )
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
 })

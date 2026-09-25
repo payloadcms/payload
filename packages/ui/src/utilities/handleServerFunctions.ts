@@ -60,7 +60,7 @@ export const createServerFunctionHandler = ({
       serverFunctions: extraServerFunctions,
     } = args
 
-    const { cookies, locale, permissions, req } = await initReq({ configPromise, importMap })
+    const { cookies, locale, permissions, req, user } = await initReq({ configPromise, importMap })
 
     const augmentedArgs: DefaultServerFunctionArgs = {
       ...fnArgs,
@@ -69,6 +69,7 @@ export const createServerFunctionHandler = ({
       locale,
       permissions,
       req,
+      user,
     }
 
     const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]

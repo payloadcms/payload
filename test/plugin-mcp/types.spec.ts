@@ -39,9 +39,9 @@ describe('defineCollectionTool input inference', () => {
       annotations: { destructiveHint: false },
       description: 'x',
       input: z.object({ id: z.string() }),
-    }).handler(({ input, collectionSlug }) => {
+    }).handler(({ input, slug }) => {
       expect(input).type.toBe<IdSchemaInput>()
-      expect(collectionSlug).type.toBe<CollectionSlug>()
+      expect(slug).type.toBe<CollectionSlug>()
       return { content: [] }
     })
   })
@@ -62,9 +62,9 @@ describe('defineGlobalTool input inference', () => {
       annotations: { idempotentHint: true },
       description: 'x',
       input: z.object({ id: z.string() }),
-    }).handler(({ input, globalSlug }) => {
+    }).handler(({ input, slug }) => {
       expect(input).type.toBe<IdSchemaInput>()
-      expect(globalSlug).type.toBe<GlobalSlug>()
+      expect(slug).type.toBe<GlobalSlug>()
       return { content: [] }
     })
   })

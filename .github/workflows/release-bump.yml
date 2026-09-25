@@ -38,6 +38,9 @@ jobs:
     name: release-bump
     if: github.repository_owner == 'payloadcms'
     runs-on: ubuntu-24.04
+    # Scopes the App credentials to this environment, whose branch policy
+    # limits them to workflows running on main.
+    environment: bump
     permissions:
       contents: read
     steps:
@@ -55,13 +58,16 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.RELEASE_APP_ID }}
+          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v5
         with:
           ref: main
+          # Full history is required so the rebase-retry loop can rebase onto a
+          # moved main; blob:none keeps that graph without historical file contents.
           fetch-depth: 0
+          filter: blob:none
           token: ${{ steps.app-token.outputs.token }}
       - name: Setup
         uses: ./.github/actions/setup

@@ -1,5 +1,6 @@
 import type { AuthCollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
+import type { SharedLocalAPIOptions } from '../../../types/operations.js'
 import type { Result } from '../forgotPassword.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -14,9 +15,8 @@ export type Options<TSlug extends AuthCollectionSlug> = {
   }
   disableEmail?: boolean
   expiration?: number
-  overrideAccess?: boolean
   req?: Partial<PayloadRequest>
-}
+} & Pick<SharedLocalAPIOptions, 'overrideAccess'>
 
 export async function forgotPasswordLocal<T extends AuthCollectionSlug>(
   payload: Payload,
@@ -27,7 +27,7 @@ export async function forgotPasswordLocal<T extends AuthCollectionSlug>(
     data,
     disableEmail,
     expiration,
-    overrideAccess = true,
+    overrideAccess = false,
   } = options
 
   const collection = payload.collections[collectionSlug]

@@ -49,6 +49,8 @@
     "./*.tsx",
     "./__helpers/**/*.ts",
     "./__helpers/**/*.tsx",
+    "./__setup/**/*.ts",
+    "./__setup/**/*.tsx",
     "./app/**/*.ts",
     "./app/**/*.tsx",
     "./evals/**/*.ts",

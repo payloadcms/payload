@@ -29,13 +29,16 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.RELEASE_APP_ID }}
+          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - name: Checkout tag
         uses: actions/checkout@v5
         with:
           ref: ${{ github.ref }}
+          # Full history and tags are required to resolve the changelog base tag;
+          # blob:none keeps that graph without historical file contents.
           fetch-depth: 0
+          filter: blob:none
           token: ${{ steps.app-token.outputs.token }}
       - name: Setup
         uses: ./.github/actions/setup

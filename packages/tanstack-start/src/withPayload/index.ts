@@ -15,6 +15,7 @@ import {
 } from './config/external.js'
 import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from './config/optimizeDeps.js'
 import { payloadScssImporters } from './config/scss.js'
+import { payloadDevConfigReload } from './devConfigReload.js'
 import {
   defaultImportProtectionIgnoreImporters,
   onImportProtectionViolation,
@@ -31,8 +32,18 @@ import { wrapCjsForClient } from './workarounds/wrapCjsForClient.js'
  * Vite dependency warnings Payload consumers can't act on: third-party packages
  * ship sourcemaps whose original sources aren't published, so Vite warns on
  * every one. Suppressed by default (see `silenceDependencyWarnings`).
+ *
+ * `Failed to load source map` covers deps that ship a `sourceMappingURL` comment
+ * without the `.map` file it points at (e.g. `undici`'s `lib/llhttp/*.js`, pulled
+ * in via `@vercel/blob`). Vite appends the underlying `ENOENT` stack to that one,
+ * so each occurrence is a ~10-line block that buries real log output.
  */
-const suppressibleWarningPatterns = ['points to missing source files', 'Sourcemap for']
+const suppressibleWarningPatterns = [
+  'points to missing source files',
+  'Sourcemap for',
+  'Failed to load source map',
+  'references a map file outside its package',
+]
 
 /**
  * Wraps a Vite logger so warnings matching {@link suppressibleWarningPatterns}
@@ -73,6 +84,12 @@ export type WithPayloadOptions = {
   adminRouteId?: string
   /** Extra globs exempted from the `.client.*` SSR denial (beyond the default node_modules exemption). */
   clientDenialExcludeFiles?: string[]
+  /**
+   * Packages added to `ssr.external` on dev serve only (the build bundles them).
+   * List CommonJS deps that 500 with `__cjs_module_runner_transform` — the RSC
+   * plugin's CJS-to-ESM rewrite breaks on their circular `require`s.
+   */
+  devServerExternalPackages?: string[]
   /** Path to the user's `payload.config.ts` (required) */
   payloadConfigPath: string
   /** TanStack router routes directory relative to `srcDirectory`. Defaults to `'app'` */
@@ -85,8 +102,14 @@ export type WithPayloadOptions = {
   vite?: UserConfig
 }
 
+/** The `nitro()` options Payload's server build requires. Typed structurally — `nitro` is the host's dependency, not Payload's. */
+export type PayloadNitroOptions = {
+  traceDeps: string[]
+}
+
 /** The options Payload's admin requires for each third-party plugin. */
 export type PayloadPluginOptions = {
+  nitro: PayloadNitroOptions
   react: NonNullable<Parameters<typeof viteReact>[0]>
   rsc: NonNullable<Parameters<typeof rsc>[0]>
   tanstackStart: NonNullable<Parameters<typeof tanstackStart>[0]>
@@ -126,6 +149,7 @@ export type WithPayloadBuilder = (context: WithPayloadBuilderContext) => UserCon
  *       rsc(pluginOptions.rsc),
  *       tanstackStart(pluginOptions.tanstackStart),
  *       viteReact(pluginOptions.react),
+ *       nitro(pluginOptions.nitro), // only if the app deploys through Nitro
  *     ],
  *     // ...other config options
  *   }),
@@ -141,6 +165,7 @@ export function withPayload(
     additionalIgnoreImporters = [],
     adminRouteId,
     clientDenialExcludeFiles = [],
+    devServerExternalPackages = [],
     payloadConfigPath,
     routesDirectory = 'app',
     silenceDependencyWarnings = true,
@@ -166,7 +191,12 @@ export function withPayload(
     // externalizes the package boundaries (`buildExternalPackages`) and drops
     // `pluralize` so it bundles — leaving it in `ssr.external` here would win over
     // `noExternal` and re-emit the bare specifier.
-    const ssrExternal = isBuild ? buildExternalPackages : ssrExternalPackages
+    // Dev serve also honors `devServerExternalPackages`, the app's own CJS
+    // dependencies that break under the RSC plugin's CJS-to-ESM rewrite; the build
+    // needs none of it, since Rollup bundles CJS correctly.
+    const ssrExternal = isBuild
+      ? buildExternalPackages
+      : [...ssrExternalPackages, ...devServerExternalPackages]
 
     const base: UserConfig = {
       build: {
@@ -207,6 +237,7 @@ export function withPayload(
         reactDomServerInRsc(),
         stubPrettierInClient(),
         payloadDevTransforms(),
+        payloadDevConfigReload({ payloadConfigPath }),
       ],
       resolve: {
         alias: [{ find: '@payload-config', replacement: path.resolve(payloadConfigPath) }],
@@ -227,6 +258,7 @@ export function withPayload(
     }
 
     const pluginOptions: PayloadPluginOptions = {
+      nitro: payloadNitroOptions(),
       react: payloadReactOptions(),
       rsc: payloadRscOptions(),
       tanstackStart: payloadTanstackStartOptions({
@@ -261,6 +293,16 @@ export function withPayload(
 /** `@vitejs/plugin-rsc` options for Payload: `serverHandler: false` (TanStack owns the handler). */
 export function payloadRscOptions(): NonNullable<Parameters<typeof rsc>[0]> {
   return { serverHandler: false }
+}
+
+/**
+ * `nitro/vite` options for Payload's server build. `tslib*` full-traces `tslib`
+ * so an externalized dep's `tslib/modules/index.js` import (its `import.node`
+ * export condition) ships — otherwise the build is green and the server 500s
+ * with `ERR_MODULE_NOT_FOUND` on the first request.
+ */
+export function payloadNitroOptions(): PayloadNitroOptions {
+  return { traceDeps: ['tslib*'] }
 }
 
 /** `@vitejs/plugin-react` options for Payload: transform every `.[jt]sx?` file. */
@@ -330,7 +372,7 @@ export function payloadTanstackStartOptions(
       },
       // Ignore generated importMap files and colocated `*.functions.ts` modules
       // (they define `createServerFn`s, not routes).
-      routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$|\\.functions\\.',
+      routeFileIgnorePattern: 'importMap\\.(?:d\\.ts|js|server\\.ts)$|\\.functions\\.',
       routesDirectory,
     } as any,
     rsc: { enabled: true },

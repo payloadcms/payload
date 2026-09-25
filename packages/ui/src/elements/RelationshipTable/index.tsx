@@ -319,11 +319,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     allowCreate !== false &&
     permissions?.collections?.[isPolymorphic ? relationTo[0] : relationTo]?.create
 
-  useEffect(() => {
+  const openSelectedCollectionDrawer = useEffectEvent(() => {
     if (isPolymorphic && selectedCollection) {
       openDrawer()
     }
-  }, [selectedCollection, openDrawer, isPolymorphic])
+  })
+
+  useEffect(() => {
+    openSelectedCollectionDrawer()
+  }, [selectedCollection, isPolymorphic])
 
   useEffect(() => {
     if (isPolymorphic && !isDrawerOpen && selectedCollection) {
