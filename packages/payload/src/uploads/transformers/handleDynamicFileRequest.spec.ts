@@ -130,6 +130,98 @@ describe('handleDynamicFileRequest', () => {
     expect(finalizeFileResponse).not.toHaveBeenCalled()
   })
 
+  it('should serve the access-checked document when the unfiltered lookup matched another document with the same filename', async () => {
+    const otherTenantDocument = { ...document, id: '2', prefix: 'bob' }
+    const authorizedDocument = { ...document, id: '1', prefix: 'alice' }
+    vi.mocked(resolveUploadDocument).mockResolvedValue(otherTenantDocument)
+    vi.mocked(checkFileAccess).mockResolvedValue(authorizedDocument)
+    vi.mocked(planTransformerPipeline).mockResolvedValue([])
+
+    await handleDynamicFileRequest({
+      collection: makeCollection(),
+      filename: 'logo.png',
+      req: makeReq(),
+    })
+
+    expect(retrieveFileResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ doc: authorizedDocument }),
+    )
+  })
+
+  it('should retrieve the transform source from the access-checked document', async () => {
+    const otherTenantDocument = { ...document, id: '2', prefix: 'bob' }
+    const authorizedDocument = { ...document, id: '1', prefix: 'alice' }
+    const transformer = makeTransformer({
+      handleRequest: vi.fn().mockImplementation(async ({ getSourceFile }) => ({
+        response: await getSourceFile(),
+        status: 'complete',
+      })),
+    })
+    vi.mocked(resolveUploadDocument).mockResolvedValue(otherTenantDocument)
+    vi.mocked(checkFileAccess).mockResolvedValue(authorizedDocument)
+    vi.mocked(planTransformerPipeline).mockResolvedValue([transformer])
+
+    await handleDynamicFileRequest({
+      collection: makeCollection(),
+      filename: 'logo.png',
+      req: makeReq(),
+    })
+
+    expect(getSourceFileResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ document: authorizedDocument }),
+    )
+    expect(transformer.handleRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ documentID: authorizedDocument.id }),
+    )
+  })
+
+  it('should re-plan from the access-checked document and re-check transform access when it becomes transformable', async () => {
+    const otherTenantDocument = { ...document, id: '2', mimeType: 'application/pdf' }
+    const authorizedDocument = { ...document, id: '1', mimeType: 'image/png' }
+    const transformer = makeTransformer()
+    vi.mocked(resolveUploadDocument).mockResolvedValue(otherTenantDocument)
+    vi.mocked(checkFileAccess).mockResolvedValue(authorizedDocument)
+    vi.mocked(planTransformerPipeline)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([transformer])
+
+    await handleDynamicFileRequest({
+      collection: makeCollection(),
+      filename: 'logo.png',
+      req: makeReq(),
+    })
+
+    expect(planTransformerPipeline).toHaveBeenLastCalledWith(
+      expect.objectContaining({ args: expect.objectContaining({ mimeType: 'image/png' }) }),
+    )
+    expect(
+      vi.mocked(withFileTransformAccessContext).mock.calls.map(([args]) => args.isTransform),
+    ).toEqual([false, true])
+    expect(transformer.handleRequest).toHaveBeenCalled()
+  })
+
+  it('should throw Forbidden when the transform-aware re-check authorizes a different document', async () => {
+    const otherTenantDocument = { ...document, id: '2', mimeType: 'application/pdf' }
+    const authorizedDocument = { ...document, id: '1', mimeType: 'image/png' }
+    vi.mocked(resolveUploadDocument).mockResolvedValue(otherTenantDocument)
+    vi.mocked(checkFileAccess)
+      .mockResolvedValueOnce(authorizedDocument)
+      .mockResolvedValueOnce(otherTenantDocument)
+    vi.mocked(planTransformerPipeline)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([makeTransformer()])
+
+    await expect(
+      handleDynamicFileRequest({
+        collection: makeCollection(),
+        filename: 'logo.png',
+        req: makeReq(),
+      }),
+    ).rejects.toMatchObject({ status: 403 })
+
+    expect(getSourceFileResponse).not.toHaveBeenCalled()
+  })
+
   it('should plan and run the pipeline with the requested image size filename and mimeType', async () => {
     const transformer = makeTransformer()
     vi.mocked(resolveUploadDocument).mockResolvedValue({
