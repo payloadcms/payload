@@ -18,6 +18,7 @@ export type ThumbnailProps = {
   fileSrc?: string
   height?: number
   imageCacheTag?: string
+  loading?: 'eager' | 'lazy'
   size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
   uploadConfig?: SanitizedCollectionConfig['upload']
   width?: number
@@ -30,6 +31,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     fileSrc,
     height,
     imageCacheTag,
+    loading,
     size,
     width,
   } = props
@@ -62,7 +64,9 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && <img alt={filename as string} height={height} src={src} width={width} />}
+      {fileExists && (
+        <img alt={filename as string} height={height} loading={loading} src={src} width={width} />
+      )}
       {fileExists === false && <File />}
     </div>
   )
