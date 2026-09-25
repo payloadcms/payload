@@ -64,18 +64,22 @@ export const getArchivedFilename = ({
 }
 
 export const assertStorageDestinationAvailable = ({
-  backend,
   destination,
   occupied,
+  storageBackendId,
 }: {
-  backend: string
   destination: string
   occupied: ManagedFileIdentity[]
+  storageBackendId: string
 }): void => {
   const key = normalizeStorageKey({ key: destination })
 
-  if (occupied.some((file) => file.backend === backend && normalizeStorageKey(file) === key)) {
-    throw new Error(`Managed storage destination is already occupied: ${backend}:${key}`)
+  if (
+    occupied.some(
+      (file) => file.storageBackendId === storageBackendId && normalizeStorageKey(file) === key,
+    )
+  ) {
+    throw new Error(`Managed storage destination is already occupied: ${storageBackendId}:${key}`)
   }
 }
 

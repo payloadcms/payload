@@ -7,12 +7,12 @@ import type {
 
 import { normalizeStorageKey } from './naming.js'
 
-export const getManagedFileIdentity = ({ backend, key }: ManagedFileIdentity): string => {
-  if (!backend || backend.trim() !== backend) {
-    throw new Error('A managed file requires a configured storage backend identity')
+export const getManagedFileIdentity = ({ key, storageBackendId }: ManagedFileIdentity): string => {
+  if (!storageBackendId || storageBackendId.trim() !== storageBackendId) {
+    throw new Error('A managed file requires a configured storage backend ID')
   }
 
-  return JSON.stringify([backend, normalizeStorageKey({ key })])
+  return JSON.stringify([storageBackendId, normalizeStorageKey({ key })])
 }
 
 export const createManagedFileManifest = ({
@@ -23,15 +23,15 @@ export const createManagedFileManifest = ({
   const files: ManagedFileManifest = []
   const fileByIdentity = new Map<string, ManagedFileManifest[number]>()
 
-  for (const { backend, key, role } of references) {
+  for (const { key, role, storageBackendId } of references) {
     validateRole({ role })
 
     const normalizedKey = normalizeStorageKey({ key })
-    const identity = getManagedFileIdentity({ backend, key: normalizedKey })
+    const identity = getManagedFileIdentity({ key: normalizedKey, storageBackendId })
     let file = fileByIdentity.get(identity)
 
     if (!file) {
-      file = { backend, key: normalizedKey, roles: [] }
+      file = { key: normalizedKey, roles: [], storageBackendId }
       fileByIdentity.set(identity, file)
       files.push(file)
     }
@@ -45,11 +45,11 @@ export const createManagedFileManifest = ({
 }
 
 export const hasManagedFile = ({
-  backend,
   key,
   manifest,
+  storageBackendId,
 }: { manifest: ManagedFileManifest } & ManagedFileIdentity): boolean => {
-  const identity = getManagedFileIdentity({ backend, key })
+  const identity = getManagedFileIdentity({ key, storageBackendId })
 
   return manifest.some((file) => getManagedFileIdentity(file) === identity)
 }

@@ -48,22 +48,22 @@ describe('file version naming', () => {
     },
   )
 
-  it('should reject a destination collision in the same backend', () => {
+  it('should reject a destination collision in the same storage location', () => {
     expect(() =>
       assertStorageDestinationAvailable({
-        backend: 's3:media',
+        storageBackendId: 's3:media',
         destination: 'media/photo.jpg',
-        occupied: [{ backend: 's3:media', key: 'media//photo.jpg' }],
+        occupied: [{ storageBackendId: 's3:media', key: 'media//photo.jpg' }],
       }),
     ).toThrow()
   })
 
-  it('should permit the same key in another backend', () => {
+  it('should permit the same key in another storage location', () => {
     expect(() =>
       assertStorageDestinationAvailable({
-        backend: 's3:public',
+        storageBackendId: 's3:public',
         destination: 'media/photo.jpg',
-        occupied: [{ backend: 's3:private', key: 'media/photo.jpg' }],
+        occupied: [{ storageBackendId: 's3:private', key: 'media/photo.jpg' }],
       }),
     ).not.toThrow()
   })

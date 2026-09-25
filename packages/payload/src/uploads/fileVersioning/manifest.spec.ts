@@ -6,14 +6,22 @@ describe('createManagedFileManifest', () => {
   it('should keep original and default roles on one physical object', () => {
     const manifest = createManagedFileManifest({
       references: [
-        { backend: 'local:media', key: 'media/photo-original.jpg', role: { type: 'original' } },
-        { backend: 'local:media', key: 'media/photo-original.jpg', role: { type: 'default' } },
+        {
+          storageBackendId: 'local:media',
+          key: 'media/photo-original.jpg',
+          role: { type: 'original' },
+        },
+        {
+          storageBackendId: 'local:media',
+          key: 'media/photo-original.jpg',
+          role: { type: 'default' },
+        },
       ],
     })
 
     expect(manifest).toEqual([
       {
-        backend: 'local:media',
+        storageBackendId: 'local:media',
         key: 'media/photo-original.jpg',
         roles: [{ type: 'original' }, { type: 'default' }],
       },
@@ -23,8 +31,8 @@ describe('createManagedFileManifest', () => {
   it('should retain a separate managed thumbnail', () => {
     const manifest = createManagedFileManifest({
       references: [
-        { backend: 's3:media', key: 'media/photo.jpg', role: { type: 'default' } },
-        { backend: 's3:media', key: 'media/photo-thumb.jpg', role: { type: 'thumbnail' } },
+        { storageBackendId: 's3:media', key: 'media/photo.jpg', role: { type: 'default' } },
+        { storageBackendId: 's3:media', key: 'media/photo-thumb.jpg', role: { type: 'thumbnail' } },
       ],
     })
 
@@ -32,35 +40,45 @@ describe('createManagedFileManifest', () => {
     expect(manifest[1]?.roles).toEqual([{ type: 'thumbnail' }])
   })
 
-  it('should distinguish identical keys in different configured backends', () => {
+  it('should distinguish identical keys in different configured storage locations', () => {
     const manifest = createManagedFileManifest({
       references: [
-        { backend: 's3:private', key: 'photo.jpg', role: { type: 'original' } },
-        { backend: 's3:public', key: 'photo.jpg', role: { type: 'original' } },
+        { storageBackendId: 's3:private', key: 'photo.jpg', role: { type: 'original' } },
+        { storageBackendId: 's3:public', key: 'photo.jpg', role: { type: 'original' } },
       ],
     })
 
     expect(manifest).toHaveLength(2)
-    expect(hasManagedFile({ manifest, backend: 's3:private', key: 'photo.jpg' })).toBe(true)
-    expect(hasManagedFile({ manifest, backend: 's3:other', key: 'photo.jpg' })).toBe(false)
+    expect(hasManagedFile({ manifest, storageBackendId: 's3:private', key: 'photo.jpg' })).toBe(
+      true,
+    )
+    expect(hasManagedFile({ manifest, storageBackendId: 's3:other', key: 'photo.jpg' })).toBe(false)
   })
 
   it('should preserve saved size keys even when the collection configuration changes', () => {
     const manifest = createManagedFileManifest({
       references: [
-        { backend: 'local:media', key: 'photo-card.jpg', role: { type: 'size', sizeKey: 'card' } },
         {
-          backend: 'local:media',
+          storageBackendId: 'local:media',
+          key: 'photo-card.jpg',
+          role: { type: 'size', sizeKey: 'card' },
+        },
+        {
+          storageBackendId: 'local:media',
           key: 'photo-card.jpg',
           role: { type: 'size', sizeKey: 'legacy' },
         },
-        { backend: 'local:media', key: 'photo-card.jpg', role: { type: 'size', sizeKey: 'card' } },
+        {
+          storageBackendId: 'local:media',
+          key: 'photo-card.jpg',
+          role: { type: 'size', sizeKey: 'card' },
+        },
       ],
     })
 
     expect(manifest).toEqual([
       {
-        backend: 'local:media',
+        storageBackendId: 'local:media',
         key: 'photo-card.jpg',
         roles: [
           { type: 'size', sizeKey: 'card' },
@@ -73,14 +91,14 @@ describe('createManagedFileManifest', () => {
   it('should normalize complete keys without using display URLs as ownership', () => {
     const manifest = createManagedFileManifest({
       references: [
-        { backend: 's3:media', key: 'media//2026/photo.jpg', role: { type: 'original' } },
-        { backend: 's3:media', key: 'media/2026/photo.jpg', role: { type: 'default' } },
+        { storageBackendId: 's3:media', key: 'media//2026/photo.jpg', role: { type: 'original' } },
+        { storageBackendId: 's3:media', key: 'media/2026/photo.jpg', role: { type: 'default' } },
       ],
     })
 
     expect(manifest).toEqual([
       {
-        backend: 's3:media',
+        storageBackendId: 's3:media',
         key: 'media/2026/photo.jpg',
         roles: [{ type: 'original' }, { type: 'default' }],
       },
@@ -92,7 +110,7 @@ describe('createManagedFileManifest', () => {
     (key) => {
       expect(() =>
         createManagedFileManifest({
-          references: [{ backend: 'local:media', key, role: { type: 'original' } }],
+          references: [{ storageBackendId: 'local:media', key, role: { type: 'original' } }],
         }),
       ).toThrow()
     },
