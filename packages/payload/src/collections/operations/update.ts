@@ -22,6 +22,13 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
+import {
+  abortFileOperationScope,
+  beginFileOperationScope,
+  completeFileOperationScope,
+  runFileOperationPlan,
+  stageLocalUploadFiles,
+} from '../../uploads/fileVersioning/fileOperationManager.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
   getLocalizedUploadProperties,
@@ -88,9 +95,14 @@ export const updateOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+  const hasFileOperationScope = Boolean(args.collection.config.upload)
 
   if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
+  }
+
+  if (hasFileOperationScope) {
+    beginFileOperationScope({ req: args.req })
   }
 
   try {
@@ -309,18 +321,17 @@ export const updateOperation = async <
       docs = query.docs
     }
 
-    const sharedGeneratedFileData =
-      !collectionConfig.upload || (overrideAccess && Boolean(req.file))
-        ? await generateFileData({
-            collection,
-            config,
-            data: bulkUpdateData,
-            operation: 'update',
-            overwriteExistingFiles,
-            req,
-            throwOnMissingFile: false,
-          })
-        : null
+    const sharedGeneratedFileData = !collectionConfig.upload
+      ? await generateFileData({
+          collection,
+          config,
+          data: bulkUpdateData,
+          operation: 'update',
+          overwriteExistingFiles,
+          req,
+          throwOnMissingFile: false,
+        })
+      : null
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
@@ -336,7 +347,7 @@ export const updateOperation = async <
         }
 
         const documentFile = req.file ? { ...req.file } : undefined
-        if (collectionConfig.upload && !overrideAccess && documentFile?.tempFilePath) {
+        if (collectionConfig.upload && documentFile?.tempFilePath) {
           const extension = path.extname(documentFile.tempFilePath)
           documentTempFilePath = path.join(
             path.dirname(documentFile.tempFilePath),
@@ -386,17 +397,18 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
-        let updatedDoc = await updateDocument({
+        const documentData = copyDataWithFreshRowIDs({
+          config,
+          data: generatedFileData.data,
+          existingDoc: docWithLocales,
+          fields: collectionConfig.fields,
+        })
+        const updateArgs = {
           id,
           autosave,
           collectionConfig,
           config,
-          data: copyDataWithFreshRowIDs({
-            config,
-            data: generatedFileData.data,
-            existingDoc: docWithLocales,
-            fields: collectionConfig.fields,
-          }),
+          data: documentData,
           depth: depth!,
           docWithLocales,
           draftArg,
@@ -412,7 +424,26 @@ export const updateOperation = async <
           select: select!,
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
-        })
+        } as const
+        const hasManagedLocalUpload =
+          !collectionConfig.upload.disableLocalStorage &&
+          generatedFileData.files.length > 0 &&
+          Array.isArray((generatedFileData.data as Record<string, unknown>)._managedFiles)
+        let updatedDoc = hasManagedLocalUpload
+          ? await runFileOperationPlan({
+              id,
+              collection: collectionConfig.slug,
+              req,
+              stage: ({ trackStagedObject }) =>
+                stageLocalUploadFiles({
+                  files: generatedFileData.files,
+                  staticDir: collectionConfig.upload.staticDir!,
+                  storageBackendId: `local:${collectionConfig.slug}`,
+                  trackStagedObject,
+                }),
+              write: () => updateDocument(updateArgs),
+            })
+          : await updateDocument(updateArgs)
 
         // /////////////////////////////////////
         // Add collection property for auth collections
@@ -453,8 +484,7 @@ export const updateOperation = async <
     // (`req.file`); metadata-only bulk updates use isolated per-document request state and can
     // stay parallel. Other bulk updates retain their existing parallel behavior.
     const processSequentially =
-      req.payload.db.bulkOperationsSingleTransaction ||
-      Boolean(collectionConfig.upload && !overrideAccess && req.file)
+      req.payload.db.bulkOperationsSingleTransaction || Boolean(collectionConfig.upload && req.file)
     let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
     if (processSequentially) {
       awaitedDocs = []
@@ -495,6 +525,10 @@ export const updateOperation = async <
       await commitTransaction(req)
     }
 
+    if (hasFileOperationScope) {
+      await completeFileOperationScope({ req })
+    }
+
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return result
   } catch (error: unknown) {
@@ -506,6 +540,9 @@ export const updateOperation = async <
       args.req.payload.logger.error({ err: unlinkError, msg: 'Failed to remove temp file' })
     })
     await killTransaction(args.req)
+    if (hasFileOperationScope) {
+      abortFileOperationScope({ req: args.req })
+    }
     throw error
   }
 }

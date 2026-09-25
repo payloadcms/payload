@@ -189,7 +189,12 @@ export const updateDocument = async <
   // draft, it is safe to delete the old draft file as it is being replaced.
   const isDraftOverPublished = isSavingDraft && docWithLocales._status === 'published'
 
-  if (!isDraftOverPublished) {
+  const hasManagedLocalUpload =
+    filesToUpload.length > 0 &&
+    Array.isArray(data._managedFiles) &&
+    !collectionConfig.upload.disableLocalStorage
+
+  if (!isDraftOverPublished && !hasManagedLocalUpload) {
     await deleteAssociatedFiles({
       collectionConfig,
       config,
@@ -270,7 +275,7 @@ export const updateDocument = async <
   // Write files to local storage
   // /////////////////////////////////////
 
-  if (!collectionConfig.upload.disableLocalStorage) {
+  if (!collectionConfig.upload.disableLocalStorage && !hasManagedLocalUpload) {
     await uploadFiles(payload, filesToUpload, req)
   }
 

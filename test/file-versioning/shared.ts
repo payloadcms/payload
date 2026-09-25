@@ -8,3 +8,13 @@ export const draftMediaDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   'draft-media',
 )
+export const transformedMediaSlug = 'file-versioned-transformed-media'
+export const transformedMediaDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'transformed-media',
+)
+export const convertedMediaSlug = 'file-versioned-converted-media'
+export const convertedMediaDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'converted-media',
+)

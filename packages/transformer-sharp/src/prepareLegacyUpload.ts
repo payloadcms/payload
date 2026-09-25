@@ -84,17 +84,10 @@ export function createPrepareLegacyUpload({
 
     const results: PreparedUploadTransformation[] = [mainResult]
 
-    // A cropped upload derives its sizes from the crop output, not the original.
-    const isCropped = Boolean(crop && mainResult.width && mainResult.height)
-    const sizeSourceFile = isCropped ? mainResultFile : undefined
-    const sizeSourceDimensions: ProbedImageSize | undefined = isCropped
-      ? { height: mainResult.height!, width: mainResult.width! }
-      : originalDimensions
-
     const focalPointEnabled = collectionUpload.focalPoint !== false
     const imageSizes = collectionUpload.imageSizes
 
-    if (canProcessAsImage && Array.isArray(imageSizes) && sizeSourceDimensions) {
+    if (canProcessAsImage && Array.isArray(imageSizes) && originalDimensions) {
       const focalPoint: FocalPoint | undefined =
         focalPointEnabled && uploadEdits?.focalPoint
           ? {
@@ -108,7 +101,7 @@ export function createPrepareLegacyUpload({
         const fieldPath = `sizes.${imageResizeConfig.name}` as const
 
         const resizeAction = getImageResizeAction({
-          dimensions: sizeSourceDimensions,
+          dimensions: originalDimensions,
           hasFocalPoint: Boolean(focalPoint),
           imageResizeConfig,
         })
@@ -119,13 +112,12 @@ export function createPrepareLegacyUpload({
 
         const sizeResultFile = await transform({
           fieldPath,
-          file: sizeSourceFile,
           options: {
             collectionUpload,
             focalPoint: resizeAction === 'resizeWithFocalPoint' ? focalPoint : undefined,
             imageResizeConfig,
             kind: 'size',
-            originalDimensions: sizeSourceDimensions,
+            originalDimensions,
           } satisfies SharpUploadTaskOptions,
         })
 

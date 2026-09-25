@@ -25,6 +25,8 @@ import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
+  runFileOperationPlan,
+  stageLocalUploadFiles,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
@@ -309,7 +311,7 @@ export const updateByIDOperation = async <
     // Update document, runs all document level hooks
     // ///////////////////////////////////////////////
 
-    let result = await updateDocument<TSlug, TSelect>({
+    const updateArgs = {
       id,
       autosave,
       collectionConfig,
@@ -330,7 +332,28 @@ export const updateByIDOperation = async <
       select: select!,
       showHiddenFields: showHiddenFields!,
       unpublishAllLocales,
-    })
+    } as const
+
+    const hasManagedLocalUpload =
+      !collectionConfig.upload.disableLocalStorage &&
+      filesToUpload.length > 0 &&
+      Array.isArray((newFileData as Record<string, unknown>)._managedFiles)
+
+    let result = hasManagedLocalUpload
+      ? await runFileOperationPlan({
+          id,
+          collection: collectionConfig.slug,
+          req,
+          stage: ({ trackStagedObject }) =>
+            stageLocalUploadFiles({
+              files: filesToUpload,
+              staticDir: collectionConfig.upload.staticDir!,
+              storageBackendId: `local:${collectionConfig.slug}`,
+              trackStagedObject,
+            }),
+          write: () => updateDocument<TSlug, TSelect>(updateArgs),
+        })
+      : await updateDocument<TSlug, TSelect>(updateArgs)
 
     // /////////////////////////////////////
     // Add collection property for auth collections

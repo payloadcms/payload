@@ -31,6 +31,8 @@ import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
+  runFileCreationPlan,
+  stageLocalUploadFiles,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
@@ -448,15 +450,9 @@ export const createOperation = async <
     // Write files to local storage
     // /////////////////////////////////////
 
-    if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, req)
-    }
-
     // /////////////////////////////////////
     // Create
     // /////////////////////////////////////
-
-    let doc
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
@@ -468,25 +464,52 @@ export const createOperation = async <
       }),
     })
 
-    if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
-      if (collectionConfig.auth.verify) {
-        dataWithLocales._verified = Boolean(dataWithLocales._verified) || false
-        dataWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
+    const writeDocument = async () => {
+      if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
+        if (collectionConfig.auth.verify) {
+          dataWithLocales._verified = Boolean(dataWithLocales._verified) || false
+          dataWithLocales._verificationToken = crypto.randomBytes(20).toString('hex')
+        }
+
+        return registerLocalStrategy({
+          collection: collectionConfig,
+          doc: dataWithLocales,
+          password: data.password as string,
+          payload: req.payload,
+          req,
+        })
       }
 
-      doc = await registerLocalStrategy({
-        collection: collectionConfig,
-        doc: dataWithLocales,
-        password: data.password as string,
-        payload: req.payload,
-        req,
-      })
-    } else {
-      doc = await payload.db.create({
+      return payload.db.create({
         collection: collectionConfig.slug,
         data: dataWithLocales,
         req,
       })
+    }
+
+    const hasManagedLocalUpload =
+      !collectionConfig.upload.disableLocalStorage &&
+      filesToUpload.length > 0 &&
+      Array.isArray(dataWithLocales._managedFiles)
+    let doc
+
+    if (hasManagedLocalUpload) {
+      doc = await runFileCreationPlan({
+        req,
+        stage: ({ trackStagedObject }) =>
+          stageLocalUploadFiles({
+            files: filesToUpload,
+            staticDir: collectionConfig.upload.staticDir!,
+            storageBackendId: `local:${collectionConfig.slug}`,
+            trackStagedObject,
+          }),
+        write: writeDocument,
+      })
+    } else {
+      if (!collectionConfig.upload.disableLocalStorage) {
+        await uploadFiles(payload, filesToUpload, req)
+      }
+      doc = await writeDocument()
     }
 
     const verificationToken = doc._verificationToken

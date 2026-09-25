@@ -4,19 +4,23 @@ import fs from 'fs/promises'
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Document, PayloadRequest } from '../types/index.js'
+import type { ManagedFileReference } from './fileVersioning/types.js'
 import type { ExternalUploadSource } from './sanitizeUploadData.js'
 import type { PreparedUploadTransformation } from './transformers/uploadTransformerBridge.js'
 import type { FileData, FileSizes, FileToSave, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import { formatAdminURL } from '../utilities/formatAdminURL.js'
 import { isNumber } from '../utilities/isNumber.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { downloadFileToBuffer } from './downloadFileToBuffer.js'
+import { createManagedFileManifest } from './fileVersioning/manifest.js'
+import { getOriginalFilename } from './fileVersioning/naming.js'
 import { generateImageSizeFilename } from './generateImageSizeFilename.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getFileExtension, getSanitizedUploadFilename } from './getFileTypeIdentity.js'
 import { getImageSize } from './getImageSize.js'
-import { getSafeFileName } from './getSafeFilename.js'
+import { getSafeFileName, incrementName } from './getSafeFilename.js'
 import { hasCropOrResizeEdit } from './hasCropOrResizeEdit.js'
 import { hasFullFileContents } from './hasFullFileContents.js'
 import { isProcessableImage } from './isProcessableImage.js'
@@ -349,7 +353,7 @@ export const generateFileData = async <T>({
 
     let fsSafeName = getSanitizedUploadFilename(file.name, ext)
 
-    if (!overwriteExistingFiles) {
+    if (!overwriteExistingFiles || !disableLocalStorage) {
       // Extract prefix if present (added by plugin-cloud-storage)
       const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
       fsSafeName = await getSafeFileName({
@@ -362,6 +366,49 @@ export const generateFileData = async <T>({
     }
 
     fileData.filename = fsSafeName
+
+    if (!disableLocalStorage) {
+      const originalFilename = fileWasTransformed
+        ? await getSafeFileName({
+            collectionSlug: collectionConfig.slug,
+            desiredFilename: getOriginalFilename({
+              filename: getSanitizedUploadFilename(file.name),
+            }),
+            req,
+            staticPath: staticPath!,
+          })
+        : fsSafeName
+      const original = {
+        filename: originalFilename,
+        filesize: file.size,
+        mimeType: file.mimetype,
+        url: formatAdminURL({
+          apiRoute: req.payload.config.routes.api,
+          path: `/${collectionConfig.slug}/file/${encodeURIComponent(originalFilename)}`,
+          relative: true,
+          serverURL: req.payload.config.serverURL,
+        }),
+      } as NonNullable<FileData['original']>
+
+      if (isProcessableImage(file.mimetype)) {
+        try {
+          const dimensions = await getImageSize({ file })
+          original.width = dimensions.width
+          original.height = dimensions.height
+        } catch {
+          // Files with an image MIME type may not have readable dimensions.
+        }
+      }
+
+      fileData.original = original
+
+      if (fileWasTransformed) {
+        filesToSave.push({
+          buffer: Buffer.from(await originalWebFile!.arrayBuffer()),
+          path: `${staticPath}/${originalFilename}`,
+        })
+      }
+    }
 
     if (mainBuffer) {
       // The stored bytes are no longer the ones the client uploaded, so the client's upload
@@ -429,6 +476,8 @@ export const generateFileData = async <T>({
       req.payloadUploadSizes = {}
       const sizes: FileSizes = {}
       const { name: baseName, ext: baseExt } = parseFilename(fsSafeName)
+      const plannedNames = new Set([fileData.original?.filename, fsSafeName])
+      const plannedSizeBuffers = new Map<string, Buffer>()
 
       for (const result of sizeResults) {
         const sizeName = result.fieldPath.slice('sizes.'.length)
@@ -471,10 +520,34 @@ export const generateFileData = async <T>({
               width: result.width!,
             })
 
-        const imagePath = `${staticPath}/${imageNameWithDimensions}`
+        let imageName = imageNameWithDimensions
+
+        if (!disableLocalStorage) {
+          const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
+
+          while (true) {
+            imageName = await getSafeFileName({
+              collectionSlug: collectionConfig.slug,
+              desiredFilename: imageName,
+              prefix,
+              req,
+              staticPath: staticPath!,
+            })
+            if (plannedSizeBuffers.get(imageName)?.equals(sizeBuffer)) {
+              break
+            }
+            if (!plannedNames.has(imageName)) {
+              break
+            }
+            imageName = incrementName(imageName)
+          }
+          plannedNames.add(imageName)
+        }
+
+        const imagePath = `${staticPath}/${imageName}`
 
         sizes[sizeName] = {
-          filename: imageNameWithDimensions,
+          filename: imageName,
           filesize: sizeBuffer.length,
           height: result.height!,
           mimeType: sizeMimeType,
@@ -482,13 +555,40 @@ export const generateFileData = async <T>({
           width: result.width!,
         }
 
-        filesToSave.push({
-          buffer: sizeBuffer,
-          path: imagePath,
-        })
+        if (!plannedSizeBuffers.has(imageName)) {
+          plannedSizeBuffers.set(imageName, sizeBuffer)
+          filesToSave.push({
+            buffer: sizeBuffer,
+            path: imagePath,
+          })
+        }
       }
 
       fileData.sizes = sizes
+    }
+
+    if (!disableLocalStorage && fileData.original) {
+      const storageBackendId = `local:${collectionConfig.slug}`
+      const references: ManagedFileReference[] = [
+        {
+          key: fileData.original.filename,
+          role: { type: 'original' as const },
+          storageBackendId,
+        },
+        { key: fsSafeName, role: { type: 'default' as const }, storageBackendId },
+      ]
+
+      for (const [sizeKey, size] of Object.entries(fileData.sizes ?? {})) {
+        if (size.filename) {
+          references.push({
+            key: size.filename,
+            role: { type: 'size' as const, sizeKey },
+            storageBackendId,
+          })
+        }
+      }
+
+      fileData._managedFiles = createManagedFileManifest({ references })
     }
   } catch (err) {
     req.payload.logger.error(err)

@@ -10,6 +10,16 @@ export const Media: CollectionConfig = {
     update: () => true,
   },
   fields: [{ name: 'alt', type: 'text' }],
+  hooks: {
+    afterChange: [
+      ({ doc }) => {
+        if (doc.alt === 'reject-after-write') {
+          throw new Error('Rejected after the file and document write')
+        }
+        return doc
+      },
+    ],
+  },
   upload: { filesRequiredOnCreate: false, staticDir: mediaDir },
   versions: true,
 }

@@ -1,12 +1,15 @@
 import { randomUUID } from 'node:crypto'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
+import type { FileToSave } from '../types.js'
 
 import { APIError } from '../../errors/APIError.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 
-type StagedObject = {
+export type StagedObject = {
   key: string
   remove: () => Promise<void>
   storageBackendId: string
@@ -167,6 +170,104 @@ export const runFileOperationPlan = async <T>({
         await flushCleanup({ req, state: requestState })
       } else if (!req.transactionID) {
         requests.delete(req)
+      }
+    }
+  }
+}
+
+/** Creates have no parent row to claim, but still need rollback and outer-scope compensation. */
+export const runFileCreationPlan = async <T>({
+  req,
+  stage,
+  write,
+}: {
+  req: PayloadRequest
+  stage: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<void>
+  write: () => Promise<T>
+}): Promise<T> => {
+  const requestState = getRequestState({ req })
+  const attempt: Attempt = { staged: new Map() }
+  let hasStartedWrite = false
+  let hasSucceeded = false
+
+  requestState.depth += 1
+
+  try {
+    await stage({
+      trackStagedObject: (object) => {
+        const identity = `${object.storageBackendId}\0${object.key}`
+        if (attempt.staged.has(identity)) {
+          throw new Error(`Storage object was staged twice: ${object.key}`)
+        }
+        attempt.staged.set(identity, object)
+      },
+    })
+
+    hasStartedWrite = true
+    const result = await write()
+
+    requestState.pending.push(attempt)
+    hasSucceeded = true
+    return result
+  } catch (err) {
+    if (!hasStartedWrite) {
+      await compensate({ attempt, req })
+    } else if (req.transactionID) {
+      requestState.pending.push(attempt)
+    }
+    throw err
+  } finally {
+    requestState.depth -= 1
+    if (requestState.depth === 0) {
+      if (hasSucceeded && (!req.transactionID || requestState.isCommitted)) {
+        await flushCleanup({ req, state: requestState })
+      } else if (!req.transactionID) {
+        requests.delete(req)
+      }
+    }
+  }
+}
+
+/** Writes each planned local object exclusively and registers only completed writes for rollback. */
+export const stageLocalUploadFiles = async ({
+  files,
+  staticDir,
+  storageBackendId,
+  trackStagedObject,
+}: {
+  files: FileToSave[]
+  staticDir: string
+  storageBackendId: string
+  trackStagedObject: (object: StagedObject) => void
+}): Promise<void> => {
+  const directory = path.resolve(staticDir)
+
+  for (const file of files) {
+    const destination = path.resolve(file.path)
+    const key = path.relative(directory, destination)
+
+    if (!key || key.startsWith('..') || path.isAbsolute(key)) {
+      throw new Error('Upload destination is outside its storage directory')
+    }
+
+    if ('sourcePath' in file) {
+      await fs.copyFile(file.sourcePath, destination, fs.constants.COPYFILE_EXCL)
+      trackStagedObject({
+        key,
+        remove: () => fs.rm(destination, { force: true }),
+        storageBackendId,
+      })
+    } else {
+      const handle = await fs.open(destination, 'wx')
+      trackStagedObject({
+        key,
+        remove: () => fs.rm(destination, { force: true }),
+        storageBackendId,
+      })
+      try {
+        await handle.writeFile(file.buffer)
+      } finally {
+        await handle.close()
       }
     }
   }
