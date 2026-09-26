@@ -1,40 +1,26 @@
+import nodeModule from 'node:module'
+
 import type { RequireDrizzleKit } from '../types.js'
 
-type DrizzleKit = ReturnType<RequireDrizzleKit>
+export const createRequireDrizzleKit =
+  ({
+    from,
+  }: {
+    /** Module URL of the adapter that owns the drizzle-kit dependency. */
+    from: string
+  }): RequireDrizzleKit =>
+  () => {
+    // Use the default import to preserve Node's loader instead of Webpack's createRequire transform.
+    const require = nodeModule.createRequire(from)
+    const {
+      generateSQLiteDrizzleJson,
+      generateSQLiteMigration,
+      pushSQLiteSchema,
+    } = require('drizzle-kit/api')
 
-export const createRequireDrizzleKit = ({
-  load,
-}: {
-  load: () => Promise<DrizzleKit>
-}): RequireDrizzleKit => {
-  let drizzleKitPromise: Promise<DrizzleKit> | undefined
-
-  const loadDrizzleKit = () => {
-    const promise = load().catch((error: unknown) => {
-      drizzleKitPromise = undefined
-      throw error
-    })
-    drizzleKitPromise = promise
-    return promise
+    return {
+      generateDrizzleJson: generateSQLiteDrizzleJson,
+      generateMigration: generateSQLiteMigration,
+      pushSchema: pushSQLiteSchema,
+    }
   }
-
-  const getDrizzleKit = () => {
-    drizzleKitPromise ??= loadDrizzleKit()
-    return drizzleKitPromise
-  }
-
-  return () => ({
-    generateDrizzleJson: async (...args) => {
-      const { generateDrizzleJson } = await getDrizzleKit()
-      return generateDrizzleJson(...args)
-    },
-    generateMigration: async (...args) => {
-      const { generateMigration } = await getDrizzleKit()
-      return generateMigration(...args)
-    },
-    pushSchema: async (...args) => {
-      const { pushSchema } = await getDrizzleKit()
-      return pushSchema(...args)
-    },
-  })
-}
