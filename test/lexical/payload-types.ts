@@ -3352,6 +3352,12 @@ export interface MyBlock {
   id: string;
   blockType: 'myBlock';
   someText?: string | null;
+  items?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   blockName?: string | null;
 }
 /**
@@ -3380,6 +3386,12 @@ export interface MyInlineBlock {
   id: string;
   blockType: 'myInlineBlock';
   someText?: string | null;
+  items?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

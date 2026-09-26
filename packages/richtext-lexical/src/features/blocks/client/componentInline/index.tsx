@@ -1,6 +1,6 @@
 'use client'
 
-import type { BlocksFieldClient, ClientBlock, Data, FormState } from 'payload'
+import type { BlocksFieldClient, ClientBlock, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
@@ -26,7 +26,7 @@ import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import './index.css'
 import '../../../../utilities/fieldsDrawer/index.css'
 
-import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
@@ -40,6 +40,10 @@ import {
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import {
+  getCachedFormStateIfDataMatches,
+  reduceFormStateToBlockData,
+} from '../getCachedFormStateIfDataMatches.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 export type InlineBlockComponentProps<
@@ -90,28 +94,25 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   const { getFormState } = useServerFunctions()
   const editDepth = useEditDepth()
   const firstTimeDrawer = useRef(false)
+  const blockType = formData.blockType
+  const formDataRef = useRef(formData)
+  formDataRef.current = formData
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockType}.fields`
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
     // Initial form state that was calculated server-side. May have stale values
-    const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
+    const cachedState = initialLexicalFormState?.[formData.id]
+    const cachedFormState = cachedState?.formState
     if (!cachedFormState) {
       return false
     }
 
-    // Merge current formData values into the cached form state
-    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
-    return Object.fromEntries(
-      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
-        fieldName,
-        fieldName in formData
-          ? {
-              ...fieldState,
-              initialValue: formData[fieldName],
-              value: formData[fieldName],
-            }
-          : fieldState,
-      ]),
-    )
+    return getCachedFormStateIfDataMatches({
+      cachedFormState,
+      cachedSchemaPath: cachedState.schemaPath,
+      currentSchemaPath: schemaFieldsPath,
+      formData,
+    })
   })
 
   const hasMounted = useRef(false)
@@ -191,7 +192,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { config } = useConfig()
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockType}`
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
@@ -228,7 +229,6 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     : clientBlock?.slug
 
   const onChangeAbortControllerRef = useRef(new AbortController())
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${clientBlock?.slug}.fields`
 
   // Initial state for newly created blocks
   useEffect(() => {
@@ -251,7 +251,6 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         }),
         globalSlug,
         initialBlockData: formData,
-        initialBlockFormState: formData,
         operation: 'update',
         readOnly: !isEditable,
         renderAllFields: true,
@@ -260,9 +259,8 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       })
 
       if (state) {
-        const newFormStateData: InlineBlockFields = reduceFieldsToValues(
+        const newFormStateData = reduceFormStateToBlockData(
           deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
         ) as InlineBlockFields
 
         // Things like default values may come back from the server => update the node with the new data
@@ -324,10 +322,15 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
       const controller = new AbortController()
       onChangeAbortControllerRef.current = controller
+      const blockData = reduceFormStateToBlockData(
+        deepCopyObjectSimpleWithoutReactComponents(prevFormState, { excludeFiles: true }),
+        formDataRef.current,
+      )
 
       const { state } = await getFormState({
         id,
         collectionSlug,
+        data: blockData,
         docPermissions: {
           fields: true,
         },
@@ -337,7 +340,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         }),
         formState: prevFormState,
         globalSlug,
-        initialBlockFormState: prevFormState,
+        initialBlockData: blockData,
         operation: 'update',
         readOnly: !isEditable,
         renderAllFields: submit ? true : false,
@@ -396,8 +399,9 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
    * HANDLE FORM SUBMIT
    */
   const onFormSubmit = useCallback(
-    (formState: FormState, newData: Data) => {
-      newData.blockType = formData.blockType
+    (formState: FormState) => {
+      const newData = reduceFormStateToBlockData(formState, formDataRef.current)
+      newData.blockType = blockType
 
       editor.update(
         () => {
@@ -411,7 +415,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         { tag: SKIP_DOM_SELECTION_TAG },
       )
     },
-    [editor, nodeKey, formData],
+    [blockType, editor, nodeKey],
   )
 
   const { headerActions, submitRef } = useDrawerSubmit()
@@ -519,8 +523,8 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       fields={clientBlock?.fields}
       initialState={initialState || {}}
       onChange={[onChange]}
-      onSubmit={(formState, data) => {
-        onFormSubmit(formState, data)
+      onSubmit={(formState) => {
+        onFormSubmit(formState)
         toggleDrawer()
       }}
       uuid={formUuid}
