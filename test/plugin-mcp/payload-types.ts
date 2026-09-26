@@ -156,14 +156,15 @@ export interface User {
     | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
   apiKey?: string | null;
+  apiKeyLast4?: string | null;
   apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -421,8 +422,8 @@ export interface FieldType {
    * A group field with nested properties
    */
   groupField?: {
-    groupText?: string | null;
-    groupNumber?: number | null;
+    groupText: string;
+    groupNumber: number;
   };
   /**
    * An upload field
@@ -446,6 +447,7 @@ export interface FieldType {
    * Text field inside an unnamed tab
    */
   unnamedTabText?: string | null;
+  requireGroupField?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -563,14 +565,15 @@ export interface UsersSelect<T extends boolean = true> {
   rbac?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
   apiKey?: T;
+  apiKeyLast4?: T;
   apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -742,6 +745,7 @@ export interface FieldTypesSelect<T extends boolean = true> {
         namedTabText?: T;
       };
   unnamedTabText?: T;
+  requireGroupField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -145,6 +145,7 @@ export interface Media {
   id: string;
   alt?: string | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -182,6 +183,7 @@ export interface Media {
 export interface MediaWithCompositePrefix {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -201,6 +203,7 @@ export interface MediaWithCompositePrefix {
 export interface MediaWithCustomUrl {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -220,6 +223,7 @@ export interface MediaWithCustomUrl {
 export interface MediaWithDisabledPlugin {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -239,6 +243,7 @@ export interface MediaWithDisabledPlugin {
 export interface MediaWithGenerateFileUrl {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -259,6 +264,7 @@ export interface MediaWithOverwrite {
   id: string;
   alt?: string | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -296,6 +302,7 @@ export interface MediaWithOverwrite {
 export interface MediaWithPrefix {
   id: string;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -320,6 +327,7 @@ export interface MediaWithThrowingHook {
    */
   shouldThrow?: boolean | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -340,6 +348,7 @@ export interface RestrictedMedia {
   id: string;
   title?: string | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -363,6 +372,7 @@ export interface TestMetadatum {
    */
   testNote?: string | null;
   prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -398,6 +408,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -527,6 +538,7 @@ export interface PayloadMigration {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -569,6 +581,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -587,6 +600,7 @@ export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
  */
 export interface MediaWithCustomUrlSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -605,6 +619,7 @@ export interface MediaWithCustomUrlSelect<T extends boolean = true> {
  */
 export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -623,6 +638,7 @@ export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
  */
 export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -642,6 +658,7 @@ export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
 export interface MediaWithOverwriteSelect<T extends boolean = true> {
   alt?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -684,6 +701,7 @@ export interface MediaWithOverwriteSelect<T extends boolean = true> {
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -704,6 +722,7 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
   alt?: T;
   shouldThrow?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -723,6 +742,7 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
 export interface RestrictedMediaSelect<T extends boolean = true> {
   title?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -742,6 +762,7 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
 export interface TestMetadataSelect<T extends boolean = true> {
   testNote?: T;
   prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -780,6 +801,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:

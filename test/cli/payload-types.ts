@@ -67,37 +67,24 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    posts: Post;
-    drafts: Draft;
-    'default-sort': DefaultSort;
-    'non-unique-sort': NonUniqueSort;
-    localized: Localized;
-    orderable: Orderable;
-    'orderable-join': OrderableJoin;
+    pages: Page;
+    media: Media;
+    'custom-ids': CustomId;
     'payload-kv': PayloadKv;
     users: User;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    'orderable-join': {
-      orderableJoinField1: 'orderable';
-      orderableJoinField2: 'orderable';
-      nonOrderableJoinField: 'orderable';
-      'group.orderableJoinField': 'orderable';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
-    posts: PostsSelect<false> | PostsSelect<true>;
-    drafts: DraftsSelect<false> | DraftsSelect<true>;
-    'default-sort': DefaultSortSelect<false> | DefaultSortSelect<true>;
-    'non-unique-sort': NonUniqueSortSelect<false> | NonUniqueSortSelect<true>;
-    localized: LocalizedSelect<false> | LocalizedSelect<true>;
-    orderable: OrderableSelect<false> | OrderableSelect<true>;
-    'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -105,10 +92,16 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'nb') | ('en' | 'nb')[];
-  globals: {};
-  globalsSelect: {};
-  locale: 'en' | 'nb';
+  fallbackLocale: null;
+  globals: {
+    settings: Setting;
+    'payload-jobs-stats': PayloadJobsStat;
+  };
+  globalsSelect: {
+    settings: SettingsSelect<false> | SettingsSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
+  };
+  locale: null;
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
@@ -116,7 +109,13 @@ export interface Config {
   };
   user: User;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      noop: TaskNoop;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -140,116 +139,51 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "pages".
  */
-export interface Post {
+export interface Page {
   id: string;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
-  group?: {
-    text?: string | null;
-    number?: number | null;
+  title: string;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
+  requireMetadata?: boolean | null;
+  metadata?: {
+    description: string;
+    title: string;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts".
- */
-export interface Draft {
-  id: string;
-  _order?: string | null;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-sort".
+ * via the `definition` "media".
  */
-export interface DefaultSort {
+export interface Media {
   id: string;
-  text?: string | null;
-  number?: number | null;
+  title: string;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-unique-sort".
+ * via the `definition` "custom-ids".
  */
-export interface NonUniqueSort {
+export interface CustomId {
   id: string;
-  title?: string | null;
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized".
- */
-export interface Localized {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  number2?: number | null;
-  group?: {
-    text?: string | null;
-    number?: number | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable".
- */
-export interface Orderable {
-  id: string;
-  _orderable_group_orderableJoinField_order?: string | null;
-  _orderable_orderableJoinField2_order?: string | null;
-  _orderable_orderableJoinField1_order?: string | null;
-  _order?: string | null;
-  title?: string | null;
-  orderableField?: (string | null) | OrderableJoin;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable-join".
- */
-export interface OrderableJoin {
-  id: string;
-  title?: string | null;
-  orderableJoinField1?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  orderableJoinField2?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  nonOrderableJoinField?: {
-    docs?: (string | Orderable)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  group?: {
-    orderableJoinField?: {
-      docs?: (string | Orderable)[];
-      hasNextPage?: boolean;
-      totalDocs?: number;
-    };
-  };
+  title: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -298,38 +232,128 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: string;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'noop';
+        taskID: string;
+        input:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        parent?: {
+          taskSlug?: ('inline' | 'noop') | null;
+          taskID?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'noop') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'pages';
+        value: string | Page;
       } | null)
     | ({
-        relationTo: 'drafts';
-        value: string | Draft;
-      } | null)
-    | ({
-        relationTo: 'default-sort';
-        value: string | DefaultSort;
-      } | null)
-    | ({
-        relationTo: 'non-unique-sort';
-        value: string | NonUniqueSort;
-      } | null)
-    | ({
-        relationTo: 'localized';
-        value: string | Localized;
-      } | null)
-    | ({
-        relationTo: 'orderable';
-        value: string | Orderable;
-      } | null)
-    | ({
-        relationTo: 'orderable-join';
-        value: string | OrderableJoin;
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -379,99 +403,47 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "pages_select".
  */
-export interface PostsSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  number2?: T;
-  group?:
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  location?: T;
+  requireMetadata?: T;
+  metadata?:
     | T
     | {
-        text?: T;
-        number?: T;
+        description?: T;
+        title?: T;
       };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts_select".
- */
-export interface DraftsSelect<T extends boolean = true> {
-  _order?: T;
-  text?: T;
-  number?: T;
-  number2?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-sort_select".
+ * via the `definition` "media_select".
  */
-export interface DefaultSortSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-unique-sort_select".
- */
-export interface NonUniqueSortSelect<T extends boolean = true> {
+export interface MediaSelect<T extends boolean = true> {
   title?: T;
-  order?: T;
   updatedAt?: T;
   createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized_select".
+ * via the `definition` "custom-ids_select".
  */
-export interface LocalizedSelect<T extends boolean = true> {
-  text?: T;
-  number?: T;
-  number2?: T;
-  group?:
-    | T
-    | {
-        text?: T;
-        number?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable_select".
- */
-export interface OrderableSelect<T extends boolean = true> {
-  _orderable_group_orderableJoinField_order?: T;
-  _orderable_orderableJoinField2_order?: T;
-  _orderable_orderableJoinField1_order?: T;
-  _order?: T;
+export interface CustomIdsSelect<T extends boolean = true> {
+  id?: T;
   title?: T;
-  orderableField?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable-join_select".
- */
-export interface OrderableJoinSelect<T extends boolean = true> {
-  title?: T;
-  orderableJoinField1?: T;
-  orderableJoinField2?: T;
-  nonOrderableJoinField?: T;
-  group?:
-    | T
-    | {
-        orderableJoinField?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -508,6 +480,46 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  meta?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processingUntil?: T;
+  processingToken?: T;
+  concurrencyKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -540,6 +552,54 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings".
+ */
+export interface Setting {
+  id: string;
+  title: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: string;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -555,15 +615,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection:
-      | 'posts'
-      | 'drafts'
-      | 'default-sort'
-      | 'non-unique-sort'
-      | 'localized'
-      | 'orderable'
-      | 'orderable-join'
-      | 'users';
+    relatedCollection: 'pages' | 'media' | 'custom-ids' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -585,20 +637,17 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?:
-      | (
-          | 'posts'
-          | 'drafts'
-          | 'default-sort'
-          | 'non-unique-sort'
-          | 'localized'
-          | 'orderable'
-          | 'orderable-join'
-          | 'users'
-        )[]
-      | null;
+    excludedCollections?: ('pages' | 'media' | 'custom-ids' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskNoop".
+ */
+export interface TaskNoop {
+  input?: unknown;
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

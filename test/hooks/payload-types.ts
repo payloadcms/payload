@@ -177,6 +177,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: HooksUser;
   jobs: {
@@ -369,6 +371,7 @@ export interface HooksUser {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -744,6 +747,7 @@ export interface HooksUsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -897,6 +901,78 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'beforeOperation'
+      | 'before-change-hooks'
+      | 'before-validate'
+      | 'afterOperation'
+      | 'context-hooks'
+      | 'transforms'
+      | 'hooks'
+      | 'nested-after-read-hooks'
+      | 'nested-after-change-hooks'
+      | 'chaining-hooks'
+      | 'relations'
+      | 'hooks-users'
+      | 'data-hooks'
+      | 'before-delete-hooks'
+      | 'before-delete-2-hooks'
+      | 'value-hooks'
+      | 'after-read'
+      | 'override-access-hooks';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'beforeOperation'
+          | 'before-change-hooks'
+          | 'before-validate'
+          | 'afterOperation'
+          | 'context-hooks'
+          | 'transforms'
+          | 'hooks'
+          | 'nested-after-read-hooks'
+          | 'nested-after-change-hooks'
+          | 'chaining-hooks'
+          | 'relations'
+          | 'hooks-users'
+          | 'data-hooks'
+          | 'before-delete-hooks'
+          | 'before-delete-2-hooks'
+          | 'value-hooks'
+          | 'after-read'
+          | 'override-access-hooks'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

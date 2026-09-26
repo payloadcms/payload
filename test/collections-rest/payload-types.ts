@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'update-shapes': UpdateShape;
     posts: Post;
     point: Point;
     relation: Relation;
@@ -86,6 +87,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    'update-shapes': UpdateShapesSelect<false> | UpdateShapesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     point: PointSelect<false> | PointSelect<true>;
     relation: RelationSelect<false> | RelationSelect<true>;
@@ -112,6 +114,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -136,6 +140,72 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "update-shapes".
+ */
+export interface UpdateShape {
+  id: string;
+  items?:
+    | {
+        publicField?: string | null;
+        restrictedField?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  content?: UpdateShapeBlock[] | null;
+  number?: number | null;
+  numbers?: number[] | null;
+  relations?: (string | Relation)[] | null;
+  polymorphicRelations?:
+    | (
+        | {
+            relationTo: 'relation';
+            value: string | Relation;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+      )[]
+    | null;
+  hookedPolymorphicRelations?:
+    | (
+        | {
+            relationTo: 'relation';
+            value: string | Relation;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UpdateShapeBlock".
+ */
+export interface UpdateShapeBlock {
+  publicField?: string | null;
+  restrictedField?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'update-shape-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation".
+ */
+export interface Relation {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -178,16 +248,6 @@ export interface Post {
       };
     };
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation".
- */
-export interface Relation {
-  id: string;
-  name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -322,6 +382,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -341,6 +402,10 @@ export interface User {
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'update-shapes';
+        value: string | UpdateShape;
+      } | null)
     | ({
         relationTo: 'posts';
         value: string | Post;
@@ -430,6 +495,39 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "update-shapes_select".
+ */
+export interface UpdateShapesSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        publicField?: T;
+        restrictedField?: T;
+        id?: T;
+      };
+  content?:
+    | T
+    | {
+        'update-shape-block'?:
+          | T
+          | {
+              publicField?: T;
+              restrictedField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  number?: T;
+  numbers?: T;
+  relations?: T;
+  polymorphicRelations?: T;
+  hookedPolymorphicRelations?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -580,6 +678,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -631,6 +730,68 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'update-shapes'
+      | 'posts'
+      | 'point'
+      | 'relation'
+      | 'dummy'
+      | 'custom-id'
+      | 'custom-id-number'
+      | 'error-on-hooks'
+      | 'endpoints'
+      | 'disabled-bulk-edit-docs'
+      | 'disabled-bulk-delete-docs'
+      | 'large-documents'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'update-shapes'
+          | 'posts'
+          | 'point'
+          | 'relation'
+          | 'dummy'
+          | 'custom-id'
+          | 'custom-id-number'
+          | 'error-on-hooks'
+          | 'endpoints'
+          | 'disabled-bulk-edit-docs'
+          | 'disabled-bulk-delete-docs'
+          | 'large-documents'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
