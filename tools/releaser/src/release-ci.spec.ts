@@ -33,7 +33,7 @@ describe('runReleaseCi', () => {
     expect(deps.findChangelogBaseTag).toHaveBeenCalledWith({ version: '4.0.0-canary.10' })
     expect(deps.generateReleaseNotes).toHaveBeenCalledWith({
       fromVersion: 'v4.0.0-canary.9',
-      toVersion: 'HEAD',
+      toVersion: 'v4.0.0-canary.10',
     })
     expect(deps.createDraftGitHubRelease).toHaveBeenCalledWith({
       branch: 'main',
@@ -94,6 +94,15 @@ describe('runReleaseCi', () => {
 
     await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/prerelease line must be/)
     expect(deps.workspace.build).not.toHaveBeenCalled()
+  })
+
+  it('should refuse when no changelog base tag is available', async () => {
+    const deps = makeDeps({ findChangelogBaseTag: vi.fn(async () => undefined) })
+
+    await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/changelog base tag/)
+    expect(deps.generateReleaseNotes).not.toHaveBeenCalled()
+    expect(deps.workspace.build).not.toHaveBeenCalled()
+    expect(deps.workspace.publish).not.toHaveBeenCalled()
   })
 
   it('should refuse an unsupported prerelease line', async () => {

@@ -86,16 +86,21 @@ export const runReleaseCi = async ({
   log(`\n  Publishing ${version} to dist-tag '${tag}'${dryRun ? ' (dry-run)' : ''}\n`)
 
   const fromVersion = await findChangelogBaseTag({ version })
+  if (!fromVersion) {
+    throw new Error(`Could not determine changelog base tag for v${version}`)
+  }
+
+  const releaseTag = `v${version}`
   const { releaseNotes, releaseUrl } = await generateReleaseNotes({
     fromVersion,
-    toVersion: 'HEAD',
+    toVersion: releaseTag,
   })
   log(`Release URL: ${releaseUrl}`)
 
   if (dryRun) {
     log(`[dry-run] would build all packages`)
     log(`[dry-run] would publish all packages to dist-tag '${tag}'`)
-    log(`[dry-run] would create/upsert draft GitHub release for v${version}`)
+    log(`[dry-run] would create/upsert draft GitHub release for ${releaseTag}`)
     return
   }
 
@@ -105,7 +110,7 @@ export const runReleaseCi = async ({
   const { releaseUrl: draftUrl } = await createDraftGitHubRelease({
     branch: 'main',
     releaseNotes,
-    tag: `v${version}`,
+    tag: releaseTag,
   })
   log(`Draft release: ${draftUrl}`)
 }
