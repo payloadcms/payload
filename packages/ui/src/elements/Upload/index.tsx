@@ -538,8 +538,8 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
               imageCacheTag={imageCacheTag}
               initialCrop={uploadEdits?.crop ?? undefined}
               initialFocalPoint={{
-                x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
-                y: uploadEdits?.focalPoint?.y || data?.focalY || 50,
+                x: uploadEdits?.focalPoint?.x ?? data?.focalX ?? 50,
+                y: uploadEdits?.focalPoint?.y ?? data?.focalY ?? 50,
               }}
               onSave={onEditsSave}
               showCrop={showCrop}
