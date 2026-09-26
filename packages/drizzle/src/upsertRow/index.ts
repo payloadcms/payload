@@ -239,11 +239,16 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       if (hasMainRowData) {
         if (id) {
           rowToInsert.row.id = id
+          // Keep the id out of the ON CONFLICT DO UPDATE SET list. Postgres
+          // picks the row lock from the columns named in SET, so naming the
+          // key column takes FOR UPDATE instead of FOR NO KEY UPDATE, which
+          // blocks concurrent inserts of referencing rows until commit.
+          const { id: _conflictTargetID, ...rowWithoutID } = rowToInsert.row
           ;[insertedRow] = await adapter.insert({
             db,
             onConflictDoUpdate: where
-              ? { set: rowToInsert.row, target, where }
-              : { set: rowToInsert.row, target },
+              ? { set: rowWithoutID, target, where }
+              : { set: rowWithoutID, target },
             tableName,
             values: rowToInsert.row,
           })
