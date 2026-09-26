@@ -8,6 +8,7 @@ import { findConfig } from '../config/find.js'
 import { getPayload, type Payload } from '../index.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
+import { getScriptArgs } from './getScriptArgs.js'
 import { info } from './info.js'
 import { loadEnv } from './loadEnv.js'
 import { migrate, availableCommands as migrateCommands } from './migrate.js'
@@ -56,7 +57,9 @@ export const bin = async () => {
     if (payload) {
       await payload.destroy() // close database connections after running jobs so process can exit cleanly
     }
-    process.exit(0)
+    // Preserve a non-zero `process.exitCode` set by the script. Exiting with a hardcoded 0
+    // would report success for a script that failed without throwing.
+    process.exit(process.exitCode ?? 0)
   }
 }
 
@@ -89,7 +92,11 @@ async function runBinScript({
 
     // Modify process.argv to remove 'run' and the script path
     const originalArgv = process.argv
-    process.argv = [process.argv[0]!, process.argv[1]!, ...args._.slice(2)]
+    process.argv = [
+      process.argv[0]!,
+      process.argv[1]!,
+      ...getScriptArgs({ argv: process.argv.slice(2), script, scriptPath }),
+    ]
 
     try {
       await import(pathToFileURL(absoluteScriptPath).toString())
