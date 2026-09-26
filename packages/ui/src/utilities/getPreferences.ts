@@ -8,7 +8,7 @@ export const getPreferences = cache(
     payload: Payload,
     userID: DefaultDocumentIDType,
     userSlug: string,
-  ): Promise<{ id: DefaultDocumentIDType; value: T }> => {
+  ): Promise<{ id: DefaultDocumentIDType; value: T } | undefined> => {
     const result = (await payload
       .find({
         collection: 'payload-preferences',
@@ -36,7 +36,7 @@ export const getPreferences = cache(
           ],
         },
       })
-      .then((res) => res.docs?.[0])) as { id: DefaultDocumentIDType; value: T }
+      .then((res) => res.docs?.[0])) as { id: DefaultDocumentIDType; value: T } | undefined
 
     return result
   },
