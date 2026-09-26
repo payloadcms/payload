@@ -1070,6 +1070,82 @@ test.suite('database', { config: './config.ts', resetBetweenTests: false }, () =
     })
   })
 
+  test
+    .options({ db: (adapter) => adapter === 'postgres-uuid' || adapter === 'postgres-uuidv7' })
+    .describe('IDs that are not RFC 4122 compliant', () => {
+      // A SQL Server NEWSEQUENTIALID() value, as emitted by Dynamics / Dataverse.
+      // Postgres stores and queries it happily - only the version nibble ("f") makes it
+      // fail an RFC 4122 validator.
+      const sequentialID = '117bd54e-c5aa-f111-aaab-7ced8d44b1d7'
+
+      test.beforeAll(({ payloadInstance: payload }) => {
+        payload.db.allowIDOnCreate = true
+        payload.config.db.allowIDOnCreate = true
+      })
+
+      test.afterAll(({ payloadInstance }) => {
+        payloadInstance.db.allowIDOnCreate = false
+        payloadInstance.config.db.allowIDOnCreate = false
+      })
+
+      test('should find a document by an ID that is not RFC 4122 compliant', async ({
+        payload,
+      }) => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { id: sequentialID, title: 'non-rfc id' },
+        })
+
+        expect(created.id).toBe(sequentialID)
+
+        const found = await payload.findByID({ collection: postsSlug, id: sequentialID })
+
+        expect(found.id).toBe(sequentialID)
+
+        await payload.delete({ collection: postsSlug, id: sequentialID })
+      })
+
+      test('should filter a relationship by an ID that is not RFC 4122 compliant', async ({
+        payload,
+      }) => {
+        const category = await payload.create({
+          collection: 'categories',
+          data: { id: sequentialID, title: 'non-rfc category' },
+        })
+
+        const related = await payload.create({
+          collection: postsSlug,
+          data: { category: sequentialID, title: 'related' },
+        })
+
+        const unrelated = await payload.create({
+          collection: postsSlug,
+          data: { title: 'unrelated' },
+        })
+
+        const equals = await payload.find({
+          collection: postsSlug,
+          depth: 0,
+          where: { category: { equals: sequentialID } },
+        })
+
+        expect(equals.docs.map((doc) => doc.id)).toStrictEqual([related.id])
+
+        const notEquals = await payload.find({
+          collection: postsSlug,
+          depth: 0,
+          where: { category: { not_equals: sequentialID } },
+        })
+
+        expect(notEquals.docs.map((doc) => doc.id)).not.toContain(related.id)
+        expect(notEquals.docs.map((doc) => doc.id)).toContain(unrelated.id)
+
+        await payload.delete({ collection: postsSlug, id: related.id })
+        await payload.delete({ collection: postsSlug, id: unrelated.id })
+        await payload.delete({ collection: 'categories', id: category.id })
+      })
+    })
+
   test('should find distinct field values of the collection', async ({ payload }) => {
     await payload.delete({ collection: 'posts', overrideAccess: true, where: {} })
     const titles = [
