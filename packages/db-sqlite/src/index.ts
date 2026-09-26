@@ -66,7 +66,6 @@ const filename = fileURLToPath(import.meta.url)
 
 const requireDrizzleKit = createRequireDrizzleKit({
   from: import.meta.url,
-  packageName: '@payloadcms/db-sqlite',
 })
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {

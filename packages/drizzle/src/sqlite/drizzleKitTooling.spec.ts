@@ -22,11 +22,8 @@ describe('SQLite Drizzle Kit tooling in Node', () => {
       const directory = mkdtempSync(path.join(tmpdir(), 'payload-drizzle-tooling-'))
       temporaryDirectories.push(directory)
 
-      // Exercise the real factory and dynamicImport implementation without loading all of Payload.
+      // Exercise the real loader outside Vitest.
       await build({
-        alias: {
-          payload: path.join(workspaceDirectory, 'packages/payload/src/utilities/dynamicImport.ts'),
-        },
         bundle: true,
         entryPoints: [
           path.join(workspaceDirectory, 'packages/drizzle/src/sqlite/createRequireDrizzleKit.ts'),
@@ -56,7 +53,7 @@ const { createClient } = require('@libsql/client')
 const { drizzle } = require('drizzle-orm/libsql')
 const { sqliteTable, integer } = require('drizzle-orm/sqlite-core')
 assert.equal(process.env.VITEST, undefined)
-const tooling = createRequireDrizzleKit({ from: ${JSON.stringify(from)}, packageName: ${JSON.stringify(`@payloadcms/${adapter}`)} })()
+const tooling = createRequireDrizzleKit({ from: ${JSON.stringify(from)} })()
 const schema = { probe: sqliteTable('probe', { id: integer('id').primaryKey() }) }
 const before = await tooling.generateDrizzleJson({})
 const after = await tooling.generateDrizzleJson(schema)
