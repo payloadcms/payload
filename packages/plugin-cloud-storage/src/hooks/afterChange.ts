@@ -37,6 +37,14 @@ export const getAfterChangeHook =
       return doc
     }
 
+    // `createLocalReq` returns the caller's own `context` object while it is
+    // empty, then swaps `req.context` for a spread copy once it is not. The
+    // nested `update` below therefore moves `req.context` off the object this
+    // hook wrote to, so both references are kept and cleared: otherwise a
+    // caller that reuses one `context` across Local API calls keeps the
+    // plugin's private keys forever and every later upload is skipped.
+    const incomingContext = req.context
+
     // Restore upload metadata removed by select, including partially selected image sizes.
     const uploadData = select ? deepMergeWithSourceArrays<FileData & TypeWithID>(data, doc) : doc
     const isDraftSave = (uploadData as { _status?: string })._status === 'draft'
@@ -89,7 +97,8 @@ export const getAfterChangeHook =
           if (!req.context) {
             req.context = {}
           }
-          req.context.skipCloudStorage = true
+          const flaggedContext = req.context
+          flaggedContext.skipCloudStorage = true
 
           // Clear to prevent re-processing
           req.file = undefined
@@ -110,6 +119,7 @@ export const getAfterChangeHook =
             // Persist all adapter metadata, but do not add unselected fields to the response.
             docWithMetadata = select ? { ...doc, ...updatedDoc } : { ...doc, ...uploadMetadata }
           } finally {
+            delete flaggedContext.skipCloudStorage
             delete req.context.skipCloudStorage
           }
         }
@@ -202,6 +212,13 @@ export const getAfterChangeHook =
       )
       req.payload.logger.error({ err })
       throw err
+    } finally {
+      // The preserved buffer is only needed until the upload above finishes.
+      // `preserveFileData` writes it once and never refreshes it, so leaving it
+      // behind would hand the first file's buffer to every later upload that
+      // reuses the same `context`.
+      delete incomingContext?._payloadCloudStorage
+      delete req.context?._payloadCloudStorage
     }
     return doc
   }
