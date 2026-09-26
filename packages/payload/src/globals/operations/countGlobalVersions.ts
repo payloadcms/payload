@@ -10,6 +10,7 @@ import {
   type GlobalSlug,
   type SanitizedGlobalConfig,
 } from '../../index.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   disableErrors?: boolean
@@ -23,27 +24,20 @@ export type Arguments = {
 export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
   args: Arguments,
 ): Promise<{ totalDocs: number }> => {
-  const { disableErrors, global, overrideAccess, where } = args
-  const req = args.req!
-  const { payload } = req
-
   // /////////////////////////////////////
   // beforeOperation - Global
   // /////////////////////////////////////
 
-  if (global.hooks?.beforeOperation?.length) {
-    for (const hook of global.hooks.beforeOperation) {
-      args =
-        (await hook({
-          args,
-          context: req.context,
-          global,
-          operation: 'countVersions',
-          overrideAccess,
-          req,
-        })) || args
-    }
-  }
+  args = await buildBeforeOperation({
+    args,
+    global: args.global,
+    operation: 'countVersions',
+    overrideAccess: args.overrideAccess,
+  })
+
+  const { disableErrors, global, overrideAccess, where } = args
+  const req = args.req!
+  const { payload } = req
 
   // /////////////////////////////////////
   // Access

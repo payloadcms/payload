@@ -26,6 +26,7 @@ import type {
 } from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
+import type { BeforeOperationArg, OperationMap } from '../operations/utilities/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
@@ -72,12 +73,12 @@ export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes e
       draft?: boolean
     }
 
-export type BeforeValidateHook = (args: {
+export type BeforeValidateHook<T = any> = (args: {
   context: RequestContext
-  data?: any
+  data?: Partial<T>
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
-  originalDoc?: any
+  originalDoc?: T
   /**
    * Whether access control is being overridden for this operation
    */
@@ -85,12 +86,12 @@ export type BeforeValidateHook = (args: {
   req: PayloadRequest
 }) => any
 
-export type BeforeChangeHook = (args: {
+export type BeforeChangeHook<T = any> = (args: {
   context: RequestContext
-  data: any
+  data: Partial<T>
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
-  originalDoc?: any
+  originalDoc?: T
   /**
    * Whether access control is being overridden for this operation
    */
@@ -98,23 +99,23 @@ export type BeforeChangeHook = (args: {
   req: PayloadRequest
 }) => any
 
-export type AfterChangeHook = (args: {
+export type AfterChangeHook<T = any> = (args: {
   context: RequestContext
-  data: any
-  doc: any
+  data: Partial<T>
+  doc: T
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   /**
    * Whether access control is being overridden for this operation
    */
   overrideAccess?: boolean
-  previousDoc: any
+  previousDoc: T
   req: PayloadRequest
 }) => any
 
-export type BeforeReadHook = (args: {
+export type BeforeReadHook<T = any> = (args: {
   context: RequestContext
-  doc: any
+  doc: T
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   /**
@@ -124,9 +125,9 @@ export type BeforeReadHook = (args: {
   req: PayloadRequest
 }) => any
 
-export type AfterReadHook = (args: {
+export type AfterReadHook<T = any> = (args: {
   context: RequestContext
-  doc: any
+  doc: T
   findMany?: boolean
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
@@ -140,23 +141,13 @@ export type AfterReadHook = (args: {
 
 export type HookOperationType = 'countVersions' | 'read' | 'restoreVersion' | 'update'
 
-export type BeforeOperationHook = (args: {
-  args?: any
-  context: RequestContext
-  /**
-   * The Global which this hook is being run on
-   * */
-  global: SanitizedGlobalConfig
-  /**
-   * Hook operation being performed
-   */
-  operation: HookOperationType
-  /**
-   * Whether access control is being overridden for this operation
-   */
-  overrideAccess?: boolean
-  req: PayloadRequest
-}) => any
+export type BeforeOperationHook<TOperationGeneric extends GlobalSlug = string> = (
+  arg: BeforeOperationArg<TOperationGeneric>,
+) =>
+  | Parameters<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>[0]
+  | Promise<Parameters<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>[0]>
+  | Promise<void>
+  | void
 
 export type GlobalAdminOptions = {
   /**
@@ -191,11 +182,11 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
-type GlobalHooks = {
+type GlobalHooks<TSlug extends GlobalSlug = any> = {
   afterChange?: AfterChangeHook[]
   afterRead?: AfterReadHook[]
   beforeChange?: BeforeChangeHook[]
-  beforeOperation?: BeforeOperationHook[]
+  beforeOperation?: BeforeOperationHook<TSlug>[]
   beforeRead?: BeforeReadHook[]
   beforeValidate?: BeforeValidateHook[]
 }
@@ -223,7 +214,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
         name?: string
       }
     | false
-  hooks?: GlobalHooks
+  hooks?: GlobalHooks<TSlug>
   label?: LabelFunction | StaticLabel
   /**
    * Enables / Disables the ability to lock documents while editing

@@ -48,6 +48,7 @@ import {
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -71,7 +72,7 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-  const req = args.req
+  let req = args.req
   const initialGlobalConfig = args.globalConfig
 
   validateAllLocalesPublicationFlags({
@@ -102,19 +103,14 @@ export const updateOperation = async <
     // beforeOperation - Global
     // /////////////////////////////////////
 
-    if (initialGlobalConfig.hooks?.beforeOperation?.length) {
-      for (const hook of initialGlobalConfig.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            context: args.req.context,
-            global: initialGlobalConfig,
-            operation: 'update',
-            overrideAccess: args.overrideAccess,
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      global: args.globalConfig,
+      operation: 'update',
+      overrideAccess: args.overrideAccess,
+    })
+
+    req = args.req
 
     const {
       slug,
