@@ -87,10 +87,24 @@ export async function updateJobs({
         where: where as Where,
       }
 
-  const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
+  let updatedJobs: Job[] | null
 
-  if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
-    await req.payload.db.commitTransaction(jobReq.transactionID)
+  try {
+    updatedJobs = await req.payload.db.updateJobs(args)
+
+    if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
+      await req.payload.db.commitTransaction(jobReq.transactionID)
+    }
+  } catch (error) {
+    if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
+      try {
+        await req.payload.db.rollbackTransaction(jobReq.transactionID)
+      } catch {
+        // Preserve the original update or commit error.
+      }
+    }
+
+    throw error
   }
 
   if (returning === false || !updatedJobs?.length) {
