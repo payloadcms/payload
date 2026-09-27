@@ -237,6 +237,7 @@ export const getVersions = async ({
           depth: 0,
           locale,
           select: {
+            _status: true,
             updatedAt: true,
           },
           user,
