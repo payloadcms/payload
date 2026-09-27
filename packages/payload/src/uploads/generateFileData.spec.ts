@@ -16,6 +16,12 @@ const PNG_SIGNATURE = Buffer.from(
   'base64',
 )
 
+// A minimal valid 1x1 lossy WebP, so `file-type` can detect `image/webp` from it.
+const WEBP_SIGNATURE = Buffer.from(
+  'UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=',
+  'base64',
+)
+
 const createSharpMock = () => {
   const toBufferMock = vi.fn().mockResolvedValue({
     data: PNG_SIGNATURE,
@@ -35,7 +41,7 @@ const createSharpMock = () => {
 
   const sharp = vi.fn(() => chain)
 
-  return { sharp, toBufferMock }
+  return { metadataMock, sharp, toBufferMock }
 }
 
 const createCollection = (uploadOverrides: Record<string, unknown> = {}): Collection =>
@@ -139,6 +145,76 @@ describe('generateFileData', () => {
 
       expect(toBufferMock).not.toHaveBeenCalled()
       expect(files).toEqual([{ path: `${os.tmpdir()}/photo.png`, sourcePath: tempFilePath }])
+    })
+  })
+
+  describe('when the mime type can be animated (WebP, GIF, TIFF)', () => {
+    const createWebpReq = (sharp: unknown): PayloadRequest =>
+      ({
+        file: {
+          data: WEBP_SIGNATURE,
+          mimetype: 'image/webp',
+          name: 'photo.webp',
+          size: WEBP_SIGNATURE.length,
+          tempFilePath: '',
+        },
+        payload: {
+          config: { sharp },
+          logger: { error: vi.fn() },
+        },
+      }) as unknown as PayloadRequest
+
+    it('should store a single-frame image untouched instead of re-encoding it', async () => {
+      const { sharp, toBufferMock } = createSharpMock()
+
+      const { data, files } = await generateFileData({
+        collection: createCollection(),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createWebpReq(sharp),
+      })
+
+      expect(toBufferMock).not.toHaveBeenCalled()
+      expect(files).toEqual([{ buffer: WEBP_SIGNATURE, path: `${os.tmpdir()}/photo.webp` }])
+      expect(data).toMatchObject({ filesize: WEBP_SIGNATURE.length, mimeType: 'image/webp' })
+    })
+
+    it('should still process an animated image with sharp', async () => {
+      const { metadataMock, sharp, toBufferMock } = createSharpMock()
+      metadataMock.mockResolvedValue({ height: 3, pages: 3, width: 1 })
+
+      await generateFileData({
+        collection: createCollection(),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createWebpReq(sharp),
+      })
+
+      expect(toBufferMock).toHaveBeenCalledTimes(1)
+      expect(sharp).toHaveBeenCalledWith(
+        WEBP_SIGNATURE,
+        expect.objectContaining({ animated: true }),
+      )
+    })
+
+    it('should keep the existing behavior when sharp cannot read the frame count', async () => {
+      const { metadataMock, sharp, toBufferMock } = createSharpMock()
+      metadataMock.mockRejectedValueOnce(new Error('unsupported image format'))
+
+      await generateFileData({
+        collection: createCollection(),
+        config: {} as SanitizedConfig,
+        data: {},
+        operation: 'create',
+        overwriteExistingFiles: true,
+        req: createWebpReq(sharp),
+      })
+
+      expect(toBufferMock).toHaveBeenCalledTimes(1)
     })
   })
 })
