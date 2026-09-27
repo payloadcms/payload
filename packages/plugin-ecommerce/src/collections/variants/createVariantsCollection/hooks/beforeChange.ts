@@ -16,6 +16,7 @@ export const variantsCollectionBeforeChange: (args: Props) => CollectionBeforeCh
         collection: productsSlug,
         depth: 0,
         overrideAccess: true,
+        req,
         select: {
           title: true,
           variantTypes: true,
@@ -32,6 +33,7 @@ export const variantsCollectionBeforeChange: (args: Props) => CollectionBeforeCh
           collection: variantOptionsSlug,
           depth: 0,
           overrideAccess: true,
+          req,
           select: {
             label: true,
           },

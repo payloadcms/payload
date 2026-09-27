@@ -39,6 +39,7 @@ export const validateOptions: (props?: Props) => Validate =
         },
       },
       overrideAccess: true,
+      req,
       select: {
         variants: true,
         variantTypes: true,
