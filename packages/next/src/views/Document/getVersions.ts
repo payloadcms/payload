@@ -65,10 +65,46 @@ export const getVersions = async ({
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
   if (!shouldFetchVersions) {
-    // Without readVersions permission, determine published status from the _status field
-    const hasPublishedDoc = localizedDraftsEnabled
+    // Without readVersions permission, determine publication from readable documents.
+    let hasPublishedDoc = localizedDraftsEnabled
       ? doc?._status === 'published'
       : doc?._status !== 'draft'
+
+    if (hasDraftsEnabled(entityConfig) && doc?._status === 'draft') {
+      let mainDoc
+
+      if (globalConfig) {
+        mainDoc = await payload.findGlobal({
+          slug: globalConfig.slug,
+          depth: 0,
+          disableErrors: true,
+          locale,
+          overrideAccess: false,
+          select: { _status: true },
+          user,
+        })
+      } else if (collectionConfig && id) {
+        mainDoc = (
+          await payload.find({
+            collection: collectionConfig.slug,
+            depth: 0,
+            limit: 1,
+            locale: locale || undefined,
+            overrideAccess: false,
+            pagination: false,
+            select: { _status: true },
+            user,
+            where: {
+              and: [{ id: { equals: id } }, { _status: { equals: 'published' } }],
+            },
+          })
+        )?.docs?.[0]
+      }
+
+      hasPublishedDoc = mainDoc?._status === 'published'
+      // The readable draft proves one pending version without querying version history.
+      unpublishedVersionCount = hasPublishedDoc ? 1 : 0
+    }
 
     return {
       hasPublishedDoc,
