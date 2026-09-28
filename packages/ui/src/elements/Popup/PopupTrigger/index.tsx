@@ -109,6 +109,43 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
   }
 
   if (buttonType === 'custom') {
+    if (
+      React.isValidElement<{
+        'aria-controls'?: AriaAttributes['aria-controls']
+        'aria-expanded'?: AriaAttributes['aria-expanded']
+        'aria-haspopup'?: AriaAttributes['aria-haspopup']
+        'aria-label'?: string
+        className?: string
+        onClick?: React.MouseEventHandler
+        onKeyDown?: React.KeyboardEventHandler
+        role?: React.AriaRole
+        tabIndex?: number
+      }>(button)
+    ) {
+      const originalOnClick = button.props.onClick
+      const originalOnKeyDown = button.props.onKeyDown
+
+      // Apply the trigger contract to the supplied control instead of adding another interactive wrapper.
+      // eslint-disable-next-line @eslint-react/no-clone-element
+      return React.cloneElement(button, {
+        'aria-controls': contentId,
+        'aria-expanded': active,
+        'aria-haspopup': popupType,
+        'aria-label': buttonAriaLabel ?? button.props['aria-label'],
+        className: [classes, button.props.className].filter(Boolean).join(' '),
+        onClick: (event) => {
+          originalOnClick?.(event)
+          handleClick(event)
+        },
+        onKeyDown: (event) => {
+          originalOnKeyDown?.(event)
+          handleKeyDown(event)
+        },
+        role: isMenuItem ? 'menuitem' : button.props.role,
+        tabIndex: isMenuItem ? -1 : (button.props.tabIndex ?? 0),
+      })
+    }
+
     return (
       <div
         aria-controls={contentId}

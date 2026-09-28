@@ -46,7 +46,7 @@ export const MultiValueRemove: React.FC<
         onClick?.(e)
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' || e.key === ' ') {
           e.stopPropagation()
         }
       }}

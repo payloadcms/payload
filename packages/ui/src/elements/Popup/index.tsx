@@ -13,7 +13,7 @@ import { type PopupButtonRenderProps, PopupTrigger } from './PopupTrigger/index.
 const baseClass = 'popup'
 
 type PopupContextValue = {
-  closePopupChain: () => void
+  closePopupChain: (options?: { restoreFocus?: boolean }) => void
   popupRef: React.RefObject<HTMLDivElement | null>
   popupRole?: AriaRole
 }
@@ -194,10 +194,18 @@ export const Popup: React.FC<PopupProps> = (props) => {
     [setActive],
   )
   const close = useCallback(() => closePopup(), [closePopup])
-  const closePopupChain = useCallback(() => {
-    closePopup({ restoreFocus: false })
-    parentPopup?.closePopupChain()
-  }, [closePopup, parentPopup])
+  const closePopupChain = useCallback(
+    (options: { restoreFocus?: boolean } = {}) => {
+      if (parentPopup) {
+        closePopup({ restoreFocus: false })
+        parentPopup.closePopupChain(options)
+        return
+      }
+
+      closePopup(options)
+    },
+    [closePopup, parentPopup],
+  )
 
   // /////////////////////////////////////
   // Position Calculation
@@ -415,6 +423,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
     }
 
     if (e.key === 'Tab' && popupRole === 'menu') {
+      if (e.shiftKey) {
+        e.preventDefault()
+        closePopupChain({ restoreFocus: true })
+        return
+      }
+
       setTimeout(closePopupChain)
       return
     }
