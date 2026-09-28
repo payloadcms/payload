@@ -99,7 +99,10 @@ export type SharpDynamicDefaults = {
   fit?: keyof FitEnum
   /** @default 4096 */
   maxHeight?: number
-  /** @default 16_777_216 */
+  /**
+   * Total output pixels, counted across every frame of an animated image.
+   * @default 16_777_216
+   */
   maxPixels?: number
   /** @default 4096 */
   maxWidth?: number

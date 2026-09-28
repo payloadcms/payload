@@ -1,10 +1,17 @@
 import type { PayloadRequest } from 'payload'
 
+import { readFileSync } from 'fs'
+import path from 'path'
 import sharp from 'sharp'
+import { fileURLToPath } from 'url'
 import { describe, expect, it, vi } from 'vitest'
 
 import { createHandleRequest } from './handleRequest.js'
 import { resolveSharpDynamicDefaults } from './sharpTransformer.js'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
+// 200x200, 44 frames.
+const animatedWebp = readFileSync(path.resolve(dirname, '../../../test/uploads/animated.webp'))
 
 const makeReq = ({ query = '' }: { query?: string } = {}): PayloadRequest =>
   ({
@@ -65,6 +72,39 @@ describe('createHandleRequest', () => {
     })
 
     expect(result.response?.status).toBe(400)
+  })
+
+  it.each(['width=1000&height=1000', 'width=1000'])(
+    'should count every frame of an animated source against maxPixels (%s)',
+    async (query) => {
+      // 1000x1000 per frame is within the 16,777,216 default, but across 44 frames
+      // Sharp would render 44,000,000 pixels.
+      const result = await resizeReal({
+        mimeType: 'image/webp',
+        query,
+        sourceBuffer: animatedWebp,
+      })
+
+      expect(result.response?.status).toBe(400)
+    },
+  )
+
+  it('should resize every frame of an animated source within maxPixels', async () => {
+    const metadata = await sharp(
+      Buffer.from(
+        await (
+          await resizeReal({
+            mimeType: 'image/webp',
+            query: 'width=100',
+            sourceBuffer: animatedWebp,
+          })
+        ).response!.arrayBuffer(),
+      ),
+      { animated: true },
+    ).metadata()
+
+    expect(metadata.width).toBe(100)
+    expect(metadata.pages).toBe(44)
   })
 
   it('should not upscale when withoutEnlargement is configured as the default', async () => {

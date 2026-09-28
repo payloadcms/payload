@@ -353,7 +353,7 @@ Every dynamic-resize request decodes the full source image and encodes a new one
 
    A denied transform request returns `403`, and the source file is never fetched.
 
-3. **Lower the limits to what you serve.** Set `maxWidth`, `maxHeight`, and `maxPixels` to your largest real rendition, and set `withoutEnlargement: true` so requests can't upscale small images. Limits apply per frame: animated GIF, WebP, and AVIF images are resized frame by frame, so a many-frame image costs far more than its dimensions suggest. If you accept animated uploads on a collection, keep its limits tight or leave dynamic resizing off for it.
+3. **Lower the limits to what you serve.** Set `maxWidth`, `maxHeight`, and `maxPixels` to your largest real rendition, and set `withoutEnlargement: true` so requests can't upscale small images. `maxWidth` and `maxHeight` apply per frame, while `maxPixels` counts every frame: animated GIF, WebP, and AVIF images are resized frame by frame, so a 44-frame image at 1000x1000 counts as 44,000,000 pixels.
 
 4. **Cache the output in front of Payload.** Dynamic-resize responses don't set `Cache-Control`. Add one with the collection's [`modifyResponseHeaders`](./overview#modifying-response-headers), which also applies to dynamic-resize responses, and serve the endpoint through a CDN or reverse proxy that caches by full URL. A fixed set of allowed sizes (step 2) keeps the cache effective. Only mark responses `public` for collections whose files are publicly readable, or a shared cache will serve access-controlled files to anyone.
 
