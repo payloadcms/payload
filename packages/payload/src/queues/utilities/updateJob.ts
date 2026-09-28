@@ -1,6 +1,6 @@
 import type { ManyOptions } from '../../collections/operations/local/update.js'
 import type { UpdateJobsArgs } from '../../database/types.js'
-import type { Job } from '../../index.js'
+import type { Job, JobLog } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
 import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
@@ -61,6 +61,17 @@ export async function updateJobs({
   const where = id ? { id: { equals: id } } : whereArg
 
   if (depth || req.payload.config?.jobs?.runHooks) {
+    if (id && data.log && '$push' in data.log) {
+      const job = await req.payload.findByID({
+        id,
+        collection: jobsCollectionSlug,
+        depth: 0,
+        req,
+      })
+
+      data = { ...data, log: [...(job.log ?? []), data.log.$push as JobLog] }
+    }
+
     const result = await req.payload.update({
       id,
       collection: jobsCollectionSlug,
