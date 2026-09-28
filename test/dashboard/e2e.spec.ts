@@ -71,8 +71,8 @@ describe('Dashboard', () => {
     const wrapBox = (await wrap.boundingBox())!
     const cardBox = (await card.boundingBox())!
 
-    expect(cardBox.x - wrapBox.x).toBe(32)
-    expect(cardBox.y - wrapBox.y).toBe(69)
+    expect(cardBox.x - wrapBox.x).toBe(0)
+    expect(cardBox.y - wrapBox.y).toBe(37)
     expect(cardBox.height).toBe(64)
     await expect(card).toHaveCSS('border-radius', '13px')
     await expect(actions).toHaveCSS('opacity', '0')

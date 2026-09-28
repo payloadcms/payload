@@ -8,7 +8,6 @@
     flex-direction: column;
     gap: var(--spacer-5);
     width: 100%;
-    padding: var(--spacer-5);
     background: var(--color-bg);
   }
 
