@@ -77,6 +77,7 @@ export default defineConfig({
           ],
           name: 'unit',
           environment: 'node',
+          execArgv: ['--expose-gc'],
         },
       },
       {
