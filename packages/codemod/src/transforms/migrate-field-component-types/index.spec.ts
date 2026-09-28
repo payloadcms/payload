@@ -764,6 +764,29 @@ const fields: { field: React.FC<TextFieldClientProps>; helper: typeof Helper } =
 }`)
   })
 
+  it('should migrate statically computed object properties when an unrelated property contains a class', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+const fieldKey = 'field'
+class Helper {}
+const fields: { [fieldKey]: TextFieldClientComponent; helper: typeof Helper } = {
+  [fieldKey]: () => null,
+  helper: Helper,
+}`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+const fieldKey = 'field'
+class Helper {}
+const fields: { [fieldKey]: React.FC<TextFieldClientProps>; helper: typeof Helper } = {
+  [fieldKey]: () => null,
+  helper: Helper,
+}`)
+  })
+
   it('should migrate object properties in arrays when an unrelated property contains a class', async () => {
     const source = `import type { TextFieldClientComponent } from 'payload'
 

@@ -638,6 +638,10 @@ type GetStaticPropertyNameArgs = {
 }
 
 function getStaticPropertyName({ nameNode }: GetStaticPropertyNameArgs): string | undefined {
+  if (Node.isComputedPropertyName(nameNode)) {
+    return getStaticComputedPropertyName({ expression: nameNode.getExpression() })
+  }
+
   if (Node.isStringLiteral(nameNode) || Node.isNoSubstitutionTemplateLiteral(nameNode)) {
     return nameNode.getLiteralText()
   }
@@ -647,6 +651,64 @@ function getStaticPropertyName({ nameNode }: GetStaticPropertyNameArgs): string 
   }
 
   return Node.isIdentifier(nameNode) ? nameNode.getText() : undefined
+}
+
+type GetStaticComputedPropertyNameArgs = {
+  expression: Expression
+  visitedExpressions?: Set<Expression>
+}
+
+function getStaticComputedPropertyName({
+  expression: initialExpression,
+  visitedExpressions = new Set<Expression>(),
+}: GetStaticComputedPropertyNameArgs): string | undefined {
+  let expression = initialExpression
+
+  while (
+    Node.isParenthesizedExpression(expression) ||
+    Node.isAsExpression(expression) ||
+    Node.isSatisfiesExpression(expression) ||
+    Node.isTypeAssertion(expression) ||
+    Node.isNonNullExpression(expression)
+  ) {
+    expression = expression.getExpression()
+  }
+
+  if (visitedExpressions.has(expression)) {
+    return undefined
+  }
+
+  visitedExpressions.add(expression)
+
+  if (Node.isStringLiteral(expression) || Node.isNoSubstitutionTemplateLiteral(expression)) {
+    return expression.getLiteralText()
+  }
+
+  if (Node.isNumericLiteral(expression)) {
+    return String(expression.getLiteralValue())
+  }
+
+  if (!Node.isIdentifier(expression)) {
+    return undefined
+  }
+
+  for (const definition of expression.getDefinitions()) {
+    const declaration = definition.getDeclarationNode()
+
+    if (Node.isVariableDeclaration(declaration)) {
+      const initializer = declaration.getInitializer()
+      const propertyName =
+        initializer && Node.isExpression(initializer)
+          ? getStaticComputedPropertyName({ expression: initializer, visitedExpressions })
+          : undefined
+
+      if (propertyName !== undefined) {
+        return propertyName
+      }
+    }
+  }
+
+  return undefined
 }
 
 type GetAvailableNameArgs = {
