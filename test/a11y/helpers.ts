@@ -448,7 +448,6 @@ export async function inContrastThemes({
       await run()
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
       await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
-      await attachContrastScreenshots({ name: `contrast-${theme}`, page })
     })
   }
 }
@@ -465,8 +464,7 @@ export async function expectTextContrast({
 
 /**
  * Measures solid CSS paint, including alpha and ancestor group opacity, without rounding ratios.
- * Boundary checks accept a contrasting fill, border, or outline. Screenshots retain the visual
- * context for reviewing overlapping paint and whether a graphical part is needed to identify state.
+ * Boundary checks accept a contrasting fill, border, or outline.
  */
 export async function expectPaintContrast({
   againstParent = false,
@@ -653,38 +651,8 @@ export async function expectPaintContrast({
   )
 
   expect(results.length, `No rendered contrast targets in ${targets.toString()}`).toBeGreaterThan(0)
-  await test.info().attach('rendered-contrast-measurements', {
-    body: JSON.stringify(results, null, 2),
-    contentType: 'application/json',
-  })
   for (const result of results) {
     expect.soft(result.unsupported, JSON.stringify(result)).toEqual([])
     expect.soft(result.ratio, JSON.stringify(result)).toBeGreaterThanOrEqual(result.minimum)
   }
-}
-
-/** Captures both palettes on identical content; preference behavior is tested separately. */
-export async function attachContrastScreenshots({ name, page }: { name: string; page: Page }) {
-  const theme = await page.locator('html').getAttribute('data-theme')
-  const themeLabel = theme === 'dark' ? 'Dark' : 'Light'
-  const sceneLabel = name.startsWith('contrast-') ? '' : ` — ${name}`
-
-  await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
-  try {
-    await page
-      .locator('html')
-      .evaluate((element) => element.removeAttribute('data-enhanced-contrast'))
-    await test.info().attach(`${themeLabel} — Default${sceneLabel}`, {
-      body: await page.screenshot({ animations: 'disabled', fullPage: true }),
-      contentType: 'image/png',
-    })
-  } finally {
-    await page
-      .locator('html')
-      .evaluate((element) => element.setAttribute('data-enhanced-contrast', ''))
-  }
-  await test.info().attach(`${themeLabel} — Enhanced${sceneLabel}`, {
-    body: await page.screenshot({ animations: 'disabled', fullPage: true }),
-    contentType: 'image/png',
-  })
 }

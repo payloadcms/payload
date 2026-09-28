@@ -11,7 +11,6 @@ import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import {
   addTextBlock,
-  attachContrastScreenshots,
   expectOptionsToHaveAccessibleNames,
   expectPaintContrast,
   expectTextContrast,
@@ -129,10 +128,6 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
         await page.mouse.move(0, 0)
         await expect(save).toHaveCSS('background-color', 'rgb(13, 153, 255)')
-        await test.info().attach(`${theme === 'light' ? 'Light' : 'Dark'} — Default`, {
-          body: await page.screenshot({ fullPage: true }),
-          contentType: 'image/png',
-        })
 
         await toggle.check()
         await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
@@ -143,10 +138,6 @@ test.describe('WCAG 2.2 Level AA', () => {
         await expect(toggle).toBeChecked()
         await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
         await expect(save).toHaveCSS('background-color', 'rgb(7, 104, 207)')
-        await test.info().attach(`${theme === 'light' ? 'Light' : 'Dark'} — Enhanced`, {
-          body: await page.screenshot({ fullPage: true }),
-          contentType: 'image/png',
-        })
 
         await toggle.uncheck()
         await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
@@ -241,7 +232,6 @@ test.describe('WCAG 2.2 Level AA', () => {
               )
             await loginPage.goto(postsURL.login)
             await expectTextContrast({ targets: loginPage.getByRole('link', { name: /forgot/i }) })
-            await attachContrastScreenshots({ name: 'login-contrast', page: loginPage })
           } finally {
             await loginPage.context().close()
           }
@@ -312,8 +302,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
     })
 
-    test('should provide contrast for the unavailable Copy button in light mode', async () => {
-      // PYLD-3681
+    test('should provide contrast for the unavailable Copy button', async () => {
+      // PYLD-3681, PYLD-3683
       await inContrastThemes({
         page,
         run: async () => {
@@ -328,48 +318,8 @@ test.describe('WCAG 2.2 Level AA', () => {
       })
     })
 
-    test('should provide contrast for the unavailable Copy button in dark mode', async () => {
-      // PYLD-3683
-      await inContrastThemes({
-        page,
-        run: async () => {
-          const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
-          const button = drawer.getByRole('button', { name: 'Copy', exact: true })
-          await expect(button).toBeDisabled()
-          // Reported readability expectation; inactive controls are exempt from WCAG 1.4.3.
-          await expectTextContrast({ targets: button })
-        },
-        serverURL,
-        themes: ['light', 'dark'],
-      })
-    })
-
-    test('should provide contrast for Copy from and Copy to field content in light mode', async () => {
-      // PYLD-3684
-      await inContrastThemes({
-        page,
-        run: async () => {
-          const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
-          await expectTextContrast({
-            targets: drawer.locator(
-              '#field-fromLocale .rs__single-value, #field-toLocale .rs__placeholder',
-            ),
-          })
-          await selectInput({
-            multiSelect: false,
-            option: 'Spanish',
-            page,
-            selectLocator: drawer.locator('#field-toLocale'),
-          })
-          await expectTextContrast({ targets: drawer.locator('#field-toLocale .rs__single-value') })
-        },
-        serverURL,
-        themes: ['light', 'dark'],
-      })
-    })
-
-    test('should provide contrast for Copy from and Copy to field content in dark mode', async () => {
-      // PYLD-3685
+    test('should provide contrast for Copy from and Copy to field content', async () => {
+      // PYLD-3684, PYLD-3685
       await inContrastThemes({
         page,
         run: async () => {
@@ -460,7 +410,6 @@ test.describe('WCAG 2.2 Level AA', () => {
             await loginPage.getByRole('link', { name: /forgot/i }).click()
             await expect(loginPage.locator('.forgot-password__form')).toBeVisible()
             await expectTextContrast({ targets: loginPage.locator('button[type="submit"]') })
-            await attachContrastScreenshots({ name: 'forgot-password-submit', page: loginPage })
           } finally {
             await loginPage.context().close()
           }
