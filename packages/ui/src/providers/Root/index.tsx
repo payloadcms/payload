@@ -139,10 +139,11 @@ export const RootProvider: React.FC<Props> = ({
                                   </ThemeProvider>
                                 </HierarchyProvider>
                               </PreferencesProvider>
-                              <ToastContainer config={config} />
                               <ModalContainer />
                               <StayLoggedInModal />
                             </AuthProvider>
+                            {/* AuthProvider can unmount its children during logout; keep pending toasts alive. */}
+                            <ToastContainer config={config} />
                           </DrawerStackProvider>
                         </ModalProvider>
                       </ScrollInfoProvider>
