@@ -2,16 +2,20 @@ import type { ScreenReaderPlaywright } from '@guidepup/playwright'
 import type { Browser, Locator, Page, TestInfo } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { formatAdminURL } from 'payload/shared'
 
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openLocaleSelector, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { toggleLivePreview } from '../__helpers/e2e/live-preview/toggleLivePreview.js'
+import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
+import { DashboardHelper } from '../dashboard/utils.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -232,7 +236,7 @@ export async function openRichTextRelationshipDrawer({
   await gotoCreatePost({ page, postsURL })
   await page.locator('.rich-text-lexical .toolbar-popup__dropdown-add').click()
   await page.locator('.toolbar-popup__dropdown-item[data-item-key="relationship"]').click()
-  const drawer = page.locator('[id^="list-drawer_1_"]')
+  const drawer = page.locator('dialog[id^="list-drawer_1_"]')
   await expect(drawer).toBeVisible()
   return drawer
 }
@@ -423,4 +427,143 @@ export async function expectPopupCursorToMove({
 
   expect.soft(capture.itemText).toMatch(expectedItem)
   await trigger.page().keyboard.press('Escape')
+}
+
+export async function openWidgetDrawer({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', serverURL }))
+  await new DashboardHelper(page).setEditing()
+  const trigger = page.locator('.dashboard-breadcrumb-dropdown__actions button').first()
+
+  return { drawer: page.locator('dialog[id^="widgets-drawer-"]'), trigger }
+}
+
+export async function openRelationshipCreationDrawer({
+  page,
+  postsURL,
+}: {
+  page: Page
+  postsURL: AdminUrlUtil
+}) {
+  await gotoCreatePost({ page, postsURL })
+  await page.locator('#relatedPost-add-new button').press('Enter')
+  const drawer = page.locator('dialog[id^="doc-drawer_posts_"]')
+
+  await expect(drawer).toBeVisible()
+  await expect(drawer.locator('#field-title')).toBeVisible()
+  return drawer
+}
+
+export async function openRichTextUploadDrawer({
+  page,
+  postsURL,
+}: {
+  page: Page
+  postsURL: AdminUrlUtil
+}) {
+  await gotoCreatePost({ page, postsURL })
+  await page.locator('.rich-text-lexical .toolbar-popup__dropdown-add').click()
+  await page.locator('.toolbar-popup__dropdown-item[data-item-key="upload"]').press('Enter')
+  const drawer = page.locator('dialog[id^="list-drawer_1_"]')
+
+  await expect(drawer).toBeVisible()
+  return drawer
+}
+
+const mediaFixtures = new WeakMap<Page, string[]>()
+
+export async function cleanupModalMedia({ page }: { page: Page }) {
+  for (const url of mediaFixtures.get(page) || []) {
+    const response = await page.request.delete(url)
+
+    expect(response.ok(), 'Remove the temporary media document and its generated image files').toBe(
+      true,
+    )
+  }
+  mediaFixtures.delete(page)
+}
+
+export async function openEditImageDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+  const apiURL = formatAdminURL({ apiRoute: '/api', path: '/media', serverURL })
+  const response = await page.request.post(apiURL, {
+    multipart: {
+      _payload: JSON.stringify({}),
+      file: {
+        name: 'modal-dialog-regression.png',
+        buffer: await readFile(path.resolve(dirname, '../uploads/image.png')),
+        mimeType: 'image/png',
+      },
+    },
+  })
+
+  expect(response.ok(), 'Create a persisted image so production crop controls are available').toBe(
+    true,
+  )
+  const { doc } = await response.json()
+
+  mediaFixtures.set(page, [...(mediaFixtures.get(page) || []), `${apiURL}/${doc.id}`])
+  await page.goto(mediaURL.edit(doc.id))
+  await waitForFormReady(page)
+  await page.getByRole('button', { name: /edit image/i }).click()
+  const dialog = page.locator('.edit-upload__dialog')
+
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('button', { name: /apply changes/i })).toBeEnabled()
+  return dialog
+}
+
+export async function openBulkUploadDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  const mediaURL = new AdminUrlUtil(serverURL, 'media')
+
+  await page.goto(mediaURL.list)
+  await page.getByRole('button', { name: /bulk upload/i }).click()
+  const dialog = page.locator('.bulk-upload--add-files')
+
+  await expect(dialog).toBeVisible()
+  return dialog
+}
+
+export async function openAPIKeyDialog({ page, serverURL }: { page: Page; serverURL: string }) {
+  await page.goto(formatAdminURL({ adminRoute: '/admin', path: '/account', serverURL }))
+  await waitForFormReady(page)
+  await page.locator('#regenerate-api-key').click()
+  const dialog = page.locator('dialog[id^="generate-confirmation-"]')
+
+  await expect(dialog).toBeVisible()
+  return dialog
+}
+
+export async function openDrawerFilters({
+  collectionLabel,
+  drawer,
+}: {
+  collectionLabel?: string
+  drawer: Locator
+}) {
+  if (collectionLabel) {
+    await selectInput({
+      multiSelect: false,
+      option: collectionLabel,
+      page: drawer.page(),
+      selectLocator: drawer.locator('.list-drawer__select-collection-wrap'),
+    })
+    await expect(
+      drawer.locator('.list-drawer__select-collection-wrap .rs__single-value'),
+    ).toHaveText(collectionLabel)
+    if (collectionLabel === 'Post') {
+      await expect(drawer.locator('.collection-list--posts')).toBeVisible()
+    }
+  }
+  const drawerSelector = `dialog[id=${JSON.stringify(await drawer.getAttribute('id'))}]`
+  const { filterContainer: filters } = await openListFilters(drawer.page(), {
+    filterContainerSelector: `${drawerSelector} .where-builder`,
+    togglerSelector: `${drawerSelector} #toggle-list-filters`,
+  })
+  const comboboxes = filters.locator('input[role="combobox"]')
+
+  if ((await comboboxes.count()) === 0) {
+    await filters.getByRole('button', { name: /add filter/i }).click()
+  }
+  await expect(comboboxes).toHaveCount(2)
+  return comboboxes
 }

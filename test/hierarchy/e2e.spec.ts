@@ -821,8 +821,8 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(modal).toBeVisible()
 
       // Both folders should be visible in their respective columns
-      await expect(modal.getByRole('button', { name: parentFolderName })).toBeVisible()
-      await expect(modal.getByRole('button', { name: childFolderName })).toBeVisible()
+      await expect(modal.getByRole('button', { name: parentFolderName, exact: true })).toBeVisible()
+      await expect(modal.getByRole('button', { name: childFolderName, exact: true })).toBeVisible()
     })
 
     test('should reset transient selections after canceling and reopening the modal', async () => {

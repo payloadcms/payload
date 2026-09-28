@@ -32,6 +32,7 @@ import { DocumentEventsProvider } from '../DocumentEvents/index.js'
 import { EmbedProvider } from '../Embed/index.js'
 import { HierarchyProvider } from '../Hierarchy/index.js'
 import { LocaleProvider } from '../Locale/index.js'
+import { ModalAccessibility } from '../ModalAccessibility/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { RouteTransitionProvider } from '../RouteTransition/index.js'
@@ -108,6 +109,7 @@ export const RootProvider: React.FC<Props> = ({
                       <ScrollInfoProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
                           <DrawerStackProvider>
+                            <ModalAccessibility />
                             <CloseModalOnRouteChange />
                             <AuthProvider permissions={permissions} user={user}>
                               <PreferencesProvider>
@@ -137,6 +139,7 @@ export const RootProvider: React.FC<Props> = ({
                                   </ThemeProvider>
                                 </HierarchyProvider>
                               </PreferencesProvider>
+                              <ToastContainer config={config} />
                               <ModalContainer />
                               <StayLoggedInModal />
                             </AuthProvider>
@@ -151,7 +154,6 @@ export const RootProvider: React.FC<Props> = ({
           </ServerFunctionsProvider>
         </RouterAdapter>
       </RouteTransitionProvider>
-      <ToastContainer config={config} />
     </ClickOutsideProvider>
   )
 }
