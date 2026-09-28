@@ -673,6 +673,25 @@ const fields: TextFieldClientComponent[] = [CustomField]`
     expect(result.notes?.join('\n')).toContain('class component')
   })
 
+  it('should leave class components in conditional array values unchanged', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const isCustomFieldEnabled = true
+const fields: TextFieldClientComponent[] = [
+  isCustomFieldEnabled ? CustomField : () => null,
+]`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/conditional-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
   it('should leave class components in object properties unchanged and report manual work', async () => {
     const source = `import React from 'react'
 import type { TextFieldClientComponent } from 'payload'
@@ -688,6 +707,27 @@ const fields: { field: TextFieldClientComponent } = { field: CustomField }`
     expect(result.filesChanged).toEqual([])
     expect(result.notes?.join('\n')).toContain('/object-class-component.tsx')
     expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should migrate object properties when an unrelated property contains a class', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+class Helper {}
+const fields: { field: TextFieldClientComponent; helper: typeof Helper } = {
+  field: () => null,
+  helper: Helper,
+}`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+class Helper {}
+const fields: { field: React.FC<TextFieldClientProps>; helper: typeof Helper } = {
+  field: () => null,
+  helper: Helper,
+}`)
   })
 
   it('should leave class components in referenced containers unchanged and report manual work', async () => {

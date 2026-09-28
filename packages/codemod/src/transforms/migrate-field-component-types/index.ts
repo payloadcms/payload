@@ -164,10 +164,15 @@ export const migrateFieldComponentTypes: Transform = {
 
           const classDeclaration = references
             .map((reference) => reference.getFirstAncestorByKind(SyntaxKind.VariableDeclaration))
-            .find((declaration) => {
+            .find((declaration, referenceIndex) => {
               const initializer = declaration?.getInitializer()
+              const componentPropertyName = references[referenceIndex]
+                ?.getFirstAncestorByKind(SyntaxKind.PropertySignature)
+                ?.getName()
 
-              return initializer ? initializerContainsClassComponent(initializer) : false
+              return initializer
+                ? initializerContainsClassComponent({ componentPropertyName, initializer })
+                : false
             })
 
           if (classDeclaration) {
@@ -475,10 +480,17 @@ function addReactTypeImport({ file, reactName }: AddReactTypeImportArgs): void {
   )
 }
 
-function initializerContainsClassComponent(
-  initializer: Expression,
+type InitializerContainsClassComponentArgs = {
+  componentPropertyName?: string
+  initializer: Expression
+  visitedExpressions?: Set<Expression>
+}
+
+function initializerContainsClassComponent({
+  componentPropertyName,
+  initializer,
   visitedExpressions = new Set<Expression>(),
-): boolean {
+}: InitializerContainsClassComponentArgs): boolean {
   let expression = initializer
 
   while (
@@ -506,27 +518,57 @@ function initializerContainsClassComponent(
       const nestedExpression = Node.isSpreadElement(element) ? element.getExpression() : element
 
       return Node.isExpression(nestedExpression)
-        ? initializerContainsClassComponent(nestedExpression, visitedExpressions)
+        ? initializerContainsClassComponent({
+            initializer: nestedExpression,
+            visitedExpressions,
+          })
         : false
     })
   }
 
+  if (Node.isConditionalExpression(expression)) {
+    return [expression.getWhenTrue(), expression.getWhenFalse()].some((nestedExpression) =>
+      initializerContainsClassComponent({ initializer: nestedExpression, visitedExpressions }),
+    )
+  }
+
   if (Node.isObjectLiteralExpression(expression)) {
-    return expression.getProperties().some((property) => {
+    const properties = expression.getProperties()
+    const propertiesToInspect = componentPropertyName
+      ? properties.filter(
+          (property) =>
+            ((Node.isPropertyAssignment(property) ||
+              Node.isShorthandPropertyAssignment(property)) &&
+              property.getName() === componentPropertyName) ||
+            Node.isSpreadAssignment(property),
+        )
+      : properties
+
+    return propertiesToInspect.some((property) => {
       if (Node.isPropertyAssignment(property)) {
         const propertyInitializer = property.getInitializer()
 
         return propertyInitializer && Node.isExpression(propertyInitializer)
-          ? initializerContainsClassComponent(propertyInitializer, visitedExpressions)
+          ? initializerContainsClassComponent({
+              initializer: propertyInitializer,
+              visitedExpressions,
+            })
           : false
       }
 
       if (Node.isShorthandPropertyAssignment(property)) {
-        return initializerContainsClassComponent(property.getNameNode(), visitedExpressions)
+        return initializerContainsClassComponent({
+          initializer: property.getNameNode(),
+          visitedExpressions,
+        })
       }
 
       return Node.isSpreadAssignment(property)
-        ? initializerContainsClassComponent(property.getExpression(), visitedExpressions)
+        ? initializerContainsClassComponent({
+            componentPropertyName,
+            initializer: property.getExpression(),
+            visitedExpressions,
+          })
         : false
     })
   }
@@ -546,7 +588,11 @@ function initializerContainsClassComponent(
       const referencedInitializer = declaration.getInitializer()
 
       return referencedInitializer
-        ? initializerContainsClassComponent(referencedInitializer, visitedExpressions)
+        ? initializerContainsClassComponent({
+            componentPropertyName,
+            initializer: referencedInitializer,
+            visitedExpressions,
+          })
         : false
     }
 
