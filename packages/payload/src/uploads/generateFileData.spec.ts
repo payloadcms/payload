@@ -22,6 +22,16 @@ const WEBP_SIGNATURE = Buffer.from(
   'base64',
 )
 
+// Minimal valid 1x1 single-frame GIF and TIFF, for the same reason.
+const GIF_SIGNATURE = Buffer.from(
+  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+  'base64',
+)
+const TIFF_SIGNATURE = Buffer.from(
+  'SUkqAAwAAAAAAAAADwAAAQMAAQAAAAEAAAABAQMAAQAAAAEAAAACAQMAAwAAANYAAAADAQMAAQAAAAEAAAAGAQMAAQAAAAIAAAARAQQAAQAAAAgAAAASAQMAAQAAAAEAAAAVAQMAAQAAAAMAAAAWAQMAAQAAAAABAAAXAQQAAQAAAAMAAAAaAQUAAQAAAMYAAAAbAQUAAQAAAM4AAAAcAQMAAQAAAAEAAAAoAQMAAQAAAAIAAABTAQMAAwAAANwAAAAAAAAAMzPLAAAACAAzM8sAAAAIAAgACAAIAAEAAQABAA==',
+  'base64',
+)
+
 const createSharpMock = () => {
   const toBufferMock = vi.fn().mockResolvedValue({
     data: PNG_SIGNATURE,
@@ -149,14 +159,26 @@ describe('generateFileData', () => {
   })
 
   describe('when the mime type can be animated (WebP, GIF, TIFF)', () => {
-    const createWebpReq = (sharp: unknown): PayloadRequest =>
+    const createReqFor = ({
+      data,
+      mimetype,
+      name,
+      sharp,
+      tempFilePath = '',
+    }: {
+      data: Buffer
+      mimetype: string
+      name: string
+      sharp: unknown
+      tempFilePath?: string
+    }): PayloadRequest =>
       ({
         file: {
-          data: WEBP_SIGNATURE,
-          mimetype: 'image/webp',
-          name: 'photo.webp',
-          size: WEBP_SIGNATURE.length,
-          tempFilePath: '',
+          data: tempFilePath ? Buffer.alloc(0) : data,
+          mimetype,
+          name,
+          size: data.length,
+          tempFilePath,
         },
         payload: {
           config: { sharp },
@@ -164,21 +186,55 @@ describe('generateFileData', () => {
         },
       }) as unknown as PayloadRequest
 
-    it('should store a single-frame image untouched instead of re-encoding it', async () => {
-      const { sharp, toBufferMock } = createSharpMock()
+    const createWebpReq = (sharp: unknown): PayloadRequest =>
+      createReqFor({ name: 'photo.webp', data: WEBP_SIGNATURE, mimetype: 'image/webp', sharp })
 
-      const { data, files } = await generateFileData({
+    it.each([
+      { name: 'photo.webp', data: WEBP_SIGNATURE, mimetype: 'image/webp' },
+      { name: 'photo.gif', data: GIF_SIGNATURE, mimetype: 'image/gif' },
+      { name: 'photo.tiff', data: TIFF_SIGNATURE, mimetype: 'image/tiff' },
+    ])(
+      'should store a single-frame $mimetype untouched instead of re-encoding it',
+      async ({ name, data: fileBytes, mimetype }) => {
+        const { sharp, toBufferMock } = createSharpMock()
+
+        const { data, files } = await generateFileData({
+          collection: createCollection(),
+          config: {} as SanitizedConfig,
+          data: {},
+          operation: 'create',
+          overwriteExistingFiles: true,
+          req: createReqFor({ name, data: fileBytes, mimetype, sharp }),
+        })
+
+        expect(toBufferMock).not.toHaveBeenCalled()
+        expect(files).toEqual([{ buffer: fileBytes, path: `${os.tmpdir()}/${name}` }])
+        expect(data).toMatchObject({ filesize: fileBytes.length, mimeType: mimetype })
+      },
+    )
+
+    it('should read the frame count from tempFilePath and copy the single-frame file untouched', async () => {
+      const { sharp, toBufferMock } = createSharpMock()
+      await fs.writeFile(tempFilePath, WEBP_SIGNATURE)
+
+      const { files } = await generateFileData({
         collection: createCollection(),
         config: {} as SanitizedConfig,
         data: {},
         operation: 'create',
         overwriteExistingFiles: true,
-        req: createWebpReq(sharp),
+        req: createReqFor({
+          name: 'photo.webp',
+          data: WEBP_SIGNATURE,
+          mimetype: 'image/webp',
+          sharp,
+          tempFilePath,
+        }),
       })
 
+      expect(sharp).toHaveBeenCalledWith(tempFilePath)
       expect(toBufferMock).not.toHaveBeenCalled()
-      expect(files).toEqual([{ buffer: WEBP_SIGNATURE, path: `${os.tmpdir()}/photo.webp` }])
-      expect(data).toMatchObject({ filesize: WEBP_SIGNATURE.length, mimeType: 'image/webp' })
+      expect(files).toEqual([{ path: `${os.tmpdir()}/photo.webp`, sourcePath: tempFilePath }])
     })
 
     it('should still process an animated image with sharp', async () => {
