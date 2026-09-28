@@ -20,6 +20,22 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    dashboard: {
+      defaultLayout: [
+        { widgetSlug: 'welcome', width: 'full' },
+        { widgetSlug: 'collections', width: 'full' },
+        { widgetSlug: 'activity', width: 'small' },
+      ],
+      widgets: [
+        {
+          slug: 'welcome',
+          Component: './components/Welcome/index.tsx#WelcomeWidget',
+          maxWidth: 'full',
+          minWidth: 'full',
+          label: 'Welcome',
+        },
+      ],
+    },
   },
   collections: [Users, Media, Folders, Tags],
   editor: lexicalEditor(),

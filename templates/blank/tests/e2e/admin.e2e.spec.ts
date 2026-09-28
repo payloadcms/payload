@@ -23,6 +23,9 @@ test.describe('Admin Panel', () => {
     await expect(page).toHaveURL('http://localhost:3000/admin')
     const dashboardArtifact = page.locator('.step-nav__first').first()
     await expect(dashboardArtifact).toBeVisible()
+    await expect(
+      page.getByRole('heading', { level: 1, name: `Welcome, ${testUser.email}` }),
+    ).toBeVisible()
   })
 
   test('can navigate to list view', async () => {
