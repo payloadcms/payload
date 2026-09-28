@@ -709,6 +709,40 @@ const fields: { field: TextFieldClientComponent } = { field: CustomField }`
     expect(result.notes?.join('\n')).toContain('class component')
   })
 
+  it('should leave class components in nested object properties unchanged', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const config: { container: { field: TextFieldClientComponent } } = {
+  container: { field: CustomField },
+}`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/nested-object-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should match quoted component property types to unquoted object properties', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const fields: { "field": TextFieldClientComponent } = { field: CustomField }`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/quoted-property-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
   it('should migrate object properties when an unrelated property contains a class', async () => {
     const source = `import type { TextFieldClientComponent } from 'payload'
 
@@ -728,6 +762,46 @@ const fields: { field: React.FC<TextFieldClientProps>; helper: typeof Helper } =
   field: () => null,
   helper: Helper,
 }`)
+  })
+
+  it('should migrate object properties in arrays when an unrelated property contains a class', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+class Helper {}
+const fields: { field: TextFieldClientComponent; helper: typeof Helper }[] = [
+  { field: () => null, helper: Helper },
+]`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+class Helper {}
+const fields: { field: React.FC<TextFieldClientProps>; helper: typeof Helper }[] = [
+  { field: () => null, helper: Helper },
+]`)
+  })
+
+  it('should migrate object properties in conditional values when an unrelated property contains a class', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+class Helper {}
+const isPrimary = true
+const fields: { field: TextFieldClientComponent; helper: typeof Helper } = isPrimary
+  ? { field: () => null, helper: Helper }
+  : { field: () => null, helper: Helper }`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+class Helper {}
+const isPrimary = true
+const fields: { field: React.FC<TextFieldClientProps>; helper: typeof Helper } = isPrimary
+  ? { field: () => null, helper: Helper }
+  : { field: () => null, helper: Helper }`)
   })
 
   it('should leave class components in referenced containers unchanged and report manual work', async () => {

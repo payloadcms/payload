@@ -166,12 +166,13 @@ export const migrateFieldComponentTypes: Transform = {
             .map((reference) => reference.getFirstAncestorByKind(SyntaxKind.VariableDeclaration))
             .find((declaration, referenceIndex) => {
               const initializer = declaration?.getInitializer()
-              const componentPropertyName = references[referenceIndex]
-                ?.getFirstAncestorByKind(SyntaxKind.PropertySignature)
-                ?.getName()
+              const reference = references[referenceIndex]
+              const componentPropertyPath = reference
+                ? getComponentPropertyPath({ reference })
+                : undefined
 
               return initializer
-                ? initializerContainsClassComponent({ componentPropertyName, initializer })
+                ? initializerContainsClassComponent({ componentPropertyPath, initializer })
                 : false
             })
 
@@ -481,13 +482,13 @@ function addReactTypeImport({ file, reactName }: AddReactTypeImportArgs): void {
 }
 
 type InitializerContainsClassComponentArgs = {
-  componentPropertyName?: string
+  componentPropertyPath?: string[]
   initializer: Expression
   visitedExpressions?: Set<Expression>
 }
 
 function initializerContainsClassComponent({
-  componentPropertyName,
+  componentPropertyPath,
   initializer,
   visitedExpressions = new Set<Expression>(),
 }: InitializerContainsClassComponentArgs): boolean {
@@ -519,6 +520,7 @@ function initializerContainsClassComponent({
 
       return Node.isExpression(nestedExpression)
         ? initializerContainsClassComponent({
+            componentPropertyPath,
             initializer: nestedExpression,
             visitedExpressions,
           })
@@ -528,18 +530,25 @@ function initializerContainsClassComponent({
 
   if (Node.isConditionalExpression(expression)) {
     return [expression.getWhenTrue(), expression.getWhenFalse()].some((nestedExpression) =>
-      initializerContainsClassComponent({ initializer: nestedExpression, visitedExpressions }),
+      initializerContainsClassComponent({
+        componentPropertyPath,
+        initializer: nestedExpression,
+        visitedExpressions,
+      }),
     )
   }
 
   if (Node.isObjectLiteralExpression(expression)) {
     const properties = expression.getProperties()
+    const componentPropertyName = componentPropertyPath?.[0]
+    const remainingComponentPropertyPath = componentPropertyPath?.slice(1)
     const propertiesToInspect = componentPropertyName
       ? properties.filter(
           (property) =>
             ((Node.isPropertyAssignment(property) ||
               Node.isShorthandPropertyAssignment(property)) &&
-              property.getName() === componentPropertyName) ||
+              getStaticPropertyName({ nameNode: property.getNameNode() }) ===
+                componentPropertyName) ||
             Node.isSpreadAssignment(property),
         )
       : properties
@@ -550,6 +559,7 @@ function initializerContainsClassComponent({
 
         return propertyInitializer && Node.isExpression(propertyInitializer)
           ? initializerContainsClassComponent({
+              componentPropertyPath: remainingComponentPropertyPath,
               initializer: propertyInitializer,
               visitedExpressions,
             })
@@ -558,6 +568,7 @@ function initializerContainsClassComponent({
 
       if (Node.isShorthandPropertyAssignment(property)) {
         return initializerContainsClassComponent({
+          componentPropertyPath: remainingComponentPropertyPath,
           initializer: property.getNameNode(),
           visitedExpressions,
         })
@@ -565,7 +576,7 @@ function initializerContainsClassComponent({
 
       return Node.isSpreadAssignment(property)
         ? initializerContainsClassComponent({
-            componentPropertyName,
+            componentPropertyPath,
             initializer: property.getExpression(),
             visitedExpressions,
           })
@@ -589,7 +600,7 @@ function initializerContainsClassComponent({
 
       return referencedInitializer
         ? initializerContainsClassComponent({
-            componentPropertyName,
+            componentPropertyPath,
             initializer: referencedInitializer,
             visitedExpressions,
           })
@@ -598,6 +609,44 @@ function initializerContainsClassComponent({
 
     return false
   })
+}
+
+type GetComponentPropertyPathArgs = {
+  reference: Node
+}
+
+function getComponentPropertyPath({
+  reference,
+}: GetComponentPropertyPathArgs): string[] | undefined {
+  const propertySignatures = reference.getAncestors().filter(Node.isPropertySignature).reverse()
+
+  if (propertySignatures.length === 0) {
+    return undefined
+  }
+
+  const propertyPath = propertySignatures.map((property) =>
+    getStaticPropertyName({ nameNode: property.getNameNode() }),
+  )
+
+  return propertyPath.every((propertyName): propertyName is string => propertyName !== undefined)
+    ? propertyPath
+    : undefined
+}
+
+type GetStaticPropertyNameArgs = {
+  nameNode: Node
+}
+
+function getStaticPropertyName({ nameNode }: GetStaticPropertyNameArgs): string | undefined {
+  if (Node.isStringLiteral(nameNode) || Node.isNoSubstitutionTemplateLiteral(nameNode)) {
+    return nameNode.getLiteralText()
+  }
+
+  if (Node.isNumericLiteral(nameNode)) {
+    return String(nameNode.getLiteralValue())
+  }
+
+  return Node.isIdentifier(nameNode) ? nameNode.getText() : undefined
 }
 
 type GetAvailableNameArgs = {
