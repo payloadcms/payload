@@ -67,7 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    'base-access-posts': BaseAccessPost;
+    posts: Post;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -76,7 +76,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    'base-access-posts': BaseAccessPostsSelect<false> | BaseAccessPostsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -87,12 +87,8 @@ export interface Config {
     defaultIDType: string;
   };
   fallbackLocale: null;
-  globals: {
-    'base-access-settings': BaseAccessSetting;
-  };
-  globalsSelect: {
-    'base-access-settings': BaseAccessSettingsSelect<false> | BaseAccessSettingsSelect<true>;
-  };
+  globals: {};
+  globalsSelect: {};
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -125,13 +121,11 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "base-access-posts".
+ * via the `definition` "posts".
  */
-export interface BaseAccessPost {
+export interface Post {
   id: string;
   title?: string | null;
-  tenant?: string | null;
-  status?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -202,8 +196,8 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'base-access-posts';
-        value: string | BaseAccessPost;
+        relationTo: 'posts';
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'users';
@@ -253,12 +247,10 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "base-access-posts_select".
+ * via the `definition` "posts_select".
  */
-export interface BaseAccessPostsSelect<T extends boolean = true> {
+export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  tenant?: T;
-  status?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -331,36 +323,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "base-access-settings".
- */
-export interface BaseAccessSetting {
-  id: string;
-  title?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "base-access-settings_select".
- */
-export interface BaseAccessSettingsSelect<T extends boolean = true> {
-  title?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -376,7 +338,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'base-access-posts' | 'users';
+    relatedCollection: 'posts' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -398,7 +360,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('base-access-posts' | 'users')[] | null;
+    excludedCollections?: ('posts' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

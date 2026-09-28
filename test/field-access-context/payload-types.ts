@@ -67,7 +67,8 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    'base-access-posts': BaseAccessPost;
+    'field-access-context-parents': FieldAccessContextParent;
+    'field-access-context-children': FieldAccessContextChild;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -76,7 +77,8 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    'base-access-posts': BaseAccessPostsSelect<false> | BaseAccessPostsSelect<true>;
+    'field-access-context-parents': FieldAccessContextParentsSelect<false> | FieldAccessContextParentsSelect<true>;
+    'field-access-context-children': FieldAccessContextChildrenSelect<false> | FieldAccessContextChildrenSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -88,10 +90,10 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    'base-access-settings': BaseAccessSetting;
+    'field-access-context-global': FieldAccessContextGlobal;
   };
   globalsSelect: {
-    'base-access-settings': BaseAccessSettingsSelect<false> | BaseAccessSettingsSelect<true>;
+    'field-access-context-global': FieldAccessContextGlobalSelect<false> | FieldAccessContextGlobalSelect<true>;
   };
   locale: null;
   widgets: {
@@ -125,13 +127,36 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "base-access-posts".
+ * via the `definition` "field-access-context-parents".
  */
-export interface BaseAccessPost {
+export interface FieldAccessContextParent {
   id: string;
   title?: string | null;
-  tenant?: string | null;
-  status?: string | null;
+  accessCreateProbe?: string | null;
+  accessReadProbe?: string | null;
+  accessUpdateProbe?: string | null;
+  distinctProbe?: string | null;
+  permissionsProbe?: string | null;
+  child?: (string | null) | FieldAccessContextChild;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-access-context-children".
+ */
+export interface FieldAccessContextChild {
+  id: string;
+  title?: string | null;
+  childReadProbe?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -202,8 +227,12 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'base-access-posts';
-        value: string | BaseAccessPost;
+        relationTo: 'field-access-context-parents';
+        value: string | FieldAccessContextParent;
+      } | null)
+    | ({
+        relationTo: 'field-access-context-children';
+        value: string | FieldAccessContextChild;
       } | null)
     | ({
         relationTo: 'users';
@@ -253,12 +282,28 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "base-access-posts_select".
+ * via the `definition` "field-access-context-parents_select".
  */
-export interface BaseAccessPostsSelect<T extends boolean = true> {
+export interface FieldAccessContextParentsSelect<T extends boolean = true> {
   title?: T;
-  tenant?: T;
-  status?: T;
+  accessCreateProbe?: T;
+  accessReadProbe?: T;
+  accessUpdateProbe?: T;
+  distinctProbe?: T;
+  permissionsProbe?: T;
+  child?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-access-context-children_select".
+ */
+export interface FieldAccessContextChildrenSelect<T extends boolean = true> {
+  title?: T;
+  childReadProbe?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -331,11 +376,12 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "base-access-settings".
+ * via the `definition` "field-access-context-global".
  */
-export interface BaseAccessSetting {
+export interface FieldAccessContextGlobal {
   id: string;
-  title?: string | null;
+  globalReadProbe?: string | null;
+  globalChild?: (string | null) | FieldAccessContextChild;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -349,10 +395,11 @@ export interface BaseAccessSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "base-access-settings_select".
+ * via the `definition` "field-access-context-global_select".
  */
-export interface BaseAccessSettingsSelect<T extends boolean = true> {
-  title?: T;
+export interface FieldAccessContextGlobalSelect<T extends boolean = true> {
+  globalReadProbe?: T;
+  globalChild?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -376,7 +423,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'base-access-posts' | 'users';
+    relatedCollection: 'field-access-context-parents' | 'field-access-context-children' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -398,7 +445,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('base-access-posts' | 'users')[] | null;
+    excludedCollections?: ('field-access-context-parents' | 'field-access-context-children' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

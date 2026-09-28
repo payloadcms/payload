@@ -102,7 +102,7 @@ export interface Config {
     configurable: ConfigurableWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
-    activity: RecentlyViewedWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -139,6 +139,14 @@ export interface Ticket {
   status: 'open' | 'in-progress' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'critical';
   assignee?: (string | null) | User;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -148,6 +156,14 @@ export interface Ticket {
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -155,6 +171,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -178,6 +195,14 @@ export interface Revenue {
   date: string;
   category: 'sales' | 'subscriptions' | 'services' | 'other';
   source?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -199,6 +224,14 @@ export interface Event {
     priority?: number | null;
     room?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -294,6 +327,8 @@ export interface TicketsSelect<T extends boolean = true> {
   status?: T;
   priority?: T;
   assignee?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -307,6 +342,8 @@ export interface RevenueSelect<T extends boolean = true> {
   date?: T;
   category?: T;
   source?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -329,6 +366,8 @@ export interface EventsSelect<T extends boolean = true> {
         priority?: T;
         room?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -345,6 +384,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -352,6 +393,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -467,7 +509,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'tickets' | 'revenue' | 'events' | 'payload-kv';
+    relatedCollection: 'tickets' | 'revenue' | 'events' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -487,9 +529,9 @@ export interface CollectionQueryWidget {
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "activity_widget".
  */
-export interface RecentlyViewedWidget {
+export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'payload-kv')[] | null;
+    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
