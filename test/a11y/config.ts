@@ -6,7 +6,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
+import { MediaCollection, mediaSlug } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
@@ -43,6 +43,13 @@ export default buildConfigWithDefaults({
             path: '/focus-indicators',
           },
         },
+      },
+      dashboard: {
+        defaultLayout: [
+          { widgetSlug: 'collections', width: 'full' },
+          { data: { collection: mediaSlug }, widgetSlug: 'upload-dropzone', width: 'small' },
+        ],
+        widgets: [],
       },
       importMap: {
         baseDir: path.resolve(dirname),

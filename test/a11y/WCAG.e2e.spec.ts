@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test'
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
 import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { selectInput } from '../__helpers/e2e/selectInput.js'
 import {
   addTextBlock,
@@ -187,6 +188,25 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should open the upload dropzone modal from its button with the keyboard', async () => {
+      // PYLD-4166
+      await page.goto(`${serverURL}/admin`)
+
+      const widget = page.locator('.upload-dropzone-widget')
+      const button = widget.getByRole('button', { name: 'Upload files' })
+
+      await expect(button).toBeVisible()
+      await button.focus()
+      await expect(button).toBeFocused()
+      await button.press('Enter')
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+      await expect(modal).toBeVisible()
+      await expect(modal.locator('.bulk-upload--add-files')).toBeVisible()
+      await modal.getByRole('button', { name: 'Close' }).click()
+      await expect(button).toBeFocused()
+    })
+
     test('should operate the Copy to locale select with the keyboard', async () => {
       // PYLD-3688
       const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
@@ -891,6 +911,20 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should expose the upload dropzone without detectable accessibility violations', async ({}, testInfo) => {
+      // PYLD-4166
+      await page.goto(`${serverURL}/admin`)
+      await expect(page.locator('.upload-dropzone-widget')).toBeVisible()
+
+      const results = await runAxeScan({
+        include: ['.upload-dropzone-widget'],
+        page,
+        testInfo,
+      })
+
+      expect(results.violations).toEqual([])
+    })
+
     test('should expose the active locale as selected rather than disabled', async () => {
       // Additional coverage for PYLD-3699.
       // Additional coverage for PYLD-3700.

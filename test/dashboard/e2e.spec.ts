@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -390,6 +391,53 @@ describe('Dashboard', () => {
     await d.addWidget('revenue')
     await d.assertWidget(TOTAL_WIDGETS + 1, 'revenue', 'medium')
     await d.saveChangesAndValidate()
+  })
+
+  test('should open bulk upload from the configured dropzone button and a file drop', async ({
+    page,
+  }) => {
+    test.setTimeout(60000)
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    await d.addWidget('Upload files')
+
+    const widget = d.widgetByPos(TOTAL_WIDGETS + 1)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    const collectionField = drawer.locator('#field-collection')
+
+    await selectInput({
+      multiSelect: false,
+      option: 'Media',
+      page,
+      selectLocator: collectionField,
+    })
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+    await d.saveChangesAndValidate()
+
+    const dropzone = widget.locator('.upload-dropzone-widget__dropzone')
+    await expect(dropzone).toBeVisible()
+    await widget.getByRole('button', { name: 'Upload files' }).click()
+
+    const modal = page.locator('#bulk-upload-modal-slug-1')
+    await expect(modal).toBeVisible()
+    await expect(modal.locator('.bulk-upload--add-files')).toBeVisible()
+    await modal.getByRole('button', { name: 'Close' }).click()
+    await expect(modal).toBeHidden()
+
+    await dropzone.evaluate((element) => {
+      const transfer = new DataTransfer()
+      transfer.items.add(new File(['image'], 'dashboard.png', { type: 'image/png' }))
+      element.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer: transfer }))
+    })
+
+    await expect(modal).toBeVisible()
+    await expect(modal.getByText('dashboard.png')).toBeVisible()
   })
 
   test('delete widget', async ({ page }) => {

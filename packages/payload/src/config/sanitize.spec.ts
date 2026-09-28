@@ -89,6 +89,34 @@ describe('sanitizeConfig', () => {
     expect(sanitizedConfig.admin.avatar).toBe('gravatar')
   })
 
+  it('should offer the upload dropzone only for bulk upload collections without adding it to the default layout', () => {
+    const config: Config = {
+      ...configDefaults,
+      collections: [
+        { slug: 'media', fields: [], upload: true },
+        { slug: 'single-upload', fields: [], upload: { bulkUpload: false } },
+        { slug: 'posts', fields: [] },
+      ],
+    }
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const dashboard = sanitizedConfig.admin.dashboard
+    const widget = dashboard.widgets.find(({ slug }) => slug === 'upload-dropzone')
+    const collectionField = widget?.fields?.find(
+      (field) => 'name' in field && field.name === 'collection',
+    )
+
+    expect(widget).toBeDefined()
+    expect(collectionField).toMatchObject({
+      options: [{ value: 'media' }],
+      required: true,
+      type: 'select',
+    })
+    expect(dashboard.defaultLayout).not.toContainEqual(
+      expect.objectContaining({ widgetSlug: 'upload-dropzone' }),
+    )
+  })
+
   it('should populate sanitized localization defaults with no locales', () => {
     const config: Config = {
       ...configDefaults,
