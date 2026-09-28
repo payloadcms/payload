@@ -56,17 +56,10 @@ export async function RecentlyViewedWidget({
     loadRecentDrafts({ excludedCollections, req }),
   ])
 
-  const relativeTimeFormat = getRelativeTimeFormat(i18n.language)
   const recents = recentReferences
     .map((reference): RecentDocument | undefined => {
       const document = documentsByKey.get(documentKey(reference))
       return document
-        ? {
-            ...document,
-            dateLabel: formatRelativeDate({ relativeTimeFormat, value: reference.viewedAt }),
-            dateTime: reference.viewedAt,
-          }
-        : undefined
     })
     .filter((item): item is RecentDocument => Boolean(item))
     .slice(0, displayLimit)
@@ -78,18 +71,25 @@ export async function RecentlyViewedWidget({
     <RecentsAndPinnedClient
       drafts={drafts}
       labels={{
+        name: i18n.t('general:name'),
         addPin: i18n.t('dashboard:widgetAddPin'),
+        collection: i18n.t('general:collection'),
         drafts: i18n.t('dashboard:widgetRecentDrafts'),
         draftsEmpty: i18n.t('dashboard:widgetRecentDraftsEmpty'),
+        draftsEmptyDescription: i18n.t('dashboard:widgetRecentDraftsEmptyDescription'),
         grid: i18n.t('dashboard:widgetGridView'),
         list: i18n.t('dashboard:widgetListView'),
         pinned: i18n.t('dashboard:widgetPinned'),
         pinnedEmpty: i18n.t('dashboard:widgetPinnedEmpty'),
+        pinnedEmptyDescription: i18n.t('dashboard:widgetPinnedEmptyDescription'),
         pinnedSaveError: i18n.t('dashboard:widgetPinnedSaveError'),
         recents: i18n.t('dashboard:widgetRecentlyViewedTitle'),
         recentsEmpty: i18n.t('dashboard:widgetRecentlyViewedEmpty'),
+        recentsEmptyDescription: i18n.t('dashboard:widgetRecentlyViewedEmptyDescription'),
         removePin: i18n.t('dashboard:widgetRemovePin'),
         title: i18n.t('dashboard:widgetRecentsAndPinned'),
+        updated: i18n.t('dashboard:widgetUpdated'),
+        updatedBy: i18n.t('dashboard:widgetUpdatedBy'),
       }}
       pinned={pinned}
       recents={recents}
@@ -218,6 +218,13 @@ function enrichDocument({
       adminRoute: payload.config.routes.admin,
       path: `/collections/${collectionSlug}/${doc.id}`,
     }),
+    isDraft: doc._status === 'draft',
+    statusLabel:
+      doc._status === 'draft'
+        ? i18n.t('version:draft')
+        : doc._status === 'published'
+          ? i18n.t('version:published')
+          : undefined,
     thumbnailURL: getThumbnailURL({
       doc,
       fields: collectionConfig.fields,
@@ -225,7 +232,7 @@ function enrichDocument({
       useAsThumbnail: collectionConfig.admin?.useAsThumbnail,
     }),
     title: typeof rawTitle === 'string' && rawTitle ? rawTitle : String(doc.id),
-    typeLabel: getTranslation(collectionConfig.labels.singular, i18n),
+    typeLabel: getTranslation(collectionConfig.labels.plural, i18n),
     updatedAt: doc.updatedAt,
   }
 }

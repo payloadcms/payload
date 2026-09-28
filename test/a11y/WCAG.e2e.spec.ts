@@ -219,7 +219,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await drafts.focus()
       await drafts.press('Enter')
       await expect(drafts).toHaveAttribute('aria-pressed', 'true')
-      await expect(widget.getByRole('button', { name: 'You recently viewed' })).toHaveAttribute(
+      await expect(widget.getByRole('button', { name: 'Recently viewed' })).toHaveAttribute(
         'aria-pressed',
         'false',
       )

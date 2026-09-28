@@ -5,8 +5,6 @@ import React, { useRef, useState } from 'react'
 
 import type { PinnedItem, PinnedPreferences } from './recents.js'
 
-import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
-import { GridViewIcon } from '../../icons/GridView/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { WidgetCard } from '../WidgetCard/index.js'
 import { documentKey, togglePinnedItem } from './recents.js'
@@ -16,6 +14,8 @@ export type RecentDocument = {
   dateLabel?: string
   dateTime?: string
   href: string
+  isDraft?: boolean
+  statusLabel?: string
   thumbnailURL?: string
   title: string
   typeLabel: string
@@ -25,17 +25,24 @@ export type RecentDocument = {
 
 type Labels = {
   addPin: string
+  collection: string
   drafts: string
   draftsEmpty: string
+  draftsEmptyDescription: string
   grid: string
   list: string
+  name: string
   pinned: string
   pinnedEmpty: string
+  pinnedEmptyDescription: string
   pinnedSaveError: string
   recents: string
   recentsEmpty: string
+  recentsEmptyDescription: string
   removePin: string
   title: string
+  updated: string
+  updatedBy: string
 }
 
 type Tab = 'drafts' | 'pinned' | 'recents'
@@ -54,7 +61,7 @@ export function RecentsAndPinnedClient({
 }) {
   const { setPreference } = usePreferences()
   const pinnedTabRef = useRef<HTMLButtonElement>(null)
-  const [activeTab, setActiveTab] = useState<Tab>('recents')
+  const [activeTab, setActiveTab] = useState<Tab>('pinned')
   const [view, setView] = useState<View>('grid')
   const [pinned, setPinned] = useState(initialPinned)
   const [isSaving, setIsSaving] = useState(false)
@@ -67,6 +74,12 @@ export function RecentsAndPinnedClient({
       : activeTab === 'drafts'
         ? labels.draftsEmpty
         : labels.pinnedEmpty
+  const emptyDescription =
+    activeTab === 'recents'
+      ? labels.recentsEmptyDescription
+      : activeTab === 'drafts'
+        ? labels.draftsEmptyDescription
+        : labels.pinnedEmptyDescription
 
   const togglePin = async (item: RecentDocument) => {
     if (isSaving) {
@@ -101,7 +114,7 @@ export function RecentsAndPinnedClient({
     <WidgetCard className="recently-viewed-widget recents-widget" title={labels.title}>
       <div className="recents-widget__toolbar">
         <div aria-label={labels.title} className="recents-widget__tabs" role="group">
-          {(['recents', 'drafts', 'pinned'] as const).map((tab) => (
+          {(['pinned', 'recents', 'drafts'] as const).map((tab) => (
             <button
               aria-pressed={activeTab === tab}
               className="recents-widget__tab"
@@ -126,7 +139,10 @@ export function RecentsAndPinnedClient({
             onClick={() => setView('grid')}
             type="button"
           >
-            <GridViewIcon size={16} />
+            <span
+              aria-hidden="true"
+              className="recents-widget__view-icon recents-widget__view-icon--grid"
+            />
           </button>
           <button
             aria-label={labels.list}
@@ -135,64 +151,116 @@ export function RecentsAndPinnedClient({
             onClick={() => setView('list')}
             type="button"
           >
-            <AlignJustifiedIcon size={16} />
+            <span
+              aria-hidden="true"
+              className="recents-widget__view-icon recents-widget__view-icon--table"
+            />
           </button>
         </div>
       </div>
       {items.length ? (
-        <ul className={`recents-widget__items recents-widget__items--${view}`}>
-          {items.map((item) => {
-            const isPinned = pinned.some((entry) => documentKey(entry) === documentKey(item))
+        <div className={`recents-widget__content recents-widget__content--${view}`}>
+          {view === 'list' ? (
+            <div aria-hidden="true" className="recents-widget__list-header">
+              <span>{labels.name}</span>
+              <span>{labels.collection}</span>
+              <span>{labels.updated} ↓</span>
+              <span>{labels.updatedBy}</span>
+            </div>
+          ) : null}
+          <ul className={`recents-widget__items recents-widget__items--${view}`}>
+            {items.map((item) => {
+              const isPinned = pinned.some((entry) => documentKey(entry) === documentKey(item))
 
-            return (
-              <li className="recents-widget__item" key={documentKey(item)}>
-                <a className="recents-widget__link" href={item.href}>
-                  {item.thumbnailURL ? (
-                    <img alt="" className="recents-widget__thumbnail" src={item.thumbnailURL} />
-                  ) : (
-                    <span
-                      aria-hidden="true"
-                      className="recents-widget__thumbnail recents-widget__thumbnail--empty"
-                    />
-                  )}
-                  <span className="recents-widget__details">
-                    <span className="recents-widget__name">{item.title}</span>
-                    <span className="recents-widget__meta">
-                      {item.typeLabel}
-                      {item.dateTime && item.dateLabel ? (
-                        <>
-                          {' · '}
-                          <time dateTime={item.dateTime}>{item.dateLabel}</time>
-                        </>
+              return (
+                <li className="recents-widget__item" key={documentKey(item)}>
+                  <a className="recents-widget__link" href={item.href}>
+                    <span className="recents-widget__thumbnail-container">
+                      {item.thumbnailURL ? (
+                        <img alt="" className="recents-widget__thumbnail" src={item.thumbnailURL} />
+                      ) : (
+                        <span
+                          aria-hidden="true"
+                          className="recents-widget__thumbnail recents-widget__thumbnail--empty"
+                        />
+                      )}
+                      {item.statusLabel ? (
+                        <span
+                          className={`recents-widget__status-pill${item.isDraft ? ' recents-widget__status-pill--draft' : ''}`}
+                        >
+                          {item.statusLabel}
+                        </span>
                       ) : null}
                     </span>
-                  </span>
-                </a>
-                <button
-                  aria-label={`${isPinned ? labels.removePin : labels.addPin}: ${item.title}`}
-                  aria-pressed={isPinned}
-                  className="recents-widget__pin"
-                  disabled={isSaving}
-                  onClick={() => void togglePin(item)}
-                  type="button"
-                >
-                  <svg aria-hidden="true" fill="none" height="16" viewBox="0 0 16 16" width="16">
-                    <path
-                      d="M5 2h6l-1 4 2 2v1H4V8l2-2-1-4ZM8 9v5"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+                    <span className="recents-widget__details">
+                      <span className="recents-widget__name-row">
+                        {item.thumbnailURL ? (
+                          <img
+                            alt=""
+                            className="recents-widget__list-thumbnail"
+                            src={item.thumbnailURL}
+                          />
+                        ) : (
+                          <span
+                            aria-hidden="true"
+                            className="recents-widget__list-thumbnail recents-widget__thumbnail--empty"
+                          />
+                        )}
+                        <span className="recents-widget__name">{item.title}</span>
+                        {item.statusLabel ? (
+                          <span
+                            className={`recents-widget__list-status${item.isDraft ? ' recents-widget__list-status--draft' : ''}`}
+                          >
+                            {item.statusLabel}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="recents-widget__meta">
+                        {item.typeLabel}
+                        {item.dateTime && item.dateLabel ? (
+                          <>
+                            {' · '}
+                            <time dateTime={item.dateTime}>{item.dateLabel}</time>
+                          </>
+                        ) : null}
+                      </span>
+                    </span>
+                    <span className="recents-widget__list-collection">{item.typeLabel}</span>
+                    <span className="recents-widget__list-updated">
+                      {item.dateTime && item.dateLabel ? (
+                        <time dateTime={item.dateTime}>{item.dateLabel}</time>
+                      ) : (
+                        '—'
+                      )}
+                    </span>
+                    <span className="recents-widget__list-updated-by">—</span>
+                  </a>
+                  <button
+                    aria-label={`${isPinned ? labels.removePin : labels.addPin}: ${item.title}`}
+                    aria-pressed={isPinned}
+                    className="recents-widget__pin"
+                    disabled={isSaving}
+                    onClick={() => void togglePin(item)}
+                    type="button"
+                  >
+                    <span aria-hidden="true" className="recents-widget__pin-icon" />
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       ) : (
-        <p aria-live="polite" className="recents-widget__empty">
-          {emptyMessage}
-        </p>
+        <div aria-live="polite" className="recents-widget__empty">
+          <span
+            aria-hidden="true"
+            className={`recents-widget__empty-icon recents-widget__empty-icon--${activeTab}`}
+          />
+          <span className="recents-widget__empty-text">
+            <span className="recents-widget__empty-title">{emptyMessage}</span>
+            <span className="recents-widget__empty-description">{emptyDescription}</span>
+          </span>
+        </div>
       )}
       <span aria-live="polite" className="recents-widget__status">
         {saveError}
