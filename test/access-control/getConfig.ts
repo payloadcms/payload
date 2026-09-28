@@ -139,6 +139,9 @@ export const getConfig: () => Partial<Config> = () => ({
   collections: [
     {
       slug: 'users',
+      admin: {
+        defaultColumns: ['id', 'email'],
+      },
       access: {
         // admin:  () => true,
         admin: async ({ req }) => {

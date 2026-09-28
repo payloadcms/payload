@@ -18,6 +18,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
     hidden: true,
     useAsTitle: 'title',
   },
+  authorship: false,
   fields: [
     {
       name: 'title',
