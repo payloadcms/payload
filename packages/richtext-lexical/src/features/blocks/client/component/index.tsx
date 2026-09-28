@@ -129,6 +129,18 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const blockType = formData.blockType
 
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
+
+  const clientSchemaMap = featureClientSchemaMap['blocks']
+
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
+    componentMapRenderedBlockPath
+  ]?.[0] as BlocksFieldClient | undefined
+
+  const blockOrSlug = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
+
   const { getFormState } = useServerFunctions()
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
@@ -302,7 +314,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       }
     }
 
-    if (formData && !initialState) {
+    if (clientBlock && formData && !initialState) {
       void awaitInitialState()
     }
 
@@ -325,23 +337,12 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     getDocPreferences,
     parentDocumentFields,
     blockType,
+    clientBlock,
   ])
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
     initialLexicalFormState?.[formData.id]?.collapsed ?? false,
   )
-
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
-
-  const clientSchemaMap = featureClientSchemaMap['blocks']
-
-  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
-    componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient | undefined
-
-  const blockOrSlug = blocksField?.blocks?.[0]
-  const clientBlock: ClientBlock | undefined =
-    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
 
   const { i18n, t } = useTranslation<object, string>()
 
