@@ -107,6 +107,7 @@ test.suite('@payloadcms/storage-azure', { config: './config.ts', resetBetweenTes
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()

@@ -1233,12 +1233,17 @@ test.suite('@payloadcms/plugin-cloud-storage', { config: './config.ts' }, () => 
             prefix: 'test',
           },
           filePath: path.resolve(dirname, '../uploads/image.png'),
+          overrideAccess: true,
         })
 
         expect(upload.id).toBeTruthy()
         expect(upload.prefix).toBe('test')
 
-        await payload.delete({ id: upload.id, collection: mediaWithDisabledPluginSlug })
+        await payload.delete({
+          id: upload.id,
+          collection: mediaWithDisabledPluginSlug,
+          overrideAccess: true,
+        })
       })
     })
   })

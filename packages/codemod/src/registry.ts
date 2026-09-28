@@ -1,5 +1,6 @@
 import type { Transform } from './types.js'
 
+import { addOverrideAccessTrue } from './transforms/add-override-access-true/index.js'
 import { exampleNoop } from './transforms/example-noop/index.js'
 import { globalsComponentsEdit } from './transforms/globals-components-edit/index.js'
 import { migrateAfterOperationRead } from './transforms/migrate-after-operation-read/index.js'
@@ -16,6 +17,7 @@ import { migrateImportExportHooks } from './transforms/migrate-import-export-hoo
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
 import { migrateNextGenerateViewportExport } from './transforms/migrate-next-generate-viewport-export/index.js'
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
+import { migratePayloadRequestCreation } from './transforms/migrate-payload-request-creation/index.js'
 import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
@@ -31,6 +33,7 @@ import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescri
 
 export const transforms: Transform[] = [
   exampleNoop,
+  addOverrideAccessTrue,
   migrateAfterOperationRead,
   migrateHideAPIURL,
   globalsComponentsEdit,
@@ -38,6 +41,7 @@ export const transforms: Transform[] = [
   migrateDisabledFields,
   migrateForceSelect,
   migrateAliasedExports,
+  migratePayloadRequestCreation,
   migrateBlockReferencesToBlocks,
   migrateBuildScript,
   migrateDocumentTitleContext,

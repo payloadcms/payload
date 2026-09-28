@@ -33,6 +33,7 @@ const createdJob = await payload.jobs.queue({
   input: {
     title: 'my title',
   },
+  overrideAccess: true,
 })
 ```
 
@@ -44,6 +45,7 @@ const createdJob = await payload.jobs.queue({
   input: {
     title: 'my title',
   },
+  overrideAccess: true,
 })
 ```
 
@@ -68,6 +70,7 @@ The most common place - queue jobs in response to document changes:
             input: {
               postId: doc.id,
             },
+            overrideAccess: true,
           })
         }
       },
@@ -95,6 +98,7 @@ Queue jobs based on specific field changes:
             input: {
               imageId: value,
             },
+            overrideAccess: true,
           })
         }
       },
@@ -115,6 +119,8 @@ export const POST = async (req: PayloadRequest) => {
       month: new Date().getMonth(),
       year: new Date().getFullYear(),
     },
+    overrideAccess: false,
+    req,
   })
 
   return Response.json({
@@ -131,15 +137,25 @@ Queue jobs from Next.js server actions:
 ```ts
 'use server'
 
-import { getPayload } from 'payload'
+import { headers } from 'next/headers'
+import { createLocalReq, getPayload, UnauthorizedError } from 'payload'
 import config from '@payload-config'
 
-export async function scheduleEmail(userId: string) {
+export async function scheduleEmail() {
   const payload = await getPayload({ config })
+  const { user } = await payload.auth({ headers: await headers() })
+
+  if (!user) {
+    throw new UnauthorizedError()
+  }
+
+  const req = await createLocalReq({ user }, payload)
 
   await payload.jobs.queue({
     task: 'sendEmail',
-    input: { userId },
+    input: { userId: user.id },
+    overrideAccess: false,
+    req,
   })
 }
 ```
@@ -152,6 +168,7 @@ When queuing a job, you can pass additional options:
 await payload.jobs.queue({
   task: 'sendEmail',
   input: { userId: '123' },
+  overrideAccess: true,
 
   // Schedule the job to run in the future
   waitUntil: new Date('2024-12-25T00:00:00Z'),
@@ -175,6 +192,7 @@ await payload.jobs.queue({
 - `queue` - Assign the job to a specific queue (defaults to `'default'`)
 - `log` - Add custom log entries for debugging or tracking
 - `req` - Pass the request context for access control
+- `overrideAccess` - Skip Jobs access control when set to `true` (defaults to `false`)
 
 #### Check Job Status
 
@@ -184,11 +202,13 @@ After queuing a job, you can check its status:
 const job = await payload.jobs.queue({
   task: 'processPayment',
   input: { orderId: '123' },
+  overrideAccess: true,
 })
 
 // Later, check the job status
 const updatedJob = await payload.findByID({
   collection: 'payload-jobs',
+  overrideAccess: true,
   id: job.id,
 })
 
@@ -234,9 +254,9 @@ Payload increments `totalTried` after each completed attempt. While the handler 
 
 Use Payload's dedicated Jobs APIs and endpoints, such as `payload.jobs.*`, `/run`, and `/handle-schedules`. Calling generic Local API, REST, or GraphQL CRUD directly on `payload-jobs` is not recommended because it bypasses the job operations and does not run `jobs.access.*`.
 
-Raw collection create, read, update, and delete access is denied by default. You can adjust these rules through `jobsCollectionOverrides`. REST and GraphQL always run them; Local API CRUD runs them when you pass `overrideAccess: false`.
+Raw collection create, read, update, and delete access is denied by default. You can adjust these rules through `jobsCollectionOverrides`. REST, GraphQL, and Local API CRUD run these access rules by default. Set `overrideAccess: true` only for trusted server-side operations that should bypass them.
 
-The dedicated job operations use `jobs.access.queue`, `run`, and `cancel`. Local API calls run these functions when you pass `overrideAccess: false`. The `/run` and `/handle-schedules` endpoints always check `jobs.access.run`.
+The dedicated job operations use `jobs.access.queue`, `run`, and `cancel`. `payload.jobs.queue()`, `run()`, `runByID()`, `cancel()`, and `cancelByID()` run these functions by default because their `overrideAccess` option defaults to `false`. Set `overrideAccess: true` to bypass Jobs access control for trusted server-side work. The `/run` and `/handle-schedules` endpoints always check `jobs.access.run`.
 
 Configure access for the dedicated job operations in your Jobs Config:
 
@@ -266,10 +286,10 @@ const config: SanitizedConfig = {
 
 These functions receive the current `req` and return a boolean. By default, they allow authenticated users.
 
-Pass `overrideAccess: false` to run them from the Local API:
+Omit `overrideAccess` or pass `overrideAccess: false` to run them from the Local API:
 
 ```ts
-const req = await createLocalReq({ user }, payload)
+const req = await createPayloadRequest({ payload, user })
 
 await payload.jobs.queue({
   workflow: 'createPost',
@@ -288,6 +308,7 @@ To cancel a specific job, use the `payload.jobs.cancelByID` method with the job'
 ```ts
 await payload.jobs.cancelByID({
   id: createdJob.id,
+  overrideAccess: true,
 })
 ```
 
@@ -295,6 +316,7 @@ To cancel multiple jobs at once, use the `payload.jobs.cancel` method with a `Wh
 
 ```ts
 await payload.jobs.cancel({
+  overrideAccess: true,
   where: {
     workflowSlug: {
       equals: 'createPost',

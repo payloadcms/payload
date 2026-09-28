@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { Payload } from '../index.js'
 
-import { createLocalReq } from './createLocalReq.js'
+import { createPayloadRequest } from './createPayloadRequest.js'
 
-describe('createLocalReq - URL construction', () => {
+describe('createPayloadRequest - URL construction', () => {
   const mockPayload = {
     config: {
       serverURL: undefined,
@@ -25,7 +25,7 @@ describe('createLocalReq - URL construction', () => {
       url: 'http://example.com/api/test',
     }
 
-    const result = await createLocalReq({ req }, mockPayload)
+    const result = await createPayloadRequest({ payload: mockPayload, req })
 
     expect(result.url).toBe('http://example.com/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
@@ -49,7 +49,11 @@ describe('createLocalReq - URL construction', () => {
 
     const req = {}
 
-    const result = await createLocalReq({ req, urlSuffix: '/api' }, payloadWithServerURL)
+    const result = await createPayloadRequest({
+      payload: payloadWithServerURL,
+      req,
+      urlSuffix: '/api',
+    })
 
     expect(result.url).toContain('http://configured-server.com/api')
     expect(payloadWithServerURL.logger.error).not.toHaveBeenCalled()
@@ -75,7 +79,7 @@ describe('createLocalReq - URL construction', () => {
       url: 'http://actual-request.com/api/test',
     }
 
-    const result = await createLocalReq({ req }, payloadWithServerURL)
+    const result = await createPayloadRequest({ payload: payloadWithServerURL, req })
 
     expect(result.url).toBe('http://actual-request.com/api/test')
     expect(payloadWithServerURL.logger.error).not.toHaveBeenCalled()
@@ -84,7 +88,7 @@ describe('createLocalReq - URL construction', () => {
   it('should fall back to localhost when neither req.url nor serverURL provided', async () => {
     const req = {}
 
-    const result = await createLocalReq({ req }, mockPayload)
+    const result = await createPayloadRequest({ payload: mockPayload, req })
 
     expect(result.url).toBe('http://localhost/')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
@@ -108,7 +112,11 @@ describe('createLocalReq - URL construction', () => {
 
     const req = {}
 
-    const result = await createLocalReq({ req, urlSuffix: '/api/preview' }, payloadWithServerURL)
+    const result = await createPayloadRequest({
+      payload: payloadWithServerURL,
+      req,
+      urlSuffix: '/api/preview',
+    })
 
     expect(result.url).toContain('/api/preview')
     expect(payloadWithServerURL.logger.error).not.toHaveBeenCalled()
@@ -117,14 +125,14 @@ describe('createLocalReq - URL construction', () => {
   it('should append urlSuffix to fallback URL when neither req.url nor serverURL provided', async () => {
     const req = {}
 
-    const result = await createLocalReq({ req, urlSuffix: '/api/test' }, mockPayload)
+    const result = await createPayloadRequest({ payload: mockPayload, req, urlSuffix: '/api/test' })
 
     expect(result.url).toBe('http://localhost/api/test')
     expect(mockPayload.logger.error).not.toHaveBeenCalled()
   })
 })
 
-describe('createLocalReq - locale isolation', () => {
+describe('createPayloadRequest - locale isolation', () => {
   const localizedPayload = {
     config: {
       admin: { user: 'users' },
@@ -153,7 +161,7 @@ describe('createLocalReq - locale isolation', () => {
       payloadDataLoader: {},
     }
 
-    const result = await createLocalReq({ locale: 'en', req }, localizedPayload)
+    const result = await createPayloadRequest({ locale: 'en', payload: localizedPayload, req })
 
     expect(result.locale).toBe('en')
     expect(req.locale).toBe('es')
@@ -167,7 +175,7 @@ describe('createLocalReq - locale isolation', () => {
       payloadDataLoader: {},
     }
 
-    const result = await createLocalReq({ locale: 'en', req }, localizedPayload)
+    const result = await createPayloadRequest({ locale: 'en', payload: localizedPayload, req })
 
     expect(result.fallbackLocale).toBe('en')
     expect(req.fallbackLocale).toBe(false)
@@ -180,7 +188,7 @@ describe('createLocalReq - locale isolation', () => {
       payloadDataLoader: {},
     }
 
-    const result = await createLocalReq({ req }, localizedPayload)
+    const result = await createPayloadRequest({ payload: localizedPayload, req })
 
     expect(result.locale).toBe('es')
     expect(req.locale).toBe('es')

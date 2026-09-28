@@ -18,12 +18,13 @@ test.suite(
           input: {
             message: 'test',
           },
+          overrideAccess: true,
         })
 
         // Count every console log (= db call)
         const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
-        const res = await payload.jobs.run({})
+        const res = await payload.jobs.run({ overrideAccess: true })
 
         expect(res).toEqual({
           jobStatus: { '1': { status: 'success' } },

@@ -1094,7 +1094,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
     'jobs:run --all-queues --limit 1 --json',
     { db: 'mongo' },
     async ({ cli, payload }) => {
-      await payload.jobs.queue({ input: {}, task: 'noop' } as never)
+      await payload.jobs.queue({ input: {}, overrideAccess: true, task: 'noop' } as never)
       const jobsBefore = (await payload.find({
         collection: 'payload-jobs',
         limit: 100,
@@ -1131,7 +1131,7 @@ test.suite('CLI', { config: './config.ts' }, () => {
   )
 
   test.options('jobs:run --help', { db: 'mongo' }, async ({ cli, payload }) => {
-    await payload.jobs.queue({ input: {}, task: 'noop' } as never)
+    await payload.jobs.queue({ input: {}, overrideAccess: true, task: 'noop' } as never)
     const pagesBefore = (await payload.find({
       collection: 'pages',
       limit: 100,

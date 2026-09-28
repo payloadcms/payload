@@ -58,6 +58,7 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
     const uploadData = (await payload.findByID({
       id: uploadId,
       collection: collectionSlug as 'media',
+      overrideAccess: true,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
     const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
@@ -77,6 +78,7 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -89,6 +91,7 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -117,6 +120,7 @@ test.suite('@payloadcms/storage-gcs', { config: './config.ts', resetBetweenTests
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()

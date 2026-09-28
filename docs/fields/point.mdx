@@ -90,6 +90,7 @@ const polygon: Point[] = [
 
 payload.find({
   collection: 'points',
+  overrideAccess: true,
   where: {
     point: {
       within: {
@@ -117,6 +118,7 @@ const polygon: Point[] = [
 
 payload.find({
   collection: 'points',
+  overrideAccess: true,
   where: {
     point: {
       intersects: {
