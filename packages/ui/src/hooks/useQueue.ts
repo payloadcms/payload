@@ -10,8 +10,9 @@ type QueuedTaskOptions = {
    */
   afterProcess?: () => void
   /**
-   * A function that can be used to prevent the queue from processing under certain conditions
-   * Can also be used to perform side effects before processing the queue
+   * A function that is called before the queue processes each function
+   * Can be used to prevent the queue from processing under certain conditions
+   * Can also be used to perform side effects before processing, such as undoing those of `afterProcess`
    * @returns {boolean} If `false`, the queue will not process
    */
   beforeProcess?: () => boolean | void
@@ -50,16 +51,17 @@ export function useQueue(): {
         return
       }
 
-      // Allow the consumer to prevent the queue from processing under certain conditions
-      if (typeof options?.beforeProcess === 'function') {
-        const shouldContinue = options.beforeProcess()
-
-        if (shouldContinue === false) {
-          return
-        }
-      }
-
       while (queue.current.length > 0) {
+        // Allow the consumer to prevent the queue from processing under certain conditions
+        // Runs before every task, because `afterProcess` runs after every task
+        if (typeof options?.beforeProcess === 'function') {
+          const shouldContinue = options.beforeProcess()
+
+          if (shouldContinue === false) {
+            return
+          }
+        }
+
         const latestTask = queue.current.pop() // Only process the last task in the queue
         queue.current = [] // Discard all other tasks
 
