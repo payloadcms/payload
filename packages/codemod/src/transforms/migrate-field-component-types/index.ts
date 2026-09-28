@@ -167,7 +167,7 @@ export const migrateFieldComponentTypes: Transform = {
             .find((declaration) => {
               const initializer = declaration?.getInitializer()
 
-              return initializer ? isClassComponentInitializer(initializer) : false
+              return initializer ? initializerContainsClassComponent(initializer) : false
             })
 
           if (classDeclaration) {
@@ -461,21 +461,21 @@ type AddReactTypeImportArgs = {
 function addReactTypeImport({ file, reactName }: AddReactTypeImportArgs): void {
   const importDeclarations = file.getImportDeclarations()
   const lastImport = importDeclarations.at(-1)
-  const nextStatement = lastImport
-    ? file.getStatements().find((statement) => statement.getStart() > lastImport.getEnd())
-    : undefined
+  const statements = file.getStatements()
+  const insertionIndex = lastImport ? statements.indexOf(lastImport) + 1 : 0
+  const nextStatement = statements.at(insertionIndex)
   const needsTerminator =
     lastImport && nextStatement
       ? lastImport.getEndLineNumber() === nextStatement.getStartLineNumber()
       : false
 
   file.insertStatements(
-    importDeclarations.length,
+    insertionIndex,
     `import type ${reactName} from 'react'${needsTerminator ? ';' : ''}`,
   )
 }
 
-function isClassComponentInitializer(
+function initializerContainsClassComponent(
   initializer: Expression,
   visitedExpressions = new Set<Expression>(),
 ): boolean {
@@ -501,6 +501,36 @@ function isClassComponentInitializer(
     return true
   }
 
+  if (Node.isArrayLiteralExpression(expression)) {
+    return expression.getElements().some((element) => {
+      const nestedExpression = Node.isSpreadElement(element) ? element.getExpression() : element
+
+      return Node.isExpression(nestedExpression)
+        ? initializerContainsClassComponent(nestedExpression, visitedExpressions)
+        : false
+    })
+  }
+
+  if (Node.isObjectLiteralExpression(expression)) {
+    return expression.getProperties().some((property) => {
+      if (Node.isPropertyAssignment(property)) {
+        const propertyInitializer = property.getInitializer()
+
+        return propertyInitializer && Node.isExpression(propertyInitializer)
+          ? initializerContainsClassComponent(propertyInitializer, visitedExpressions)
+          : false
+      }
+
+      if (Node.isShorthandPropertyAssignment(property)) {
+        return initializerContainsClassComponent(property.getNameNode(), visitedExpressions)
+      }
+
+      return Node.isSpreadAssignment(property)
+        ? initializerContainsClassComponent(property.getExpression(), visitedExpressions)
+        : false
+    })
+  }
+
   if (!Node.isIdentifier(expression)) {
     return false
   }
@@ -516,7 +546,7 @@ function isClassComponentInitializer(
       const referencedInitializer = declaration.getInitializer()
 
       return referencedInitializer
-        ? isClassComponentInitializer(referencedInitializer, visitedExpressions)
+        ? initializerContainsClassComponent(referencedInitializer, visitedExpressions)
         : false
     }
 
