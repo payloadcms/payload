@@ -10,6 +10,11 @@ const dirname = path.dirname(filename)
 
 export const ResizePreviewMedia: CollectionConfig = {
   slug: resizePreviewMediaSlug,
+  access: {
+    // Ordinary reads are public so Cloudinary can fetch the source; a dynamic
+    // transformation request requires an authenticated user.
+    read: ({ req }) => (req.fileTransform ? Boolean(req.user) : true),
+  },
   fields: [
     {
       name: 'resizePreview',

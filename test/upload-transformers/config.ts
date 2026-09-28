@@ -6,7 +6,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ResizePreviewMedia } from './collections/ResizePreviewMedia/index.js'
 import { TransformerMedia } from './collections/TransformerMedia/index.js'
-import { testTransformers } from './transformerFixtures.js'
+import { isCloudinaryEnabled, testTransformers } from './transformerFixtures.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +24,11 @@ export default buildConfigWithDefaults({
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
     upload: {
-      transformers: [sharpTransformer({ dynamic: true }), ...testTransformers],
+      transformers: [
+        // Cloudinary takes over dynamic resizing when enabled, so leave Sharp none to handle.
+        sharpTransformer({ dynamic: isCloudinaryEnabled ? { collections: [] } : true }),
+        ...testTransformers,
+      ],
     },
   },
   seed: async (payload) => {
