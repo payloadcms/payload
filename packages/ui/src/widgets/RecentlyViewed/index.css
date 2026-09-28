@@ -342,6 +342,12 @@
     line-height: var(--text-body-medium-line-height);
   }
 
+  .recents-widget__content--list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
   .recents-widget__items--list {
     display: flex;
     flex-direction: column;
