@@ -14,6 +14,11 @@ const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   suite: 'upload-transformers',
   config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
     collections: [TransformerMedia, ResizePreviewMedia],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
