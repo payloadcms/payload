@@ -88,8 +88,6 @@ describe('General', () => {
     const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -119,7 +117,6 @@ describe('General', () => {
 
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
@@ -1261,6 +1258,7 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       title,
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -1271,5 +1269,6 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       point: [4, -4],
       ...overrides,
     },
+    overrideAccess: true,
   }) as unknown as Promise<Geo>
 }

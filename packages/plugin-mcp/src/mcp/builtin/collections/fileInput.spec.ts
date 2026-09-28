@@ -35,7 +35,7 @@ describe('MCP file input', () => {
 
     await expect(
       resolveFile({
-        collectionSlug: 'media',
+        slug: 'media',
         input: {
           data: Buffer.from('hello').toString('base64'),
           mimeType: 'text/plain',
@@ -54,7 +54,7 @@ describe('MCP file input', () => {
 
     await expect(
       resolveFile({
-        collectionSlug: 'media',
+        slug: 'media',
         input: {
           source: 'externalURL',
           url: 'https://example.com/image.png',

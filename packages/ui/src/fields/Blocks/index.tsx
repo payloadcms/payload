@@ -87,7 +87,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     replaceState,
     setModified,
   } = useForm()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
   const {
     config: { localization },
     config,

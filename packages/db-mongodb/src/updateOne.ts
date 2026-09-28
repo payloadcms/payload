@@ -85,12 +85,12 @@ export const updateOne: UpdateOne = async function updateOne(
   const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
-    new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: collectionConfig.flattenedFields,
       select,
     }),
+    returnDocument: 'after',
   }
 
   try {

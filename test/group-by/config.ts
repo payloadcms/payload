@@ -15,26 +15,25 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [
-    PagesCollection,
-    PostsCollection,
-    CategoriesCollection,
-    MediaCollection,
-    RelationshipsCollection,
-    NoGroupableCollection,
-  ],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
+  suite: 'group-by',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname),
+      },
+    },
+    collections: [
+      PagesCollection,
+      PostsCollection,
+      CategoriesCollection,
+      MediaCollection,
+      RelationshipsCollection,
+      NoGroupableCollection,
+    ],
+    editor: lexicalEditor({}),
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  editor: lexicalEditor({}),
-  onInit: async (payload) => {
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
-  },
+  seed,
 })

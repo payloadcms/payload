@@ -1,31 +1,13 @@
-import type { Payload } from 'payload'
-
-import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { expect } from 'vitest'
 
 import type { Organization } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { test } from '../__helpers/int/vitest.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-let payload: Payload
-
-describe('Hierarchy', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    if (payload) {
-      await payload.destroy()
-    }
-  })
-
-  describe('Collection Config Property', () => {
-    it('should add virtual path fields to collection', () => {
+test.suite('Hierarchy', { config: './config.ts', resetBetweenTests: false }, () => {
+  test.describe('Collection Config Property', () => {
+    test('should add virtual path fields to collection', ({ payload }) => {
       const organizationsCollection = payload.collections.organizations.config
 
       // Check that virtual path fields were added
@@ -40,26 +22,34 @@ describe('Hierarchy', () => {
       expect(titlePathField.virtual).toBe(true)
     })
 
-    it('should have sanitized hierarchy config', () => {
+    test('should hide virtual path fields from the admin panel', ({ payload }) => {
+      const organizationsCollection = payload.collections.organizations.config
+
+      const slugPathField = organizationsCollection.fields.find((f) => f.name === '_h_slugPath')
+      const titlePathField = organizationsCollection.fields.find((f) => f.name === '_h_titlePath')
+
+      expect(slugPathField.admin.hidden).toBe(true)
+      expect(titlePathField.admin.hidden).toBe(true)
+    })
+
+    test('should have sanitized hierarchy config', ({ payload }) => {
       const organizationsCollection = payload.collections.organizations.config
 
       expect(organizationsCollection.hierarchy).not.toBe(false)
       if (organizationsCollection.hierarchy !== false) {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(organizationsCollection.hierarchy.parentFieldName).toBe('parent')
       }
     })
 
-    it('should support custom field names', () => {
+    test('should support custom field names', ({ payload }) => {
       const deptsCollection = payload.collections.departments.config
 
       expect(deptsCollection.hierarchy).not.toBe(false)
       if (deptsCollection.hierarchy !== false) {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(deptsCollection.hierarchy.parentFieldName).toBe('parentDept')
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(deptsCollection.hierarchy.slugPathFieldName).toBe('_breadcrumbSlug')
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(deptsCollection.hierarchy.titlePathFieldName).toBe('_breadcrumbTitle')
       }
 
@@ -72,18 +62,18 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Tree Data Generation', () => {
-    beforeEach(async () => {
+  test.describe('Tree Data Generation', () => {
+    test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    it('should compute correct paths for root document', async () => {
+    test('should compute correct paths for root document', async ({ payload }) => {
       const rootPage = await payload.create({
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
@@ -91,13 +81,14 @@ describe('Hierarchy', () => {
           parent: null,
           title: 'Root Page',
         },
+        overrideAccess: true,
       })
 
       expect(rootPage._h_slugPath).toBe('root-page')
       expect(rootPage._h_titlePath).toBe('Root Page')
     })
 
-    it('should compute correct paths for nested documents', async () => {
+    test('should compute correct paths for nested documents', async ({ payload }) => {
       // Create root
       const rootPage = await payload.create({
         collection: 'organizations',
@@ -105,6 +96,7 @@ describe('Hierarchy', () => {
           parent: null,
           title: 'Root',
         },
+        overrideAccess: true,
       })
 
       // Create child
@@ -115,6 +107,7 @@ describe('Hierarchy', () => {
           parent: rootPage.id,
           title: 'Child',
         },
+        overrideAccess: true,
       })
 
       expect(childPage._h_slugPath).toBe('root/child')
@@ -128,32 +121,37 @@ describe('Hierarchy', () => {
           parent: childPage.id,
           title: 'Grandchild',
         },
+        overrideAccess: true,
       })
 
       expect(grandchildPage._h_slugPath).toBe('root/child/grandchild')
       expect(grandchildPage._h_titlePath).toBe('Root/Child/Grandchild')
     })
 
-    it('should compute updated paths when parent changes', async () => {
+    test('should compute updated paths when parent changes', async ({ payload }) => {
       // Create initial tree: Root -> Child -> Grandchild
       const rootPage = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
+        overrideAccess: true,
       })
 
       const anotherRoot = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Another Root' },
+        overrideAccess: true,
       })
 
       const childPage = await payload.create({
         collection: 'organizations',
         data: { parent: rootPage.id, title: 'Child' },
+        overrideAccess: true,
       })
 
       const grandchildPage = await payload.create({
         collection: 'organizations',
         data: { parent: childPage.id, title: 'Grandchild' },
+        overrideAccess: true,
       })
 
       // Move child to another root
@@ -162,6 +160,7 @@ describe('Hierarchy', () => {
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         data: { parent: anotherRoot.id },
+        overrideAccess: true,
       })
 
       // Check child path reflects new parent
@@ -173,22 +172,25 @@ describe('Hierarchy', () => {
         id: grandchildPage.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
+        overrideAccess: true,
       })
 
       expect(updatedGrandchild._h_slugPath).toBe('another-root/child/grandchild')
       expect(updatedGrandchild._h_titlePath).toBe('Another Root/Child/Grandchild')
     })
 
-    it('should compute updated paths when ancestor title changes', async () => {
+    test('should compute updated paths when ancestor title changes', async ({ payload }) => {
       // Create tree
       const rootPage = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
+        overrideAccess: true,
       })
 
       const childPage = await payload.create({
         collection: 'organizations',
         data: { parent: rootPage.id, title: 'Child' },
+        overrideAccess: true,
       })
 
       // Update root title
@@ -196,6 +198,7 @@ describe('Hierarchy', () => {
         id: rootPage.id,
         collection: 'organizations',
         data: { title: 'Updated Root' },
+        overrideAccess: true,
       })
 
       // Check child paths automatically reflect change (walks up parent chain)
@@ -203,22 +206,25 @@ describe('Hierarchy', () => {
         id: childPage.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
+        overrideAccess: true,
       })
 
       expect(updatedChild._h_slugPath).toBe('updated-root/child')
       expect(updatedChild._h_titlePath).toBe('Updated Root/Child')
     })
 
-    it('should handle moving to root level', async () => {
+    test('should handle moving to root level', async ({ payload }) => {
       // Create tree
       const rootPage = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
+        overrideAccess: true,
       })
 
       const childPage = await payload.create({
         collection: 'organizations',
         data: { parent: rootPage.id, title: 'Child' },
+        overrideAccess: true,
       })
 
       // Move child to root
@@ -227,6 +233,7 @@ describe('Hierarchy', () => {
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         data: { parent: null },
+        overrideAccess: true,
       })
 
       expect(updatedChild._h_slugPath).toBe('child')
@@ -234,19 +241,20 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Circular Reference Prevention', () => {
-    beforeEach(async () => {
-      await payload.delete({ collection: 'organizations', where: {} })
+  test.describe('Circular Reference Prevention', () => {
+    test.beforeEach(async ({ payload }) => {
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    afterEach(async () => {
-      await payload.delete({ collection: 'organizations', where: {} })
+    test.afterEach(async ({ payload }) => {
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    it('should prevent self-referential parent', async () => {
+    test('should prevent self-referential parent', async ({ payload }) => {
       const page = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Test Page' },
+        overrideAccess: true,
       })
 
       await expect(
@@ -254,19 +262,22 @@ describe('Hierarchy', () => {
           id: page.id,
           collection: 'organizations',
           data: { parent: page.id },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('Document cannot be its own parent')
     })
 
-    it('should prevent circular reference with direct child', async () => {
+    test('should prevent circular reference with direct child', async ({ payload }) => {
       const parentPage = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Parent' },
+        overrideAccess: true,
       })
 
       const childPage = await payload.create({
         collection: 'organizations',
         data: { parent: parentPage.id, title: 'Child' },
+        overrideAccess: true,
       })
 
       await expect(
@@ -274,24 +285,28 @@ describe('Hierarchy', () => {
           id: parentPage.id,
           collection: 'organizations',
           data: { parent: childPage.id },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('Cannot move folder into its own subfolder')
     })
 
-    it('should prevent circular reference with grandchild', async () => {
+    test('should prevent circular reference with grandchild', async ({ payload }) => {
       const grandparent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Grandparent' },
+        overrideAccess: true,
       })
 
       const parent = await payload.create({
         collection: 'organizations',
         data: { parent: grandparent.id, title: 'Parent' },
+        overrideAccess: true,
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent.id, title: 'Child' },
+        overrideAccess: true,
       })
 
       await expect(
@@ -299,24 +314,28 @@ describe('Hierarchy', () => {
           id: grandparent.id,
           collection: 'organizations',
           data: { parent: child.id },
+          overrideAccess: true,
         }),
       ).rejects.toThrow('Cannot move folder into its own subfolder')
     })
 
-    it('should allow moving to a non-circular parent', async () => {
+    test('should allow moving to a non-circular parent', async ({ payload }) => {
       const page1 = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Page 1' },
+        overrideAccess: true,
       })
 
       const page2 = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Page 2' },
+        overrideAccess: true,
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: page1.id, title: 'Child' },
+        overrideAccess: true,
       })
 
       // Moving child from page1 to page2 should work
@@ -326,6 +345,7 @@ describe('Hierarchy', () => {
         context: { computeHierarchyPaths: true },
         data: { parent: page2.id },
         depth: 0,
+        overrideAccess: true,
       })
 
       expect(updated.parent).toBe(page2.id)
@@ -333,26 +353,28 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Query Patterns', () => {
-    beforeEach(async () => {
+  test.describe('Query Patterns', () => {
+    test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    it('should find root documents by querying parent field', async () => {
+    test('should find root documents by querying parent field', async ({ payload }) => {
       const root = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
+        overrideAccess: true,
       })
 
       await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 1' },
+        overrideAccess: true,
       })
 
       const roots = await payload.find({
@@ -360,31 +382,36 @@ describe('Hierarchy', () => {
         where: {
           parent: { equals: null },
         },
+        overrideAccess: true,
       })
 
       expect(roots.docs).toHaveLength(1)
       expect(roots.docs[0]!.id).toBe(root.id)
     })
 
-    it('should find direct children by querying parent field', async () => {
+    test('should find direct children by querying parent field', async ({ payload }) => {
       const root = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
+        overrideAccess: true,
       })
 
       const child1 = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 1' },
+        overrideAccess: true,
       })
 
       const child2 = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Child 2' },
+        overrideAccess: true,
       })
 
       await payload.create({
         collection: 'organizations',
         data: { parent: child1.id, title: 'Grandchild 1' },
+        overrideAccess: true,
       })
 
       const directChildren = await payload.find({
@@ -392,6 +419,7 @@ describe('Hierarchy', () => {
         where: {
           parent: { equals: root.id },
         },
+        overrideAccess: true,
       })
 
       expect(directChildren.docs).toHaveLength(2)
@@ -401,20 +429,21 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Custom Field Names', () => {
-    beforeEach(async () => {
-      await payload.delete({ collection: 'departments', where: {} })
+  test.describe('Custom Field Names', () => {
+    test.beforeEach(async ({ payload }) => {
+      await payload.delete({ collection: 'departments', where: {}, overrideAccess: true })
     })
 
-    afterEach(async () => {
-      await payload.delete({ collection: 'departments', where: {} })
+    test.afterEach(async ({ payload }) => {
+      await payload.delete({ collection: 'departments', where: {}, overrideAccess: true })
     })
 
-    it('should use custom field names for path fields', async () => {
+    test('should use custom field names for path fields', async ({ payload }) => {
       const parentDept = await payload.create({
         collection: 'departments',
         context: { computeHierarchyPaths: true },
         data: { deptName: 'Engineering' },
+        overrideAccess: true,
       })
 
       expect(parentDept._breadcrumbSlug).toBe('engineering')
@@ -427,6 +456,7 @@ describe('Hierarchy', () => {
           deptName: 'Frontend',
           parentDept: parentDept.id,
         },
+        overrideAccess: true,
       })
 
       expect(childDept._breadcrumbSlug).toBe('engineering/frontend')
@@ -434,18 +464,18 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Deep Nesting', () => {
-    beforeEach(async () => {
+  test.describe('Deep Nesting', () => {
+    test.beforeEach(async ({ payload }) => {
       // Clear existing data before each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Clean up data after each test
-      await payload.delete({ collection: 'organizations', where: {} })
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    it('should handle deeply nested structures', async () => {
+    test('should handle deeply nested structures', async ({ payload }) => {
       // Create 10-level deep hierarchy
       let currentParent: null | Organization = null
 
@@ -457,36 +487,38 @@ describe('Hierarchy', () => {
             parent: currentParent?.id || null,
             title: `Level ${i}`,
           },
+          overrideAccess: true,
         })
       }
 
       // Verify the deepest level has correct slug path
       if (currentParent) {
-        // eslint-disable-next-line vitest/no-conditional-expect
         expect(currentParent._h_slugPath).toContain('/')
         const pathSegments = currentParent._h_slugPath?.split('/')
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(pathSegments).toHaveLength(10) // level-0 through level-9
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(pathSegments?.[0]).toBe('level-0')
-        // eslint-disable-next-line vitest/no-conditional-expect
+
         expect(pathSegments?.[9]).toBe('level-9')
       }
     })
   })
 
-  describe('Draft Versions', () => {
-    it('should compute paths correctly for published and draft versions', async () => {
+  test.describe('Draft Versions', () => {
+    test('should compute paths correctly for published and draft versions', async ({ payload }) => {
       // Create parent and child
       const parent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Products' },
+        overrideAccess: true,
       })
 
       // Publish child
       const child = await payload.create({
         collection: 'organizations',
         data: { _status: 'published', parent: parent.id, title: 'Clothing' },
+        overrideAccess: true,
       })
 
       // Create draft with different title
@@ -495,18 +527,21 @@ describe('Hierarchy', () => {
         collection: 'organizations',
         data: { title: 'Apparel' },
         draft: true,
+        overrideAccess: true,
       })
 
       // Move parent
       const grandParent = await payload.create({
         collection: 'organizations',
         data: { _status: 'published', parent: null, title: 'Categories' },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: parent.id,
         collection: 'organizations',
         data: { _status: 'published', parent: grandParent.id },
+        overrideAccess: true,
       })
 
       // Paths are computed on read - published version uses published title
@@ -515,6 +550,7 @@ describe('Hierarchy', () => {
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         draft: false,
+        overrideAccess: true,
       })
 
       expect(publishedChild._h_slugPath).toBe('categories/products/clothing')
@@ -525,31 +561,36 @@ describe('Hierarchy', () => {
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(draftChild._h_slugPath).toBe('categories/products/apparel')
     })
 
-    it('should compute paths when no draft exists', async () => {
+    test('should compute paths when no draft exists', async ({ payload }) => {
       const parent = await payload.create({
         collection: 'organizations',
         data: { _status: 'published', parent: null, title: 'Services' },
+        overrideAccess: true,
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { _status: 'published', parent: parent.id, title: 'Consulting' },
+        overrideAccess: true,
       })
 
       const newParent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Offerings' },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: parent.id,
         collection: 'organizations',
         data: { parent: newParent.id },
+        overrideAccess: true,
       })
 
       // Path is computed from current parent chain
@@ -557,6 +598,7 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
+        overrideAccess: true,
       })
 
       expect(publishedChild._h_slugPath).toBe('offerings/services/consulting')
@@ -568,29 +610,33 @@ describe('Hierarchy', () => {
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(draftChild._h_slugPath).toBe('offerings/services/consulting')
       expect(draftChild._status).toBe('published')
     })
 
-    it('should compute paths for draft-only documents', async () => {
+    test('should compute paths for draft-only documents', async ({ payload }) => {
       const parent1 = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Future' },
         draft: true,
+        overrideAccess: true,
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent1.id, title: 'Plans' },
         draft: true,
+        overrideAccess: true,
       })
 
       const newParent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Roadmap' },
         draft: true,
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -598,6 +644,7 @@ describe('Hierarchy', () => {
         collection: 'organizations',
         data: { parent: newParent.id },
         draft: true,
+        overrideAccess: true,
       })
 
       // Path is computed from current draft parent chain
@@ -606,32 +653,37 @@ describe('Hierarchy', () => {
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
         draft: true,
+        overrideAccess: true,
       })
 
       expect(draftChild._h_slugPath).toBe('roadmap/future/plans')
       expect(draftChild._status).toBe('draft')
     })
 
-    it('should compute paths for collections without versioning', async () => {
+    test('should compute paths for collections without versioning', async ({ payload }) => {
       const parent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Electronics' },
+        overrideAccess: true,
       })
 
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent.id, title: 'Phones' },
+        overrideAccess: true,
       })
 
       const newParent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Tech' },
+        overrideAccess: true,
       })
 
       await payload.update({
         id: parent.id,
         collection: 'organizations',
         data: { parent: newParent.id },
+        overrideAccess: true,
       })
 
       // Path is computed from current parent chain
@@ -639,14 +691,15 @@ describe('Hierarchy', () => {
         id: child.id,
         collection: 'organizations',
         context: { computeHierarchyPaths: true },
+        overrideAccess: true,
       })
 
       expect(updatedChild._h_slugPath).toBe('tech/electronics/phones')
     })
   })
 
-  describe('Localization', () => {
-    it('should generate localized paths for each locale', async () => {
+  test.describe('Localization', () => {
+    test('should generate localized paths for each locale', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
@@ -654,6 +707,7 @@ describe('Hierarchy', () => {
           name: 'Clothing',
           parent: null,
         },
+        overrideAccess: true,
       })
 
       // Update parent for Spanish
@@ -662,6 +716,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Ropa' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       // Update parent for German
@@ -670,6 +725,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Kleidung' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Create child with default locale (en)
@@ -679,6 +735,7 @@ describe('Hierarchy', () => {
           name: 'Shirts',
           parent: parent.id,
         },
+        overrideAccess: true,
       })
 
       // Update child for Spanish
@@ -687,6 +744,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Camisas' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       // Update child for German
@@ -695,6 +753,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Hemden' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Fetch with locale: 'all' to get all locales
@@ -703,6 +762,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         context: { computeHierarchyPaths: true },
         locale: 'all',
+        overrideAccess: true,
       })
 
       // Verify paths are localized
@@ -719,7 +779,7 @@ describe('Hierarchy', () => {
       })
     })
 
-    it('should update localized paths when parent moves', async () => {
+    test('should update localized paths when parent moves', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
@@ -727,6 +787,7 @@ describe('Hierarchy', () => {
           name: 'Clothing',
           parent: null,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -734,6 +795,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Ropa' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -741,6 +803,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Kleidung' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Create child with default locale (en)
@@ -750,6 +813,7 @@ describe('Hierarchy', () => {
           name: 'Shirts',
           parent: parent.id,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -757,6 +821,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Camisas' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -764,6 +829,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Hemden' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Create new parent with default locale (en)
@@ -773,6 +839,7 @@ describe('Hierarchy', () => {
           name: 'Apparel',
           parent: null,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -780,6 +847,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Indumentaria' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -787,6 +855,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Bekleidung' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Move parent under newParent
@@ -794,6 +863,7 @@ describe('Hierarchy', () => {
         id: parent.id,
         collection: 'products',
         data: { parent: newParent.id },
+        overrideAccess: true,
       })
 
       // Fetch child with all locales
@@ -802,6 +872,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         context: { computeHierarchyPaths: true },
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(updatedChild._h_slugPath).toEqual({
@@ -817,7 +888,7 @@ describe('Hierarchy', () => {
       })
     })
 
-    it('should update localized paths when title changes', async () => {
+    test('should update localized paths when title changes', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
@@ -825,6 +896,7 @@ describe('Hierarchy', () => {
           name: 'Clothing',
           parent: null,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -832,6 +904,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Ropa' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -839,6 +912,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Kleidung' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Create child with default locale (en)
@@ -848,6 +922,7 @@ describe('Hierarchy', () => {
           name: 'Shirts',
           parent: parent.id,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -855,6 +930,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Camisas' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -862,6 +938,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Hemden' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Update parent title for all locales
@@ -870,6 +947,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Apparel' },
         locale: 'en',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -877,6 +955,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Indumentaria' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -884,6 +963,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Bekleidung' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Fetch child with all locales
@@ -892,6 +972,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         context: { computeHierarchyPaths: true },
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(updatedChild._h_slugPath).toEqual({
@@ -907,7 +988,7 @@ describe('Hierarchy', () => {
       })
     })
 
-    it('should handle localized drafts with different titles per locale', async () => {
+    test('should handle localized drafts with different titles per locale', async ({ payload }) => {
       // Create parent with default locale (en)
       const parent = await payload.create({
         collection: 'products',
@@ -915,6 +996,7 @@ describe('Hierarchy', () => {
           name: 'Clothing',
           parent: null,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -922,6 +1004,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Ropa' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -929,6 +1012,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Kleidung' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Create child with default locale (en)
@@ -938,6 +1022,7 @@ describe('Hierarchy', () => {
           name: 'Shirts',
           parent: parent.id,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -945,6 +1030,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Camisas' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -952,6 +1038,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Hemden' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Publish
@@ -961,6 +1048,7 @@ describe('Hierarchy', () => {
         data: { _status: 'published' },
         draft: false,
         publishAllLocales: true,
+        overrideAccess: true,
       })
 
       // Create draft with different title for each locale
@@ -978,6 +1066,7 @@ describe('Hierarchy', () => {
           },
           draft: true,
           locale,
+          overrideAccess: true,
         })
       }
 
@@ -988,6 +1077,7 @@ describe('Hierarchy', () => {
           name: 'Apparel',
           parent: null,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -995,6 +1085,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Indumentaria' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -1002,6 +1093,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Bekleidung' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Move parent under newParent
@@ -1009,6 +1101,7 @@ describe('Hierarchy', () => {
         id: parent.id,
         collection: 'products',
         data: { parent: newParent.id },
+        overrideAccess: true,
       })
 
       // Verify published version
@@ -1017,6 +1110,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         context: { computeHierarchyPaths: true },
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(publishedChild._h_slugPath).toEqual({
@@ -1032,6 +1126,7 @@ describe('Hierarchy', () => {
         context: { computeHierarchyPaths: true },
         draft: true,
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(draftChild._h_slugPath).toEqual({
@@ -1041,7 +1136,7 @@ describe('Hierarchy', () => {
       })
     })
 
-    it('should handle draft-only documents with localized paths', async () => {
+    test('should handle draft-only documents with localized paths', async ({ payload }) => {
       // Create parent as draft for default locale first
       const parent = await payload.create({
         collection: 'products',
@@ -1051,6 +1146,7 @@ describe('Hierarchy', () => {
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Update other locales for parent
@@ -1060,6 +1156,7 @@ describe('Hierarchy', () => {
         data: { name: 'Futuro' },
         draft: true,
         locale: 'es',
+        overrideAccess: true,
       })
       await payload.update({
         id: parent.id,
@@ -1067,6 +1164,7 @@ describe('Hierarchy', () => {
         data: { name: 'Zukunft' },
         draft: true,
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Create child as draft
@@ -1078,6 +1176,7 @@ describe('Hierarchy', () => {
         },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       // Update other locales for child
@@ -1087,6 +1186,7 @@ describe('Hierarchy', () => {
         data: { name: 'Planes' },
         draft: true,
         locale: 'es',
+        overrideAccess: true,
       })
       await payload.update({
         id: child.id,
@@ -1094,6 +1194,7 @@ describe('Hierarchy', () => {
         data: { name: 'Pläne' },
         draft: true,
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Create new parent (published) with default locale
@@ -1103,6 +1204,7 @@ describe('Hierarchy', () => {
           name: 'Roadmap',
           parent: null,
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -1110,6 +1212,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Hoja de Ruta' },
         locale: 'es',
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -1117,6 +1220,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { name: 'Fahrplan' },
         locale: 'de',
+        overrideAccess: true,
       })
 
       // Move parent
@@ -1126,6 +1230,7 @@ describe('Hierarchy', () => {
         data: { parent: newParent.id },
         draft: true,
         locale: 'en',
+        overrideAccess: true,
       })
 
       const draftChild = await payload.findByID({
@@ -1134,6 +1239,7 @@ describe('Hierarchy', () => {
         context: { computeHierarchyPaths: true },
         draft: true,
         locale: 'all',
+        overrideAccess: true,
       })
 
       expect(draftChild._h_slugPath).toEqual({
@@ -1150,25 +1256,29 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Ancestor Cache Performance', () => {
-    beforeEach(async () => {
-      await payload.delete({ collection: 'organizations', where: {} })
+  test.describe('Ancestor Cache Performance', () => {
+    test.beforeEach(async ({ payload }) => {
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    afterEach(async () => {
-      await payload.delete({ collection: 'organizations', where: {} })
+    test.afterEach(async ({ payload }) => {
+      await payload.delete({ collection: 'organizations', where: {}, overrideAccess: true })
     })
 
-    it('should cache ancestors when computing paths for multiple documents', async () => {
+    test('should cache ancestors when computing paths for multiple documents', async ({
+      payload,
+    }) => {
       // Create a hierarchy: Root > Category > 5 children
       const root = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Root' },
+        overrideAccess: true,
       })
 
       const category = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Category' },
+        overrideAccess: true,
       })
 
       const childIds: Array<number | string> = []
@@ -1177,6 +1287,7 @@ describe('Hierarchy', () => {
         const child = await payload.create({
           collection: 'organizations',
           data: { parent: category.id, title: `Child ${i}` },
+          overrideAccess: true,
         })
         childIds.push(child.id)
       }
@@ -1198,6 +1309,7 @@ describe('Hierarchy', () => {
         where: {
           id: { in: childIds },
         },
+        overrideAccess: true,
       })
 
       expect(results.docs.length).toBe(5)
@@ -1221,21 +1333,24 @@ describe('Hierarchy', () => {
       }
     })
 
-    it('should show cache benefit: 10 docs with shared ancestors', async () => {
+    test('should show cache benefit: 10 docs with shared ancestors', async ({ payload }) => {
       // Create deeper hierarchy
       const root = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Products' },
+        overrideAccess: true,
       })
 
       const cat1 = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Electronics' },
+        overrideAccess: true,
       })
 
       const cat2 = await payload.create({
         collection: 'organizations',
         data: { parent: root.id, title: 'Clothing' },
+        overrideAccess: true,
       })
 
       const childIds: Array<number | string> = []
@@ -1245,6 +1360,7 @@ describe('Hierarchy', () => {
         const child = await payload.create({
           collection: 'organizations',
           data: { parent: cat1.id, title: `Product E${i}` },
+          overrideAccess: true,
         })
         childIds.push(child.id)
       }
@@ -1254,6 +1370,7 @@ describe('Hierarchy', () => {
         const child = await payload.create({
           collection: 'organizations',
           data: { parent: cat2.id, title: `Product C${i}` },
+          overrideAccess: true,
         })
         childIds.push(child.id)
       }
@@ -1273,6 +1390,7 @@ describe('Hierarchy', () => {
         where: {
           id: { in: childIds },
         },
+        overrideAccess: true,
       })
 
       const stats = cacheStats
@@ -1288,17 +1406,17 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Slug Field Configuration', () => {
+  test.describe('Slug Field Configuration', () => {
     const createdPageIds: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       for (const id of createdPageIds) {
-        await payload.delete({ collection: 'pages', id }).catch(() => {})
+        await payload.delete({ collection: 'pages', id, overrideAccess: true }).catch(() => {})
       }
       createdPageIds.length = 0
     })
 
-    it('should use slugField value directly for _h_slugPath', async () => {
+    test('should use slugField value directly for _h_slugPath', async ({ payload }) => {
       // Pages collection has slugField: 'slug' configured
       const page = await payload.create({
         collection: 'pages',
@@ -1308,6 +1426,7 @@ describe('Hierarchy', () => {
           slug: 'about-us', // Different from title
           title: 'About Our Company', // Would slugify to 'about-our-company'
         },
+        overrideAccess: true,
       })
       createdPageIds.push(page.id)
 
@@ -1316,7 +1435,7 @@ describe('Hierarchy', () => {
       expect(page._h_titlePath).toBe('About Our Company')
     })
 
-    it('should use slugField value for nested documents', async () => {
+    test('should use slugField value for nested documents', async ({ payload }) => {
       // Create root page
       const rootPage = await payload.create({
         collection: 'pages',
@@ -1325,6 +1444,7 @@ describe('Hierarchy', () => {
           slug: 'home',
           title: 'Home Page',
         },
+        overrideAccess: true,
       })
       createdPageIds.push(rootPage.id)
 
@@ -1337,6 +1457,7 @@ describe('Hierarchy', () => {
           slug: 'services',
           title: 'Our Services',
         },
+        overrideAccess: true,
       })
       createdPageIds.push(childPage.id)
 
@@ -1345,7 +1466,7 @@ describe('Hierarchy', () => {
       expect(childPage._h_titlePath).toBe('Home Page/Our Services')
     })
 
-    it('should fall back to slugified title when slug field is empty', async () => {
+    test('should fall back to slugified title when slug field is empty', async ({ payload }) => {
       const page = await payload.create({
         collection: 'pages',
         context: { computeHierarchyPaths: true },
@@ -1354,6 +1475,7 @@ describe('Hierarchy', () => {
           slug: '', // Empty slug
           title: 'Contact Us',
         },
+        overrideAccess: true,
       })
       createdPageIds.push(page.id)
 
@@ -1363,14 +1485,14 @@ describe('Hierarchy', () => {
     })
   })
 
-  describe('Select-based Path Computation', () => {
+  test.describe('Select-based Path Computation', () => {
     const createdOrgIds: (number | string)[] = []
 
-    afterEach(async () => {
+    test.afterEach(async ({ payload }) => {
       // Delete in reverse order (children before parents)
       for (const id of [...createdOrgIds].reverse()) {
         try {
-          await payload.delete({ collection: 'organizations', id })
+          await payload.delete({ collection: 'organizations', id, overrideAccess: true })
         } catch {
           // Ignore if already deleted
         }
@@ -1378,11 +1500,12 @@ describe('Hierarchy', () => {
       createdOrgIds.length = 0
     })
 
-    it('should compute full paths when selecting path fields', async () => {
+    test('should compute full paths when selecting path fields', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Parent Org' },
+        overrideAccess: true,
       })
       createdOrgIds.push(parent.id)
 
@@ -1390,6 +1513,7 @@ describe('Hierarchy', () => {
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent.id, title: 'Child Org' },
+        overrideAccess: true,
       })
       createdOrgIds.push(child.id)
 
@@ -1401,6 +1525,7 @@ describe('Hierarchy', () => {
           _h_slugPath: true,
           _h_titlePath: true,
         },
+        overrideAccess: true,
       })
 
       // Should have full paths (not flat paths)
@@ -1408,11 +1533,12 @@ describe('Hierarchy', () => {
       expect(result._h_titlePath).toBe('Parent Org/Child Org')
     })
 
-    it('should not expose auto-added fields in response', async () => {
+    test('should not expose auto-added fields in response', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Hidden Parent' },
+        overrideAccess: true,
       })
       createdOrgIds.push(parent.id)
 
@@ -1420,6 +1546,7 @@ describe('Hierarchy', () => {
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent.id, title: 'Hidden Child' },
+        overrideAccess: true,
       })
       createdOrgIds.push(child.id)
 
@@ -1431,6 +1558,7 @@ describe('Hierarchy', () => {
           _h_slugPath: true,
           _h_titlePath: true,
         },
+        overrideAccess: true,
       })
 
       // Paths should be computed correctly
@@ -1441,11 +1569,12 @@ describe('Hierarchy', () => {
       expect(result).not.toHaveProperty('title')
     })
 
-    it('should keep explicitly selected fields in response', async () => {
+    test('should keep explicitly selected fields in response', async ({ payload }) => {
       // Create parent
       const parent = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Explicit Parent' },
+        overrideAccess: true,
       })
       createdOrgIds.push(parent.id)
 
@@ -1453,6 +1582,7 @@ describe('Hierarchy', () => {
       const child = await payload.create({
         collection: 'organizations',
         data: { parent: parent.id, title: 'Explicit Child' },
+        overrideAccess: true,
       })
       createdOrgIds.push(child.id)
 
@@ -1464,6 +1594,7 @@ describe('Hierarchy', () => {
           _h_slugPath: true,
           title: true,
         },
+        overrideAccess: true,
       })
 
       // Paths should be computed correctly
@@ -1476,23 +1607,26 @@ describe('Hierarchy', () => {
       expect(result).not.toHaveProperty('parent')
     })
 
-    it('should work with deeply nested hierarchy using select', async () => {
+    test('should work with deeply nested hierarchy using select', async ({ payload }) => {
       // Create 3-level hierarchy
       const level1 = await payload.create({
         collection: 'organizations',
         data: { parent: null, title: 'Level 1' },
+        overrideAccess: true,
       })
       createdOrgIds.push(level1.id)
 
       const level2 = await payload.create({
         collection: 'organizations',
         data: { parent: level1.id, title: 'Level 2' },
+        overrideAccess: true,
       })
       createdOrgIds.push(level2.id)
 
       const level3 = await payload.create({
         collection: 'organizations',
         data: { parent: level2.id, title: 'Level 3' },
+        overrideAccess: true,
       })
       createdOrgIds.push(level3.id)
 
@@ -1504,6 +1638,7 @@ describe('Hierarchy', () => {
           _h_slugPath: true,
           _h_titlePath: true,
         },
+        overrideAccess: true,
       })
 
       // Should have full 3-level path

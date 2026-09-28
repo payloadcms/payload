@@ -1,6 +1,8 @@
+import type { MigrationResult } from 'payload'
+
 import {
   commitTransaction,
-  createLocalReq,
+  createPayloadRequest,
   initTransaction,
   killTransaction,
   readMigrationFiles,
@@ -17,27 +19,24 @@ import { parseError } from './utilities/parseError.js'
  */
 export async function migrateFresh(
   this: DrizzleAdapter,
-  { forceAcceptWarning = false },
-): Promise<void> {
+  { forceAcceptWarning = false, shouldPrompt = true },
+): Promise<MigrationResult> {
   const { payload } = this
 
   if (forceAcceptWarning === false) {
-    const { confirm: acceptWarning } = await prompts(
-      {
-        name: 'confirm',
-        type: 'confirm',
-        initial: false,
-        message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
+    if (!shouldPrompt) {
+      return { cancelled: true, migrated: [], rolledBack: [] }
+    }
+
+    const { confirm: acceptWarning } = await prompts({
+      name: 'confirm',
+      type: 'confirm',
+      initial: false,
+      message: `WARNING: This will drop your database and run all migrations. Are you sure you want to proceed?`,
+    })
 
     if (!acceptWarning) {
-      process.exit(0)
+      return { cancelled: true, migrated: [], rolledBack: [] }
     }
   }
 
@@ -52,7 +51,8 @@ export async function migrateFresh(
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const req = await createLocalReq({}, payload)
+  const req = await createPayloadRequest({ payload })
+  const migrated: string[] = []
 
   if ('createExtensions' in this && typeof this.createExtensions === 'function') {
     await this.createExtensions()
@@ -72,9 +72,11 @@ export async function migrateFresh(
           name: migration.name,
           batch: 1,
         },
+        overrideAccess: true,
         req,
       })
       await commitTransaction(req)
+      migrated.push(migration.name)
 
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
@@ -83,7 +85,9 @@ export async function migrateFresh(
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back`),
       })
-      process.exit(1)
+      throw err
     }
   }
+
+  return { batch: 1, migrated, rolledBack: [] }
 }

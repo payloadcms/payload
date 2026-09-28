@@ -70,6 +70,7 @@ export interface Config {
     media: Media;
     'media-with-composite-prefixes': MediaWithCompositePrefix;
     'media-with-custom-url': MediaWithCustomUrl;
+    'media-with-disabled-plugin': MediaWithDisabledPlugin;
     'media-with-generate-file-url': MediaWithGenerateFileUrl;
     'media-with-overwrite': MediaWithOverwrite;
     'media-with-prefix': MediaWithPrefix;
@@ -87,6 +88,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'media-with-composite-prefixes': MediaWithCompositePrefixesSelect<false> | MediaWithCompositePrefixesSelect<true>;
     'media-with-custom-url': MediaWithCustomUrlSelect<false> | MediaWithCustomUrlSelect<true>;
+    'media-with-disabled-plugin': MediaWithDisabledPluginSelect<false> | MediaWithDisabledPluginSelect<true>;
     'media-with-generate-file-url': MediaWithGenerateFileUrlSelect<false> | MediaWithGenerateFileUrlSelect<true>;
     'media-with-overwrite': MediaWithOverwriteSelect<false> | MediaWithOverwriteSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
@@ -108,6 +110,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -140,6 +144,7 @@ export interface UserAuthOperations {
 export interface Media {
   id: string;
   alt?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -210,6 +215,25 @@ export interface MediaWithCustomUrl {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-disabled-plugin".
+ */
+export interface MediaWithDisabledPlugin {
+  id: string;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-generate-file-url".
  */
 export interface MediaWithGenerateFileUrl {
@@ -234,6 +258,7 @@ export interface MediaWithGenerateFileUrl {
 export interface MediaWithOverwrite {
   id: string;
   alt?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -294,6 +319,7 @@ export interface MediaWithThrowingHook {
    * When enabled, the afterChange hook throws during the cloud-storage plugin internal update. Used to reproduce the swallowed-error bug in the admin panel and integration tests.
    */
   shouldThrow?: boolean | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -313,6 +339,7 @@ export interface MediaWithThrowingHook {
 export interface RestrictedMedia {
   id: string;
   title?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -335,6 +362,7 @@ export interface TestMetadatum {
    * Test note to identify this upload
    */
   testNote?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -419,6 +447,10 @@ export interface PayloadLockedDocument {
         value: string | MediaWithCustomUrl;
       } | null)
     | ({
+        relationTo: 'media-with-disabled-plugin';
+        value: string | MediaWithDisabledPlugin;
+      } | null)
+    | ({
         relationTo: 'media-with-generate-file-url';
         value: string | MediaWithGenerateFileUrl;
       } | null)
@@ -494,6 +526,7 @@ export interface PayloadMigration {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -568,6 +601,24 @@ export interface MediaWithCustomUrlSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-disabled-plugin_select".
+ */
+export interface MediaWithDisabledPluginSelect<T extends boolean = true> {
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-generate-file-url_select".
  */
 export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
@@ -590,6 +641,7 @@ export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
  */
 export interface MediaWithOverwriteSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -651,6 +703,7 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
 export interface MediaWithThrowingHookSelect<T extends boolean = true> {
   alt?: T;
   shouldThrow?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -669,6 +722,7 @@ export interface MediaWithThrowingHookSelect<T extends boolean = true> {
  */
 export interface RestrictedMediaSelect<T extends boolean = true> {
   title?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -687,6 +741,7 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
  */
 export interface TestMetadataSelect<T extends boolean = true> {
   testNote?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -784,6 +839,64 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'media'
+      | 'media-with-composite-prefixes'
+      | 'media-with-custom-url'
+      | 'media-with-disabled-plugin'
+      | 'media-with-generate-file-url'
+      | 'media-with-overwrite'
+      | 'media-with-prefix'
+      | 'media-with-throwing-hook'
+      | 'restricted-media'
+      | 'test-metadata'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'media'
+          | 'media-with-composite-prefixes'
+          | 'media-with-custom-url'
+          | 'media-with-disabled-plugin'
+          | 'media-with-generate-file-url'
+          | 'media-with-overwrite'
+          | 'media-with-prefix'
+          | 'media-with-throwing-hook'
+          | 'restricted-media'
+          | 'test-metadata'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

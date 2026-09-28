@@ -2,7 +2,7 @@ import type { PayloadRequest, User } from 'payload'
 
 import { APIError } from 'payload'
 
-import type { ImportResult } from '../types.js'
+import type { ImportDoc, ImportResult } from '../types.js'
 
 import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
@@ -49,6 +49,7 @@ export type Import = {
 
 export type CreateImportArgs = {
   defaultVersionStatus?: 'draft' | 'published'
+  importDoc: ImportDoc
   req: PayloadRequest
 } & Import
 
@@ -59,6 +60,7 @@ export const createImport = async ({
   defaultVersionStatus = 'published',
   file,
   format,
+  importDoc,
   importMode = 'create',
   matchField = 'id',
   maxLimit,
@@ -72,6 +74,7 @@ export const createImport = async ({
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
+      overrideAccess: true,
       req,
     })) as User
   }
@@ -229,6 +232,7 @@ export const createImport = async ({
     docs: documents,
     format,
     hooks: importHooks,
+    importDoc,
     importMode,
     matchField,
     originalDocs,

@@ -105,36 +105,6 @@
     line-height: var(--text-body-small-line-height);
   }
 
-  .file-manager__hidden-input {
-    display: none;
-  }
-
-  .file-manager__dropzone-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacer-2);
-    width: 100%;
-  }
-
-  .file-manager__dropzone-buttons {
-    display: flex;
-    gap: var(--spacer-2);
-    align-items: center;
-  }
-
-  .file-manager__or-text {
-    color: var(--color-text-tertiary);
-    text-transform: lowercase;
-  }
-
-  .file-manager__drag-text {
-    flex-shrink: 0;
-    margin: 0;
-    text-transform: lowercase;
-    color: var(--color-text-tertiary);
-  }
-
   @container edit-main (min-width: 1024px) {
     .file-manager {
       min-height: 100px;

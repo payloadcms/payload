@@ -4,12 +4,8 @@ import type { ClientCollectionConfig, CollectionSlug } from 'payload'
 import { useConfig, useEntityVisibility } from '@payloadcms/ui'
 import * as React from 'react'
 
-import { filterEnabledRelationshipCollections } from '../../shared/filterEnabledRelationshipCollections.js'
-
 type UseEnabledRelationshipsOptions = {
-  collectionSlugsBlacklist?: string[]
-  collectionSlugsWhitelist?: string[]
-  uploads?: boolean
+  enabledCollectionSlugs: CollectionSlug[]
 }
 
 type UseEnabledRelationshipsResult = {
@@ -17,25 +13,23 @@ type UseEnabledRelationshipsResult = {
   enabledCollectionSlugs: CollectionSlug[]
 }
 
-export const useEnabledRelationships = (
-  options?: UseEnabledRelationshipsOptions,
-): UseEnabledRelationshipsResult => {
-  const { collectionSlugsBlacklist, collectionSlugsWhitelist, uploads = false } = options || {}
+export const useEnabledRelationships = ({
+  enabledCollectionSlugs,
+}: UseEnabledRelationshipsOptions): UseEnabledRelationshipsResult => {
   const {
     config: { collections },
   } = useConfig()
   const { visibleEntities } = useEntityVisibility()
 
   return React.useMemo(() => {
-    const enabledCollections = filterEnabledRelationshipCollections(collections, {
-      disabledCollections: collectionSlugsBlacklist,
-      enabledCollections: collectionSlugsWhitelist,
-      uploads,
-      visibleSlugs: visibleEntities?.collections,
-    })
+    const enabledCollections = collections.filter(
+      ({ slug }) =>
+        enabledCollectionSlugs.includes(slug) &&
+        (!visibleEntities?.collections || visibleEntities.collections.includes(slug)),
+    )
     return {
       enabledCollections,
       enabledCollectionSlugs: enabledCollections.map((c) => c.slug),
     }
-  }, [collections, visibleEntities, uploads, collectionSlugsWhitelist, collectionSlugsBlacklist])
+  }, [collections, enabledCollectionSlugs, visibleEntities])
 }

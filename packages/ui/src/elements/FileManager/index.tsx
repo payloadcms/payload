@@ -2,16 +2,14 @@
 import type { SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, formatFilesize, isImage } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { formatFilesize, isImage } from 'payload/shared'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
 import { TextInput } from '../../fields/Text/Input.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
-import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -24,7 +22,10 @@ import { EditUpload } from '../EditUpload/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
-import { pasteURLDrawerSlug, UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
+import { UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
+import { usePasteFromClipboard } from '../Upload/usePasteFromClipboard.js'
+import { useUploadFromUrl } from '../Upload/useUploadFromUrl.js'
+import { UploadDropzoneContent } from '../UploadDropzoneContent/index.js'
 import { AudioPreview } from './FilePreview/AudioPreview/index.js'
 import { FilePreview } from './FilePreview/index.js'
 import { PdfPreview } from './FilePreview/PdfPreview/index.js'
@@ -69,25 +70,19 @@ export const FileManager: React.FC<FileManagerProps> = ({
   uploadEdits: uploadEditsFromProps,
   UploadFilePreview,
 }) => {
-  const { closeModal, openModal } = useModal()
+  const { openModal } = useModal()
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { id, data, setUploadStatus } = useDocumentInfo()
+  const { data } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
   const {
-    config: {
-      routes: { api },
-    },
-  } = useConfig()
-  const {
     setUploadControlFile,
     setUploadControlFileName,
     setUploadControlFileUrl,
     uploadControlFile,
-    uploadControlFileName,
     uploadControlFileUrl,
   } = useUploadControls()
   const uploadEditsContext = useUploadEdits()
@@ -98,13 +93,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)
   const [filename, setFilename] = useState<string>(value?.name || '')
-  const [fileUrl, setFileUrl] = useState<string>('')
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
-
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const useServerSideFetch =
-    typeof uploadConfig?.pasteURL === 'object' && uploadConfig.pasteURL.allowList?.length > 0
 
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
   const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt
@@ -158,6 +147,29 @@ export const FileManager: React.FC<FileManagerProps> = ({
     [handleFileChange, value],
   )
 
+  const handleFileSelection = useCallback(
+    (files: FileList) => handleFileChange({ file: files?.[0] }),
+    [handleFileChange],
+  )
+
+  const handleFileFetchedFromUrl = useCallback(
+    (file: File) => handleFileChange({ file }),
+    [handleFileChange],
+  )
+
+  const { fileUrl, handleUrlSubmit, isValidUrl, setFileUrl } = useUploadFromUrl({
+    collectionSlug,
+    onFileFetched: handleFileFetchedFromUrl,
+    uploadConfig,
+  })
+
+  const handlePasteFromClipboard = usePasteFromClipboard({
+    handleFileSelection,
+    handleUrlSubmit,
+    setFileUrl,
+    uploadConfig,
+  })
+
   const handleFileRemoval = useCallback(() => {
     setRemovedFile(true)
     handleFileChange({ file: null })
@@ -171,71 +183,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
   }, [
     handleFileChange,
     resetUploadEdits,
+    setFileUrl,
     setUploadControlFile,
     setUploadControlFileName,
     setUploadControlFileUrl,
-  ])
-
-  const handleFileSelection = useCallback(
-    (files: FileList) => handleFileChange({ file: files?.[0] }),
-    [handleFileChange],
-  )
-
-  const isValidUrl = Boolean(fileUrl && URL.canParse(fileUrl))
-
-  const handleUrlSubmit = useCallback(async () => {
-    if (!fileUrl || !URL.canParse(fileUrl) || uploadConfig?.pasteURL === false) {
-      return
-    }
-    setUploadStatus('uploading')
-    try {
-      const clientResponse = await fetch(fileUrl)
-      if (!clientResponse.ok) {
-        throw new Error(`Fetch failed: ${clientResponse.status}`)
-      }
-      const blob = await clientResponse.blob()
-      const rawSegment = fileUrl.split('/').pop() || ''
-      const fileName = uploadControlFileName || decodeURIComponent(rawSegment.split('?')[0])
-      handleFileChange({ file: new File([blob], fileName, { type: blob.type }) })
-      setUploadStatus('idle')
-      closeModal(pasteURLDrawerSlug)
-      setFileUrl('')
-      return
-    } catch (_clientError) {
-      if (!useServerSideFetch) {
-        toast.error('Failed to fetch the file.')
-        setUploadStatus('failed')
-        return
-      }
-    }
-    try {
-      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
-      const serverResponse = await fetch(formatAdminURL({ apiRoute: api, path: pasteURL }))
-      if (!serverResponse.ok) {
-        throw new Error(`Fetch failed: ${serverResponse.status}`)
-      }
-      const blob = await serverResponse.blob()
-      const rawSegment = fileUrl.split('/').pop() || ''
-      const fileName = decodeURIComponent(rawSegment.split('?')[0])
-      handleFileChange({ file: new File([blob], fileName, { type: blob.type }) })
-      setUploadStatus('idle')
-      closeModal(pasteURLDrawerSlug)
-      setFileUrl('')
-    } catch (_serverError) {
-      toast.error('The provided URL is not allowed.')
-      setUploadStatus('failed')
-    }
-  }, [
-    api,
-    closeModal,
-    collectionSlug,
-    fileUrl,
-    handleFileChange,
-    id,
-    setUploadStatus,
-    uploadConfig,
-    uploadControlFileName,
-    useServerSideFetch,
   ])
 
   const onEditsSave = useCallback(
@@ -276,7 +227,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       }
     }
     void handleControlFileUrl()
-  }, [uploadControlFileUrl, handleUrlSubmit])
+  }, [uploadControlFileUrl, handleUrlSubmit, setFileUrl])
 
   useEffect(() => {
     if (uploadControlFile) {
@@ -409,51 +360,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
               )}
               {!value && (
                 <Dropzone onChange={handleFileSelection}>
-                  <div className={`${baseClass}__dropzone-content`}>
-                    <div className={`${baseClass}__dropzone-buttons`}>
-                      <Button
-                        buttonStyle="secondary"
-                        onClick={() => inputRef.current?.click()}
-                        size="medium"
-                      >
-                        {t('upload:selectFile')}
-                      </Button>
-                      <input
-                        accept={acceptMimeTypes}
-                        aria-hidden="true"
-                        className={`${baseClass}__hidden-input`}
-                        hidden
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files.length > 0) {
-                            handleFileSelection(e.target.files)
-                          }
-                        }}
-                        ref={inputRef}
-                        type="file"
-                      />
-                      {uploadConfig?.pasteURL !== false && (
-                        <Fragment>
-                          <span className={`${baseClass}__or-text`}>{t('general:or')}</span>
-                          <Button
-                            buttonStyle="secondary"
-                            onClick={() => {
-                              openModal(pasteURLDrawerSlug)
-                              setUploadControlFileUrl('')
-                              setUploadControlFile(null)
-                              setUploadControlFileName(null)
-                            }}
-                            size="medium"
-                          >
-                            {t('upload:pasteURL')}
-                          </Button>
-                        </Fragment>
-                      )}
-                      {UploadControls ?? null}
-                    </div>
-                    <p className={`${baseClass}__drag-text`}>
-                      {t('general:or')} {t('upload:dragAndDrop')}
-                    </p>
-                  </div>
+                  <UploadDropzoneContent
+                    acceptMimeTypes={acceptMimeTypes}
+                    extraControls={UploadControls}
+                    onFilesSelected={handleFileSelection}
+                    onPasteFromClipboard={handlePasteFromClipboard}
+                    pasteButtonClassName={`${baseClass}__pasteFromClipboard`}
+                    pasteTooltip={t('upload:pasteURL')}
+                  />
                 </Dropzone>
               )}
               {value && fileSrc && (

@@ -15,6 +15,7 @@ type Args = {
   policies?: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
+  showHiddenFields?: boolean
   versionFields?: FlattenedField[]
   where: Where
 } & (
@@ -39,6 +40,7 @@ export async function validateQueryPaths({
   },
   polymorphicJoin,
   req,
+  showHiddenFields,
   versionFields,
   where,
 }: Args): Promise<void> {
@@ -50,7 +52,7 @@ export async function validateQueryPaths({
     for (const path in where) {
       const constraint = where[path]
 
-      if ((path === 'and' || path === 'or') && Array.isArray(constraint)) {
+      if (['and', 'or'].includes(path.toLowerCase()) && Array.isArray(constraint)) {
         for (const item of constraint) {
           if (collectionConfig) {
             promises.push(
@@ -61,6 +63,7 @@ export async function validateQueryPaths({
                 policies,
                 polymorphicJoin,
                 req,
+                showHiddenFields,
                 versionFields,
                 where: item,
               }),
@@ -74,12 +77,15 @@ export async function validateQueryPaths({
                 policies,
                 polymorphicJoin,
                 req,
+                showHiddenFields,
                 versionFields,
                 where: item,
               }),
             )
           }
         }
+      } else if (Array.isArray(constraint)) {
+        errors.push({ path })
       } else if (!Array.isArray(constraint)) {
         for (const operator in constraint) {
           const val = constraint[operator as keyof typeof constraint]
@@ -97,6 +103,7 @@ export async function validateQueryPaths({
                 policies,
                 polymorphicJoin,
                 req,
+                showHiddenFields,
                 val,
                 versionFields,
               }),

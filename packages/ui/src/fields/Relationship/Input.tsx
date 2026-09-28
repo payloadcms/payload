@@ -87,7 +87,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
-  const { code: locale } = useLocale()
+  const currentLocale = useLocale()
+  const locale = currentLocale?.code
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
     Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]

@@ -88,6 +88,8 @@ export const GroupByButton: React.FC<GroupByButtonProps> = ({
     <Popup
       className={baseClass}
       horizontalAlign="right"
+      popupAriaLabel={triggerLabel}
+      popupType="dialog"
       portalClassName={`${baseClass}__popup`}
       render={({ close }) => (
         <GroupByPopup

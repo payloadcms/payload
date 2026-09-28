@@ -91,8 +91,6 @@ describe('List View', () => {
     const prebuild = false // Boolean(process.env.CI)
 
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       prebuild,
@@ -122,13 +120,13 @@ describe('List View', () => {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
   })
 
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'adminTests',
     })
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
@@ -174,6 +172,7 @@ describe('List View', () => {
         await payload.delete({
           id,
           collection: listViewSelectAPISlug,
+          overrideAccess: true,
         })
       }
       fallbackDocumentIDs.length = 0
@@ -193,6 +192,7 @@ describe('List View', () => {
         data: {
           title: 'Fallback test title',
         },
+        overrideAccess: true,
       })
       fallbackDocumentIDs.push(doc.id)
       const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
@@ -383,6 +383,29 @@ describe('List View', () => {
 
       await expect(page.locator('#search-filter-input')).toHaveValue('')
     })
+
+    test('should search by title containing accented characters', async () => {
+      await createPost({ title: 'Café' })
+
+      await page.locator('#search-filter-input').fill('Café')
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
+
+    test('should remain accent-sensitive when the search term omits the accent', async () => {
+      await createPost({ title: 'Café' })
+
+      await page.locator('#search-filter-input').fill('Cafe')
+      await expect(page.locator(tableRowLocator)).toHaveCount(0)
+    })
+
+    test('should prefill search input from a query param containing accented characters', async () => {
+      await createPost({ title: 'Café' })
+
+      await page.goto(`${postsUrl.list}?search=${encodeURIComponent('Café')}`)
+
+      await expect(page.locator('#search-filter-input')).toHaveValue('Café')
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
   })
 
   describe('filters', () => {
@@ -450,6 +473,22 @@ describe('List View', () => {
 
       await page.locator('.condition__actions-remove').click()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
+    test('should filter rows using contains with accented characters', async () => {
+      await createPost({ title: 'Café' })
+      await createPost({ title: 'Cafe' })
+
+      await addListFilter({
+        fieldLabel: 'Title',
+        operatorLabel: 'contains',
+        page,
+        value: 'Café',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      await page.locator('.condition__actions-remove').click()
     })
 
     test('should render the ID cell as a pill with a hover background instead of an underline', async () => {
@@ -740,7 +779,7 @@ describe('List View', () => {
 
       await expect(tableItems).toHaveCount(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
-      await expect(page.locator('.per-page button')).toContainText('5')
+      await expect(page.locator('.per-page .popup__trigger-wrap > button')).toContainText('5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
       await addListFilter({
@@ -1065,6 +1104,7 @@ describe('List View', () => {
             description: 'This is a test description',
             title: 'This is a test title',
           },
+          overrideAccess: true,
         })
 
         const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
@@ -1122,6 +1162,7 @@ describe('List View', () => {
             },
             title: 'This is a test title',
           },
+          overrideAccess: true,
         })
 
         const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
@@ -1150,6 +1191,7 @@ describe('List View', () => {
         await payload.delete({
           id: doc.id,
           collection: listViewSelectAPISlug,
+          overrideAccess: true,
         })
       })
     })
@@ -1455,7 +1497,7 @@ describe('List View', () => {
     })
 
     test('should hide edit many from collection with disableBulkEdit: true', async () => {
-      await payload.create({ collection: 'disable-bulk-edit', data: {} })
+      await payload.create({ collection: 'disable-bulk-edit', data: {}, overrideAccess: true })
       await page.goto(disableBulkEditUrl.list)
 
       // select one row
@@ -1475,7 +1517,9 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
       await expect
-        .poll(async () => await page.locator('.per-page button').textContent())
+        .poll(
+          async () => await page.locator('.per-page .popup__trigger-wrap > button').textContent(),
+        )
         .toContain('5')
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
@@ -1491,7 +1535,9 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await expect.poll(async () => await page.locator('.per-page button').isVisible()).toBe(true)
+      await expect
+        .poll(async () => await page.locator('.per-page .popup__trigger-wrap > button').isVisible())
+        .toBe(true)
 
       await expectPerPageLimits({ expectedLimits: [5, 10, 15], page })
     })
@@ -1585,6 +1631,7 @@ describe('List View', () => {
     test('should persist per-page limit in list drawer', async () => {
       await payload.delete({
         collection: listDrawerSlug,
+        overrideAccess: true,
         where: {},
       })
 
@@ -1597,6 +1644,7 @@ describe('List View', () => {
             title: `List Drawer Item ${i + 1}`,
           },
           disableTransaction: true,
+          overrideAccess: true,
         })
       })
 
@@ -1616,7 +1664,9 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page button')).toContainText('10')
+      await expect(
+        page.locator('.list-drawer .per-page .popup__trigger-wrap > button'),
+      ).toContainText('10')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
 
       // Change per-page to 5
@@ -1633,7 +1683,9 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page button')).toContainText('5')
+      await expect(
+        page.locator('.list-drawer .per-page .popup__trigger-wrap > button'),
+      ).toContainText('5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
     })
   })
@@ -1961,12 +2013,14 @@ describe('List View', () => {
 
     await payload.delete({
       collection: 'custom-list-drawer',
+      overrideAccess: true,
       where: { id: { exists: true } },
     })
 
     const { id } = await payload.create({
       collection: 'custom-list-drawer',
       data: {},
+      overrideAccess: true,
     })
 
     await page.goto(url.list)
@@ -1997,6 +2051,7 @@ describe('List View', () => {
       // Clean up any existing formatDocURL documents
       await payload.delete({
         collection: formatDocURLCollectionSlug,
+        overrideAccess: true,
         where: { id: { exists: true } },
       })
     })
@@ -2006,11 +2061,13 @@ describe('List View', () => {
       await payload.create({
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should not be linkable', title: 'no-link' },
+        overrideAccess: true,
       })
 
       const normalDoc = await payload.create({
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should be linkable normally', title: 'normal' },
+        overrideAccess: true,
       })
 
       await page.goto(formatDocURLUrl.list)
@@ -2037,6 +2094,7 @@ describe('List View', () => {
       await payload.create({
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should link to custom destination', title: 'custom-link' },
+        overrideAccess: true,
       })
 
       await page.goto(formatDocURLUrl.list)
@@ -2055,6 +2113,7 @@ describe('List View', () => {
       const adminDoc = await payload.create({
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should have admin query param', title: 'admin-test' },
+        overrideAccess: true,
       })
 
       await page.goto(formatDocURLUrl.list)
@@ -2078,6 +2137,7 @@ describe('List View', () => {
       const trashDoc = await payload.create({
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should show trash URL', title: 'trash-test' },
+        overrideAccess: true,
       })
 
       // Move the document to trash by setting deletedAt (not delete)
@@ -2087,6 +2147,7 @@ describe('List View', () => {
         data: {
           deletedAt: new Date().toISOString(),
         },
+        overrideAccess: true,
       })
 
       // Go to trash view
@@ -2115,6 +2176,7 @@ describe('List View', () => {
           description: 'This is a published document',
           title: 'published-test',
         },
+        overrideAccess: true,
       })
 
       await page.goto(formatDocURLUrl.list)
@@ -2137,14 +2199,17 @@ describe('List View', () => {
       await payload.create({
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should not be linkable in drawer', title: 'no-link' },
+        overrideAccess: true,
       })
 
       await payload.create({
         collection: formatDocURLCollectionSlug,
         data: { description: 'This should be linkable in drawer', title: 'linkable' },
+        overrideAccess: true,
       })
 
       await page.goto(formatDocURLUrl.list)
+      await expect(page).toHaveURL(/depth=1&limit=10/)
 
       const selectButton = page.locator('button:has-text("Select format doc")')
       await selectButton.waitFor({ state: 'visible' })
@@ -2181,11 +2246,16 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
     disableTransaction: true,
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
 async function deleteAllPosts() {
-  await payload.delete({ collection: postsCollectionSlug, where: { id: { exists: true } } })
+  await payload.delete({
+    collection: postsCollectionSlug,
+    overrideAccess: true,
+    where: { id: { exists: true } },
+  })
 }
 
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
@@ -2196,6 +2266,7 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       ...overrides,
     },
     disableTransaction: true,
+    overrideAccess: true,
   }) as unknown as Promise<Geo>
 }
 
@@ -2207,6 +2278,7 @@ async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
     disableTransaction: true,
+    overrideAccess: true,
   }) as unknown as Promise<Post>
 }
 
@@ -2217,6 +2289,7 @@ async function createArray() {
       array: [{ text: 'test' }],
     },
     disableTransaction: true,
+    overrideAccess: true,
   })
 }
 
@@ -2228,5 +2301,6 @@ async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> 
       ...overrides,
     },
     disableTransaction: true,
+    overrideAccess: true,
   }) as unknown as Promise<Virtual>
 }

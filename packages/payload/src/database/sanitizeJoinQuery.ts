@@ -5,6 +5,7 @@ import { executeAccess } from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
+import { validateSortQuery } from './queryValidation/validateSortQuery.js'
 import { sanitizeWhereQuery } from './sanitizeWhereQuery.js'
 
 type Args = {
@@ -42,7 +43,10 @@ const sanitizeJoinFieldQuery = async ({
   const joinCollectionConfig = req.payload.collections[collectionSlug]!.config
 
   const accessResult = !overrideAccess
-    ? await executeAccess({ disableErrors: true, req }, joinCollectionConfig.access.read)
+    ? await executeAccess(
+        { slug: joinCollectionConfig.slug, disableErrors: true, req },
+        joinCollectionConfig.access.read,
+      )
     : true
 
   if (accessResult === false) {
@@ -73,6 +77,12 @@ const sanitizeJoinFieldQuery = async ({
       req,
       // incoming where input, but we shouldn't validate generated from the access control.
       where: joinQuery.where,
+    }),
+    validateSortQuery({
+      collectionConfig: joinCollectionConfig,
+      overrideAccess,
+      req,
+      sort: joinQuery.sort || join.field.defaultSort || joinCollectionConfig.defaultSort,
     }),
   )
 

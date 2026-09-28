@@ -62,20 +62,19 @@ export function findConverterForNode<
           style['text-align'] = 'center'
           break
         case 'end':
-          style['text-align'] = 'right'
+          style['text-align'] = 'end'
           break
         case 'justify':
           style['text-align'] = 'justify'
           break
         case 'left':
-          //style['text-align'] = 'left'
-          // Do nothing, as left is the default
+          style['text-align'] = 'left'
           break
         case 'right':
           style['text-align'] = 'right'
           break
         case 'start':
-          style['text-align'] = 'left'
+          style['text-align'] = 'start'
           break
       }
     }

@@ -319,6 +319,7 @@ const locationField: PointField = {
 // Query by distance (sorted by nearest first)
 const nearbyLocations = await payload.find({
   collection: 'stores',
+  overrideAccess: true,
   where: {
     location: {
       near: [10, 20], // [longitude, latitude]
@@ -339,6 +340,7 @@ const polygon: Point[] = [
 
 const withinArea = await payload.find({
   collection: 'stores',
+  overrideAccess: true,
   where: {
     location: {
       within: {
@@ -352,6 +354,7 @@ const withinArea = await payload.find({
 // Query intersecting area
 const intersecting = await payload.find({
   collection: 'stores',
+  overrideAccess: true,
   where: {
     location: {
       intersects: {
@@ -419,6 +422,12 @@ const pathVirtualField: TextField = {
   virtual: 'author.name',
 }
 ```
+
+Do not set `admin.useAsTitle` to a computed field configured with
+`virtual: true`. Computed virtual fields are not queryable, and Payload rejects
+them as collection titles. Use a stored top-level field instead. The string-path
+form, such as `virtual: 'author.name'`, is queryable and can be used as
+`admin.useAsTitle` when the title must come from a related document.
 
 ## Conditional Fields
 

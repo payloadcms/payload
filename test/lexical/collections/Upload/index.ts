@@ -3,11 +3,14 @@ import type { CollectionConfig } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { getTestSuiteDir } from '../../../__helpers/shared/getTestSuiteDir.js'
 import { uploads2Slug, uploadsSlug } from '../../slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
-const dirname = process.env.ROOT_DIR
-  ? path.resolve(process.env.ROOT_DIR, 'lexical/collections/Upload')
-  : path.dirname(filename)
+const dirname = getTestSuiteDir({
+  fallbackDir: path.dirname(filename),
+  suitePath: 'lexical/collections/Upload',
+})
 
 export const Uploads: CollectionConfig = {
   slug: uploadsSlug,

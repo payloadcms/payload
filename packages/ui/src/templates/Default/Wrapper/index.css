@@ -6,6 +6,7 @@
     isolation: isolate;
   }
 
+  /* stylelint-disable-next-line plugin/no-non-standard-breakpoints -- TODO: pre-existing; align with a canonical breakpoint */
   @media (min-width: 1441px) {
     .template-default {
       grid-template-columns: 0 auto;
@@ -16,6 +17,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 1440px) {
     .template-default--nav-hydrated.template-default--nav-open {
       grid-template-columns: var(--nav-width) auto;

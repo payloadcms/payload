@@ -31,7 +31,6 @@ describe('Lexical Fully Featured', () => {
   let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     await ensureCompilationIsDone({ browser, serverURL })
@@ -52,7 +51,9 @@ describe('Lexical Fully Featured', () => {
     await expect(lexical.decorator).toHaveCount(2)
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
-    await lexical.drawer.getByText('Paste URL').click()
+    await lexical.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await lexical.page.evaluate(() => navigator.clipboard.writeText(''))
+    await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     await lexical.page
       .locator('#upload-paste-url #field-url')
       .fill(
@@ -68,13 +69,15 @@ describe('Lexical Fully Featured', () => {
   test('ensure upload node can be aligned', async ({ page }) => {
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
-    await lexical.drawer.getByText('Paste URL').click()
+    await lexical.page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await lexical.page.evaluate(() => navigator.clipboard.writeText(''))
+    await lexical.drawer.locator('.file-manager__pasteFromClipboard').click()
     const url =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
     await lexical.page.locator('#upload-paste-url #field-url').fill(url)
     await lexical.page.locator('#upload-paste-url button', { hasText: 'Add file' }).click()
     await lexical.save('drawer')
-    const img = lexical.editor.locator('img').first()
+    const img = lexical.editor.locator('.LexicalEditorTheme__upload img').first()
     await img.click()
     const imgBoxBeforeCenter = await img.boundingBox()
     await expect(() => {
@@ -404,7 +407,6 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
   let lexical: LexicalHelpers
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     await ensureCompilationIsDone({ browser, serverURL })
