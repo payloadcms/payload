@@ -20,7 +20,10 @@ export const DocumentActivityWidget = ({
   preferences: initialPreferences,
   recentKeys,
 }: DocumentWidgetData) => {
-  const [preferences, setPreferences] = useState(initialPreferences)
+  const [preferences, setPreferences] = useState<DocumentWidgetPreferences>(() => ({
+    ...initialPreferences,
+    tab: initialPreferences.tab === 'pinned' ? 'recent' : initialPreferences.tab,
+  }))
   const saveInProgress = useRef(false)
   const [isSaving, setIsSaving] = useState(false)
   const [hasSaveError, setHasSaveError] = useState(false)
@@ -31,7 +34,6 @@ export const DocumentActivityWidget = ({
   const { pins, tab, view } = preferences
   const tabs = useMemo(
     () => [
-      { label: t('dashboard:pinned'), value: 'pinned' as const },
       { label: t('dashboard:recentlyViewed'), value: 'recent' as const },
       { label: t('dashboard:recentDrafts'), value: 'drafts' as const },
     ],
@@ -211,7 +213,7 @@ export const DocumentActivityWidget = ({
                 />
               ))}
               {view === 'grid' &&
-                Array.from({ length: Math.max(0, 8 - items.length) }, (_, index) => (
+                Array.from({ length: Math.max(0, 6 - items.length) }, (_, index) => (
                   <li
                     aria-hidden="true"
                     className="document-activity__placeholder"

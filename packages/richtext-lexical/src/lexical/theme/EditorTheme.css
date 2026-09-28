@@ -3,21 +3,12 @@
     --lexical-indent-base-value: var(--spacer-6);
 
     /* Lexical heading typography scale */
-    --lexical-h1-font-size: 2rem; /* 32px */
-    --lexical-h1-letter-spacing: -0.544px;
-    --lexical-h2-font-size: 1.5rem; /* 24px */
-    --lexical-h2-letter-spacing: var(--text-heading-large-letter-spacing);
-    --lexical-h2-line-height: 2rem; /* 32px */
-    --lexical-h3-font-size: 1.25rem; /* 20px */
-    --lexical-h3-letter-spacing: -0.34px;
+    --lexical-h1-font-size: 1.5rem; /* 24px */
+    --lexical-h2-font-size: 1.25rem; /* 20px */
+    --lexical-h3-font-size: 1.125rem; /* 18px */
     --lexical-h4-font-size: 1rem; /* 16px */
-    --lexical-h4-letter-spacing: -0.272px;
-    --lexical-h5-font-size: 0.8125rem; /* 13px */
-    --lexical-h5-letter-spacing: -0.221px;
-    --lexical-h6-font-size: 0.6875rem; /* 11px */
-    --lexical-h6-letter-spacing: -0.187px;
-    --lexical-body-letter-spacing: -0.0325px;
-
+    --lexical-h5-font-size: 0.875rem; /* 14px */
+    --lexical-h6-font-size: 0.75rem; /* 12px */
     color: var(--color-text);
   }
 
@@ -38,21 +29,21 @@
   }
 
   .LexicalEditorTheme__paragraph {
-    font-family: var(--text-body-large-font-family);
-    font-size: var(--text-body-large-font-size);
-    font-weight: var(--text-body-large-font-weight);
-    line-height: var(--text-body-large-line-height);
-    letter-spacing: var(--lexical-body-letter-spacing);
-    margin-block: var(--spacer-3);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    margin-block: var(--spacer-2);
     position: relative;
   }
 
   .LexicalEditorTheme__quote {
-    font-size: var(--spacer-3);
-    line-height: 1.5;
-    letter-spacing: normal;
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
     color: var(--color-text);
-    margin-block: var(--spacer-3);
+    margin-block: var(--spacer-2);
     margin-inline: var(--spacer-1);
     border-inline-start-color: var(--color-border);
     border-inline-start-width: var(--spacer-1);
@@ -69,38 +60,32 @@
   .LexicalEditorTheme__h6 {
     font-weight: 550;
     line-height: 1.2;
-    margin-block: var(--spacer-3);
+    letter-spacing: -0.017em;
+    margin-block: 1em var(--spacer-2);
   }
 
   .LexicalEditorTheme__h1 {
     font-size: var(--lexical-h1-font-size);
-    letter-spacing: var(--lexical-h1-letter-spacing);
   }
 
   .LexicalEditorTheme__h2 {
     font-size: var(--lexical-h2-font-size);
-    line-height: var(--lexical-h2-line-height);
-    letter-spacing: var(--lexical-h2-letter-spacing);
   }
 
   .LexicalEditorTheme__h3 {
     font-size: var(--lexical-h3-font-size);
-    letter-spacing: var(--lexical-h3-letter-spacing);
   }
 
   .LexicalEditorTheme__h4 {
     font-size: var(--lexical-h4-font-size);
-    letter-spacing: var(--lexical-h4-letter-spacing);
   }
 
   .LexicalEditorTheme__h5 {
     font-size: var(--lexical-h5-font-size);
-    letter-spacing: var(--lexical-h5-letter-spacing);
   }
 
   .LexicalEditorTheme__h6 {
     font-size: var(--lexical-h6-font-size);
-    letter-spacing: var(--lexical-h6-letter-spacing);
   }
 
   .LexicalEditorTheme__textBold {
@@ -215,7 +200,7 @@
     padding: 0;
     list-style-type: decimal;
     list-style-position: outside;
-    margin-block: var(--spacer-3);
+    margin-block: var(--spacer-2);
   }
 
   .LexicalEditorTheme__ol2 {
@@ -248,7 +233,7 @@
 
   .LexicalEditorTheme__ul {
     padding: 0;
-    margin-block: var(--spacer-3);
+    margin-block: var(--spacer-2);
     list-style-type: disc;
     list-style-position: outside;
   }
@@ -258,9 +243,12 @@
   }
 
   .LexicalEditorTheme__listItem {
-    font-family: var(--text-body-large-font-family);
-    font-size: var(--text-body-large-font-size);
-    margin-block-end: var(--spacer-3);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    margin-block-end: var(--spacer-2);
     margin-inline-start: var(--spacer-6);
   }
 

@@ -86,9 +86,4 @@
       --cols: 6;
     }
   }
-  @container collection-cards (min-width: 1440px) {
-    .collections__card-list {
-      --cols: 8;
-    }
-  }
 }

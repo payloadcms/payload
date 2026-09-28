@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { type CollectionConfig, type Config } from 'payload'
+import { deepCopyObjectComplex } from 'payload/shared'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
@@ -89,13 +90,15 @@ import {
   tableContent,
 } from './seed/richTextData.js'
 
-const withGroup = (collection: CollectionConfig, group: string): CollectionConfig => ({
-  ...collection,
-  admin: {
-    ...collection.admin,
-    group,
-  },
-})
+// Sanitization mutates nested fields and hooks. Keep the imported configs pristine across hot reloads.
+const withGroup = (collection: CollectionConfig, group: string): CollectionConfig =>
+  deepCopyObjectComplex({
+    ...collection,
+    admin: {
+      ...collection.admin,
+      group,
+    },
+  })
 
 export const collections: CollectionConfig[] = [
   // Auth

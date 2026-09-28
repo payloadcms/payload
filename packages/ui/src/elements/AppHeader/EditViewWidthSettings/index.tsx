@@ -9,11 +9,17 @@ import { PopupList } from '../../Popup/index.js'
 import { Switch } from '../../Switch/index.js'
 import './index.css'
 
-const widths: EditViewWidth[] = ['640', '800', '960', 'full']
+const widths: EditViewWidth[] = ['960', '1200', '1440', 'full']
 
 export const EditViewWidthSettings: React.FC = () => {
-  const { editViewWidth, setEditViewHeaderAlignment, setEditViewWidth, shouldAlignEditViewHeader } =
-    useTheme()
+  const {
+    editViewWidth,
+    setEditViewHeaderAlignment,
+    setEditViewWidth,
+    setListViewMaxWidth,
+    shouldAlignEditViewHeader,
+    shouldApplyListViewMaxWidth,
+  } = useTheme()
   const { t } = useTranslation()
 
   return (
@@ -30,6 +36,12 @@ export const EditViewWidthSettings: React.FC = () => {
           </PopupList.RadioGroupItem>
         ))}
       </PopupList.RadioGroup>
+      <Switch
+        checked={shouldApplyListViewMaxWidth}
+        className="edit-view-width-settings__list-views"
+        label={`${t('general:editViewWidth')}: ${t('dashboard:listView')}`}
+        onChange={(isEnabled) => setListViewMaxWidth({ isEnabled })}
+      />
       <Switch
         checked={shouldAlignEditViewHeader}
         className="edit-view-width-settings__alignment"

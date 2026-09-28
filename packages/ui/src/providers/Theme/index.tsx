@@ -16,9 +16,11 @@ export type ThemeContext = {
   setEditViewHeaderAlignment: (args: { isEnabled: boolean }) => void
   setEditViewWidth: (args: { editViewWidth: EditViewWidth }) => void
   setHighContrastMode: (isHighContrast: boolean, options?: { scoped?: boolean }) => void
+  setListViewMaxWidth: (args: { isEnabled: boolean }) => void
   setTheme: (theme: 'auto' | Theme, options?: { scoped?: boolean }) => void
   setTypeSize: (args: { typeSize: TypeSize }) => void
   shouldAlignEditViewHeader: boolean
+  shouldApplyListViewMaxWidth: boolean
   theme: Theme
   typeSize: TypeSize
 }
@@ -30,9 +32,11 @@ const initialContext: ThemeContext = {
   setEditViewHeaderAlignment: () => null,
   setEditViewWidth: () => null,
   setHighContrastMode: () => null,
+  setListViewMaxWidth: () => null,
   setTheme: () => null,
   setTypeSize: () => null,
   shouldAlignEditViewHeader: false,
+  shouldApplyListViewMaxWidth: true,
   theme: 'light',
   typeSize: 'proposed',
 }
@@ -109,6 +113,7 @@ export const ThemeProvider: React.FC<{
   editViewWidth?: EditViewWidth
   highContrastMode?: boolean
   shouldAlignEditViewHeader?: boolean
+  shouldApplyListViewMaxWidth?: boolean
   theme?: Theme
   typeSize?: TypeSize
 }> = ({
@@ -116,6 +121,7 @@ export const ThemeProvider: React.FC<{
   editViewWidth: initialEditViewWidth = 'full',
   highContrastMode: initialHighContrastMode,
   shouldAlignEditViewHeader: initialHeaderAlignment = false,
+  shouldApplyListViewMaxWidth: initialListViewMaxWidth = true,
   theme: themeOverride,
   typeSize: initialTypeSize = 'proposed',
 }) => {
@@ -158,6 +164,38 @@ export const ThemeProvider: React.FC<{
     setEditViewWidthState(detectedEditViewWidth)
     document.documentElement.setAttribute('data-edit-view-width', detectedEditViewWidth)
   }, [isScoped, editViewWidthCookieKey])
+
+  const listViewMaxWidthCookieKey = `${config.cookiePrefix || 'payload'}-list-view-max-width`
+  const [shouldApplyListViewMaxWidth, setListViewMaxWidthState] = useState(initialListViewMaxWidth)
+
+  const setListViewMaxWidth = useCallback(
+    ({ isEnabled }: { isEnabled: boolean }) => {
+      if (isScoped) {
+        outerContext.setListViewMaxWidth({ isEnabled })
+        return
+      }
+
+      setListViewMaxWidthState(isEnabled)
+      setCookie(listViewMaxWidthCookieKey, String(isEnabled), 365)
+      document.documentElement.setAttribute('data-list-view-max-width', String(isEnabled))
+    },
+    [isScoped, outerContext, listViewMaxWidthCookieKey],
+  )
+
+  useEffect(() => {
+    if (isScoped) {
+      return
+    }
+
+    const value = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${listViewMaxWidthCookieKey}=`))
+      ?.split('=')[1]
+    const isEnabled = value !== 'false'
+
+    setListViewMaxWidthState(isEnabled)
+    document.documentElement.setAttribute('data-list-view-max-width', String(isEnabled))
+  }, [isScoped, listViewMaxWidthCookieKey])
 
   const headerAlignmentCookieKey = `${config.cookiePrefix || 'payload'}-edit-view-header-alignment`
   const [shouldAlignEditViewHeader, setHeaderAlignmentState] = useState(initialHeaderAlignment)
@@ -312,11 +350,15 @@ export const ThemeProvider: React.FC<{
         setEditViewHeaderAlignment,
         setEditViewWidth,
         setHighContrastMode,
+        setListViewMaxWidth,
         setTheme,
         setTypeSize,
         shouldAlignEditViewHeader: isScoped
           ? outerContext.shouldAlignEditViewHeader
           : shouldAlignEditViewHeader,
+        shouldApplyListViewMaxWidth: isScoped
+          ? outerContext.shouldApplyListViewMaxWidth
+          : shouldApplyListViewMaxWidth,
         theme: isScoped ? outerContext.theme : theme,
         typeSize: isScoped ? outerContext.typeSize : typeSize,
       }}

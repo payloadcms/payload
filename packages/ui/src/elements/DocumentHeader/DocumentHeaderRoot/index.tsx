@@ -19,7 +19,7 @@ export const DocumentHeaderRoot: React.FC<{ children: React.ReactNode }> = ({ ch
 
   return (
     <div className={baseClass} ref={ref}>
-      {children}
+      <div className={`${baseClass}__content`}>{children}</div>
     </div>
   )
 }

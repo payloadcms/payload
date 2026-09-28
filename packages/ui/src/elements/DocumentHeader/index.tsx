@@ -8,7 +8,7 @@ import type {
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { DocumentHeaderRoot, Gutter, RenderTitle } from '../../exports/client/index.js'
+import { DocumentHeaderRoot, RenderTitle } from '../../exports/client/index.js'
 import { DocumentTabs } from './Tabs/index.js'
 import './index.css'
 
@@ -30,7 +30,10 @@ export const DocumentHeader: React.FC<{
 
   return (
     <DocumentHeaderRoot>
-      <RenderTitle className={`${baseClass}__title`} />
+      <RenderTitle
+        className={`${baseClass}__title`}
+        focusFieldOnPlaceholder={collectionConfig?.admin?.useAsTitle}
+      />
       {!hideTabs && (
         <DocumentTabs
           collectionConfig={collectionConfig}

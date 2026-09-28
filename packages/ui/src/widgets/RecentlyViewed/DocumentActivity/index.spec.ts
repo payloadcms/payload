@@ -99,10 +99,10 @@ describe('dashboard document controls', () => {
     act(() =>
       tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })),
     )
-    expect(document.activeElement).toBe(tabs[2])
+    expect(document.activeElement).toBe(tabs[0])
     const panel = container.querySelector('[role="tabpanel"]')
     expect(tabs[1].getAttribute('aria-controls')).toBe(panel.id)
-    expect(panel.getAttribute('aria-labelledby')).toBe(tabs[1].id)
+    expect(panel.getAttribute('aria-labelledby')).toBe(tabs[0].id)
   })
 })
 
@@ -110,7 +110,7 @@ describe('dashboard document empty states', () => {
   it('should fill unused grid slots with non-interactive decorative cards', () => {
     const placeholders = container.querySelectorAll('.document-activity__placeholder')
 
-    expect(placeholders).toHaveLength(7)
+    expect(placeholders).toHaveLength(5)
     for (const placeholder of placeholders) {
       expect(placeholder.getAttribute('aria-hidden')).toBe('true')
       expect(placeholder.querySelector('a, button, input, [tabindex]')).toBeNull()
@@ -127,7 +127,7 @@ describe('dashboard document empty states', () => {
     expect(container.querySelector('.document-activity__placeholder')).toBeNull()
   })
 
-  it.each(['pinned', 'recent', 'drafts'] as const)(
+  it.each(['recent', 'drafts'] as const)(
     'should show the %s empty message instead of placeholder cards when no documents exist',
     (tab) => {
       act(() =>
@@ -146,42 +146,39 @@ describe('dashboard document empty states', () => {
       expect(container.querySelector('.document-activity__empty')).not.toBeNull()
       expect(container.querySelector('.document-activity__placeholder')).toBeNull()
       expect(container.querySelector('.document-activity__empty strong').textContent).toBe(
-        tab === 'pinned'
-          ? 'dashboard:noPinned'
-          : tab === 'drafts'
-            ? 'dashboard:noDrafts'
-            : 'dashboard:noRecents',
+        tab === 'drafts' ? 'dashboard:noDrafts' : 'dashboard:noRecents',
       )
     },
   )
 
-  it.each([8, 9])('should retain all %i pins without adding extra placeholder cards', (count) => {
-    const documents = Array.from({ length: count }, (_, id) => ({
-      id,
-      collectionSlug: 'posts',
-      href: `/posts/${id}`,
-      title: `Post ${id}`,
-      typeLabel: 'Posts',
-    }))
-
+  it('should show Recent when the saved tab is Pinned', () => {
     act(() =>
       root.render(
         createElement(DocumentActivityWidget, {
-          documents,
+          documents: [
+            {
+              id: 1,
+              collectionSlug: 'posts',
+              href: '/posts/1',
+              title: 'Example',
+              typeLabel: 'Posts',
+            },
+          ],
           draftKeys: [],
           hasError: false,
           key: 'pinned',
-          preferences: {
-            pins: documents.map(({ id, collectionSlug }) => ({ id, collectionSlug })),
-            tab: 'pinned',
-            view: 'grid',
-          },
-          recentKeys: [],
+          preferences: { pins: [], tab: 'pinned', view: 'grid' },
+          recentKeys: ['posts:1'],
         }),
       ),
     )
 
-    expect(container.querySelectorAll('.document-activity__items > li')).toHaveLength(count)
-    expect(container.querySelector('.document-activity__placeholder')).toBeNull()
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(2)
+    expect(container.querySelector('[role="tab"][aria-selected="true"]')?.textContent).toBe(
+      'dashboard:recentlyViewed',
+    )
+    expect(container.querySelector('.document-activity__items > li button')?.textContent).toBe(
+      'Example',
+    )
   })
 })

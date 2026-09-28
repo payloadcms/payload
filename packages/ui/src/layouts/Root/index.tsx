@@ -133,6 +133,9 @@ const RootLayoutContent = async ({
     value: cookies.get(`${config.cookiePrefix || 'payload'}-edit-view-width`),
   })
 
+  const shouldApplyListViewMaxWidth =
+    cookies.get(`${config.cookiePrefix || 'payload'}-list-view-max-width`) !== 'false'
+
   const shouldAlignEditViewHeader =
     cookies.get(`${config.cookiePrefix || 'payload'}-edit-view-header-alignment`) === 'true'
 
@@ -176,6 +179,7 @@ const RootLayoutContent = async ({
       className={[...fontClassNames, htmlProps?.className].filter(Boolean).join(' ')}
       data-edit-view-width={editViewWidth}
       data-enhanced-contrast={highContrastMode ? '' : undefined}
+      data-list-view-max-width={shouldApplyListViewMaxWidth}
       data-theme={theme}
       data-type-size={typeSize}
       dir={dir}
@@ -203,6 +207,7 @@ const RootLayoutContent = async ({
           RouterAdapter={RouterAdapter}
           serverFunction={serverFunction}
           shouldAlignEditViewHeader={shouldAlignEditViewHeader}
+          shouldApplyListViewMaxWidth={shouldApplyListViewMaxWidth}
           theme={theme}
           translations={req.i18n.translations}
           typeSize={typeSize}

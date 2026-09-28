@@ -181,13 +181,4 @@
       grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
-  @container activity (min-width: 1440px) {
-    .document-activity__items--grid > .document-activity__placeholder:nth-child(-n + 8),
-    .document-activity__items--grid:not([data-tab='pinned']) > :nth-child(-n + 8) {
-      display: list-item;
-    }
-    .document-activity__items--grid {
-      grid-template-columns: repeat(8, minmax(0, 1fr));
-    }
-  }
 }

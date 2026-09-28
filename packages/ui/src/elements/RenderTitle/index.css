@@ -26,6 +26,17 @@
     color: var(--color-text-secondary);
   }
 
+  .render-title__placeholder-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    cursor: pointer;
+  }
+
   .render-title__id {
     vertical-align: middle;
     position: relative;

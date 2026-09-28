@@ -18,7 +18,7 @@ let resize: () => void
 const disconnect = vi.fn()
 
 const Form = ({
-  editViewWidth = '800',
+  editViewWidth = '960',
   shouldAlignHeader = false,
 }: {
   editViewWidth?: EditViewWidth
@@ -124,7 +124,7 @@ describe('edit view whitespace', () => {
     expect(isFullWidth()).toBe(true)
 
     constrainedWidth = 1168
-    act(() => root.render(createElement(Form, { editViewWidth: '640' })))
+    act(() => root.render(createElement(Form, { editViewWidth: '1200' })))
     expect(isFullWidth()).toBe(false)
   })
 
@@ -141,7 +141,7 @@ describe('edit view whitespace', () => {
   it('should restore the width cap when switching from Full to a fixed width', () => {
     mainWidth = 2000
     act(() => root.render(createElement(Form, { editViewWidth: 'full', shouldAlignHeader: true })))
-    act(() => root.render(createElement(Form, { editViewWidth: '800', shouldAlignHeader: true })))
+    act(() => root.render(createElement(Form, { editViewWidth: '1200', shouldAlignHeader: true })))
 
     expect(isFullWidth()).toBe(false)
     for (const bar of getBars()) {

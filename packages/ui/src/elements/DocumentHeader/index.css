@@ -1,13 +1,32 @@
 @layer payload-default {
   .doc-header {
     width: 100%;
-    padding: var(--spacer-2-5) var(--gutter-h);
     position: relative;
     border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .doc-header__content {
+    width: 100%;
+    padding: var(--spacer-2-5) var(--gutter-h);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--spacer-2-5);
+  }
+
+  .template-default__wrap:has(> :is(.versions, .view-version, .query-inspector))
+    > .doc-header
+    > .doc-header__content {
+    max-inline-size: var(--edit-view-max-width);
+    margin-inline: auto;
+  }
+
+  :root[data-edit-view-width='full']
+    .template-default__wrap:has(> :is(.versions, .view-version, .query-inspector))
+    > .doc-header
+    > .doc-header__content,
+  .template-default__wrap:has(> .query-inspector--fullscreen) > .doc-header > .doc-header__content {
+    max-inline-size: none;
   }
 
   .doc-header__title {
@@ -25,7 +44,7 @@
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
-    .doc-header {
+    .doc-header__content {
       flex-direction: column;
       padding: var(--spacer-2) var(--gutter-h);
       gap: var(--spacer-2);

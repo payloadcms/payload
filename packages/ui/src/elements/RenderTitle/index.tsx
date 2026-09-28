@@ -16,6 +16,7 @@ export type RenderTitleProps = {
   element?: React.ElementType
   fallback?: string
   fallbackToID?: boolean
+  focusFieldOnPlaceholder?: string
   /**
    * When true, renders the title as a link to the document. Useful inside drawers
    * to navigate to the full document view.
@@ -25,7 +26,14 @@ export type RenderTitleProps = {
 }
 
 export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
-  const { className, element = 'h1', fallback, renderAsLink, title: titleFromProps } = props
+  const {
+    className,
+    element = 'h1',
+    fallback,
+    focusFieldOnPlaceholder,
+    renderAsLink,
+    title: titleFromProps,
+  } = props
 
   const { id, collectionSlug, globalSlug, isInitializing } = useDocumentInfo()
   const { isPlaceholder, title: titleFromContext } = useDocumentTitle()
@@ -75,6 +83,26 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
         <Link className={`${baseClass}__link`} href={docPath}>
           {title || EmptySpace}
         </Link>
+      ) : showPlaceholder && focusFieldOnPlaceholder && focusFieldOnPlaceholder !== 'id' ? (
+        <button
+          className={`${baseClass}__placeholder-button`}
+          onClick={(event) => {
+            const fieldID = `field-${focusFieldOnPlaceholder.replace(/\./g, '__')}`
+            const scope = event.currentTarget.closest('.template-default__wrap')
+            const field = scope?.querySelector<HTMLElement>(`#${CSS.escape(fieldID)}`)
+            const input =
+              field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement
+                ? field
+                : field?.querySelector<HTMLElement>(
+                    'input:not([type="hidden"]), textarea, [contenteditable="true"], [role="combobox"], button',
+                  )
+
+            input?.focus()
+          }}
+          type="button"
+        >
+          {title || EmptySpace}
+        </button>
       ) : (
         title || EmptySpace
       )}

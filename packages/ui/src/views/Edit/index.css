@@ -7,13 +7,7 @@
   }
 
   .collection-edit__main > .document-fields {
-    --edit-view-sidebar-form-width: 400px;
-    --doc-sidebar-width: calc(var(--edit-view-sidebar-form-width) + var(--gutter-h) * 2);
-    --edit-view-sidebar-width: 0px;
-    /* With a sidebar, the cap includes the selected main width, 400px sidebar, and gutters. */
-    max-inline-size: calc(
-      var(--edit-view-max-width) + var(--gutter-h) * 2 + var(--edit-view-sidebar-width)
-    );
+    max-inline-size: var(--edit-view-max-width);
     margin-inline: auto;
   }
 
@@ -22,26 +16,7 @@
     max-inline-size: none;
   }
 
-  @media (min-width: 1024px) {
-    .collection-edit__main
-      > .document-fields--has-sidebar:not(.document-fields--force-sidebar-wrap):has(
-        .document-fields__sidebar-fields > .render-fields:not(:empty)
-      ) {
-      --edit-view-sidebar-width: var(--doc-sidebar-width);
-      --sidebar-wrap-width: var(--doc-sidebar-width);
-    }
-  }
-
-  @container drawer (max-width: 768px) {
-    .collection-edit__main
-      > .document-fields--has-sidebar:not(.document-fields--force-sidebar-wrap):has(
-        .document-fields__sidebar-fields > .render-fields:not(:empty)
-      ) {
-      --edit-view-sidebar-width: 0px;
-    }
-  }
-
-  .doc-header[data-edit-view-aligned],
+  .doc-header[data-edit-view-aligned] .doc-header__content,
   .doc-controls[data-edit-view-aligned] {
     padding-inline: max(
       var(--gutter-h),

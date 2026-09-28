@@ -2,7 +2,7 @@
   .list-controls {
     display: flex;
     flex-direction: column;
-    padding: var(--spacer-2-5) var(--gutter-h);
+    padding-block: var(--spacer-2-5);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
 
     .pill-selector,
@@ -12,9 +12,14 @@
     }
   }
 
-  .drawer .list-controls {
-    padding-left: var(--spacer-3);
-    padding-right: var(--spacer-3);
+  .list-controls__search-row,
+  .list-controls__where {
+    padding-inline: var(--gutter-h);
+  }
+
+  .drawer .list-controls__search-row,
+  .drawer .list-controls__where {
+    padding-inline: var(--spacer-3);
   }
 
   .list-controls__search-row {

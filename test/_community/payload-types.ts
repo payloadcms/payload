@@ -62,24 +62,37 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_C0124FAC".
+ * via the `definition` "LexicalNodes_0BAA0A47".
  */
-export type LexicalNodes_C0124FAC =
+export type LexicalNodes_0BAA0A47 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_C0124FAC>
+  | SerializedParagraphNode<LexicalNodes_0BAA0A47>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_C0124FAC>
+  | SerializedQuoteNode<LexicalNodes_0BAA0A47>
   | SerializedRelationshipNode<
-      'posts' | 'payload-kv' | 'users' | 'payload-locked-documents' | 'payload-preferences' | 'payload-migrations'
+      | 'users'
+      | 'authors'
+      | 'categories'
+      | 'articles'
+      | 'products'
+      | 'events'
+      | 'experiments'
+      | 'pages'
+      | 'folders'
+      | 'posts'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_C0124FAC, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_C0124FAC, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_C0124FAC>
-  | SerializedListItemNode<LexicalNodes_C0124FAC>
-  | SerializedHeadingNode<LexicalNodes_C0124FAC>;
+  | SerializedAutoLinkNode<LexicalNodes_0BAA0A47, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_0BAA0A47, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_0BAA0A47>
+  | SerializedListItemNode<LexicalNodes_0BAA0A47>
+  | SerializedHeadingNode<LexicalNodes_0BAA0A47>;
 
 export interface Config {
   auth: {
@@ -87,39 +100,59 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    posts: Post;
     media: Media;
-    'payload-kv': PayloadKv;
     users: User;
+    authors: Author;
+    categories: Category;
+    articles: Article;
+    products: Product;
+    events: Event;
+    experiments: Experiment;
+    pages: Page;
+    folders: Folder;
+    posts: Post;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
-    posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    authors: AuthorsSelect<false> | AuthorsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    experiments: ExperimentsSelect<false> | ExperimentsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
+    'playground-settings': PlaygroundSetting;
     menu: Menu;
   };
   globalsSelect: {
+    'playground-settings': PlaygroundSettingsSelect<false> | PlaygroundSettingsSelect<true>;
     menu: MenuSelect<false> | MenuSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
+    welcome: WelcomeWidget;
+    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -147,21 +180,13 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  title?: string | null;
-  content?: LexicalRichText<LexicalNodes_C0124FAC> | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
+  alt: string;
+  caption?: string | null;
+  credit?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -202,27 +227,11 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
+  role: 'admin' | 'editor' | 'viewer';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -245,27 +254,329 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors".
+ */
+export interface Author {
+  id: number;
+  name: string;
+  /**
+   * Stable identifier; generated from title or name when empty.
+   */
+  slug: string;
+  bio?: string | null;
+  specialty?: ('hiking' | 'climbing' | 'camping' | 'conservation') | null;
+  portrait?: (number | null) | Media;
+  socialLinks?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  /**
+   * Stable identifier; generated from title or name when empty.
+   */
+  slug: string;
+  description?: string | null;
+  parent?: (number | null) | Category;
+  color?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: number;
+  title: string;
+  /**
+   * Stable identifier; generated from title or name when empty.
+   */
+  slug: string;
+  excerpt?: string | null;
+  body: LexicalRichText<LexicalNodes_0BAA0A47>;
+  cover?: (number | null) | Media;
+  sections?: (Callout | GearList)[] | null;
+  author: number | Author;
+  categories?: (number | Category)[] | null;
+  relatedArticles?: (number | Article)[] | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  featured?: boolean | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Callout".
+ */
+export interface Callout {
+  tone?: ('tip' | 'note' | 'warning') | null;
+  text: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'callout';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GearList".
+ */
+export interface GearList {
+  heading?: string | null;
+  products?: (number | Product)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gearList';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  name: string;
+  /**
+   * Stable identifier; generated from title or name when empty.
+   */
+  slug: string;
+  sku: string;
+  description?: string | null;
+  /**
+   * USD; sample catalog only.
+   */
+  price: number;
+  inventory: number;
+  categories?: (number | Category)[] | null;
+  gallery?:
+    | {
+        image: number | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  variants?:
+    | {
+        label: string;
+        sku: string;
+        inStock?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Flexible metadata for testing JSON fields.
+   */
+  specifications?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  /**
+   * Stable identifier; generated from title or name when empty.
+   */
+  slug: string;
+  description?: string | null;
+  startsAt: string;
+  format?: ('in-person' | 'online') | null;
+  venue?: {
+    name?: string | null;
+    city?: string | null;
+    address?: string | null;
+  };
+  meetingURL?: string | null;
+  capacity?: number | null;
+  hosts?: (number | Author)[] | null;
+  recommendedGear?: (number | Product)[] | null;
+  difficulty?: ('beginner' | 'intermediate' | 'advanced') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * A notebook for your tests. These records do not change Payload configuration.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experiments".
+ */
+export interface Experiment {
+  id: number;
+  name: string;
+  hypothesis?: string | null;
+  status?: ('planned' | 'running' | 'complete' | 'paused') | null;
+  enabled?: boolean | null;
+  settings:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  subjects?:
+    | (
+        | {
+            relationTo: 'articles';
+            value: number | Article;
+          }
+        | {
+            relationTo: 'products';
+            value: number | Product;
+          }
+        | {
+            relationTo: 'events';
+            value: number | Event;
+          }
+      )[]
+    | null;
+  observations?:
+    | {
+        recordedAt: string;
+        note: string;
+        result?: ('pass' | 'fail' | 'inconclusive') | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title?: string | null;
+  content?: LexicalRichText<LexicalNodes_0BAA0A47> | null;
+  _h_folders?: (number | null) | Folder;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: number;
+  _h_folders?: (number | null) | Folder;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title?: string | null;
+  content?: LexicalRichText<LexicalNodes_0BAA0A47> | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: number;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
-        relationTo: 'posts';
-        value: string | Post;
-      } | null)
-    | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'authors';
+        value: number | Author;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'experiments';
+        value: number | Experiment;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'folders';
+        value: number | Folder;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -275,10 +586,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -298,7 +609,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -306,19 +617,12 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  content?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  caption?: T;
+  credit?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -367,17 +671,10 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -395,6 +692,205 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors_select".
+ */
+export interface AuthorsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  bio?: T;
+  specialty?: T;
+  portrait?: T;
+  socialLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  parent?: T;
+  color?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  excerpt?: T;
+  body?: T;
+  cover?: T;
+  sections?:
+    | T
+    | {
+        callout?:
+          | T
+          | {
+              tone?: T;
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        gearList?:
+          | T
+          | {
+              heading?: T;
+              products?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  author?: T;
+  categories?: T;
+  relatedArticles?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  featured?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  sku?: T;
+  description?: T;
+  price?: T;
+  inventory?: T;
+  categories?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  variants?:
+    | T
+    | {
+        label?: T;
+        sku?: T;
+        inStock?: T;
+        id?: T;
+      };
+  specifications?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  description?: T;
+  startsAt?: T;
+  format?: T;
+  venue?:
+    | T
+    | {
+        name?: T;
+        city?: T;
+        address?: T;
+      };
+  meetingURL?: T;
+  capacity?: T;
+  hosts?: T;
+  recommendedGear?: T;
+  difficulty?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "experiments_select".
+ */
+export interface ExperimentsSelect<T extends boolean = true> {
+  name?: T;
+  hypothesis?: T;
+  status?: T;
+  enabled?: T;
+  settings?: T;
+  subjects?: T;
+  observations?:
+    | T
+    | {
+        recordedAt?: T;
+        note?: T;
+        result?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  _h_folders?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  _h_folders?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -429,14 +925,50 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Sample app settings for the community demo.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "playground-settings".
+ */
+export interface PlaygroundSetting {
+  id: number;
+  siteName?: string | null;
+  announcement?: string | null;
+  features?: {
+    showEvents?: boolean | null;
+    showCatalog?: boolean | null;
+  };
+  notes?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: string;
+  id: number;
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "playground-settings_select".
+ */
+export interface PlaygroundSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  announcement?: T;
+  features?:
+    | T
+    | {
+        showEvents?: T;
+        showCatalog?: T;
+      };
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -465,7 +997,18 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'media' | 'users';
+    relatedCollection:
+      | 'media'
+      | 'users'
+      | 'authors'
+      | 'categories'
+      | 'articles'
+      | 'products'
+      | 'events'
+      | 'experiments'
+      | 'pages'
+      | 'folders'
+      | 'posts';
     where?:
       | {
           [k: string]: unknown;
@@ -487,9 +1030,43 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('posts' | 'media' | 'users')[] | null;
+    excludedCollections?:
+      | (
+          | 'media'
+          | 'users'
+          | 'authors'
+          | 'categories'
+          | 'articles'
+          | 'products'
+          | 'events'
+          | 'experiments'
+          | 'pages'
+          | 'folders'
+          | 'posts'
+        )[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "welcome_widget".
+ */
+export interface WelcomeWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    collection: 'media';
+  };
+  width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

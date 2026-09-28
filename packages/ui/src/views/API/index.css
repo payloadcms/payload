@@ -1,6 +1,9 @@
 @layer payload-default {
   .query-inspector {
     --header-offset: 110px;
+    width: 100%;
+    max-inline-size: var(--edit-view-max-width);
+    margin-inline: auto;
     flex: 1;
     min-height: 0;
     display: flex;
@@ -11,7 +14,12 @@
     }
   }
 
+  :root[data-edit-view-width='full'] .query-inspector {
+    max-inline-size: none;
+  }
+
   .query-inspector--fullscreen {
+    max-inline-size: none;
     padding: 0;
 
     .query-inspector__configuration {

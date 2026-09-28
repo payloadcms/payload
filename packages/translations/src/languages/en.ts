@@ -382,7 +382,7 @@ export const enTranslations = {
     editingLabel_other: 'Editing {{count}} {{label}}',
     editingTakenOver: 'Editing taken over',
     editLabel: 'Edit {{label}}',
-    editViewWidth: 'Edit view width',
+    editViewWidth: 'View width',
     editViewWidthFull: 'Full',
     email: 'Email',
     emailAddress: 'Email Address',

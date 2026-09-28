@@ -1,9 +1,13 @@
 @layer payload-default {
   .list-controls-bar {
+    padding-block: var(--spacer-2-5);
+  }
+
+  .list-controls-bar__inner {
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
-    padding: var(--spacer-2-5) var(--gutter-h);
+    padding-inline: var(--gutter-h);
   }
 
   .list-controls-bar--border {
@@ -12,8 +16,8 @@
 
   /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
-    .list-controls-bar {
-      padding: var(--spacer-2-5) var(--spacer-3);
+    .list-controls-bar__inner {
+      padding-inline: var(--spacer-3);
       flex-wrap: wrap;
       row-gap: var(--spacer-2);
     }

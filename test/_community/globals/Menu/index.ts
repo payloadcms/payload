@@ -4,6 +4,9 @@ export const menuSlug = 'menu'
 
 export const MenuGlobal: GlobalConfig = {
   slug: menuSlug,
+  admin: {
+    group: 'Content',
+  },
   fields: [
     {
       name: 'globalText',

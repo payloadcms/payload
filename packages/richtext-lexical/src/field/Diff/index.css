@@ -1,17 +1,17 @@
 @layer payload-default {
   .lexical-diff .field-diff-content {
     .html-diff {
-      font-family: var(--text-body-large-font-family);
-      font-size: var(--text-body-large-font-size);
-      font-weight: var(--text-body-large-font-weight);
-      line-height: var(--text-body-large-line-height);
-      letter-spacing: -0.0325px;
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+      letter-spacing: var(--text-body-medium-letter-spacing);
     }
 
     blockquote {
-      font-size: var(--text-body-large-font-size);
-      line-height: 1.5;
-      letter-spacing: normal;
+      font-size: var(--text-body-medium-font-size);
+      line-height: var(--text-body-medium-line-height);
+      letter-spacing: var(--text-body-medium-letter-spacing);
       margin-inline: var(--spacer-1);
       padding-inline-start: var(--spacer-2-5);
       padding-block: var(--spacer-1);
@@ -40,32 +40,26 @@
     h6 {
       font-weight: 550;
       line-height: 1.2;
+      letter-spacing: -0.017em;
     }
 
     h1 {
-      font-size: 2rem;
-      letter-spacing: -0.544px;
+      font-size: 1.5rem;
     }
     h2 {
-      font-size: 1.5rem;
-      line-height: 2rem;
-      letter-spacing: var(--text-heading-large-letter-spacing);
+      font-size: 1.25rem;
     }
     h3 {
-      font-size: 1.25rem;
-      letter-spacing: -0.34px;
+      font-size: 1.125rem;
     }
     h4 {
       font-size: 1rem;
-      letter-spacing: -0.272px;
     }
     h5 {
-      font-size: 0.8125rem;
-      letter-spacing: -0.221px;
+      font-size: 0.875rem;
     }
     h6 {
-      font-size: 0.6875rem;
-      letter-spacing: -0.187px;
+      font-size: 0.75rem;
     }
 
     > .html-diff > :first-child {
@@ -119,8 +113,11 @@
     }
 
     li {
-      font-family: var(--text-body-large-font-family);
-      font-size: var(--text-body-large-font-size);
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+      letter-spacing: var(--text-body-medium-letter-spacing);
       margin-block: 0 var(--spacer-1);
       margin-inline-start: var(--spacer-4);
       position: relative;

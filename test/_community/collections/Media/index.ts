@@ -1,22 +1,31 @@
 import type { CollectionConfig } from 'payload'
 
+import { contentAccess } from '../../access.js'
+
 export const mediaSlug = 'media'
 
 export const MediaCollection: CollectionConfig = {
   slug: mediaSlug,
-  access: {
-    create: () => true,
-    read: () => true,
+  access: contentAccess,
+  admin: {
+    group: 'Content',
+    // useAsTitle: 'alt',
   },
-  fields: [],
+  fields: [
+    { name: 'alt', type: 'text', required: true },
+    { name: 'caption', type: 'textarea', localized: true },
+    { name: 'credit', type: 'text' },
+  ],
   upload: {
+    adminThumbnail: 'thumbnail',
     crop: true,
     focalPoint: true,
     imageSizes: [
       {
         name: 'thumbnail',
-        height: 200,
-        width: 200,
+        fit: 'cover',
+        height: 300,
+        width: 400,
       },
       {
         name: 'medium',
@@ -29,6 +38,7 @@ export const MediaCollection: CollectionConfig = {
         width: 1200,
       },
     ],
+    mimeTypes: ['image/*', 'application/pdf'],
   },
   versions: false,
 }

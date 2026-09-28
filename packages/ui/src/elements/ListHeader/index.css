@@ -3,8 +3,13 @@
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
-    padding: var(--spacer-2-5) var(--gutter-h);
+    padding-block: var(--spacer-2-5);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .list-header__content,
+  .list-header__after-header-content {
+    padding-inline: var(--gutter-h);
   }
 
   .list-header__content {

@@ -27,7 +27,7 @@
       -moz-user-select: none;
       -ms-user-select: none;
       pointer-events: none;
-      line-height: var(--text-body-large-line-height);
+      line-height: var(--text-body-medium-line-height);
     }
   }
 
@@ -43,7 +43,7 @@
       > .editor-container
       > .editor-scroller
       > .editor {
-      --content-editable-padding-block-start: var(--spacer-2);
+      --content-editable-padding-block-start: var(--spacer-3);
       --content-editable-padding-inline-start: 0px;
     }
   }

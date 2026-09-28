@@ -50,25 +50,7 @@
     }
 
     .radio-input__label {
-      color: var(--field-color-text-readonly);
-    }
-
-    .radio-input__styled-radio {
-      border-color: var(--field-color-toggle-border-disabled);
-
-      &::before {
-        background-color: var(--field-color-toggle-border-disabled);
-      }
-    }
-
-    .radio-input:not(.radio-input--is-selected) {
-      &:hover {
-        .radio-input__styled-radio {
-          &::before {
-            opacity: 0;
-          }
-        }
-      }
+      color: var(--color-text-disabled);
     }
   }
 }

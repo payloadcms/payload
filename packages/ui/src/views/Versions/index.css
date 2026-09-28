@@ -1,9 +1,15 @@
 @layer payload-default {
   .versions {
     width: 100%;
+    max-inline-size: var(--edit-view-max-width);
+    margin-inline: auto;
     display: flex;
     flex-direction: column;
     flex: 1;
+  }
+
+  :root[data-edit-view-width='full'] .versions {
+    max-inline-size: none;
   }
 
   .versions__wrap {

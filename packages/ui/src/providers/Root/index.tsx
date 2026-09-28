@@ -57,6 +57,7 @@ type Props = {
   readonly RouterAdapter: RouterAdapterComponent
   readonly serverFunction: ServerFunctionClient
   readonly shouldAlignEditViewHeader?: boolean
+  readonly shouldApplyListViewMaxWidth?: boolean
   readonly theme: Theme
   readonly translations: I18nClient['translations']
   readonly typeSize?: TypeSize
@@ -79,6 +80,7 @@ export const RootProvider: React.FC<Props> = ({
   RouterAdapter,
   serverFunction,
   shouldAlignEditViewHeader,
+  shouldApplyListViewMaxWidth,
   theme,
   translations,
   typeSize,
@@ -122,6 +124,7 @@ export const RootProvider: React.FC<Props> = ({
                                     editViewWidth={editViewWidth}
                                     highContrastMode={highContrastMode}
                                     shouldAlignEditViewHeader={shouldAlignEditViewHeader}
+                                    shouldApplyListViewMaxWidth={shouldApplyListViewMaxWidth}
                                     theme={theme}
                                     typeSize={typeSize}
                                   >

@@ -78,10 +78,10 @@
       border-radius: 0 0 var(--radius-medium) var(--radius-medium) !important;
 
       > .editor-scroller > .editor {
-        --content-editable-padding-block-start: var(--spacer-2);
+        --content-editable-padding-block-start: var(--spacer-3);
 
         > .ContentEditable__root {
-          padding-top: var(--spacer-2);
+          padding-block-start: var(--spacer-3);
         }
       }
     }

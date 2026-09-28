@@ -40,6 +40,10 @@
     gap: var(--spacer-2);
   }
 
+  .rich-text-lexical__editor-content {
+    padding-block-start: var(--spacer-3);
+  }
+
   @keyframes rich-text-lexical-fade-in-background {
     from {
       background-color: transparent;

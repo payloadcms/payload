@@ -6,6 +6,18 @@
     flex-direction: column;
   }
 
+  .collection-list > :not(.list-header):not(.list-controls),
+  .collection-list > .list-header > :is(.list-header__content, .list-header__after-header-content),
+  .collection-list > .list-controls > :is(.list-controls__search-row, .list-controls__where) {
+    width: 100%;
+    max-inline-size: var(--list-view-max-width);
+    margin-inline: auto;
+  }
+
+  .collection-list > .no-results--with-margin {
+    width: calc(100% - (var(--gutter-h) * 2));
+  }
+
   .collection-list .list-header a {
     text-decoration: none;
   }

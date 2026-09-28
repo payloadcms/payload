@@ -30,8 +30,8 @@ export type CheckboxInputProps = {
   readonly tooltip?: string
   /**
    * Visual variant for the checkbox
-   * - 'default': Dark border, transparent background (for form fields)
-   * - 'muted': Light gray background and border (for tables)
+   * - 'default': Brand fill when selected (for form fields)
+   * - 'muted': Neutral fill when selected (for tables)
    */
   readonly variant?: 'default' | 'muted'
 }

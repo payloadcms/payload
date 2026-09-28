@@ -30,7 +30,7 @@ export const ListControlsBar: React.FC<ListControlsBarProps> = ({
         .filter(Boolean)
         .join(' ')}
     >
-      {children}
+      <div className={`${baseClass}__inner`}>{children}</div>
     </div>
   )
 }

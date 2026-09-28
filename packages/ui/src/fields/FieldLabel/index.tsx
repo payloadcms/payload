@@ -41,12 +41,10 @@ export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
     return (
       <Element className={`field-label${unstyled ? ' unstyled' : ''}`} htmlFor={htmlFor}>
         {getTranslation(label, i18n)}
-        {required && !unstyled && <span className="required">*</span>}
         {localized && !hideLocale && locale && (
-          <span className="localized">
-            &mdash; {typeof localLabel === 'string' ? localLabel : code}
-          </span>
+          <span className="localized">{typeof localLabel === 'string' ? localLabel : code}</span>
         )}
+        {required && !unstyled && <span className="required">*</span>}
       </Element>
     )
   }

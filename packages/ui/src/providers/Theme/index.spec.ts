@@ -36,7 +36,9 @@ afterEach(() => {
   container.remove()
   document.cookie = 'type-size-test-edit-view-header-alignment=; max-age=0; path=/'
   document.cookie = 'type-size-test-edit-view-width=; max-age=0; path=/'
+  document.cookie = 'type-size-test-list-view-max-width=; max-age=0; path=/'
   document.documentElement.removeAttribute('data-edit-view-width')
+  document.documentElement.removeAttribute('data-list-view-max-width')
   document.cookie = 'type-size-test-type-size=; max-age=0; path=/'
   document.documentElement.removeAttribute('data-type-size')
   document.documentElement.removeAttribute('data-enhanced-contrast')
@@ -112,7 +114,7 @@ const WidthControl = () => {
 
   return createElement(
     'button',
-    { onClick: () => setEditViewWidth({ editViewWidth: '640' }) },
+    { onClick: () => setEditViewWidth({ editViewWidth: '960' }) },
     editViewWidth,
   )
 }
@@ -140,14 +142,14 @@ describe('edit view width preferences', () => {
 
     act(() => buttons[1].click())
 
-    expect(buttons[0].textContent).toBe('640')
-    expect(buttons[1].textContent).toBe('640')
+    expect(buttons[0].textContent).toBe('960')
+    expect(buttons[1].textContent).toBe('960')
     expect(buttons[2].textContent).toBe('current')
-    expect(document.documentElement.getAttribute('data-edit-view-width')).toBe('640')
-    expect(document.cookie).toContain('type-size-test-edit-view-width=640')
+    expect(document.documentElement.getAttribute('data-edit-view-width')).toBe('960')
+    expect(document.cookie).toContain('type-size-test-edit-view-width=960')
   })
 
-  it.each(['640', '800', '960', 'full'])('should restore the saved %s width', (editViewWidth) => {
+  it.each(['960', '1200', '1440', 'full'])('should restore the saved %s width', (editViewWidth) => {
     document.cookie = `type-size-test-edit-view-width=${editViewWidth}; path=/`
 
     act(() => {
@@ -167,6 +169,52 @@ describe('edit view width preferences', () => {
 
     expect(container.textContent).toBe('full')
     expect(document.documentElement.getAttribute('data-edit-view-width')).toBe('full')
+  })
+})
+
+const ListWidthControl = () => {
+  const { setListViewMaxWidth, shouldApplyListViewMaxWidth } = useTheme()
+
+  return createElement(
+    'button',
+    {
+      'aria-pressed': shouldApplyListViewMaxWidth,
+      onClick: () => setListViewMaxWidth({ isEnabled: !shouldApplyListViewMaxWidth }),
+    },
+    'Apply max width to list views',
+  )
+}
+
+describe('list view max width preference', () => {
+  it('should default to on and persist changes from a scoped settings popup', () => {
+    act(() => {
+      root.render(
+        createElement(
+          ThemeProvider,
+          null,
+          createElement(ListWidthControl),
+          createElement(ThemeProvider, { theme: 'dark' }, createElement(ListWidthControl)),
+        ),
+      )
+    })
+
+    const buttons = container.querySelectorAll('button')
+
+    expect(buttons[0].getAttribute('aria-pressed')).toBe('true')
+    act(() => buttons[1].click())
+    expect(buttons[0].getAttribute('aria-pressed')).toBe('false')
+    expect(buttons[1].getAttribute('aria-pressed')).toBe('false')
+    expect(document.documentElement.getAttribute('data-list-view-max-width')).toBe('false')
+    expect(document.cookie).toContain('type-size-test-list-view-max-width=false')
+  })
+
+  it.each(['true', 'false'])('should restore the saved %s preference', (value) => {
+    document.cookie = `type-size-test-list-view-max-width=${value}; path=/`
+
+    act(() => root.render(createElement(ThemeProvider, null, createElement(ListWidthControl))))
+
+    expect(container.querySelector('button').getAttribute('aria-pressed')).toBe(value)
+    expect(document.documentElement.getAttribute('data-list-view-max-width')).toBe(value)
   })
 })
 

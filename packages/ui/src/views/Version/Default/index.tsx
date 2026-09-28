@@ -177,7 +177,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   return (
     <main className={baseClass}>
-      <Gutter className={`${baseClass}-controls-top`}>
+      <Gutter className={`${baseClass}-controls-top`} left={false} right={false}>
         <div className={`${baseClass}-controls-top__wrapper`}>
           <h2>{i18n.t('version:compareVersions')}</h2>
           <div className={`${baseClass}-controls-top__wrapper-actions`}>
@@ -193,7 +193,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
           </div>
         </div>
       </Gutter>
-      <Gutter className={`${baseClass}-controls-bottom`}>
+      <Gutter className={`${baseClass}-controls-bottom`} left={false} right={false}>
         <div className={`${baseClass}-controls-bottom__wrapper`}>
           <div className={`${baseClass}__version-from`}>
             <div className={`${baseClass}__version-from-labels`}>

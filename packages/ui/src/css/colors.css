@@ -276,7 +276,7 @@
     --field-color-border-error: var(--color-border-danger-strong);
 
     --field-color-label: var(--color-text);
-    --field-color-label-required: var(--color-text-secondary);
+    --field-color-label-required: var(--color-text-danger);
 
     --field-color-description: var(--color-text-secondary);
 
@@ -466,7 +466,7 @@
     --field-color-border-error: var(--color-border-danger-strong);
 
     --field-color-label: var(--color-text);
-    --field-color-label-required: var(--color-text-secondary);
+    --field-color-label-required: var(--color-text-danger);
 
     --field-color-description: var(--color-text-secondary);
 

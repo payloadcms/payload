@@ -61,7 +61,7 @@
     inset-block-start: var(--spacer-3);
     inset-inline-end: var(--spacer-3);
     padding: 0;
-    display: flex;
+    display: none;
     background: var(--color-bg);
     color: var(--color-text-secondary);
     border: var(--stroke-width-small) solid var(--color-border);
@@ -90,7 +90,7 @@
   }
   .dashboard-document--grid .dashboard-document__thumbnail {
     grid-column: 1 / -1;
-    block-size: var(--document-activity-thumbnail-height);
+    aspect-ratio: 4 / 3;
     border-block-end: var(--stroke-width-small) solid var(--color-border);
     margin-block-end: var(--spacer-2);
   }
@@ -119,7 +119,6 @@
     align-items: center;
     gap: var(--spacer-2);
     padding: var(--spacer-2);
-    padding-inline-end: var(--spacer-6);
     border-radius: var(--radius-medium);
   }
   .dashboard-document--list .dashboard-document__thumbnail {

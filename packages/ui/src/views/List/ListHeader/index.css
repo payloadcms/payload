@@ -35,6 +35,11 @@
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg);
 
+    .list-header__content,
+    .list-header__after-header-content {
+      padding-inline: 0;
+    }
+
     .list-header__title-and-actions {
       align-items: center;
       gap: var(--spacer-1);

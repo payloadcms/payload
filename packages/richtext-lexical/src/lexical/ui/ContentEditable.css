@@ -28,6 +28,7 @@
       > .editor
       > .ContentEditable__root {
       padding: var(--spacer-2) 0;
+      padding-block-start: var(--spacer-3);
     }
   }
 
