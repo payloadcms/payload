@@ -48,6 +48,9 @@ export const getFields = ({
     name: 'prefix',
     type: 'text',
     admin: {
+      disableBulkEdit: true,
+      disableListColumn: true,
+      disableListFilter: true,
       hidden: true,
       readOnly: true,
     },
@@ -58,6 +61,9 @@ export const getFields = ({
     name: '_objectKey',
     type: 'text',
     admin: {
+      disableBulkEdit: true,
+      disableListColumn: true,
+      disableListFilter: true,
       hidden: true,
       readOnly: true,
     },
