@@ -11,9 +11,8 @@ export const TypeSizeSettings: React.FC = () => {
   const { setTypeSize, typeSize } = useTheme()
   const { t } = useTranslation()
   const options: { label: string; value: TypeSize }[] = [
-    { label: t('general:typeSizeSmall'), value: 'small' },
-    { label: t('general:typeSizeDefault'), value: 'default' },
-    { label: t('general:typeSizeLarge'), value: 'large' },
+    { label: t('general:typeSizeCurrent'), value: 'current' },
+    { label: t('general:typeSizeProposed'), value: 'proposed' },
   ]
 
   return (

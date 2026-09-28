@@ -34,7 +34,7 @@ const initialContext: ThemeContext = {
   setTypeSize: () => null,
   shouldAlignEditViewHeader: false,
   theme: 'light',
-  typeSize: 'default',
+  typeSize: 'proposed',
 }
 
 const Context = createContext<ThemeContext | undefined>(undefined)
@@ -117,7 +117,7 @@ export const ThemeProvider: React.FC<{
   highContrastMode: initialHighContrastMode,
   shouldAlignEditViewHeader: initialHeaderAlignment = false,
   theme: themeOverride,
-  typeSize: initialTypeSize = 'default',
+  typeSize: initialTypeSize = 'proposed',
 }) => {
   const outerContext = use(Context)
   const isScoped = outerContext !== undefined

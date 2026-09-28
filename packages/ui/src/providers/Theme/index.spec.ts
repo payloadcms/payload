@@ -21,7 +21,7 @@ let root: Root
 const SizeControl = () => {
   const { setTypeSize, typeSize } = useTheme()
 
-  return createElement('button', { onClick: () => setTypeSize({ typeSize: 'large' }) }, typeSize)
+  return createElement('button', { onClick: () => setTypeSize({ typeSize: 'current' }) }, typeSize)
 }
 
 beforeEach(() => {
@@ -58,18 +58,18 @@ describe('type size preferences', () => {
 
     const buttons = container.querySelectorAll('button')
 
-    expect(buttons[0].textContent).toBe('default')
-    expect(buttons[1].textContent).toBe('default')
+    expect(buttons[0].textContent).toBe('proposed')
+    expect(buttons[1].textContent).toBe('proposed')
 
     act(() => buttons[1].click())
 
-    expect(buttons[0].textContent).toBe('large')
-    expect(buttons[1].textContent).toBe('large')
-    expect(document.documentElement.getAttribute('data-type-size')).toBe('large')
-    expect(document.cookie).toContain('type-size-test-type-size=large')
+    expect(buttons[0].textContent).toBe('current')
+    expect(buttons[1].textContent).toBe('current')
+    expect(document.documentElement.getAttribute('data-type-size')).toBe('current')
+    expect(document.cookie).toContain('type-size-test-type-size=current')
   })
 
-  it.each(['small', 'default', 'large'])('should restore the saved %s size', (typeSize) => {
+  it.each(['current', 'proposed'])('should restore the saved %s size', (typeSize) => {
     document.cookie = `type-size-test-type-size=${typeSize}; path=/`
 
     act(() => {
@@ -80,15 +80,30 @@ describe('type size preferences', () => {
     expect(document.documentElement.getAttribute('data-type-size')).toBe(typeSize)
   })
 
-  it('should fall back to Default for an invalid saved size', () => {
+  it.each([
+    ['small', 'current'],
+    ['default', 'proposed'],
+    ['large', 'proposed'],
+  ])('should migrate the saved %s size to %s', (saved, expected) => {
+    document.cookie = `type-size-test-type-size=${saved}; path=/`
+
+    act(() => {
+      root.render(createElement(ThemeProvider, null, createElement(SizeControl)))
+    })
+
+    expect(container.textContent).toBe(expected)
+    expect(document.documentElement.getAttribute('data-type-size')).toBe(expected)
+  })
+
+  it('should fall back to Proposed for an invalid saved size', () => {
     document.cookie = 'type-size-test-type-size=invalid; path=/'
 
     act(() => {
       root.render(createElement(ThemeProvider, null, createElement(SizeControl)))
     })
 
-    expect(container.textContent).toBe('default')
-    expect(document.documentElement.getAttribute('data-type-size')).toBe('default')
+    expect(container.textContent).toBe('proposed')
+    expect(document.documentElement.getAttribute('data-type-size')).toBe('proposed')
   })
 })
 
@@ -104,7 +119,7 @@ const WidthControl = () => {
 
 describe('edit view width preferences', () => {
   it('should update the root width from a scoped popup without changing the type size', () => {
-    document.cookie = 'type-size-test-type-size=large; path=/'
+    document.cookie = 'type-size-test-type-size=current; path=/'
 
     act(() => {
       root.render(
@@ -127,7 +142,7 @@ describe('edit view width preferences', () => {
 
     expect(buttons[0].textContent).toBe('640')
     expect(buttons[1].textContent).toBe('640')
-    expect(buttons[2].textContent).toBe('large')
+    expect(buttons[2].textContent).toBe('current')
     expect(document.documentElement.getAttribute('data-edit-view-width')).toBe('640')
     expect(document.cookie).toContain('type-size-test-edit-view-width=640')
   })

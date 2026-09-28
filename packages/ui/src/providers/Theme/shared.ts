@@ -2,10 +2,10 @@ export type Theme = 'dark' | 'light'
 
 export const defaultTheme: Theme = 'light'
 
-export type TypeSize = 'default' | 'large' | 'small'
+export type TypeSize = 'current' | 'proposed'
 
 export const getTypeSize = ({ value }: { value: null | string | undefined }): TypeSize =>
-  value === 'small' || value === 'large' ? value : 'default'
+  value === 'current' || value === 'small' ? 'current' : 'proposed'
 
 export type EditViewWidth = '640' | '800' | '960' | 'full'
 
