@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { getRequest, initPayloadReq, tanstackServerAdapter } = vi.hoisted(() => ({
+const { getRequest, initPayloadAdminContext, tanstackServerAdapter } = vi.hoisted(() => ({
   getRequest: vi.fn(),
-  initPayloadReq: vi.fn(),
+  initPayloadAdminContext: vi.fn(),
   tanstackServerAdapter: {
     getHeaders: vi.fn(),
   },
@@ -13,7 +13,7 @@ vi.mock('@tanstack/react-start/server', () => ({
 }))
 
 vi.mock('payload/internal', () => ({
-  initReq: initPayloadReq,
+  initAdminContext: initPayloadAdminContext,
 }))
 
 vi.mock('./devConfigReload.server.js', () => ({}))
@@ -22,12 +22,12 @@ vi.mock('./serverAdapter.server.js', () => ({
   tanstackServerAdapter,
 }))
 
-import { initReq } from './initReq.server.js'
+import { initAdminContext } from './initAdminContext.server.js'
 
-describe('initReq', () => {
+describe('initAdminContext', () => {
   beforeEach(() => {
     getRequest.mockReset().mockReturnValue(new Request('http://localhost/admin?locale=es'))
-    initPayloadReq.mockReset().mockResolvedValue({})
+    initPayloadAdminContext.mockReset().mockResolvedValue({})
   })
 
   it('should provide the active request URL and default server adapter', async () => {
@@ -36,9 +36,9 @@ describe('initReq', () => {
       importMap: {},
     }
 
-    await initReq(args)
+    await initAdminContext(args)
 
-    expect(initPayloadReq).toHaveBeenCalledWith({
+    expect(initPayloadAdminContext).toHaveBeenCalledWith({
       ...args,
       requestURL: 'http://localhost/admin?locale=es',
       serverAdapter: tanstackServerAdapter,
@@ -50,13 +50,13 @@ describe('initReq', () => {
       getHeaders: vi.fn(),
     }
 
-    await initReq({
+    await initAdminContext({
       configPromise: Promise.resolve({} as never),
       importMap: {},
       serverAdapter: serverAdapter as never,
     })
 
-    expect(initPayloadReq).toHaveBeenCalledWith(
+    expect(initPayloadAdminContext).toHaveBeenCalledWith(
       expect.objectContaining({
         serverAdapter,
       }),

@@ -1,7 +1,7 @@
 import type { BaseDatabaseAdapter, MigrationResult } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
-import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
@@ -18,7 +18,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter): Promise<Migrati
     payload,
   })
 
-  const req = await createLocalReq({}, payload)
+  const req = await createPayloadRequest({ payload })
   const migrated: string[] = []
   const rolledBack: string[] = []
 

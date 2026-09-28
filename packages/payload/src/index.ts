@@ -2020,8 +2020,11 @@ export {
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
-export { createLocalReq } from './utilities/createLocalReq.js'
-export { createPayloadRequest } from './utilities/createPayloadRequest.js'
+export {
+  createPayloadRequest,
+  type CreatePayloadRequestArgs,
+} from './utilities/createPayloadRequest.js'
+export { createPayloadRequestFromWebRequest } from './utilities/createPayloadRequestFromWebRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,
