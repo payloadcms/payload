@@ -316,6 +316,28 @@ export type TextFieldClient = { type: 'text' }`,
     ).toEqual([])
   })
 
+  it('should migrate local references when the removed alias declaration is resolvable', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+const Field: TextFieldClientComponent = () => null`
+    const project = new Project({ useInMemoryFileSystem: true })
+
+    project.createSourceFile(
+      '/node_modules/payload/index.d.ts',
+      `export type TextFieldClientComponent = (props: TextFieldClientProps) => unknown
+export type TextFieldClientProps = Record<string, unknown>`,
+    )
+    const file = project.createSourceFile('/input.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+const Field: React.FC<TextFieldClientProps> = () => null`)
+    expect(result.notes).toBeUndefined()
+  })
+
   it('should preserve omitted canonical generic defaults', async () => {
     const source = `import type { FieldDiffClientComponent, FieldDiffServerComponent, FieldErrorServerComponent, FieldLabelClientComponent, FieldLabelServerComponent, TextField } from 'payload'
 
@@ -462,6 +484,35 @@ export = React`,
     ).toEqual([])
   })
 
+  it('should insert a valid React import when statements share a line', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'; const Field: TextFieldClientComponent = () => null;`
+    const output = await runTransform({
+      filename: 'input.ts',
+      source,
+      transform: migrateFieldComponentTypes,
+    })
+    const project = new Project({
+      compilerOptions: { esModuleInterop: true, noEmit: true, strict: true },
+      useInMemoryFileSystem: true,
+    })
+
+    project.createSourceFile(
+      '/node_modules/react/index.d.ts',
+      `declare namespace React { type FC<Props> = (props: Props) => unknown }
+export = React`,
+    )
+    project.createSourceFile(
+      '/node_modules/payload/index.d.ts',
+      `export type TextFieldClientProps = Record<string, unknown>`,
+    )
+    project.createSourceFile('/output.ts', output)
+
+    expect(output).toContain(`import type React from 'react'`)
+    expect(
+      project.getPreEmitDiagnostics().map((diagnostic) => diagnostic.getMessageText()),
+    ).toEqual([])
+  })
+
   it('should avoid local React and props-name collisions', async () => {
     const source = `import type { TextFieldClientComponent } from 'payload'
 
@@ -562,6 +613,22 @@ class CustomField extends React.Component {}
 const Field: TextFieldClientComponent = CustomField`
     const project = new Project({ useInMemoryFileSystem: true })
     const file = project.createSourceFile('/referenced-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should leave referenced class expressions unchanged and report manual work', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+const CustomField = class extends React.Component {}
+const Field: TextFieldClientComponent = CustomField`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/referenced-class-expression.tsx', source)
 
     const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
 

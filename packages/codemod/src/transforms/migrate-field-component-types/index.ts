@@ -146,7 +146,9 @@ export const migrateFieldComponentTypes: Transform = {
           }
 
           const binding = specifier.getAliasNode() ?? specifier.getNameNode()
-          const references = binding.findReferencesAsNodes().filter((node) => node !== binding)
+          const references = binding
+            .findReferencesAsNodes()
+            .filter((node) => node !== binding && node.getSourceFile() === file)
           const unsupportedReference = references.find((reference) => {
             const parent = reference.getParent()
 
@@ -457,13 +459,26 @@ type AddReactTypeImportArgs = {
 }
 
 function addReactTypeImport({ file, reactName }: AddReactTypeImportArgs): void {
+  const importDeclarations = file.getImportDeclarations()
+  const lastImport = importDeclarations.at(-1)
+  const nextStatement = lastImport
+    ? file.getStatements().find((statement) => statement.getStart() > lastImport.getEnd())
+    : undefined
+  const needsTerminator =
+    lastImport && nextStatement
+      ? lastImport.getEndLineNumber() === nextStatement.getStartLineNumber()
+      : false
+
   file.insertStatements(
-    file.getImportDeclarations().length,
-    `import type ${reactName} from 'react'`,
+    importDeclarations.length,
+    `import type ${reactName} from 'react'${needsTerminator ? ';' : ''}`,
   )
 }
 
-function isClassComponentInitializer(initializer: Expression): boolean {
+function isClassComponentInitializer(
+  initializer: Expression,
+  visitedExpressions = new Set<Expression>(),
+): boolean {
   let expression = initializer
 
   while (
@@ -476,16 +491,37 @@ function isClassComponentInitializer(initializer: Expression): boolean {
     expression = expression.getExpression()
   }
 
+  if (visitedExpressions.has(expression)) {
+    return false
+  }
+
+  visitedExpressions.add(expression)
+
   if (Node.isClassExpression(expression)) {
     return true
   }
 
-  return (
-    Node.isIdentifier(expression) &&
-    expression
-      .getDefinitions()
-      .some((definition) => Node.isClassDeclaration(definition.getDeclarationNode()))
-  )
+  if (!Node.isIdentifier(expression)) {
+    return false
+  }
+
+  return expression.getDefinitions().some((definition) => {
+    const declaration = definition.getDeclarationNode()
+
+    if (Node.isClassDeclaration(declaration)) {
+      return true
+    }
+
+    if (Node.isVariableDeclaration(declaration)) {
+      const referencedInitializer = declaration.getInitializer()
+
+      return referencedInitializer
+        ? isClassComponentInitializer(referencedInitializer, visitedExpressions)
+        : false
+    }
+
+    return false
+  })
 }
 
 type GetAvailableNameArgs = {
