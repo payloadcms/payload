@@ -60,6 +60,43 @@ describe('Dashboard', () => {
     await d.validateLayout()
   })
 
+  test('collection cards match the dashboard tile layout and reveal create on hover or focus', async ({
+    page,
+  }) => {
+    const wrap = page.locator('.collections__wrap')
+    const group = wrap.locator('.collections__group').first()
+    const card = group.locator('.card').first()
+    const actions = card.locator('.card__actions')
+    const createLink = card.getByRole('link', { name: 'Create new Users' })
+    const wrapBox = (await wrap.boundingBox())!
+    const cardBox = (await card.boundingBox())!
+
+    expect(cardBox.x - wrapBox.x).toBe(32)
+    expect(cardBox.y - wrapBox.y).toBe(69)
+    expect(cardBox.height).toBe(64)
+    await expect(card).toHaveCSS('border-radius', '13px')
+    await expect(actions).toHaveCSS('opacity', '0')
+    const defaultBackground = await card.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    )
+
+    await card.hover()
+
+    await expect(actions).toHaveCSS('opacity', '1')
+    expect(await card.evaluate((element) => getComputedStyle(element).backgroundColor)).not.toBe(
+      defaultBackground,
+    )
+    await createLink.hover()
+    await expect(page.getByRole('tooltip')).toContainText('Create new Users')
+
+    await page.mouse.move(0, 0)
+    await card.getByRole('link', { name: 'Show all Users' }).focus()
+    await page.keyboard.press('Tab')
+
+    await expect(createLink).toBeFocused()
+    await expect(actions).toHaveCSS('opacity', '1')
+  })
+
   test('collection-query default layout includes valid and stale config examples', async ({
     page,
   }) => {
