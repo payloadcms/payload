@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { DraftPosts } from './collections/DraftPosts.js'
 import { Events } from './collections/Events.js'
 import { Revenue } from './collections/Revenue.js'
 import { Tickets } from './collections/Tickets.js'
@@ -13,7 +14,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  suite: 'dashboard',
   config: {
     admin: {
       components: {
@@ -269,6 +269,7 @@ export default buildConfigWithDefaults({
       },
     },
     collections: [
+      DraftPosts,
       Tickets,
       Revenue,
       Events,
@@ -283,4 +284,5 @@ export default buildConfigWithDefaults({
     },
   },
   seed,
+  suite: 'dashboard',
 })

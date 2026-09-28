@@ -108,6 +108,29 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('1.4.10 Reflow (AA)', () => {
+    test('should keep dashboard document controls usable at a narrow viewport', async () => {
+      const originalViewport = page.viewportSize()
+
+      try {
+        await page.setViewportSize({ height: 800, width: 320 })
+        await page.goto(`${serverURL}/admin`)
+        const widget = page.locator('.recents-widget')
+        const toolbar = widget.locator('.recents-widget__toolbar')
+
+        await expect(widget.getByRole('button', { name: 'Recent drafts' })).toBeVisible()
+        await expect(widget.getByRole('button', { name: 'List view' })).toBeVisible()
+        const geometry = await toolbar.evaluate((element) => ({
+          clientWidth: element.clientWidth,
+          scrollWidth: element.scrollWidth,
+        }))
+
+        expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth)
+      } finally {
+        if (originalViewport) {
+          await page.setViewportSize(originalViewport)
+        }
+      }
+    })
     test('should ellipsize long selected values without obscuring their remove control', async () => {
       // Additional coverage for PYLD-3811.
       const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
@@ -187,6 +210,25 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should switch dashboard document views with keyboard and expose pressed states', async () => {
+      await page.goto(`${serverURL}/admin`)
+      const widget = page.locator('.recents-widget')
+      const drafts = widget.getByRole('button', { name: 'Recent drafts' })
+      const list = widget.getByRole('button', { name: 'List view' })
+
+      await drafts.focus()
+      await drafts.press('Enter')
+      await expect(drafts).toHaveAttribute('aria-pressed', 'true')
+      await expect(widget.getByRole('button', { name: 'You recently viewed' })).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      )
+
+      await list.focus()
+      await list.press('Space')
+      await expect(list).toHaveAttribute('aria-pressed', 'true')
+    })
+
     test('should operate the Copy to locale select with the keyboard', async () => {
       // PYLD-3688
       const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
