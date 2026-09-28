@@ -509,6 +509,8 @@ export interface FieldBase {
   /** Extension point to add your custom data. Server only. */
   custom?: FieldCustom
   defaultValue?: DefaultValue
+  /** Prevents the field's value from being copied when duplicating a document. */
+  disableDuplicate?: boolean
   hidden?: boolean
   hooks?: {
     afterChange?: FieldHook[]
@@ -832,7 +834,7 @@ export type NamedGroupField = {
 export type UnnamedGroupField = {
   interfaceName?: never
   localized?: never
-} & Omit<GroupBase, 'hooks' | 'name' | 'virtual'>
+} & Omit<GroupBase, 'disableDuplicate' | 'hooks' | 'name' | 'virtual'>
 
 export type GroupField = NamedGroupField | UnnamedGroupField
 
@@ -851,7 +853,10 @@ export type RowField = {
   admin?: Omit<FieldAdmin, 'description'>
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'hooks' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
+} & Omit<
+  FieldBase,
+  'admin' | 'disableDuplicate' | 'hooks' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'
+>
 
 export type RowFieldClient = {
   admin?: Omit<AdminClient, 'description'>
@@ -890,7 +895,10 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'hooks' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
+  Omit<
+    FieldBase,
+    'disableDuplicate' | 'hooks' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'
+  >
 
 export type CollapsibleFieldClient = {
   admin?: {
@@ -938,7 +946,7 @@ export type UnnamedTab = {
     | LabelFunction
     | string
   localized?: never
-} & Omit<TabBase, 'hooks' | 'name' | 'virtual'>
+} & Omit<TabBase, 'disableDuplicate' | 'hooks' | 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
 export type TabsField = {
@@ -946,7 +954,7 @@ export type TabsField = {
   type: 'tabs'
 } & {
   tabs: Tab[]
-} & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
+} & Omit<FieldBase, 'admin' | 'disableDuplicate' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
   admin?: Omit<AdminClient, 'description'>

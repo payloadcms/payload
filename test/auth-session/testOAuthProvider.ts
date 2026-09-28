@@ -169,6 +169,7 @@ export const authenticateTestOAuthSession: AuthStrategyFunction = async ({
   const user = await payload.findByID({
     id: lookup.session.userID,
     collection: authSessionUsersSlug,
+    overrideAccess: true,
   })
 
   return {
@@ -273,6 +274,7 @@ const loginTestOAuthSession: Endpoint = {
     const result = await req.payload.find({
       collection: authSessionUsersSlug,
       limit: 1,
+      overrideAccess: true,
     })
     const user = result.docs[0]
 

@@ -356,5 +356,7 @@ declare module '${this.packageName}' {
     if (log) {
       this.payload.logger.info(`Written ${outputFile}`)
     }
+
+    return { outputFile }
   }
 }

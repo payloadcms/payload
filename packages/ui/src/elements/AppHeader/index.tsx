@@ -109,7 +109,7 @@ export function AppHeader() {
                     {...ariaProps}
                   >
                     <div className="localizer__button-content">
-                      {locale.code}
+                      {locale?.code}
                       <ChevronIcon direction={active ? 'up' : 'down'} size={16} />
                     </div>
                   </Button>

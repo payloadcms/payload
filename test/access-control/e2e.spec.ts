@@ -186,6 +186,7 @@ describe('Access Control', () => {
 
       await payload.delete({
         collection: 'field-restricted-update-based-on-data',
+        overrideAccess: true,
         where: {
           id: {
             exists: true,
@@ -236,6 +237,7 @@ describe('Access Control', () => {
 
       await payload.delete({
         collection: 'field-restricted-update-based-on-data',
+        overrideAccess: true,
         where: {
           id: {
             exists: true,
@@ -400,6 +402,7 @@ describe('Access Control', () => {
         data: {
           name: 'name',
         },
+        overrideAccess: true,
       })
     })
 
@@ -451,6 +454,7 @@ describe('Access Control', () => {
         data: {
           name: 'name',
         },
+        overrideAccess: true,
       })
     })
 
@@ -517,6 +521,7 @@ describe('Access Control', () => {
         data: {
           name: 'unrestricted-123',
         },
+        overrideAccess: true,
       })
 
       await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
@@ -578,6 +583,7 @@ describe('Access Control', () => {
           data: {
             name: 'unrestricted-123',
           },
+          overrideAccess: true,
         })
         await page.goto(unrestrictedURL.edit(unrestrictedDoc.id.toString()))
         const field = page.locator('#field-userRestrictedDocs')
@@ -612,6 +618,7 @@ describe('Access Control', () => {
           data: {
             name: 'dev@payloadcms.com',
           },
+          overrideAccess: true,
         })
 
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
@@ -629,6 +636,7 @@ describe('Access Control', () => {
           data: {
             name: 'anonymous@payloadcms.com',
           },
+          overrideAccess: true,
         })
 
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
@@ -663,6 +671,7 @@ describe('Access Control', () => {
         data: {
           name: 'name',
         },
+        overrideAccess: true,
       })
 
       await payload.update({
@@ -671,6 +680,7 @@ describe('Access Control', () => {
         data: {
           hidden: true,
         },
+        overrideAccess: true,
       })
     })
 
@@ -696,6 +706,7 @@ describe('Access Control', () => {
           approvedTitle: 'Title',
           lockTitle: true,
         },
+        overrideAccess: true,
       })
     })
 
@@ -718,8 +729,14 @@ describe('Access Control', () => {
     test('can only unlock self when admin', async () => {
       await page.goto(usersUrl.list)
 
-      const adminUserRow = page.locator('.table tr').filter({ hasText: devUser.email })
-      const nonAdminUserRow = page.locator('.table tr').filter({ hasText: nonAdminEmail })
+      // Scope the match to the email cell so authorship's createdBy/updatedBy
+      // columns can't interfere with locating the correct user row.
+      const adminUserRow = page
+        .locator('.table tr')
+        .filter({ has: page.locator('.cell-email', { hasText: devUser.email }) })
+      const nonAdminUserRow = page
+        .locator('.table tr')
+        .filter({ has: page.locator('.cell-email', { hasText: nonAdminEmail }) })
 
       // Wait for hydration
       await wait(1000)
@@ -820,6 +837,7 @@ describe('Access Control', () => {
           email: publicUserEmail,
           password: devUser.password,
         },
+        overrideAccess: true,
       })
 
       await context.addCookies([
@@ -895,10 +913,11 @@ describe('Access Control', () => {
       const existing = await payload.find({
         collection: authSlug,
         limit: 1,
+        overrideAccess: true,
         where: { email: { equals: 'test@payloadcms.com' } },
       })
       for (const doc of existing.docs) {
-        await payload.delete({ id: doc.id, collection: authSlug })
+        await payload.delete({ id: doc.id, collection: authSlug, overrideAccess: true })
       }
 
       existingDoc = await payload.create({
@@ -907,12 +926,13 @@ describe('Access Control', () => {
           email: 'test@payloadcms.com',
           password: 'test',
         },
+        overrideAccess: true,
       })
     })
 
     afterAll(async () => {
       if (existingDoc?.id) {
-        await payload.delete({ id: existingDoc.id, collection: authSlug })
+        await payload.delete({ id: existingDoc.id, collection: authSlug, overrideAccess: true })
       }
     })
     test('should show email as readonly when user does not have update permission', async () => {
@@ -1797,6 +1817,7 @@ describe('Access Control', () => {
           },
           title: 'Test Document',
         },
+        overrideAccess: true,
       })
 
       await page.goto(blocksFieldAccessUrl.edit(doc.id))
@@ -1840,6 +1861,7 @@ describe('Access Control', () => {
           await payload.delete({
             id,
             collection: differentiatedTrashSlug,
+            overrideAccess: true,
             trash: true,
           })
         }
@@ -1862,6 +1884,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -1878,6 +1901,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -1895,6 +1919,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: { _status: 'published', title: 'Test Doc For Perma Delete' },
+            overrideAccess: true,
           })
           // Don't add to createdDocIds since we're permanently deleting it
 
@@ -1922,6 +1947,7 @@ describe('Access Control', () => {
               deletedAt: new Date().toISOString(),
               title: 'Admin Trashed Doc View Test',
             },
+            overrideAccess: true,
           })
           // Don't add to createdDocIds since we're permanently deleting it
 
@@ -1972,6 +1998,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -1988,6 +2015,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2007,6 +2035,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: differentiatedTrashSlug,
             data: { _status: 'published', title: 'Test Doc For Trash' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2033,6 +2062,7 @@ describe('Access Control', () => {
               deletedAt: new Date().toISOString(),
               title: 'Trashed Doc View Test',
             },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2071,6 +2101,7 @@ describe('Access Control', () => {
           await payload.delete({
             id,
             collection: restrictedTrashSlug,
+            overrideAccess: true,
             trash: true,
           })
         }
@@ -2086,6 +2117,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
             data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2102,6 +2134,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
             data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2119,6 +2152,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
             data: { _status: 'published', title: 'Test Doc For Trash' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2140,6 +2174,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
             data: { _status: 'published', title: 'Test Doc For Perma Delete' },
+            overrideAccess: true,
           })
           // Don't add to createdDocIds since we're permanently deleting it
 
@@ -2180,6 +2215,7 @@ describe('Access Control', () => {
           const doc = await payload.create({
             collection: restrictedTrashSlug,
             data: { _status: 'published', title: 'Test Doc' },
+            overrideAccess: true,
           })
           createdDocIds.push(doc.id)
 
@@ -2204,6 +2240,7 @@ describe('Access Control', () => {
             await payload.delete({
               id,
               collection: differentiatedTrashSlug,
+              overrideAccess: true,
               trash: true,
             })
           }
@@ -2219,6 +2256,7 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
               data: { _status: 'published', title: 'Bulk Test Doc 1' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2262,6 +2300,7 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
               data: { _status: 'published', title: 'Bulk Test Doc Regular User' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2288,6 +2327,7 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: differentiatedTrashSlug,
               data: { _status: 'published', title: 'Bulk Test Doc Regular User 2' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2323,6 +2363,7 @@ describe('Access Control', () => {
             await payload.delete({
               id,
               collection: restrictedTrashSlug,
+              overrideAccess: true,
               trash: true,
             })
           }
@@ -2338,6 +2379,7 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: restrictedTrashSlug,
               data: { _status: 'published', title: 'Restricted Bulk Test Doc' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2381,6 +2423,7 @@ describe('Access Control', () => {
             const doc = await payload.create({
               collection: restrictedTrashSlug,
               data: { _status: 'published', title: 'Restricted Bulk Test Doc Regular User' },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2416,6 +2459,7 @@ describe('Access Control', () => {
               await payload.delete({
                 id,
                 collection: differentiatedTrashSlug,
+                overrideAccess: true,
                 trash: true,
               })
             } catch (_e) {
@@ -2439,6 +2483,7 @@ describe('Access Control', () => {
                 deletedAt: new Date().toISOString(),
                 title: 'Trash View Bulk Test Admin',
               },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2487,6 +2532,7 @@ describe('Access Control', () => {
                 deletedAt: new Date().toISOString(),
                 title: 'Trash View Bulk Test Regular',
               },
+              overrideAccess: true,
             })
             createdDocIds.push(doc.id)
 
@@ -2519,5 +2565,6 @@ async function createDoc(data: any): Promise<Record<string, unknown> & TypeWithI
   return payload.create({
     collection: slug,
     data,
+    overrideAccess: true,
   }) as any as Promise<Record<string, unknown> & TypeWithID>
 }

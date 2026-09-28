@@ -152,6 +152,7 @@ const StepNav: React.FC<{
               className={`${baseClass}__collapsed`}
               horizontalAlign="left"
               noBackground
+              popupType="menu"
               render={({ close }) => (
                 <PopupList.ButtonGroup className={`${baseClass}__collapsed-list`}>
                   {collapsedItems.map((item, i) => (

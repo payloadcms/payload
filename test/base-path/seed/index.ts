@@ -9,6 +9,7 @@ export const seed: Config['onInit'] = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 
   // Seed some sample posts
@@ -18,6 +19,7 @@ export const seed: Config['onInit'] = async (payload) => {
       content: 'This is the content of the first post.',
       title: 'First Post',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -26,6 +28,7 @@ export const seed: Config['onInit'] = async (payload) => {
       content: 'This is the content of the second post.',
       title: 'Second Post',
     },
+    overrideAccess: true,
   })
 
   await payload.create({
@@ -34,5 +37,6 @@ export const seed: Config['onInit'] = async (payload) => {
       content: 'This is the content of the third post.',
       title: 'Third Post',
     },
+    overrideAccess: true,
   })
 }

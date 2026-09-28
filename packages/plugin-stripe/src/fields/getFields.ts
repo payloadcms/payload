@@ -14,6 +14,10 @@ export const getFields = ({ collection, pluginConfig, syncConfig }: Args): Field
   const stripeIDField: Field = {
     name: 'stripeID',
     type: 'text',
+    access: {
+      create: () => false,
+      update: () => false,
+    },
     admin: {
       position: 'sidebar',
       readOnly: true,
@@ -25,6 +29,10 @@ export const getFields = ({ collection, pluginConfig, syncConfig }: Args): Field
   const skipSyncField: Field = {
     name: 'skipSync',
     type: 'checkbox',
+    access: {
+      create: () => false,
+      update: () => false,
+    },
     admin: {
       position: 'sidebar',
       readOnly: true,

@@ -13,10 +13,7 @@ import {
   ListDrawerCreateNewDocButton,
 } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
 import { ListHeader } from '../../../elements/ListHeader/index.js'
-import {
-  ListBulkUploadButton,
-  ListEmptyTrashButton,
-} from '../../../elements/ListHeader/TitleActions/index.js'
+import { ListBulkUploadButton } from '../../../elements/ListHeader/TitleActions/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { ListSelection } from '../ListSelection/index.js'
@@ -36,7 +33,6 @@ export type ListHeaderProps = {
   hasTrashPermission?: boolean
   i18n: I18nClient
   isBulkUploadEnabled: boolean
-  isTrashEnabled?: boolean
   newDocumentURL: string
   onBulkUploadSuccess?: () => void
   smallBreak: boolean
@@ -55,7 +51,6 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   hasTrashPermission,
   i18n,
   isBulkUploadEnabled,
-  isTrashEnabled,
   onBulkUploadSuccess,
   smallBreak,
   viewType,
@@ -128,13 +123,6 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             isBulkUploadEnabled={isBulkUploadEnabled}
             key="list-header-bulk-upload"
             onBulkUploadSuccess={onBulkUploadSuccess}
-          />
-        ),
-        hasDeletePermission && isTrashEnabled && viewType === 'trash' && (
-          <ListEmptyTrashButton
-            collectionConfig={collectionConfig}
-            hasDeletePermission={hasDeletePermission}
-            key="list-header-empty-trash"
           />
         ),
       ].filter(Boolean)}

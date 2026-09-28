@@ -1,6 +1,7 @@
 import type { Endpoint } from '../../config/types.js'
 import type { SanitizedJobsConfig } from '../config/types/index.js'
 
+import { defaultAccess } from '../../auth/defaultAccess.js'
 import { runJobs, type RunJobsArgs } from '../operations/runJobs/index.js'
 
 /**
@@ -21,7 +22,7 @@ export const runJobsEndpoint: Endpoint = {
       )
     }
 
-    const accessFn = jobsConfig.access?.run ?? (() => true)
+    const accessFn = jobsConfig.access?.run ?? defaultAccess
 
     const hasAccess = await accessFn({ req })
 

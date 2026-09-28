@@ -40111,10 +40111,10 @@ function readSystemPrompt(promptFilePath) {
 }
 function buildSystemPrompt(promptFilePath, isFork = false) {
     const reviewPrompt = readSystemPrompt(promptFilePath);
-    const claudeMdPath = external_path_.resolve(process.env.GITHUB_WORKSPACE ?? process.cwd(), 'CLAUDE.md');
-    const base = !external_fs_.existsSync(claudeMdPath)
+    const agentsMdPath = external_path_.resolve(process.env.GITHUB_WORKSPACE ?? process.cwd(), 'AGENTS.md');
+    const base = !external_fs_.existsSync(agentsMdPath)
         ? reviewPrompt
-        : `# Project Conventions (from CLAUDE.md)\n\n${external_fs_.readFileSync(claudeMdPath, 'utf-8')}\n\n---\n\n# Review Instructions\n\n${reviewPrompt}`;
+        : `# Project Conventions (from AGENTS.md)\n\n${external_fs_.readFileSync(agentsMdPath, 'utf-8')}\n\n---\n\n# Review Instructions\n\n${reviewPrompt}`;
     return isFork ? base + INJECTION_NOTICE : base;
 }
 function mergeReviewResults(results) {

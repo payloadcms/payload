@@ -75,6 +75,7 @@ export async function getGlobalViewRedirect({
         collection: collectionSlug,
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         pagination: false,
         select: {
           id: true,
@@ -171,6 +172,7 @@ async function generateCreateRedirect({
         },
         depth: 0,
         draft: true,
+        overrideAccess: true,
         select: {
           id: true,
         },

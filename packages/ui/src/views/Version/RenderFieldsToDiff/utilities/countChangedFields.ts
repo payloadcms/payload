@@ -3,7 +3,7 @@ import type { ArrayFieldClient, BlocksFieldClient, ClientConfig, ClientField } f
 import { fieldShouldBeLocalized, groupHasName } from 'payload/shared'
 
 import { fieldHasChanges } from './fieldHasChanges.js'
-import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
+import { getBlockFields, getFieldsForRowComparison } from './getFieldsForRowComparison.js'
 
 type Args = {
   config: ClientConfig
@@ -231,6 +231,33 @@ export function countChangedFieldsInRows({
   while (valueFromRows[i] || valueToRows[i]) {
     const valueFromRow = valueFromRows?.[i] || {}
     const valueToRow = valueToRows?.[i] || {}
+
+    if (field.type === 'blocks') {
+      const blockTypeFrom = (valueFromRow as { blockType?: string }).blockType
+      const blockTypeTo = (valueToRow as { blockType?: string }).blockType
+
+      if (blockTypeFrom !== blockTypeTo) {
+        count += countChangedFields({
+          config,
+          fields: getBlockFields({ blockSlug: blockTypeFrom, config, field }),
+          locales,
+          parentIsLocalized: parentIsLocalized || field.localized,
+          valueFrom: valueFromRow,
+          valueTo: {},
+        })
+        count += countChangedFields({
+          config,
+          fields: getBlockFields({ blockSlug: blockTypeTo, config, field }),
+          locales,
+          parentIsLocalized: parentIsLocalized || field.localized,
+          valueFrom: {},
+          valueTo: valueToRow,
+        })
+
+        i++
+        continue
+      }
+    }
 
     const { fields: rowFields } = getFieldsForRowComparison({
       baseVersionField: { type: 'text', fields: [], path: '', schemaPath: '' }, // Doesn't matter, as we don't need the versionFields output here

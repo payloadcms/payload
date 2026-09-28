@@ -13,6 +13,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js'
 import { ListGroupByButton } from '../ListGroupByButton/index.js'
+import { ListEmptyTrashButton } from '../ListHeader/TitleActions/index.js'
 import { ListWhereBuilder } from '../ListWhereBuilder/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { ListSearchFilter } from '../Search/ListSearchFilter/index.js'
@@ -35,6 +36,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableFilters = true,
     enableSort = false,
     hasCreatePermission,
+    hasDeletePermission,
     isWhereOpen: isWhereOpenFromProps,
     listMenuItems,
     newDocumentURL,
@@ -44,6 +46,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     renderedFilters,
     resolvedFilterOptions,
     viewModeToggle,
+    viewType,
   } = props
 
   const isControlled = typeof onWhereToggle === 'function'
@@ -150,12 +153,19 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:createNew')}
             </Button>
           )}
+          {hasDeletePermission && collectionConfig.trash && viewType === 'trash' && (
+            <ListEmptyTrashButton
+              collectionConfig={collectionConfig}
+              hasDeletePermission={hasDeletePermission}
+            />
+          )}
           {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
             <Popup
               button={<Dots ariaLabel={t('general:moreOptions')} />}
               className={`${baseClass}__popup`}
               horizontalAlign="right"
               id="list-menu"
+              popupType="menu"
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>

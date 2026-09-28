@@ -4,6 +4,7 @@ import type { Column } from 'payload'
 
 import React from 'react'
 
+import { useTableID } from './TableIdentity.js'
 import './index.css'
 
 const baseClass = 'table'
@@ -13,9 +14,11 @@ export type Props = {
   readonly BeforeTable?: React.ReactNode
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
+  readonly id?: string
 }
 
-export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data }) => {
+export const Table: React.FC<Props> = ({ id, appearance, BeforeTable, columns, data }) => {
+  const tableID = useTableID(id)
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -29,7 +32,7 @@ export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data 
         .join(' ')}
     >
       {BeforeTable}
-      <table cellPadding="0" cellSpacing="0">
+      <table cellPadding="0" cellSpacing="0" id={tableID}>
         <thead>
           <tr>
             {activeColumns.map((col, i) => (

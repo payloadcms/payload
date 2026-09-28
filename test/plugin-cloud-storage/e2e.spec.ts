@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import dotenv from 'dotenv'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -10,9 +11,12 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
+import { createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+dotenv.config({ path: path.resolve(dirname, './.env.emulated') })
 
 async function selectFile(page: Page, filePath: string) {
   await expect(async () => {
@@ -29,6 +33,7 @@ test.describe('Cloud Storage Plugin', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     const { serverURL } = await initPayloadE2ENoConfig({ dirname })
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
+    await createTestBucket()
 
     const context = await browser.newContext()
     page = await context.newPage()

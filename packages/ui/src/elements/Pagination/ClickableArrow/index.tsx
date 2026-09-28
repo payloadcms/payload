@@ -7,13 +7,14 @@ import './index.css'
 const baseClass = 'clickable-arrow'
 
 export type ClickableArrowProps = {
+  ariaControls?: string
   direction?: 'left' | 'right'
   isDisabled?: boolean
   updatePage?: () => void
 }
 
 export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
-  const { direction = 'right', isDisabled = false, updatePage } = props
+  const { ariaControls, direction = 'right', isDisabled = false, updatePage } = props
 
   const classes = [
     baseClass,
@@ -25,6 +26,7 @@ export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
 
   return (
     <button
+      aria-controls={ariaControls}
       className={classes}
       disabled={isDisabled}
       onClick={!isDisabled ? updatePage : undefined}

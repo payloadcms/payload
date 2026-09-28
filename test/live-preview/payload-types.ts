@@ -62,16 +62,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D4620076".
+ * via the `definition` "LexicalNodes_265E6A5E".
  */
-export type LexicalNodes_D4620076 =
+export type LexicalNodes_265E6A5E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D4620076>
+  | SerializedParagraphNode<LexicalNodes_265E6A5E>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_D4620076>
+  | SerializedQuoteNode<LexicalNodes_265E6A5E>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -85,29 +85,30 @@ export type LexicalNodes_D4620076 =
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
+      | 'forbidden-url'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D4620076, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D4620076, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D4620076>
-  | SerializedListItemNode<LexicalNodes_D4620076>
-  | SerializedHeadingNode<LexicalNodes_D4620076>;
+  | SerializedAutoLinkNode<LexicalNodes_265E6A5E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_265E6A5E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_265E6A5E>
+  | SerializedListItemNode<LexicalNodes_265E6A5E>
+  | SerializedHeadingNode<LexicalNodes_265E6A5E>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D773765D".
+ * via the `definition` "LexicalNodes_50E80D16".
  */
-export type LexicalNodes_D773765D =
+export type LexicalNodes_50E80D16 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D773765D>
+  | SerializedParagraphNode<LexicalNodes_50E80D16>
   | SerializedBlockNode<MediaBlock_1EDC4A89>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_D773765D>
+  | SerializedQuoteNode<LexicalNodes_50E80D16>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -121,33 +122,34 @@ export type LexicalNodes_D773765D =
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
+      | 'forbidden-url'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D773765D, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D773765D, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D773765D>
-  | SerializedListItemNode<LexicalNodes_D773765D>
-  | SerializedHeadingNode<LexicalNodes_D773765D>;
+  | SerializedAutoLinkNode<LexicalNodes_50E80D16, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_50E80D16, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_50E80D16>
+  | SerializedListItemNode<LexicalNodes_50E80D16>
+  | SerializedHeadingNode<LexicalNodes_50E80D16>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_6238834A".
+ * via the `definition` "LexicalNodes_638B30E7".
  */
-export type LexicalNodes_6238834A =
+export type LexicalNodes_638B30E7 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_6238834A>
+  | SerializedParagraphNode<LexicalNodes_638B30E7>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_6238834A>
+  | SerializedHeadingNode<LexicalNodes_638B30E7>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
-  | SerializedQuoteNode<LexicalNodes_6238834A>
-  | SerializedListNode<LexicalNodes_6238834A>
-  | SerializedListItemNode<LexicalNodes_6238834A>
-  | SerializedAutoLinkNode<LexicalNodes_6238834A, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_6238834A, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_638B30E7>
+  | SerializedListNode<LexicalNodes_638B30E7>
+  | SerializedListItemNode<LexicalNodes_638B30E7>
+  | SerializedAutoLinkNode<LexicalNodes_638B30E7, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_638B30E7, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -161,6 +163,7 @@ export type LexicalNodes_6238834A =
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
+      | 'forbidden-url'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -188,6 +191,7 @@ export interface Config {
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
     'conditional-url': ConditionalUrl;
+    'forbidden-url': ForbiddenUrl;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -208,6 +212,7 @@ export interface Config {
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
+    'forbidden-url': ForbiddenUrlSelect<false> | ForbiddenUrlSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -324,7 +329,7 @@ export interface Page {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -334,8 +339,8 @@ export interface Page {
   testNumber?: number | null;
   localizedTitle?: string | null;
   relationToLocalized?: (string | null) | Post;
-  richTextLexical?: LexicalRichText<LexicalNodes_D773765D> | null;
-  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_D773765D> | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_50E80D16> | null;
+  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_50E80D16> | null;
   relationshipAsUpload?: (string | null) | Media;
   relationshipMonoHasOne?: (string | null) | Post;
   relationshipMonoHasMany?: (string | Post)[] | null;
@@ -352,7 +357,7 @@ export interface Page {
   arrayOfRelationships?:
     | {
         uploadInArray?: (string | null) | Media;
-        richTextInArray?: LexicalRichText<LexicalNodes_6238834A> | null;
+        richTextInArray?: LexicalRichText<LexicalNodes_638B30E7> | null;
         relationshipInArrayMonoHasOne?: (string | null) | Post;
         relationshipInArrayMonoHasMany?: (string | Post)[] | null;
         relationshipInArrayPolyHasOne?: {
@@ -396,7 +401,7 @@ export interface Tenant {
  */
 export interface Cta {
   invertBackground?: boolean | null;
-  richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+  richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
   links?:
     | {
         link: {
@@ -436,7 +441,7 @@ export interface Post {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -460,7 +465,7 @@ export interface Content {
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+        richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
         enableLink?: boolean | null;
         link?: {
           type?: ('reference' | 'custom') | null;
@@ -493,7 +498,7 @@ export interface Content {
  * via the `definition` "Archive".
  */
 export interface Archive {
-  introContent?: LexicalRichText<LexicalNodes_D4620076> | null;
+  introContent?: LexicalRichText<LexicalNodes_265E6A5E> | null;
   populateBy?: ('collection' | 'selection') | null;
   relationTo?: 'posts' | null;
   categories?: (string | Category)[] | null;
@@ -544,7 +549,7 @@ export interface Ssr {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -569,7 +574,7 @@ export interface SsrAutosave {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -627,7 +632,7 @@ export interface CustomLivePreview {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_D4620076> | null;
+    richText?: LexicalRichText<LexicalNodes_265E6A5E> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -647,6 +652,15 @@ export interface ConditionalUrl {
   id: string;
   title?: string | null;
   enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forbidden-url".
+ */
+export interface ForbiddenUrl {
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -725,6 +739,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-url';
         value: string | ConditionalUrl;
+      } | null)
+    | ({
+        relationTo: 'forbidden-url';
+        value: string | ForbiddenUrl;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1396,6 +1414,14 @@ export interface ConditionalUrlSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forbidden-url_select".
+ */
+export interface ForbiddenUrlSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1578,7 +1604,8 @@ export interface CollectionQueryWidget {
       | 'open-by-default'
       | 'static-url'
       | 'custom-live-preview'
-      | 'conditional-url';
+      | 'conditional-url'
+      | 'forbidden-url';
     where?:
       | {
           [k: string]: unknown;
@@ -1615,6 +1642,7 @@ export interface ActivityWidget {
           | 'static-url'
           | 'custom-live-preview'
           | 'conditional-url'
+          | 'forbidden-url'
         )[]
       | null;
   };

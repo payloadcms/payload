@@ -117,6 +117,7 @@
     }
   }
 
+  /* stylelint-disable-next-line plugin/no-max-width-media-query -- TODO: pre-existing; migrate to a mobile-first min-width query */
   @media (max-width: 768px) {
     .html-diff:has([data-match-type='create']),
     .html-diff:has([data-match-type='delete']) {
