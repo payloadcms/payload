@@ -1752,9 +1752,9 @@ describe('lexicalMain', () => {
     await textNode.click()
     await expect(decoratorLocator).toBeHidden()
 
-    const closeTagInMultiSelect = page
-      .getByRole('button', { name: 'payload.jpg Edit payload.jpg' })
-      .getByLabel('Remove')
+    const closeTagInMultiSelect = page.getByRole('button', {
+      name: /^Remove payload\.jpg/,
+    })
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
 

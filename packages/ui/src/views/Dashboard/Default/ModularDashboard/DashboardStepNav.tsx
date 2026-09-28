@@ -103,6 +103,7 @@ export function DashboardBreadcrumbDropdown(props: {
     <Popup
       className="dashboard-breadcrumb-dropdown"
       horizontalAlign="left"
+      popupType="menu"
       render={({ close }) => (
         <PopupList.ButtonGroup>
           <PopupList.Button

@@ -585,6 +585,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                     buttonClassName={`${baseClass}__actions-button`}
                     caret={false}
                     horizontalAlign="right"
+                    popupType="menu"
                     render={({ close }) => (
                       <PopupList.ButtonGroup buttonSize="medium">
                         {((resolvedCustomBlock && editButton !== false) ||

@@ -70,11 +70,15 @@
   .toolbar-popup__dropdown-items {
     --dropdown-min-width: 5rem;
     position: absolute;
+    inset: auto;
+    margin: 0;
     background: var(--color-bg-elevated);
     color: var(--color-text);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
     min-width: var(--dropdown-min-width);
+    max-height: calc(100vh - var(--spacer-3));
+    overflow-y: auto;
     z-index: 100;
     box-shadow: var(--elevation-300-tooltip);
 

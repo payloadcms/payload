@@ -169,7 +169,7 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 }
 
 export async function openLocaleSelector(page: Page): Promise<void> {
-  const button = page.locator('.localizer button')
+  const button = page.locator('.localizer .popup__trigger-wrap > button')
   const popup = page.locator('.popup__content')
 
   if (!(await popup.isVisible())) {

@@ -4,6 +4,7 @@ import type { PaginatedDocs } from 'payload'
 import React from 'react'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { useTableID } from '../../Table/TableIdentity.js'
 import { ClickableArrow } from '../ClickableArrow/index.js'
 import './index.css'
 
@@ -12,14 +13,16 @@ const baseClass = 'simple-pagination'
 export type SimplePaginationProps = {
   data: PaginatedDocs
   onChange?: (page: number) => void
+  tableId?: string
 }
 
 /**
  * A simplified pagination component for inline use (e.g., in table headers).
  * Shows "X-Y of Z" with prev/next arrows. No page input or per-page selector.
  */
-export const SimplePagination: React.FC<SimplePaginationProps> = ({ data, onChange }) => {
+export const SimplePagination: React.FC<SimplePaginationProps> = ({ data, onChange, tableId }) => {
   const { i18n } = useTranslation()
+  const resolvedTableID = useTableID(tableId)
 
   const {
     hasNextPage = false,
@@ -60,8 +63,18 @@ export const SimplePagination: React.FC<SimplePaginationProps> = ({ data, onChan
       </span>
       {totalPages > 1 && (
         <div className={`${baseClass}__arrows`}>
-          <ClickableArrow direction="left" isDisabled={!hasPrevPage} updatePage={handlePrevPage} />
-          <ClickableArrow direction="right" isDisabled={!hasNextPage} updatePage={handleNextPage} />
+          <ClickableArrow
+            ariaControls={resolvedTableID}
+            direction="left"
+            isDisabled={!hasPrevPage}
+            updatePage={handlePrevPage}
+          />
+          <ClickableArrow
+            ariaControls={resolvedTableID}
+            direction="right"
+            isDisabled={!hasNextPage}
+            updatePage={handleNextPage}
+          />
         </div>
       )}
     </div>
