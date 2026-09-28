@@ -60,6 +60,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     notRedirected: 'Niste preusmereni? <0>Prijavite se ovde</0>',
     passed: 'Autentifikacija uspela',
     passwordResetSuccessfully: 'Успешно ресетована лозинка.',
+    resend: 'Пошаљи поново',
     resetPassword: 'Промена лозинке',
     resetPasswordExpiration: 'Промена рока трајања лозинке',
     resetPasswordToken: 'Промена лозинке токена',

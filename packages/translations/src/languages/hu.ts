@@ -62,6 +62,7 @@ export const huTranslations: DefaultTranslationsObject = {
     notRedirected: 'Nem történt átirányítás? <0>Jelentkezzen be itt</0>',
     passed: 'Hitelesítés sikeres',
     passwordResetSuccessfully: 'A jelszó sikeresen vissza lett állítva.',
+    resend: 'Újraküldés',
     resetPassword: 'Jelszó visszaállítása',
     resetPasswordExpiration: 'Jelszóvisszaállítás lejárata',
     resetPasswordToken: 'Jelszóvisszaállító token',

@@ -31,6 +31,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
       user,
     },
     searchParams = {},
+    user: userWithReadAccess,
     versions,
   } = args
 
@@ -54,6 +55,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
         collection: 'payload-preferences',
         depth: 0,
         limit: 1,
+        overrideAccess: true,
         where: {
           and: [
             {
@@ -118,6 +120,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     redirectAfterDuplicate,
     searchParams,
     server: req.server,
+    user: userWithReadAccess,
     versions,
     viewType: 'document',
   })

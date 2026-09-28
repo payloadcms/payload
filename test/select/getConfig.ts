@@ -142,5 +142,6 @@ export const seed: NonNullable<Config['onInit']> = async (payload) => {
       email: devUser.email,
       password: devUser.password,
     },
+    overrideAccess: true,
   })
 }

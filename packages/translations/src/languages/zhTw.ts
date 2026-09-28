@@ -57,6 +57,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     notRedirected: '未重定向？<0>請在此登入</0>',
     passed: '驗證通過',
     passwordResetSuccessfully: '密碼重設成功。',
+    resend: '重新傳送',
     resetPassword: '重設密碼',
     resetPasswordExpiration: '密碼重設有效期限',
     resetPasswordToken: '密碼重設憑證',

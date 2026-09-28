@@ -6,13 +6,10 @@ import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
 import { getBeforeChangeHook } from '../hooks/beforeChange.js'
+import { getNormalizeUploadPrefixFieldHook } from '../hooks/normalizeUploadPrefix.js'
 
 interface Args {
   adapter?: GeneratedAdapter
-  /**
-   * When true, always insert the prefix field regardless of whether a prefix is configured.
-   */
-  alwaysInsertFields?: boolean
   collection: CollectionConfig
   disablePayloadAccessControl?: true
   generateFileURL?: GenerateFileURL
@@ -26,7 +23,6 @@ interface Args {
 
 export const getFields = ({
   adapter,
-  alwaysInsertFields,
   collection,
   disablePayloadAccessControl,
   generateFileURL,
@@ -50,6 +46,13 @@ export const getFields = ({
       hidden: true,
       readOnly: true,
     },
+  }
+
+  // Server-owned key segment; hidden from the API and admin, read internally via showHiddenFields.
+  const baseObjectKeyField: TextField = {
+    name: '_objectKey',
+    type: 'text',
+    hidden: true,
   }
 
   const fields = [...collection.fields, ...(adapter?.fields || [])]
@@ -181,30 +184,45 @@ export const getFields = ({
     fields.push(sizesField)
   }
 
-  // If prefix is enabled or alwaysInsertFields is true, save it to db
-  if (typeof prefix !== 'undefined' || alwaysInsertFields) {
-    let existingPrefixFieldIndex = -1
+  // Always insert the prefix field so the schema stays consistent regardless of
+  // whether the plugin is enabled or a prefix is configured.
+  let existingPrefixFieldIndex = -1
 
-    const existingPrefixField = fields.find((existingField, i) => {
-      if ('name' in existingField && existingField.name === 'prefix') {
-        existingPrefixFieldIndex = i
-        return true
-      }
-      return false
-    }) as TextField
-
-    if (existingPrefixFieldIndex > -1) {
-      fields.splice(existingPrefixFieldIndex, 1)
+  const existingPrefixField = fields.find((existingField, i) => {
+    if ('name' in existingField && existingField.name === 'prefix') {
+      existingPrefixFieldIndex = i
+      return true
     }
+    return false
+  }) as TextField
 
-    fields.push({
-      ...basePrefixField,
-      ...(existingPrefixField || {}),
-      defaultValue:
-        existingPrefixField?.defaultValue ??
-        (useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : ''),
-    } as TextField)
+  if (existingPrefixFieldIndex > -1) {
+    fields.splice(existingPrefixFieldIndex, 1)
   }
+
+  fields.push({
+    ...basePrefixField,
+    ...(existingPrefixField || {}),
+    defaultValue:
+      existingPrefixField?.defaultValue ??
+      (useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : ''),
+    hooks: {
+      ...existingPrefixField?.hooks,
+      beforeChange: [
+        ...(existingPrefixField?.hooks?.beforeChange || []),
+        getNormalizeUploadPrefixFieldHook({ collectionPrefix: prefix, useCompositePrefixes }),
+      ],
+    },
+  } as TextField)
+
+  const existingObjectKeyFieldIndex = fields.findIndex(
+    (existingField) => 'name' in existingField && existingField.name === '_objectKey',
+  )
+  if (existingObjectKeyFieldIndex > -1) {
+    fields.splice(existingObjectKeyFieldIndex, 1)
+  }
+
+  fields.push({ ...baseObjectKeyField } as TextField)
 
   return fields
 }

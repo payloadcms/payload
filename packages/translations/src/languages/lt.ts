@@ -60,6 +60,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     notRedirected: 'Nepageidaujate nukreipti? <0>Prisijunkite čia</0>',
     passed: 'Autentifikacija sėkminga',
     passwordResetSuccessfully: 'Slaptažodis sėkmingai atnaujintas.',
+    resend: 'Siųsti dar kartą',
     resetPassword: 'Atstatyti slaptažodį',
     resetPasswordExpiration: 'Atstatyti slaptažodžio galiojimo laiką',
     resetPasswordToken: 'Slaptažodžio atkūrimo žetonas',

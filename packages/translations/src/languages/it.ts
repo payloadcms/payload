@@ -60,6 +60,7 @@ export const itTranslations: DefaultTranslationsObject = {
     notRedirected: 'Non reindirizzato? <0>Accedi qui</0>',
     passed: 'Autenticazione Superata',
     passwordResetSuccessfully: 'Reset della password eseguito con successo.',
+    resend: 'Invia di nuovo',
     resetPassword: 'Modifica Password',
     resetPasswordExpiration: 'Reimposta Scadenza Password',
     resetPasswordToken: 'Reimposta il Password Token',

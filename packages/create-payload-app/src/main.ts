@@ -50,7 +50,6 @@ export class Main {
     // @ts-expect-error bad typings
     this.args = arg(
       {
-        '--agent': String,
         '--branch': String,
         '--db': String,
         '--db-accept-recommended': Boolean,

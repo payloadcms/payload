@@ -82,10 +82,12 @@ test.describe('Hierarchy Sidebar', () => {
   test.afterAll(async () => {
     // Clean up created documents
     for (const id of createdOrgIds) {
-      await payload.delete({ id, collection: 'organizations' }).catch(() => {})
+      await payload
+        .delete({ id, collection: 'organizations', overrideAccess: true })
+        .catch(() => {})
     }
     for (const id of createdDeptIds) {
-      await payload.delete({ id, collection: 'departments' }).catch(() => {})
+      await payload.delete({ id, collection: 'departments', overrideAccess: true }).catch(() => {})
     }
   })
 
@@ -161,10 +163,15 @@ test.describe('Hierarchy Sidebar', () => {
     test('should navigate tree via keyboard and load more with Enter without navigation', async () => {
       const prefs = await payload.find({
         collection: 'payload-preferences',
+        overrideAccess: true,
         where: { key: { equals: 'hierarchy-tree-divisions' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ id: pref.id, collection: 'payload-preferences' })
+        await payload.delete({
+          id: pref.id,
+          collection: 'payload-preferences',
+          overrideAccess: true,
+        })
       }
 
       await page.goto(`${serverURL}/admin`)
@@ -313,6 +320,7 @@ test.describe('Hierarchy Sidebar', () => {
       testOrg = await payload.create({
         collection: 'organizations',
         data: { title: 'Selection Test Org' },
+        overrideAccess: true,
       })
       createdOrgIds.push(testOrg.id)
     })
@@ -413,16 +421,17 @@ test.describe('Hierarchy Sidebar', () => {
       await preferenceUpdate
 
       const searchInput = page.getByPlaceholder('Search Organizations')
+      const clearButton = page.getByRole('button', { name: 'Clear' })
 
       // Perform search
       await searchInput.fill('Engineering')
+      await expect(clearButton).toBeVisible()
       await searchInput.press('Enter')
 
       // Wait for tree to be hidden
       await expect(page.getByRole('tree')).toBeHidden()
 
       // Clear search (aria-label is t('general:clear') = "Clear")
-      const clearButton = page.getByRole('button', { name: 'Clear' })
       await clearButton.click()
 
       // Tree should be visible again
@@ -441,10 +450,15 @@ test.describe('Hierarchy Sidebar', () => {
       // Clear folder tree preferences to ensure clean filter state
       const prefs = await payload.find({
         collection: 'payload-preferences',
+        overrideAccess: true,
         where: { key: { equals: 'hierarchy-tree-folders' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ id: pref.id, collection: 'payload-preferences' })
+        await payload.delete({
+          id: pref.id,
+          collection: 'payload-preferences',
+          overrideAccess: true,
+        })
       }
     })
 
@@ -455,11 +469,16 @@ test.describe('Hierarchy Sidebar', () => {
         const createdOrganizations = await payload.find({
           collection: 'organizations',
           draft: true,
+          overrideAccess: true,
           where: { title: { equals: organizationTitle } },
         })
 
         for (const organization of createdOrganizations.docs) {
-          await payload.delete({ id: organization.id, collection: 'organizations' })
+          await payload.delete({
+            id: organization.id,
+            collection: 'organizations',
+            overrideAccess: true,
+          })
         }
       })
 
@@ -470,6 +489,7 @@ test.describe('Hierarchy Sidebar', () => {
         const multiTypeFolders = await payload.find({
           collection: 'folders',
           limit: 1,
+          overrideAccess: true,
           where: { name: { equals: 'Orgs and Products' } },
         })
         const multiTypeFolder = multiTypeFolders.docs[0]
@@ -496,6 +516,7 @@ test.describe('Hierarchy Sidebar', () => {
               collection: 'organizations',
               depth: 0,
               draft: true,
+              overrideAccess: true,
               where: { title: { equals: organizationTitle } },
             })
 
@@ -646,10 +667,15 @@ test.describe('Hierarchy Sidebar', () => {
       // Clean up - delete the created folder
       const createdFolder = await payload.find({
         collection: 'folders',
+        overrideAccess: true,
         where: { name: { equals: newFolderName } },
       })
       if (createdFolder.docs[0]) {
-        await payload.delete({ id: createdFolder.docs[0].id, collection: 'folders' })
+        await payload.delete({
+          id: createdFolder.docs[0].id,
+          collection: 'folders',
+          overrideAccess: true,
+        })
       }
     })
 
@@ -701,10 +727,15 @@ test.describe('Hierarchy Sidebar', () => {
       // Clean up
       const createdFolder = await payload.find({
         collection: 'folders',
+        overrideAccess: true,
         where: { name: { equals: newFolderName } },
       })
       if (createdFolder.docs[0]) {
-        await payload.delete({ id: createdFolder.docs[0].id, collection: 'folders' })
+        await payload.delete({
+          id: createdFolder.docs[0].id,
+          collection: 'folders',
+          overrideAccess: true,
+        })
       }
     })
   })
@@ -729,11 +760,13 @@ test.describe('Hierarchy Sidebar', () => {
       parentFolder = await payload.create({
         collection: 'folders',
         data: { name: parentFolderName },
+        overrideAccess: true,
       })
 
       childFolder = await payload.create({
         collection: 'folders',
         data: { name: childFolderName, parentFolder: parentFolder.id },
+        overrideAccess: true,
       })
 
       // Create a product with the child folder selected
@@ -744,19 +777,26 @@ test.describe('Hierarchy Sidebar', () => {
           name: `Product In Child Folder ${uniqueSuffix}`,
           parentFolder: childFolder.id as number,
         },
+        overrideAccess: true,
       })
     })
 
     test.afterAll(async () => {
       // Clean up in reverse order of dependencies
       if (productWithFolder?.id) {
-        await payload.delete({ id: productWithFolder.id, collection: 'products' }).catch(() => {})
+        await payload
+          .delete({ id: productWithFolder.id, collection: 'products', overrideAccess: true })
+          .catch(() => {})
       }
       if (childFolder?.id) {
-        await payload.delete({ id: childFolder.id, collection: 'folders' }).catch(() => {})
+        await payload
+          .delete({ id: childFolder.id, collection: 'folders', overrideAccess: true })
+          .catch(() => {})
       }
       if (parentFolder?.id) {
-        await payload.delete({ id: parentFolder.id, collection: 'folders' }).catch(() => {})
+        await payload
+          .delete({ id: parentFolder.id, collection: 'folders', overrideAccess: true })
+          .catch(() => {})
       }
     })
 

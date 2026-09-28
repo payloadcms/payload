@@ -60,6 +60,7 @@ export const idTranslations: DefaultTranslationsObject = {
     notRedirected: 'Tidak diarahkan? <0>Masuk di sini</0>',
     passed: 'Autentikasi Lulus',
     passwordResetSuccessfully: 'Kata sandi berhasil diatur ulang.',
+    resend: 'Kirim ulang',
     resetPassword: 'Atur Ulang Kata Sandi',
     resetPasswordExpiration: 'Masa Berlaku Token Atur Ulang Kata Sandi',
     resetPasswordToken: 'Token Atur Ulang Kata Sandi',

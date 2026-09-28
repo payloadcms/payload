@@ -19,7 +19,7 @@ const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated') })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
+test.suite('@payloadcms/storage-vercel-blob', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
     await clearTestBlobs()
   })
@@ -27,11 +27,15 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
   test.afterEach(async ({ payload }) => {
     await clearTestBlobs()
     await Promise.all([
-      payload.delete({ collection: mediaSlug, where: {} }),
-      payload.delete({ collection: mediaWithPrefixSlug, where: {} }),
-      payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} }),
-      payload.delete({ collection: mediaWithDirectAccessSlug, where: {} }),
-      payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {} }),
+      payload.delete({ collection: mediaSlug, where: {}, overrideAccess: true }),
+      payload.delete({ collection: mediaWithPrefixSlug, where: {}, overrideAccess: true }),
+      payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        where: {},
+        overrideAccess: true,
+      }),
+      payload.delete({ collection: mediaWithDirectAccessSlug, where: {}, overrideAccess: true }),
+      payload.delete({ collection: mediaWithDynamicPrefixSlug, where: {}, overrideAccess: true }),
     ])
   })
 
@@ -40,6 +44,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -58,6 +63,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
       collection: mediaWithPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -74,15 +80,14 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
     )
   })
 
-  test('has prefix field with alwaysInsertFields even when plugin is disabled', async ({
-    payload,
-  }) => {
+  test('has prefix field by default even when plugin is disabled', async ({ payload }) => {
     const upload = await payload.create({
       collection: mediaWithAlwaysInsertFieldsSlug,
       data: {
         prefix: 'test',
       },
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     expect(upload.id).toBeTruthy()
@@ -102,6 +107,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const response = await restClient.GET(`/${mediaSlug}/file/image.png`)
@@ -117,6 +123,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
       collection: mediaSlug,
       data: {},
       filePath: path.resolve(dirname, '../uploads/image.png'),
+      overrideAccess: true,
     })
 
     const first = await restClient.GET(`/${mediaSlug}/file/image.png`)
@@ -137,6 +144,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -154,6 +162,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image.png'),
+        overrideAccess: true,
       })
 
       expect(upload.sizes?.thumbnail?.url).toContain(process.env.STORAGE_VERCEL_BLOB_BASE_URL)
@@ -175,6 +184,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDirectAccessSlug,
         data: {},
         filePath: path.resolve(dirname, '../uploads/image with spaces.png'),
+        overrideAccess: true,
       })
 
       expect(upload.id).toBeTruthy()
@@ -190,9 +200,13 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
   test.describe('prefix collision detection', () => {
     test.beforeEach(async ({ payload }) => {
       await clearTestBlobs()
-      await payload.delete({ collection: mediaWithPrefixSlug, where: {} })
-      await payload.delete({ collection: mediaSlug, where: {} })
-      await payload.delete({ collection: mediaWithAlwaysInsertFieldsSlug, where: {} })
+      await payload.delete({ collection: mediaWithPrefixSlug, where: {}, overrideAccess: true })
+      await payload.delete({ collection: mediaSlug, where: {}, overrideAccess: true })
+      await payload.delete({
+        collection: mediaWithAlwaysInsertFieldsSlug,
+        where: {},
+        overrideAccess: true,
+      })
     })
 
     test('detects collision within same prefix', async ({ payload }) => {
@@ -202,12 +216,14 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
@@ -223,20 +239,22 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image-1.png')
-      // @ts-expect-error prefix should never be set
-      expect(upload1.prefix).toBeUndefined()
-      // @ts-expect-error prefix should never be set
-      expect(upload2.prefix).toBeUndefined()
+      // The prefix field is always inserted by default, defaulting to an empty string
+      // for collections that don't configure a prefix.
+      expect(upload1.prefix).toBe('')
+      expect(upload2.prefix).toBe('')
     })
 
     test('allows same filename under different prefixes', async ({ payload }) => {
@@ -246,18 +264,27 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithPrefixSlug,
         data: {},
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: { prefix: 'different-prefix' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(upload1.filename).toBe('image.png')
       expect(upload2.filename).toBe('image.png')
       expect(upload1.prefix).toBe(prefix)
-      expect(upload2.prefix).toBe('different-prefix')
+      // New uploads store the document prefix beneath the collection prefix.
+      expect(upload2.prefix).toBe(`${prefix}/different-prefix`)
+      await verifyUploads({
+        collectionSlug: mediaWithPrefixSlug,
+        payload,
+        prefix: `${prefix}/different-prefix`,
+        uploadId: upload2.id,
+      })
     })
 
     test('supports multi-tenant scenario with dynamic prefix from hook', async ({ payload }) => {
@@ -267,12 +294,14 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-vercel-blob', () => {
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'a' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       const tenantBUpload = await payload.create({
         collection: mediaWithDynamicPrefixSlug,
         data: { tenant: 'b' },
         filePath: imageFile,
+        overrideAccess: true,
       })
 
       expect(tenantAUpload.filename).toBe('image.png')

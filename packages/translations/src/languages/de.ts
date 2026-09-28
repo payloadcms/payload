@@ -62,6 +62,7 @@ export const deTranslations: DefaultTranslationsObject = {
     notRedirected: 'Nicht weitergeleitet? <0>Hier anmelden</0>',
     passed: 'Authentifizierung erfolgreich',
     passwordResetSuccessfully: 'Passwort erfolgreich zurückgesetzt.',
+    resend: 'Erneut senden',
     resetPassword: 'Passwort zurücksetzen',
     resetPasswordExpiration: 'Passwort-Gültigkeitsdauer zurücksetzen',
     resetPasswordToken: 'Passwort-Token zurücksetzen',

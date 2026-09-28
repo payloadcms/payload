@@ -37,6 +37,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
 
     await payload.create({
@@ -44,6 +45,7 @@ export default buildConfigWithDefaults({
       data: {
         title: 'example post',
       },
+      overrideAccess: true,
     })
   },
 })

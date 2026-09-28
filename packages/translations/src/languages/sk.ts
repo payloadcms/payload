@@ -60,6 +60,7 @@ export const skTranslations: DefaultTranslationsObject = {
     notRedirected: 'Nebol ste presmerovaný? <0>Prihláste sa tu</0>',
     passed: 'Overenie prešlo',
     passwordResetSuccessfully: 'Úspešne zmenené heslo.',
+    resend: 'Odoslať znova',
     resetPassword: 'Obnoviť heslo',
     resetPasswordExpiration: 'Vypršanie platnosti obnovenia hesla',
     resetPasswordToken: 'Token na resetovanie hesla',

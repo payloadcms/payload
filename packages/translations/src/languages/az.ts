@@ -59,6 +59,7 @@ export const azTranslations: DefaultTranslationsObject = {
     notRedirected: 'Yönləndirilmədiniz? <0>Buradan daxil olun</0>',
     passed: 'Doğrulama Keçildi',
     passwordResetSuccessfully: 'Parol uğurla yenidən quruldu.',
+    resend: 'Yenidən göndər',
     resetPassword: 'Şifrəni sıfırla',
     resetPasswordExpiration: 'Şifrənin müddətini sıfırla',
     resetPasswordToken: 'Şifrə Tokenini Sıfırla',

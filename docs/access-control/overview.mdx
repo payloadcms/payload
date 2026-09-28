@@ -44,10 +44,10 @@ const defaultPayloadAccess = ({ req: { payload, user } }) => {
 ```
 
 <Banner type="warning">
-  **Important:** In the [Local API](../local-api/overview), all Access Control
-  is _skipped_ by default. This allows your server to have full control over
-  your application. To opt back in, you can set the `overrideAccess` option to
-  `false` in your requests.
+  **Important:** By default, all [Local API](../local-api/overview) operations
+  respect Access Control based on the passed `user`. Set
+  `overrideAccess: true` only when the operation should entirely bypass
+  Access Control. See [Local API Access Control](../local-api/access-control).
 </Banner>
 
 ## Base Access Control

@@ -16,9 +16,23 @@
     gap: var(--spacer-3);
   }
 
+  .forgot-password__form__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
   .forgot-password__form__submit {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+  }
+
+  .forgot-password__form__submit.btn--style-primary.btn--disabled:not(.btn--loading) {
+    border: var(--stroke-width-small) solid var(--color-border);
+    color: var(--color-text);
+    background-color: var(--color-bg-secondary);
   }
 }

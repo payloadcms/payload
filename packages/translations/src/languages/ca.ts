@@ -60,6 +60,7 @@ export const caTranslations: DefaultTranslationsObject = {
     notRedirected: "No s'ha redirigit? <0>Inicieu sessió aquí</0>",
     passed: 'Autenticació superada',
     passwordResetSuccessfully: 'Contrasenya restablerta amb èxit.',
+    resend: 'Torna a enviar',
     resetPassword: 'Restablir contrasenya',
     resetPasswordExpiration: 'Caducitat del restabliment de contrasenya',
     resetPasswordToken: 'Token de restabliment de contrasenya',

@@ -60,6 +60,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     notRedirected: 'Не перенаправлено? <0>Увійдіть тут</0>',
     passed: 'Аутентифікація пройшла успішно',
     passwordResetSuccessfully: 'Пароль успішно скинуто.',
+    resend: 'Надіслати повторно',
     resetPassword: 'Скинути пароль',
     resetPasswordExpiration: 'Скинути пароль після закінчення строку дії',
     resetPasswordToken: 'Токен для скидання пароля',

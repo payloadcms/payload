@@ -59,6 +59,7 @@ export const heTranslations: DefaultTranslationsObject = {
     notRedirected: 'לא הועברת אוטומטית? <0>התחבר כאן</0>',
     passed: 'אימות הצליח',
     passwordResetSuccessfully: 'איפוס הסיסמה הצליח.',
+    resend: 'שלח שוב',
     resetPassword: 'איפוס סיסמה',
     resetPasswordExpiration: 'אפס את תוקף תפוגת הסיסמה',
     resetPasswordToken: 'אפס את טוקן הסיסמה',

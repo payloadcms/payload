@@ -60,6 +60,7 @@ export const myTranslations: DefaultTranslationsObject = {
     notRedirected: 'မအော်တိုမတင်ပြောင်းသေးပါဘူးလား? <0>ဤနေရာတွင် လော့ဂ်အင်ဝင်ပါ</0>',
     passed: 'အတည်ပြုချက် ကျောင်းပြန်',
     passwordResetSuccessfully: 'စကားဝှက် ပြန်လည်စစ်ဆင်မှု အောင်မြင်စွာ ပြီးစီးပါပြီ။',
+    resend: 'ပြန်ပို့ရန်',
     resetPassword: 'စကားဝှက် ပြန်လည်သတ်မှတ်',
     resetPasswordExpiration: 'စကားဝှက် ပြန်လည်သတ်မှတ်ရန် သတ်တမ်း',
     resetPasswordToken: 'စကားဝှက် တိုကင်အား ပြန်လည်သတ်မှတ်',

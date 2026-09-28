@@ -1,18 +1,21 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 
-import { draftCollectionSlug } from '../slugs.js'
+import { draftCollectionSlug, secondaryAdminUserCollectionSlug } from '../slugs.js'
 
 const DraftPosts: CollectionConfig = {
   slug: draftCollectionSlug,
   access: {
-    update: () => {
-      return {
-        restrictedToUpdate: {
-          not_equals: true,
-        },
+    read: ({ req }) => {
+      if (typeof req.context.draftAccessDescription === 'string') {
+        return {
+          description: {
+            equals: req.context.draftAccessDescription,
+          },
+        }
       }
-    },
-    read: ({ req: { user } }) => {
+
+      const { user } = req
+
       if (user) {
         return true
       }
@@ -33,6 +36,15 @@ const DraftPosts: CollectionConfig = {
       }
     },
     readVersions: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => {
+      const constraints: Where[] = [{ restrictedToUpdate: { not_equals: true } }]
+
+      if (user && user.collection === secondaryAdminUserCollectionSlug) {
+        constraints.push({ restrictedToSecondaryCollection: { not_equals: true } })
+      }
+
+      return { and: constraints }
+    },
   },
   admin: {
     components: {
@@ -135,6 +147,10 @@ const DraftPosts: CollectionConfig = {
     },
     {
       name: 'restrictedToUpdate',
+      type: 'checkbox',
+    },
+    {
+      name: 'restrictedToSecondaryCollection',
       type: 'checkbox',
     },
   ],

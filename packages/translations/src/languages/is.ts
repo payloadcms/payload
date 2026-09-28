@@ -61,6 +61,7 @@ export const isTranslations: DefaultTranslationsObject = {
     notRedirected: 'Ekki sjálfkrafa vísað áfram? <0>Skráðu þig inn hér</0>',
     passed: 'Auðkenning tókst',
     passwordResetSuccessfully: 'Lykilorð endursett.',
+    resend: 'Senda aftur',
     resetPassword: 'Endursetja lykilorð',
     resetPasswordExpiration: 'Endursetning lykilorðs rennur út',
     resetPasswordToken: 'Endursetja lykilorðs tóka',

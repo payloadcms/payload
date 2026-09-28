@@ -15,6 +15,7 @@ export const populateAuthors: CollectionAfterReadHook = async ({ doc, req, req: 
         collection: 'users',
         depth: 0,
         req,
+        overrideAccess: true,
       })
 
       authorDocs.push(authorDoc)

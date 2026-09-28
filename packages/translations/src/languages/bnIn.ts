@@ -60,6 +60,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     notRedirected: 'পুনঃনির্দেশিত হননি? <0>এখানে লগ ইন করুন</0>',
     passed: 'প্রমাণীকরণ সফল হয়েছে',
     passwordResetSuccessfully: 'পাসওয়ার্ড সফলভাবে রিসেট করা হয়েছে।',
+    resend: 'পুনরায় পাঠান',
     resetPassword: 'পাসওয়ার্ড রিসেট করুন',
     resetPasswordExpiration: 'পাসওয়ার্ড রিসেটের মেয়াদ শেষ',
     resetPasswordToken: 'পাসওয়ার্ড রিসেট টোকেন',

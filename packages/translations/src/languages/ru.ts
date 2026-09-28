@@ -61,6 +61,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     notRedirected: 'Не перенаправлены? <0>Войдите здесь</0>',
     passed: 'Аутентификация пройдена',
     passwordResetSuccessfully: 'Сброс пароля успешно выполнен.',
+    resend: 'Отправить повторно',
     resetPassword: 'Сброс пароля',
     resetPasswordExpiration: 'Сброс пароля по истечении срока действия',
     resetPasswordToken: 'Токен сброса пароля',

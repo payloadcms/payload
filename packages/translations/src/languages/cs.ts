@@ -59,6 +59,7 @@ export const csTranslations: DefaultTranslationsObject = {
     notRedirected: 'Nejste přesměrováni? <0>Přihlaste se zde</0>',
     passed: 'Ověření prošlo',
     passwordResetSuccessfully: 'Heslo bylo úspěšně resetováno.',
+    resend: 'Odeslat znovu',
     resetPassword: 'Resetovat heslo',
     resetPasswordExpiration: 'Expirace resetování hesla',
     resetPasswordToken: 'Token pro resetování hesla',

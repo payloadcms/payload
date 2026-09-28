@@ -58,6 +58,7 @@ export const faTranslations: DefaultTranslationsObject = {
     notRedirected: 'تغییر مسیر داده نشدید؟ <0>اینجا وارد شوید</0>',
     passed: 'تأیید شد',
     passwordResetSuccessfully: 'رمز عبور با موفقیت تغییر کرد.',
+    resend: 'ارسال مجدد',
     resetPassword: 'بازنشانی رمز عبور',
     resetPasswordExpiration: 'انقضای توکن بازنشانی',
     resetPasswordToken: 'توکن بازنشانی رمز عبور',

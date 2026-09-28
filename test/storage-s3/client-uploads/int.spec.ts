@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
-import { mediaHeaderOnlySlug, mediaHeaderOnlyWithSizesSlug } from '../shared.js'
+import { mediaHeaderOnlySlug, mediaHeaderOnlyWithSizesSlug, mediaSlug } from '../shared.js'
 import {
   clearTestBucket,
   createTestBucket,
@@ -34,7 +34,7 @@ const signedURLBody = (
     mimeType,
   })
 
-test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', () => {
+test.suite('@payloadcms/storage-s3 clientUploads', { config: './config.ts' }, () => {
   test.beforeEach(async () => {
     await createTestBucket()
     await clearTestBucket()
@@ -51,10 +51,14 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
 
     expect(instructions.type).toBe('http')
     expect(instructions.file).toEqual({
-      uploadReference: { prefix: '' },
       filename: 'image.png',
       mimeType: 'image/png',
       size: file.length,
+      uploadReference: {
+        _objectKey: expect.stringMatching(/^[0-9a-f-]+$/),
+        prefix: '',
+        signedReceipt: expect.any(String),
+      },
     })
 
     if (instructions.type !== 'http') {
@@ -65,15 +69,20 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     expect(instructions.request.headers).toEqual({
       'Content-Length': String(file.length),
       'Content-Type': 'image/png',
+      'If-None-Match': '*',
     })
     const { url } = instructions.request
 
     expect(url).toBeDefined()
+    expect(new URL(url).searchParams.get('X-Amz-SignedHeaders')?.split(';')).toEqual(
+      expect.arrayContaining(['content-length', 'content-type']),
+    )
 
     const uploadResponse = await fetch(url, {
       body: file,
       headers: {
         'Content-Type': 'image/png',
+        'If-None-Match': '*',
       },
       method: 'PUT',
     })
@@ -83,7 +92,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     const res = await getAWSClient()
       .headObject({
         Bucket: getTestBucketName(),
-        Key: 'image.png',
+        Key: decodeURIComponent(new URL(url).pathname.split('/').slice(2).join('/')),
       })
       .catch((e) => {
         console.error(e)
@@ -94,6 +103,107 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     assert(res)
     expect(res.ContentLength).toBe(file.length)
     expect(res.ContentType).toBe('image/png')
+  })
+
+  test('does not overwrite an existing object through client uploads', async ({ restClient }) => {
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const replacement = Buffer.alloc(file.length, 1)
+    const instructions = await restClient
+      .POST(signedURLEndpoint, {
+        body: signedURLBody('media', 'protected.png', file.length, 'image/png'),
+      })
+      .then((res) => res.json<UploadInstructions>())
+
+    if (instructions.type !== 'http') {
+      throw new Error('Expected HTTP upload instructions')
+    }
+
+    const headers = new Headers(instructions.request.headers)
+    headers.delete('Content-Length')
+
+    const upload = (body: Buffer) =>
+      fetch(instructions.request.url, {
+        body,
+        headers,
+        method: instructions.request.method,
+      })
+
+    await expect(upload(file)).resolves.toMatchObject({ ok: true })
+
+    const overwrite = await upload(replacement)
+    expect(overwrite.status).toBe(412)
+
+    const stored = await getAWSClient().getObject({
+      Bucket: getTestBucketName(),
+      Key: decodeURIComponent(
+        new URL(instructions.request.url).pathname.split('/').slice(2).join('/'),
+      ),
+    })
+    expect(Buffer.from(await stored.Body!.transformToByteArray())).toEqual(file)
+  })
+
+  for (const [uploadFilename, mimeType] of [
+    ['reference.svg', 'image/svg+xml'],
+    ['reference.xml', 'application/xml'],
+    ['reference.bin', 'application/atom+xml'],
+  ] as const) {
+    test(`should keep ${uploadFilename} with ${mimeType} in document uploads`, async ({
+      restClient,
+    }) => {
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: signedURLBody('media', uploadFilename, 100, mimeType),
+      })
+
+      expect(response.status).toBe(400)
+      const { errors } = await response.json()
+      expect(errors[0].message).toContain('uploaded with the document through Payload')
+    })
+  }
+
+  test('should persist adapter-backed SVG only after document validation', async ({
+    restClient,
+  }) => {
+    const safeSVG =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>'
+    const safeForm = new FormData()
+    safeForm.append('_payload', JSON.stringify({ alt: 'Reference graphic' }))
+    safeForm.append('file', new Blob([safeSVG], { type: 'image/svg+xml' }), 'reference.svg')
+
+    const safeResponse = await restClient.POST('/media', { body: safeForm })
+    const { doc } = await safeResponse.json()
+
+    expect(safeResponse.status).toBe(201)
+    expect(doc.filename).toBe('reference.svg')
+    await expect(
+      getAWSClient().headObject({ Bucket: getTestBucketName(), Key: 'reference.svg' }),
+    ).resolves.toMatchObject({ ContentType: 'image/svg+xml' })
+
+    await clearTestBucket()
+
+    for (const file of [
+      new File(
+        ['<svg xmlns="http://www.w3.org/2000/svg"><script>reference()</script></svg>'],
+        'reference.svg',
+        { type: 'image/svg+xml' },
+      ),
+      new File(
+        [
+          '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" onload="reference()"><rect width="10" height="10"/></svg>',
+        ],
+        'reference.xml',
+        { type: 'application/xml' },
+      ),
+    ]) {
+      const formData = new FormData()
+      formData.append('_payload', JSON.stringify({ alt: 'Reference graphic' }))
+      formData.append('file', file)
+
+      const response = await restClient.POST('/media', { body: formData })
+
+      expect(response.status).toBe(400)
+      const objects = await getAWSClient().listObjectsV2({ Bucket: getTestBucketName() })
+      expect(objects.Contents).toBeUndefined()
+    }
   })
 
   test("should reject signed URL generation by access control when 'x-disallow-access' header is set", async ({
@@ -107,6 +217,23 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
     })
 
     expect(response.status).toBe(403)
+  })
+
+  test('should reject upload instructions without collection create or update permission', async ({
+    restClient,
+  }) => {
+    const response = await restClient.POST(signedURLEndpoint, {
+      body: signedURLBody(mediaSlug, 'forbidden.png', MB(1), 'image/png'),
+      headers: {
+        'x-disallow-create': 'true',
+        'x-disallow-update': 'true',
+      },
+    })
+    const body = await response.json()
+
+    expect(response.status).toBe(403)
+    expect(body.request).toBeUndefined()
+    expect(body.errors).toBeDefined()
   })
 
   test('should generate signed URL for file within size limit', async ({ restClient }) => {
@@ -183,6 +310,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
       body: file,
       headers: {
         'Content-Type': mimeType,
+        'If-None-Match': '*',
       },
       method: 'PUT',
     })
@@ -271,6 +399,27 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
       expect(url).toContain('test-prefix')
       expect(url).toContain('safe-image.png')
     })
+
+    // Regression for #16694: trailing dots are stripped from the storage key the same way they
+    // are stripped from the DB filename, so the key and doc.filename stay in sync.
+    test('should strip trailing dots so the storage key matches the DB filename', async ({
+      restClient,
+    }) => {
+      const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+
+      const {
+        request: { url },
+      } = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody('media-with-prefix', 'report...png', file.length, 'image/png'),
+        })
+        .then((res) => res.json<{ request: { url: string } }>())
+
+      expect(url).toBeDefined()
+      expect(url).toContain('test-prefix')
+      expect(url).toContain('report.png')
+      expect(url).not.toContain('report...png')
+    })
   })
 
   /**
@@ -287,7 +436,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlySlug })
+        await payload.delete({ id, collection: mediaHeaderOnlySlug, overrideAccess: true })
       }
       createdIds.length = 0
     })
@@ -344,7 +493,7 @@ test.suite({ config: './config.ts' })('@payloadcms/storage-s3 clientUploads', ()
 
     test.afterEach(async ({ payload }) => {
       for (const id of createdIds) {
-        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug })
+        await payload.delete({ id, collection: mediaHeaderOnlyWithSizesSlug, overrideAccess: true })
       }
       createdIds.length = 0
     })
