@@ -49,6 +49,7 @@ export const getFields = ({
     type: 'text',
     admin: {
       disableBulkEdit: true,
+      disableGroupBy: true,
       disableListColumn: true,
       disableListFilter: true,
       hidden: true,
@@ -62,6 +63,7 @@ export const getFields = ({
     type: 'text',
     admin: {
       disableBulkEdit: true,
+      disableGroupBy: true,
       disableListColumn: true,
       disableListFilter: true,
       hidden: true,
