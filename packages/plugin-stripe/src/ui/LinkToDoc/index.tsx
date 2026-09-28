@@ -1,5 +1,5 @@
 'use client'
-import type { UIFieldClientComponent } from 'payload'
+import type { UIFieldClientProps } from 'payload'
 
 import { CopyToClipboard, FieldLabel, useFormFields } from '@payloadcms/ui'
 import React from 'react'
@@ -8,7 +8,7 @@ import './index.css'
 
 const baseClass = 'link-to-doc'
 
-export const LinkToDoc: UIFieldClientComponent = (props) => {
+export const LinkToDoc: React.FC<UIFieldClientProps> = (props) => {
   const {
     field: { admin: { custom = {} } = {} },
   } = props
