@@ -1,6 +1,6 @@
 import type { Expression, ImportDeclaration, SourceFile } from 'ts-morph'
 
-import { Node, SyntaxKind } from 'ts-morph'
+import { Node, SyntaxKind, VariableDeclarationKind } from 'ts-morph'
 
 import type { Transform } from '../../types.js'
 
@@ -543,14 +543,22 @@ function initializerContainsClassComponent({
     const componentPropertyName = componentPropertyPath?.[0]
     const remainingComponentPropertyPath = componentPropertyPath?.slice(1)
     const propertiesToInspect = componentPropertyName
-      ? properties.filter(
-          (property) =>
-            ((Node.isPropertyAssignment(property) ||
-              Node.isShorthandPropertyAssignment(property)) &&
-              getStaticPropertyName({ nameNode: property.getNameNode() }) ===
-                componentPropertyName) ||
-            Node.isSpreadAssignment(property),
-        )
+      ? properties.filter((property) => {
+          if (Node.isSpreadAssignment(property)) {
+            return true
+          }
+
+          if (
+            !Node.isPropertyAssignment(property) &&
+            !Node.isShorthandPropertyAssignment(property)
+          ) {
+            return false
+          }
+
+          const propertyName = getStaticPropertyName({ nameNode: property.getNameNode() })
+
+          return propertyName === undefined || propertyName === componentPropertyName
+        })
       : properties
 
     return propertiesToInspect.some((property) => {
@@ -695,7 +703,10 @@ function getStaticComputedPropertyName({
   for (const definition of expression.getDefinitions()) {
     const declaration = definition.getDeclarationNode()
 
-    if (Node.isVariableDeclaration(declaration)) {
+    if (
+      Node.isVariableDeclaration(declaration) &&
+      declaration.getVariableStatement()?.getDeclarationKind() === VariableDeclarationKind.Const
+    ) {
       const initializer = declaration.getInitializer()
       const propertyName =
         initializer && Node.isExpression(initializer)

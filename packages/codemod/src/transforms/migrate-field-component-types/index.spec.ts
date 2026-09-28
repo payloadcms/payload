@@ -787,6 +787,27 @@ const fields: { [fieldKey]: React.FC<TextFieldClientProps>; helper: typeof Helpe
 }`)
   })
 
+  it('should leave class components assigned through mutable computed keys unchanged', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+let fieldKey = 'other'
+fieldKey = 'field'
+class CustomField extends React.Component {}
+const fields: { field: TextFieldClientComponent } = {
+  field: () => null,
+  [fieldKey]: CustomField,
+}`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/mutable-computed-key-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
   it('should migrate object properties in arrays when an unrelated property contains a class', async () => {
     const source = `import type { TextFieldClientComponent } from 'payload'
 
