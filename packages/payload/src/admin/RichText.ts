@@ -269,6 +269,14 @@ type RichTextAdapterBase<
       | 'variant'
     >,
   ) => JSONSchema4
+  /** Editors configured for specific uses, initialized independently from this editor. */
+  presets?: {
+    /**
+     * Editor for LLM instructions. Must provide both Markdown converters.
+     * This provider should select its own features without inheriting unrestricted root features.
+     */
+    llmInstructions?: RichTextAdapterProvider<Value, AdapterProps, ExtraFieldProperties>
+  }
   /**
    * Provide validation function for the richText field. This function is run the same way
    * as other field validation functions.
