@@ -51,17 +51,18 @@ export function createHandleRequest({
 
     const sourceBuffer = Buffer.from(await source.arrayBuffer())
 
-    const sharpOptions: SharpOptions = ANIMATED_MIME_TYPES.includes(mimeType)
-      ? { animated: true }
-      : {}
+    const isAnimated = ANIMATED_MIME_TYPES.includes(mimeType)
+    const sharpOptions: SharpOptions = isAnimated ? { animated: true } : {}
 
     const withoutEnlargement = parseResult.withoutEnlargement ?? dynamicDefaults.withoutEnlargement
 
-    // With a single dimension Sharp derives the other from the aspect ratio, so the
-    // output size is only known once the source is probed.
-    if (parseResult.width === undefined || parseResult.height === undefined) {
+    // The output size is only known once the source is probed: with a single dimension
+    // Sharp derives the other from the aspect ratio, and an animated source is resized
+    // frame by frame, so its real cost is the per-frame output times the frame count.
+    if (isAnimated || parseResult.width === undefined || parseResult.height === undefined) {
       const metadata = await sharpDependency(sourceBuffer, sharpOptions).metadata()
-      const output = getAspectRatioOutputDimensions({
+      const frameCount = isAnimated ? (metadata.pages ?? 1) : 1
+      const output = getOutputDimensions({
         height: parseResult.height,
         sourceHeight: metadata.pageHeight ?? metadata.height,
         sourceWidth: metadata.width,
@@ -73,14 +74,16 @@ export function createHandleRequest({
         output &&
         (output.width > dynamicDefaults.maxWidth ||
           output.height > dynamicDefaults.maxHeight ||
-          output.width * output.height > dynamicDefaults.maxPixels)
+          output.width * output.height * frameCount > dynamicDefaults.maxPixels)
       ) {
+        const frameDescription = frameCount > 1 ? ` across ${frameCount} frames` : ''
+
         return {
           response: Response.json(
             {
               errors: [
                 {
-                  message: `Requested dimensions (${output.width}x${output.height}) exceed the configured maximum.`,
+                  message: `Requested dimensions (${output.width}x${output.height}${frameDescription}) exceed the configured maximum.`,
                 },
               ],
             },
@@ -115,7 +118,12 @@ export function createHandleRequest({
   }
 }
 
-function getAspectRatioOutputDimensions({
+/**
+ * The per-frame output size. When both dimensions are requested this is an upper
+ * bound (`fit: 'contain'`/`'inside'` or `withoutEnlargement` can render smaller),
+ * which is what a resource budget needs.
+ */
+function getOutputDimensions({
   height,
   sourceHeight,
   sourceWidth,
@@ -128,6 +136,10 @@ function getAspectRatioOutputDimensions({
   width: number | undefined
   withoutEnlargement: boolean
 }): { height: number; width: number } | undefined {
+  if (width !== undefined && height !== undefined) {
+    return { height, width }
+  }
+
   if (!sourceWidth || !sourceHeight) {
     return undefined
   }

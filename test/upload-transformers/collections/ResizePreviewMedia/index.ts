@@ -10,7 +10,18 @@ const dirname = path.dirname(filename)
 
 export const ResizePreviewMedia: CollectionConfig = {
   slug: resizePreviewMediaSlug,
-  fields: [],
+  fields: [
+    {
+      name: 'resizePreview',
+      type: 'ui',
+      admin: {
+        components: {
+          Field:
+            '/collections/ResizePreviewMedia/components/ResizePreview/index.client.js#ResizePreviewField',
+        },
+      },
+    },
+  ],
   upload: {
     mimeTypes: ['image/*'],
     staticDir: path.resolve(dirname, '../../media'),
