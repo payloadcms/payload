@@ -1,4 +1,5 @@
 export const slug = 'fields-relationship'
+export const globalRelationshipSlug = 'global-relationship'
 
 export const relationOneSlug = 'relation-one'
 export const relationTrueFilterOptionSlug = 'relation-filter-true'

@@ -341,6 +341,7 @@ export const updateOperation = async <
       fieldsToValidate: submittedTopLevelFieldNames,
       global: globalConfig,
       operation: 'update' as Operation,
+      overrideAccess,
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
     }
