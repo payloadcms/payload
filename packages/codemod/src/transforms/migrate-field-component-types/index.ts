@@ -1,6 +1,6 @@
 import type { Expression, ImportDeclaration, SourceFile } from 'ts-morph'
 
-import { Node, SyntaxKind } from 'ts-morph'
+import { Node, SyntaxKind, VariableDeclarationKind } from 'ts-morph'
 
 import type { Transform } from '../../types.js'
 
@@ -164,10 +164,16 @@ export const migrateFieldComponentTypes: Transform = {
 
           const classDeclaration = references
             .map((reference) => reference.getFirstAncestorByKind(SyntaxKind.VariableDeclaration))
-            .find((declaration) => {
+            .find((declaration, referenceIndex) => {
               const initializer = declaration?.getInitializer()
+              const reference = references[referenceIndex]
+              const componentPropertyPath = reference
+                ? getComponentPropertyPath({ reference })
+                : undefined
 
-              return initializer ? isClassComponentInitializer(initializer) : false
+              return initializer
+                ? initializerContainsClassComponent({ componentPropertyPath, initializer })
+                : false
             })
 
           if (classDeclaration) {
@@ -461,24 +467,31 @@ type AddReactTypeImportArgs = {
 function addReactTypeImport({ file, reactName }: AddReactTypeImportArgs): void {
   const importDeclarations = file.getImportDeclarations()
   const lastImport = importDeclarations.at(-1)
-  const nextStatement = lastImport
-    ? file.getStatements().find((statement) => statement.getStart() > lastImport.getEnd())
-    : undefined
+  const statements = file.getStatements()
+  const insertionIndex = lastImport ? statements.indexOf(lastImport) + 1 : 0
+  const nextStatement = statements.at(insertionIndex)
   const needsTerminator =
     lastImport && nextStatement
       ? lastImport.getEndLineNumber() === nextStatement.getStartLineNumber()
       : false
 
   file.insertStatements(
-    importDeclarations.length,
+    insertionIndex,
     `import type ${reactName} from 'react'${needsTerminator ? ';' : ''}`,
   )
 }
 
-function isClassComponentInitializer(
-  initializer: Expression,
+type InitializerContainsClassComponentArgs = {
+  componentPropertyPath?: string[]
+  initializer: Expression
+  visitedExpressions?: Set<Expression>
+}
+
+function initializerContainsClassComponent({
+  componentPropertyPath,
+  initializer,
   visitedExpressions = new Set<Expression>(),
-): boolean {
+}: InitializerContainsClassComponentArgs): boolean {
   let expression = initializer
 
   while (
@@ -501,6 +514,84 @@ function isClassComponentInitializer(
     return true
   }
 
+  if (Node.isArrayLiteralExpression(expression)) {
+    return expression.getElements().some((element) => {
+      const nestedExpression = Node.isSpreadElement(element) ? element.getExpression() : element
+
+      return Node.isExpression(nestedExpression)
+        ? initializerContainsClassComponent({
+            componentPropertyPath,
+            initializer: nestedExpression,
+            visitedExpressions,
+          })
+        : false
+    })
+  }
+
+  if (Node.isConditionalExpression(expression)) {
+    return [expression.getWhenTrue(), expression.getWhenFalse()].some((nestedExpression) =>
+      initializerContainsClassComponent({
+        componentPropertyPath,
+        initializer: nestedExpression,
+        visitedExpressions,
+      }),
+    )
+  }
+
+  if (Node.isObjectLiteralExpression(expression)) {
+    const properties = expression.getProperties()
+    const componentPropertyName = componentPropertyPath?.[0]
+    const remainingComponentPropertyPath = componentPropertyPath?.slice(1)
+    const propertiesToInspect = componentPropertyName
+      ? properties.filter((property) => {
+          if (Node.isSpreadAssignment(property)) {
+            return true
+          }
+
+          if (
+            !Node.isPropertyAssignment(property) &&
+            !Node.isShorthandPropertyAssignment(property)
+          ) {
+            return false
+          }
+
+          const propertyName = getStaticPropertyName({ nameNode: property.getNameNode() })
+
+          return propertyName === undefined || propertyName === componentPropertyName
+        })
+      : properties
+
+    return propertiesToInspect.some((property) => {
+      if (Node.isPropertyAssignment(property)) {
+        const propertyInitializer = property.getInitializer()
+
+        return propertyInitializer && Node.isExpression(propertyInitializer)
+          ? initializerContainsClassComponent({
+              componentPropertyPath: remainingComponentPropertyPath,
+              initializer: propertyInitializer,
+              visitedExpressions,
+            })
+          : false
+      }
+
+      if (Node.isShorthandPropertyAssignment(property)) {
+        return initializerContainsClassComponent({
+          componentPropertyPath: remainingComponentPropertyPath,
+          initializer: property.getNameNode(),
+          visitedExpressions,
+        })
+      }
+
+      return Node.isSpreadAssignment(property)
+        ? initializerContainsClassComponent({
+            componentPropertyPath,
+            initializer: property.getExpression(),
+            visitedExpressions,
+          })
+        : false
+    })
+  }
+
   if (!Node.isIdentifier(expression)) {
     return false
   }
@@ -516,12 +607,119 @@ function isClassComponentInitializer(
       const referencedInitializer = declaration.getInitializer()
 
       return referencedInitializer
-        ? isClassComponentInitializer(referencedInitializer, visitedExpressions)
+        ? initializerContainsClassComponent({
+            componentPropertyPath,
+            initializer: referencedInitializer,
+            visitedExpressions,
+          })
         : false
     }
 
     return false
   })
+}
+
+type GetComponentPropertyPathArgs = {
+  reference: Node
+}
+
+function getComponentPropertyPath({
+  reference,
+}: GetComponentPropertyPathArgs): string[] | undefined {
+  const propertySignatures = reference.getAncestors().filter(Node.isPropertySignature).reverse()
+
+  if (propertySignatures.length === 0) {
+    return undefined
+  }
+
+  const propertyPath = propertySignatures.map((property) =>
+    getStaticPropertyName({ nameNode: property.getNameNode() }),
+  )
+
+  return propertyPath.every((propertyName): propertyName is string => propertyName !== undefined)
+    ? propertyPath
+    : undefined
+}
+
+type GetStaticPropertyNameArgs = {
+  nameNode: Node
+}
+
+function getStaticPropertyName({ nameNode }: GetStaticPropertyNameArgs): string | undefined {
+  if (Node.isComputedPropertyName(nameNode)) {
+    return getStaticComputedPropertyName({ expression: nameNode.getExpression() })
+  }
+
+  if (Node.isStringLiteral(nameNode) || Node.isNoSubstitutionTemplateLiteral(nameNode)) {
+    return nameNode.getLiteralText()
+  }
+
+  if (Node.isNumericLiteral(nameNode)) {
+    return String(nameNode.getLiteralValue())
+  }
+
+  return Node.isIdentifier(nameNode) ? nameNode.getText() : undefined
+}
+
+type GetStaticComputedPropertyNameArgs = {
+  expression: Expression
+  visitedExpressions?: Set<Expression>
+}
+
+function getStaticComputedPropertyName({
+  expression: initialExpression,
+  visitedExpressions = new Set<Expression>(),
+}: GetStaticComputedPropertyNameArgs): string | undefined {
+  let expression = initialExpression
+
+  while (
+    Node.isParenthesizedExpression(expression) ||
+    Node.isAsExpression(expression) ||
+    Node.isSatisfiesExpression(expression) ||
+    Node.isTypeAssertion(expression) ||
+    Node.isNonNullExpression(expression)
+  ) {
+    expression = expression.getExpression()
+  }
+
+  if (visitedExpressions.has(expression)) {
+    return undefined
+  }
+
+  visitedExpressions.add(expression)
+
+  if (Node.isStringLiteral(expression) || Node.isNoSubstitutionTemplateLiteral(expression)) {
+    return expression.getLiteralText()
+  }
+
+  if (Node.isNumericLiteral(expression)) {
+    return String(expression.getLiteralValue())
+  }
+
+  if (!Node.isIdentifier(expression)) {
+    return undefined
+  }
+
+  for (const definition of expression.getDefinitions()) {
+    const declaration = definition.getDeclarationNode()
+
+    if (
+      Node.isVariableDeclaration(declaration) &&
+      declaration.getVariableStatement()?.getDeclarationKind() === VariableDeclarationKind.Const
+    ) {
+      const initializer = declaration.getInitializer()
+      const propertyName =
+        initializer && Node.isExpression(initializer)
+          ? getStaticComputedPropertyName({ expression: initializer, visitedExpressions })
+          : undefined
+
+      if (propertyName !== undefined) {
+        return propertyName
+      }
+    }
+  }
+
+  return undefined
 }
 
 type GetAvailableNameArgs = {

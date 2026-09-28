@@ -513,6 +513,25 @@ export = React`,
     ).toEqual([])
   })
 
+  it('should insert React imports after all leading directives and existing imports', async () => {
+    const source = `'use strict'
+'use client'
+
+import type { TextFieldClientComponent } from 'payload'
+
+const Field: TextFieldClientComponent = () => null`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`'use strict'
+'use client'
+
+import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+const Field: React.FC<TextFieldClientProps> = () => null`)
+  })
+
   it('should avoid local React and props-name collisions', async () => {
     const source = `import type { TextFieldClientComponent } from 'payload'
 
@@ -634,6 +653,216 @@ const Field: TextFieldClientComponent = CustomField`
 
     expect(file.getFullText()).toBe(source)
     expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should leave class components in arrays unchanged and report manual work', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const fields: TextFieldClientComponent[] = [CustomField]`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/array-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('/array-class-component.tsx')
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should leave class components in conditional array values unchanged', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const isCustomFieldEnabled = true
+const fields: TextFieldClientComponent[] = [
+  isCustomFieldEnabled ? CustomField : () => null,
+]`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/conditional-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should leave class components in object properties unchanged and report manual work', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const fields: { field: TextFieldClientComponent } = { field: CustomField }`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/object-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('/object-class-component.tsx')
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should leave class components in nested object properties unchanged', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const config: { container: { field: TextFieldClientComponent } } = {
+  container: { field: CustomField },
+}`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/nested-object-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should match quoted component property types to unquoted object properties', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const fields: { "field": TextFieldClientComponent } = { field: CustomField }`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/quoted-property-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should migrate object properties when an unrelated property contains a class', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+class Helper {}
+const fields: { field: TextFieldClientComponent; helper: typeof Helper } = {
+  field: () => null,
+  helper: Helper,
+}`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+class Helper {}
+const fields: { field: React.FC<TextFieldClientProps>; helper: typeof Helper } = {
+  field: () => null,
+  helper: Helper,
+}`)
+  })
+
+  it('should migrate statically computed object properties when an unrelated property contains a class', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+const fieldKey = 'field'
+class Helper {}
+const fields: { [fieldKey]: TextFieldClientComponent; helper: typeof Helper } = {
+  [fieldKey]: () => null,
+  helper: Helper,
+}`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+const fieldKey = 'field'
+class Helper {}
+const fields: { [fieldKey]: React.FC<TextFieldClientProps>; helper: typeof Helper } = {
+  [fieldKey]: () => null,
+  helper: Helper,
+}`)
+  })
+
+  it('should leave class components assigned through mutable computed keys unchanged', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+let fieldKey = 'other'
+fieldKey = 'field'
+class CustomField extends React.Component {}
+const fields: { field: TextFieldClientComponent } = {
+  field: () => null,
+  [fieldKey]: CustomField,
+}`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/mutable-computed-key-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('class component')
+  })
+
+  it('should migrate object properties in arrays when an unrelated property contains a class', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+class Helper {}
+const fields: { field: TextFieldClientComponent; helper: typeof Helper }[] = [
+  { field: () => null, helper: Helper },
+]`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+class Helper {}
+const fields: { field: React.FC<TextFieldClientProps>; helper: typeof Helper }[] = [
+  { field: () => null, helper: Helper },
+]`)
+  })
+
+  it('should migrate object properties in conditional values when an unrelated property contains a class', async () => {
+    const source = `import type { TextFieldClientComponent } from 'payload'
+
+class Helper {}
+const isPrimary = true
+const fields: { field: TextFieldClientComponent; helper: typeof Helper } = isPrimary
+  ? { field: () => null, helper: Helper }
+  : { field: () => null, helper: Helper }`
+
+    expect(
+      await runTransform({ filename: 'input.tsx', source, transform: migrateFieldComponentTypes }),
+    ).toBe(`import type { TextFieldClientProps } from 'payload'
+import type React from 'react'
+
+class Helper {}
+const isPrimary = true
+const fields: { field: React.FC<TextFieldClientProps>; helper: typeof Helper } = isPrimary
+  ? { field: () => null, helper: Helper }
+  : { field: () => null, helper: Helper }`)
+  })
+
+  it('should leave class components in referenced containers unchanged and report manual work', async () => {
+    const source = `import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+class CustomField extends React.Component {}
+const customFields = [CustomField]
+const fields: TextFieldClientComponent[] = customFields`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('/referenced-container-class-component.tsx', source)
+
+    const result = await migrateFieldComponentTypes.apply({ packageJsons: [], project })
+
+    expect(file.getFullText()).toBe(source)
+    expect(result.filesChanged).toEqual([])
+    expect(result.notes?.join('\n')).toContain('/referenced-container-class-component.tsx')
     expect(result.notes?.join('\n')).toContain('class component')
   })
 
