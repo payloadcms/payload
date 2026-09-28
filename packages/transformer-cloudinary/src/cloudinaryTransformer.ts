@@ -92,7 +92,7 @@ export function cloudinaryTransformer(
       config,
       delivery: options.delivery ?? 'proxy',
       dynamicDefaults,
-      resolveSourceURL: options.sourceURL ?? createResolveSourceURL(),
+      resolveSourceURL: (dynamicOptions || undefined)?.sourceURL ?? createResolveSourceURL(),
     }),
     init: (payloadConfig) => {
       assertDynamicCollectionsExist({ config: payloadConfig, dynamicOptions })

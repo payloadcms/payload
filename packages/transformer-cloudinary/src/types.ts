@@ -145,6 +145,12 @@ export type CloudinaryDynamicDefaults = {
  */
 export type CloudinaryDynamicOptions = {
   collections?: UploadCollectionSlug[]
+  /**
+   * Overrides how the publicly reachable source URL is resolved for a dynamic
+   * request. Defaults to the requested file's own `url`, resolved against the
+   * config's `serverURL`.
+   */
+  sourceURL?: ResolveSourceURL
 } & CloudinaryDynamicDefaults
 
 /**
@@ -213,12 +219,6 @@ export type CloudinaryTransformerOptions = {
   dynamic?: boolean | CloudinaryDynamicOptions
   /** @default 'cloudinary' */
   slug?: string
-  /**
-   * Overrides how the publicly reachable source URL is resolved for a dynamic
-   * request. Defaults to the requested file's own `url`, resolved against the
-   * config's `serverURL`.
-   */
-  sourceURL?: ResolveSourceURL
   /**
    * Folder the short-lived upload-time originals are written to before their
    * derived sizes are pulled back. Each is deleted once its upload completes.

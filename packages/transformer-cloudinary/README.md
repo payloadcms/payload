@@ -59,13 +59,15 @@ Sharp's resize semantics map onto Cloudinary crop modes like this:
 
 This transformer uses Cloudinary's [fetch delivery](https://cloudinary.com/documentation/fetch_remote_images): it builds an `image/fetch/` URL over the stored file's own URL and lets Cloudinary pull the source itself. `getSourceFile` is never called, so the stored bytes never pass through Payload — and the single-use source handle stays available to any later transformer in the pipeline.
 
-That means the source URL **must be reachable from the public internet**, and its host must be allow-listed in your Cloudinary fetch settings. A `localhost` dev server will not work; use a tunnel or point `sourceURL` at your storage adapter's CDN URL.
+That means the source URL **must be reachable from the public internet**, and its host must be allow-listed in your Cloudinary fetch settings. A `localhost` dev server will not work; use a tunnel or point `dynamic.sourceURL` at your storage adapter's CDN URL.
 
 By default the source URL is the requested file's own `url`, resolved against your config's `serverURL`. Override it when the default is not publicly reachable:
 
 ```ts
 cloudinaryTransformer({
-  sourceURL: ({ filename }) => `https://cdn.example.com/media/${filename}`,
+  dynamic: {
+    sourceURL: ({ filename }) => `https://cdn.example.com/media/${filename}`,
+  },
 })
 ```
 
@@ -84,6 +86,7 @@ cloudinaryTransformer({ delivery: 'proxy' }) // default
 cloudinaryTransformer({
   dynamic: {
     collections: ['media'], // omit to allow every upload collection
+    sourceURL: undefined, // default (the file's own `url`)
     crop: 'fill', // default, when both width and height are given
     gravity: 'center', // default — try 'auto' for content-aware cropping
     quality: 'auto', // default
@@ -136,6 +139,5 @@ Staged originals are written to `payload-transformer-tmp/` (configurable via `up
 | `delivery`     | `'proxy'` or `'redirect'`                                                                 | `'proxy'`                    |
 | `dynamic`      | Enables request-time transformation (`true` or an object with `collections` and defaults) | `false`                      |
 | `slug`         | Transformer slug, unique across `upload.transformers`                                     | `'cloudinary'`               |
-| `sourceURL`    | Overrides how the publicly reachable source URL is resolved                               | the file's `url`             |
 | `uploadFolder` | Folder for short-lived upload-time originals                                              | `'payload-transformer-tmp'`  |
 | `url`          | `cloudinary://<api_key>:<api_secret>@<cloud_name>`                                        | `process.env.CLOUDINARY_URL` |
