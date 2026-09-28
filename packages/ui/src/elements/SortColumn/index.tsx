@@ -1,12 +1,13 @@
 'use client'
 import type { StaticLabel } from 'payload'
 
-import React from 'react'
+import React, { useId, useRef } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useAriaSort } from '../Table/useAriaSort.js'
 import './index.css'
 
 export type SortColumnProps = {
@@ -40,6 +41,14 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
   }
 
   const isSorted = sort === asc || sort === desc
+  const labelId = useId()
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useAriaSort({
+    labelledBy: labelId,
+    ref: rootRef,
+    value: sort === asc ? 'ascending' : sort === desc ? 'descending' : undefined,
+  })
 
   const descLabel = t('general:sortByLabelDirection', {
     direction: t('general:descending'),
@@ -59,14 +68,16 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      ref={rootRef}
     >
-      <span className={`${baseClass}__label`}>
+      <span className={`${baseClass}__label`} id={labelId}>
         {Label ?? <FieldLabel hideLocale label={label} unstyled />}
       </span>
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button
             aria-label={descLabel}
+            aria-pressed={sort === desc}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(desc)}
             title={descLabel}
@@ -76,6 +87,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
           </button>
           <button
             aria-label={ascLabel}
+            aria-pressed={sort === asc}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(asc)}
             title={ascLabel}

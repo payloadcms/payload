@@ -236,6 +236,42 @@ query {
       })
     })
 
+    test('should keep a relationship selection inside an aliased array', async ({
+      payload,
+      restClient,
+    }) => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'Aliased array post' },
+        overrideAccess: true,
+      })
+
+      await payload.updateGlobal({
+        slug: 'home',
+        data: {
+          topPosts: [{ caption: 'Featured', post: post.id }],
+        },
+        overrideAccess: true,
+      })
+
+      const query = `query {
+        Home(select: true) {
+          featured: topPosts {
+            post { title }
+          }
+        }
+      }`
+
+      const { data, errors } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((response) => response.json())
+
+      expect(errors).toBeUndefined()
+      expect(data.Home.featured).toEqual([
+        expect.objectContaining({ post: { title: 'Aliased array post' } }),
+      ])
+    })
+
     test('should not error when querying a global with a deleted relationship in an array', async ({
       payload,
       restClient,

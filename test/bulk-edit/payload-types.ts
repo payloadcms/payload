@@ -158,6 +158,14 @@ export interface Post {
   blocks?: TextBlock[] | null;
   noRead?: string | null;
   noUpdate?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -233,6 +241,14 @@ export interface PayloadKv {
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -252,6 +268,76 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs".
+ */
+export interface Tab {
+  id: string;
+  title?: string | null;
+  noLabelText?: string | null;
+  tabTab?: {
+    tabText?: string | null;
+    tabTabArray?:
+      | {
+          tabTabArrayText?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  noLabelGroup?: {
+    rowText?: string | null;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs".
+ */
+export interface RestrictedTab {
+  id: string;
+  title?: string | null;
+  noUpdate?: string | null;
+  namedTab?: {
+    namedTabText?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -364,6 +450,8 @@ export interface PostsSelect<T extends boolean = true> {
       };
   noRead?: T;
   noUpdate?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -391,6 +479,23 @@ export interface TabsSelect<T extends boolean = true> {
     | {
         rowText?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs_select".
+ */
+export interface RestrictedTabsSelect<T extends boolean = true> {
+  title?: T;
+  noUpdate?: T;
+  namedTab?:
+    | T
+    | {
+        namedTabText?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -417,12 +522,16 @@ export interface RestrictedTabsSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+  createdBy?: T;
+  updatedBy?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -526,6 +635,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

@@ -1,6 +1,6 @@
 import type { Payload, User, Where } from 'payload'
 
-import { createLocalReq } from 'payload'
+import { createPayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
@@ -3304,7 +3304,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           overrideAccess: true,
         })
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         const res = (await copyDataFromLocaleHandler({
           collectionSlug: 'localized-posts',
@@ -3343,7 +3343,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           overrideAccess: true,
         })
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         const res = (await copyDataFromLocaleHandler({
           collectionSlug: 'blocks-fields',
@@ -3374,7 +3374,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           overrideAccess: true,
         })
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
         const res = (await copyDataFromLocaleHandler({
           collectionSlug: 'blocks-fields',
           docID: doc.id,
@@ -3401,7 +3401,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           overrideAccess: true,
         })
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         const res = (await copyDataFromLocaleHandler({
           collectionSlug: 'nested',
@@ -3440,7 +3440,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
           overrideAccess: true,
         })
 
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         const res = (await copyDataFromLocaleHandler({
           collectionSlug: 'nested',
@@ -3483,7 +3483,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
         })
 
         try {
-          const req = await createLocalReq({ user }, payload)
+          const req = await createPayloadRequest({ payload, user })
 
           const res = (await copyDataFromLocaleHandler({
             collectionSlug: arrayCollectionSlug,
@@ -3561,7 +3561,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
         expect(enDocBefore.content?.[0]?.text).toBe('English block text')
 
         // Copy data from en to es
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         await copyDataFromLocaleHandler({
           collectionSlug: 'blocks-fields',
@@ -3629,7 +3629,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
         expect(draftBefore.title).toBe('Draft English Title')
 
         // Copy draft data to another locale
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         await copyDataFromLocaleHandler({
           collectionSlug: 'blocks-fields',
@@ -3697,7 +3697,7 @@ test.suite('Localization', { config: './config.ts', resetBetweenTests: false }, 
         expect(enDraftBefore.title).toBe('Draft EN')
 
         // Copy to another locale using the actual handler
-        const req = await createLocalReq({ user }, payload)
+        const req = await createPayloadRequest({ payload, user })
 
         await copyDataFromLocaleHandler({
           collectionSlug: 'blocks-fields',

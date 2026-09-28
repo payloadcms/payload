@@ -318,7 +318,7 @@ describe('Versions', () => {
       await page.goto(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
       await page.locator('.restore-version .popup__trigger-wrap button').click()
-      await page.getByRole('button', { name: 'Restore as draft' }).click()
+      await page.getByRole('menuitem', { name: 'Restore as draft' }).click()
       await page.locator('button:has-text("Confirm")').click()
       await page.waitForURL(savedDocURL)
 
@@ -851,7 +851,7 @@ describe('Versions', () => {
       await page.goto(customUnpublishURL.edit(String(publishedDoc.id)))
 
       await openDocControls(page)
-      await expect(page.getByRole('button', { name: 'Custom Unpublish' })).toBeVisible()
+      await expect(page.getByRole('menuitem', { name: 'Custom Unpublish' })).toBeVisible()
 
       await payload.delete({
         id: publishedDoc.id,

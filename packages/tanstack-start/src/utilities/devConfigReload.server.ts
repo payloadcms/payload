@@ -6,7 +6,7 @@ import { PAYLOAD_CONFIG_CHANGED_EVENT } from './devConfigReloadEvent.js'
  * Subscribes the Payload instance to the config-changed event that the
  * `payload:dev-config-reload` Vite plugin broadcasts.
  *
- * Imported for its side effect by `initReq.server.ts`, the adapter's only
+ * Imported for its side effect by `initAdminContext.server.ts`, the adapter's only
  * `getPayload` call site, so the strategy is registered before an instance can
  * be built. Registration is module-scoped on both ends: this runs inside the
  * app's server graph and so resolves the same copy of `payload` that

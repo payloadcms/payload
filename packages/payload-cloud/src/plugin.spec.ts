@@ -184,6 +184,7 @@ describe('plugin', () => {
       )
 
       expect(globalInstance).toBeDefined()
+      expect(globalInstance?.authorship).toBe(false)
       expect(globalInstance?.fields).toStrictEqual([
         {
           name: 'instance',
