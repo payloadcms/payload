@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const hyTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Հաշիվ',
@@ -103,6 +105,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     title: 'Հրամանների վահանակ',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Ավելացնել +',
     addWidget: 'Ավելացնել վիճակագրություն',
     deleteWidget: 'Ջնջել վիդջեթը {{id}}',

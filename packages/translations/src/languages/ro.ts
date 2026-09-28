@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const roTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cont',
@@ -105,6 +107,7 @@ export const roTranslations: DefaultTranslationsObject = {
     title: 'Paletă de comenzi',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Adaugă +',
     addWidget: 'Adaugați widget',
     deleteWidget: 'Ștergeți widget-ul {{id}}',

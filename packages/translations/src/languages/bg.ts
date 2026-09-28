@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const bgTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Профил',
@@ -102,6 +104,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     title: 'Палитра с команди',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Добавете +',
     addWidget: 'Добави джаджа',
     deleteWidget: 'Изтрийте джаджа {{id}}',

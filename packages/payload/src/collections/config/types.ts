@@ -528,6 +528,11 @@ export type CollectionAdminOptions = {
    */
   preview?: GeneratePreviewURL
   /**
+   * Upload field to use as the thumbnail for documents in dashboard widgets.
+   * Defaults to the first upload field when omitted.
+   */
+  useAsThumbnail?: string
+  /**
    * Field to use as title in Edit View and first column in List view
    */
   useAsTitle?: string

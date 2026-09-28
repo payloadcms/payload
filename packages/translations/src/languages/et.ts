@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const etTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
@@ -101,6 +103,7 @@ export const etTranslations: DefaultTranslationsObject = {
     title: 'Käsukeskus',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Lisa +',
     addWidget: 'Lisa vidin',
     deleteWidget: 'Kustuta vidin {{id}}',

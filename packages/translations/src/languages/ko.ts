@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const koTranslations: DefaultTranslationsObject = {
   authentication: {
     account: '계정',
@@ -102,6 +104,7 @@ export const koTranslations: DefaultTranslationsObject = {
     title: '명령 팔레트',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: '더하다',
     addWidget: '위젯 추가',
     deleteWidget: '위젯 {{id}} 삭제',

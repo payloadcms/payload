@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const arTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'الحساب',
@@ -103,6 +105,7 @@ export const arTranslations: DefaultTranslationsObject = {
     title: 'لوحة الأوامر',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'اضف +',
     addWidget: 'أضف الواجهة البيانية',
     deleteWidget: 'حذف الودجت {{id}}',

@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const hrTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Račun',
@@ -103,6 +105,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     title: 'Paleta naredbi',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',
     deleteWidget: 'Izbriši widget {{id}}',

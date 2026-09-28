@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const esTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Cuenta',
@@ -103,6 +105,7 @@ export const esTranslations: DefaultTranslationsObject = {
     title: 'Paleta de comandos',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Añadir +',
     addWidget: 'Agregar Widget',
     deleteWidget: 'Eliminar widget {{id}}',
@@ -116,19 +119,29 @@ export const esTranslations: DefaultTranslationsObject = {
       'No hay widgets en su tablero. Puede agregarlos desde el menú "Tablero" ubicado en la barra superior.',
     resetLayout: 'Restablecer Diseño',
     searchWidgets: 'Buscar widgets...',
+    widgetAddPin: 'Fijar documento',
     widgetCollectionRequired: 'La Colección es requerida.',
     widgetConfigurationError: 'Error de configuración del widget',
+    widgetGridView: 'Vista de cuadrícula',
     widgetInvalidCollection: 'La Colección "{{collection}}" no existe.',
     widgetInvalidFilterField:
       'El campo de filtro "{{field}}" no existe en la colección "{{collection}}".',
     widgetInvalidSortField:
       'El campo de ordenación "{{field}}" no existe en la colección "{{collection}}".',
     widgetLimitLabel: 'Límite',
+    widgetListView: 'Vista de lista',
     widgetNonSortableSortField:
       'El campo de ordenación "{{field}}" no se puede ordenar en la colección "{{collection}}".',
+    widgetPinned: 'Fijados',
+    widgetPinnedEmpty: 'Todavía no ha fijado ningún documento.',
+    widgetPinnedSaveError: 'No se pudieron guardar los documentos fijados.',
     widgetQueryError: 'No se pudieron cargar los documentos para este widget.',
+    widgetRecentDrafts: 'Borradores recientes',
+    widgetRecentDraftsEmpty: 'No tiene borradores recientes.',
     widgetRecentlyViewedEmpty: 'Aún no ha visualizado ningún documento.',
     widgetRecentlyViewedTitle: 'Visto recientemente',
+    widgetRecentsAndPinned: 'Recientes y fijados',
+    widgetRemovePin: 'Quitar documento fijado',
     widgetSelectCollectionFirst: 'Seleccione una colección antes de elegir el orden',
     widgetSelectSortField: 'Seleccione un campo para ordenar por',
     widgetSortDirectionLabel: 'Dirección de ordenamiento',

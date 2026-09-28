@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const huTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Fiók',
@@ -105,6 +107,7 @@ export const huTranslations: DefaultTranslationsObject = {
     title: 'Parancs paletta',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Adj hozzá +',
     addWidget: 'Adjon hozzá widgetet',
     deleteWidget: 'Törölje a(z) {{id}} widgetet',

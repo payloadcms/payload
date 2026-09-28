@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const daTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
@@ -101,6 +103,7 @@ export const daTranslations: DefaultTranslationsObject = {
     title: 'Kommandooversigt',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Tilføj +',
     addWidget: 'Tilføj Widget',
     deleteWidget: 'Slet widget {{id}}',

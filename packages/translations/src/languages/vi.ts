@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const viTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Tài khoản',
@@ -103,6 +105,7 @@ export const viTranslations: DefaultTranslationsObject = {
     title: 'Bảng Lệnh',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Thêm +',
     addWidget: 'Thêm Widget',
     deleteWidget: 'Xóa widget {{id}}',

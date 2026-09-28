@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const ruTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Аккаунт',
@@ -104,6 +106,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     title: 'Палитра команд',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Добавить +',
     addWidget: 'Добавить виджет',
     deleteWidget: 'Удалить виджет {{id}}',

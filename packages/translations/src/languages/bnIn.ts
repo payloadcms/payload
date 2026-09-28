@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const bnInTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'অ্যাকাউন্ট',
@@ -103,6 +105,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     title: 'কমান্ড পেলেট',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'যোগ করুন +',
     addWidget: 'উইজেট যোগ করুন',
     deleteWidget: 'উইজেট মুছুন {{id}}',

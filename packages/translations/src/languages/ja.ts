@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const jaTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'アカウント',
@@ -103,6 +105,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     title: 'コマンドパレット',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: '追加 +',
     addWidget: 'ウィジェットを追加する',
     deleteWidget: 'ウィジェット{{id}}を削除します',

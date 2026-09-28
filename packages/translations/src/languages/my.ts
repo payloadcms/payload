@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const myTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'အကောင့်',
@@ -103,6 +105,7 @@ export const myTranslations: DefaultTranslationsObject = {
     title: 'Command Palette (ကမန်း့ ပလက်လက်)',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: '+ ထည့်ပါ',
     addWidget: 'ဝစ်ဂျက် ထည့်ပါ',
     deleteWidget: 'ဝစ်ဂျက် {{id}} ကို ဖျက်ပါ',

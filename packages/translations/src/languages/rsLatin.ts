@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const rsLatinTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Nalog',
@@ -103,6 +105,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     title: 'Komandna paleta',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',
     deleteWidget: 'Obriši widget {{id}}',

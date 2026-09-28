@@ -233,8 +233,8 @@ const addDefaultDashboardWidgets = ({
       richTextSanitizers,
       validRelationships,
     }),
-    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
-    minWidth: 'x-small',
+    label: ({ t }) => t('dashboard:widgetRecentsAndPinned'),
+    minWidth: 'small',
   })
   dashboard.defaultLayout ??= [
     {
@@ -243,7 +243,7 @@ const addDefaultDashboardWidgets = ({
     } satisfies WidgetInstance,
     {
       widgetSlug: 'activity',
-      width: 'small',
+      width: 'full',
     } satisfies WidgetInstance,
   ]
 }

@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const zhTranslations: DefaultTranslationsObject = {
   authentication: {
     account: '账号',
@@ -99,6 +101,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     title: '命令面板',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: '添加 +',
     addWidget: '添加小部件',
     deleteWidget: '删除小部件 {{id}}',

@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const svTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
@@ -102,6 +104,7 @@ export const svTranslations: DefaultTranslationsObject = {
     title: 'Kommandopalett',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Lägg till +',
     addWidget: 'Lägg till Widget',
     deleteWidget: 'Radera widget {{id}}',

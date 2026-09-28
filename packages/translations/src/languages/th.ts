@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const thTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'บัญชี',
@@ -101,6 +103,7 @@ export const thTranslations: DefaultTranslationsObject = {
     title: 'แถบคำสั่ง',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'เพิ่ม +',
     addWidget: 'เพิ่มวิดเจ็ต',
     deleteWidget: 'ลบวิดเจ็ต {{id}}',

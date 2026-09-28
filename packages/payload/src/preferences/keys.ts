@@ -28,4 +28,7 @@ export const PREFERENCE_KEYS = {
    * Stores the documents the user has recently viewed in the admin
    */
   RECENTLY_VIEWED: 'recently-viewed',
+
+  /** Stores documents pinned by the user in the dashboard widget. */
+  PINNED: 'pinned-documents',
 } as const

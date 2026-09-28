@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const heTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'חשבון',
@@ -100,6 +102,7 @@ export const heTranslations: DefaultTranslationsObject = {
     title: 'תפריט פקודות',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'הוסף +',
     addWidget: "הוסף וידג'ט",
     deleteWidget: "מחק וידג'ט {{id}}",

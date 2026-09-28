@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const lvTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konts',
@@ -102,6 +104,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     title: 'Komandu palete',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Pievienot +',
     addWidget: 'Pievienot logrīku',
     deleteWidget: 'Dzēst logrīku {{id}}',

@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const caTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Compte',
@@ -103,6 +105,7 @@ export const caTranslations: DefaultTranslationsObject = {
     title: 'Paleta d’ordres',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Afegeix +',
     addWidget: 'Afegeix Widget',
     deleteWidget: 'Esborra el widget {{id}}',

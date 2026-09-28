@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const trTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesap',
@@ -104,6 +106,7 @@ export const trTranslations: DefaultTranslationsObject = {
     title: 'Komut Paleti',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Ekle +',
     addWidget: 'Widget Ekle',
     deleteWidget: "Widget'i sil {{id}}",

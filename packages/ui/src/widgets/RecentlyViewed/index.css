@@ -1,0 +1,181 @@
+@layer payload-default {
+  .card.recents-widget {
+    container-type: inline-size;
+    height: auto;
+    max-height: none;
+  }
+
+  .recents-widget__toolbar,
+  .recents-widget__tabs,
+  .recents-widget__views {
+    display: flex;
+    align-items: center;
+  }
+
+  .recents-widget__toolbar {
+    justify-content: space-between;
+    gap: var(--spacer-2);
+    flex-wrap: wrap;
+  }
+
+  .recents-widget__tabs {
+    gap: var(--spacer-2);
+  }
+
+  .recents-widget__tab,
+  .recents-widget__view,
+  .recents-widget__pin {
+    border: 0;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+  }
+
+  .recents-widget__tab {
+    padding: var(--spacer-1) 0;
+    font: inherit;
+    white-space: nowrap;
+  }
+
+  .recents-widget__tab[aria-pressed='true'] {
+    border-block-end: var(--stroke-width-medium) solid var(--color-text-brand);
+    color: var(--color-text);
+  }
+
+  .recents-widget__views {
+    gap: var(--spacer-1);
+  }
+
+  .recents-widget__view,
+  .recents-widget__pin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--spacer-4);
+    min-height: var(--spacer-4);
+    border-radius: var(--radius-small);
+  }
+
+  .recents-widget__view[aria-pressed='true'],
+  .recents-widget__pin[aria-pressed='true'] {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+  }
+
+  .recents-widget__items {
+    display: grid;
+    gap: var(--spacer-2);
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .recents-widget__items--grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .recents-widget__item {
+    display: flex;
+    align-items: flex-start;
+    min-width: 0;
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg);
+  }
+
+  .recents-widget__item:hover {
+    background: var(--color-bg-secondary-hover);
+  }
+
+  .recents-widget__link {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: var(--spacer-2);
+    align-items: center;
+    padding: var(--spacer-2);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .recents-widget__link:hover {
+    text-decoration: none;
+  }
+
+  .recents-widget__thumbnail {
+    width: var(--spacer-5);
+    height: var(--spacer-5);
+    flex: 0 0 auto;
+    border-radius: var(--radius-small);
+    object-fit: cover;
+  }
+
+  .recents-widget__thumbnail--empty {
+    background: var(--color-bg-secondary);
+  }
+
+  .recents-widget__details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .recents-widget__name {
+    overflow: hidden;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .recents-widget__meta,
+  .recents-widget__empty {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .recents-widget__pin {
+    flex: 0 0 auto;
+    margin: var(--spacer-1);
+  }
+
+  .recents-widget__pin:disabled {
+    cursor: progress;
+  }
+
+  .recents-widget__empty {
+    margin: 0;
+    padding: var(--spacer-3);
+    text-align: center;
+  }
+
+  .recents-widget__status:empty {
+    display: none;
+  }
+
+  .recents-widget__tab:focus-visible,
+  .recents-widget__view:focus-visible,
+  .recents-widget__pin:focus-visible,
+  .recents-widget__link:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
+
+  @container (min-width: 400px) {
+    .recents-widget__items--grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @container (min-width: 768px) {
+    .recents-widget__items--grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}

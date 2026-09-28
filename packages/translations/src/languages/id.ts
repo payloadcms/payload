@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const idTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Akun',
@@ -103,6 +105,7 @@ export const idTranslations: DefaultTranslationsObject = {
     title: 'Palet Perintah',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Tambah +',
     addWidget: 'Tambah Widget',
     deleteWidget: 'Hapus widget {{id}}',

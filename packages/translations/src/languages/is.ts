@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const isTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Aðgangur',
@@ -104,6 +106,7 @@ export const isTranslations: DefaultTranslationsObject = {
     title: 'Skipunarvalmynd',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Bæta við +',
     addWidget: 'Bæta við smáforriti',
     deleteWidget: 'Eyða græju {{id}}',

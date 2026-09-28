@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const azTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Hesab',
@@ -102,6 +104,7 @@ export const azTranslations: DefaultTranslationsObject = {
     title: 'Əmr Palitrası',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Əlavə et +',
     addWidget: 'Vidjet əlavə et',
     deleteWidget: 'Vidgeti silin {{id}}',

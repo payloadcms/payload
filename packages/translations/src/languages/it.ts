@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const itTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Account',
@@ -103,6 +105,7 @@ export const itTranslations: DefaultTranslationsObject = {
     title: 'Palette dei comandi',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Aggiungi +',
     addWidget: 'Aggiungi Widget',
     deleteWidget: 'Elimina widget {{id}}',

@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const taTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'கணக்கு',
@@ -102,6 +104,7 @@ export const taTranslations: DefaultTranslationsObject = {
     title: 'கமாண்டு பேலெட்',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'சேர் +',
     addWidget: 'விக்கெட் சேர்',
     deleteWidget: '{{id}} விட்ஜெடை நீக்கு',

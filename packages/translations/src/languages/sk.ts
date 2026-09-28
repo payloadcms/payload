@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const skTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Účet',
@@ -103,6 +105,7 @@ export const skTranslations: DefaultTranslationsObject = {
     title: 'Príkazová paleta',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Pridať +',
     addWidget: 'Pridať Widget',
     deleteWidget: 'Odstrániť widget {{id}}',

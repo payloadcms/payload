@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const faTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'حساب کاربری',
@@ -101,6 +103,7 @@ export const faTranslations: DefaultTranslationsObject = {
     title: 'پنل فرمان',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'اضافه کنید +',
     addWidget: 'اضافه کردن ویجت',
     deleteWidget: 'حذف ابزارک {{id}}',

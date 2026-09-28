@@ -1,5 +1,7 @@
 import type { DefaultTranslationsObject, Language } from '../types.js'
 
+import { enTranslations } from './en.js'
+
 export const ltTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Paskyra',
@@ -103,6 +105,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     title: 'Komandų paletė',
   },
   dashboard: {
+    ...enTranslations.dashboard,
     addButton: 'Pridėti +',
     addWidget: 'Pridėti valdiklį',
     deleteWidget: 'Ištrinti valdiklį {{id}}',
