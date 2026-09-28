@@ -136,6 +136,7 @@ Staged originals are written to `payload-transformer-tmp/` (configurable via `up
 | -------------- | ----------------------------------------------------------------------------------------- | ---------------------------- |
 | `collections`  | Per-collection upload-time image processing settings                                      |                              |
 | `config`       | Cloudinary client configuration                                                           |                              |
+| `debug`        | Log every call made to Cloudinary, with its outcome and duration                          | `false`                      |
 | `delivery`     | `'proxy'` or `'redirect'`                                                                 | `'proxy'`                    |
 | `dynamic`      | Enables request-time transformation (`true` or an object with `collections` and defaults) | `false`                      |
 | `slug`         | Transformer slug, unique across `upload.transformers`                                     | `'cloudinary'`               |

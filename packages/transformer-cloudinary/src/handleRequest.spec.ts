@@ -17,6 +17,7 @@ const resolveSourceURL = () => 'https://cdn.example.com/media/photo.png'
 const createHandler = (delivery: 'proxy' | 'redirect' = 'proxy') =>
   createHandleRequest({
     config,
+    debugLog: () => {},
     delivery,
     dynamicDefaults: resolveCloudinaryDynamicDefaults(),
     resolveSourceURL,

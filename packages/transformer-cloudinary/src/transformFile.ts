@@ -1,35 +1,48 @@
 import type { TransformFileArgs, TransformFileResult } from 'payload'
 
+import type { DebugLog } from './debugLog.js'
 import type { CloudinaryUploadTaskOptions } from './types.js'
+
+import { formatElapsed } from './debugLog.js'
 
 /**
  * This package's one-file-in/one-file-out upload primitive. All of the decision-making
  * happened in `prepareUpload`, which already resolved the derived asset's URL - this
  * stage only pulls those bytes back. Never writes to storage.
  */
-export async function transformFile({
-  file,
-  options,
-  req,
-}: TransformFileArgs<CloudinaryUploadTaskOptions | undefined>): Promise<TransformFileResult> {
-  if (!options?.derivedURL) {
-    return { status: 'continue' }
-  }
+export function createTransformFile({
+  debugLog,
+}: {
+  debugLog: DebugLog
+}): (
+  args: TransformFileArgs<CloudinaryUploadTaskOptions | undefined>,
+) => Promise<TransformFileResult> {
+  return async ({ file, options, req }) => {
+    if (!options?.derivedURL) {
+      return { status: 'continue' }
+    }
 
-  const response = await fetch(options.derivedURL, { signal: req.signal })
+    const startedAt = Date.now()
+    const response = await fetch(options.derivedURL, { signal: req.signal })
 
-  if (!response.ok) {
-    throw new Error(
-      `Cloudinary returned ${response.status} for the derived asset "${options.derivedURL}".`,
-    )
-  }
+    debugLog({
+      msg: `GET derived asset ${options.derivedURL} -> ${response.status} in ${formatElapsed(startedAt)}`,
+      req,
+    })
 
-  const bytes = Buffer.from(await response.arrayBuffer())
+    if (!response.ok) {
+      throw new Error(
+        `Cloudinary returned ${response.status} for the derived asset "${options.derivedURL}".`,
+      )
+    }
 
-  return {
-    file: new File([bytes], file.name, {
-      type: response.headers.get('content-type') ?? options.mimeType,
-    }),
-    status: 'continue',
+    const bytes = Buffer.from(await response.arrayBuffer())
+
+    return {
+      file: new File([bytes], file.name, {
+        type: response.headers.get('content-type') ?? options.mimeType,
+      }),
+      status: 'continue',
+    }
   }
 }

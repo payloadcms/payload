@@ -1,5 +1,6 @@
 import type { HandleTransformRequestArgs, HandleTransformRequestResult } from 'payload'
 
+import type { DebugLog } from './debugLog.js'
 import type {
   CloudinaryDeliveryMode,
   CloudinaryDynamicDefaults,
@@ -9,6 +10,7 @@ import type {
 
 import { buildFetchURL } from './buildFetchURL.js'
 import { buildDynamicTransformation } from './buildTransformation.js'
+import { formatElapsed } from './debugLog.js'
 import { parseDynamicTransform } from './parseDynamicTransform.js'
 
 type ResolvedDynamicDefaults = {
@@ -26,11 +28,13 @@ type ResolvedDynamicDefaults = {
  */
 export function createHandleRequest({
   config,
+  debugLog,
   delivery,
   dynamicDefaults,
   resolveSourceURL,
 }: {
   config: ResolvedCloudinaryConfig
+  debugLog: DebugLog
   delivery: CloudinaryDeliveryMode
   dynamicDefaults: ResolvedDynamicDefaults
   resolveSourceURL: ResolveSourceURL
@@ -70,12 +74,18 @@ export function createHandleRequest({
     })
 
     if (delivery === 'redirect') {
+      debugLog({ msg: `Redirecting to ${deliveryURL}`, req })
+
       return { response: Response.redirect(deliveryURL, 302), status: 'complete' }
     }
 
-    const transformed = await fetch(deliveryURL, {
-      method: req.method === 'HEAD' ? 'HEAD' : 'GET',
-      signal: req.signal,
+    const method = req.method === 'HEAD' ? 'HEAD' : 'GET'
+    const startedAt = Date.now()
+    const transformed = await fetch(deliveryURL, { method, signal: req.signal })
+
+    debugLog({
+      msg: `${method} ${deliveryURL} -> ${transformed.status} in ${formatElapsed(startedAt)}`,
+      req,
     })
 
     if (!transformed.ok) {

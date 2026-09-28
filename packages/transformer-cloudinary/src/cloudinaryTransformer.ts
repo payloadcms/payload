@@ -10,13 +10,14 @@ import type {
 } from './types.js'
 
 import { TRANSFORMABLE_MIME_TYPES } from './canTransformImage.js'
+import { createDebugLog } from './debugLog.js'
 import { createHandleRequest } from './handleRequest.js'
 import { initCloudinaryCollections } from './initCloudinaryCollections.js'
 import { parseDynamicTransform } from './parseDynamicTransform.js'
 import { createPrepareUpload } from './prepareUpload.js'
 import { resolveConfig } from './resolveConfig.js'
 import { createResolveSourceURL } from './resolveSourceURL.js'
-import { transformFile } from './transformFile.js'
+import { createTransformFile } from './transformFile.js'
 
 type ResolvedDynamicDefaults = {
   format?: CloudinaryDynamicDefaults['format']
@@ -66,9 +67,11 @@ export function cloudinaryTransformer(
   const dynamicOptions = resolveCloudinaryDynamicOptions(options.dynamic)
   const dynamicDefaults = resolveCloudinaryDynamicDefaults(dynamicOptions || undefined)
   const collections = options.collections ?? {}
+  const slug = options.slug ?? 'cloudinary'
+  const debugLog = createDebugLog({ slug, isEnabled: options.debug ?? false })
 
   return {
-    slug: options.slug ?? 'cloudinary',
+    slug,
     canTransform: (args) => {
       // Upload-time eligibility is already decided by the MIME match that ran
       // before `canTransform`; only dynamic request routing needs the query.
@@ -90,6 +93,7 @@ export function cloudinaryTransformer(
     },
     handleRequest: createHandleRequest({
       config,
+      debugLog,
       delivery: options.delivery ?? 'proxy',
       dynamicDefaults,
       resolveSourceURL: (dynamicOptions || undefined)?.sourceURL ?? createResolveSourceURL(),
@@ -104,12 +108,15 @@ export function cloudinaryTransformer(
       prepareUpload: createPrepareUpload({
         collections,
         config,
+        debugLog,
         uploadFolder: options.uploadFolder ?? 'payload-transformer-tmp',
       }),
     },
     // `options` here is always what this transformer computed via `prepareUpload`'s
     // `transform` callback; the public contract's `unknown` just reflects that core never inspects it.
-    transformFile: transformFile as (args: TransformFileArgs) => Promise<TransformFileResult>,
+    transformFile: createTransformFile({ debugLog }) as (
+      args: TransformFileArgs,
+    ) => Promise<TransformFileResult>,
   }
 }
 

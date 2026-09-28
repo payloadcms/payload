@@ -207,6 +207,13 @@ export type CloudinaryTransformerOptions = {
    * Anything omitted falls back to `url`, then to `CLOUDINARY_URL`.
    */
   config?: ConfigOptions
+  /**
+   * Log every call made to Cloudinary - staged uploads, derived-asset generation,
+   * cleanup, and dynamic delivery fetches/redirects - with its outcome and duration.
+   *
+   * @default false
+   */
+  debug?: boolean
   /** @default 'proxy' */
   delivery?: CloudinaryDeliveryMode
   /**

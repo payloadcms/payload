@@ -1,9 +1,5 @@
 import type { UploadTransformer } from 'payload'
 
-import { cloudinaryTransformer } from '@payloadcms/transformer-cloudinary'
-
-import { resizePreviewMediaSlug } from './shared.js'
-
 /**
  * Call counters for the fake transformers below, reset by each test that needs
  * them. Each transformer's `canTransform` recognizes its own dedicated query
@@ -134,8 +130,8 @@ export const consumeWithoutResponseTransformer: UploadTransformer = {
 }
 
 /**
- * Opt-in: routes dynamic resizing on `resize-preview-media` through Cloudinary instead of
- * Sharp. Cloudinary fetches the source itself, so it also needs a publicly reachable
+ * Opt-in: replaces Sharp with Cloudinary for image uploads and for dynamic resizing on
+ * `resize-preview-media` (see `config.ts`). Cloudinary fetches the source itself, so it also needs a publicly reachable
  * server URL (e.g. a tunnel) - `CLOUDINARY_URL` alone is not enough, and gating on it
  * would silently switch every local run that loads the repo root `.env`.
  *
@@ -155,7 +151,7 @@ export const consumeWithoutResponseTransformer: UploadTransformer = {
  *
  * If your Cloudinary account restricts fetched URLs, allow-list the tunnel host.
  */
-const publicServerURL = process.env.PAYLOAD_PUBLIC_SERVER_URL
+export const publicServerURL = process.env.PAYLOAD_PUBLIC_SERVER_URL
 
 export const isCloudinaryEnabled = Boolean(process.env.CLOUDINARY_URL && publicServerURL)
 
@@ -167,16 +163,4 @@ export const testTransformers: UploadTransformer[] = [
   throwingTransformer,
   sourceConsumingErrorTransformer,
   consumeWithoutResponseTransformer,
-  ...(isCloudinaryEnabled
-    ? [
-        cloudinaryTransformer({
-          dynamic: {
-            collections: [resizePreviewMediaSlug],
-            sourceURL: ({ collectionSlug, filename }) =>
-              `${publicServerURL}/api/${collectionSlug}/file/${encodeURIComponent(filename)}`,
-          },
-          url: process.env.CLOUDINARY_URL,
-        }),
-      ]
-    : []),
 ]

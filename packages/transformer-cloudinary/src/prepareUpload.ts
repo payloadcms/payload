@@ -3,6 +3,7 @@ import type { PreparedUploadTransformation, UploadTransformerInternal } from 'pa
 
 import { isNumber } from 'payload/shared'
 
+import type { DebugLog } from './debugLog.js'
 import type {
   CloudinaryCollectionConfig,
   CloudinaryImageSizeOptions,
@@ -16,6 +17,7 @@ import {
   buildMainTransformationChain,
 } from './buildTransformation.js'
 import { canTransformImage } from './canTransformImage.js'
+import { formatElapsed } from './debugLog.js'
 import { getImageSizeAction } from './getImageSizeAction.js'
 import { deleteOriginal, generateDerivedAssets, uploadOriginal } from './uploadSession.js'
 
@@ -39,10 +41,12 @@ type PlannedTask = {
 export function createPrepareUpload({
   collections,
   config,
+  debugLog,
   uploadFolder,
 }: {
   collections: Partial<Record<string, CloudinaryCollectionConfig>>
   config: ResolvedCloudinaryConfig
+  debugLog: DebugLog
   uploadFolder: string
 }): NonNullable<UploadTransformerInternal['prepareUpload']> {
   return async ({ collectionSlug, file, req, transform, uploadEdits }) => {
@@ -56,10 +60,13 @@ export function createPrepareUpload({
       return [{ fieldPath: 'filename', file: passthrough, mimeType: passthrough.type }]
     }
 
-    const original = await uploadOriginal({
-      buffer: Buffer.from(await file.arrayBuffer()),
-      config,
-      folder: uploadFolder,
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const uploadStartedAt = Date.now()
+    const original = await uploadOriginal({ buffer, config, folder: uploadFolder })
+
+    debugLog({
+      msg: `Uploaded staged original "${original.publicId}" (${buffer.byteLength} bytes, ${original.width}x${original.height}) in ${formatElapsed(uploadStartedAt)}`,
+      req,
     })
 
     try {
@@ -112,11 +119,19 @@ export function createPrepareUpload({
         })
       }
 
+      const deriveStartedAt = Date.now()
       const derived = await generateDerivedAssets({
         chains: tasks.map((task) => task.chain),
         config,
         publicId: original.publicId,
       })
+
+      if (tasks.length > 0) {
+        debugLog({
+          msg: `Generated ${derived.length} derived assets for "${original.publicId}" (${tasks.map((task) => task.fieldPath).join(', ')}) in ${formatElapsed(deriveStartedAt)}`,
+          req,
+        })
+      }
 
       const results: PreparedUploadTransformation[] = []
       let hasMainTask = false
@@ -164,7 +179,14 @@ export function createPrepareUpload({
       return [...results, ...omittedSizes]
     } finally {
       try {
+        const deleteStartedAt = Date.now()
+
         await deleteOriginal({ config, publicId: original.publicId })
+
+        debugLog({
+          msg: `Deleted staged original "${original.publicId}" in ${formatElapsed(deleteStartedAt)}`,
+          req,
+        })
       } catch (err) {
         req.payload.logger.error({
           err,

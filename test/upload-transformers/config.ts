@@ -1,3 +1,4 @@
+import { cloudinaryTransformer } from '@payloadcms/transformer-cloudinary'
 import { sharpTransformer } from '@payloadcms/transformer-sharp'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -6,7 +7,8 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ResizePreviewMedia } from './collections/ResizePreviewMedia/index.js'
 import { TransformerMedia } from './collections/TransformerMedia/index.js'
-import { isCloudinaryEnabled, testTransformers } from './transformerFixtures.js'
+import { resizePreviewMediaSlug } from './shared.js'
+import { isCloudinaryEnabled, publicServerURL, testTransformers } from './transformerFixtures.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,8 +27,20 @@ export default buildConfigWithDefaults({
     },
     upload: {
       transformers: [
-        // Cloudinary takes over dynamic resizing when enabled, so leave Sharp none to handle.
-        sharpTransformer({ dynamic: isCloudinaryEnabled ? { collections: [] } : true }),
+        // Cloudinary replaces Sharp rather than running alongside it: core runs every eligible
+        // transformer's `transformFile` with the upload bridge's task options, and Sharp can't
+        // read Cloudinary's.
+        isCloudinaryEnabled
+          ? cloudinaryTransformer({
+              debug: true,
+              dynamic: {
+                collections: [resizePreviewMediaSlug],
+                sourceURL: ({ collectionSlug, filename }) =>
+                  `${publicServerURL}/api/${collectionSlug}/file/${encodeURIComponent(filename)}`,
+              },
+              url: process.env.CLOUDINARY_URL,
+            })
+          : sharpTransformer({ dynamic: true }),
         ...testTransformers,
       ],
     },
