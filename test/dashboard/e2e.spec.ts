@@ -399,6 +399,7 @@ describe('Dashboard', () => {
     test.setTimeout(60000)
     const d = new DashboardHelper(page)
 
+    await expect(page.locator('.upload-dropzone-widget')).toHaveCount(0)
     await d.setEditing()
     await d.addWidget('Upload files')
 
