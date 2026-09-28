@@ -79,11 +79,28 @@ export function createHandleRequest({
     })
 
     if (!transformed.ok) {
+      // Cloudinary explains fetch failures (unreachable source, disallowed host, …) only
+      // in this header - without it, every failure looks like an unexplained status code.
+      const cloudinaryError = transformed.headers.get('x-cld-error')
+
+      req.payload?.logger.warn({
+        msg: `Cloudinary transformation failed with status ${transformed.status}${cloudinaryError ? `: ${cloudinaryError}` : ''}`,
+      })
+
       return {
-        response: new Response(null, {
-          status: transformed.status,
-          statusText: transformed.statusText,
-        }),
+        response: cloudinaryError
+          ? Response.json(
+              { errors: [{ message: cloudinaryError }] },
+              {
+                headers: { 'x-cld-error': cloudinaryError },
+                status: transformed.status,
+                statusText: transformed.statusText,
+              },
+            )
+          : new Response(null, {
+              status: transformed.status,
+              statusText: transformed.statusText,
+            }),
         status: 'complete',
       }
     }

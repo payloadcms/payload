@@ -104,6 +104,28 @@ describe('createHandleRequest', () => {
     expect(result.response!.status).toBe(404)
   })
 
+  it('should forward the Cloudinary error reason when present', async () => {
+    const cloudinaryError =
+      'Error in loading https://cdn.example.com/media/photo.png - HTTP status code 530'
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(null, { headers: { 'x-cld-error': cloudinaryError }, status: 400 }),
+      ),
+    )
+
+    const result = await createHandler()(createArgs())
+
+    expect(result.status).toBe('complete')
+    expect(result.response!.status).toBe(400)
+    expect(result.response!.headers.get('x-cld-error')).toBe(cloudinaryError)
+    expect(await result.response!.json()).toStrictEqual({
+      errors: [{ message: cloudinaryError }],
+    })
+  })
+
   it('should answer a HEAD request without a body', async () => {
     const fetchMock = vi.fn(
       async () => new Response(null, { headers: { 'content-type': 'image/png' }, status: 200 }),
