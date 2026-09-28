@@ -119,6 +119,7 @@ export const trTranslations: DefaultTranslationsObject = {
     searchWidgets: "Arama widget'ları...",
     widgetCollectionRequired: 'Collection gereklidir.',
     widgetConfigurationError: 'Widget yapılandırma hatası',
+    widgetDropFilesToUpload: 'Bir dosya sürükleyip bırakabilirsiniz',
     widgetInvalidCollection: 'Collection "{{collection}}" mevcut değil.',
     widgetInvalidFilterField:
       'Filtre alanı "{{field}}", "{{collection}}" koleksiyonunda mevcut değil.',
@@ -136,6 +137,8 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field Sıralama',
     widgetTitleFallback: 'Collection sorgusu',
     widgetTitleLabel: 'Başlık',
+    widgetUploadDropzoneDescription: 'Bir dosya sürükleyip bırakabilirsiniz',
+    widgetUploadFiles: 'Dosya Ekle',
   },
   error: {
     accountAlreadyActivated: 'Hesap zaten etkinleştirildi.',

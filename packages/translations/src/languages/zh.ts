@@ -112,6 +112,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     searchWidgets: '搜索小工具...',
     widgetCollectionRequired: 'Collection为必填项。',
     widgetConfigurationError: '小部件配置错误',
+    widgetDropFilesToUpload: '拖放一个文件',
     widgetInvalidCollection: 'Collection "{{collection}}" 不存在。',
     widgetInvalidFilterField: '筛选字段“{{field}}”在集合“{{collection}}”中不存在。',
     widgetInvalidSortField: '集合“{{collection}}”中不存在排序字段“{{field}}”。',
@@ -126,6 +127,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '排序字段',
     widgetTitleFallback: 'Collection 查询',
     widgetTitleLabel: '标题',
+    widgetUploadDropzoneDescription: '拖放一个文件',
+    widgetUploadFiles: '添加文件',
   },
   error: {
     accountAlreadyActivated: '该账号已被激活。',

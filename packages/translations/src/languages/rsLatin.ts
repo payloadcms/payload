@@ -118,6 +118,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pretraži dodatke...',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
+    widgetDropFilesToUpload: 'Prevucite i ispustite datoteku',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
     widgetInvalidFilterField:
       'Polje za filtriranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
@@ -134,6 +135,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortiraj Field',
     widgetTitleFallback: 'Upit kolekcije',
     widgetTitleLabel: 'Naslov',
+    widgetUploadDropzoneDescription: 'Prevucite i ispustite datoteku',
+    widgetUploadFiles: 'Dodaj Datoteke',
   },
   error: {
     accountAlreadyActivated: 'Ovaj nalog je već aktiviran.',

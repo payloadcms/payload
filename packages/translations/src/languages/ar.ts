@@ -118,6 +118,7 @@ export const arTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ابحث عن الأدوات...',
     widgetCollectionRequired: 'المجموعة مطلوبة.',
     widgetConfigurationError: 'خطأ في تكوين الودجة',
+    widgetDropFilesToUpload: 'قم بسحب وإسقاط ملفّ',
     widgetInvalidCollection: 'مجموعة "{{collection}}" غير موجودة.',
     widgetInvalidFilterField: 'حقل التصفية "{{field}}" غير موجود في المجموعة "{{collection}}".',
     widgetInvalidSortField: 'حقل الفرز "{{field}}" غير موجود في Collection "{{collection}}".',
@@ -133,6 +134,8 @@ export const arTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'ترتيب Field',
     widgetTitleFallback: 'استعلام Collection',
     widgetTitleLabel: 'العنوان',
+    widgetUploadDropzoneDescription: 'قم بسحب وإسقاط ملفّ',
+    widgetUploadFiles: 'أضف ملفات',
   },
   error: {
     accountAlreadyActivated: 'تم تفعيل هذا الحساب بالفعل.',

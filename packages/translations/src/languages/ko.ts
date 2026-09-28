@@ -116,6 +116,7 @@ export const koTranslations: DefaultTranslationsObject = {
     searchWidgets: '위젯 검색...',
     widgetCollectionRequired: 'Collection이 필요합니다.',
     widgetConfigurationError: '위젯 구성 오류',
+    widgetDropFilesToUpload: '파일을 끌어다 놓으세요',
     widgetInvalidCollection: 'Collection "{{collection}}"이(가) 존재하지 않습니다.',
     widgetInvalidFilterField:
       '컬렉션 "{{collection}}"에 필터 필드 "{{field}}"가 존재하지 않습니다.',
@@ -132,6 +133,8 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: '정렬 필드',
     widgetTitleFallback: '컬렉션 쿼리',
     widgetTitleLabel: '제목',
+    widgetUploadDropzoneDescription: '파일을 끌어다 놓으세요',
+    widgetUploadFiles: '파일 추가',
   },
   error: {
     accountAlreadyActivated: '이 계정은 이미 활성화되었습니다.',

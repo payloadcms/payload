@@ -119,6 +119,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Поиск виджетов...',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',
+    widgetDropFilesToUpload: 'Перетащите файл',
     widgetInvalidCollection: 'Коллекция "{{collection}}" не существует.',
     widgetInvalidFilterField:
       'Поле фильтра «{{field}}» не существует в коллекции «{{collection}}».',
@@ -136,6 +137,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Сортировать поле',
     widgetTitleFallback: 'Запрос к Collection',
     widgetTitleLabel: 'Заголовок',
+    widgetUploadDropzoneDescription: 'Перетащите файл',
+    widgetUploadFiles: 'Добавить файлы',
   },
   error: {
     accountAlreadyActivated: 'Этот аккаунт уже был активирован.',

@@ -120,6 +120,7 @@ export const deTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Suche Widgets...',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
+    widgetDropFilesToUpload: 'Datei per Drag & Drop verschieben',
     widgetInvalidCollection: 'Collection „{{collection}}“ existiert nicht.',
     widgetInvalidFilterField:
       'Das Filter-Feld "{{field}}" existiert nicht in der Collection "{{collection}}".',
@@ -138,6 +139,8 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sortierfeld',
     widgetTitleFallback: 'Sammlungsabfrage',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription: 'Datei per Drag & Drop verschieben',
+    widgetUploadFiles: 'Dateien hinzufügen',
   },
   error: {
     accountAlreadyActivated: 'Dieses Benutzerkonto wurde bereits aktiviert',

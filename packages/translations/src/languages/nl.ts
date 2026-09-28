@@ -119,6 +119,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Zoek widgets...',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',
+    widgetDropFilesToUpload: 'Sleep een bestand',
     widgetInvalidCollection: 'Collectie "{{collection}}" bestaat niet.',
     widgetInvalidFilterField: 'Filterveld "{{field}}" bestaat niet in collectie "{{collection}}".',
     widgetInvalidSortField: 'Sorteerveld "{{field}}" bestaat niet in collectie "{{collection}}".',
@@ -134,6 +135,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteerveld',
     widgetTitleFallback: 'Collectiequery',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription: 'Sleep een bestand',
+    widgetUploadFiles: 'Bestanden toevoegen',
   },
   error: {
     accountAlreadyActivated: 'Dit account is al geactiveerd.',

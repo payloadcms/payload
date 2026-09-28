@@ -117,6 +117,7 @@ export const csTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Hledat widgety...',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfiguraci widgetu',
+    widgetDropFilesToUpload: 'Přetáhněte soubor',
     widgetInvalidCollection: 'Collection "{{collection}}" neexistuje.',
     widgetInvalidFilterField: 'Filtrační pole "{{field}}" neexistuje v kolekci "{{collection}}".',
     widgetInvalidSortField: 'Třídicí field "{{field}}" neexistuje v kolekci "{{collection}}".',
@@ -131,6 +132,8 @@ export const csTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Řadicí pole',
     widgetTitleFallback: 'Dotaz na Collection',
     widgetTitleLabel: 'Název',
+    widgetUploadDropzoneDescription: 'Přetáhněte soubor',
+    widgetUploadFiles: 'Přidat soubory',
   },
   error: {
     accountAlreadyActivated: 'Tento účet již byl aktivován.',

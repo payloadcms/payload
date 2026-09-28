@@ -117,6 +117,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Meklēt logrīkus...',
     widgetCollectionRequired: 'Kolekcija ir obligāta.',
     widgetConfigurationError: 'Sīkrīka konfigurācijas kļūda',
+    widgetDropFilesToUpload: 'Ievelciet un nometiet failu',
     widgetInvalidCollection: 'Collection "{{collection}}" neeksistē.',
     widgetInvalidFilterField: 'Filtra lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
     widgetInvalidSortField: 'Kārtošanas lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
@@ -132,6 +133,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Kārtot lauku',
     widgetTitleFallback: 'Kolekcijas vaicājums',
     widgetTitleLabel: 'Virsraksts',
+    widgetUploadDropzoneDescription: 'Ievelciet un nometiet failu',
+    widgetUploadFiles: 'Pievienot failus',
   },
   error: {
     accountAlreadyActivated: 'Šis konts jau ir aktivizēts.',

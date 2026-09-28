@@ -117,6 +117,7 @@ export const svTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Sök efter widget...',
     widgetCollectionRequired: 'Collection är obligatorisk.',
     widgetConfigurationError: 'Fel i widgetkonfiguration',
+    widgetDropFilesToUpload: 'Dra och släpp en fil',
     widgetInvalidCollection: 'Collection "{{collection}}" finns inte.',
     widgetInvalidFilterField: 'Filterfältet "{{field}}" finns inte i Collection "{{collection}}".',
     widgetInvalidSortField:
@@ -133,6 +134,8 @@ export const svTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Sorteringsfält',
     widgetTitleFallback: 'Collectiefråga',
     widgetTitleLabel: 'Titel',
+    widgetUploadDropzoneDescription: 'Dra och släpp en fil',
+    widgetUploadFiles: 'Lägg till filer',
   },
   error: {
     accountAlreadyActivated: 'Detta konto har redan aktiverats',

@@ -117,6 +117,7 @@ export const azTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Widgetləri axtarın...',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
+    widgetDropFilesToUpload: 'Faylı buraya sürükləyin və buraxın',
     widgetInvalidCollection: 'Collection "{{collection}}" mövcud deyil.',
     widgetInvalidFilterField:
       'Filter sahəsi "{{field}}" "{{collection}}" kolleksiyasında mövcud deyil.',
@@ -134,6 +135,8 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetSortFieldLabel: 'Field-u sırala',
     widgetTitleFallback: 'Collection sorğusu',
     widgetTitleLabel: 'Başlıq',
+    widgetUploadDropzoneDescription: 'Faylı buraya sürükləyin və buraxın',
+    widgetUploadFiles: 'Faylları Əlavə Edin',
   },
   error: {
     accountAlreadyActivated: 'Bu hesab artıq aktivləşdirilib.',

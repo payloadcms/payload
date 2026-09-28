@@ -430,6 +430,10 @@ describe('Dashboard', () => {
     await modal.getByRole('button', { name: 'Close' }).click()
     await expect(modal).toBeHidden()
 
+    await dropzone.dispatchEvent('dragenter')
+    await expect(dropzone).toHaveClass(/dragging/)
+    await expect(dropzone.getByText('Drop files to upload')).toBeVisible()
+
     await dropzone.evaluate((element) => {
       const transfer = new DataTransfer()
       transfer.items.add(new File(['image'], 'dashboard.png', { type: 'image/png' }))
