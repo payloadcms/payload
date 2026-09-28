@@ -226,4 +226,8 @@
     background: var(--color-icon);
     margin-inline: var(--spacer-3);
   }
+
+  html[data-enhanced-contrast] .column-selector__search-bar {
+    outline: var(--stroke-width-small) solid var(--color-border-control);
+  }
 }

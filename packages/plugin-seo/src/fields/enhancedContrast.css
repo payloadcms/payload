@@ -1,0 +1,13 @@
+@layer payload-default {
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme] {
+    --seo-description-color: var(--color-text-secondary);
+    --seo-danger-bg: var(--color-bg-danger);
+    --seo-danger-text: var(--color-text-ondanger);
+    --seo-warning-bg: var(--color-bg-warning);
+    --seo-warning-text: var(--color-text-onwarning);
+    --seo-success-bg: var(--color-bg-success-tertiary);
+    --seo-success-text: var(--color-text);
+    --seo-track-bg: var(--color-bg-tertiary);
+  }
+}

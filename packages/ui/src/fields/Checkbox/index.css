@@ -172,7 +172,7 @@
   .checkbox-input--muted {
     .checkbox-input__input {
       background: var(--color-bg-secondary);
-      border-color: var(--color-border);
+      border-color: var(--color-border-control, var(--color-border));
     }
 
     &:not(.checkbox-input--read-only):not(.checkbox-input--checked) {

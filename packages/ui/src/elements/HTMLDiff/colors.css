@@ -14,4 +14,10 @@
     --diff-create-parent-color: var(--color-text-brand);
     --diff-create-link-color: var(--color-text-brand);
   }
+
+  html[data-enhanced-contrast],
+  html[data-enhanced-contrast] [data-theme] {
+    --diff-create-pill-color: var(--color-text-selected);
+    --diff-delete-pill-color: var(--color-text);
+  }
 }
