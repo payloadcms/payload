@@ -207,6 +207,48 @@ export interface TenantRevealableKeyAuthOperations {
  */
 export interface User {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -234,6 +276,48 @@ export interface User {
 export interface ApiKey {
   id: string;
   name?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
@@ -247,6 +331,48 @@ export interface ApiKey {
  */
 export interface RevealableKey {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
@@ -263,6 +389,48 @@ export interface RestrictedRevealableKey {
   denyCollectionReadAccess?: boolean | null;
   denyAPIKeyUpdateAccess?: boolean | null;
   denyCollectionUpdateAccess?: boolean | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -278,6 +446,48 @@ export interface RestrictedRevealableKey {
 export interface TenantRevealableKey {
   id: string;
   tenant?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'api-keys';
+        value: string | ApiKey;
+      } | null)
+    | ({
+        relationTo: 'revealableKeys';
+        value: string | RevealableKey;
+      } | null)
+    | ({
+        relationTo: 'restrictedRevealableKeys';
+        value: string | RestrictedRevealableKey;
+      } | null)
+    | ({
+        relationTo: 'tenantRevealableKeys';
+        value: string | TenantRevealableKey;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
@@ -410,6 +620,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -434,6 +646,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface ApiKeysSelect<T extends boolean = true> {
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
@@ -445,6 +659,8 @@ export interface ApiKeysSelect<T extends boolean = true> {
  * via the `definition` "revealableKeys_select".
  */
 export interface RevealableKeysSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
@@ -459,6 +675,8 @@ export interface RestrictedRevealableKeysSelect<T extends boolean = true> {
   denyCollectionReadAccess?: T;
   denyAPIKeyUpdateAccess?: T;
   denyCollectionUpdateAccess?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -472,6 +690,8 @@ export interface RestrictedRevealableKeysSelect<T extends boolean = true> {
  */
 export interface TenantRevealableKeysSelect<T extends boolean = true> {
   tenant?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;

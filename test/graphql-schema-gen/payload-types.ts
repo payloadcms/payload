@@ -144,6 +144,14 @@ export interface Collection1 {
   title: string;
   meta?: SharedMetaArray;
   blocks: (SharedMetaBlock | AnotherSharedBlock)[];
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -171,61 +179,18 @@ export interface AnotherSharedBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collection2".
- */
-export interface Collection2 {
-  id: string;
-  metaArray?: SharedMetaArray;
-  metaGroup?: SharedMeta;
-  nestedGroup?: {
-    meta?: SharedMeta;
-  };
-  'some[text]'?: string | null;
-  spaceBottom?: ('mb-0' | 'mb-8' | 'mb-16' | 'mb-24' | 'mb-[150px]') | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SharedMeta".
- */
-export interface SharedMeta {
-  title?: string | null;
-  description?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "no-graphql".
- */
-export interface NoGraphql {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -245,6 +210,73 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection2".
+ */
+export interface Collection2 {
+  id: string;
+  metaArray?: SharedMetaArray;
+  metaGroup?: SharedMeta;
+  nestedGroup?: {
+    meta?: SharedMeta;
+  };
+  'some[text]'?: string | null;
+  spaceBottom?: ('mb-0' | 'mb-8' | 'mb-16' | 'mb-24' | 'mb-[150px]') | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SharedMeta".
+ */
+export interface SharedMeta {
+  title?: string | null;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-graphql".
+ */
+export interface NoGraphql {
+  id: string;
+  name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -325,6 +357,8 @@ export interface Collection1Select<T extends boolean = true> {
         block1?: T | SharedMetaBlockSelect<T>;
         block2?: T | AnotherSharedBlockSelect<T>;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -371,6 +405,8 @@ export interface Collection2Select<T extends boolean = true> {
       };
   'some[text]'?: T;
   spaceBottom?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -388,6 +424,8 @@ export interface SharedMetaSelect<T extends boolean = true> {
  */
 export interface NoGraphqlSelect<T extends boolean = true> {
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -404,6 +442,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

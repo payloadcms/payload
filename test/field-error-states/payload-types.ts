@@ -282,6 +282,14 @@ export interface ErrorField {
   group: {
     text: string;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -291,6 +299,14 @@ export interface ErrorField {
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -320,6 +336,14 @@ export interface Upload {
   text?: string | null;
   media?: (string | null) | Upload;
   richText?: LexicalRichText<LexicalNodes_DFDE7E69> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -404,6 +428,14 @@ export interface ValidateDraftsOn {
    * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
    */
   validatedField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -423,6 +455,14 @@ export interface ValidateDraftsOff {
    * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
    */
   validatedField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -442,6 +482,14 @@ export interface ValidateDraftsOnAutosave {
    * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
    */
   validatedField?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -454,6 +502,14 @@ export interface PrevValue {
   id: string;
   title: string;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -464,6 +520,14 @@ export interface PrevValue {
 export interface PrevValueRelation {
   id: string;
   previousValueRelation?: (string | null) | PrevValue;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -477,6 +541,14 @@ export interface TabErrorReset {
   errorTab: {
     requiredInTab: string;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -734,6 +806,8 @@ export interface ErrorFieldsSelect<T extends boolean = true> {
     | {
         text?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -745,6 +819,8 @@ export interface UploadsSelect<T extends boolean = true> {
   text?: T;
   media?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -765,6 +841,8 @@ export interface ValidateDraftsOnSelect<T extends boolean = true> {
   title?: T;
   failValidation?: T;
   validatedField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -777,6 +855,8 @@ export interface ValidateDraftsOffSelect<T extends boolean = true> {
   title?: T;
   failValidation?: T;
   validatedField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -789,6 +869,8 @@ export interface ValidateDraftsOnAutosaveSelect<T extends boolean = true> {
   title?: T;
   failValidation?: T;
   validatedField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -800,6 +882,8 @@ export interface ValidateDraftsOnAutosaveSelect<T extends boolean = true> {
 export interface PrevValueSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -809,6 +893,8 @@ export interface PrevValueSelect<T extends boolean = true> {
  */
 export interface PrevValueRelationSelect<T extends boolean = true> {
   previousValueRelation?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -823,6 +909,8 @@ export interface TabErrorResetSelect<T extends boolean = true> {
     | {
         requiredInTab?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -839,6 +927,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -898,6 +988,14 @@ export interface GlobalValidateDraftsOn {
   group: {
     title: string;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -912,6 +1010,8 @@ export interface GlobalValidateDraftsOnSelect<T extends boolean = true> {
     | {
         title?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -139,6 +139,14 @@ export interface Ticket {
   status: 'open' | 'in-progress' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'critical';
   assignee?: (string | null) | User;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -148,6 +156,14 @@ export interface Ticket {
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -179,6 +195,14 @@ export interface Revenue {
   date: string;
   category: 'sales' | 'subscriptions' | 'services' | 'other';
   source?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -200,6 +224,14 @@ export interface Event {
     priority?: number | null;
     room?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -295,6 +327,8 @@ export interface TicketsSelect<T extends boolean = true> {
   status?: T;
   priority?: T;
   assignee?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -308,6 +342,8 @@ export interface RevenueSelect<T extends boolean = true> {
   date?: T;
   category?: T;
   source?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -330,6 +366,8 @@ export interface EventsSelect<T extends boolean = true> {
         priority?: T;
         room?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -346,6 +384,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

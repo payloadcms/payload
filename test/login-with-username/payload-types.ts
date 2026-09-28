@@ -174,6 +174,32 @@ export interface RequireEmailAuthOperations {
  */
 export interface User {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email?: string | null;
@@ -201,6 +227,32 @@ export interface User {
  */
 export interface LoginWithEither {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email?: string | null;
@@ -228,6 +280,32 @@ export interface LoginWithEither {
  */
 export interface RequireEmail {
   id: string;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'login-with-either';
+        value: string | LoginWithEither;
+      } | null)
+    | ({
+        relationTo: 'require-email';
+        value: string | RequireEmail;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -350,6 +428,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -374,6 +454,8 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "login-with-either_select".
  */
 export interface LoginWithEitherSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -398,6 +480,8 @@ export interface LoginWithEitherSelect<T extends boolean = true> {
  * via the `definition` "require-email_select".
  */
 export interface RequireEmailSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

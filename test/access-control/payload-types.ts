@@ -1332,6 +1332,32 @@ export interface FieldsAndTopAccess {
 export interface InheritedReadVersion {
   id: string;
   secret?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -1342,6 +1368,32 @@ export interface InheritedReadVersion {
 export interface InheritedReadVersionsVirtualRelated {
   id: string;
   label?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -1353,6 +1405,32 @@ export interface InheritedReadVersionsVirtual {
   id: string;
   related?: (string | null) | InheritedReadVersionsVirtualRelated;
   relatedLabel?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -2149,32 +2227,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-  createdBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'public-users';
-        value: string | PublicUser;
-      } | null)
-    | ({
-        relationTo: 'auth-collection';
-        value: string | AuthCollection;
-      } | null);
-  updatedBy?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'public-users';
-        value: string | PublicUser;
-      } | null)
-    | ({
-        relationTo: 'auth-collection';
-        value: string | AuthCollection;
-      } | null);
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2726,6 +2778,8 @@ export interface FieldsAndTopAccessSelect<T extends boolean = true> {
  */
 export interface InheritedReadVersionsSelect<T extends boolean = true> {
   secret?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2735,6 +2789,8 @@ export interface InheritedReadVersionsSelect<T extends boolean = true> {
  */
 export interface InheritedReadVersionsVirtualRelatedSelect<T extends boolean = true> {
   label?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2745,6 +2801,8 @@ export interface InheritedReadVersionsVirtualRelatedSelect<T extends boolean = t
 export interface InheritedReadVersionsVirtualSelect<T extends boolean = true> {
   related?: T;
   relatedLabel?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3191,8 +3249,6 @@ export interface SelfReferentialSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
-  createdBy?: T;
-  updatedBy?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3233,6 +3289,32 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface InheritedReadVersionsGlobal {
   id: string;
   visible?: boolean | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -3244,6 +3326,32 @@ export interface InheritedReadVersionsVirtualGlobal {
   id: string;
   related?: (string | null) | InheritedReadVersionsVirtualRelated;
   relatedLabel?: string | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string | PublicUser;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string | AuthCollection;
+      } | null);
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -3433,6 +3541,8 @@ export interface ReadNotUpdateGlobal {
  */
 export interface InheritedReadVersionsGlobalSelect<T extends boolean = true> {
   visible?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -3444,6 +3554,8 @@ export interface InheritedReadVersionsGlobalSelect<T extends boolean = true> {
 export interface InheritedReadVersionsVirtualGlobalSelect<T extends boolean = true> {
   related?: T;
   relatedLabel?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

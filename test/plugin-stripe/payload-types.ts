@@ -148,6 +148,24 @@ export interface User {
   id: string;
   name?: string | null;
   roles?: ('admin' | 'user')[] | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null);
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -167,25 +185,6 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "products".
- */
-export interface Product {
-  id: string;
-  name?: string | null;
-  /**
-   * All pricing information is managed in Stripe and will be reflected here.
-   */
-  price?: {
-    stripePriceID?: string | null;
-    stripeJSON?: string | null;
-  };
-  stripeID?: string | null;
-  skipSync?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -210,6 +209,24 @@ export interface Customer {
     | null;
   stripeID?: string | null;
   skipSync?: boolean | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null);
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
@@ -232,6 +249,43 @@ export interface Customer {
     | null;
   password?: string | null;
   collection: 'customers';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: string;
+  name?: string | null;
+  /**
+   * All pricing information is managed in Stripe and will be reflected here.
+   */
+  price?: {
+    stripePriceID?: string | null;
+    stripeJSON?: string | null;
+  };
+  stripeID?: string | null;
+  skipSync?: boolean | null;
+  createdBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null);
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string | Customer;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -328,6 +382,8 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   roles?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -360,6 +416,8 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   stripeID?: T;
   skipSync?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -380,6 +438,8 @@ export interface CustomersSelect<T extends boolean = true> {
       };
   stripeID?: T;
   skipSync?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
