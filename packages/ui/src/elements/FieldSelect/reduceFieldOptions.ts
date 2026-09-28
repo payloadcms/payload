@@ -1,11 +1,14 @@
+import type { I18nClient } from '@payloadcms/translations'
 import type { ClientField, FormState, SanitizedFieldPermissions } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsHiddenOrDisabled,
   getFieldPermissions,
   isFieldDisabled,
+  toWords,
 } from 'payload/shared'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
@@ -19,7 +22,22 @@ export type SelectedField = {
 
 export type FieldOption = {
   label: React.ReactNode
+  plainTextLabel: string
   value: SelectedField
+}
+
+const getPlainTextFieldLabel = (field: ClientField, i18n?: I18nClient): string => {
+  if ('label' in field && field.label) {
+    if (typeof field.label === 'string') {
+      return field.label
+    }
+
+    if (i18n) {
+      return getTranslation(field.label, i18n)
+    }
+  }
+
+  return 'name' in field && field.name ? toWords(field.name) : ''
 }
 
 export const ignoreFromBulkEdit = (field: ClientField): boolean =>
@@ -34,13 +52,16 @@ export const ignoreFromBulkEdit = (field: ClientField): boolean =>
 export const reduceFieldOptions = ({
   fields,
   formState,
+  i18n,
   labelPrefix = null,
   parentPath = '',
   path = '',
   permissions,
+  plainTextLabelPrefix = '',
 }: {
   readonly fields: ClientField[]
   readonly formState?: FormState
+  readonly i18n?: I18nClient
   readonly labelPrefix?: React.ReactNode
   readonly parentPath?: string
   readonly path?: string
@@ -49,6 +70,7 @@ export const reduceFieldOptions = ({
         [fieldName: string]: SanitizedFieldPermissions
       }
     | SanitizedFieldPermissions
+  readonly plainTextLabelPrefix?: string
 }): FieldOption[] => {
   if (!fields) {
     return []
@@ -85,16 +107,21 @@ export const reduceFieldOptions = ({
 
     if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
       const fieldHasLabel = 'label' in field && field.label
+      const fieldPlainTextLabel = getPlainTextFieldLabel(field, i18n)
       return [
         ...fieldsToUse,
         ...reduceFieldOptions({
           fields: field.fields,
+          i18n,
           labelPrefix: fieldHasLabel
             ? combineFieldLabel({ CustomLabel, field, prefix: labelPrefix })
             : labelPrefix,
           parentPath: path,
           path: createNestedClientFieldPath(path, field),
           permissions: fieldPermissions,
+          plainTextLabelPrefix: fieldHasLabel
+            ? [plainTextLabelPrefix, fieldPlainTextLabel].filter(Boolean).join(' > ')
+            : plainTextLabelPrefix,
         }),
       ]
     }
@@ -121,10 +148,12 @@ export const reduceFieldOptions = ({
               ...tabFields,
               ...reduceFieldOptions({
                 fields: tab.fields,
+                i18n,
                 labelPrefix,
                 parentPath: path,
                 path: isNamedTab ? createNestedClientFieldPath(path, tab as ClientField) : path,
                 permissions: tabPermissions,
+                plainTextLabelPrefix,
               }),
             ]
           }
@@ -134,6 +163,9 @@ export const reduceFieldOptions = ({
 
     const formattedField: FieldOption = {
       label: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
+      plainTextLabel: [plainTextLabelPrefix, getPlainTextFieldLabel(field, i18n)]
+        .filter(Boolean)
+        .join(' > '),
       value: {
         field,
         fieldPermissions: fieldPermissions as SanitizedFieldPermissions,

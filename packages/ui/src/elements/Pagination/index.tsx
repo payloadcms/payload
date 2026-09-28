@@ -15,6 +15,7 @@ export type PaginationProps = {
   onChange?: (page: number) => void
   page?: number
   prevPage?: number
+  tableId?: string
   totalPages?: number
 }
 
@@ -26,6 +27,7 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     onChange,
     page: currentPage = 1,
     prevPage = null,
+    tableId,
     totalPages = 1,
   } = props
 
@@ -91,17 +93,20 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
   return (
     <div className={baseClass}>
       <ClickableArrow
+        ariaControls={tableId}
         direction="left"
         isDisabled={isSinglePage || !hasPrevPage}
         updatePage={() => updatePage(prevPage ?? Math.max(1, currentPage - 1))}
       />
       <ClickableArrow
+        ariaControls={tableId}
         direction="right"
         isDisabled={isSinglePage || !hasNextPage}
         updatePage={() => updatePage(nextPage ?? currentPage + 1)}
       />
       <div className={`${baseClass}__page-input-wrapper`}>
         <input
+          aria-controls={tableId}
           aria-label="Go to page"
           className={`${baseClass}__page-input`}
           disabled={isSinglePage}

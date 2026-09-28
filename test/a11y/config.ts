@@ -1,3 +1,5 @@
+import type { CollectionConfig } from 'payload'
+
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -11,8 +13,26 @@ import { MenuGlobal } from './globals/Menu/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const FolderCollection = {
+  slug: 'payload-folders',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+  folders: {
+    joinField: {
+      name: 'documentsAndFolders',
+    },
+  },
+} satisfies CollectionConfig
+
 export default buildConfigWithDefaults({
-  suite: 'a11y',
   config: {
     // ...extend config here
     admin: {
@@ -28,12 +48,26 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [PostsCollection, MediaCollection],
+    collections: [FolderCollection, PostsCollection, MediaCollection],
     editor: lexicalEditor({}),
     globals: [
       // ...add more globals here
       MenuGlobal,
     ],
+    indexSortableFields: true,
+    localization: {
+      defaultLocale: 'en',
+      locales: [
+        {
+          code: 'en',
+          label: 'English',
+        },
+        {
+          code: 'es',
+          label: 'Spanish',
+        },
+      ],
+    },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
@@ -49,11 +83,64 @@ export default buildConfigWithDefaults({
     })
 
     await payload.create({
-      collection: postsSlug,
+      collection: 'payload-folders',
       data: {
-        title: 'example post',
+        name: 'Accessibility folder',
       },
       overrideAccess: true,
     })
+
+    const firstPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        accessibilitySelect: 'one',
+        title: 'Example post one',
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: firstPost.id,
+      collection: postsSlug,
+      data: {
+        title: 'Example post one, second version',
+      },
+      draft: true,
+      overrideAccess: true,
+    })
+
+    await payload.update({
+      id: firstPost.id,
+      collection: postsSlug,
+      data: {
+        title: 'Example post one, third version',
+      },
+      draft: false,
+      overrideAccess: true,
+    })
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        accessibilitySelect: 'two',
+        relatedPost: firstPost.id,
+        title: 'Example post two',
+      },
+      draft: false,
+      overrideAccess: true,
+    })
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        accessibilitySelect: 'one',
+        relatedPost: firstPost.id,
+        title: 'Example post three',
+      },
+      draft: false,
+      overrideAccess: true,
+    })
   },
+  suite: 'a11y',
 })

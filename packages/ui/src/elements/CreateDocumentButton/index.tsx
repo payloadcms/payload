@@ -126,6 +126,7 @@ export function CreateDocumentButton({
         buttonType="custom"
         className={`${baseClass}__popup`}
         horizontalAlign="right"
+        popupType="menu"
       >
         <PopupList.ButtonGroup>
           {collections.map((collection) => (
