@@ -125,7 +125,7 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
                 )}
               />
             )}
-            {!isEmbedded && <SettingsMenu />}
+            <SettingsMenu />
           </div>
           {!isEmbedded && (
             <UserMenu
