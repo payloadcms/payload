@@ -153,7 +153,7 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
       const instructionsResponse = await restClient.POST(uploadInstructionsPath, {
         body: JSON.stringify({
           collectionSlug,
-          filename: `processed.${format}`,
+          filename: `processed.${format === 'tiff' ? 'tif' : format}`,
           filesize: file.length,
           mimeType,
         }),
@@ -205,8 +205,38 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
           .join('/')
         const stored = blobs.find((blob) => blob.pathname === storagePath)
 
+        expect(doc.filename).toBe(instructions.file.filename)
+        expect(storagePath).toBe(instructions.data.pathname)
         expect(blobs.every((blob) => blob.size > 0)).toBe(true)
+        expect(
+          Object.values(doc.sizes ?? {}).filter((size: { filename?: string }) => size.filename),
+        ).toHaveLength(collectionSlug === mediaSlug ? 1 : 0)
         expect(stored).toBeDefined()
+        expect(blobs).toHaveLength(
+          1 +
+            Object.values(doc.sizes ?? {}).filter((size: { filename?: string }) => size.filename)
+              .length,
+        )
+
+        for (const size of Object.values(doc.sizes ?? {})) {
+          if (!size.filename) {
+            continue
+          }
+          const sizePath = [storedDoc.prefix, storedDoc._objectKey, size.filename]
+            .filter(Boolean)
+            .join('/')
+          const storedSize = blobs.find((blob) => blob.pathname === sizePath)
+
+          expect(storedSize).toBeDefined()
+          expect(storedSize!.size).toBe(size.filesize)
+
+          const sizeBytes = Buffer.from(await (await fetch(storedSize!.url)).arrayBuffer())
+
+          expect(await sharp(sizeBytes).metadata()).toMatchObject({
+            height: size.height,
+            width: size.width,
+          })
+        }
 
         const download = await fetch(stored!.url)
         const bytes = Buffer.from(await download.arrayBuffer())

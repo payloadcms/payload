@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   generateClientToken: vi.fn(async () => 'client-token'),
+  uploadFile: vi.fn(async () => ({})),
   // Resolves the stored location of an owning document, so it matches the requested key.
   buildStoragePathData: vi.fn(() => ({
     storageFilePath: 'reference.png',
@@ -36,6 +37,8 @@ vi.mock('@payloadcms/plugin-cloud-storage/utilities', () => ({
 vi.mock('@vercel/blob/client', () => ({
   generateClientTokenFromReadWriteToken: mocks.generateClientToken,
 }))
+
+vi.mock('./uploadFile.js', () => ({ uploadFile: mocks.uploadFile }))
 
 import { createVercelBlobAdapter } from './adapter.js'
 
@@ -81,6 +84,35 @@ describe('createVercelBlobAdapter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
+
+  it.each([true, { access: () => true }, false])(
+    'should keep the suffix policy consistent for clientUploads=%j',
+    async (clientUploads) => {
+      const adapter = createVercelBlobAdapter({
+        access: 'public',
+        addRandomSuffix: true,
+        baseUrl: 'https://example.com',
+        cacheControlMaxAge: 60,
+        clientUploads,
+        collectionSources: [],
+        token: 'read-write-token',
+      })({ collection: { slug: 'media' } } as never)
+
+      for (const filename of ['image.png', 'image-30x20.png']) {
+        await adapter.handleUpload({
+          file: { buffer: Buffer.from('image'), filename, mimeType: 'image/png' },
+          storageFilePath: `upload-key/${filename}`,
+        } as never)
+
+        expect(mocks.uploadFile).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            addRandomSuffix: !clientUploads,
+            storageFilePath: `upload-key/${filename}`,
+          }),
+        )
+      }
+    },
+  )
 
   it('should disable overwrite when no document owns the requested key', async () => {
     const instructions = await generateInstructions({ hasOwner: false })

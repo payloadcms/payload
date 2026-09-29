@@ -19,16 +19,27 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  suite: 'storage-vercel-blob-client-uploads',
   config: {
     admin: {
       importMap: {
         baseDir: path.resolve(dirname, '..'),
       },
     },
-    collections: [Media, MediaWithPrefix, MediaContainer, Users],
+    collections: [
+      {
+        ...Media,
+        upload: {
+          ...(typeof Media.upload === 'object' ? Media.upload : {}),
+          imageSizes: [{ name: 'square', height: 20, width: 30 }],
+        },
+      },
+      MediaWithPrefix,
+      MediaContainer,
+      Users,
+    ],
     storage: [
       vercelBlobStorage({
+        addRandomSuffix: true,
         clientUploads: {
           access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
         },
@@ -55,4 +66,5 @@ export default buildConfigWithDefaults({
       overrideAccess: true,
     })
   },
+  suite: 'storage-vercel-blob-client-uploads',
 })
