@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { Project } from 'ts-morph'
 import { describe, expect, it } from 'vitest'
 
 import { runTransform } from '../../utils/test-helpers.js'
@@ -8,6 +9,14 @@ import { migrateSharpToTransformer } from './index.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const fixture = (name: string) => readFile(join(here, name), 'utf8')
+
+const runTransformWithNotes = async ({ input }: { input: string }) => {
+  const project = new Project({ useInMemoryFileSystem: true })
+  const file = project.createSourceFile('/payload.config.ts', input)
+  const result = await migrateSharpToTransformer.apply({ packageJsons: [], project })
+
+  return { notes: result.notes ?? [], source: file.getFullText() }
+}
 
 describe('migrate-sharp-to-transformer', () => {
   it('moves a top-level sharp dependency and per-collection Sharp options into sharpTransformer', async () => {
@@ -43,6 +52,58 @@ describe('migrate-sharp-to-transformer', () => {
     const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
 
     expect(result).toBe(output)
+  })
+
+  it.each([
+    ['a call expression', 'transformers: makeTransformers(),'],
+    ['an identifier', 'transformers: sharedTransformers,'],
+    ['a shorthand property', 'transformers,'],
+  ])(
+    'does not add a duplicate transformers property when the existing one is %s',
+    async (_, transformersPropertyText) => {
+      const input = `import sharp from 'sharp'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [],
+  sharp,
+  upload: {
+    ${transformersPropertyText}
+  },
+})
+`
+      const { notes, source } = await runTransformWithNotes({ input })
+
+      expect(source.match(/transformers\b/g)).toHaveLength(1)
+      expect(source).toContain(transformersPropertyText)
+      expect(notes).toContainEqual(
+        expect.stringContaining(
+          "`upload.transformers` isn't an inline array — add `sharpTransformer({ sharp })`",
+        ),
+      )
+    },
+  )
+
+  it('does not add a transformers property after a spread that may already set it', async () => {
+    const input = `import sharp from 'sharp'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [],
+  sharp,
+  upload: {
+    ...sharedUpload,
+  },
+})
+`
+    const { notes, source } = await runTransformWithNotes({ input })
+
+    expect(source).not.toContain('transformers')
+    expect(notes).toContainEqual(
+      expect.stringContaining(
+        '`upload` contains a spread that may already set `transformers` — add `sharpTransformer({ sharp })`',
+      ),
+    )
   })
 
   it('preserves an injected (non-default) sharp dependency', async () => {

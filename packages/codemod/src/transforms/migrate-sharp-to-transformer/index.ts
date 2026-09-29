@@ -337,8 +337,23 @@ export const migrateSharpToTransformer: Transform = {
 
         const transformerCallText = `${TRANSFORMER_NAME}({ ${transformerArgs.join(', ')} })`
 
+        // Adding a `transformers` property next to a non-array one, or after a spread
+        // that may already set it, would create a duplicate key whose last value wins
+        // at runtime — silently dropping the existing transformers.
+        const uploadHasSpread = uploadObj
+          ?.getProperties()
+          .some((prop) => Node.isSpreadAssignment(prop))
+
         if (existingTransformersArray) {
           existingTransformersArray.addElement(transformerCallText)
+        } else if (existingTransformersProp) {
+          notes.push(
+            `${sourceFile.getFilePath()}: \`upload.transformers\` isn't an inline array — add \`${transformerCallText}\` to it manually.`,
+          )
+        } else if (uploadHasSpread) {
+          notes.push(
+            `${sourceFile.getFilePath()}: \`upload\` contains a spread that may already set \`transformers\` — add \`${transformerCallText}\` to its transformers manually.`,
+          )
         } else if (uploadObj) {
           uploadObj.addPropertyAssignment({
             name: 'transformers',
