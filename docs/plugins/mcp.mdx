@@ -217,6 +217,12 @@ MCP can add or replace files in upload-enabled collections.
 
 The agent reads the collection's upload settings before acting. MIME type and file-size restrictions still apply, URL uploads respect `pasteURL` and its allow list, and local files are transferred as base64.
 
+## LLM instructions
+
+The `getCollectionSchema` and `getGlobalSchema` tools return [LLM instructions](../configuration/llm-instructions) in `structuredContent.instructions` alongside `schema`, and in a text content block. Read them before creating or updating content.
+
+Saved instructions are retrieved using the authenticated caller and the request's access mode.
+
 ## HTTP transport
 
 HTTP is the recommended transport for both local development and deployed apps. During development, config changes follow Payload's normal dev-server reload lifecycle.
