@@ -56,4 +56,32 @@ describe('upload replacement cleanup', () => {
       }
     },
   )
+
+  it('should restore the hidden storage key without exposing other hidden fields', async () => {
+    const doc = { id: 1, filename: 'file.png', mimeType: 'image/png', prefix: 'images' }
+    const handleUpload = vi.fn(({ data }) => data)
+    const hook = getAfterChangeHook({
+      adapter: { handleUpload } as never,
+      collection: { slug: 'media' } as never,
+    })
+    const result = await hook({
+      data: { ...doc, _objectKey: 'upload-key', privateNote: 'hidden' },
+      doc,
+      operation: 'create',
+      req: {
+        context: {},
+        file: { data: Buffer.from('file'), size: 4 },
+        payload: {
+          logger: { error: vi.fn() },
+          update: vi.fn(async () => doc),
+        },
+      },
+    } as never)
+
+    expect(handleUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ storageFilePath: 'images/upload-key/file.png' }),
+    )
+    expect(result).not.toHaveProperty('privateNote')
+    expect(result).not.toHaveProperty('_objectKey')
+  })
 })

@@ -1,15 +1,17 @@
 import type { UploadInstructions } from 'payload'
 
-import { del, list } from '@vercel/blob'
+import { del, head, list } from '@vercel/blob'
 import { put } from '@vercel/blob/client'
 import dotenv from 'dotenv'
 import { readFileSync } from 'fs'
 import path from 'path'
+import * as qs from 'qs-esm'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 import { expect } from 'vitest'
 
 import { test } from '../../__helpers/int/vitest.js'
-import { prefix } from '../shared.js'
+import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -128,4 +130,104 @@ test.suite('@payloadcms/storage-vercel-blob clientUploads', { config: './config.
     const uploaded = blobs.find((b) => b.pathname === instructions.data.pathname)
     expect(uploaded).toBeDefined()
   })
+
+  for (const { collectionSlug, format, shouldCrop } of [
+    { collectionSlug: mediaWithPrefixSlug, format: 'webp', shouldCrop: false },
+    { collectionSlug: mediaWithPrefixSlug, format: 'gif', shouldCrop: false },
+    { collectionSlug: mediaWithPrefixSlug, format: 'tiff', shouldCrop: false },
+    { collectionSlug: mediaWithPrefixSlug, format: 'png', shouldCrop: true },
+    { collectionSlug: mediaSlug, format: 'png', shouldCrop: false },
+    { collectionSlug: mediaSlug, format: 'png', shouldCrop: true },
+    { collectionSlug: mediaWithPrefixSlug, format: 'png', shouldCrop: false },
+  ] as const) {
+    test(`should preserve stored bytes after saving a ${format} client upload (collection: ${collectionSlug}, crop: ${shouldCrop})`, async ({
+      payload,
+      restClient,
+    }) => {
+      const file = await sharp({
+        create: { background: '#336699', channels: 3, height: 80, width: 120 },
+      })
+        .toFormat(format)
+        .toBuffer()
+      const mimeType = `image/${format}`
+      const instructionsResponse = await restClient.POST(uploadInstructionsPath, {
+        body: JSON.stringify({
+          collectionSlug,
+          filename: `processed.${format}`,
+          filesize: file.length,
+          mimeType,
+        }),
+      })
+
+      expect(instructionsResponse.status).toBe(200)
+
+      const instructions = (await instructionsResponse.json()) as VercelBlobUploadInstructions
+      const uploaded = await put(instructions.data.pathname, new Blob([file], { type: mimeType }), {
+        access: 'public',
+        contentType: mimeType,
+        token: instructions.data.token,
+      })
+
+      expect((await head(uploaded.url)).size).toBe(file.length)
+
+      const formData = new FormData()
+
+      formData.append('_payload', JSON.stringify({}))
+      formData.append('file', JSON.stringify(instructions.file))
+
+      const query = shouldCrop
+        ? qs.stringify(
+            {
+              uploadEdits: {
+                crop: { height: 50, unit: '%', width: 50, x: 0, y: 0 },
+                heightInPixels: 40,
+                widthInPixels: 60,
+              },
+            },
+            { addQueryPrefix: true },
+          )
+        : ''
+      const response = await restClient.POST(`/${collectionSlug}${query}`, { body: formData })
+      const { doc } = await response.json()
+
+      expect(response.status).toBe(201)
+
+      try {
+        const { blobs } = await list()
+        const storedDoc = await payload.findByID({
+          id: doc.id,
+          collection: collectionSlug,
+          overrideAccess: true,
+          showHiddenFields: true,
+        })
+        const storagePath = [storedDoc.prefix, storedDoc._objectKey, doc.filename]
+          .filter(Boolean)
+          .join('/')
+        const stored = blobs.find((blob) => blob.pathname === storagePath)
+
+        expect(blobs.every((blob) => blob.size > 0)).toBe(true)
+        expect(stored).toBeDefined()
+
+        const download = await fetch(stored!.url)
+        const bytes = Buffer.from(await download.arrayBuffer())
+
+        expect(doc.filesize).toBeGreaterThan(0)
+        expect(stored!.size).toBe(doc.filesize)
+        expect(download.status).toBe(200)
+        expect(bytes.length).toBe(doc.filesize)
+
+        const served = await restClient.GET(doc.url.replace(/^\/api/, ''))
+
+        expect(served.status).toBe(200)
+        expect(Buffer.from(await served.arrayBuffer()).equals(bytes)).toBe(true)
+        expect(await sharp(bytes).metadata()).toMatchObject({
+          format,
+          height: collectionSlug === mediaSlug ? 200 : shouldCrop ? 40 : 80,
+          width: collectionSlug === mediaSlug ? 200 : shouldCrop ? 60 : 120,
+        })
+      } finally {
+        await payload.delete({ id: doc.id, collection: collectionSlug, overrideAccess: true })
+      }
+    })
+  }
 })

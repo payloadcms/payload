@@ -1,8 +1,10 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { list } from '@vercel/blob'
 import dotenv from 'dotenv'
 import * as path from 'path'
+import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
 import { exactText, gotoAndWaitForForm, saveDocAndAssert } from '../../__helpers/e2e/helpers.js'
@@ -70,6 +72,53 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
     await expect(page.locator('#field-filemanager-filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
+  })
+
+  test('should retain processed image bytes after saving a WebP client upload', async () => {
+    const buffer = await sharp({
+      create: { background: '#336699', channels: 3, height: 80, width: 120 },
+    })
+      .webp()
+      .toBuffer()
+
+    await gotoAndWaitForForm(page, mediaURL.create)
+    await page.setInputFiles('input[type="file"]', {
+      name: 'client-upload.webp',
+      buffer,
+      mimeType: 'image/webp',
+    })
+
+    const savedResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === `/api/${mediaSlug}` &&
+        response.request().method() === 'POST',
+    )
+
+    await saveDocAndAssert(page)
+
+    const { doc } = await (await savedResponse).json()
+    const { blobs } = await list()
+    const stored = blobs.find((blob) => blob.pathname.endsWith(`/${doc.filename}`))
+
+    expect(blobs.every((blob) => blob.size > 0)).toBe(true)
+    expect(stored).toBeDefined()
+
+    const download = await fetch(stored!.url)
+    const bytes = Buffer.from(await download.arrayBuffer())
+
+    expect(doc.filesize).toBeGreaterThan(0)
+    expect(stored!.size).toBe(doc.filesize)
+    expect(bytes.length).toBe(doc.filesize)
+
+    const served = await page.request.get(new URL(doc.url, serverURL).href)
+
+    expect(served.status()).toBe(200)
+    expect((await served.body()).equals(bytes)).toBe(true)
+    expect(await sharp(bytes).metadata()).toMatchObject({
+      format: 'webp',
+      height: 200,
+      width: 200,
+    })
   })
 
   test('should upload file directly to Vercel Blob, not through the Payload server', async ({

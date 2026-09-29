@@ -11,6 +11,8 @@ import {
 } from '../utilities/buildStoragePathData.js'
 import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
 
+type StorageFileData = { _objectKey?: string } & FileData & TypeWithID
+
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
@@ -30,7 +32,7 @@ export const getAfterChangeHook =
     collection,
     collectionPrefix,
     useCompositePrefixes,
-  }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
+  }: Args): CollectionAfterChangeHook<StorageFileData> =>
   async ({ data, doc, operation, previousDoc, req, select }) => {
     // Skip if this is an internal update to prevent infinite loop
     if (req.context?.skipCloudStorage) {
@@ -38,7 +40,9 @@ export const getAfterChangeHook =
     }
 
     // Restore upload metadata removed by select, including partially selected image sizes.
-    const uploadData = select ? deepMergeWithSourceArrays<FileData & TypeWithID>(data, doc) : doc
+    const uploadData = select
+      ? deepMergeWithSourceArrays<StorageFileData>(data, doc)
+      : { ...doc, _objectKey: data?._objectKey ?? doc._objectKey }
     const isDraftSave = (uploadData as { _status?: string })._status === 'draft'
     const isDraftOverPublished =
       isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'

@@ -409,7 +409,7 @@ export const generateFileData = async <T>({
       delete file.uploadReference
       delete fileForResize.uploadReference
       if (file.tempFilePath) {
-        await fs.writeFile(file.tempFilePath, croppedImage)
+        await fs.writeFile(file.tempFilePath, fileForResize.data)
       } else {
         req.file = fileForResize
       }
