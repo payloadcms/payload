@@ -173,10 +173,21 @@ function extractCollectionSharpEntry({
   const movedTexts: string[] = []
   for (const name of MOVED_UPLOAD_FIELDS) {
     const prop = uploadObj.getProperty(name)
-    if (prop && Node.isPropertyAssignment(prop)) {
+    if (!prop) {
+      continue
+    }
+
+    // A shorthand `imageSizes` reads the same binding from `buildConfig`'s argument,
+    // where the `sharpTransformer` call is inserted, so it moves verbatim.
+    if (Node.isPropertyAssignment(prop) || Node.isShorthandPropertyAssignment(prop)) {
       movedTexts.push(prop.print())
       prop.remove()
+      continue
     }
+
+    notes.push(
+      `${filePath}: collection ${slugInitializer.getText()}'s \`upload.${name}\` isn't a plain property — move it into \`sharpTransformer({ collections })\` manually.`,
+    )
   }
 
   if (movedTexts.length === 0) {

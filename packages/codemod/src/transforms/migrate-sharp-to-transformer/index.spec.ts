@@ -106,6 +106,57 @@ export default buildConfig({
     )
   })
 
+  it('moves shorthand Sharp options into sharpTransformer', async () => {
+    const input = `import { buildConfig } from 'payload'
+
+const imageSizes = [{ name: 'thumbnail', width: 400 }]
+const focalPoint = true
+
+export default buildConfig({
+  collections: [
+    {
+      slug: 'media',
+      fields: [],
+      upload: {
+        focalPoint,
+        imageSizes,
+        staticDir: 'media',
+      },
+    },
+  ],
+})
+`
+    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
+    const [beforeTransformerCall, afterTransformerCall] = result.split('sharpTransformer(')
+
+    expect(beforeTransformerCall).toContain("upload: {\n        staticDir: 'media',\n      },")
+    expect(afterTransformerCall).toContain('media: { imageSizes, focalPoint }')
+  })
+
+  it('reports a Sharp option it cannot move instead of leaving it behind silently', async () => {
+    const input = `import { buildConfig } from 'payload'
+
+export default buildConfig({
+  collections: [
+    {
+      slug: 'media',
+      fields: [],
+      upload: {
+        get imageSizes() {
+          return []
+        },
+      },
+    },
+  ],
+})
+`
+    const { notes } = await runTransformWithNotes({ input })
+
+    expect(notes).toContainEqual(
+      expect.stringContaining("collection 'media''s `upload.imageSizes` isn't a plain property"),
+    )
+  })
+
   it('preserves an injected (non-default) sharp dependency', async () => {
     const input = `import myCustomSharp from 'sharp'
 import { buildConfig } from 'payload'
