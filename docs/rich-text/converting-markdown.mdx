@@ -8,7 +8,7 @@ keywords: lexical, richtext, markdown, md, mdx
 
 ## Editor adapter converters
 
-Initialized richtext adapters can expose `converters.fromMarkdown` and `converters.toMarkdown`. Lexical provides both, using the editor's configured features and Markdown transformers:
+Lexical provides `converters.fromMarkdown` and `converters.toMarkdown` using the editor's configured features:
 
 ```ts
 const converters = payload.config.editor?.converters
@@ -22,7 +22,7 @@ if (converters?.fromMarkdown && converters.toMarkdown) {
 }
 ```
 
-For a field with its own editor, use the converters on that field's initialized `editor` instead. Both methods are synchronous and independently optional in the core adapter contract. Markdown conversion supports the configured features and is not guaranteed to preserve every detail of custom nodes.
+For a field with its own editor, use the converters on that field's initialized `editor`.
 
 ## Richtext to Markdown
 
