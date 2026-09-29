@@ -59,6 +59,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
 
   return (
     <Popup
+      className="popup-button-list__submenu"
       forceOpen={isOpen}
       onToggleOpen={(nextOpen) => {
         if (!nextOpen) {
@@ -69,7 +70,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger popup-button-list__button--submenu-trigger-settings"
+          className="popup-button-list__button popup-button-list__button--submenu-trigger"
           onClick={onClick}
           onKeyDown={onKeyDown}
           onMouseEnter={open}
@@ -90,7 +91,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen
       theme="dark"
     >
       <div
-        className="popup-button-list__submenu-content-settings"
+        className="popup-button-list__submenu-content"
         onMouseEnter={keepOpen}
         ref={contentRef as React.Ref<HTMLDivElement>}
       >

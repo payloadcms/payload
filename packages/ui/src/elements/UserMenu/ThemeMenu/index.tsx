@@ -66,6 +66,7 @@ export const ThemeMenu: React.FC<{
 
   return (
     <Popup
+      className="popup-button-list__submenu"
       forceOpen={isOpen}
       onToggleOpen={(nextOpen) => {
         if (!nextOpen) {
@@ -76,7 +77,7 @@ export const ThemeMenu: React.FC<{
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger popup-button-list__button--submenu-trigger-theme"
+          className="popup-button-list__button popup-button-list__button--submenu-trigger"
           onClick={onClick}
           onKeyDown={onKeyDown}
           onMouseEnter={open}
@@ -97,7 +98,7 @@ export const ThemeMenu: React.FC<{
       theme="dark"
     >
       <div
-        className="popup-button-list__submenu-content-theme"
+        className="popup-button-list__submenu-content"
         onMouseEnter={keepOpen}
         ref={contentRef as React.Ref<HTMLDivElement>}
       >

@@ -60,6 +60,7 @@ export const LanguageMenu: React.FC<{
 
   return (
     <Popup
+      className="popup-button-list__submenu"
       forceOpen={isOpen}
       onToggleOpen={(nextOpen) => {
         if (!nextOpen) {
@@ -70,7 +71,7 @@ export const LanguageMenu: React.FC<{
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className="popup-button-list__button popup-button-list__button--submenu-trigger popup-button-list__button--submenu-trigger-language"
+          className="popup-button-list__button popup-button-list__button--submenu-trigger"
           onClick={onClick}
           onKeyDown={onKeyDown}
           onMouseEnter={open}
@@ -91,7 +92,7 @@ export const LanguageMenu: React.FC<{
       theme="dark"
     >
       <div
-        className="popup-button-list__submenu-content-language"
+        className="popup-button-list__submenu-content"
         onMouseEnter={keepOpen}
         ref={contentRef as React.Ref<HTMLDivElement>}
       >

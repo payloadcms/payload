@@ -151,6 +151,20 @@
   /* Submenu trigger buttons: icon on left, label in middle, chevron pushed right */
   .popup-button-list__button--submenu-trigger {
     align-items: center;
+    width: 100%;
+  }
+
+  .popup-button-list__button--submenu-trigger:hover,
+  .popup-button-list__button--submenu-trigger[aria-expanded='true'] {
+    background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+    color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
+  }
+
+  .popup-button-list__button--submenu-trigger .popup-button-list__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   .popup-button-list__submenu-icon {
@@ -168,6 +182,7 @@
   }
 
   .popup-button-list__button--submenu-trigger:hover .popup-button-list__chevron,
+  .popup-button-list__button--submenu-trigger[aria-expanded='true'] .popup-button-list__chevron,
   .popup-button-list__button--selected .popup-button-list__chevron {
     opacity: 1;
   }
