@@ -6,6 +6,7 @@ import { VariableColorIcon } from '../../../icons/VariableColor/index.js'
 import { useTheme } from '../../../providers/Theme/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
+import { useHoverSubmenu } from '../useHoverSubmenu.js'
 
 export const ThemeMenuContent: React.FC = () => {
   const { autoMode, setTheme, theme } = useTheme()
@@ -40,6 +41,7 @@ export const ThemeMenu: React.FC<{
   readonly onMobileOpen?: () => void
 }> = ({ onMobileOpen }) => {
   const { t } = useTranslation()
+  const { close, contentRef, isOpen, keepOpen, open, triggerRef } = useHoverSubmenu('theme')
 
   if (onMobileOpen) {
     return (
@@ -51,7 +53,7 @@ export const ThemeMenu: React.FC<{
         tabIndex={-1}
         type="button"
       >
-        <span className="popup-button-list__submenu-icon">
+        <span className="popup-button-list__icon">
           <VariableColorIcon size={24} />
         </span>
         <span className="popup-button-list__label">{t('general:theme')}</span>
@@ -64,22 +66,24 @@ export const ThemeMenu: React.FC<{
 
   return (
     <Popup
+      forceOpen={isOpen}
+      onToggleOpen={(nextOpen) => {
+        if (!nextOpen) {
+          close()
+        }
+      }}
       popupType="menu"
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className={[
-            'popup-button-list__button',
-            'popup-button-list__button--submenu-trigger',
-            active && 'popup-button-list__button--selected',
-          ]
-            .filter(Boolean)
-            .join(' ')}
+          className="popup-button-list__button popup-button-list__button--submenu-trigger popup-button-list__button--submenu-trigger-theme"
           onClick={onClick}
           onKeyDown={onKeyDown}
+          onMouseEnter={open}
+          ref={triggerRef as React.Ref<HTMLButtonElement>}
           type="button"
         >
-          <span className="popup-button-list__submenu-icon">
+          <span className="popup-button-list__icon">
             <VariableColorIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:theme')}</span>
@@ -92,7 +96,13 @@ export const ThemeMenu: React.FC<{
       size="large"
       theme="dark"
     >
-      <ThemeMenuContent />
+      <div
+        className="popup-button-list__submenu-content-theme"
+        onMouseEnter={keepOpen}
+        ref={contentRef as React.Ref<HTMLDivElement>}
+      >
+        <ThemeMenuContent />
+      </div>
     </Popup>
   )
 }

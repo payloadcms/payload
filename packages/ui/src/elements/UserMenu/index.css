@@ -10,10 +10,40 @@
   border: none;
   cursor: pointer;
   padding: 0;
+  border-radius: var(--radius-medium);
+
+  &:hover {
+    background-color: var(--color-bg-transparent-hover);
+  }
 }
 
-.user-menu__trigger--active {
-  opacity: 0.8;
+.user-menu__trigger--active,
+.user-menu__trigger--active:hover {
+  background-color: var(--color-bg-transparent-pressed);
+}
+
+.user-menu__trigger--with-title {
+  gap: var(--spacer-1);
+}
+
+.user-menu__trigger-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-1);
+  padding-block: var(--spacer-1);
+  padding-inline: var(--spacer-2) var(--spacer-1);
+}
+
+.user-menu__trigger-label {
+  font-family: var(--text-body-medium-strong-font-family);
+  font-size: var(--text-body-medium-strong-font-size);
+  font-weight: var(--text-body-medium-strong-font-weight);
+  line-height: var(--text-body-medium-strong-line-height);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text);
 }
 
 .user-menu__profile {

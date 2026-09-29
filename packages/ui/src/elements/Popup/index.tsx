@@ -81,6 +81,11 @@ export type PopupProps = {
   renderButton?: (props: PopupButtonRenderProps) => React.ReactNode
   showOnHover?: boolean
   /**
+   * Renders a full-viewport layer beneath the popup while it is open, preventing a dismissal
+   * click from also activating content underneath the popup.
+   */
+  showScrim?: boolean
+  /**
    * By default, the scrollbar is hidden. If you want to show it, set this to true.
    * In both cases, the container is still scrollable.
    *
@@ -144,6 +149,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     render,
     renderButton,
     showOnHover = false,
+    showScrim = false,
     showScrollbar = false,
     side,
     size = 'fit-content',
@@ -645,6 +651,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       </div>
 
       <PopupContext value={{ closePopupChain, popupRef, popupRole }}>
+        {active && showScrim && !parentPopup && <div className={`${baseClass}__scrim`} />}
         <div
           aria-label={popupAriaLabel}
           className={

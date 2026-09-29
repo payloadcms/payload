@@ -14,7 +14,7 @@ export const NavSidebarToggle: React.FC<{
 
   return (
     <button
-      className={`${baseClass}__mobile-close`}
+      className={`${baseClass}__close`}
       onClick={() => {
         setNavOpen(false)
       }}

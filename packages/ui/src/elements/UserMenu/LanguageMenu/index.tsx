@@ -5,6 +5,7 @@ import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../../icons/Language/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
+import { useHoverSubmenu } from '../useHoverSubmenu.js'
 
 export const LanguageMenuContent: React.FC = () => {
   const { i18n, languageOptions, switchLanguage } = useTranslation()
@@ -34,6 +35,7 @@ export const LanguageMenu: React.FC<{
   readonly onMobileOpen?: () => void
 }> = ({ onMobileOpen }) => {
   const { t } = useTranslation()
+  const { close, contentRef, isOpen, keepOpen, open, triggerRef } = useHoverSubmenu('language')
 
   if (onMobileOpen) {
     return (
@@ -45,7 +47,7 @@ export const LanguageMenu: React.FC<{
         tabIndex={-1}
         type="button"
       >
-        <span className="popup-button-list__submenu-icon">
+        <span className="popup-button-list__icon">
           <LanguageIcon size={24} />
         </span>
         <span className="popup-button-list__label">{t('general:language')}</span>
@@ -58,22 +60,24 @@ export const LanguageMenu: React.FC<{
 
   return (
     <Popup
+      forceOpen={isOpen}
+      onToggleOpen={(nextOpen) => {
+        if (!nextOpen) {
+          close()
+        }
+      }}
       popupType="menu"
       renderButton={({ active, onClick, onKeyDown, ...aria }) => (
         <button
           {...aria}
-          className={[
-            'popup-button-list__button',
-            'popup-button-list__button--submenu-trigger',
-            active && 'popup-button-list__button--selected',
-          ]
-            .filter(Boolean)
-            .join(' ')}
+          className="popup-button-list__button popup-button-list__button--submenu-trigger popup-button-list__button--submenu-trigger-language"
           onClick={onClick}
           onKeyDown={onKeyDown}
+          onMouseEnter={open}
+          ref={triggerRef as React.Ref<HTMLButtonElement>}
           type="button"
         >
-          <span className="popup-button-list__submenu-icon">
+          <span className="popup-button-list__icon">
             <LanguageIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:language')}</span>
@@ -86,7 +90,13 @@ export const LanguageMenu: React.FC<{
       size="large"
       theme="dark"
     >
-      <LanguageMenuContent />
+      <div
+        className="popup-button-list__submenu-content-language"
+        onMouseEnter={keepOpen}
+        ref={contentRef as React.Ref<HTMLDivElement>}
+      >
+        <LanguageMenuContent />
+      </div>
     </Popup>
   )
 }

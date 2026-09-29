@@ -4,7 +4,6 @@
     flex-direction: column;
     width: 100%;
     flex-grow: 1;
-    gap: var(--spacer-2-5);
   }
 
   .sidebar-tabs__tabs {
@@ -12,7 +11,7 @@
     gap: 0;
     background-color: var(--color-bg-secondary);
     border-radius: var(--button-radius);
-    width: 100%;
+    margin: var(--spacer-2) var(--spacer-2-5) 0;
   }
 
   .sidebar-tabs__tab {
