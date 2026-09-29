@@ -53,7 +53,7 @@ export function createPrepareLegacyUpload({
     if (fileSupportsResize) {
       const originalMeta = await tryProbe(file, sharpDependency)
       if (originalMeta) {
-        originalDimensions = { height: originalMeta.height!, width: originalMeta.width! }
+        originalDimensions = { height: originalMeta.height, width: originalMeta.width }
       }
     }
 

@@ -28,6 +28,7 @@ import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
 import { seed } from './seed.js'
 import {
+  adminThumbnailSizeSlug,
   allowListMediaSlug,
   animatedTypeMedia,
   audioSlug,
@@ -70,6 +71,20 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = getTestSuiteDir({ fallbackDir: path.dirname(filename), suitePath: 'uploads' })
 
 const sharpCollections: Record<string, SharpCollectionConfig> = {
+  [adminThumbnailSizeSlug]: {
+    imageSizes: [
+      {
+        name: 'small',
+        height: 100,
+        width: 100,
+      },
+      {
+        name: 'medium',
+        height: 200,
+        width: 200,
+      },
+    ],
+  },
   [fileAccessMediaSlug]: {
     imageSizes: [
       {
