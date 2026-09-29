@@ -314,13 +314,20 @@ export const generateFileData = async <T>({
       ? Buffer.from(await mainWebFile!.arrayBuffer())
       : undefined
 
+    // A transformed file is named after what the transformer returned, not the upload.
+    const outputName = (fileWasTransformed && mainWebFile!.name) || file.name
+
     let mimeType: string
     let ext: string | undefined
 
     if (mainBuffer) {
+      // Detected bytes win for binary formats (Sharp keeps the input's name and type on a
+      // converted output), but text-like output such as CSV has no signature to detect, so
+      // fall back to the type and extension the transformer declared on the returned File.
       const typeResult = await fileTypeFromBuffer(mainBuffer)
-      ext = typeResult?.ext
-      mimeType = typeResult?.mime ?? file.mimetype
+      ext =
+        typeResult?.ext ?? (getFileExtension(getSanitizedUploadFilename(outputName)) || undefined)
+      mimeType = typeResult?.mime ?? (mainWebFile!.type || file.mimetype)
     } else {
       mimeType = file.mimetype
       ext = getFileExtension(getSanitizedUploadFilename(file.name))
@@ -347,7 +354,7 @@ export const generateFileData = async <T>({
       }
     }
 
-    let fsSafeName = getSanitizedUploadFilename(file.name, ext)
+    let fsSafeName = getSanitizedUploadFilename(outputName, ext)
 
     if (!overwriteExistingFiles) {
       // Extract prefix if present (added by plugin-cloud-storage)

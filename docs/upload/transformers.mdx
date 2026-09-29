@@ -97,6 +97,8 @@ transformFile: (args: {
 
 `transformFile` is a one-file-in, one-file-out primitive — it never writes to storage itself. Payload's upload pipeline calls every eligible transformer's `transformFile` in declaration order, threading the result of one into the next, then persists whatever the pipeline produces.
 
+The stored `filename` is based on the returned `File`'s `name`. Its `mimeType` and extension come from the output bytes when their format can be detected, such as an image converted to WebP. Otherwise, as for text-like output like CSV or JSON, they come from the returned `File`'s `type` and `name`. Set both on the `File` you return when your transformer changes the format.
+
 ## The `handleRequest` capability (dynamic requests)
 
 ```ts
