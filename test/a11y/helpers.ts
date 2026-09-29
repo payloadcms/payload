@@ -559,7 +559,7 @@ export async function openDrawerFilters({
     filterContainerSelector: `${drawerSelector} .where-builder`,
     togglerSelector: `${drawerSelector} #toggle-list-filters`,
   })
-  const comboboxes = filters.locator('input[role="combobox"]')
+  const comboboxes = filters.getByRole('combobox', { name: /^(Field|Filter)$/ })
 
   if ((await comboboxes.count()) === 0) {
     await filters.getByRole('button', { name: /add filter/i }).click()
