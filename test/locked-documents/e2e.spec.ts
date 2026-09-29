@@ -213,7 +213,7 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').click()
       // Should be partial since one doc is locked and cannot be selected
-      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.delete-documents__toggle').click()
       await expect(page.locator('#confirm-delete-many-docs .dialog__body p')).toHaveText(
         'You are about to delete 2 Posts',
@@ -290,7 +290,7 @@ describe('Locked Documents', () => {
       const bulkText = 'Bulk update title'
       await page.locator('input#select-all').click()
       // Should be partial since one doc is locked and cannot be selected
-      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
+      await expect(page.locator('input#select-all')).toHaveJSProperty('indeterminate', true)
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 
