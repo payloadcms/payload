@@ -4,7 +4,7 @@ import { HierarchyButton as HierarchyButton_ab83ff7e88da8d3530831f296ec4756a } f
 import { FolderIcon as FolderIcon_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { HierarchySidebarTabServer as HierarchySidebarTabServer_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { TagIcon as TagIcon_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
-import { WelcomeWidget as WelcomeWidget_73d358c73abac21a304a1919dd859eb0 } from '../../../components/Welcome/index.tsx'
+import { WelcomeWidget as WelcomeWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { CollectionQueryWidget as CollectionQueryWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { QueryPresetsWhereField as QueryPresetsWhereField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
@@ -21,7 +21,7 @@ export const importMap = {
   '@payloadcms/ui/rsc#HierarchySidebarTabServer':
     HierarchySidebarTabServer_ab83ff7e88da8d3530831f296ec4756a,
   '@payloadcms/ui#TagIcon': TagIcon_3817bf644402e67bfe6577f60ef982de,
-  './components/Welcome/index.tsx#WelcomeWidget': WelcomeWidget_73d358c73abac21a304a1919dd859eb0,
+  '@payloadcms/ui/rsc#WelcomeWidget': WelcomeWidget_ab83ff7e88da8d3530831f296ec4756a,
   '@payloadcms/ui/rsc#CollectionCards': CollectionCards_ab83ff7e88da8d3530831f296ec4756a,
   '@payloadcms/ui/rsc#CollectionQueryWidget':
     CollectionQueryWidget_ab83ff7e88da8d3530831f296ec4756a,
