@@ -1,5 +1,6 @@
 /* eslint-disable playwright/expect-expect */
 import { expect, test } from '@playwright/test'
+import { rm, rmdir } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -326,7 +327,7 @@ describe('Dashboard', () => {
     const drawer = page.locator('.drawer__content:visible')
     await expect(drawer).toBeVisible()
 
-    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    const collectionsField = drawer
     await expect(collectionsField).toBeVisible()
 
     // Every collection is included (checked) by default - the stored exclusion list is empty.
@@ -393,7 +394,7 @@ describe('Dashboard', () => {
     await d.saveChangesAndValidate()
   })
 
-  test('should open bulk upload from the configured dropzone button and a file drop', async ({
+  test('should include every upload collection by default and use the selected destination', async ({
     page,
   }) => {
     test.setTimeout(60000)
@@ -408,15 +409,13 @@ describe('Dashboard', () => {
     await widget.locator('.widget-wrapper__edit-btn').click()
 
     const drawer = page.locator('.drawer__content:visible')
-    const collectionField = drawer.locator('#field-collection')
-
-    await selectInput({
-      multiSelect: false,
-      option: 'Media',
-      page,
-      selectLocator: collectionField,
-    })
-    await page.waitForTimeout(500)
+    const collectionsField = drawer
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media', exact: true }),
+    ).toBeChecked()
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
     await expect(drawer).toBeHidden()
     await d.saveChangesAndValidate()
@@ -428,21 +427,95 @@ describe('Dashboard', () => {
     const modal = page.locator('#bulk-upload-modal-slug-1')
     await expect(modal).toBeVisible()
     await expect(modal.locator('.bulk-upload--add-files')).toBeVisible()
-    await modal.getByRole('button', { name: 'Close' }).click()
-    await expect(modal).toBeHidden()
-
-    await dropzone.dispatchEvent('dragenter')
-    await expect(dropzone).toHaveClass(/dragging/)
-    await expect(dropzone.getByText('Drop files to upload')).toBeVisible()
-
-    await dropzone.evaluate((element) => {
-      const transfer = new DataTransfer()
-      transfer.items.add(new File(['image'], 'dashboard.png', { type: 'image/png' }))
-      element.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer: transfer }))
+    const destination = modal.locator('.bulk-upload--add-files__collectionSelect')
+    await expect(destination).toBeVisible()
+    await selectInput({
+      multiSelect: false,
+      option: 'Media Alt',
+      page,
+      selectLocator: destination,
     })
+    await expect(destination).toContainText('Media Alt')
+    await modal
+      .locator('.dropzone input[type="file"]')
+      .setInputFiles(path.resolve(dirname, 'test/uploads/image.png'))
+    await expect(modal.getByText('image.png')).toBeVisible()
+    await modal.locator('#field-description').fill('Uploaded from the dashboard')
+    try {
+      await modal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await expect(modal).toBeHidden()
+      const uploadedMedia = await page.request.get(`${serverURL}/api/media-alt?limit=10`)
+      expect(uploadedMedia.ok()).toBe(true)
+      expect((await uploadedMedia.json()).docs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            description: 'Uploaded from the dashboard',
+            filename: 'image.png',
+          }),
+        ]),
+      )
 
-    await expect(modal).toBeVisible()
-    await expect(modal.getByText('dashboard.png')).toBeVisible()
+      await dropzone.dispatchEvent('dragenter')
+      await expect(dropzone).toHaveClass(/dragging/)
+      await expect(dropzone.getByText('Drop files to upload')).toBeVisible()
+
+      await dropzone.evaluate((element) => {
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(['pdf'], 'dashboard.pdf', { type: 'application/pdf' }))
+        element.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer: transfer }))
+      })
+
+      await expect(modal).toBeVisible()
+      await expect(modal.getByText('dashboard.pdf')).toBeVisible()
+      await expect(modal.locator('.file-selections__collectionSelect')).toContainText('Media Alt')
+    } finally {
+      const uploadDirectory = path.resolve(dirname, 'media-alt')
+      await rm(path.join(uploadDirectory, 'image.png'), { force: true })
+      await rmdir(uploadDirectory).catch((err: NodeJS.ErrnoException) => {
+        if (err.code !== 'ENOENT' && err.code !== 'ENOTEMPTY') {
+          throw err
+        }
+      })
+    }
+  })
+
+  test('should exclude an upload collection and preserve the choice after reload', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('Upload files')
+    const widget = d.widgetByPos(TOTAL_WIDGETS + 1)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    await collectionsField.getByRole('checkbox', { name: 'Media', exact: true }).uncheck()
+    await expect(
+      collectionsField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await d.saveChangesAndValidate()
+    await page.reload()
+
+    const dropzoneWidget = page.locator('.upload-dropzone-widget')
+    await dropzoneWidget.getByRole('button', { name: 'Upload files' }).click()
+    const modal = page.locator('#bulk-upload-modal-slug-1')
+    await expect(modal.locator('.bulk-upload--add-files__collectionSelect')).toHaveCount(0)
+    await modal.getByRole('button', { name: 'Close' }).click()
+
+    await d.setEditing()
+    await d.widgetByPos(TOTAL_WIDGETS + 1).hover()
+    await d
+      .widgetByPos(TOTAL_WIDGETS + 1)
+      .locator('.widget-wrapper__edit-btn')
+      .click()
+    const savedField = page.locator('.drawer__content:visible')
+    await expect(savedField.getByRole('checkbox', { name: 'Media', exact: true })).not.toBeChecked()
+    await expect(
+      savedField.getByRole('checkbox', { name: 'Media Alts', exact: true }),
+    ).toBeChecked()
   })
 
   test('delete widget', async ({ page }) => {

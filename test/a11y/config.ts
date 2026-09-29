@@ -6,7 +6,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection, mediaSlug } from './collections/Media/index.js'
+import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
@@ -32,6 +32,12 @@ const FolderCollection = {
   },
 } satisfies CollectionConfig
 
+const MediaAltCollection = {
+  slug: 'media-alt',
+  fields: [],
+  upload: true,
+} satisfies CollectionConfig
+
 export default buildConfigWithDefaults({
   config: {
     // ...extend config here
@@ -47,7 +53,7 @@ export default buildConfigWithDefaults({
       dashboard: {
         defaultLayout: [
           { widgetSlug: 'collections', width: 'full' },
-          { data: { collection: mediaSlug }, widgetSlug: 'upload-dropzone', width: 'small' },
+          { widgetSlug: 'upload-dropzone', width: 'small' },
         ],
         widgets: [],
       },
@@ -55,7 +61,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [FolderCollection, PostsCollection, MediaCollection],
+    collections: [FolderCollection, PostsCollection, MediaCollection, MediaAltCollection],
     editor: lexicalEditor({}),
     globals: [
       // ...add more globals here

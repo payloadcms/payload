@@ -62,16 +62,17 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_9EE25F58".
+ * via the `definition` "LexicalNodes_329CB7DF".
  */
-export type LexicalNodes_9EE25F58 =
+export type LexicalNodes_329CB7DF =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_9EE25F58>
+  | SerializedParagraphNode<LexicalNodes_329CB7DF>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_9EE25F58>
+  | SerializedUploadNode<'media-alt'>
+  | SerializedQuoteNode<LexicalNodes_329CB7DF>
   | SerializedRelationshipNode<
       | 'payload-folders'
       | 'posts'
@@ -81,11 +82,11 @@ export type LexicalNodes_9EE25F58 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_9EE25F58, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_9EE25F58, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_9EE25F58>
-  | SerializedListItemNode<LexicalNodes_9EE25F58>
-  | SerializedHeadingNode<LexicalNodes_9EE25F58>;
+  | SerializedAutoLinkNode<LexicalNodes_329CB7DF, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_329CB7DF, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_329CB7DF>
+  | SerializedListItemNode<LexicalNodes_329CB7DF>
+  | SerializedHeadingNode<LexicalNodes_329CB7DF>;
 
 export interface Config {
   auth: {
@@ -96,6 +97,7 @@ export interface Config {
     'payload-folders': PayloadFolder;
     posts: Post;
     media: Media;
+    'media-alt': MediaAlt;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -111,6 +113,7 @@ export interface Config {
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'media-alt': MediaAltSelect<false> | MediaAltSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -132,6 +135,7 @@ export interface Config {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
+    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -200,7 +204,7 @@ export interface Post {
   accessibilityDisabledSelect?: ('one' | 'two') | null;
   relatedPost?: (string | null) | Post;
   publishedOn?: string | null;
-  content?: LexicalRichText<LexicalNodes_9EE25F58> | null;
+  content?: LexicalRichText<LexicalNodes_329CB7DF> | null;
   items?:
     | {
         label?: string | null;
@@ -282,6 +286,24 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-alt".
+ */
+export interface MediaAlt {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -341,6 +363,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'media-alt';
+        value: string | MediaAlt;
       } | null)
     | ({
         relationTo: 'users';
@@ -499,6 +525,23 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-alt_select".
+ */
+export interface MediaAltSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -597,7 +640,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'payload-folders' | 'posts' | 'media' | 'users';
+    relatedCollection: 'payload-folders' | 'posts' | 'media' | 'media-alt' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -619,7 +662,17 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('payload-folders' | 'posts' | 'media' | 'users')[] | null;
+    excludedCollections?: ('payload-folders' | 'posts' | 'media' | 'media-alt' | 'users')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    excludedCollections?: ('media' | 'media-alt')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

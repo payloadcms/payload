@@ -11,42 +11,48 @@ import { useModal } from '../../elements/Modal/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 type Props = {
-  collectionSlug: string
-  mimeTypes?: string[]
+  collections: Array<{ mimeTypes?: string[]; slug: string }>
 }
 
-export function UploadDropzoneWidgetClient({ collectionSlug, mimeTypes }: Props) {
-  const { modalSlug, setCollectionSlug, setInitialFiles } = useBulkUpload()
+export function UploadDropzoneWidgetClient({ collections }: Props) {
+  const { modalSlug, setCollectionSlug, setInitialFiles, setSelectableCollections } =
+    useBulkUpload()
   const { openModal } = useModal()
   const { t } = useTranslation()
 
   const openUpload = React.useCallback(
-    (files?: FileList) => {
-      setCollectionSlug(collectionSlug)
+    (files?: FileList, destination = collections[0].slug) => {
+      setSelectableCollections(collections.map(({ slug }) => slug))
+      setCollectionSlug(destination)
       setInitialFiles(files)
       openModal(modalSlug)
     },
-    [collectionSlug, modalSlug, openModal, setCollectionSlug, setInitialFiles],
+    [
+      collections,
+      modalSlug,
+      openModal,
+      setCollectionSlug,
+      setInitialFiles,
+      setSelectableCollections,
+    ],
   )
 
   const onDrop = React.useCallback(
     (files: FileList) => {
-      const acceptedFiles = new DataTransfer()
+      const destination = collections.find(({ mimeTypes }) =>
+        Array.from(files).every(
+          (file) => !mimeTypes?.length || validateMimeType(file.type, mimeTypes),
+        ),
+      )
 
-      for (const file of files) {
-        if (!mimeTypes?.length || validateMimeType(file.type, mimeTypes)) {
-          acceptedFiles.items.add(file)
-        }
-      }
-
-      if (!acceptedFiles.files.length) {
+      if (!destination) {
         toast.error(t('error:invalidFileType'))
         return
       }
 
-      openUpload(acceptedFiles.files)
+      openUpload(files, destination.slug)
     },
-    [mimeTypes, openUpload, t],
+    [collections, openUpload, t],
   )
 
   return (

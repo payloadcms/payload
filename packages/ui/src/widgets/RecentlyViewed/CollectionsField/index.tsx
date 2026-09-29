@@ -16,7 +16,7 @@ const normalizeOption = (option: Option): OptionObject =>
   typeof option === 'string' ? { label: option, value: option } : option
 
 /**
- * Widget config field for the activity widget. The value is stored as an exclusion list
+ * Widget config field shared by collection checklists. The value is stored as an exclusion list
  * (`excludedCollections`), but the user sees an inclusion filter: every collection is checked by
  * default and unchecking one adds it to the stored exclusions. Storing exclusions means collections
  * added later are visible by default.

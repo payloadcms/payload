@@ -207,6 +207,25 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(button).toBeFocused()
     })
 
+    test('should choose the upload collection from the dropzone modal with the keyboard', async () => {
+      await page.goto(`${serverURL}/admin`)
+      await page
+        .locator('.upload-dropzone-widget')
+        .getByRole('button', { name: 'Upload files' })
+        .click()
+
+      const modal = page.locator('#bulk-upload-modal-slug-1')
+      const collection = modal.getByRole('combobox', { name: 'Collection' })
+      await expect(collection).toBeVisible()
+      await collection.focus()
+      await collection.pressSequentially('Media Alt')
+      await collection.press('Enter')
+
+      await expect(modal.locator('.bulk-upload--add-files__collectionSelect')).toContainText(
+        'Media Alt',
+      )
+    })
+
     test('should operate the Copy to locale select with the keyboard', async () => {
       // PYLD-3688
       const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })

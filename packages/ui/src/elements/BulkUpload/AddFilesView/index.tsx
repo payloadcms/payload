@@ -3,11 +3,14 @@
 import React from 'react'
 import { toast } from 'sonner'
 
+import { SelectInput } from '../../../fields/Select/Input.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { getFilesFromClipboard } from '../../../utilities/getFilesFromClipboard.js'
 import { DialogHeader, DialogModal } from '../../Dialog/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
 import { UploadDropzoneContent } from '../../UploadDropzoneContent/index.js'
+import { useBulkUpload } from '../index.js'
 import './index.css'
 
 const baseClass = 'bulk-upload--add-files'
@@ -19,6 +22,8 @@ type Props = {
 }
 export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: Props) {
   const { t } = useTranslation()
+  const { getEntityConfig } = useConfig()
+  const { collectionSlug, selectableCollections, setCollectionSlug } = useBulkUpload()
 
   const handlePasteFromClipboard = React.useCallback(async () => {
     try {
@@ -36,6 +41,28 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
   return (
     <DialogModal className={baseClass} size="large" slug={modalSlug}>
       <DialogHeader showClose title={t('upload:addFiles')} />
+      {selectableCollections?.length > 1 && (
+        <SelectInput
+          className={`${baseClass}__collectionSelect`}
+          isClearable={false}
+          label={t('general:collection')}
+          name="collection"
+          onChange={(option) => {
+            if (option && typeof option === 'object' && 'value' in option) {
+              if (typeof option.value === 'string') {
+                setCollectionSlug(option.value)
+              }
+            }
+          }}
+          options={selectableCollections.map((slug) => ({
+            label: getEntityConfig({ collectionSlug: slug }).labels.singular,
+            value: slug,
+          }))}
+          path="uploadCollection"
+          required
+          value={collectionSlug}
+        />
+      )}
       <div className={`${baseClass}__body`}>
         <div className={`${baseClass}__dropArea`}>
           <Dropzone multipleFiles onChange={onDrop}>

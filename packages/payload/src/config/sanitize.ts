@@ -252,14 +252,19 @@ const addDefaultDashboardWidgets = ({
         existingFieldNames: new Set(),
         fields: [
           {
-            name: 'collection',
+            name: 'excludedCollections',
             type: 'select',
-            label: ({ t }) => t('general:collection'),
+            admin: {
+              components: {
+                Field: '@payloadcms/ui#UploadDropzoneCollectionsField',
+              },
+            },
+            hasMany: true,
+            label: ({ t }) => t('general:collections'),
             options: uploadCollections.map((collection) => ({
               label: collection.labels?.plural || collection.slug,
               value: collection.slug,
             })),
-            required: true,
           },
         ],
         parentIsLocalized: false,

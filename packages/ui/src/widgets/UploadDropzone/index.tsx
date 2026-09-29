@@ -8,7 +8,7 @@ import '../../elements/Card/index.css'
 import './index.css'
 
 type UploadDropzoneWidgetData = {
-  collection?: CollectionSlug
+  excludedCollections?: CollectionSlug[]
 }
 
 export function UploadDropzoneWidget({
@@ -17,24 +17,34 @@ export function UploadDropzoneWidget({
   widgetData,
 }: WidgetServerProps<{ data?: UploadDropzoneWidgetData }>) {
   const { i18n, payload } = req
-  const collectionSlug = widgetData?.collection
-  const collection = collectionSlug ? payload.collections[collectionSlug]?.config : undefined
-  const isUploadCollection = Boolean(collection?.upload && collection.upload.bulkUpload)
+  const uploadCollections = Object.values(payload.collections)
+    .map(({ config }) => config)
+    .filter(
+      (collection) =>
+        collection.upload &&
+        collection.upload.bulkUpload !== false &&
+        collection.admin?.hidden !== true,
+    )
+  const excludedCollections = new Set(widgetData?.excludedCollections ?? [])
+  const selectedCollections = uploadCollections.filter(
+    (collection) => !excludedCollections.has(collection.slug),
+  )
+  const permittedCollections = selectedCollections.filter(
+    (collection) => permissions?.collections?.[collection.slug]?.create,
+  )
   const title = i18n.t('dashboard:widgetUploadFiles')
 
-  if (!collectionSlug || !isUploadCollection) {
+  if (!selectedCollections.length) {
     return (
       <section aria-label={title} className="card upload-dropzone-widget">
         <p className="upload-dropzone-widget__message">
-          {collectionSlug
-            ? i18n.t('dashboard:widgetInvalidCollection', { collection: collectionSlug })
-            : i18n.t('dashboard:widgetCollectionRequired')}
+          {i18n.t('dashboard:widgetCollectionRequired')}
         </p>
       </section>
     )
   }
 
-  if (!permissions?.collections?.[collectionSlug]?.create) {
+  if (!permittedCollections.length) {
     return (
       <section aria-label={title} className="card upload-dropzone-widget">
         <p className="upload-dropzone-widget__message">
@@ -47,8 +57,10 @@ export function UploadDropzoneWidget({
   return (
     <section aria-label={title} className="card upload-dropzone-widget">
       <UploadDropzoneWidgetClient
-        collectionSlug={collectionSlug}
-        mimeTypes={collection.upload.mimeTypes}
+        collections={permittedCollections.map((collection) => ({
+          slug: collection.slug,
+          mimeTypes: collection.upload.mimeTypes,
+        }))}
       />
     </section>
   )
