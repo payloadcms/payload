@@ -124,6 +124,35 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     expect(uploaded).toBeDefined()
   })
 
+  it('should retain random suffixes for Local API uploads when client uploads are enabled', async () => {
+    const doc = await payload.create({
+      collection: 'media-with-prefix',
+      data: {},
+      filePath: path.resolve(dirname, '../../uploads/image.png'),
+      overrideAccess: true,
+    })
+    const { blobs } = await list()
+
+    expect(doc.filename).toMatch(/^image-[a-z0-9]+\.png$/)
+    expect(blobs.map((blob) => blob.pathname)).toContain(`${prefix}/${doc.filename}`)
+  })
+
+  it('should retain random suffixes for REST multipart uploads when client uploads are enabled', async () => {
+    const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
+    const formData = new FormData()
+
+    formData.append('_payload', JSON.stringify({}))
+    formData.append('file', new File([file], 'image.png', { type: 'image/png' }))
+
+    const response = await restClient.POST('/media-with-prefix', { body: formData })
+    const { doc } = await response.json()
+    const { blobs } = await list()
+
+    expect(response.status).toBe(201)
+    expect(doc.filename).toMatch(/^image-[a-z0-9]+\.png$/)
+    expect(blobs.map((blob) => blob.pathname)).toContain(`${prefix}/${doc.filename}`)
+  })
+
   it("should reject upload when 'x-disallow-access' header is set", async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
     const issued = await issueClientUpload({
