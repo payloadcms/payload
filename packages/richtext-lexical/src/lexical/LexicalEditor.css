@@ -1,6 +1,7 @@
 @layer payload-default {
   .ContentEditable__keyboard-hint {
-    display: none;
+    /* Reserve space so blur cannot move a pointer target between mouse-down and mouse-up. */
+    visibility: hidden;
     margin: 0;
     padding-block-start: var(--spacer-2);
     padding-inline: calc(var(--content-editable-padding-inline-start) + var(--stroke-width-small));
@@ -10,7 +11,7 @@
 
   .editor-container:has(> .editor-scroller > .editor > .ContentEditable__root:focus)
     + .ContentEditable__keyboard-hint {
-    display: block;
+    visibility: visible;
   }
 
   .rich-text-lexical {
