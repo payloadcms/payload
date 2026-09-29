@@ -57,12 +57,19 @@ export function createHandleRequest({
     const withoutEnlargement = parseResult.withoutEnlargement ?? dynamicDefaults.withoutEnlargement
 
     // The output size is only known once the source is probed: with a single dimension
-    // Sharp derives the other from the aspect ratio, and an animated source is resized
-    // frame by frame, so its real cost is the per-frame output times the frame count.
-    if (isAnimated || parseResult.width === undefined || parseResult.height === undefined) {
+    // Sharp derives the other from the aspect ratio, `fit: 'outside'` can overflow the
+    // requested box along one axis, and an animated source is resized frame by frame,
+    // so its real cost is the per-frame output times the frame count.
+    if (
+      isAnimated ||
+      parseResult.width === undefined ||
+      parseResult.height === undefined ||
+      dynamicDefaults.fit === 'outside'
+    ) {
       const metadata = await sharpDependency(sourceBuffer, sharpOptions).metadata()
       const frameCount = isAnimated ? (metadata.pages ?? 1) : 1
       const output = getOutputDimensions({
+        fit: dynamicDefaults.fit,
         height: parseResult.height,
         sourceHeight: metadata.pageHeight ?? metadata.height,
         sourceWidth: metadata.width,
@@ -119,24 +126,29 @@ export function createHandleRequest({
 }
 
 /**
- * The per-frame output size. When both dimensions are requested this is an upper
- * bound (`fit: 'contain'`/`'inside'` or `withoutEnlargement` can render smaller),
- * which is what a resource budget needs.
+ * The per-frame output size. When both dimensions are requested with any `fit` other
+ * than `'outside'` this is the requested box, an upper bound (`fit: 'contain'`/`'inside'`
+ * or `withoutEnlargement` can render smaller), which is what a resource budget needs.
+ * `'outside'` scales to cover the box, so one axis can exceed it.
  */
 function getOutputDimensions({
+  fit,
   height,
   sourceHeight,
   sourceWidth,
   width,
   withoutEnlargement,
 }: {
+  fit: SharpDynamicDefaults['fit']
   height: number | undefined
   sourceHeight: number | undefined
   sourceWidth: number | undefined
   width: number | undefined
   withoutEnlargement: boolean
 }): { height: number; width: number } | undefined {
-  if (width !== undefined && height !== undefined) {
+  const hasBothDimensions = width !== undefined && height !== undefined
+
+  if (hasBothDimensions && fit !== 'outside') {
     return { height, width }
   }
 
@@ -144,7 +156,11 @@ function getOutputDimensions({
     return undefined
   }
 
-  const scale = width !== undefined ? width / sourceWidth : height! / sourceHeight
+  const scale = hasBothDimensions
+    ? Math.max(width / sourceWidth, height / sourceHeight)
+    : width !== undefined
+      ? width / sourceWidth
+      : height! / sourceHeight
   const effectiveScale = withoutEnlargement ? Math.min(scale, 1) : scale
 
   return {
