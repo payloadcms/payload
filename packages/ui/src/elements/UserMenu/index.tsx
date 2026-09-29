@@ -116,7 +116,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           aria-label={t('authentication:account')}
           className={[
             `${baseClass}__trigger`,
-            active && `${baseClass}__trigger--active`,
+            active && 'popup-button--active',
             showTitle && `${baseClass}__trigger--with-title`,
           ]
             .filter(Boolean)
