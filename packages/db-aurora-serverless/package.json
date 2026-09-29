@@ -1,0 +1,129 @@
+{
+  "name": "@payloadcms/db-aurora-serverless",
+  "version": "4.0.0-canary.37",
+  "description": "Aurora Serverless / RDS Data API database adapter for Payload",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-aurora-serverless"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./migration-utils": {
+      "import": "./src/exports/migration-utils.ts",
+      "types": "./src/exports/migration-utils.ts",
+      "default": "./src/exports/migration-utils.ts"
+    },
+    "./drizzle": {
+      "import": "./src/drizzle-proxy/index.ts",
+      "types": "./src/drizzle-proxy/index.ts",
+      "default": "./src/drizzle-proxy/index.ts"
+    },
+    "./drizzle/pg-core": {
+      "import": "./src/drizzle-proxy/pg-core.ts",
+      "types": "./src/drizzle-proxy/pg-core.ts",
+      "default": "./src/drizzle-proxy/pg-core.ts"
+    },
+    "./drizzle/aws-data-api": {
+      "import": "./src/drizzle-proxy/aws-data-api.ts",
+      "types": "./src/drizzle-proxy/aws-data-api.ts",
+      "default": "./src/drizzle-proxy/aws-data-api.ts"
+    },
+    "./drizzle/relations": {
+      "import": "./src/drizzle-proxy/relations.ts",
+      "types": "./src/drizzle-proxy/relations.ts",
+      "default": "./src/drizzle-proxy/relations.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist",
+    "mock.js"
+  ],
+  "scripts": {
+    "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm renamePredefinedMigrations",
+    "build:debug": "pnpm build",
+    "build:esbuild": "echo skipping esbuild",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-rds-data": "^3.614.0",
+    "@payloadcms/drizzle": "workspace:*",
+    "console-table-printer": "2.15.0",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.45.2",
+    "prompts": "2.4.2",
+    "to-snake-case": "1.0.0",
+    "uuid": "14.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260218.0",
+    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/pg": "8.20.0",
+    "@types/to-snake-case": "1.0.0",
+    "esbuild": "0.27.1",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./migration-utils": {
+        "import": "./dist/exports/migration-utils.js",
+        "types": "./dist/exports/migration-utils.d.ts",
+        "default": "./dist/exports/migration-utils.js"
+      },
+      "./drizzle": {
+        "import": "./dist/drizzle-proxy/index.js",
+        "types": "./dist/drizzle-proxy/index.d.ts",
+        "default": "./dist/drizzle-proxy/index.js"
+      },
+      "./drizzle/pg-core": {
+        "import": "./dist/drizzle-proxy/pg-core.js",
+        "types": "./dist/drizzle-proxy/pg-core.d.ts",
+        "default": "./dist/drizzle-proxy/pg-core.js"
+      },
+      "./drizzle/aws-data-api": {
+        "import": "./dist/drizzle-proxy/aws-data-api.js",
+        "types": "./dist/drizzle-proxy/aws-data-api.d.ts",
+        "default": "./dist/drizzle-proxy/aws-data-api.js"
+      },
+      "./drizzle/relations": {
+        "import": "./dist/drizzle-proxy/relations.js",
+        "types": "./dist/drizzle-proxy/relations.d.ts",
+        "default": "./dist/drizzle-proxy/relations.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  }
+}

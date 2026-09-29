@@ -148,6 +148,8 @@ export const rootEslintConfig = [
             '../richtext-lexical/babel.config.cjs',
             '../richtext-lexical/bundle.js',
             '../richtext-lexical/scripts/translateNewKeys.ts',
+            '../db-aurora-serverless/relationships-v2-v3.mjs',
+            '../db-aurora-serverless/scripts/renamePredefinedMigrations.ts',
             '../db-postgres/bundle.js',
             '../db-postgres/relationships-v2-v3.mjs',
             '../db-postgres/scripts/renamePredefinedMigrations.ts',
