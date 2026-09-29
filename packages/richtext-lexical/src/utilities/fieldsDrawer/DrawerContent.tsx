@@ -14,7 +14,7 @@ import {
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { FieldsDrawerProps } from './Drawer.js'
@@ -51,6 +51,30 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
+  const initializationKey = useMemo(
+    () => ({
+      id,
+      collectionSlug,
+      data,
+      getDocPreferences,
+      getFormState,
+      globalSlug,
+      isEditable,
+      schemaFieldsPath,
+    }),
+    [
+      schemaFieldsPath,
+      id,
+      data,
+      getFormState,
+      collectionSlug,
+      isEditable,
+      globalSlug,
+      getDocPreferences,
+    ],
+  )
+  const initializedKeyRef = useRef<object | undefined>(undefined)
+
   // Parent form state changes after autosave. Read its latest value when initializing without
   // reinitializing this drawer and discarding its unsaved form state after every parent update.
   const getInitialState = useEffectEvent(async (controller: AbortController) => {
@@ -74,10 +98,19 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       signal: controller.signal,
     })
 
-    setInitialState(state)
+    if (!controller.signal.aborted && state) {
+      initializedKeyRef.current = initializationKey
+      setInitialState(state)
+    }
   })
 
   useEffect(() => {
+    // Suspense reconnects effects when a nested drawer finishes loading. Reusing the initialized
+    // form keeps that reconnect from replacing the user's unsaved changes with the original data.
+    if (initializedKeyRef.current === initializationKey) {
+      return
+    }
+
     const controller = new AbortController()
 
     void getInitialState(controller)
@@ -85,16 +118,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     return () => {
       abortAndIgnore(controller)
     }
-  }, [
-    schemaFieldsPath,
-    id,
-    data,
-    getFormState,
-    collectionSlug,
-    isEditable,
-    globalSlug,
-    getDocPreferences,
-  ])
+  }, [initializationKey])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }: { formState: FormState }) => {
