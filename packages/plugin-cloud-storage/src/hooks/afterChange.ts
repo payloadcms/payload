@@ -107,8 +107,8 @@ export const getAfterChangeHook =
               select,
             })
 
-            // Persist all adapter metadata, but do not add unselected fields to the response.
-            docWithMetadata = select ? { ...doc, ...updatedDoc } : { ...doc, ...uploadMetadata }
+            // Persist all adapter metadata, including updated computed fields (such as url).
+            docWithMetadata = select ? { ...doc, ...updatedDoc } : { ...doc, ...updatedDoc }
           } finally {
             delete req.context.skipCloudStorage
           }
