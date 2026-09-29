@@ -1,5 +1,4 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
 import React, {
   createContext,
   use,
@@ -16,6 +15,7 @@ import type { Props, TogglerProps } from './types.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
+import { Modal, useModal } from '../Modal/index.js'
 import './index.css'
 
 const baseClass = 'drawer'
@@ -129,10 +129,12 @@ const DrawerInner: React.FC<Props> = ({
       >
         <div className={`${baseClass}__blur-bg`} />
         <button
+          aria-hidden="true"
           aria-label={t('general:close')}
           className={`${baseClass}__close`}
           id={`close-drawer__${slug}`}
           onClick={() => closeModal(slug)}
+          tabIndex={-1}
           type="button"
         />
         <div className={`${baseClass}__content`}>
