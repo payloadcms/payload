@@ -35,6 +35,14 @@
     }
   }
 
+  /* SidebarRow is also a public extension point for custom navigation items. Keep its
+     default spacing aligned with built-in nav links without changing tree rows that only
+     reuse the shared sidebar-row class. */
+  .sidebar-row-wrapper > .sidebar-row {
+    padding-block: var(--spacer-2);
+    padding-inline: var(--spacer-3);
+  }
+
   .sidebar-row--selected {
     font-weight: var(--text-body-medium-strong-font-weight);
     background: var(--color-bg-selected);
