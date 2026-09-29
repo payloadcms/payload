@@ -402,6 +402,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:selectAllRows',
   'general:selectedCount',
   'general:selectLabel',
+  'general:selectRow',
   'general:selectValue',
   'general:settings',
   'general:showAllLabel',
