@@ -1749,7 +1749,7 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(page.getByRole('main')).toHaveCount(0)
       await expect(drawer).toHaveAccessibleName(/add widget/i)
       await page.keyboard.press('Escape')
-      await expect(drawer).not.toBeVisible()
+      await expect(drawer).toBeHidden()
       await expect(trigger).toBeFocused()
       await expect(page.getByRole('navigation').first()).toBeVisible()
 
@@ -1758,7 +1758,7 @@ test.describe('WCAG 2.2 Level AA', () => {
 
       await expect(parent.getByRole('textbox')).toHaveCount(0)
       await page.keyboard.press('Escape')
-      await expect(modal).not.toBeVisible()
+      await expect(modal).toBeHidden()
       await expect(parent).toBeVisible()
       await expect
         .poll(() => parent.evaluate((element) => element.contains(document.activeElement)))
@@ -1836,8 +1836,10 @@ test.describe('WCAG 2.2 Level AA', () => {
       ]) {
         const drawer = await open({ page, postsURL })
 
-        await expect.soft
-          .poll(() => drawer.evaluate((element) => element.contains(document.activeElement)))
+        await expect
+          .poll(() => drawer.evaluate((element) => element.contains(document.activeElement)), {
+            soft: true,
+          })
           .toBe(true)
       }
     })
