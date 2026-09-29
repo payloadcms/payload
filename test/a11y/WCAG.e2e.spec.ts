@@ -64,6 +64,7 @@ test.describe('WCAG 2.2 Level AA', () => {
 
   test.describe('1.1.1 Non-text Content (A)', () => {
     test('should expose the default login logo as an image named Payload', async ({ browser }) => {
+      // PYLD-3609: expose the static logo without adding a keyboard Tab stop.
       const loginPage = await browser.newPage({
         extraHTTPHeaders: { DisableAutologin: 'true' },
       })
@@ -73,11 +74,7 @@ test.describe('WCAG 2.2 Level AA', () => {
         const logo = loginPage.getByRole('img', { name: 'Payload', exact: true })
 
         await expect(logo).toBeVisible()
-        await loginPage.locator('#field-email').focus()
-        await loginPage.keyboard.press('Shift+Tab')
-        await expect(logo).toBeFocused()
-        await loginPage.keyboard.press('Tab')
-        await expect(loginPage.locator('#field-email')).toBeFocused()
+        expect(await logo.evaluate((element) => element.tabIndex)).toBe(-1)
       } finally {
         await loginPage.close()
       }

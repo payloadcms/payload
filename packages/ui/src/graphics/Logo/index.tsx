@@ -13,7 +13,6 @@ export const PayloadLogo: React.FC = () => (
     fill="none"
     height="32"
     role="img"
-    tabIndex={0}
     viewBox="0 0 143 32"
     width="143"
     xmlns="http://www.w3.org/2000/svg"

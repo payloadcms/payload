@@ -84,14 +84,6 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
       })
 
       expect(output).toMatch(/Payload/i)
-      await page.locator('#field-email').focus()
-      const capture = await captureScreenReader({
-        action: () => page.keyboard.press('Shift+Tab'),
-        screenReader,
-      })
-
-      await expect(page.getByRole('img', { name: 'Payload', exact: true })).toBeFocused()
-      expect(capture.spokenPhrase).toMatch(/Payload/i)
     })
   })
 
