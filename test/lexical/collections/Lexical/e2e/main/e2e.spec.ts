@@ -312,7 +312,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     await richTextField.click() // Use click, because focus does not work
     await page.keyboard.type('some text')
-    const spanInEditor = richTextField.locator('span').first()
+    const spanInEditor = richTextField.locator('[data-lexical-text="true"]').first()
     await expect(spanInEditor).toHaveText('some text')
     await saveDocAndAssert(page)
     await page.locator('#clear-lexical-lexicalSimple').click()
@@ -327,7 +327,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     await richTextField.click() // Use click, because focus does not work
     await page.keyboard.type('some text')
-    const spanInEditor = richTextField.locator('span').first()
+    const spanInEditor = richTextField.locator('[data-lexical-text="true"]').first()
     await expect(spanInEditor).toHaveText('some text')
     await saveDocAndAssert(page)
     await page.locator('#clear-lexical-lexicalSimple').click()

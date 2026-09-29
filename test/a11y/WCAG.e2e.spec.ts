@@ -1,6 +1,7 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { formatAdminURL } from 'payload/shared'
 
 import type { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 
@@ -8,6 +9,7 @@ import { addGroupBy, clearGroupBy, openGroupBy } from '../__helpers/e2e/groupBy/
 import { selectInput } from '../__helpers/e2e/selectInput.js'
 import {
   addTextBlock,
+  cleanupModalMedia,
   expectOptionsToHaveAccessibleNames,
   getFocusIndicatorStyle,
   gotoCreatePost,
@@ -15,16 +17,24 @@ import {
   gotoPostsList,
   hasRenderedFocusIndicator,
   openAccessibilityTestPage,
+  openAPIKeyDialog,
   openBlockDatePicker,
   openBulkEditFieldSelect,
+  openBulkUploadDialog,
   openCopyToLocaleDrawer,
+  openDrawerFilters,
+  openEditImageDialog,
   openFirstBlockActions,
   openFolderCreationLocation,
+  openLivePreview,
   openLocaleOptions,
   openPopupWithKeyboard,
   openPostsFilter,
+  openRelationshipCreationDrawer,
   openRichTextRelationshipDrawer,
+  openRichTextUploadDrawer,
   openVersionComparison,
+  openWidgetDrawer,
 } from './helpers.js'
 
 test.describe('WCAG 2.2 Level AA', () => {
@@ -39,11 +49,106 @@ test.describe('WCAG 2.2 Level AA', () => {
     }))
   })
 
+  test.afterEach(async () => {
+    await cleanupModalMedia({ page })
+  })
+
   test.afterAll(async () => {
     await page.context().close()
   })
 
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should expose image-edit section titles as headings', async () => {
+      // PYLD-3576
+      const dialog = await openEditImageDialog({ page, serverURL })
+
+      await expect.soft(dialog.getByRole('heading', { name: 'Crop', exact: true })).toBeVisible()
+      await expect
+        .soft(dialog.getByRole('heading', { name: 'Focal Point', exact: true }))
+        .toBeVisible()
+    })
+
+    test('should preserve image-edit title typography when changing spans to headings', async () => {
+      const dialog = await openEditImageDialog({ page, serverURL })
+
+      await page.evaluate(() => document.fonts.ready)
+      for (const name of ['Crop', 'Focal Point']) {
+        const heading = dialog.getByRole('heading', { name, exact: true })
+
+        await expect(heading).toBeVisible()
+        const comparison = await compareHeadingWithOriginalSpan({
+          heading,
+          originalStyle: `
+            font-family: var(--text-body-medium-strong-font-family);
+            font-size: var(--text-body-medium-strong-font-size);
+            font-weight: var(--text-body-medium-strong-font-weight);
+            line-height: var(--text-body-medium-strong-line-height);
+            color: var(--color-text);
+          `,
+        })
+
+        await test.info().attach(`${name}-typography-before-after`, {
+          body: JSON.stringify(comparison, null, 2),
+          contentType: 'application/json',
+        })
+        expect.soft(comparison.after, name).toEqual(comparison.before)
+      }
+    })
+
+    test('should expose the folder location column title as a heading', async () => {
+      // PYLD-3586
+      const modal = await openFolderCreationLocation({ page, serverURL })
+
+      await expect(modal.getByRole('heading', { name: 'All', exact: true })).toBeVisible()
+    })
+
+    test('should preserve folder column title typography when changing span to heading', async () => {
+      const modal = await openFolderCreationLocation({ page, serverURL })
+      const heading = modal.getByRole('heading', { name: 'All', exact: true })
+
+      await expect(heading).toBeVisible()
+      await page.evaluate(() => document.fonts.ready)
+      const comparison = await compareHeadingWithOriginalSpan({
+        heading,
+        originalStyle: `
+          display: flex; align-items: center; gap: var(--spacer-2);
+          font-weight: 500; color: var(--color-text); white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis;
+        `,
+      })
+
+      await test.info().attach('title-typography-before-after', {
+        body: JSON.stringify(comparison, null, 2),
+        contentType: 'application/json',
+      })
+      expect(comparison.after).toEqual(comparison.before)
+    })
+
+    test('should preserve the meaning and semantic emphasis of API-key replacement warnings', async () => {
+      // PYLD-3616
+      const dialog = await openAPIKeyDialog({ page, serverURL })
+
+      // The current UI emphasizes the affected key suffix, rather than the word "invalidate".
+      await expect(dialog).toContainText(/invalidate.*1234/i)
+      await expect(dialog.locator('strong')).toHaveText('1234')
+      // Spoken emphasis depends on screen-reader verbosity; confirm manually with VoiceOver.
+    })
+
+    test('should expose the add-widget title as a heading', async () => {
+      // PYLD-3648
+      const { drawer, trigger } = await openWidgetDrawer({ page, serverURL })
+
+      await trigger.press('Enter')
+      await expect(drawer.getByRole('heading', { name: /add widget/i })).toBeVisible()
+    })
+
+    test('should expose the relationship creation panel title as a heading', async () => {
+      // PYLD-3653
+      const drawer = await openRelationshipCreationDrawer({ page, postsURL })
+
+      await expect(drawer.getByRole('heading', { name: /creating new post/i })).toBeVisible()
+    })
+
     test('should give the Copy to locale combobox an accessible name', async () => {
       // PYLD-3687
       const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
@@ -187,6 +292,220 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.1.1 Keyboard (A)', () => {
+    test('should move the focal-point handle with arrow keys and clamp it to the image', async () => {
+      const dialog = await openEditImageDialog({ page, serverURL })
+      const handle = dialog.getByRole('button', { name: 'Set focal point', exact: true })
+      const x = dialog.getByRole('spinbutton', { name: 'Focal Point X', exact: true })
+      const y = dialog.getByRole('spinbutton', { name: 'Focal Point Y', exact: true })
+
+      await handle.focus()
+      await handle.press('ArrowRight')
+      await expect(x).toHaveValue('51')
+      await handle.press('ArrowDown')
+      await expect(y).toHaveValue('51')
+      await handle.press('ArrowLeft')
+      await handle.press('ArrowUp')
+      await expect(x).toHaveValue('50')
+      await expect(y).toHaveValue('50')
+      await expect(handle).toBeFocused()
+
+      await x.fill('99')
+      await y.fill('1')
+      await handle.focus()
+      await handle.press('Shift+ArrowRight')
+      await handle.press('Shift+ArrowUp')
+      await expect(x).toHaveValue('100')
+      await expect(y).toHaveValue('0')
+      await handle.press('ArrowRight')
+      await handle.press('ArrowUp')
+      await expect(x).toHaveValue('100')
+      await expect(y).toHaveValue('0')
+      await handle.press('Shift+ArrowLeft')
+      await handle.press('Shift+ArrowDown')
+      await expect(x).toHaveValue('90')
+      await expect(y).toHaveValue('10')
+      await expect(handle).toBeFocused()
+      await handle.press('Tab')
+      await expect(handle).not.toBeFocused()
+    })
+
+    test('should reorder rich-text callouts using the keyboard on the page and creation panel', async () => {
+      // PYLD-3666
+      test.setTimeout(60000)
+      for (const context of ['page', 'relationship panel'] as const) {
+        await test.step(context, async () => {
+          const container = await openRichTextContext({
+            isDrawer: context === 'relationship panel',
+            page,
+            postsURL,
+          })
+          const callouts = getCallouts({ container })
+
+          await expect(callouts).toHaveCount(2)
+          const handle = callouts.first().getByRole('button', { name: /drag to reorder/i })
+
+          const paragraph = container.locator('[contenteditable="true"] > p').last()
+
+          await paragraph.click()
+          await page.keyboard.press('Tab')
+          await expect(paragraph).toHaveCSS('padding-inline-start', '40px')
+          await page.keyboard.press('Shift+Tab')
+          await expect(paragraph).toHaveCSS('padding-inline-start', '0px')
+          await callouts.first().locator('.collapsible__toggle').focus()
+          await page.keyboard.press('Tab')
+          await expect(handle).toBeFocused()
+          await page.keyboard.press('Shift+Tab')
+          await expect(callouts.first().locator('.collapsible__toggle')).toBeFocused()
+          await page.keyboard.press('Tab')
+          await expect(handle).toBeFocused()
+          const initialTop = (await callouts.first().boundingBox())!.y
+
+          await page.keyboard.press('Space')
+          await page.keyboard.press('ArrowDown')
+          await expect
+            .poll(async () => (await callouts.first().boundingBox())!.y)
+            .toBeGreaterThan(initialTop)
+          await expect(handle).toBeFocused()
+          await page.keyboard.press('Space')
+          await expect
+            .soft(callouts.first().locator('input[value$="callout"]'))
+            .toHaveValue('Second callout')
+          await expect
+            .soft(callouts.nth(1).locator('input[value$="callout"]'))
+            .toHaveValue('First callout')
+          await expect(paragraph).toHaveText('')
+          await expect(paragraph).toHaveCSS('padding-inline-start', '0px')
+          if (context === 'page') {
+            await callouts
+              .nth(1)
+              .getByRole('button', { name: /drag to reorder/i })
+              .focus()
+            const modifier = await page.evaluate(() =>
+              navigator.userAgent.includes('Mac OS X') ? 'Meta' : 'Control',
+            )
+
+            await page.keyboard.press(`${modifier}+k`)
+            await expect(page.locator('#command-palette')).toBeVisible()
+            await page.keyboard.press('Escape')
+          }
+        })
+      }
+    })
+
+    test('should move rich-text lines with keyboard shortcuts in both editor contexts', async () => {
+      // Additional coverage for PYLD-3666 beyond block-object handles.
+      for (const isDrawer of [false, true]) {
+        const container = await openRichTextContext({ isDrawer, page, postsURL })
+        const editor = container.locator('[contenteditable="true"]').first()
+
+        await editor.locator('p').last().click()
+        await page.keyboard.insertText('First line')
+        await page.keyboard.press('Enter')
+        await page.keyboard.insertText('Second line')
+        await page.keyboard.press('Alt+Shift+ArrowUp')
+        await expect(editor.locator('p')).toHaveText(['Second line', 'First line'])
+        await page.keyboard.press('Alt+Shift+ArrowDown')
+        await expect(editor.locator('p')).toHaveText(['First line', 'Second line'])
+      }
+    })
+
+    test('should cancel block reordering and retain focus at the first boundary', async () => {
+      // Additional coverage for PYLD-3666.
+      const drawer = await openRelationshipCreationDrawer({ page, postsURL })
+      const callouts = getCallouts({ container: drawer })
+      let handle = callouts.first().getByRole('button', { name: /drag to reorder/i })
+
+      await handle.focus()
+      const initialTop = (await callouts.first().boundingBox())!.y
+
+      await handle.press('Space')
+      await page.keyboard.press('ArrowDown')
+      await expect
+        .poll(async () => (await callouts.first().boundingBox())!.y)
+        .toBeGreaterThan(initialTop)
+      await page.keyboard.press('ArrowUp')
+      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('Escape')
+      await expect.poll(async () => (await callouts.first().boundingBox())!.y).toBe(initialTop)
+      await expect(drawer).toBeVisible()
+      await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue('First callout')
+      await expect(handle).toBeFocused()
+      await handle.press('Space')
+      await page.keyboard.press('ArrowUp')
+      await page.keyboard.press('Space')
+      handle = callouts.first().getByRole('button', { name: /drag to reorder/i })
+      await expect(handle).toBeFocused()
+      await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue('First callout')
+    })
+
+    test('should expose reorder feedback when a callout is collapsed', async () => {
+      // Additional coverage for PYLD-3666 and 4.1.3 Status Messages (AA).
+      await gotoCreatePost({ page, postsURL })
+      const callout = page.locator('.rich-text-lexical .collapsible').first()
+      await callout.getByRole('button', { name: 'Collapse', exact: true }).click()
+      const handle = callout.getByRole('button', { name: /drag to reorder/i })
+
+      await handle.focus()
+      await handle.press('Space')
+      await handle.press('ArrowDown')
+      await expect(callout.getByRole('status')).toHaveText(/Order: 2/)
+      await handle.press('Escape')
+    })
+
+    test('should operate callout menus and collapse controls with a pointer', async () => {
+      // Additional coverage for PYLD-3666 and 2.5.7 Dragging Movements (AA).
+      await gotoCreatePost({ page, postsURL })
+      const callouts = getCallouts({ container: page.locator('main') })
+
+      await callouts.first().locator('.section-title__input').fill('Edited block')
+      const handle = callouts.first().getByRole('button', { name: /drag to reorder/i })
+
+      await handle.focus()
+      await handle.press('Space')
+      await handle.press('ArrowDown')
+      const collapse = callouts.first().getByRole('button', { name: 'Collapse', exact: true })
+      const background = await collapse.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      )
+
+      await collapse.hover()
+      await expect(collapse).not.toHaveCSS('background-color', background)
+      await collapse.click({ delay: 150 })
+      await expect(callouts.first().locator('input[value="First callout"]')).toBeHidden()
+      await callouts
+        .first()
+        .getByRole('button', { name: 'Expand', exact: true })
+        .click({ delay: 150 })
+      await expect(callouts.first().locator('input[value="First callout"]')).toBeVisible()
+      await handle.focus()
+      await handle.press('Space')
+      await handle.press('ArrowDown')
+      await callouts
+        .first()
+        .locator('.collapsible__actions .popup__trigger-wrap button')
+        .click({ delay: 150 })
+      await page.getByRole('menuitem', { name: 'Move Down', exact: true }).click({ delay: 150 })
+      await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue(
+        'Second callout',
+      )
+      await callouts
+        .nth(1)
+        .locator('.collapsible__actions .popup__trigger-wrap button')
+        .click({ delay: 150 })
+      await page.getByRole('menuitem', { name: 'Move Up', exact: true }).click({ delay: 150 })
+      await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue('First callout')
+      await callouts
+        .first()
+        .locator('.collapsible__actions .popup__trigger-wrap button')
+        .click({ delay: 150 })
+      await page.getByRole('menuitem', { name: 'Remove', exact: true }).click({ delay: 150 })
+      await expect(callouts).toHaveCount(1)
+      await expect(callouts.first().locator('input[value$="callout"]')).toHaveValue(
+        'Second callout',
+      )
+    })
+
     test('should operate the Copy to locale select with the keyboard', async () => {
       // PYLD-3688
       const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
@@ -403,6 +722,244 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    for (const key of ['Enter', 'Space']) {
+      test(`should retain focus after moving a rich-text block without a drag handle using ${key}`, async () => {
+        await gotoCreatePost({ page, postsURL })
+        await page.locator('[contenteditable="true"]').first().locator('p').last().click()
+        await page.keyboard.type('/nohandle')
+        await page
+          .locator('#slash-menu')
+          .getByRole('option', { name: /no handle block/i })
+          .click()
+        const block = page.locator('.LexicalEditorTheme__block-noHandle')
+        const trigger = block.locator('.LexicalEditorTheme__block__actions-button')
+
+        const header = block.locator('.collapsible__toggle-wrap').first()
+        const nestedHandle = block.locator('.collapsible__drag')
+
+        await expect(header.locator('.collapsible__drag')).toHaveCount(0)
+        await expect(nestedHandle).toBeVisible()
+        await expect(block.locator('.LexicalEditorTheme__block__block-number')).toHaveText('03')
+        const paragraphs = page.locator('[contenteditable="true"]').first().locator(':scope > p')
+        const paragraphCount = await paragraphs.count()
+
+        await trigger.press(key)
+        await page.getByRole('menuitem', { name: 'Move Up', exact: true }).press(key)
+        await expect(block.locator('.LexicalEditorTheme__block__block-number')).toHaveText('02')
+        await expect(trigger).toBeFocused()
+        await header.getByRole('button', { name: 'Collapse', exact: true }).click()
+        await expect(nestedHandle).toBeHidden()
+        await trigger.press(key)
+        await page.getByRole('menuitem', { name: 'Move Down', exact: true }).press(key)
+        await expect(block.locator('.LexicalEditorTheme__block__block-number')).toHaveText('03')
+        await expect(trigger).toBeFocused()
+        await expect(paragraphs).toHaveCount(paragraphCount)
+        await page.keyboard.press(key)
+        await page.getByRole('menuitem', { name: 'Remove', exact: true }).press(key)
+        await expect(block).toHaveCount(0)
+        await expect(paragraphs).toHaveCount(paragraphCount)
+      })
+    }
+
+    test('should focus and isolate nested modals with custom IDs', async () => {
+      await page.goto(
+        formatAdminURL({ adminRoute: '/admin', path: '/custom-modal-ids', serverURL }),
+      )
+      await page.getByRole('button', { name: 'Open parent' }).click()
+      await expect(page.getByRole('dialog', { name: 'Parent title' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Parent title' })).toBeFocused()
+      await page.getByRole('button', { name: 'Open child' }).click()
+      await expect(page.getByRole('dialog', { name: 'Child title' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Child title' })).toBeFocused()
+      await expect(page.getByTestId('parent')).toHaveAttribute('inert', '')
+      await expect(page.getByTestId('child')).not.toHaveAttribute('inert')
+      await page.getByRole('button', { name: 'Close child' }).click()
+      await expect(page.getByTestId('parent')).not.toHaveAttribute('inert')
+      await expect(page.getByRole('button', { name: 'Open child' })).toBeFocused()
+      await page.getByRole('button', { name: 'Close parent' }).click()
+      await expect(page.getByRole('button', { name: 'Open parent' })).toBeFocused()
+    })
+
+    test('should contain keyboard focus in media and nested folder modals', async () => {
+      // Additional coverage for PYLD-3575 and PYLD-3587; browse-cursor coverage is in screen-reader.spec.ts.
+      test.setTimeout(60000)
+      for (const open of [openBulkUploadDialog, openEditImageDialog, openFolderCreationLocation]) {
+        const modal = await open({ page, serverURL })
+        const firstButton = modal.getByRole('button').first()
+
+        await firstButton.focus()
+        const stopCount = await modal.locator('button, input, a[href], [tabindex="0"]').count()
+
+        for (const key of ['Tab', 'Shift+Tab']) {
+          for (let step = 0; step < stopCount + 2; step++) {
+            await page.keyboard.press(key)
+            expect
+              .soft(await modal.evaluate((element) => element.contains(document.activeElement)))
+              .toBe(true)
+          }
+        }
+      }
+    })
+
+    test('should isolate modal content and restore focus after nested dismissal', async () => {
+      // Additional coverage for PYLD-3575, PYLD-3587, PYLD-3644 and PYLD-3682.
+      const { drawer, trigger } = await openWidgetDrawer({ page, serverURL })
+
+      await trigger.press('Enter')
+      await expect(drawer).toBeVisible()
+      await expect(page.getByRole('main')).toHaveCount(0)
+      await expect(drawer).toHaveAccessibleName(/add widget/i)
+      await page.keyboard.press('Escape')
+      await expect(drawer).not.toBeVisible()
+      await expect(trigger).toBeFocused()
+      await expect(page.getByRole('navigation').first()).toBeVisible()
+
+      const modal = await openFolderCreationLocation({ page, serverURL })
+      const parent = page.locator('dialog.drawer[open]')
+
+      await expect(parent.getByRole('textbox')).toHaveCount(0)
+      await page.keyboard.press('Escape')
+      await expect(modal).not.toBeVisible()
+      await expect(parent).toBeVisible()
+      await expect
+        .poll(() => parent.evaluate((element) => element.contains(document.activeElement)))
+        .toBe(true)
+      await expect(parent.getByRole('textbox').first()).toBeVisible()
+    })
+
+    test('should keep drawer filter options inside the active modal accessibility tree', async () => {
+      // Additional coverage for PYLD-3662; synthesized speech still needs NVDA.
+      const drawer = await openRichTextUploadDrawer({ page, postsURL })
+      const controls = await openDrawerFilters({ drawer })
+
+      await controls.nth(0).click()
+      await expect(drawer.getByRole('option').first()).toBeVisible()
+      await expect(page.getByRole('main')).toHaveCount(0)
+    })
+
+    test('should keep table actions and resize handles operable inside a creation drawer', async () => {
+      // Additional coverage for portals owned by the active modal.
+      const drawer = await openRelationshipCreationDrawer({ page, postsURL })
+      await drawer.locator('[contenteditable="true"] p').last().click()
+      await drawer.locator('.toolbar-popup__dropdown-add').click()
+      await drawer.locator('.toolbar-popup__dropdown-item[data-item-key="table"]').click()
+      await drawer.getByRole('button', { name: '2 columns, 2 rows', exact: true }).click()
+      const table = drawer.locator('[contenteditable="true"] table')
+      await expect(table.locator('tr')).toHaveCount(2)
+      const cell = table.locator('th, td').first()
+      await cell.click()
+      await cell.hover()
+      await expect(drawer.locator('.TableCellResizer__ui')).toHaveCount(2)
+      const width = (await cell.boundingBox())?.width ?? 0
+      const resize = await drawer.locator('.TableCellResizer__ui').first().boundingBox()
+
+      if (!resize) {
+        throw new Error('Expected a visible table resize handle')
+      }
+      await page.mouse.move(resize.x + resize.width / 2, resize.y + resize.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(resize.x + resize.width / 2 + 40, resize.y + resize.height / 2, {
+        steps: 5,
+      })
+      await page.mouse.up()
+      await expect
+        .poll(async () => (await cell.boundingBox())?.width ?? 0)
+        .toBeGreaterThan(width + 20)
+      await cell.click()
+      await drawer.locator('.table-cell-action-button').click()
+      await drawer.locator('[data-test-id="table-insert-row-below"]').click()
+      await expect(table.locator('tr')).toHaveCount(3)
+    })
+
+    test('should keep calendar controls operable inside a creation drawer', async () => {
+      // Additional coverage for modal isolation and nested popovers.
+      const drawer = await openRelationshipCreationDrawer({ page, postsURL })
+      await drawer.locator('#field-publishedOn input').click()
+      const calendar = drawer.locator('.react-datepicker')
+
+      await expect(calendar).toBeVisible()
+      await calendar.getByRole('combobox', { name: /month/i }).selectOption('0')
+      await expect(calendar.getByRole('combobox', { name: /month/i })).toHaveValue('0')
+      await calendar
+        .locator('.react-datepicker__day:not(.react-datepicker__day--outside-month)')
+        .first()
+        .click()
+      await expect(drawer.locator('#field-publishedOn input')).not.toHaveValue('')
+    })
+
+    test('should move focus into rich-text insertion and relationship creation panels', async () => {
+      // PYLD-3676
+      test.setTimeout(60000)
+      for (const open of [
+        openRichTextUploadDrawer,
+        openRichTextRelationshipDrawer,
+        openRelationshipCreationDrawer,
+      ]) {
+        const drawer = await open({ page, postsURL })
+
+        await expect.soft
+          .poll(() => drawer.evaluate((element) => element.contains(document.activeElement)))
+          .toBe(true)
+      }
+    })
+
+    test('should keep active link editing available on the page and in a drawer', async () => {
+      // Additional coverage for PYLD-3665.
+      for (const isDrawer of [false, true]) {
+        const container = await openRichTextContext({ isDrawer, page, postsURL })
+        const editor = container.locator('[contenteditable="true"]').first()
+
+        await editor.locator('p').last().click()
+        await page.keyboard.insertText('https://example.com')
+        await page.keyboard.press('Space')
+        await page.keyboard.press('ArrowLeft')
+        await page.keyboard.press('ArrowLeft')
+        const edit = container.getByRole('button', { name: 'Edit link', exact: true })
+
+        await expect(edit).toBeVisible()
+        await edit.focus()
+        await edit.press('Enter')
+        const linkDrawer = page.locator('dialog.lexical-link-edit-drawer')
+        await expect(linkDrawer).toBeVisible()
+        await expect(linkDrawer.locator('#field-url')).toHaveValue('https://example.com')
+      }
+    })
+
+    test('should keep inactive link controls out of keyboard navigation on the page and creation panel', async () => {
+      // PYLD-3665
+      test.setTimeout(60000)
+      for (const isDrawer of [false, true]) {
+        const container = await openRichTextContext({ isDrawer, page, postsURL })
+        const editor = container.locator('[contenteditable="true"]').first()
+
+        await editor.locator('p').last().click()
+        await page.keyboard.insertText('Plain text without a link')
+        for (let step = 0; step < 12; step++) {
+          await page.keyboard.press('Tab')
+          const focus = page.locator(':focus')
+
+          await expect.soft(focus).not.toHaveAccessibleName(/^(edit|remove) link$/i)
+        }
+        const controls = container.locator('.link-edit, .link-trash')
+
+        for (const control of await controls.all()) {
+          const canReceiveTab = await control.evaluate((element) => {
+            const node = element as HTMLElement
+            return (
+              node.tabIndex >= 0 &&
+              node.getClientRects().length > 0 &&
+              !node.closest('[inert]') &&
+              getComputedStyle(node).visibility !== 'hidden'
+            )
+          })
+
+          expect
+            .soft(canReceiveTab, 'Inactive floating link controls must not receive Tab')
+            .toBe(false)
+        }
+      }
+    })
+
     test('should navigate User menu items without entering hidden submenus', async () => {
       // Additional coverage for PYLD-3645 and PYLD-3697.
       await page.goto(`${serverURL}/admin`)
@@ -778,6 +1335,44 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.6 Headings and Labels (AA)', () => {
+    test('should distinguish new-folder actions by their destination column', async () => {
+      // PYLD-3584
+      // No criterion was supplied in the report; 2.4.6 is the best-fit classification.
+      const modal = await openFolderCreationLocation({ page, serverURL })
+
+      await modal
+        .locator('.hierarchy-column-item')
+        .filter({ hasText: /^Accessibility folder$/ })
+        .press('Enter')
+      const columns = modal.locator('.hierarchy-column')
+
+      await expect(columns).toHaveCount(2)
+      await expect
+        .soft(columns.nth(0).getByRole('button', { name: /new folder/i }))
+        .toHaveAccessibleName(/new folder.*all/i)
+      await expect
+        .soft(columns.nth(1).getByRole('button', { name: /new folder/i }))
+        .toHaveAccessibleName(/new folder.*accessibility folder/i)
+    })
+
+    test('should name the API-key confirmation close control without an internal identifier', async () => {
+      // PYLD-3617
+      const dialog = await openAPIKeyDialog({ page, serverURL })
+
+      await expect(dialog.locator('.dialog__header-end button')).toHaveAccessibleName('Close')
+    })
+
+    test('should name the live-preview unpublish confirmation close control clearly', async () => {
+      // PYLD-3727
+      await openLivePreview({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      await page.locator('#action-unpublish').click()
+      const dialog = page.locator('.dialog').filter({ hasText: /confirm unpublish/i })
+
+      await expect(dialog).toBeVisible()
+      await expect(dialog.locator('.dialog__header-end button')).toHaveAccessibleName('Close')
+    })
+
     test('should give each bulk-edit remove control a unique field-specific label', async () => {
       // PYLD-3768
       const fieldSelect = await openBulkEditFieldSelect({ page, postsURL })
@@ -796,6 +1391,26 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('2.4.7 Focus Visible (AA)', () => {
+    test('should not tab to an invisible widget drawer dismissal region', async () => {
+      // PYLD-3633
+      const { drawer, trigger } = await openWidgetDrawer({ page, serverURL })
+
+      await trigger.press('Enter')
+      await expect(drawer).toBeVisible()
+      const dismissal = drawer.locator(':scope > .drawer__close')
+      const unfocusedStyle = await getFocusIndicatorStyle(dismissal)
+      const stopCount = await drawer.locator('button, input, a[href], [tabindex="0"]').count()
+
+      for (let step = 0; step <= stopCount + 1; step++) {
+        await page.keyboard.press('Tab')
+        if (await dismissal.evaluate((element) => element === document.activeElement)) {
+          const focusedStyle = await getFocusIndicatorStyle(dismissal)
+
+          expect.soft(hasRenderedFocusIndicator({ focusedStyle, unfocusedStyle })).toBe(true)
+        }
+      }
+    })
+
     test('should render a visible focus indicator on date-picker month and year selects', async () => {
       // PYLD-3738
       const { monthSelect, yearSelect } = await openBlockDatePicker({ page, postsURL })
@@ -891,6 +1506,35 @@ test.describe('WCAG 2.2 Level AA', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    for (const { label, open } of [
+      { label: 'upload', open: openRichTextUploadDrawer },
+      { label: 'relationship', open: openRichTextRelationshipDrawer },
+    ]) {
+      for (const [index, control] of ['field', 'operator'].entries()) {
+        test(`should expose named ${control} filter options in the rich-text ${label} drawer`, async () => {
+          // Additional coverage for PYLD-3662; NVDA browse-mode output is checked in screen-reader.spec.ts.
+          const drawer = await open({ page, postsURL })
+          const comboboxes = await openDrawerFilters({
+            collectionLabel: label === 'relationship' ? 'Post' : undefined,
+            drawer,
+          })
+          const combobox = comboboxes.nth(index)
+
+          await combobox.focus()
+          await combobox.press('ArrowDown')
+          await expect(page.getByRole('option').first()).toBeVisible()
+          await expectOptionsToHaveAccessibleNames(page.getByRole('option'))
+        })
+      }
+    }
+
+    test('should name the image focal-point control by its purpose', async () => {
+      // PYLD-3577
+      const dialog = await openEditImageDialog({ page, serverURL })
+
+      await expect(dialog.locator('.edit-upload__focalPoint')).toHaveAccessibleName(/focal point/i)
+    })
+
     test('should expose the active locale as selected rather than disabled', async () => {
       // Additional coverage for PYLD-3699.
       // Additional coverage for PYLD-3700.
@@ -1115,6 +1759,42 @@ test.describe('WCAG 2.2 Level AA', () => {
       expect(isHiddenAndFocusable).toBe(false)
     })
   })
+  test.describe('4.1.3 Status Messages (AA)', () => {
+    test('should expose and dismiss a failed drawer submission notification', async () => {
+      const drawer = await openRelationshipCreationDrawer({ page, postsURL })
+
+      await page.route('**/api/posts*', async (route) => {
+        if (route.request().method() === 'POST') {
+          await route.fulfill({
+            body: JSON.stringify({ errors: [{ message: 'Review the document before saving.' }] }),
+            contentType: 'application/json',
+            status: 400,
+          })
+        } else {
+          await route.continue()
+        }
+      })
+      try {
+        await drawer.getByRole('button', { name: /publish in english/i }).click()
+        const notification = page.locator('[data-sonner-toast]').filter({
+          hasText: 'Review the document before saving.',
+        })
+
+        await expect(notification).toBeVisible()
+        await expect(drawer).toBeVisible()
+        await expect(notification.getByRole('button', { name: /close toast/i })).toBeVisible()
+        const close = notification.getByRole('button', { name: /close toast/i })
+
+        await close.focus()
+        await expect(close).toBeFocused()
+        await close.press('Enter')
+        await expect(notification).toBeHidden()
+        await expect(drawer).toBeVisible()
+      } finally {
+        await page.unrouteAll({ behavior: 'wait' })
+      }
+    })
+  })
 })
 
 function getComputedBackgroundColor(element: HTMLElement): string {
@@ -1127,4 +1807,63 @@ function getComputedOpacity(element: HTMLElement): string {
 
 function getPseudoBackgroundColor(element: HTMLElement): string {
   return getComputedStyle(element, '::before').backgroundColor
+}
+
+async function compareHeadingWithOriginalSpan({
+  heading,
+  originalStyle,
+}: {
+  heading: Locator
+  originalStyle: string
+}) {
+  return heading.evaluate((element, styleText) => {
+    const measure = (node: HTMLElement) => {
+      const style = getComputedStyle(node)
+      const bounds = node.getBoundingClientRect()
+
+      return {
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        height: bounds.height,
+        lineHeight: style.lineHeight,
+        margin: style.margin,
+        width: bounds.width,
+      }
+    }
+    const after = measure(element)
+    const beforeElement = document.createElement('span')
+
+    beforeElement.textContent = element.textContent
+    // Keep the baseline independent of the current heading class.
+    beforeElement.style.cssText = styleText
+    element.replaceWith(beforeElement)
+    try {
+      return { after, before: measure(beforeElement) }
+    } finally {
+      beforeElement.replaceWith(element)
+    }
+  }, originalStyle)
+}
+
+function getCallouts({ container }: { container: Locator }) {
+  return container.locator('.rich-text-lexical .collapsible').filter({
+    has: container.page().locator('input[value$="callout"]'),
+  })
+}
+
+async function openRichTextContext({
+  isDrawer,
+  page,
+  postsURL,
+}: {
+  isDrawer: boolean
+  page: Page
+  postsURL: AdminUrlUtil
+}) {
+  if (isDrawer) {
+    return openRelationshipCreationDrawer({ page, postsURL })
+  }
+  await gotoCreatePost({ page, postsURL })
+  return page.locator('main')
 }

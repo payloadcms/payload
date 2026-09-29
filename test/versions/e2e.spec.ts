@@ -1621,15 +1621,14 @@ describe('Versions', () => {
 
       await page.locator('.date-time-picker input').click()
 
-      const popper = page.locator('.react-datepicker-popper')
+      const drawer = page.locator('dialog[id^="schedule-publish-"]')
+      const popper = drawer.locator('.react-datepicker-popper')
       await expect(popper).toBeVisible()
 
-      const portalInfo = await popper.evaluate((el) => ({
-        isInsideDrawerScroll: el.closest('.drawer__content-children') !== null,
-        isInsidePortal: el.closest('#date-time-picker-portal') !== null,
-      }))
-      expect(portalInfo.isInsideDrawerScroll).toBe(false)
-      expect(portalInfo.isInsidePortal).toBe(true)
+      const isInsideDrawerScroll = await popper.evaluate(
+        (el) => el.closest('.drawer__content-children') !== null,
+      )
+      expect(isInsideDrawerScroll).toBe(false)
 
       await expect(popper).toBeInViewport()
     })
