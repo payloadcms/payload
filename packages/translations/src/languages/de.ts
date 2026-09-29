@@ -582,6 +582,24 @@ export const deTranslations: DefaultTranslationsObject = {
     searchLabel: 'Suche {{label}}',
     searchResults: '{{count}} gefunden',
   },
+  llmInstructions: {
+    additionalInstructions: 'Zusätzliche Anweisungen',
+    collectionDescription:
+      'Fügen Sie eigene Anweisungen für die Sammlung {{label}} hinzu, damit LLMs passendere Antworten auf Prompts geben können.',
+    collectionSystemDescription:
+      'Diese Systemanweisungen stammen aus der Konfigurationsdatei der Sammlung und werden immer berücksichtigt.',
+    editInstructions: 'LLM-Anweisungen bearbeiten',
+    global: 'Global',
+    globalDescription:
+      'Fügen Sie eigene Anweisungen für das Global {{label}} hinzu, damit LLMs passendere Antworten auf Prompts geben können.',
+    globalSystemDescription:
+      'Diese Systemanweisungen stammen aus der Konfigurationsdatei des Globals und werden immer berücksichtigt.',
+    instructions: 'LLM-Anweisungen',
+    systemInstructions: 'Systemanweisungen (schreibgeschützt)',
+    targetCannotBeChanged: 'Das Ziel der Anweisungen kann nicht geändert werden.',
+    targetRequired: 'Geben Sie genau eines der Felder collectionSlug oder globalSlug an.',
+    title: 'Titel',
+  },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',
     copyFrom: 'Kopieren von',

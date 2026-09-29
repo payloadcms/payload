@@ -570,6 +570,24 @@ export const nbTranslations: DefaultTranslationsObject = {
     searchLabel: 'Søk {{label}}',
     searchResults: 'Fant {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Tilleggsinstruksjoner',
+    collectionDescription:
+      'Legg til tilpassede instruksjoner for samlingen {{label}} slik at LLM-er kan tilpasse svarene på ledetekster bedre.',
+    collectionSystemDescription:
+      'Disse systeminstruksjonene kommer fra samlingens konfigurasjonsfil og inkluderes alltid.',
+    editInstructions: 'Rediger LLM-instruksjoner',
+    global: 'Global',
+    globalDescription:
+      'Legg til tilpassede instruksjoner for globalen {{label}} slik at LLM-er kan tilpasse svarene på ledetekster bedre.',
+    globalSystemDescription:
+      'Disse systeminstruksjonene kommer fra globalens konfigurasjonsfil og inkluderes alltid.',
+    instructions: 'LLM-instruksjoner',
+    systemInstructions: 'Systeminstruksjoner (skrivebeskyttet)',
+    targetCannotBeChanged: 'Målet for instruksjonene kan ikke endres.',
+    targetRequired: 'Oppgi nøyaktig ett av feltene collectionSlug eller globalSlug.',
+    title: 'Tittel',
+  },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',
     copyFrom: 'Kopier fra',

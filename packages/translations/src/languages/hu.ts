@@ -575,6 +575,24 @@ export const huTranslations: DefaultTranslationsObject = {
     searchLabel: 'Keresés {{label}}',
     searchResults: 'Találatok száma: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'További utasítások',
+    collectionDescription:
+      'Adjon egyéni utasításokat a(z) {{label}} gyűjteményhez, hogy az LLM-ek jobban a kérésekhez igazíthassák válaszaikat.',
+    collectionSystemDescription:
+      'Ezek a rendszerutasítások a gyűjtemény konfigurációs fájljából származnak, és mindig szerepelnek az utasítások között.',
+    editInstructions: 'LLM-utasítások szerkesztése',
+    global: 'Globális dokumentum',
+    globalDescription:
+      'Adjon egyéni utasításokat a(z) {{label}} globális dokumentumhoz, hogy az LLM-ek jobban a kérésekhez igazíthassák válaszaikat.',
+    globalSystemDescription:
+      'Ezek a rendszerutasítások a globális dokumentum konfigurációs fájljából származnak, és mindig szerepelnek az utasítások között.',
+    instructions: 'LLM-utasítások',
+    systemInstructions: 'Rendszerutasítások (csak olvasható)',
+    targetCannotBeChanged: 'Az utasítások célja nem módosítható.',
+    targetRequired: 'Pontosan a collectionSlug vagy a globalSlug mező egyikét adja meg.',
+    title: 'Cím',
+  },
   localization: {
     cannotCopySameLocale: 'Nem lehet ugyanarra a helyre másolni',
     copyFrom: 'Másolás innen',

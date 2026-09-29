@@ -559,6 +559,24 @@ export const faTranslations: DefaultTranslationsObject = {
     searchLabel: 'جستجو {{label}}',
     searchResults: '{{count}} مورد یافت شد',
   },
+  llmInstructions: {
+    additionalInstructions: 'دستورالعمل‌های تکمیلی',
+    collectionDescription:
+      'برای مجموعهٔ {{label}} دستورالعمل‌های سفارشی اضافه کنید تا مدل‌های LLM پاسخ‌های متناسب‌تری به درخواست‌ها ارائه دهند.',
+    collectionSystemDescription:
+      'این دستورالعمل‌های سیستم از فایل پیکربندی مجموعه گرفته می‌شوند و همیشه گنجانده می‌شوند.',
+    editInstructions: 'ویرایش دستورالعمل‌های LLM',
+    global: 'سند سراسری',
+    globalDescription:
+      'برای سند سراسری {{label}} دستورالعمل‌های سفارشی اضافه کنید تا مدل‌های LLM پاسخ‌های متناسب‌تری به درخواست‌ها ارائه دهند.',
+    globalSystemDescription:
+      'این دستورالعمل‌های سیستم از فایل پیکربندی سند سراسری گرفته می‌شوند و همیشه گنجانده می‌شوند.',
+    instructions: 'دستورالعمل‌های LLM',
+    systemInstructions: 'دستورالعمل‌های سیستم (فقط خواندنی)',
+    targetCannotBeChanged: 'هدف دستورالعمل‌ها قابل تغییر نیست.',
+    targetRequired: 'دقیقاً یکی از فیلدهای collectionSlug یا globalSlug را مشخص کنید.',
+    title: 'عنوان',
+  },
   localization: {
     cannotCopySameLocale: 'امکان کپی کردن اطلاعات به همان زبان وجود ندارد.',
     copyFrom: 'کپی از',

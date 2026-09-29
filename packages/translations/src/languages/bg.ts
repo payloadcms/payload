@@ -567,6 +567,24 @@ export const bgTranslations: DefaultTranslationsObject = {
     searchLabel: 'Търсене {{label}}',
     searchResults: 'Намерени: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Допълнителни инструкции',
+    collectionDescription:
+      'Добавете персонализирани инструкции за колекцията {{label}}, за да помогнете на LLM моделите да адаптират по-добре отговорите си на заявки.',
+    collectionSystemDescription:
+      'Тези системни инструкции идват от конфигурационния файл на колекцията и винаги се включват.',
+    editInstructions: 'Редактиране на инструкции за LLM',
+    global: 'Глобален документ',
+    globalDescription:
+      'Добавете персонализирани инструкции за глобалния документ {{label}}, за да помогнете на LLM моделите да адаптират по-добре отговорите си на заявки.',
+    globalSystemDescription:
+      'Тези системни инструкции идват от конфигурационния файл на глобалния документ и винаги се включват.',
+    instructions: 'Инструкции за LLM',
+    systemInstructions: 'Системни инструкции (само за четене)',
+    targetCannotBeChanged: 'Целта на инструкциите не може да бъде променена.',
+    targetRequired: 'Посочете точно едно от полетата collectionSlug или globalSlug.',
+    title: 'Заглавие',
+  },
   localization: {
     cannotCopySameLocale: 'Не може да се копира в същата локация',
     copyFrom: 'Копирай от',

@@ -574,6 +574,24 @@ export const trTranslations: DefaultTranslationsObject = {
     searchLabel: '{{label}} Ara',
     searchResults: '{{count}} bulundu',
   },
+  llmInstructions: {
+    additionalInstructions: 'Ek talimatlar',
+    collectionDescription:
+      "LLM'lerin istemlere daha uygun yanıtlar vermesine yardımcı olmak için {{label}} koleksiyonuna özel talimatlar ekleyin.",
+    collectionSystemDescription:
+      'Bu sistem talimatları koleksiyonun yapılandırma dosyasından gelir ve her zaman dahil edilir.',
+    editInstructions: 'LLM talimatlarını düzenle',
+    global: 'Global',
+    globalDescription:
+      "LLM'lerin istemlere daha uygun yanıtlar vermesine yardımcı olmak için {{label}} globaline özel talimatlar ekleyin.",
+    globalSystemDescription:
+      'Bu sistem talimatları globalin yapılandırma dosyasından gelir ve her zaman dahil edilir.',
+    instructions: 'LLM Talimatları',
+    systemInstructions: 'Sistem talimatları (salt okunur)',
+    targetCannotBeChanged: 'Talimatların hedefi değiştirilemez.',
+    targetRequired: 'collectionSlug veya globalSlug alanlarından tam olarak birini belirtin.',
+    title: 'Başlık',
+  },
   localization: {
     cannotCopySameLocale: 'Aynı yerel ayara kopyalanamaz.',
     copyFrom: 'Kopyala',

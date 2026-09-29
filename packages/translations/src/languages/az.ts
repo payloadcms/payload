@@ -573,6 +573,24 @@ export const azTranslations: DefaultTranslationsObject = {
     searchLabel: 'Axtar {{label}}',
     searchResults: '{{count}} tapıldı',
   },
+  llmInstructions: {
+    additionalInstructions: 'Əlavə təlimatlar',
+    collectionDescription:
+      'LLM-lərin sorğulara daha uyğun cavablar verməsinə kömək etmək üçün {{label}} kolleksiyasına xüsusi təlimatlar əlavə edin.',
+    collectionSystemDescription:
+      'Bu sistem təlimatları kolleksiyanın konfiqurasiya faylından götürülür və həmişə daxil edilir.',
+    editInstructions: 'LLM təlimatlarını redaktə et',
+    global: 'Qlobal',
+    globalDescription:
+      'LLM-lərin sorğulara daha uyğun cavablar verməsinə kömək etmək üçün {{label}} qlobal sənədinə xüsusi təlimatlar əlavə edin.',
+    globalSystemDescription:
+      'Bu sistem təlimatları qlobal sənədin konfiqurasiya faylından götürülür və həmişə daxil edilir.',
+    instructions: 'LLM təlimatları',
+    systemInstructions: 'Sistem təlimatları (yalnız oxumaq üçün)',
+    targetCannotBeChanged: 'Təlimatların hədəfi dəyişdirilə bilməz.',
+    targetRequired: 'collectionSlug və ya globalSlug sahələrindən dəqiq birini göstərin.',
+    title: 'Başlıq',
+  },
   localization: {
     cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',
     copyFrom: 'Kopyalayın',

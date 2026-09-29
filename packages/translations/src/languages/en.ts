@@ -566,6 +566,24 @@ export const enTranslations = {
     searchLabel: 'Search {{label}}',
     searchResults: 'Found {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Additional instructions',
+    collectionDescription:
+      'Add custom instructions for the {{label}} collection to help LLMs tailor better prompt responses.',
+    collectionSystemDescription:
+      'These system instructions are provided by the collection’s config file and are always included.',
+    editInstructions: 'Edit LLM instructions',
+    global: 'Global',
+    globalDescription:
+      'Add custom instructions for the {{label}} global to help LLMs tailor better prompt responses.',
+    globalSystemDescription:
+      'These system instructions are provided by the global’s config file and are always included.',
+    instructions: 'LLM Instructions',
+    systemInstructions: 'System instructions (read-only)',
+    targetCannotBeChanged: 'The instruction target cannot be changed.',
+    targetRequired: 'Provide exactly one of collectionSlug or globalSlug.',
+    title: 'Title',
+  },
   localization: {
     cannotCopySameLocale: 'Cannot copy to the same locale',
     copyFrom: 'Copy from',

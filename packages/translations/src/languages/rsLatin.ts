@@ -567,6 +567,24 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     searchLabel: 'Pretraga {{label}}',
     searchResults: 'Pronađeno: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Dodatna uputstva',
+    collectionDescription:
+      'Dodajte prilagođena uputstva za kolekciju {{label}} da biste pomogli LLM modelima da bolje prilagode odgovore na upite.',
+    collectionSystemDescription:
+      'Ova sistemska uputstva potiču iz konfiguracione datoteke kolekcije i uvek su uključena.',
+    editInstructions: 'Uredi uputstva za LLM',
+    global: 'Globalni dokument',
+    globalDescription:
+      'Dodajte prilagođena uputstva za globalni dokument {{label}} da biste pomogli LLM modelima da bolje prilagode odgovore na upite.',
+    globalSystemDescription:
+      'Ova sistemska uputstva potiču iz konfiguracione datoteke globalnog dokumenta i uvek su uključena.',
+    instructions: 'Uputstva za LLM',
+    systemInstructions: 'Sistemska uputstva (samo za čitanje)',
+    targetCannotBeChanged: 'Cilj uputstava nije moguće promeniti.',
+    targetRequired: 'Navedite tačno jedno od polja collectionSlug ili globalSlug.',
+    title: 'Naslov',
+  },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',
     copyFrom: 'Kopiraj iz',

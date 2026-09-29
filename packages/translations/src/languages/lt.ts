@@ -571,6 +571,24 @@ export const ltTranslations: DefaultTranslationsObject = {
     searchLabel: 'Ieškoti {{label}}',
     searchResults: 'Rasta: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Papildomi nurodymai',
+    collectionDescription:
+      'Pridėkite pasirinktinius nurodymus rinkiniui {{label}}, kad LLM galėtų geriau pritaikyti atsakymus į užklausas.',
+    collectionSystemDescription:
+      'Šie sistemos nurodymai pateikiami rinkinio konfigūracijos faile ir visada įtraukiami.',
+    editInstructions: 'Redaguoti LLM nurodymus',
+    global: 'Globalus dokumentas',
+    globalDescription:
+      'Pridėkite pasirinktinius nurodymus globaliam dokumentui {{label}}, kad LLM galėtų geriau pritaikyti atsakymus į užklausas.',
+    globalSystemDescription:
+      'Šie sistemos nurodymai pateikiami globalaus dokumento konfigūracijos faile ir visada įtraukiami.',
+    instructions: 'LLM nurodymai',
+    systemInstructions: 'Sistemos nurodymai (tik skaitomi)',
+    targetCannotBeChanged: 'Nurodymų paskirties keisti negalima.',
+    targetRequired: 'Nurodykite tik vieną iš laukų collectionSlug arba globalSlug.',
+    title: 'Pavadinimas',
+  },
   localization: {
     cannotCopySameLocale: 'Negalima kopijuoti į tą pačią vietovę',
     copyFrom: 'Kopijuoti iš',

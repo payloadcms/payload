@@ -566,6 +566,24 @@ export const lvTranslations: DefaultTranslationsObject = {
     searchLabel: 'Meklēt {{label}}',
     searchResults: 'Atrasts: {{count}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Papildu norādījumi',
+    collectionDescription:
+      'Pievienojiet pielāgotus norādījumus kolekcijai {{label}}, lai palīdzētu LLM labāk pielāgot atbildes uz uzvednēm.',
+    collectionSystemDescription:
+      'Šie sistēmas norādījumi nāk no kolekcijas konfigurācijas faila un vienmēr tiek iekļauti.',
+    editInstructions: 'Rediģēt LLM norādījumus',
+    global: 'Globālais dokuments',
+    globalDescription:
+      'Pievienojiet pielāgotus norādījumus globālajam dokumentam {{label}}, lai palīdzētu LLM labāk pielāgot atbildes uz uzvednēm.',
+    globalSystemDescription:
+      'Šie sistēmas norādījumi nāk no globālā dokumenta konfigurācijas faila un vienmēr tiek iekļauti.',
+    instructions: 'LLM norādījumi',
+    systemInstructions: 'Sistēmas norādījumi (tikai lasāmi)',
+    targetCannotBeChanged: 'Norādījumu mērķi nevar mainīt.',
+    targetRequired: 'Norādiet tieši vienu no laukiem collectionSlug vai globalSlug.',
+    title: 'Virsraksts',
+  },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',
     copyFrom: 'Kopēt no',
