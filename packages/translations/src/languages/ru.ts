@@ -482,6 +482,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Выбрать все строки',
     selectedCount: '{{count}} {{label}} выбрано',
     selectLabel: 'Выберите {{label}}',
+    selectRow: undefined,
     selectValue: 'Выбрать значение',
     settings: 'Настройки',
     showAllLabel: 'Показать все {{label}}',
