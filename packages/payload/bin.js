@@ -3,6 +3,12 @@
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+// An unresolved import can let Node exit before the CLI finishes.
+const failOnIncompleteRun = () => {
+  process.exitCode = 1
+}
+process.once('beforeExit', failOnIncompleteRun)
+
 const useSwc = process.argv.includes('--use-swc')
 const disableTranspile = process.argv.includes('--disable-transpile')
 
@@ -13,6 +19,7 @@ if (disableTranspile) {
   const start = async () => {
     const { bin } = await import('./dist/bin/index.js')
     await bin()
+    process.off('beforeExit', failOnIncompleteRun)
   }
 
   void start()
@@ -28,6 +35,7 @@ if (disableTranspile) {
 
       const { bin } = await tsImport('./dist/bin/index.js', url)
       await bin()
+      process.off('beforeExit', failOnIncompleteRun)
     }
 
     void start()
@@ -47,6 +55,7 @@ if (disableTranspile) {
     const start = async () => {
       const { bin } = await import('./dist/bin/index.js')
       await bin()
+      process.off('beforeExit', failOnIncompleteRun)
     }
 
     void start()
