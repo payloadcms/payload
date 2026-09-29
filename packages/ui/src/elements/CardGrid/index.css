@@ -1,0 +1,4 @@
+@layer payload-default {
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacer-3); margin: 0; padding: 0; list-style: none; }
+  .card-grid__item { min-width: 0; }
+}
