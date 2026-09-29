@@ -95,10 +95,7 @@ export interface Config {
   globalsSelect: {};
   locale: 'en';
   widgets: {
-    welcome: WelcomeWidget;
     collections: CollectionsWidget;
-    'collection-query': CollectionQueryWidget;
-    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -124,10 +121,6 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
 export interface User {
   id: string;
   updatedAt: string;
@@ -137,7 +130,6 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -197,10 +189,6 @@ export interface Tag {
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
 export interface PayloadKv {
   id: string;
   key: string;
@@ -291,7 +279,6 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
-  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -346,10 +333,6 @@ export interface TagsSelect<T extends boolean = true> {
   _h_slugPath?: T;
   _h_titlePath?: T;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
@@ -388,16 +371,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "welcome_widget".
- */
-export interface WelcomeWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -405,39 +378,6 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collection-query_widget".
- */
-export interface CollectionQueryWidget {
-  data?: {
-    title?: string | null;
-    relatedCollection: 'users' | 'media' | 'folders' | 'tags';
-    where?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-    sortField?: string | null;
-    sortDirection?: ('asc' | 'desc') | null;
-    limit?: number | null;
-  };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "activity_widget".
- */
-export interface ActivityWidget {
-  data?: {
-    excludedCollections?: ('users' | 'media' | 'folders' | 'tags')[] | null;
-  };
-  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
