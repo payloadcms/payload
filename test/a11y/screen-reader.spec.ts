@@ -1,3 +1,6 @@
+import type { ScreenReaderPlaywright } from '@guidepup/playwright'
+
+import { NVDAKeyCodeCommands } from '@guidepup/guidepup'
 import { screenReaderTest as test } from '@guidepup/playwright'
 import { expect } from '@playwright/test'
 import path from 'node:path'
@@ -11,19 +14,26 @@ import {
   addTextBlock,
   captureScreenReader,
   captureScreenReaderOutput,
+  cleanupModalMedia,
   expectPopupCursorToMove,
   gotoCreatePost,
+  gotoFirstPost,
   gotoPostsList,
   navigateScreenReaderTo,
   openBulkEditFieldSelect,
+  openBulkUploadDialog,
   openCopyToLocaleDrawer,
+  openDrawerFilters,
+  openEditImageDialog,
   openFirstBlockActions,
   openFolderCreationLocation,
   openLivePreview,
   openLocaleOptions,
   openPostsFilter,
   openRichTextRelationshipDrawer,
+  openRichTextUploadDrawer,
   openVersionsList,
+  openWidgetDrawer,
 } from './helpers.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -44,7 +54,57 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     page.removeAllListeners('console')
   })
 
+  test.afterEach(async ({ page }) => {
+    await cleanupModalMedia({ page })
+  })
+
   test.describe('1.3.1 Info and Relationships (A)', () => {
+    test('should announce the Copy to combobox label once on focus', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3689
+      const drawer = await openCopyToLocaleDrawer({ page, postsURL, serverURL })
+      const combobox = drawer.locator('#field-toLocale input[role="combobox"]')
+
+      // Start within the drawer so this captures field focus, not the dialog opening.
+      await drawer.getByRole('checkbox', { name: 'Overwrite existing field data' }).focus()
+      const capture = await captureScreenReader({
+        action: () => combobox.focus(),
+        screenReader,
+      })
+
+      await expect(combobox).toBeFocused()
+      // Count the field label, excluding the dialog name "Copy to locale".
+      expect(capture.spokenPhrase.match(/\bcopy to\b(?!\s+locale\b)/gi) || []).toHaveLength(1)
+    })
+
+    test('should announce the deletion dialog before background page content', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3769
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      const trigger = page.getByRole('menuitem', { name: 'Delete', exact: true })
+
+      await trigger.focus()
+      const capture = await captureScreenReader({
+        action: () => trigger.press('Enter'),
+        screenReader,
+      })
+
+      await expect(
+        page.locator('[id^="delete-"]').filter({ has: page.locator('.dialog') }),
+      ).toBeVisible()
+      expect(capture.spokenPhrase).toMatch(
+        /(delete|trash|confirm).*dialog|dialog.*(delete|trash|confirm)/i,
+      )
+      expect(capture.spokenPhrase).not.toMatch(
+        /skip to content|navigation landmark|dashboard|subtitle/i,
+      )
+    })
+
     test('should announce the active sort direction on rich-text relationship table headers', async ({
       page,
       screenReader,
@@ -118,6 +178,78 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.describe('2.4.3 Focus Order (A)', () => {
+    test('should contain screen-reader traversal in bulk-upload and image-edit dialogs', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3575
+      for (const open of [openBulkUploadDialog, openEditImageDialog]) {
+        const dialog = await open({ page, serverURL })
+
+        await dialog.getByRole('button', { name: 'Close', exact: true }).focus()
+        const stops = await collectModalCursorStops({ screenReader })
+        expect(stops.join('\n')).not.toMatch(
+          /dashboard|navigation|collections|create new|\bmedia\b|\bposts\b|\busers\b|file name|save draft/i,
+        )
+        expect(stops.join('\n')).toMatch(/add files|crop|focal point|choose files|browse files/i)
+      }
+    })
+
+    test('should contain screen-reader traversal in the nested folder-location modal', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3587
+      const modal = await openFolderCreationLocation({ page, serverURL })
+
+      await modal.getByRole('button', { name: 'Cancel', exact: true }).focus()
+      const stops = await collectModalCursorStops({ screenReader })
+      expect(stops.join('\n')).not.toMatch(
+        /dashboard|navigation|collections|creating new folder|untitled|save draft/i,
+      )
+      expect(stops.join('\n')).toMatch(/accessibility folder/i)
+    })
+
+    test('should move the screen-reader cursor into the add-widget drawer upon opening', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3644
+      const { drawer, trigger } = await openWidgetDrawer({ page, serverURL })
+
+      await trigger.focus()
+      const capture = await captureScreenReader({
+        action: () => trigger.press('Enter'),
+        screenReader,
+      })
+
+      await expect(drawer).toBeVisible()
+      expect(capture.itemText).toMatch(/close|add widget|search widgets/i)
+      expect(capture.spokenPhrase).not.toMatch(/editing dashboard|save changes/i)
+    })
+
+    test('should move the screen-reader cursor into Copy to locale from the overflow menu', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3682
+      await gotoFirstPost({ page, postsURL, serverURL })
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
+      const trigger = page.locator('#copy-locale-data__button')
+
+      await trigger.focus()
+      const capture = await captureScreenReader({
+        action: () => trigger.press('Enter'),
+        screenReader,
+      })
+
+      await expect(page.locator('#copy-locale')).toBeVisible()
+      expect(capture.itemText).toMatch(
+        /close|copy to locale.*dialog|dialog.*copy to locale|copy to.*(combo|pop)/i,
+      )
+      expect(capture.itemText).not.toMatch(/skip to content|dashboard|more options/i)
+    })
+
     test('should expose one screen-reader stop for the Copy to locale select', async ({
       page,
       screenReader,
@@ -218,6 +350,52 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
   })
 
   test.describe('4.1.2 Name, Role, Value (A)', () => {
+    test('should announce rich-text upload and relationship filter options in NVDA browse mode', async ({
+      page,
+      screenReader,
+    }) => {
+      // PYLD-3662
+      test.skip(
+        screenReader.name !== 'NVDA',
+        'The report concerns NVDA browse mode; VoiceOver is not equivalent evidence.',
+      )
+      for (const open of [openRichTextUploadDrawer, openRichTextRelationshipDrawer]) {
+        for (const index of [0, 1]) {
+          // Reopen for each control: Escape currently dismisses the containing drawer too.
+          const drawer = await open({ page, postsURL })
+          const comboboxes = await openDrawerFilters({
+            collectionLabel: open === openRichTextRelationshipDrawer ? 'Post' : undefined,
+            drawer,
+          })
+          const combobox = comboboxes.nth(index)
+
+          await combobox.focus()
+          await combobox.press('ArrowDown')
+          const options = page.getByRole('option')
+
+          await expect(options.first()).toBeVisible()
+          const optionNames = await options.allTextContents()
+          const stops: string[] = []
+
+          // The focused editable combobox enters NVDA focus mode. Switch to browse mode
+          // without Escape, which would also dismiss the option list.
+          await screenReader.perform(NVDAKeyCodeCommands.toggleBetweenBrowseAndFocusMode)
+          await expect(options.first()).toBeVisible()
+          // NVDA's next command sends Down Arrow through its browse cursor.
+          for (let step = 0; step < optionNames.length + 8; step++) {
+            await screenReader.next()
+            stops.push(await screenReader.itemText())
+          }
+          for (const name of optionNames) {
+            expect(
+              stops.some((stop) => stop.toLowerCase().includes(name.trim().toLowerCase())),
+            ).toBe(true)
+          }
+          expect(stops.join('\n')).not.toMatch(/\bblank\b/i)
+        }
+      }
+    })
+
     test('should announce the selected state of the active Theme option', async ({
       page,
       screenReader,
@@ -402,3 +580,15 @@ test.describe('WCAG 2.2 Level AA — Screen readers', () => {
     })
   })
 })
+
+async function collectModalCursorStops({ screenReader }: { screenReader: ScreenReaderPlaywright }) {
+  const stops: string[] = []
+
+  for (const direction of ['next', 'previous'] as const) {
+    for (let step = 0; step < 40; step++) {
+      await screenReader[direction]()
+      stops.push(await screenReader.itemText())
+    }
+  }
+  return stops
+}

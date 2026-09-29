@@ -152,6 +152,8 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -185,9 +187,53 @@ export interface Autosave {
   id: string;
   fieldA?: string | null;
   fieldB?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  name?: string | null;
+  roles?: ('is_user' | 'is_admin')[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -196,6 +242,14 @@ export interface Autosave {
 export interface Page {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -209,6 +263,14 @@ export interface Post {
   text?: string | null;
   richText?: LexicalRichText<LexicalNodes_15E98158> | null;
   documentLoaded?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -221,6 +283,14 @@ export interface ServerComponent {
   id: string;
   customTextServer?: string | null;
   richText?: LexicalRichText<LexicalNodes_15E98158> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -232,6 +302,14 @@ export interface Simple {
   id: string;
   fieldA?: string | null;
   fieldB?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -243,6 +321,14 @@ export interface SimpleWithVersion {
   id: string;
   fieldA?: string | null;
   fieldB?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -254,36 +340,17 @@ export interface SimpleWithVersion {
 export interface Test {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  name?: string | null;
-  roles?: ('is_user' | 'is_admin')[] | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -386,6 +453,8 @@ export interface PayloadMigration {
 export interface AutosaveSelect<T extends boolean = true> {
   fieldA?: T;
   fieldB?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -396,6 +465,8 @@ export interface AutosaveSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -408,6 +479,8 @@ export interface PostsSelect<T extends boolean = true> {
   text?: T;
   richText?: T;
   documentLoaded?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -419,6 +492,8 @@ export interface PostsSelect<T extends boolean = true> {
 export interface ServerComponentsSelect<T extends boolean = true> {
   customTextServer?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -429,6 +504,8 @@ export interface ServerComponentsSelect<T extends boolean = true> {
 export interface SimpleSelect<T extends boolean = true> {
   fieldA?: T;
   fieldB?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -439,6 +516,8 @@ export interface SimpleSelect<T extends boolean = true> {
 export interface SimpleWithVersionsSelect<T extends boolean = true> {
   fieldA?: T;
   fieldB?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -449,6 +528,8 @@ export interface SimpleWithVersionsSelect<T extends boolean = true> {
  */
 export interface TestsSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -460,6 +541,8 @@ export interface TestsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   roles?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -467,6 +550,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -524,6 +608,14 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Admin {
   id: string;
   adminText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -534,6 +626,14 @@ export interface Admin {
 export interface AutosaveGlobal {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -545,6 +645,14 @@ export interface AutosaveGlobal {
 export interface GlobalWithVersion {
   id: string;
   text?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -556,6 +664,14 @@ export interface GlobalWithVersion {
 export interface Menu {
   id: string;
   globalText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -565,6 +681,8 @@ export interface Menu {
  */
 export interface AdminSelect<T extends boolean = true> {
   adminText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -575,6 +693,8 @@ export interface AdminSelect<T extends boolean = true> {
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -586,6 +706,8 @@ export interface AutosaveGlobalSelect<T extends boolean = true> {
  */
 export interface GlobalWithVersionsSelect<T extends boolean = true> {
   text?: T;
+  createdBy?: T;
+  updatedBy?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -597,6 +719,8 @@ export interface GlobalWithVersionsSelect<T extends boolean = true> {
  */
 export interface MenuSelect<T extends boolean = true> {
   globalText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -610,6 +734,49 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'autosave'
+      | 'pages'
+      | 'posts'
+      | 'server-components'
+      | 'simple'
+      | 'simple-with-versions'
+      | 'tests'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | ('autosave' | 'pages' | 'posts' | 'server-components' | 'simple' | 'simple-with-versions' | 'tests' | 'users')[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -99,8 +99,8 @@ export default async function UserStatsWidget({ req }: WidgetServerProps) {
 
 For visual consistency with the Payload UI, we recommend:
 
-1. Using the `card` class for your root element, unless you don't want it to have a background color.
-2. Using our theme variables for backgrounds and text colors. For example, use `var(--color-bg)` for backgrounds and `var(--color-text)` for text colors.
+1. Use the `card` class for card-style widget roots to inherit Payload's padding, border, radius, and theme-aware default background. Override the background in widget-scoped CSS when your design calls for a different surface; omit `card` for unframed content.
+2. Use our theme variables for backgrounds and text colors. For example, use `var(--color-bg)` for backgrounds and `var(--color-text)` for text colors.
 
 ### Default Layout
 

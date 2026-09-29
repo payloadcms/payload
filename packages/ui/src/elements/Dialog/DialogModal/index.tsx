@@ -1,10 +1,10 @@
 'use client'
 import type { ComponentProps } from 'react'
 
-import { Modal } from '@faceless-ui/modal'
 import React, { createContext, use, useEffect, useState } from 'react'
 
 import { drawerZBase, useDrawerDepth } from '../../Drawer/index.js'
+import { Modal } from '../../Modal/index.js'
 import { DialogContext } from '../context.js'
 import '../index.css'
 

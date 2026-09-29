@@ -27,7 +27,7 @@ export type Props = {
   /**
    * Disables adaptive placement: the tooltip always renders on `position` (or its
    * default) instead of flipping to whichever side has room. It does not affect
-   * portaling - every tooltip is portaled to `document.body` regardless. @default false
+   * portaling - tooltips portal to the containing dialog or `document.body`. @default false
    */
   staticPositioning?: boolean
 }
@@ -299,7 +299,7 @@ export const Tooltip: React.FC<Props> = (props) => {
             <TooltipCaret />
             <div className="tooltip-content">{children}</div>
           </aside>,
-          document.body,
+          triggerMarkerRef.current?.closest('dialog, [role="dialog"]') ?? document.body,
         )}
     </React.Fragment>
   )

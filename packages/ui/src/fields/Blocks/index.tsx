@@ -1,5 +1,5 @@
 'use client'
-import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
+import type { BlocksFieldClientProps, ClientBlock } from 'payload'
 
 import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
@@ -49,7 +49,7 @@ import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 const baseClass = 'blocks-field'
 
-const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
+const BlocksFieldComponent: React.FC<BlocksFieldClientProps> = (props) => {
   const { i18n, t } = useTranslation()
 
   const {
