@@ -144,4 +144,9 @@ export const transformBlocks = ({
 
     blocks[blockTableName].push(newRow)
   })
+
+  relationshipsToDelete.push({
+    path: `${path || ''}${field.name}.`,
+    prefix: true,
+  })
 }
