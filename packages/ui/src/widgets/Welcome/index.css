@@ -1,6 +1,7 @@
 @layer payload-default {
   .welcome-widget {
     overflow-wrap: anywhere;
+    padding-block-start: var(--spacer-2-5);
     margin-block-end: var(--spacer-2-5);
   }
 

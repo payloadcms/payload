@@ -64,14 +64,22 @@ test.describe('Community', () => {
       await expect(deleteButton).toBeVisible()
 
       const widgetBox = await welcomeWidget.boundingBox()
+      const headingBox = await welcomeWidget.locator('.welcome-widget__heading').boundingBox()
       const controlBox = await deleteButton.boundingBox()
 
-      if (!widgetBox || !controlBox) {
+      if (!widgetBox || !headingBox || !controlBox) {
         throw new Error('Welcome widget or delete control is not rendered')
       }
 
       expect(controlBox.y).toBeGreaterThanOrEqual(widgetBox.y)
       expect(controlBox.y + controlBox.height).toBeLessThanOrEqual(widgetBox.y + widgetBox.height)
+
+      if (width === 1280) {
+        const widgetCenter = widgetBox.y + widgetBox.height / 2
+
+        expect(Math.abs(headingBox.y + headingBox.height / 2 - widgetCenter)).toBeLessThanOrEqual(2)
+        expect(Math.abs(controlBox.y + controlBox.height / 2 - widgetCenter)).toBeLessThanOrEqual(2)
+      }
     }
 
     await page.setViewportSize({ height: 720, width: 1280 })
