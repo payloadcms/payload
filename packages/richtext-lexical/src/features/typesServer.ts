@@ -217,7 +217,16 @@ export type BeforeValidateNodeHook<T extends SerializedLexicalNode> = (
   args: BaseNodeHookArgs<T> & BeforeValidateNodeHookArgs<T>,
 ) => Promise<T> | T
 
-// Define the node with hooks that use the node's exportJSON return type
+// Match both overloads to infer the full JSON format. ReturnType selects the compact
+// overload, and LexicalExportJSON widens custom nodes' serialized type discriminants.
+type SerializedNodeJSON<T extends LexicalNode> = T['exportJSON'] extends {
+  (compact?: false): infer Serialized extends SerializedLexicalNode
+  // eslint-disable-next-line perfectionist/sort-object-types -- Overload order determines inference.
+  (compact: boolean): unknown
+}
+  ? Serialized
+  : never
+
 export type NodeWithHooks<T extends LexicalNode = any> = {
   /**
    * Allows you to define how a node can be serialized into different formats. Currently, only supports html.
@@ -229,7 +238,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     /**
      * @deprecated - will be removed in 4.0
      */
-    html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+    html?: HTMLConverter<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>
   }
   /**
    * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
@@ -239,14 +248,14 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     /**
      * Optional. If not provided, all possible sub-fields should be returned.
      */
-    node?: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    node?: SerializedNodeJSON<ReplaceAny<T, LexicalNode>>
     req?: PayloadRequest
   }) => Field[] | null
   /**
    * If a node includes sub-fields, the sub-fields data needs to be returned here, alongside `getSubFields` which returns their schema.
    */
   getSubFieldsData?: (args: {
-    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+    node: SerializedNodeJSON<ReplaceAny<T, LexicalNode>>
     req: PayloadRequest
   }) => JsonObject
   /**
@@ -256,18 +265,16 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    * In order for them to be populated correctly in graphQL, the population logic needs to be provided here.
    */
   graphQLPopulationPromises?: Array<
-    PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
+    PopulationPromise<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>
   >
   /**
    * Just like payload fields, you can provide hooks which are run for this specific node. These are called Node Hooks.
    */
   hooks?: {
-    afterChange?: Array<AfterChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    afterRead?: Array<AfterReadNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    beforeChange?: Array<BeforeChangeNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
-    beforeValidate?: Array<
-      BeforeValidateNodeHook<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
-    >
+    afterChange?: Array<AfterChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    afterRead?: Array<AfterReadNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    beforeChange?: Array<BeforeChangeNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
+    beforeValidate?: Array<BeforeValidateNodeHook<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
   }
   /**
    * The actual lexical node needs to be provided here. This also supports [lexical node replacements](https://lexical.dev/docs/concepts/node-replacement).
@@ -277,7 +284,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    * This allows you to provide node validations, which are run when your document is being validated, alongside other payload fields.
    * You can use it to throw a validation error for a specific node in case its data is incorrect.
    */
-  validations?: Array<NodeValidation<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>>
+  validations?: Array<NodeValidation<SerializedNodeJSON<ReplaceAny<T, LexicalNode>>>>
 }
 
 export type ServerFeature<ServerProps, ClientFeatureProps> = {
