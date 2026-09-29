@@ -41,6 +41,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'کاهش تورفتگی',
     increaseLabel: 'افزایش تورفتگی',
   },
+  fi: {
+    decreaseLabel: 'Pienennä sisennystä',
+    increaseLabel: 'Suurenna sisennystä',
+  },
   fr: {
     decreaseLabel: "Diminuer l'indentation",
     increaseLabel: "Augmenter l'indentation",
