@@ -167,6 +167,14 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   apiKey?: string | null;
@@ -198,6 +206,14 @@ export interface PayloadFolder {
   id: string;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
   name: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -243,6 +259,14 @@ export interface Post {
     | null;
   layout?: (TextBlock | ImageBlock)[] | null;
   '_h_payload-folders'?: (string | null) | PayloadFolder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -275,6 +299,14 @@ export interface ImageBlock {
  */
 export interface Media {
   id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -400,6 +432,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   apiKey?: T;
@@ -428,6 +462,8 @@ export interface UsersSelect<T extends boolean = true> {
 export interface PayloadFoldersSelect<T extends boolean = true> {
   '_h_payload-folders'?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -474,6 +510,8 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   '_h_payload-folders'?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -484,6 +522,8 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -577,6 +617,14 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Menu {
   id: string;
   globalText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -586,6 +634,8 @@ export interface Menu {
  */
 export interface MenuSelect<T extends boolean = true> {
   globalText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

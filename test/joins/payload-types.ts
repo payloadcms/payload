@@ -291,6 +291,14 @@ export interface AccessJoinArticle {
     articleTags?: ('available' | 'unavailable')[] | null;
     status?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -319,6 +327,14 @@ export interface AccessJoinParent {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -366,6 +382,14 @@ export interface AccessJoinNote {
   articleMeta?: {
     status?: string | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -380,6 +404,14 @@ export interface User {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -387,6 +419,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -489,6 +522,14 @@ export interface Post {
   tab?: {
     category?: (string | null) | Category;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -503,6 +544,14 @@ export interface Upload {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -651,6 +700,14 @@ export interface Category {
     totalDocs?: number;
   };
   enableErrorOnJoin?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -662,6 +719,14 @@ export interface HiddenPost {
   id: string;
   title?: string | null;
   category?: (string | null) | Category;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -675,6 +740,14 @@ export interface Version {
   category?: (string | null) | Category;
   categoryVersion?: (string | null) | CategoriesVersion;
   categoryVersions?: (string | CategoriesVersion)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -696,6 +769,14 @@ export interface CategoriesVersion {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -707,6 +788,14 @@ export interface CategoriesVersion {
 export interface Singular {
   id: string;
   category?: (string | null) | Category;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -728,6 +817,14 @@ export interface OperatorHandlerJoinArticle {
   id: string;
   parent?: (string | null) | OperatorHandlerJoinParent;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -751,6 +848,14 @@ export interface OperatorHandlerJoinParent {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -762,6 +867,14 @@ export interface OperatorHandlerJoinNote {
   id: string;
   parent?: (string | null) | OperatorHandlerJoinParent;
   title?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -777,6 +890,14 @@ export interface SelfJoin {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -788,6 +909,14 @@ export interface LocalizedPost {
   id: string;
   title?: string | null;
   category?: (string | null) | LocalizedCategory;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -803,6 +932,14 @@ export interface LocalizedCategory {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -818,6 +955,14 @@ export interface RestrictedCategory {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -833,6 +978,14 @@ export interface CategoriesJoinRestricted {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -845,6 +998,14 @@ export interface CollectionRestricted {
   title?: string | null;
   canRead?: boolean | null;
   category?: (string | null) | CategoriesJoinRestricted;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -857,6 +1018,14 @@ export interface RestrictedPost {
   title?: string | null;
   restrictedField?: string | null;
   category?: (string | null) | RestrictedCategory;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -872,6 +1041,14 @@ export interface DepthJoins1 {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -886,6 +1063,14 @@ export interface DepthJoins2 {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -896,6 +1081,14 @@ export interface DepthJoins2 {
 export interface DepthJoins3 {
   id: string;
   rel?: (string | null) | DepthJoins1;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -919,6 +1112,14 @@ export interface MultipleCollectionsParent {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -931,6 +1132,14 @@ export interface MultipleCollections1 {
   parent?: (string | null) | MultipleCollectionsParent;
   title?: string | null;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -943,6 +1152,14 @@ export interface MultipleCollections2 {
   parent?: (string | null) | MultipleCollectionsParent;
   title?: string | null;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -954,6 +1171,14 @@ export interface Folder {
   id: string;
   _h_folders?: (string | null) | Folder;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -995,6 +1220,14 @@ export interface ExamplePage {
   _h_folders?: (string | null) | Folder;
   title?: string | null;
   name?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1007,6 +1240,14 @@ export interface ExamplePost {
   _h_folders?: (string | null) | Folder;
   title?: string | null;
   description?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1018,6 +1259,14 @@ export interface FolderPoly1 {
   id: string;
   folderPoly1Title?: string | null;
   _h_folders?: (string | null) | Folder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1029,6 +1278,14 @@ export interface FolderPoly2 {
   id: string;
   folderPoly2Title?: string | null;
   _h_folders?: (string | null) | Folder;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1264,6 +1521,8 @@ export interface AccessJoinArticlesSelect<T extends boolean = true> {
         articleTags?: T;
         status?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1302,6 +1561,8 @@ export interface AccessJoinNotesSelect<T extends boolean = true> {
     | {
         status?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1312,6 +1573,8 @@ export interface AccessJoinNotesSelect<T extends boolean = true> {
 export interface AccessJoinParentsSelect<T extends boolean = true> {
   children?: T;
   articles?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1323,6 +1586,8 @@ export interface OperatorHandlerJoinArticlesSelect<T extends boolean = true> {
   id?: T;
   parent?: T;
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1334,6 +1599,8 @@ export interface OperatorHandlerJoinNotesSelect<T extends boolean = true> {
   id?: T;
   parent?: T;
   title?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1343,6 +1610,8 @@ export interface OperatorHandlerJoinNotesSelect<T extends boolean = true> {
  */
 export interface OperatorHandlerJoinParentsSelect<T extends boolean = true> {
   children?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1352,6 +1621,8 @@ export interface OperatorHandlerJoinParentsSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   posts?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1359,6 +1630,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -1433,6 +1705,8 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         category?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1468,6 +1742,8 @@ export interface CategoriesSelect<T extends boolean = true> {
   inTab?: T;
   joinWithError?: T;
   enableErrorOnJoin?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1478,6 +1754,8 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface HiddenPostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1487,6 +1765,8 @@ export interface HiddenPostsSelect<T extends boolean = true> {
  */
 export interface UploadsSelect<T extends boolean = true> {
   relatedPosts?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1508,6 +1788,8 @@ export interface VersionsSelect<T extends boolean = true> {
   category?: T;
   categoryVersion?: T;
   categoryVersions?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1520,6 +1802,8 @@ export interface CategoriesVersionsSelect<T extends boolean = true> {
   title?: T;
   relatedVersions?: T;
   relatedVersionsMany?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1530,6 +1814,8 @@ export interface CategoriesVersionsSelect<T extends boolean = true> {
  */
 export interface SingularSelect<T extends boolean = true> {
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1540,6 +1826,8 @@ export interface SingularSelect<T extends boolean = true> {
 export interface SelfJoinsSelect<T extends boolean = true> {
   rel?: T;
   joins?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1550,6 +1838,8 @@ export interface SelfJoinsSelect<T extends boolean = true> {
 export interface LocalizedPostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1560,6 +1850,8 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
 export interface LocalizedCategoriesSelect<T extends boolean = true> {
   name?: T;
   relatedPosts?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1570,6 +1862,8 @@ export interface LocalizedCategoriesSelect<T extends boolean = true> {
 export interface RestrictedCategoriesSelect<T extends boolean = true> {
   name?: T;
   restrictedPosts?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1580,6 +1874,8 @@ export interface RestrictedCategoriesSelect<T extends boolean = true> {
 export interface CategoriesJoinRestrictedSelect<T extends boolean = true> {
   name?: T;
   collectionRestrictedJoin?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1591,6 +1887,8 @@ export interface RestrictedPostsSelect<T extends boolean = true> {
   title?: T;
   restrictedField?: T;
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1602,6 +1900,8 @@ export interface CollectionRestrictedSelect<T extends boolean = true> {
   title?: T;
   canRead?: T;
   category?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1612,6 +1912,8 @@ export interface CollectionRestrictedSelect<T extends boolean = true> {
 export interface DepthJoins1Select<T extends boolean = true> {
   rel?: T;
   joins?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1621,6 +1923,8 @@ export interface DepthJoins1Select<T extends boolean = true> {
  */
 export interface DepthJoins2Select<T extends boolean = true> {
   joins?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1630,6 +1934,8 @@ export interface DepthJoins2Select<T extends boolean = true> {
  */
 export interface DepthJoins3Select<T extends boolean = true> {
   rel?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1639,6 +1945,8 @@ export interface DepthJoins3Select<T extends boolean = true> {
  */
 export interface MultipleCollectionsParentsSelect<T extends boolean = true> {
   children?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1650,6 +1958,8 @@ export interface MultipleCollections1Select<T extends boolean = true> {
   parent?: T;
   title?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1661,6 +1971,8 @@ export interface MultipleCollections2Select<T extends boolean = true> {
   parent?: T;
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1671,6 +1983,8 @@ export interface MultipleCollections2Select<T extends boolean = true> {
 export interface FoldersSelect<T extends boolean = true> {
   _h_folders?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -1686,6 +2000,8 @@ export interface ExamplePagesSelect<T extends boolean = true> {
   _h_folders?: T;
   title?: T;
   name?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1697,6 +2013,8 @@ export interface ExamplePostsSelect<T extends boolean = true> {
   _h_folders?: T;
   title?: T;
   description?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1707,6 +2025,8 @@ export interface ExamplePostsSelect<T extends boolean = true> {
 export interface FolderPoly1Select<T extends boolean = true> {
   folderPoly1Title?: T;
   _h_folders?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1717,6 +2037,8 @@ export interface FolderPoly1Select<T extends boolean = true> {
 export interface FolderPoly2Select<T extends boolean = true> {
   folderPoly2Title?: T;
   _h_folders?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
