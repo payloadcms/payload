@@ -151,11 +151,12 @@ export function createVercelBlobAdapter({
         token,
       }),
 
-    handleUpload: async ({ file: { buffer, mimeType, tempFilePath }, storageFilePath }) => {
+    handleUpload: async ({ file: { buffer, mimeType, tempFilePath }, req, storageFilePath }) => {
       const result = await uploadFile({
         access,
-        // Client upload receipts bind the destination before processing, including image sizes.
-        addRandomSuffix: clientUploads ? false : addRandomSuffix,
+        // Processed client uploads must stay on their receipt-bound keys, including image sizes.
+        addRandomSuffix:
+          clientUploads && req.context?._payloadClientUploadTempFile ? false : addRandomSuffix,
         buffer,
         cacheControlMaxAge,
         mimeType,

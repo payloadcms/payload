@@ -85,9 +85,14 @@ describe('createVercelBlobAdapter', () => {
     vi.clearAllMocks()
   })
 
-  it.each([true, { access: () => true }, false])(
-    'should keep the suffix policy consistent for clientUploads=%j',
-    async (clientUploads) => {
+  it.each([
+    { clientUploads: true, isClientUpload: true, shouldAddRandomSuffix: false },
+    { clientUploads: { access: () => true }, isClientUpload: true, shouldAddRandomSuffix: false },
+    { clientUploads: true, isClientUpload: false, shouldAddRandomSuffix: true },
+    { clientUploads: false, isClientUpload: false, shouldAddRandomSuffix: true },
+  ])(
+    'should use the suffix policy for clientUploads=$clientUploads and isClientUpload=$isClientUpload',
+    async ({ clientUploads, isClientUpload, shouldAddRandomSuffix }) => {
       const adapter = createVercelBlobAdapter({
         access: 'public',
         addRandomSuffix: true,
@@ -101,12 +106,13 @@ describe('createVercelBlobAdapter', () => {
       for (const filename of ['image.png', 'image-30x20.png']) {
         await adapter.handleUpload({
           file: { buffer: Buffer.from('image'), filename, mimeType: 'image/png' },
+          req: { context: { _payloadClientUploadTempFile: isClientUpload } },
           storageFilePath: `upload-key/${filename}`,
         } as never)
 
         expect(mocks.uploadFile).toHaveBeenLastCalledWith(
           expect.objectContaining({
-            addRandomSuffix: !clientUploads,
+            addRandomSuffix: shouldAddRandomSuffix,
             storageFilePath: `upload-key/${filename}`,
           }),
         )
