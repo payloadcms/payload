@@ -18,7 +18,9 @@
 }
 
 .user-menu__trigger--active,
-.user-menu__trigger--active:hover {
+.user-menu__trigger[aria-expanded='true'],
+.user-menu__trigger--active:hover,
+.user-menu__trigger[aria-expanded='true']:hover {
   background-color: var(--color-bg-transparent-pressed);
 }
 
