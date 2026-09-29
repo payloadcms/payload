@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Fragment } from 'react'
+import React, { Fragment, useMemo } from 'react'
 
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
@@ -52,7 +52,8 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   hierarchyIcon,
   hierarchySlug,
 }) => {
-  const { clearAll, getSelectionsForActions, getTotalCount } = useDocumentSelection()
+  const { clearAll, getSelectionsForActions, getSelectionsWithMetadata, getTotalCount } =
+    useDocumentSelection()
   const { parent, refreshTree } = useHierarchy()
   const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
@@ -70,6 +71,25 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
     : null
 
   const ids = singleCollectionSelected ? groupedSelections[singleCollectionSlug]?.ids || [] : []
+
+  const requiredCollections = useMemo(() => {
+    const selectionsWithMetadata = getSelectionsWithMetadata()
+    const required = new Set<string>()
+
+    for (const [collectionSlug, { selections }] of Object.entries(selectionsWithMetadata)) {
+      if (collectionSlug === hierarchySlug) {
+        for (const { metadata } of selections) {
+          for (const slug of metadata.allowedCollections ?? []) {
+            required.add(slug)
+          }
+        }
+      } else {
+        required.add(collectionSlug)
+      }
+    }
+
+    return required.size > 0 ? Array.from(required) : undefined
+  }, [getSelectionsWithMetadata, hierarchySlug])
 
   // Check if single hierarchy item is selected (for direct edit)
   // Only available when hierarchySlug is provided
@@ -153,8 +173,8 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
             hierarchySlug={hierarchySlug}
             Icon={hierarchyIcon}
             key="bulk-move"
-            modalPrefix="hierarchy-list"
             onSuccess={handleActionSuccess}
+            requiredCollections={requiredCollections}
             selections={groupedSelections}
           />
         ),

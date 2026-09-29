@@ -33,6 +33,8 @@ type MoveManyProps = {
   modalPrefix?: string
   /** Callback after successful move */
   onSuccess?: () => void
+  /** Collection slugs required by the selected documents at the destination. */
+  requiredCollections?: string[]
   /** Selections grouped by collection slug */
   selections: Record<string, { ids: (number | string)[] }>
 }
@@ -56,6 +58,7 @@ export function MoveMany({
   Icon,
   modalPrefix,
   onSuccess,
+  requiredCollections: requiredCollectionsProp,
   selections,
 }: MoveManyProps) {
   const { i18n, t } = useTranslation()
@@ -81,7 +84,7 @@ export function MoveMany({
   // Compute required collections from selection metadata
   // For related items: add their collection slug
   // For folders: add their allowedCollections values
-  const requiredCollections = useMemo(() => {
+  const inferredRequiredCollections = useMemo(() => {
     const selectionsWithMeta = getSelectionsWithMetadata()
     const required = new Set<string>()
 
@@ -103,6 +106,8 @@ export function MoveMany({
 
     return required.size > 0 ? Array.from(required) : undefined
   }, [getSelectionsWithMetadata, hierarchySlug])
+
+  const requiredCollections = requiredCollectionsProp ?? inferredRequiredCollections
 
   // Folders being moved cannot be selected as destination (can't move into themselves)
   const disabledIds = useMemo(() => {

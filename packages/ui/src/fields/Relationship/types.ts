@@ -12,6 +12,7 @@ import type {
 
 export type Option = {
   allowEdit: boolean
+  doc?: Record<string, unknown>
   label: string
   options?: Option[]
   relationTo?: string
@@ -92,11 +93,17 @@ export type RelationshipInputProps = {
   readonly appearance?: 'drawer' | 'select'
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
+  readonly CreateButton?: React.ReactNode
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly formatDisplayedOptions?: (options: OptionGroup[]) => Option[] | OptionGroup[]
+  readonly formatOptionLabel?: (args: {
+    context: 'menu' | 'value'
+    defaultLabel: string
+    doc?: Record<string, unknown>
+  }) => string
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
@@ -109,6 +116,7 @@ export type RelationshipInputProps = {
   readonly readOnly?: boolean
   readonly relationTo: string[]
   readonly required?: boolean
+  readonly selectOptionFields?: Record<string, boolean>
   readonly showError?: boolean
   /**
    * Controls the height of the input. Defaults to `'large'`.
