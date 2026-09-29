@@ -171,7 +171,7 @@
    * lets us style only the corresponding trigger while an item inside its own submenu is being
    * hovered, without requiring a menu-specific class or JS-tracked hover state.
    */
-  .popup:has(.popup__content:hover) .popup-button-list__button--submenu-trigger {
+  .popup:has(> .popup__content:hover) > .popup__trigger-wrap .popup-button-list__button--submenu-trigger {
     background-color: var(--color-bg-secondary);
     color: var(--color-text);
   }
