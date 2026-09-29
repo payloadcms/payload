@@ -3,6 +3,10 @@
     overflow-wrap: anywhere;
   }
 
+  .modular-dashboard .widget[data-width='full']:has(.welcome-widget) {
+    margin-block-end: var(--spacer-2-5);
+  }
+
   .welcome-widget__heading {
     margin: 0;
     padding-block-start: var(--spacer-1);
