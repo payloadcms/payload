@@ -12,6 +12,9 @@ export function CustomIDModals() {
       </button>
       <DialogModal closeOnEsc={false} slug="locked-slug">
         <h2>Locked title</h2>
+        <button onClick={() => openModal('child-slug')} type="button">
+          Open child
+        </button>
         <button onClick={() => closeModal('locked-slug')} type="button">
           Close locked dialog
         </button>

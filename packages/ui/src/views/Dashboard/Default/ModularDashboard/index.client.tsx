@@ -246,6 +246,8 @@ export function ModularDashboardClient({
                   )
                   return draggedWidget ? (
                     <div
+                      aria-hidden="true"
+                      inert
                       style={{
                         transform: 'scale(0.25)',
                       }}

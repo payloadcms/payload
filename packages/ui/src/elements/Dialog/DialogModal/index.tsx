@@ -35,12 +35,15 @@ export const DialogModal: React.FC<DialogModalProps> = ({
 }) => {
   const [isConfirming, setConfirming] = useState(false)
   const { modalState } = useModal()
-  const isOpen = Boolean(modalState[slug]?.isOpen)
   const drawerDepth = useDrawerDepth()
   const dialogDepth = useDialogDepth()
 
   useEffect(() => {
-    if (closeOnEsc || !isOpen) {
+    const latestOpenModal = Object.values(modalState)
+      .filter((modal) => modal.isOpen)
+      .sort((a, b) => (b.openedOn ?? 0) - (a.openedOn ?? 0))[0]
+
+    if (closeOnEsc || latestOpenModal?.slug !== slug) {
       return
     }
 
@@ -54,7 +57,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
     // Capture phase fires before ModalProvider's bubble-phase listener
     document.addEventListener('keydown', handler, true)
     return () => document.removeEventListener('keydown', handler, true)
-  }, [closeOnEsc, isOpen])
+  }, [closeOnEsc, modalState, slug])
 
   return (
     <DialogDepthProvider>

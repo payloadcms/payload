@@ -761,6 +761,15 @@ test.describe('WCAG 2.2 Level AA', () => {
       await expect(locked).toBeVisible()
       await page.keyboard.press('Escape')
       await expect(locked).toBeVisible()
+      await locked.getByRole('button', { name: 'Open child', exact: true }).click()
+      const child = page.getByTestId('child')
+
+      await expect(child).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(child).toBeHidden()
+      await expect(locked).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(locked).toBeVisible()
       await locked.getByRole('button', { name: 'Close locked dialog', exact: true }).click()
       await expect(locked).toBeHidden()
       await page.getByRole('button', { name: 'Open parent', exact: true }).click()
@@ -817,6 +826,21 @@ test.describe('WCAG 2.2 Level AA', () => {
       // PYLD-3642: browser coverage complements the NVDA regression.
       await openDashboardEditor({ page, serverURL })
       const widgets = page.locator('.modular-dashboard .widget[data-slug]')
+
+      const linkedWidget = widgets.filter({ has: page.locator('.widget-content a[href]') }).first()
+      const linkedDrag = linkedWidget.getByRole('button', { name: 'Drag to reorder', exact: true })
+
+      await linkedDrag.focus()
+      await page.keyboard.press('Space')
+      const overlay = page.locator('.drag-overlay')
+
+      await expect(overlay).toBeVisible()
+      expect(await overlay.ariaSnapshot()).toBe('')
+      expect(await linkedWidget.ariaSnapshot()).toContain('link')
+      await overlay.locator('a[href]').first().focus()
+      await expect(linkedDrag).toBeFocused()
+      await page.keyboard.press('Space')
+      await expect(overlay).toHaveCount(0)
 
       while ((await widgets.count()) > 0) {
         await widgets.last().locator('.widget-wrapper__delete-btn').click()

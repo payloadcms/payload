@@ -1729,7 +1729,7 @@ async function createInlineBlock({
     openEditDrawer: () => Promise<{ editDrawer: Locator; saveEditDrawer: () => Promise<void> }>
   }>
 }> {
-  const lastParagraph = richTextField.locator('p').last()
+  const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
 
@@ -1810,7 +1810,7 @@ async function createBlock({
   newBlock: Locator
   slashMenuPopover: Locator
 }> {
-  const lastParagraph = richTextField.locator('p').last()
+  const lastParagraph = richTextField.locator('.ContentEditable__root > p').last()
   await lastParagraph.scrollIntoViewIfNeeded()
   await expect(lastParagraph).toBeVisible()
 
