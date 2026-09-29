@@ -41,7 +41,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   if (collectionSlug) {
     to = formatAdminURL({
       adminRoute,
-      path: `/collections/${collectionSlug}/${trashedDocPrefix}${docID}/versions/${id}`,
+      path: `/collections/${collectionSlug}/${trashedDocPrefix}${encodeURIComponent(docID)}/versions/${id}`,
     })
   }
 

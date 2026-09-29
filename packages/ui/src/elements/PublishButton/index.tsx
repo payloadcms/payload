@@ -103,7 +103,7 @@ export function PublishButton({
     if (collectionSlug) {
       action = formatAdminURL({
         apiRoute: api,
-        path: `/${collectionSlug}${id ? `/${id}` : ''}${params}`,
+        path: `/${collectionSlug}${id ? `/${encodeURIComponent(id)}` : ''}${params}`,
       })
       if (id) {
         method = 'PATCH'
@@ -155,7 +155,9 @@ export function PublishButton({
     const action = formatAdminURL({
       apiRoute: api,
       path: `${
-        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
+        globalSlug
+          ? `/globals/${globalSlug}`
+          : `/${collectionSlug}${id ? `/${encodeURIComponent(id)}` : ''}`
       }${params}` as `/${string}`,
     })
 
@@ -201,7 +203,7 @@ export function PublishButton({
 
       const pathSegment = globalSlug
         ? `/globals/${globalSlug}`
-        : `/${collectionSlug}${id ? `/${id}` : ''}`
+        : `/${collectionSlug}${id ? `/${encodeURIComponent(id)}` : ''}`
       const action = formatAdminURL({
         apiRoute: api,
         path: `${pathSegment}${params}` as `/${string}`,

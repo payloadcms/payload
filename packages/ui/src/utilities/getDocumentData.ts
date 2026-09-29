@@ -7,8 +7,6 @@ import {
   type User,
 } from 'payload'
 
-import { sanitizeID } from '../utilities/sanitizeID.js'
-
 type Args = {
   collectionSlug?: string
   globalSlug?: string
@@ -21,7 +19,7 @@ type Args = {
 }
 
 export const getDocumentData = async ({
-  id: idArg,
+  id,
   collectionSlug,
   globalSlug,
   locale,
@@ -30,7 +28,6 @@ export const getDocumentData = async ({
   segments,
   user,
 }: Args): Promise<null | Record<string, unknown> | TypeWithID> => {
-  const id = sanitizeID(idArg)
   let resolvedData: Record<string, unknown> | TypeWithID = null
   const { transactionID, ...rest } = req
 

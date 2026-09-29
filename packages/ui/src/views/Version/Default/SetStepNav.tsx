@@ -43,8 +43,8 @@ export const SetStepNav: React.FC<{
       const pluralLabel = collectionConfig.labels?.plural
 
       const docBasePath: `/${string}` = isTrashed
-        ? `/collections/${collectionSlug}/trash/${id}`
-        : `/collections/${collectionSlug}/${id}`
+        ? `/collections/${collectionSlug}/trash/${encodeURIComponent(id)}`
+        : `/collections/${collectionSlug}/${encodeURIComponent(id)}`
 
       const nav = [
         {

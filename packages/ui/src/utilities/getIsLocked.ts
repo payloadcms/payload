@@ -8,8 +8,6 @@ import type {
 
 import { extractID } from 'payload/shared'
 
-import { sanitizeID } from './sanitizeID.js'
-
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
@@ -78,7 +76,7 @@ export const getIsLocked = async ({
     where.and = [
       {
         'document.value': {
-          equals: sanitizeID(id),
+          equals: id,
         },
       },
       {

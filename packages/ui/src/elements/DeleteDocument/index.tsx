@@ -86,7 +86,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     try {
       const url = formatAdminURL({
         apiRoute: api,
-        path: `/${collectionSlug}/${id}`,
+        path: `/${collectionSlug}/${encodeURIComponent(id)}`,
       })
       const res = permanentlyDelete
         ? await requests.delete(url, {

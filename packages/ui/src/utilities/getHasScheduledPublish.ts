@@ -3,7 +3,6 @@ import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig } from '
 import { hasScheduledPublishEnabled } from 'payload/shared'
 
 import { buildUpcomingScheduleWhere } from '../elements/PublishButton/ScheduleDrawer/buildUpcomingScheduleWhere.js'
-import { sanitizeID } from './sanitizeID.js'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
@@ -14,14 +13,13 @@ type Args = {
 }
 
 export const getHasScheduledPublish = async ({
-  id: idArg,
+  id,
   collectionConfig,
   globalConfig,
   hasPublishPermission,
   payload,
 }: Args): Promise<boolean> => {
   const entityConfig = collectionConfig || globalConfig
-  const id = sanitizeID(idArg)
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
 

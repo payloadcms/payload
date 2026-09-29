@@ -82,8 +82,8 @@ export const SetDocumentStepNav: React.FC<{
               ? formatAdminURL({
                   adminRoute,
                   path: isTrashed
-                    ? `/collections/${collectionSlug}/trash/${id}`
-                    : `/collections/${collectionSlug}/${id}`,
+                    ? `/collections/${collectionSlug}/trash/${encodeURIComponent(id)}`
+                    : `/collections/${collectionSlug}/${encodeURIComponent(id)}`,
                 })
               : undefined,
           })

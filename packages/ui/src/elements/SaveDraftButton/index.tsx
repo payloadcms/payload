@@ -50,7 +50,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
     if (collectionSlug) {
       action = formatAdminURL({
         apiRoute: api,
-        path: `/${collectionSlug}${id ? `/${id}` : ''}${search}`,
+        path: `/${collectionSlug}${id ? `/${encodeURIComponent(id)}` : ''}${search}`,
       })
       if (id) {
         method = 'PATCH'

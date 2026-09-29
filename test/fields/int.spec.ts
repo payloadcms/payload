@@ -2,13 +2,18 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { ValidationError } from 'payload'
 
+import { getDocumentData } from '@payloadcms/ui/utilities/getDocumentData'
 import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
+import { defaultAdminViews } from '@payloadcms/ui/views/Root/adminViews'
 import { createPayloadRequest, reload } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { expect } from 'vitest'
+import { expect, onTestFinished } from 'vitest'
 
 import type { BlockField, GroupField } from './payload-types.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports -- Exercise admin route parsing without adding a public export for tests.
+import { getRouteData } from '../../packages/ui/src/views/Root/getRouteData.js'
 import { test } from '../__helpers/int/vitest.js'
 import { devUser } from '../credentials.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
@@ -32,6 +37,7 @@ import {
   checkboxFieldsSlug,
   collapsibleFieldsSlug,
   customIDNestedSlug,
+  customIDSlug,
   dateFieldsSlug,
   duplicateFieldsSlug,
   groupFieldsSlug,
@@ -6231,6 +6237,47 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
 
       expect(result.docs).toHaveLength(1)
     })
+  })
+
+  test('should decode custom IDs once when loading an admin document route', async ({
+    payload,
+  }) => {
+    const doc = await payload.create({
+      collection: customIDSlug,
+      data: { id: 'custom:50%3A' },
+      overrideAccess: true,
+    })
+
+    onTestFinished(async () => {
+      await payload.delete({ collection: customIDSlug, id: doc.id, overrideAccess: true })
+    })
+
+    const req = await createPayloadRequest({ payload, user: user.user })
+    const segments = ['collections', customIDSlug, encodeURIComponent(doc.id)]
+    const { routeParams } = getRouteData({
+      adminRoute: payload.config.routes.admin,
+      adminViews: defaultAdminViews,
+      collectionConfig: payload.collections[customIDSlug].config,
+      currentRoute: formatAdminURL({
+        adminRoute: payload.config.routes.admin,
+        path: `/${segments.join('/')}`,
+      }),
+      payload,
+      searchParams: {},
+      segments,
+    })
+
+    expect(routeParams.id).toBe(doc.id)
+
+    const data = await getDocumentData({
+      id: routeParams.id,
+      collectionSlug: customIDSlug,
+      payload,
+      req,
+      user: req.user,
+    })
+
+    expect(data?.id).toBe(doc.id)
   })
 
   test.describe('Custom ID Nested', () => {

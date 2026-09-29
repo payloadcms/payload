@@ -19,6 +19,7 @@ import { formatAdminURL, isNumber } from 'payload/shared'
 import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
 import { isPathMatchingRoute } from '../../utilities/isPathMatchingRoute.js'
+import { sanitizeID } from '../../utilities/sanitizeID.js'
 import { TrashView } from '../CollectionTrash/index.js'
 import { DocumentView } from '../Document/index.js'
 import { forgotPasswordBaseClass } from '../ForgotPassword/index.js'
@@ -416,7 +417,7 @@ export const getRouteData = ({
   if (collectionConfig) {
     if (routeParams.id) {
       routeParams.id = parseDocumentID({
-        id: routeParams.id,
+        id: sanitizeID(routeParams.id),
         collectionSlug: collectionConfig.slug,
         payload,
       })
@@ -424,7 +425,7 @@ export const getRouteData = ({
 
     if (routeParams.versionID) {
       routeParams.versionID = parseDocumentID({
-        id: routeParams.versionID,
+        id: sanitizeID(routeParams.versionID),
         collectionSlug: collectionConfig.slug,
         payload,
       })
@@ -432,6 +433,8 @@ export const getRouteData = ({
   }
 
   if (globalConfig && routeParams.versionID) {
+    routeParams.versionID = sanitizeID(routeParams.versionID)
+
     routeParams.versionID =
       payload.db.defaultIDType === 'number' && isNumber(routeParams.versionID)
         ? Number(routeParams.versionID)

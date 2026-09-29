@@ -9,7 +9,6 @@ import type {
 import { combineQueries, extractAccessFromPermission } from 'payload'
 import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 
-import { sanitizeID } from './sanitizeID.js'
 import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
 
 type Args = {
@@ -40,7 +39,7 @@ type Result = Promise<{
 // this will speed up the API by ~30-100ms or so
 // Note from the future: I have attempted parallelizing these queries, but it made this function almost 2x slower.
 export const getVersions = async ({
-  id: idArg,
+  id,
   collectionConfig,
   doc,
   docPermissions,
@@ -49,7 +48,6 @@ export const getVersions = async ({
   payload,
   user,
 }: Args): Result => {
-  const id = sanitizeID(idArg)
   let publishedDoc
   let hasPublishedDoc = false
   let mostRecentVersionIsAutosaved = false

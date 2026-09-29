@@ -85,7 +85,7 @@ export const CopyLocaleData: React.FC = () => {
           router.push(
             formatAdminURL({
               adminRoute: admin,
-              path: `/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}`,
+              path: `/${collectionSlug ? `collections/${collectionSlug}/${encodeURIComponent(id)}` : `globals/${globalSlug}`}`,
             }) + `?locale=${to}`,
           ),
         )

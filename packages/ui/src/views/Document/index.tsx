@@ -303,7 +303,7 @@ export const renderDocument = async ({
   const apiURL = formatAdminURL({
     apiRoute,
     path: collectionSlug
-      ? `/${collectionSlug}/${idFromArgs}${apiQueryParams}`
+      ? `/${collectionSlug}/${encodeURIComponent(idFromArgs)}${apiQueryParams}`
       : globalSlug
         ? `/${globalSlug}${apiQueryParams}`
         : '',
@@ -374,7 +374,7 @@ export const renderDocument = async ({
       if (!drawerSlug && redirectAfterCreate !== false) {
         const redirectURL = formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionSlug}/${doc.id}`,
+          path: `/collections/${collectionSlug}/${encodeURIComponent(doc.id)}`,
         })
 
         req.server.redirect(redirectURL)

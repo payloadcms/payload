@@ -115,7 +115,7 @@ export const RestoreButton: React.FC<Props> = (props) => {
             router.push(
               formatAdminURL({
                 adminRoute,
-                path: `/collections/${collectionSlug}/${id}`,
+                path: `/collections/${collectionSlug}/${encodeURIComponent(id)}`,
                 serverURL,
               }),
             ),

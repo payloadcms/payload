@@ -345,7 +345,7 @@ const DocumentInfo: React.FC<
   }, [])
 
   const action: string = React.useMemo(() => {
-    const docPath = `${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
+    const docPath = `${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${encodeURIComponent(id)}` : ''}`
 
     return formatAdminURL({
       apiRoute: api,

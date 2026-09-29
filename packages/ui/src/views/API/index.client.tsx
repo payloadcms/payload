@@ -53,7 +53,7 @@ export const APIViewClient: React.FC = () => {
 
   if (collectionConfig) {
     draftsEnabled = hasDraftsEnabled(collectionConfig)
-    docEndpoint = `/${collectionSlug}/${id}`
+    docEndpoint = `/${collectionSlug}/${encodeURIComponent(id)}`
   }
 
   if (globalConfig) {

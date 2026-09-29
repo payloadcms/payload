@@ -93,7 +93,7 @@ export const DuplicateDocument: React.FC<Props> = ({
         const res = await requests.post(
           formatAdminURL({
             apiRoute,
-            path: `/${slug}/${id}/duplicate${qs.stringify(queryParams, {
+            path: `/${slug}/${encodeURIComponent(id)}/duplicate${qs.stringify(queryParams, {
               addQueryPrefix: true,
             })}`,
           }),

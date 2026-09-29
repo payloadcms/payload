@@ -79,7 +79,7 @@ export function UnpublishButton({
         if (collectionSlug) {
           url = formatAdminURL({
             apiRoute: api,
-            path: `/${collectionSlug}/${id}${queryString}`,
+            path: `/${collectionSlug}/${encodeURIComponent(id)}${queryString}`,
             serverURL,
           })
           method = 'patch'

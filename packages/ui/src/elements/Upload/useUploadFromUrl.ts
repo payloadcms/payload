@@ -97,7 +97,7 @@ export const useUploadFromUrl = ({
 
   const fetchFileFromServerProxy = useCallback(
     async (url: string): Promise<boolean> => {
-      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(url)}`
+      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${encodeURIComponent(id)}?` : '?'}src=${encodeURIComponent(url)}`
       const response = await fetch(formatAdminURL({ apiRoute: api, path: pasteURL }))
 
       if (!response.ok) {

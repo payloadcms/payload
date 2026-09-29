@@ -353,7 +353,7 @@ export function DefaultEditView({
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
+          path: `/collections/${collectionSlug}/${encodeURIComponent(document?.id)}${locale ? `?locale=${locale}` : ''}`,
         })
 
         startRouteTransition(() => router.push(redirectRoute))

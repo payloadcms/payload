@@ -68,7 +68,7 @@ export const Status: React.FC = () => {
     if (collectionSlug) {
       url = formatAdminURL({
         apiRoute: api,
-        path: `/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`,
+        path: `/${collectionSlug}/${encodeURIComponent(id)}?locale=${locale}&fallback-locale=null&depth=0`,
       })
       method = 'patch'
     }

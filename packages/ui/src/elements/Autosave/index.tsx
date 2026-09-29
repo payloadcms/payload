@@ -125,7 +125,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             entitySlug = collection.slug
             url = formatAdminURL({
               apiRoute: api,
-              path: `/${entitySlug}/${id}${params}`,
+              path: `/${entitySlug}/${encodeURIComponent(id)}${params}`,
             })
             method = 'PATCH'
           }

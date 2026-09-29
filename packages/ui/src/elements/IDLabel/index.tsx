@@ -5,7 +5,6 @@ import React from 'react'
 import { Link } from '../../elements/Link/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { sanitizeID } from '../../utilities/sanitizeID.js'
 import { useDrawerDepth } from '../Drawer/index.js'
 import './index.css'
 
@@ -25,8 +24,6 @@ export const IDLabel: React.FC<{
   const { collectionSlug, globalSlug } = useDocumentInfo()
   const drawerDepth = useDrawerDepth()
 
-  const sanitizedID = sanitizeID(id)
-
   // Only render as link if we're inside a drawer and have document context
   const shouldRenderLink = drawerDepth > 0 && (collectionSlug || globalSlug)
 
@@ -37,14 +34,14 @@ export const IDLabel: React.FC<{
   if (shouldRenderLink) {
     const docPath = formatAdminURL({
       adminRoute,
-      path: `/${collectionSlug ? `collections/${collectionSlug}` : `globals/${globalSlug}`}/${id}`,
+      path: `/${collectionSlug ? `collections/${collectionSlug}` : `globals/${globalSlug}`}/${encodeURIComponent(id)}`,
     })
 
     return (
       <div className={classes} title={String(id)}>
         <span className={`${baseClass}__prefix`}>{prefix}</span>
         <Link className={`${baseClass}__link`} href={docPath}>
-          {sanitizedID}
+          {id}
         </Link>
       </div>
     )
@@ -53,7 +50,7 @@ export const IDLabel: React.FC<{
   return (
     <div className={classes} title={String(id)}>
       <span className={`${baseClass}__prefix`}>{prefix}</span>
-      <span className={`${baseClass}__value`}>{sanitizedID}</span>
+      <span className={`${baseClass}__value`}>{id}</span>
     </div>
   )
 }

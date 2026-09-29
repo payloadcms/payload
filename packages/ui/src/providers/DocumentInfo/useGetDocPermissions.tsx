@@ -43,7 +43,7 @@ export const useGetDocPermissions = ({
 
       if (newIsEditing) {
         const docAccessPath: `/${string}` = collectionSlug
-          ? `/${collectionSlug}/access/${idToUse}`
+          ? `/${collectionSlug}/access/${encodeURIComponent(idToUse)}`
           : globalSlug
             ? `/globals/${globalSlug}/access`
             : null
