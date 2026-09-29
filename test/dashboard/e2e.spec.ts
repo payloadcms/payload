@@ -317,6 +317,7 @@ describe('Dashboard', () => {
     )
 
     expect(preferenceResponse.ok()).toBe(true)
+    await page.setViewportSize({ height: 900, width: 1920 })
     await page.goto(url.admin)
 
     const widget = page.locator('.recents-widget')
@@ -335,6 +336,24 @@ describe('Dashboard', () => {
     await expect(
       widget.getByRole('button', { name: `Unpin document: ${ticket.title}` }),
     ).toBeEnabled()
+
+    const collectionHeader = await widget
+      .locator('.recents-widget__list-header span:nth-child(2)')
+      .boundingBox()
+    const collectionCell = await widget
+      .locator('.recents-widget__items--list .recents-widget__list-collection')
+      .boundingBox()
+    const nameCell = await widget.locator('.recents-widget__details').boundingBox()
+    const pinButton = await widget
+      .getByRole('button', { name: `Unpin document: ${ticket.title}` })
+      .boundingBox()
+
+    expect(collectionHeader).not.toBeNull()
+    expect(collectionCell).not.toBeNull()
+    expect(nameCell).not.toBeNull()
+    expect(pinButton).not.toBeNull()
+    expect(collectionCell!.x).toBeCloseTo(collectionHeader!.x, 0)
+    expect(pinButton!.x + pinButton!.width).toBeLessThanOrEqual(nameCell!.x + nameCell!.width)
 
     await page.reload()
     await page
