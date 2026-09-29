@@ -35,18 +35,6 @@
     margin: 0;
     list-style: none;
 
-    .card {
-      align-items: flex-start;
-      height: 100%;
-      padding: var(--spacer-2-5);
-      border-radius: var(--radius-large);
-      background: var(--color-bg);
-    }
-
-    .card--has-onclick:hover {
-      background: var(--color-bg-secondary);
-    }
-
     .card:has(.card__actions) .card__title {
       max-width: calc(100% - var(--spacer-4));
     }

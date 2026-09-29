@@ -80,6 +80,19 @@ describe('Dashboard', () => {
       (element) => getComputedStyle(element).backgroundColor,
     )
 
+    for (const selector of [
+      '.count-widget.card',
+      '.revenue-widget.card',
+      '.private-widget.card',
+      '.widget-card.card',
+    ]) {
+      const widgetCard = page.locator(selector).first()
+
+      await expect(widgetCard).toHaveCSS('background-color', defaultBackground)
+      await expect(widgetCard).toHaveCSS('border-radius', '13px')
+      await expect(widgetCard).toHaveCSS('padding-top', '12px')
+    }
+
     await card.hover()
 
     await expect(actions).toHaveCSS('opacity', '1')
