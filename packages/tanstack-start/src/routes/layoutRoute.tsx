@@ -1,10 +1,11 @@
 'use client'
 
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 
 import { RootProvider } from '@payloadcms/ui/providers/Root'
 import { ProgressBar } from '@payloadcms/ui/providers/RouteTransition/ProgressBar'
 import { Outlet, useLoaderData } from '@tanstack/react-router'
+import { useRef } from 'react'
 
 import type { LoadLayoutDataResult } from '../utilities/loadLayoutData.js'
 
@@ -34,6 +35,12 @@ export function payloadLayoutRoute({
   function PayloadLayout() {
     const data = useLoaderData({ strict: false })
 
+    const providersRef = useRef<ReactNode>(undefined)
+    if (providersRef.current === undefined) {
+      providersRef.current = data.providers
+    }
+    const providers = providersRef.current
+
     return (
       <>
         <RootProvider
@@ -54,10 +61,10 @@ export function payloadLayoutRoute({
           user={data.user}
         >
           <ProgressBar />
-          {/* `data.providers` is the custom-provider tree (config.admin.components.providers)
+          {/* `providers` is the custom-provider tree (config.admin.components.providers)
               already wrapping the router <Outlet />; falls back to a bare <Outlet /> when
               no custom providers are configured. */}
-          {data.providers ?? <Outlet />}
+          {providers ?? <Outlet />}
         </RootProvider>
         <div id="portal" />
       </>
