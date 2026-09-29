@@ -84,10 +84,18 @@ export const aggregatePaginate = async ({
     }
   }
 
-  const [docs, countResult] = await Promise.all([
-    Model.aggregate(aggregation, { collation, session }),
-    countPromise,
-  ])
+  let docs: unknown[]
+  let countResult: null | number
+
+  if (session) {
+    docs = await Model.aggregate(aggregation, { collation, session })
+    countResult = await countPromise
+  } else {
+    ;[docs, countResult] = await Promise.all([
+      Model.aggregate(aggregation, { collation, session }),
+      countPromise,
+    ])
+  }
 
   const count = countResult === null ? docs.length : countResult
 
