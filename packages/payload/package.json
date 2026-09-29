@@ -82,7 +82,8 @@
   },
   "files": [
     "dist",
-    "bin.js"
+    "bin.js",
+    "lexicalLoader.mjs"
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",

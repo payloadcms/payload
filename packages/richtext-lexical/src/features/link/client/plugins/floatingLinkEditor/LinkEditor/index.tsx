@@ -22,7 +22,6 @@ import {
   $getSelection,
   $isLineBreakNode,
   $isRangeSelection,
-  $onUpdate,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   getDOMSelection,
@@ -334,7 +333,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
-          $onUpdate(() => editor.read('latest', $updateLinkEditor))
+          void $updateLinkEditor()
           return true
         },
         COMMAND_PRIORITY_LOW,

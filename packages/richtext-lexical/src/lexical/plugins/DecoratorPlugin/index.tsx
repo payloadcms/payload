@@ -16,7 +16,6 @@ import {
   $isRangeSelection,
   $isRootOrShadowRoot,
   $isTextNode,
-  $onUpdate,
   $setSelection,
   CLICK_COMMAND,
   COMMAND_PRIORITY_LOW,
@@ -77,24 +76,14 @@ export function DecoratorPlugin() {
       editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
-        (_, activeEditor) => {
-          // Nested editors reconcile independently and update their own highlight.
-          if (activeEditor !== editor) {
-            return false
+        () => {
+          const decorator = $getSelectedDecorator()
+          document.querySelector('.decorator-selected')?.classList.remove('decorator-selected')
+          if (decorator) {
+            decorator.element?.classList.add('decorator-selected')
+            return true
           }
-          const hasSelectedDecorator = Boolean($getSelectedDecorator())
-          $onUpdate(() => {
-            activeEditor.read('latest', () => {
-              const decorator = $getSelectedDecorator()
-              document.querySelector('.decorator-selected')?.classList.remove('decorator-selected')
-              if (decorator) {
-                activeEditor
-                  .getElementByKey(decorator.getKey())
-                  ?.classList.add('decorator-selected')
-              }
-            })
-          })
-          return hasSelectedDecorator
+          return false
         },
         COMMAND_PRIORITY_LOW,
       ),
@@ -241,7 +230,12 @@ function $getSelectedDecorator() {
     return undefined
   }
   const node = nodes[0]
-  return $isDecoratorNode(node) ? node : undefined
+  return $isDecoratorNode(node)
+    ? {
+        decorator: node,
+        element: $getEditor().getElementByKey(node.getKey()),
+      }
+    : undefined
 }
 
 function $selectDecorator({
