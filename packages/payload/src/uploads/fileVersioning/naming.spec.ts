@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  assertPlannedStorageDestinationAvailable,
-  getArchivedFilename,
-  getBaseFilenameFromOriginal,
-  getOriginalFilename,
-} from './naming.js'
+import { getArchivedFilename, getOriginalFilename } from './naming.js'
 
 describe('file version naming', () => {
   it.each([
@@ -16,7 +11,6 @@ describe('file version naming', () => {
     ['photo-original.jpg', 'photo-original-original.jpg'],
   ])('should preserve the base name when adding an original marker to %s', (name, original) => {
     expect(getOriginalFilename({ filename: name })).toBe(original)
-    expect(getBaseFilenameFromOriginal({ filename: original })).toBe(name)
   })
 
   it('should insert a version suffix before the extension', () => {
@@ -40,24 +34,4 @@ describe('file version naming', () => {
       expect(() => getOriginalFilename({ filename })).toThrow()
     },
   )
-
-  it('should reject a destination collision in the same storage location', () => {
-    expect(() =>
-      assertPlannedStorageDestinationAvailable({
-        storageBackendId: 's3:media',
-        destination: 'media/photo.jpg',
-        occupied: [{ storageBackendId: 's3:media', key: 'media/photo.jpg' }],
-      }),
-    ).toThrow()
-  })
-
-  it('should permit the same key in another storage location', () => {
-    expect(() =>
-      assertPlannedStorageDestinationAvailable({
-        storageBackendId: 's3:public',
-        destination: 'media/photo.jpg',
-        occupied: [{ storageBackendId: 's3:private', key: 'media/photo.jpg' }],
-      }),
-    ).not.toThrow()
-  })
 })

@@ -22,12 +22,11 @@ import { validateSortQuery } from '../../database/queryValidation/validateSortQu
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
 import { type CollectionSlug, type FindOptions } from '../../index.js'
+import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
-  runFileOperationPlan,
-  stageLocalUploadFiles,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
@@ -425,25 +424,15 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         } as const
-        const hasManagedLocalUpload =
-          !collectionConfig.upload.disableLocalStorage &&
-          generatedFileData.files.length > 0 &&
-          Array.isArray((generatedFileData.data as Record<string, unknown>)._managedFiles)
-        let updatedDoc = hasManagedLocalUpload
-          ? await runFileOperationPlan({
-              id,
-              collection: collectionConfig.slug,
-              req,
-              stage: ({ trackStagedObject }) =>
-                stageLocalUploadFiles({
-                  files: generatedFileData.files,
-                  staticDir: collectionConfig.upload.staticDir!,
-                  storageBackendId: `local:${collectionConfig.slug}`,
-                  trackStagedObject,
-                }),
-              write: () => updateDocument(updateArgs),
-            })
-          : await updateDocument(updateArgs)
+        let updatedDoc = await runLocalFileUpdate({
+          id,
+          collection: collectionConfig,
+          current: docWithLocales,
+          files: generatedFileData.files,
+          nextManifest: (generatedFileData.data as Record<string, unknown>)._managedFiles,
+          req,
+          write: () => updateDocument(updateArgs),
+        })
 
         // /////////////////////////////////////
         // Add collection property for auth collections

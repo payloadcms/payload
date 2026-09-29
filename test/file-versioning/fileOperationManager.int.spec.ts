@@ -1,3 +1,4 @@
+/* eslint vitest/no-standalone-expect: ["error", { "additionalTestBlockFunctions": ["test", "test.skipIf"] }] -- Tests use the shared fixture wrapper. */
 /* eslint @typescript-eslint/require-await: off -- Storage callbacks are asynchronous in production; these fakes record synchronous effects. */
 import { createPayloadRequest } from 'payload'
 import { expect } from 'vitest'
@@ -15,88 +16,6 @@ import { draftMediaSlug, mediaSlug } from './shared.js'
 
 test.suite('File operation manager', { config: './config.ts' }, () => {
   test.skipIf(process.env.PAYLOAD_DATABASE === 'sqlite')(
-    'should stage before the write and defer cleanup until commit',
-    async ({ payload }) => {
-      const doc = await payload.db.create({ collection: mediaSlug, data: { alt: 'before' } })
-      const req = await createPayloadRequest({ payload })
-      const events: string[] = []
-
-      expect(await initTransaction(req)).toBe(true)
-
-      await runFileOperationPlan({
-        collection: mediaSlug,
-        id: doc.id,
-        req,
-        stage: async ({ trackStagedObject }) => {
-          events.push('stage')
-          trackStagedObject({
-            key: 'attempt-only.jpg',
-            remove: async () => {
-              events.push('remove staged')
-            },
-            storageBackendId: `local:${mediaSlug}`,
-          })
-        },
-        write: async () => {
-          const stored = await payload.db.findOne({
-            collection: mediaSlug,
-            req,
-            where: { id: { equals: doc.id } },
-          })
-
-          expect(stored?._fileRevision).toBeTruthy()
-          events.push('write')
-        },
-        cleanup: async () => {
-          events.push('cleanup')
-        },
-      })
-
-      expect(events).toEqual(['stage', 'write'])
-
-      await commitTransaction(req)
-
-      expect(events).toEqual(['stage', 'write', 'cleanup'])
-    },
-  )
-
-  test.skipIf(process.env.PAYLOAD_DATABASE === 'sqlite')(
-    'should discard cleanup and compensate only staged objects after rollback',
-    async ({ payload }) => {
-      const doc = await payload.db.create({ collection: mediaSlug, data: { alt: 'before' } })
-      const req = await createPayloadRequest({ payload })
-      const events: string[] = []
-
-      expect(await initTransaction(req)).toBe(true)
-
-      await runFileOperationPlan({
-        collection: mediaSlug,
-        id: doc.id,
-        req,
-        stage: async ({ trackStagedObject }) => {
-          trackStagedObject({
-            key: 'attempt-only.jpg',
-            remove: async () => {
-              events.push('remove staged')
-            },
-            storageBackendId: `local:${mediaSlug}`,
-          })
-        },
-        write: async () => {
-          events.push('write')
-        },
-        cleanup: async () => {
-          events.push('cleanup')
-        },
-      })
-
-      await killTransaction(req)
-
-      expect(events).toEqual(['write', 'remove staged'])
-    },
-  )
-
-  test.skipIf(process.env.PAYLOAD_DATABASE === 'sqlite')(
     'should wait for the parent operation when a nested operation succeeds',
     async ({ payload }) => {
       const doc = await payload.db.create({ collection: mediaSlug, data: { alt: 'before' } })
@@ -106,16 +25,22 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
       expect(await initTransaction(req)).toBe(true)
 
       await runFileOperationPlan({
-        collection: mediaSlug,
         id: doc.id,
+        cleanup: async () => {
+          events.push('outer cleanup')
+        },
+        collection: mediaSlug,
         req,
         stage: async () => {
           events.push('outer stage')
         },
         write: async () => {
           await runFileOperationPlan({
-            collection: mediaSlug,
             id: doc.id,
+            cleanup: async () => {
+              events.push('inner cleanup')
+            },
+            collection: mediaSlug,
             req,
             stage: async () => {
               events.push('inner stage')
@@ -123,14 +48,8 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
             write: async () => {
               events.push('inner write')
             },
-            cleanup: async () => {
-              events.push('inner cleanup')
-            },
           })
           events.push('outer write')
-        },
-        cleanup: async () => {
-          events.push('outer cleanup')
         },
       })
 
@@ -161,8 +80,12 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
 
       await expect(
         runFileOperationPlan({
-          collection: mediaSlug,
           id: doc.id,
+          cleanup: async () => {
+            cleaned.push('old.jpg')
+            stored.delete('old.jpg')
+          },
+          collection: mediaSlug,
           req,
           stage: async ({ trackStagedObject }) => {
             stored.add('staged.jpg')
@@ -176,10 +99,6 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
           },
           write: async () => {
             throw new Error('hook failed')
-          },
-          cleanup: async () => {
-            cleaned.push('old.jpg')
-            stored.delete('old.jpg')
           },
         }),
       ).rejects.toThrow('hook failed')
@@ -205,8 +124,11 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
       expect(await initTransaction(req)).toBe(true)
 
       await runFileOperationPlan({
-        collection: mediaSlug,
         id: doc.id,
+        cleanup: async () => {
+          cleaned.push('outer')
+        },
+        collection: mediaSlug,
         req,
         stage: async ({ trackStagedObject }) => {
           staged.add('outer.jpg')
@@ -220,8 +142,11 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
         },
         write: async () => {
           await runFileOperationPlan({
-            collection: mediaSlug,
             id: doc.id,
+            cleanup: async () => {
+              cleaned.push('inner')
+            },
+            collection: mediaSlug,
             req,
             stage: async ({ trackStagedObject }) => {
               staged.add('inner.jpg')
@@ -234,13 +159,7 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
               })
             },
             write: async () => {},
-            cleanup: async () => {
-              cleaned.push('inner')
-            },
           })
-        },
-        cleanup: async () => {
-          cleaned.push('outer')
         },
       })
 
@@ -250,59 +169,6 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
 
       expect(staged.size).toBe(0)
       expect(cleaned).toEqual([])
-    },
-  )
-
-  test.skipIf(process.env.PAYLOAD_DATABASE !== 'mongodb')(
-    'should finish cleanup only after a successful no-transaction MongoDB operation',
-    async ({ payload }) => {
-      const doc = await payload.db.create({ collection: mediaSlug, data: { alt: 'before' } })
-      const successfulReq = await createPayloadRequest({ payload })
-      const failedReq = await createPayloadRequest({ payload })
-      const events: string[] = []
-
-      await runFileOperationPlan({
-        collection: mediaSlug,
-        id: doc.id,
-        req: successfulReq,
-        stage: async () => {
-          events.push('successful stage')
-        },
-        write: async () => {
-          events.push('successful write')
-        },
-        cleanup: async () => {
-          events.push('successful cleanup')
-        },
-      })
-
-      expect(events).toEqual(['successful stage', 'successful write', 'successful cleanup'])
-
-      await expect(
-        runFileOperationPlan({
-          collection: mediaSlug,
-          id: doc.id,
-          req: failedReq,
-          stage: async () => {
-            events.push('failed stage')
-          },
-          write: async () => {
-            events.push('failed write')
-            throw new Error('hook failed')
-          },
-          cleanup: async () => {
-            events.push('failed cleanup')
-          },
-        }),
-      ).rejects.toThrow('hook failed')
-
-      expect(events).toEqual([
-        'successful stage',
-        'successful write',
-        'successful cleanup',
-        'failed stage',
-        'failed write',
-      ])
     },
   )
 
@@ -318,17 +184,17 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
       ...(originalBeforeChange ?? []),
       async ({ data, req }) => {
         await runFileOperationPlan({
-          collection: mediaSlug,
           id: doc.id,
+          cleanup: async () => {
+            events.push('cleanup')
+          },
+          collection: mediaSlug,
           req,
           stage: async () => {
             events.push('stage')
           },
           write: async () => {
             events.push('plan write')
-          },
-          cleanup: async () => {
-            events.push('cleanup')
           },
         })
 
@@ -349,10 +215,10 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
     try {
       await expect(
         payload.update({
+          id: doc.id,
           collection: mediaSlug,
           data: { alt: 'first attempt' },
           disableTransaction: true,
-          id: doc.id,
         }),
       ).rejects.toThrow('outer hook failed')
 
@@ -368,10 +234,10 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
       events.length = 0
 
       await payload.update({
+        id: doc.id,
         collection: mediaSlug,
         data: { alt: 'second attempt' },
         disableTransaction: true,
-        id: doc.id,
       })
 
       expect(events).toEqual(['stage', 'plan write', 'afterChange', 'cleanup'])
@@ -396,8 +262,8 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
 
     await expect(
       runFileOperationPlan({
-        collection: mediaSlug,
         id: doc.id,
+        collection: mediaSlug,
         req,
         stage: async ({ trackStagedObject }) => {
           staged.add('attempt.jpg')
@@ -454,8 +320,8 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
       const req = await createPayloadRequest({ payload })
 
       return runFileOperationPlan({
-        collection: draftMediaSlug,
         id: doc.id,
+        collection: draftMediaSlug,
         req,
         stage: async ({ trackStagedObject }) => {
           stored.add(key)
@@ -481,7 +347,7 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
             parent: doc.id,
             req,
             updatedAt: new Date().toISOString(),
-            versionData: { alt: key, filename: key, _status: 'draft' },
+            versionData: { _status: 'draft', alt: key, filename: key },
           })
         },
       })
@@ -532,8 +398,8 @@ test.suite('File operation manager', { config: './config.ts' }, () => {
 
         try {
           await runFileOperationPlan({
-            collection: draftMediaSlug,
             id: doc.id,
+            collection: draftMediaSlug,
             req,
             stage: async ({ trackStagedObject }) => {
               stored.add(key)

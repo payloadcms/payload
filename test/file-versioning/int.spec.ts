@@ -10,6 +10,8 @@ import { devUser } from '../credentials.js'
 import {
   convertedMediaDir,
   convertedMediaSlug,
+  draftMediaDir,
+  draftMediaSlug,
   mediaDir,
   mediaSlug,
   transformedMediaDir,
@@ -41,6 +43,7 @@ const managedFiles = [
 test.suite('File versioning fields', { config: './config.ts' }, () => {
   test.afterEach(async () => {
     await rm(mediaDir, { force: true, recursive: true })
+    await rm(draftMediaDir, { force: true, recursive: true })
     await rm(transformedMediaDir, { force: true, recursive: true })
     await rm(convertedMediaDir, { force: true, recursive: true })
   })
@@ -77,7 +80,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const created = await payload.create({
       collection: mediaSlug,
       data: { alt: 'uploaded' },
-      file: { data: bytes, mimetype: 'image/png', name: 'photo.png', size: bytes.length },
+      file: { name: 'photo.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const stored = await payload.findByID({
       id: created.id,
@@ -124,7 +127,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
       const created = await payload.create({
         collection: mediaSlug,
         data: { alt: name },
-        file: { data: bytes, mimetype, name, size: bytes.length },
+        file: { name, data: bytes, mimetype, size: bytes.length },
       })
       const stored = await payload.db.findOne({
         collection: mediaSlug,
@@ -148,7 +151,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const created = await payload.create({
       collection: mediaSlug,
       data: { alt: 'before' },
-      file: { data: bytes, mimetype: 'image/png', name: 'metadata.png', size: bytes.length },
+      file: { name: 'metadata.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const filePath = path.join(mediaDir, created.filename!)
     const filesBefore = await readdir(mediaDir)
@@ -177,7 +180,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const created = await payload.create({
       collection: mediaSlug,
       data: { alt: 'source' },
-      file: { data: bytes, mimetype: 'image/png', name: 'duplicate.png', size: bytes.length },
+      file: { name: 'duplicate.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const duplicate = await payload.create({
       collection: mediaSlug,
@@ -259,7 +262,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
         payload.create({
           collection: mediaSlug,
           data: { alt: 'reject-after-write' },
-          file: { data: bytes, mimetype: 'image/png', name: 'rollback.png', size: bytes.length },
+          file: { name: 'rollback.png', data: bytes, mimetype: 'image/png', size: bytes.length },
         }),
       ).rejects.toThrow('Rejected after the file and document write')
 
@@ -283,9 +286,9 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
           collection: mediaSlug,
           data: { alt: 'reject-after-write' },
           file: {
+            name: 'nontransactional.png',
             data: bytes,
             mimetype: 'image/png',
-            name: 'nontransactional.png',
             size: bytes.length,
           },
         }),
@@ -310,7 +313,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const created = await payload.create({
       collection: transformedMediaSlug,
       data: { alt: 'source' },
-      file: { data: bytes, mimetype: 'image/png', name: 'landscape.png', size: bytes.length },
+      file: { name: 'landscape.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const originalSizePixels = await sharp(
       path.join(transformedMediaDir, created.sizes!.small!.filename!),
@@ -371,7 +374,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     const created = await payload.create({
       collection: convertedMediaSlug,
       data: { alt: 'converted' },
-      file: { data: bytes, mimetype: 'image/png', name: 'convert.png', size: bytes.length },
+      file: { name: 'convert.png', data: bytes, mimetype: 'image/png', size: bytes.length },
     })
     const stored = await payload.db.findOne({
       collection: convertedMediaSlug,
@@ -379,7 +382,7 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
     })
 
     expect(stored?.mimeType).toBe('image/jpeg')
-    expect(stored?.original).toMatchObject({ mimeType: 'image/png', filesize: bytes.length })
+    expect(stored?.original).toMatchObject({ filesize: bytes.length, mimeType: 'image/png' })
     expect(stored?.original?.filename).not.toBe(stored?.filename)
     expect(stored?._managedFiles).toHaveLength(2)
     expect(await readFile(path.join(convertedMediaDir, stored!.original!.filename))).toEqual(bytes)
@@ -430,6 +433,431 @@ test.suite('File versioning fields', { config: './config.ts' }, () => {
 
     expect(versions[0]?.version.original).toMatchObject(original)
     expect(versions[0]?.version._managedFiles).toEqual(managedFiles)
+  })
+
+  test('should archive an outgoing original for every version that shares it', async ({
+    payload,
+  }) => {
+    const firstBytes = await readFile(imageFixture)
+    const secondBytes = await sharp(firstBytes).flop().png().toBuffer()
+    const first = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'first' },
+      file: { name: 'photo.png', data: firstBytes, mimetype: 'image/png', size: firstBytes.length },
+    })
+
+    await payload.update({ id: first.id, collection: mediaSlug, data: { alt: 'metadata only' } })
+    const { docs: versionsBeforeReplacement } = await payload.db.findVersions({
+      collection: mediaSlug,
+      pagination: false,
+      where: { parent: { equals: first.id } },
+    })
+
+    await payload.update({
+      id: first.id,
+      collection: mediaSlug,
+      data: { alt: 'second' },
+      file: {
+        name: 'photo.png',
+        data: secondBytes,
+        mimetype: 'image/png',
+        size: secondBytes.length,
+      },
+    })
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: mediaSlug,
+      pagination: false,
+      where: { parent: { equals: first.id } },
+    })
+    const olderVersions = versions.filter(({ version }) => version.alt !== 'second')
+    const archivedNames = olderVersions.map(({ version }) => version.original?.filename)
+
+    expect(olderVersions).toHaveLength(2)
+    expect(new Set(archivedNames).size).toBe(1)
+    expect(archivedNames[0]).not.toBe(first.filename)
+
+    for (const { id, createdAt, updatedAt, version } of olderVersions) {
+      const archivedName = version.original!.filename!
+      const before = versionsBeforeReplacement.find((row) => row.id === id)
+
+      expect(before).toBeDefined()
+      expect(createdAt).toBe(before?.createdAt)
+      expect(updatedAt).toBe(before?.updatedAt)
+      expect(version.filename).toBe(archivedName)
+      expect(version.original?.url).toContain(encodeURIComponent(archivedName))
+      expect(version._managedFiles).toEqual([
+        {
+          key: archivedName,
+          roles: [{ type: 'original' }, { type: 'default' }],
+          storageBackendId: `local:${mediaSlug}`,
+        },
+      ])
+      expect(await readFile(path.join(mediaDir, archivedName))).toEqual(firstBytes)
+    }
+  })
+
+  test('should create a readable baseline when a legacy file is first replaced', async ({
+    payload,
+  }) => {
+    const firstBytes = await readFile(imageFixture)
+    const secondBytes = await sharp(firstBytes).flop().png().toBuffer()
+    await mkdir(mediaDir, { recursive: true })
+    await writeFile(path.join(mediaDir, 'legacy.png'), firstBytes)
+    const legacy = await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        alt: 'legacy',
+        filename: 'legacy.png',
+        filesize: firstBytes.length,
+        mimeType: 'image/png',
+        url: `/api/${mediaSlug}/file/legacy.png`,
+      },
+    })
+
+    await payload.update({
+      id: legacy.id,
+      collection: mediaSlug,
+      data: { alt: 'replacement' },
+      file: { name: 'new.png', data: secondBytes, mimetype: 'image/png', size: secondBytes.length },
+    })
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: mediaSlug,
+      limit: 0,
+      pagination: false,
+      where: { parent: { equals: legacy.id } },
+    })
+    const baseline = versions.find(({ version }) => version.alt === 'legacy')
+
+    expect(baseline).toBeDefined()
+    expect(baseline?.version.original?.filename).toBeTruthy()
+    expect(baseline?.version._managedFiles).toHaveLength(1)
+    expect(await readFile(path.join(mediaDir, baseline!.version.original!.filename))).toEqual(
+      firstBytes,
+    )
+  })
+
+  test('should archive the outgoing original on a bulk file replacement', async ({ payload }) => {
+    const firstBytes = await readFile(imageFixture)
+    const secondBytes = await sharp(firstBytes).flop().png().toBuffer()
+    const first = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'bulk first' },
+      file: { name: 'bulk.png', data: firstBytes, mimetype: 'image/png', size: firstBytes.length },
+    })
+
+    const result = await payload.update({
+      collection: mediaSlug,
+      data: { alt: 'bulk second' },
+      file: {
+        name: 'bulk-replacement.png',
+        data: secondBytes,
+        mimetype: 'image/png',
+        size: secondBytes.length,
+      },
+      where: { id: { equals: first.id } },
+    })
+
+    expect(result.errors).toEqual([])
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: mediaSlug,
+      limit: 0,
+      pagination: false,
+      where: { parent: { equals: first.id } },
+    })
+    const archived = versions.find(({ version }) => version.alt === 'bulk first')?.version
+
+    expect(archived?.original?.filename).toBeTruthy()
+    expect(archived?.original?.filename).not.toBe(first.filename)
+    expect(await readFile(path.join(mediaDir, archived!.original!.filename))).toEqual(firstBytes)
+    expect(await readFile(path.join(mediaDir, result.docs[0]!.filename!))).toEqual(secondBytes)
+  })
+
+  test('should retain original and converted output bytes across repeated replacements', async ({
+    payload,
+  }) => {
+    const firstBytes = await readFile(imageFixture)
+    const secondBytes = await sharp(firstBytes).flop().png().toBuffer()
+    const thirdBytes = await sharp(firstBytes).negate().png().toBuffer()
+    const first = await payload.create({
+      collection: convertedMediaSlug,
+      data: { alt: 'A' },
+      file: { name: 'photo.png', data: firstBytes, mimetype: 'image/png', size: firstBytes.length },
+    })
+    const firstOutput = await readFile(path.join(convertedMediaDir, first.filename!))
+
+    await payload.update({
+      id: first.id,
+      collection: convertedMediaSlug,
+      data: { alt: 'B' },
+      file: {
+        name: 'photo.png',
+        data: secondBytes,
+        mimetype: 'image/png',
+        size: secondBytes.length,
+      },
+    })
+    await payload.update({
+      id: first.id,
+      collection: convertedMediaSlug,
+      data: { alt: 'C' },
+      file: { name: 'photo.png', data: thirdBytes, mimetype: 'image/png', size: thirdBytes.length },
+    })
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: convertedMediaSlug,
+      limit: 0,
+      pagination: false,
+      where: { parent: { equals: first.id } },
+    })
+    const firstVersion = versions.find(({ version }) => version.alt === 'A')?.version
+    const secondVersion = versions.find(({ version }) => version.alt === 'B')?.version
+
+    expect(firstVersion?._managedFiles).toHaveLength(2)
+    expect(secondVersion?._managedFiles).toHaveLength(2)
+    expect(await readFile(path.join(convertedMediaDir, firstVersion!.original!.filename))).toEqual(
+      firstBytes,
+    )
+    expect(await readFile(path.join(convertedMediaDir, firstVersion!.filename))).toEqual(
+      firstOutput,
+    )
+    expect(await readFile(path.join(convertedMediaDir, secondVersion!.original!.filename))).toEqual(
+      secondBytes,
+    )
+  })
+
+  test('should preserve file revisions through draft, autosave, publish, and unpublish', async ({
+    payload,
+  }) => {
+    const publishedBytes = await readFile(imageFixture)
+    const draftBytes = await sharp(publishedBytes).flop().png().toBuffer()
+    const laterDraftBytes = await sharp(publishedBytes).negate().png().toBuffer()
+    const published = await payload.create({
+      collection: draftMediaSlug,
+      data: { _status: 'published', alt: 'published' },
+      file: {
+        name: 'draft.png',
+        data: publishedBytes,
+        mimetype: 'image/png',
+        size: publishedBytes.length,
+      },
+    })
+
+    await payload.update({
+      id: published.id,
+      collection: draftMediaSlug,
+      data: { alt: 'draft replacement' },
+      draft: true,
+      file: { name: 'draft.png', data: draftBytes, mimetype: 'image/png', size: draftBytes.length },
+    })
+    await payload.update({
+      id: published.id,
+      collection: draftMediaSlug,
+      data: { alt: 'later draft' },
+      draft: true,
+      file: {
+        name: 'draft.png',
+        data: laterDraftBytes,
+        mimetype: 'image/png',
+        size: laterDraftBytes.length,
+      },
+    })
+
+    const current = await payload.db.findOne({
+      collection: draftMediaSlug,
+      where: { id: { equals: published.id } },
+    })
+    const { docs: versions } = await payload.db.findVersions({
+      collection: draftMediaSlug,
+      limit: 0,
+      pagination: false,
+      where: { parent: { equals: published.id } },
+    })
+    const publishedVersion = versions.find(({ version }) => version.alt === 'published')?.version
+    const draftVersion = versions.find(
+      ({ version }) => version.alt === 'draft replacement',
+    )?.version
+
+    expect(current?.filename).toBe(published.filename)
+    expect(await readFile(path.join(draftMediaDir, current!.filename))).toEqual(publishedBytes)
+    expect(publishedVersion?.original?.filename).not.toBe(published.filename)
+    expect(await readFile(path.join(draftMediaDir, publishedVersion!.original!.filename))).toEqual(
+      publishedBytes,
+    )
+    expect(await readFile(path.join(draftMediaDir, draftVersion!.original!.filename))).toEqual(
+      draftBytes,
+    )
+
+    await payload.update({
+      id: published.id,
+      autosave: true,
+      collection: draftMediaSlug,
+      data: { alt: 'autosaved draft' },
+    })
+    const afterPublish = await payload.update({
+      id: published.id,
+      collection: draftMediaSlug,
+      data: { _status: 'published' },
+    })
+
+    expect(afterPublish._status).toBe('published')
+    expect(await readFile(path.join(draftMediaDir, afterPublish.filename!))).toEqual(
+      laterDraftBytes,
+    )
+
+    const afterUnpublish = await payload.update({
+      id: published.id,
+      collection: draftMediaSlug,
+      data: { _status: 'draft' },
+    })
+
+    expect(afterUnpublish._status).toBe('draft')
+    expect(await readFile(path.join(draftMediaDir, draftVersion!.original!.filename))).toEqual(
+      draftBytes,
+    )
+  })
+
+  test.options(
+    'should roll back an archived revision when a later hook rejects replacement',
+    { db: 'mongo' },
+    async ({ payload }) => {
+      const firstBytes = await readFile(imageFixture)
+      const secondBytes = await sharp(firstBytes).flop().png().toBuffer()
+      const first = await payload.create({
+        collection: mediaSlug,
+        data: { alt: 'before' },
+        file: {
+          name: 'rollback.png',
+          data: firstBytes,
+          mimetype: 'image/png',
+          size: firstBytes.length,
+        },
+      })
+      const filesBefore = await readdir(mediaDir)
+
+      await expect(
+        payload.update({
+          id: first.id,
+          collection: mediaSlug,
+          data: { alt: 'reject-after-write' },
+          file: {
+            name: 'rollback.png',
+            data: secondBytes,
+            mimetype: 'image/png',
+            size: secondBytes.length,
+          },
+        }),
+      ).rejects.toThrow('Rejected after the file and document write')
+
+      const { docs: versions } = await payload.db.findVersions({
+        collection: mediaSlug,
+        where: { parent: { equals: first.id } },
+      })
+
+      expect(await readdir(mediaDir)).toEqual(filesBefore)
+      expect(versions).toHaveLength(1)
+      expect(versions[0]?.version.original?.filename).toBe(first.filename)
+      expect(await readFile(path.join(mediaDir, first.filename!))).toEqual(firstBytes)
+    },
+  )
+
+  test('should retain a historical file when the current file is removed', async ({ payload }) => {
+    const bytes = await readFile(imageFixture)
+    const created = await payload.create({
+      collection: mediaSlug,
+      data: { alt: 'before removal' },
+      file: { name: 'removed.png', data: bytes, mimetype: 'image/png', size: bytes.length },
+    })
+
+    await payload.update({
+      id: created.id,
+      collection: mediaSlug,
+      data: {
+        _managedFiles: [],
+        alt: 'without file',
+        filename: null,
+        original: { filename: null, filesize: null, mimeType: null, url: null },
+      },
+      overrideAccess: true,
+    })
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: mediaSlug,
+      limit: 0,
+      pagination: false,
+      where: { parent: { equals: created.id } },
+    })
+    const previous = versions.find(({ version }) => version.alt === 'before removal')?.version
+
+    expect(previous?.original?.filename).not.toBe(created.filename)
+    expect(await readFile(path.join(mediaDir, previous!.original!.filename))).toEqual(bytes)
+  })
+
+  test('should archive a separately managed thumbnail with its historical version', async ({
+    payload,
+  }) => {
+    const originalBytes = await readFile(imageFixture)
+    const thumbnailBytes = await sharp(originalBytes).resize(80, 80).png().toBuffer()
+    const replacementBytes = await sharp(originalBytes).flop().png().toBuffer()
+    await mkdir(mediaDir, { recursive: true })
+    await writeFile(path.join(mediaDir, 'photo.png'), originalBytes)
+    await writeFile(path.join(mediaDir, 'photo-thumb.png'), thumbnailBytes)
+    const created = await payload.db.create({
+      collection: mediaSlug,
+      data: {
+        _managedFiles: [
+          {
+            key: 'photo.png',
+            roles: [{ type: 'original' }, { type: 'default' }],
+            storageBackendId: `local:${mediaSlug}`,
+          },
+          {
+            key: 'photo-thumb.png',
+            roles: [{ type: 'thumbnail' }],
+            storageBackendId: `local:${mediaSlug}`,
+          },
+        ],
+        alt: 'with thumbnail',
+        filename: 'photo.png',
+        filesize: originalBytes.length,
+        mimeType: 'image/png',
+        original: {
+          filename: 'photo.png',
+          filesize: originalBytes.length,
+          mimeType: 'image/png',
+          url: `/api/${mediaSlug}/file/photo.png`,
+        },
+        thumbnailURL: `/api/${mediaSlug}/file/photo-thumb.png`,
+        url: `/api/${mediaSlug}/file/photo.png`,
+      },
+    })
+
+    await payload.update({
+      id: created.id,
+      collection: mediaSlug,
+      data: { alt: 'replaced' },
+      file: {
+        name: 'replacement.png',
+        data: replacementBytes,
+        mimetype: 'image/png',
+        size: replacementBytes.length,
+      },
+    })
+
+    const { docs: versions } = await payload.db.findVersions({
+      collection: mediaSlug,
+      where: { parent: { equals: created.id } },
+    })
+    const previous = versions.find(({ version }) => version.alt === 'with thumbnail')?.version
+    const archivedThumbnail = (
+      previous?._managedFiles as Array<{ key: string; roles: Array<{ type: string }> }> | undefined
+    )?.find((file) => file.roles.some((role) => role.type === 'thumbnail'))
+
+    expect(archivedThumbnail?.key).not.toBe('photo-thumb.png')
+    expect(previous?.thumbnailURL).toContain(path.basename(archivedThumbnail!.key))
+    expect(await readFile(path.join(mediaDir, archivedThumbnail!.key))).toEqual(thumbnailBytes)
   })
 
   test('should read an untouched legacy local file without changing stored data or files', async ({

@@ -1,5 +1,3 @@
-import type { ManagedFileIdentity } from './types.js'
-
 /** Validates and returns a complete, canonical key supplied by the storage path builder or provider. */
 export const normalizeStorageKey = ({ key }: { key: string }): string => {
   if (
@@ -18,16 +16,6 @@ export const normalizeStorageKey = ({ key }: { key: string }): string => {
 export const getOriginalFilename = ({ filename }: { filename: string }): string =>
   insertSuffix({ filename, suffix: 'original' })
 
-export const getBaseFilenameFromOriginal = ({ filename }: { filename: string }): string => {
-  const { extension, stem } = splitFilename({ filename })
-
-  if (!stem.endsWith('-original')) {
-    throw new Error('Filename does not contain an original marker')
-  }
-
-  return `${stem.slice(0, -'-original'.length)}${extension}`
-}
-
 export const getArchivedFilename = ({
   filename,
   versionID,
@@ -44,27 +32,6 @@ export const getArchivedFilename = ({
   const safeID = /^[\w-]+$/.test(id) ? id : `~${Buffer.from(id).toString('base64url')}`
 
   return insertSuffix({ filename, suffix: safeID })
-}
-
-/** Checks known managed objects; the adapter must also verify provider-side availability. */
-export const assertPlannedStorageDestinationAvailable = ({
-  destination,
-  occupied,
-  storageBackendId,
-}: {
-  destination: string
-  occupied: ManagedFileIdentity[]
-  storageBackendId: string
-}): void => {
-  const key = normalizeStorageKey({ key: destination })
-
-  if (
-    occupied.some(
-      (file) => file.storageBackendId === storageBackendId && normalizeStorageKey(file) === key,
-    )
-  ) {
-    throw new Error(`Managed storage destination is already occupied: ${storageBackendId}:${key}`)
-  }
 }
 
 const insertSuffix = ({ filename, suffix }: { filename: string; suffix: string }): string => {

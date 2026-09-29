@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createManagedFileManifest, hasManagedFile } from './manifest.js'
+import { createManagedFileManifest } from './manifest.js'
 
 describe('createManagedFileManifest', () => {
   it('should keep original and default roles on one physical object', () => {
@@ -49,10 +49,10 @@ describe('createManagedFileManifest', () => {
     })
 
     expect(manifest).toHaveLength(2)
-    expect(hasManagedFile({ manifest, storageBackendId: 's3:private', key: 'photo.jpg' })).toBe(
-      true,
-    )
-    expect(hasManagedFile({ manifest, storageBackendId: 's3:other', key: 'photo.jpg' })).toBe(false)
+    expect(manifest.map(({ storageBackendId }) => storageBackendId)).toEqual([
+      's3:private',
+      's3:public',
+    ])
   })
 
   it('should preserve saved size keys even when the collection configuration changes', () => {

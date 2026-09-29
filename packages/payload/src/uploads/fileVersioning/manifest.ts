@@ -48,23 +48,13 @@ export const createManagedFileManifest = ({
   return files
 }
 
-export const hasManagedFile = ({
-  key,
-  manifest,
-  storageBackendId,
-}: { manifest: ManagedFileManifest } & ManagedFileIdentity): boolean => {
-  const identity = getManagedFileIdentity({ key, storageBackendId })
-
-  return manifest.some((file) => getManagedFileIdentity(file) === identity)
-}
-
 export const synthesizeLegacyUploadState = ({
   collection,
   config,
   doc,
 }: {
   collection: CollectionConfig
-  config: Config
+  config: Pick<Config, 'routes' | 'serverURL'>
   doc: Record<string, unknown>
 }): Record<string, unknown> => {
   const upload = typeof collection.upload === 'object' ? collection.upload : {}

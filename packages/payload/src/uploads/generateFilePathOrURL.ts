@@ -20,7 +20,7 @@ export function generateFilePathOrURL({
   urlOrPath,
 }: {
   collectionSlug: string
-  config: Config
+  config: Pick<Config, 'routes' | 'serverURL'>
   filename?: string
   relative: boolean
   serverURL?: string

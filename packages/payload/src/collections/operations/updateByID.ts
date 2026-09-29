@@ -21,12 +21,11 @@ import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
+import { runLocalFileUpdate } from '../../uploads/fileVersioning/archive.js'
 import {
   abortFileOperationScope,
   beginFileOperationScope,
   completeFileOperationScope,
-  runFileOperationPlan,
-  stageLocalUploadFiles,
 } from '../../uploads/fileVersioning/fileOperationManager.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import {
@@ -334,26 +333,15 @@ export const updateByIDOperation = async <
       unpublishAllLocales,
     } as const
 
-    const hasManagedLocalUpload =
-      !collectionConfig.upload.disableLocalStorage &&
-      filesToUpload.length > 0 &&
-      Array.isArray((newFileData as Record<string, unknown>)._managedFiles)
-
-    let result = hasManagedLocalUpload
-      ? await runFileOperationPlan({
-          id,
-          collection: collectionConfig.slug,
-          req,
-          stage: ({ trackStagedObject }) =>
-            stageLocalUploadFiles({
-              files: filesToUpload,
-              staticDir: collectionConfig.upload.staticDir!,
-              storageBackendId: `local:${collectionConfig.slug}`,
-              trackStagedObject,
-            }),
-          write: () => updateDocument<TSlug, TSelect>(updateArgs),
-        })
-      : await updateDocument<TSlug, TSelect>(updateArgs)
+    let result = await runLocalFileUpdate({
+      id,
+      collection: collectionConfig,
+      current: docWithLocales,
+      files: filesToUpload,
+      nextManifest: (newFileData as Record<string, unknown>)._managedFiles,
+      req,
+      write: () => updateDocument<TSlug, TSelect>(updateArgs),
+    })
 
     // /////////////////////////////////////
     // Add collection property for auth collections

@@ -40,7 +40,7 @@ type RunFileOperationPlanArgs<T> = {
     state: FileState
     trackStagedObject: (object: StagedObject) => void
   }) => Promise<void>
-  write: () => Promise<T>
+  write: (args: { trackStagedObject: (object: StagedObject) => void }) => Promise<T>
 }
 
 const requests = new WeakMap<PayloadRequest, RequestState>()
@@ -98,24 +98,22 @@ export const runFileOperationPlan = async <T>({
   const attempt: Attempt = { cleanup, staged: new Map() }
   let hasStartedWrite = false
   let hasSucceeded = false
+  const trackStagedObject = (object: StagedObject) => {
+    const identity = `${object.storageBackendId}\0${object.key}`
+
+    if (attempt.staged.has(identity)) {
+      throw new Error(`Storage object was staged twice: ${object.key}`)
+    }
+
+    attempt.staged.set(identity, object)
+  }
 
   requestState.depth += 1
 
   try {
     const state = await readFileState({ id, collection, req })
 
-    await stage({
-      state,
-      trackStagedObject: (object) => {
-        const identity = `${object.storageBackendId}\0${object.key}`
-
-        if (attempt.staged.has(identity)) {
-          throw new Error(`Storage object was staged twice: ${object.key}`)
-        }
-
-        attempt.staged.set(identity, object)
-      },
-    })
+    await stage({ state, trackStagedObject })
 
     let claimed
 
@@ -148,7 +146,7 @@ export const runFileOperationPlan = async <T>({
     }
 
     hasStartedWrite = true
-    const result = await write()
+    const result = await write({ trackStagedObject })
 
     requestState.pending.push(attempt)
     hasSucceeded = true
