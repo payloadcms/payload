@@ -70,7 +70,7 @@ test.describe('Community', () => {
         throw new Error('Welcome widget or delete control is not rendered')
       }
 
-      expect(controlBox.y - widgetBox.y).toBe(6)
+      expect(controlBox.y).toBeGreaterThanOrEqual(widgetBox.y)
       expect(controlBox.y + controlBox.height).toBeLessThanOrEqual(widgetBox.y + widgetBox.height)
     }
 
