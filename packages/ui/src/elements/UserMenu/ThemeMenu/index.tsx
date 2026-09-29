@@ -74,11 +74,11 @@ export const ThemeMenu: React.FC<{
         }
       }}
       popupType="menu"
-      renderButton={({ active, onClick, onKeyDown, ...aria }) => (
+      renderButton={({ onKeyDown, ...aria }) => (
         <button
           {...aria}
           className="popup-button-list__button popup-button-list__button--submenu-trigger"
-          onClick={onClick}
+          onClick={(event) => event.preventDefault()}
           onKeyDown={onKeyDown}
           onMouseEnter={open}
           ref={triggerRef as React.Ref<HTMLButtonElement>}

@@ -7,9 +7,5 @@ const baseClass = 'popup-list-group-label'
 export const PopupListGroupLabel: React.FC<{
   label: string
 }> = ({ label }) => {
-  return (
-    <p className={baseClass} data-popup-prevent-close>
-      {label}
-    </p>
-  )
+  return <p className={baseClass}>{label}</p>
 }

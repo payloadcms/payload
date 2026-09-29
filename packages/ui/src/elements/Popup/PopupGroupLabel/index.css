@@ -1,6 +1,5 @@
 @layer payload-default {
   .popup-list-group-label {
-    pointer-events: none;
     display: flex;
     align-items: center;
     height: var(--spacer-5);
