@@ -127,7 +127,7 @@
 
   .widget-wrapper__controls {
     position: absolute;
-    inset-block-start: clamp(0px, calc(50% - var(--spacer-2-5)), var(--spacer-3));
+    top: var(--spacer-3);
     right: var(--spacer-3);
     z-index: 10;
     display: flex;
