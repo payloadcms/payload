@@ -1,6 +1,6 @@
 'use client'
 
-import type { NumberFieldClientComponent } from 'payload'
+import type { NumberFieldClientProps } from 'payload'
 
 import { NumberField, useField } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
@@ -9,7 +9,7 @@ import './index.css'
 
 const baseClass = 'page-field'
 
-export const Page: NumberFieldClientComponent = (props) => {
+export const Page: React.FC<NumberFieldClientProps> = (props) => {
   const { setValue } = useField<number>()
   const { value: limitValue } = useField<number>({ path: 'limit' })
 

@@ -59,6 +59,7 @@ import {
   BlockContent,
   useBlockComponentContext,
 } from './BlockContent.js'
+import { BlockReordering } from './BlockReordering/index.js'
 
 export type BlockComponentProps<TFormData extends Record<string, unknown> = BlockFields> = {
   /**
@@ -78,13 +79,7 @@ export type BlockComponentProps<TFormData extends Record<string, unknown> = Bloc
    * Will be rendered with useBlockComponentContext hook.
    */
   readonly CustomLabel?: React.FC<ViewMapBlockComponentProps>
-  /**
-   * The block's form data (field values).
-   */
   readonly formData: TFormData
-  /**
-   * The unique key identifying this block node in the current editor instance.
-   */
   readonly nodeKey: string
 }
 
@@ -562,7 +557,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const BlockCollapsible = useMemo(
     () =>
-      ({
+      function BlockCollapsible({
         Actions,
         children,
         className,
@@ -576,115 +571,180 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         removeButton,
         showDragHandle = true,
         showRowNumber = true,
-      }: BlockCollapsibleWithErrorProps) => {
+      }: BlockCollapsibleWithErrorProps) {
         return (
-          <div className={`${baseClass}__container ${baseClass}-${blockType}`}>
-            <Collapsible
-              actions={
-                typeof Actions !== 'undefined' ? (
-                  Actions
-                ) : isEditable ? (
-                  <Popup
-                    button={<MoreIcon />}
-                    buttonClassName={`${baseClass}__actions-button`}
-                    caret={false}
-                    horizontalAlign="right"
-                    render={({ close }) => (
-                      <PopupList.ButtonGroup buttonSize="medium">
-                        {((resolvedCustomBlock && editButton !== false) ||
-                          (!resolvedCustomBlock && editButton)) && (
-                          <PopupList.Button
-                            onClick={() => {
-                              toggleDrawer()
-                              close()
-                            }}
-                          >
-                            {t('general:edit')}
-                          </PopupList.Button>
-                        )}
-                        {removeButton !== false && (
-                          <PopupList.Button
-                            onClick={() => {
-                              removeBlock()
-                              close()
-                            }}
-                          >
-                            <XIcon />
-                            {t('general:remove')}
-                          </PopupList.Button>
-                        )}
-                      </PopupList.ButtonGroup>
-                    )}
-                    size="large"
-                  />
-                ) : null
-              }
-              className={[
-                `${baseClass}__row`,
-                fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
-                className,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-              dragHandleProps={
-                showDragHandle
-                  ? {
-                      id: nodeKey,
-                      attributes: { role: 'button', tabIndex: 0 },
-                      listeners: {},
-                    }
-                  : undefined
-              }
-              header={
-                <div className={`${baseClass}__block-header`}>
-                  {typeof Label !== 'undefined' ? (
-                    Label
-                  ) : typeof resolvedCustomLabel !== 'undefined' ? (
-                    resolvedCustomLabel
-                  ) : (
-                    <div className={`${baseClass}__block-label`}>
-                      {showRowNumber && (
-                        <span className={`${baseClass}__block-number`}>
-                          {String(rowIndex + 1).padStart(2, '0')}
-                        </span>
-                      )}
-                      {typeof CustomPill !== 'undefined' ? (
-                        CustomPill
-                      ) : (
-                        <Pill
-                          className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
-                          pillStyle="white"
-                          size="small"
-                        >
-                          {blockDisplayName ?? blockType}
-                        </Pill>
-                      )}
-                      {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
-                        <SectionTitle path="blockName" readOnly={!isEditable} />
-                      )}
+          <BlockReordering editor={editor} nodeKey={nodeKey}>
+            {({ isReordering, move, onBlur, onKeyDown, reorderInstructionsID, targetIndex }) => (
+              <div
+                className={`${baseClass}__container ${baseClass}-${blockType}`}
+                onKeyDownCapture={(event) => {
+                  const target = event.target as HTMLElement
 
-                      {fieldHasErrors && (
-                        <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                  if (
+                    event.altKey ||
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    target.closest('.collapsible')?.parentElement !== event.currentTarget
+                  ) {
+                    return
+                  }
+                  // Handle controls before Lexical consumes keys using its retained text selection.
+                  if (
+                    target.matches('.collapsible__drag') &&
+                    [' ', 'ArrowDown', 'ArrowUp', 'Enter', 'Escape', 'Tab'].includes(event.key)
+                  ) {
+                    onKeyDown(event)
+                    event.stopPropagation()
+                  } else if (event.key === 'Tab' && target.matches('.collapsible__toggle')) {
+                    event.stopPropagation()
+                  }
+                }}
+              >
+                <Collapsible
+                  actions={
+                    typeof Actions !== 'undefined' ? (
+                      Actions
+                    ) : isEditable ? (
+                      <Popup
+                        button={<MoreIcon />}
+                        buttonClassName={`${baseClass}__actions-button`}
+                        caret={false}
+                        horizontalAlign="right"
+                        popupType="menu"
+                        render={({ close }) => (
+                          <PopupList.ButtonGroup buttonSize="medium">
+                            <PopupList.Button
+                              onClick={() => {
+                                close()
+                                move({ direction: -1 })
+                              }}
+                            >
+                              {t('general:moveUp')}
+                            </PopupList.Button>
+                            <PopupList.Button
+                              onClick={() => {
+                                close()
+                                move({ direction: 1 })
+                              }}
+                            >
+                              {t('general:moveDown')}
+                            </PopupList.Button>
+                            {((resolvedCustomBlock && editButton !== false) ||
+                              (!resolvedCustomBlock && editButton)) && (
+                              <PopupList.Button
+                                onClick={() => {
+                                  toggleDrawer()
+                                  close()
+                                }}
+                              >
+                                {t('general:edit')}
+                              </PopupList.Button>
+                            )}
+                            {removeButton !== false && (
+                              <PopupList.Button
+                                onClick={() => {
+                                  removeBlock()
+                                  close()
+                                }}
+                              >
+                                <XIcon />
+                                {t('general:remove')}
+                              </PopupList.Button>
+                            )}
+                          </PopupList.ButtonGroup>
+                        )}
+                        size="large"
+                      />
+                    ) : null
+                  }
+                  className={[
+                    `${baseClass}__row`,
+                    fieldHasErrors
+                      ? `${baseClass}__row--has-errors`
+                      : `${baseClass}__row--no-errors`,
+                    className,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+                  dragHandleProps={
+                    showDragHandle && isEditable
+                      ? {
+                          id: nodeKey,
+                          attributes: {
+                            'aria-describedby': reorderInstructionsID,
+                            'aria-pressed': isReordering,
+                            role: 'button',
+                            tabIndex: 0,
+                          },
+                          listeners: { onBlur },
+                        }
+                      : undefined
+                  }
+                  header={
+                    <div className={`${baseClass}__block-header`}>
+                      {typeof Label !== 'undefined' ? (
+                        Label
+                      ) : typeof resolvedCustomLabel !== 'undefined' ? (
+                        resolvedCustomLabel
+                      ) : (
+                        <div className={`${baseClass}__block-label`}>
+                          {showRowNumber && (
+                            <span className={`${baseClass}__block-number`}>
+                              {String(rowIndex + 1).padStart(2, '0')}
+                            </span>
+                          )}
+                          {typeof CustomPill !== 'undefined' ? (
+                            CustomPill
+                          ) : (
+                            <Pill
+                              className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
+                              pillStyle="white"
+                              size="small"
+                            >
+                              {blockDisplayName ?? blockType}
+                            </Pill>
+                          )}
+                          {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
+                            <SectionTitle path="blockName" readOnly={!isEditable} />
+                          )}
+
+                          {fieldHasErrors && (
+                            <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              }
-              isCollapsed={isCollapsed}
-              key={0}
-              onToggle={(incomingCollapsedState) => {
-                onCollapsedChange(incomingCollapsedState)
-                setIsCollapsed(incomingCollapsedState)
-              }}
-              {...(collapsibleProps || {})}
-            >
-              {children}
-            </Collapsible>
-          </div>
+                  }
+                  isCollapsed={isCollapsed}
+                  key={0}
+                  onToggle={(incomingCollapsedState) => {
+                    onCollapsedChange(incomingCollapsedState)
+                    setIsCollapsed(incomingCollapsedState)
+                  }}
+                  {...(collapsibleProps || {})}
+                  AfterCollapsible={
+                    <>
+                      {collapsibleProps?.AfterCollapsible}
+                      <span className="sr-only" role="status">
+                        {isReordering ? `${t('general:order')}: ${(targetIndex ?? 0) + 1}` : ''}
+                      </span>
+                    </>
+                  }
+                >
+                  <span className="sr-only" id={reorderInstructionsID}>
+                    Space / Enter · {t('general:moveUp')} ↑ · {t('general:moveDown')} ↓ ·{' '}
+                    {t('general:cancel')} Escape
+                  </span>
+                  {children}
+                </Collapsible>
+              </div>
+            )}
+          </BlockReordering>
         )
       },
     [
+      editor,
       resolvedCustomBlock,
       resolvedCustomLabel,
       blockDisplayName,

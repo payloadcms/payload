@@ -11,9 +11,9 @@ type Handler = (
   fieldname: string,
   filename: string,
 ) => {
-  cleanup: () => void
+  cleanup: () => Promise<void> | void
   complete: () => Buffer
-  dataHandler: (data: Buffer) => void
+  dataHandler: (data: Buffer) => Promise<void> | void
   getFilePath: () => string
   getFileSize: () => number
   getHash: () => string
@@ -34,6 +34,7 @@ export const tempFileHandler: Handler = (options, fieldname, filename) => {
   const writeStream = fs.createWriteStream(tempFilePath)
   const writePromise = new Promise<boolean>((resolve, reject) => {
     writeStream.on('finish', () => resolve(true))
+    writeStream.on('close', () => resolve(false))
     writeStream.on('error', (err) => {
       debugLog(options, `Error write temp file: ${err}`)
       reject(err)
@@ -43,13 +44,15 @@ export const tempFileHandler: Handler = (options, fieldname, filename) => {
   return {
     cleanup: () => {
       completed = true
-      debugLog(options, `Cleaning up temporary file ${tempFilePath}...`)
-      writeStream.end()
-      deleteFile(tempFilePath, (err) =>
-        err
-          ? debugLog(options, `Cleaning up temporary file ${tempFilePath} failed: ${err}`)
-          : debugLog(options, `Cleaning up temporary file ${tempFilePath} done.`),
-      )
+      return new Promise<void>((resolve) => {
+        const remove = () => deleteFile(tempFilePath, () => resolve())
+        if (writeStream.closed) {
+          remove()
+        } else {
+          writeStream.once('close', remove)
+          writeStream.destroy()
+        }
+      })
     },
     complete: () => {
       completed = true
@@ -65,10 +68,13 @@ export const tempFileHandler: Handler = (options, fieldname, filename) => {
         debugLog(options, `Error: got ${fieldname}->${filename} data chunk for completed upload!`)
         return
       }
-      writeStream.write(data)
+      const ready = writeStream.write(data)
       hash.update(data)
       fileSize += data.length
       debugLog(options, `Uploading ${fieldname}->${filename}, bytes:${fileSize}...`)
+      if (!ready) {
+        return new Promise<void>((resolve) => writeStream.once('drain', resolve))
+      }
     },
     getFilePath: () => tempFilePath,
     getFileSize: () => fileSize,
@@ -88,11 +94,14 @@ export const memHandler: Handler = (options, fieldname, filename) => {
   return {
     cleanup: () => {
       completed = true
+      buffers.length = 0
     },
     complete: () => {
       debugLog(options, `Upload ${fieldname}->${filename} completed, bytes:${fileSize}.`)
       completed = true
-      return getBuffer()
+      const buffer = getBuffer()
+      buffers.length = 0
+      return buffer
     },
     dataHandler: (data) => {
       if (completed === true) {

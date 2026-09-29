@@ -1,4 +1,5 @@
 import type { LabelFunction } from 'payload'
+import type { AriaAttributes } from 'react'
 import type {
   ClassNamesConfig,
   CommonProps,
@@ -10,6 +11,7 @@ import type {
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
 export type CustomSelectProps = {
+  clearValueLabel?: string
   disableKeyDown?: boolean
   disableMouseDown?: boolean
   draggableProps?: any
@@ -30,6 +32,7 @@ export type CustomSelectProps = {
   }) => void
   onDuplicate?: DocumentDrawerProps['onSave']
   onSave?: DocumentDrawerProps['onSave']
+  removeValueLabel?: string
   valueContainerLabel?: string
 }
 
@@ -68,7 +71,8 @@ export type OptionGroup = {
 }
 
 export type ReactSelectAdapterProps = {
-  'aria-label'?: string
+  'aria-label'?: AriaAttributes['aria-label']
+  'aria-labelledby'?: AriaAttributes['aria-labelledby']
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
   captureMenuScroll?: boolean
@@ -90,6 +94,16 @@ export type ReactSelectAdapterProps = {
         search: string,
       ) => boolean)
     | undefined
+  formatOptionLabel?: ReactSelectStateManagerProps<
+    Option,
+    boolean,
+    GroupBase<Option>
+  >['formatOptionLabel']
+  getOptionLabel?: ReactSelectStateManagerProps<
+    Option,
+    boolean,
+    GroupBase<Option>
+  >['getOptionLabel']
   getOptionValue?: ReactSelectStateManagerProps<
     Option,
     boolean,

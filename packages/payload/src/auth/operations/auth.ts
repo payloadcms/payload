@@ -28,6 +28,7 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
     canSetHeaders,
     headers,
     payload,
+    req,
   })
 
   req.user = user

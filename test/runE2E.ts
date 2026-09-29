@@ -35,6 +35,7 @@ const {
   'grep-invert': grepInvert,
   headed,
   part,
+  'screen-reader': screenReader,
   shard,
   'update-snapshots': updateSnapshots,
   workers,
@@ -50,7 +51,8 @@ const effectiveGrepInvert = grepInvert ?? (grep === '@visual' ? undefined : '@vi
 
 // Run all
 if (!suiteName) {
-  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
+  let files = await globby(`${path.resolve(dirname).replace(/\\/g, '/')}/**/${testFilePattern}`)
 
   const totalFiles = files.length
 
@@ -90,6 +92,7 @@ if (!suiteName) {
       baseTestFolder,
       grepInvertArg: effectiveGrepInvert,
       headedArg: headed,
+      screenReaderArg: screenReader,
       suitePaths: file,
       updateSnapshotsArg: updateSnapshots,
     })
@@ -111,7 +114,10 @@ if (!suiteName) {
     .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
 
-  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
+  const testFilePattern = screenReader ? '*screen-reader.spec.ts' : '*e2e.spec.ts'
+  const allSuitesInFolder = await globby(
+    `${suiteFolderPath.replace(/\\/g, '/')}/${testFilePattern}`,
+  )
 
   const baseTestFolder = inputSuitePath.split('__')[0]
 
@@ -131,6 +137,7 @@ if (!suiteName) {
     grepArg: grep,
     grepInvertArg: effectiveGrepInvert,
     headedArg: headed,
+    screenReaderArg: screenReader,
     shardArg: shard,
     suiteConfigPath,
     suitePaths: allSuitesInFolder,
@@ -155,6 +162,7 @@ async function executePlaywright({
   grepArg,
   grepInvertArg,
   headedArg,
+  screenReaderArg,
   shardArg,
   suiteConfigPath,
   suitePaths,
@@ -167,6 +175,7 @@ async function executePlaywright({
   grepArg?: string
   grepInvertArg?: string
   headedArg?: boolean
+  screenReaderArg?: boolean
   shardArg?: string
   suiteConfigPath?: string
   suitePaths: string | string[]
@@ -177,7 +186,9 @@ async function executePlaywright({
   console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
-    `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
+    screenReaderArg
+      ? 'playwright.screen-reader.config.ts'
+      : `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
   const spawnDevArgs: string[] = [
@@ -191,6 +202,7 @@ async function executePlaywright({
   if (!turbo) {
     spawnDevArgs.push('--no-turbo')
   }
+  spawnDevArgs.push('--no-seed')
 
   process.env.START_MEMORY_DB = 'true'
 
@@ -228,6 +240,8 @@ async function executePlaywright({
   if (prodServer && !portInUse) {
     await waitForServer(e2ePort)
   }
+
+  await resetServer(e2ePort)
 
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
@@ -321,4 +335,34 @@ async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<v
   }
 
   throw new Error(`Prod server did not start within ${timeoutMs / 1000}s`)
+}
+
+async function resetServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+  const url = `http://localhost:${port}/api/re-initialize`
+  const start = Date.now()
+  let lastConnectionError: unknown
+  console.log(`Waiting to reset test data at ${url} …`)
+
+  while (Date.now() - start < timeoutMs) {
+    let response: Response
+
+    try {
+      response = await fetch(url, { method: 'POST' })
+    } catch (error) {
+      lastConnectionError = error
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      continue
+    }
+
+    if (response.ok || response.status === 404) {
+      return
+    }
+
+    throw new Error(`Failed to reset test data: ${response.status} ${await response.text()}`)
+  }
+
+  const connectionError =
+    lastConnectionError instanceof Error ? `: ${lastConnectionError.message}` : ''
+
+  throw new Error(`Timed out waiting to reset test data at ${url}${connectionError}`)
 }

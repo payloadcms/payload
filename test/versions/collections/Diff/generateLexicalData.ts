@@ -2,6 +2,27 @@ import type { DefaultTypedEditorState, SerializedBlockNode } from '@payloadcms/r
 
 import { mediaCollectionSlug, textCollectionSlug } from '../../slugs.js'
 
+export function generateRelationshipLexicalData(textID: number | string): DefaultTypedEditorState {
+  return {
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'relationship',
+          format: '',
+          relationTo: textCollectionSlug,
+          value: textID,
+          version: 2,
+        },
+      ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      version: 1,
+    },
+  }
+}
+
 export function generateLexicalData(args: {
   mediaID: number | string
   textID: number | string

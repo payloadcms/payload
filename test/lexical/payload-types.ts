@@ -1459,6 +1459,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -1513,8 +1514,50 @@ export interface BlockWithBlockRef_DBAB1AB1 {
 export interface LexicalBenchmark {
   id: string;
   richText?: LexicalRichText<LexicalNodes_F0244ACA> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1523,6 +1566,14 @@ export interface LexicalBenchmark {
 export interface LexicalFullyFeatured {
   id: string;
   richText?: LexicalRichText<LexicalNodes_16989CBB> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1539,6 +1590,14 @@ export interface LexicalAutosave {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1550,6 +1609,14 @@ export interface LexicalAutosave {
 export interface LexicalLinkFeature {
   id: string;
   richText?: LexicalRichText<LexicalNodes_BBF2A840> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1560,6 +1627,14 @@ export interface LexicalLinkFeature {
 export interface LexicalListsFeature {
   id: string;
   onlyOrderedList?: LexicalRichText<LexicalNodes_2C2D92D6> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1570,6 +1645,14 @@ export interface LexicalListsFeature {
 export interface LexicalHeadingFeature {
   id: string;
   richText?: LexicalRichText<LexicalNodes_D4BEB275> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1580,6 +1663,14 @@ export interface LexicalHeadingFeature {
 export interface LexicalJsxConverter {
   id: string;
   richText?: LexicalRichText<LexicalNodes_F37F04C1> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1600,6 +1691,14 @@ export interface LexicalField {
    */
   lexicalWithBlocks: LexicalRichText<LexicalNodes_FC01667D>;
   lexicalWithBlocks_markdown?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1611,6 +1710,14 @@ export interface LexicalView {
   id: string;
   customDefaultView?: LexicalRichText<LexicalNodes_C0B72D32> | null;
   vanillaView?: LexicalRichText<LexicalNodes_C0B72D32> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1621,6 +1728,14 @@ export interface LexicalView {
 export interface LexicalViewsFrontend {
   id: string;
   customFrontendViews?: LexicalRichText<LexicalNodes_478B17A1> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1633,6 +1748,14 @@ export interface LexicalViewsProvider {
   viewProviderWrapper?: {
     richTextField?: LexicalRichText<LexicalNodes_C595BEE4> | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1645,6 +1768,14 @@ export interface LexicalViewsProviderDefault {
   defaultViewWrapper?: {
     richTextField?: LexicalRichText<LexicalNodes_F37F04C1> | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1657,6 +1788,14 @@ export interface LexicalViewsProviderFallback {
   fallbackViewWrapper?: {
     richTextField?: LexicalRichText<LexicalNodes_F37F04C1> | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1667,6 +1806,14 @@ export interface LexicalViewsProviderFallback {
 export interface LexicalViewsNested {
   id: string;
   parentRichText?: LexicalRichText<LexicalNodes_AD6CB151> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1685,6 +1832,14 @@ export interface LexicalLocalizedField {
    * Localized field with localized block subfields
    */
   lexicalBlocksLocalized?: LexicalRichText<LexicalNodes_30580BEA> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1696,6 +1851,14 @@ export interface LexicalObjectReferenceBug {
   id: string;
   lexicalDefault?: LexicalRichText<LexicalNodes_EB5D0B68> | null;
   lexicalEditor?: LexicalRichText<LexicalNodes_2A14730B> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1707,6 +1870,14 @@ export interface LexicalInBlock {
   id: string;
   content?: LexicalRichText<LexicalNodes_4DA054CB> | null;
   blocks?: LexicalInBlock2[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1727,6 +1898,14 @@ export interface LexicalInBlock2 {
 export interface LexicalAutosaveBlock {
   id: string;
   content?: LexicalRichText<LexicalNodes_5D719788> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1739,6 +1918,14 @@ export interface LexicalAccessControl {
   id: string;
   title?: string | null;
   richText?: LexicalRichText<LexicalNodes_5E51612C> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1752,6 +1939,14 @@ export interface LexicalRelationshipField {
   richText2?: LexicalRichText<LexicalNodes_E055DBAB> | null;
   richText3?: LexicalRichText<LexicalNodes_BF228B73> | null;
   richTextLocalized?: LexicalRichText<LexicalNodes_86068B65> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1763,6 +1958,14 @@ export interface LexicalRelationshipField {
 export interface Collision {
   id: string;
   collision?: LexicalRichText<LexicalNodes_F37F04C1> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1774,6 +1977,14 @@ export interface LexicalNestedBlock {
   id: string;
   title: string;
   richText?: LexicalRichText<LexicalNodes_85A876D1> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1795,6 +2006,14 @@ export interface RichTextField {
    */
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
   blocks?: TextBlock_9A4C1CB0[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1852,6 +2071,14 @@ export interface TextField {
       }[]
     | null;
   blocks?: BlockWithText[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1873,6 +2100,14 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1894,6 +2129,14 @@ export interface Uploads2 {
   text?: string | null;
   media?: (string | null) | Upload;
   altText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -2001,6 +2244,14 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2019,6 +2270,14 @@ export interface OnDemandForm {
     | number
     | boolean
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2038,6 +2297,14 @@ export interface OnDemandOutsideForm {
     | boolean
     | null;
   hiddenAnchor?: LexicalRichText<LexicalNodes_39EC0130> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2049,6 +2316,14 @@ export interface LexicalCustomCell {
   id: string;
   title: string;
   richTextField?: LexicalRichText<LexicalNodes_F37F04C1> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2068,31 +2343,6 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2273,6 +2523,8 @@ export interface PayloadMigration {
  */
 export interface LexicalBenchmarkSelect<T extends boolean = true> {
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2282,6 +2534,8 @@ export interface LexicalBenchmarkSelect<T extends boolean = true> {
  */
 export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2297,6 +2551,8 @@ export interface LexicalAutosaveSelect<T extends boolean = true> {
         richText?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2307,6 +2563,8 @@ export interface LexicalAutosaveSelect<T extends boolean = true> {
  */
 export interface LexicalLinkFeatureSelect<T extends boolean = true> {
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2316,6 +2574,8 @@ export interface LexicalLinkFeatureSelect<T extends boolean = true> {
  */
 export interface LexicalListsFeaturesSelect<T extends boolean = true> {
   onlyOrderedList?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2325,6 +2585,8 @@ export interface LexicalListsFeaturesSelect<T extends boolean = true> {
  */
 export interface LexicalHeadingFeatureSelect<T extends boolean = true> {
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2334,6 +2596,8 @@ export interface LexicalHeadingFeatureSelect<T extends boolean = true> {
  */
 export interface LexicalJsxConverterSelect<T extends boolean = true> {
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2347,6 +2611,8 @@ export interface LexicalFieldsSelect<T extends boolean = true> {
   lexicalSimple?: T;
   lexicalWithBlocks?: T;
   lexicalWithBlocks_markdown?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2357,6 +2623,8 @@ export interface LexicalFieldsSelect<T extends boolean = true> {
 export interface LexicalViewsSelect<T extends boolean = true> {
   customDefaultView?: T;
   vanillaView?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2366,6 +2634,8 @@ export interface LexicalViewsSelect<T extends boolean = true> {
  */
 export interface LexicalViewsFrontendSelect<T extends boolean = true> {
   customFrontendViews?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2379,6 +2649,8 @@ export interface LexicalViewsProviderSelect<T extends boolean = true> {
     | {
         richTextField?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2392,6 +2664,8 @@ export interface LexicalViewsProviderDefaultSelect<T extends boolean = true> {
     | {
         richTextField?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2405,6 +2679,8 @@ export interface LexicalViewsProviderFallbackSelect<T extends boolean = true> {
     | {
         richTextField?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2414,6 +2690,8 @@ export interface LexicalViewsProviderFallbackSelect<T extends boolean = true> {
  */
 export interface LexicalViewsNestedSelect<T extends boolean = true> {
   parentRichText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2425,6 +2703,8 @@ export interface LexicalLocalizedFieldsSelect<T extends boolean = true> {
   title?: T;
   lexicalBlocksSubLocalized?: T;
   lexicalBlocksLocalized?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2435,6 +2715,8 @@ export interface LexicalLocalizedFieldsSelect<T extends boolean = true> {
 export interface LexicalObjectReferenceBugSelect<T extends boolean = true> {
   lexicalDefault?: T;
   lexicalEditor?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2455,6 +2737,8 @@ export interface LexicalInBlockSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2464,6 +2748,8 @@ export interface LexicalInBlockSelect<T extends boolean = true> {
  */
 export interface LexicalAutosaveBlockSelect<T extends boolean = true> {
   content?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2475,6 +2761,8 @@ export interface LexicalAutosaveBlockSelect<T extends boolean = true> {
 export interface LexicalAccessControlSelect<T extends boolean = true> {
   title?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2487,6 +2775,8 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   richText2?: T;
   richText3?: T;
   richTextLocalized?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2497,6 +2787,8 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
  */
 export interface CollisionSelect<T extends boolean = true> {
   collision?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2507,6 +2799,8 @@ export interface CollisionSelect<T extends boolean = true> {
 export interface LexicalNestedBlocksSelect<T extends boolean = true> {
   title?: T;
   richText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2531,6 +2825,8 @@ export interface RichTextFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2576,6 +2872,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2586,6 +2884,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
 export interface UploadsSelect<T extends boolean = true> {
   text?: T;
   media?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2606,6 +2906,8 @@ export interface Uploads2Select<T extends boolean = true> {
   text?: T;
   media?: T;
   altText?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2715,6 +3017,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2724,6 +3028,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  */
 export interface OnDemandFormSelect<T extends boolean = true> {
   json?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2734,6 +3040,8 @@ export interface OnDemandFormSelect<T extends boolean = true> {
 export interface OnDemandOutsideFormSelect<T extends boolean = true> {
   json?: T;
   hiddenAnchor?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2744,6 +3052,8 @@ export interface OnDemandOutsideFormSelect<T extends boolean = true> {
 export interface LexicalCustomCellSelect<T extends boolean = true> {
   title?: T;
   richTextField?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2760,6 +3070,8 @@ export interface PayloadKvSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -2767,6 +3079,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -2821,6 +3134,14 @@ export interface TabsWithRichText {
   tab2?: {
     rt2?: LexicalRichText<LexicalNodes_F37F04C1> | null;
   };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2839,6 +3160,8 @@ export interface TabsWithRichTextSelect<T extends boolean = true> {
     | {
         rt2?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2904,6 +3227,50 @@ export interface CollectionQueryWidget {
     sortField?: string | null;
     sortDirection?: ('asc' | 'desc') | null;
     limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'lexical-benchmark'
+          | 'lexical-fully-featured'
+          | 'lexical-autosave'
+          | 'lexical-link-feature'
+          | 'lexical-lists-features'
+          | 'lexical-heading-feature'
+          | 'lexical-jsx-converter'
+          | 'lexical-fields'
+          | 'lexical-views'
+          | 'lexical-views-frontend'
+          | 'lexical-views-provider'
+          | 'lexical-views-provider-default'
+          | 'lexical-views-provider-fallback'
+          | 'lexical-views-nested'
+          | 'lexical-localized-fields'
+          | 'lexicalObjectReferenceBug'
+          | 'LexicalInBlock'
+          | 'lexical-autosave-block'
+          | 'lexical-access-control'
+          | 'lexical-relationship-fields'
+          | 'collision'
+          | 'lexical-nested-blocks'
+          | 'rich-text-fields'
+          | 'text-fields'
+          | 'uploads'
+          | 'uploads2'
+          | 'array-fields'
+          | 'OnDemandForm'
+          | 'OnDemandOutsideForm'
+          | 'lexical-custom-cell'
+          | 'users'
+        )[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

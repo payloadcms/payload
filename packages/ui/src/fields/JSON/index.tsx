@@ -1,5 +1,5 @@
 'use client'
-import type { JSONFieldClientComponent, JsonObject } from 'payload'
+import type { JSONFieldClientProps, JsonObject } from 'payload'
 
 import { type OnMount } from '@monaco-editor/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -19,7 +19,7 @@ import './index.css'
 
 const baseClass = 'json-field'
 
-const JSONFieldComponent: JSONFieldClientComponent = (props) => {
+const JSONFieldComponent: React.FC<JSONFieldClientProps> = (props) => {
   const {
     field,
     field: {

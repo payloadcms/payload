@@ -1,6 +1,6 @@
-import type { Config, Field, GroupField, TabsField } from 'payload'
+import type { Config, Field, GroupField, PayloadRequest, TabsField } from 'payload'
 
-import { definePlugin } from 'payload'
+import { canAccessAdmin, definePlugin, executeAccess, Forbidden, UnauthorizedError } from 'payload'
 import { deepMergeSimple } from 'payload/shared'
 
 import type {
@@ -63,6 +63,115 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
     const globalConfigBySlug = new Map<string, NonNullable<Config['globals']>[number]>()
     for (const g of config.globals ?? []) {
       globalConfigBySlug.set(g.slug, g)
+    }
+
+    const authorizeGenerateTarget = async ({
+      data,
+      req,
+    }: {
+      data:
+        | null
+        | Omit<Parameters<GenerateTitle>[0], 'collectionConfig' | 'globalConfig' | 'req'>
+        | undefined
+      req: PayloadRequest
+    }) => {
+      if (!data || typeof data !== 'object') {
+        throw new Forbidden(req.t)
+      }
+
+      const collectionConfig =
+        data.collectionSlug && pluginConfig.collections?.includes(data.collectionSlug)
+          ? collectionConfigBySlug.get(data.collectionSlug)
+          : undefined
+      const globalConfig =
+        data.globalSlug && pluginConfig.globals?.includes(data.globalSlug)
+          ? globalConfigBySlug.get(data.globalSlug)
+          : undefined
+
+      if (collectionConfig && !data.globalSlug) {
+        const dataDocumentID =
+          data.doc && typeof data.doc === 'object' && 'id' in data.doc ? data.doc.id : undefined
+        const documentIDs = [data.id, dataDocumentID].filter(
+          (id) => id !== null && id !== undefined,
+        )
+
+        if (documentIDs.some((id) => typeof id !== 'string' && typeof id !== 'number')) {
+          throw new Forbidden(req.t)
+        }
+
+        if (documentIDs.length === 2 && String(documentIDs[0]) !== String(documentIDs[1])) {
+          throw new Forbidden(req.t)
+        }
+
+        const documentID = documentIDs[0] as number | string | undefined
+
+        if (documentID !== undefined) {
+          const accessibleDoc = await req.payload.findByID({
+            id: documentID,
+            collection: collectionConfig.slug,
+            depth: 0,
+            disableErrors: true,
+            draft: true,
+            overrideAccess: false,
+            req,
+            trash: true,
+            user: req.user,
+          })
+
+          if (!accessibleDoc) {
+            const { totalDocs } = await req.payload.count({
+              collection: collectionConfig.slug,
+              disableErrors: true,
+              overrideAccess: true,
+              req,
+              trash: true,
+              where: {
+                id: {
+                  equals: documentID,
+                },
+              },
+            })
+
+            if (totalDocs > 0) {
+              throw new Forbidden(req.t)
+            }
+
+            if (collectionConfig.access?.create) {
+              await executeAccess(
+                { slug: collectionConfig.slug, data: data.doc, req },
+                collectionConfig.access.create,
+              )
+            }
+          }
+        } else if (collectionConfig.access?.create) {
+          await executeAccess(
+            { slug: collectionConfig.slug, data: data.doc, req },
+            collectionConfig.access.create,
+          )
+        }
+
+        return { collectionConfig, globalConfig: undefined }
+      }
+
+      if (globalConfig && !data.collectionSlug) {
+        const doc = await req.payload.findGlobal({
+          slug: globalConfig.slug,
+          depth: 0,
+          disableErrors: true,
+          draft: true,
+          overrideAccess: false,
+          req,
+          user: req.user,
+        })
+
+        if (!doc) {
+          throw new Forbidden(req.t)
+        }
+
+        return { collectionConfig: undefined, globalConfig }
+      }
+
+      throw new Forbidden(req.t)
     }
 
     return {
@@ -144,22 +253,24 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
         ...(config.endpoints ?? []),
         {
           handler: async (req) => {
+            await authorizeGenerate({ req })
+
             const data: Omit<
               Parameters<GenerateTitle>[0],
               'collectionConfig' | 'globalConfig' | 'req'
             > = await req.json?.()
 
             const reqData = data ?? req.data
+            const { collectionConfig, globalConfig } = await authorizeGenerateTarget({
+              data: reqData,
+              req,
+            })
 
             const result = pluginConfig.generateTitle
               ? await pluginConfig.generateTitle({
                   ...data,
-                  collectionConfig: reqData.collectionSlug
-                    ? collectionConfigBySlug.get(reqData.collectionSlug)
-                    : undefined,
-                  globalConfig: reqData.globalSlug
-                    ? globalConfigBySlug.get(reqData.globalSlug)
-                    : undefined,
+                  collectionConfig,
+                  globalConfig,
                   req,
                 } satisfies Parameters<GenerateTitle>[0])
               : ''
@@ -170,22 +281,24 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
         },
         {
           handler: async (req) => {
+            await authorizeGenerate({ req })
+
             const data: Omit<
               Parameters<GenerateTitle>[0],
               'collectionConfig' | 'globalConfig' | 'req'
             > = await req.json?.()
 
             const reqData = data ?? req.data
+            const { collectionConfig, globalConfig } = await authorizeGenerateTarget({
+              data: reqData,
+              req,
+            })
 
             const result = pluginConfig.generateDescription
               ? await pluginConfig.generateDescription({
                   ...data,
-                  collectionConfig: reqData.collectionSlug
-                    ? collectionConfigBySlug.get(reqData.collectionSlug)
-                    : undefined,
-                  globalConfig: reqData.globalSlug
-                    ? globalConfigBySlug.get(reqData.globalSlug)
-                    : undefined,
+                  collectionConfig,
+                  globalConfig,
                   req,
                 } satisfies Parameters<GenerateDescription>[0])
               : ''
@@ -196,22 +309,24 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
         },
         {
           handler: async (req) => {
+            await authorizeGenerate({ req })
+
             const data: Omit<
               Parameters<GenerateTitle>[0],
               'collectionConfig' | 'globalConfig' | 'req'
             > = await req.json?.()
 
             const reqData = data ?? req.data
+            const { collectionConfig, globalConfig } = await authorizeGenerateTarget({
+              data: reqData,
+              req,
+            })
 
             const result = pluginConfig.generateURL
               ? await pluginConfig.generateURL({
                   ...data,
-                  collectionConfig: reqData.collectionSlug
-                    ? collectionConfigBySlug.get(reqData.collectionSlug)
-                    : undefined,
-                  globalConfig: reqData.globalSlug
-                    ? globalConfigBySlug.get(reqData.globalSlug)
-                    : undefined,
+                  collectionConfig,
+                  globalConfig,
                   req,
                 } satisfies Parameters<GenerateURL>[0])
               : ''
@@ -222,22 +337,24 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
         },
         {
           handler: async (req) => {
+            await authorizeGenerate({ req })
+
             const data: Omit<
               Parameters<GenerateTitle>[0],
               'collectionConfig' | 'globalConfig' | 'req'
             > = await req.json?.()
 
             const reqData = data ?? req.data
+            const { collectionConfig, globalConfig } = await authorizeGenerateTarget({
+              data: reqData,
+              req,
+            })
 
             const result = pluginConfig.generateImage
               ? await pluginConfig.generateImage({
                   ...data,
-                  collectionConfig: reqData.collectionSlug
-                    ? collectionConfigBySlug.get(reqData.collectionSlug)
-                    : undefined,
-                  globalConfig: reqData.globalSlug
-                    ? globalConfigBySlug.get(reqData.globalSlug)
-                    : undefined,
+                  collectionConfig,
+                  globalConfig,
                   req,
                 } satisfies Parameters<GenerateImage>[0])
               : ''
@@ -300,3 +417,11 @@ export const seoPlugin = definePlugin<SEOPluginConfig>({
     }
   },
 })
+
+const authorizeGenerate = async ({ req }: { req: PayloadRequest }): Promise<void> => {
+  if (!req.user) {
+    throw new UnauthorizedError(req.t)
+  }
+
+  await canAccessAdmin({ req })
+}

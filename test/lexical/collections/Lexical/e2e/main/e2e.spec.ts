@@ -77,7 +77,6 @@ async function navigateToLexicalFields(
 describe('lexicalMain', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
@@ -91,8 +90,6 @@ describe('lexicalMain', () => {
     })*/
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
     if (client) {
@@ -315,7 +312,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     await richTextField.click() // Use click, because focus does not work
     await page.keyboard.type('some text')
-    const spanInEditor = richTextField.locator('span').first()
+    const spanInEditor = richTextField.locator('[data-lexical-text="true"]').first()
     await expect(spanInEditor).toHaveText('some text')
     await saveDocAndAssert(page)
     await page.locator('#clear-lexical-lexicalSimple').click()
@@ -330,7 +327,7 @@ describe('lexicalMain', () => {
     await expect(richTextField).toBeVisible()
     await richTextField.click() // Use click, because focus does not work
     await page.keyboard.type('some text')
-    const spanInEditor = richTextField.locator('span').first()
+    const spanInEditor = richTextField.locator('[data-lexical-text="true"]').first()
     await expect(spanInEditor).toHaveText('some text')
     await saveDocAndAssert(page)
     await page.locator('#clear-lexical-lexicalSimple').click()
@@ -1755,9 +1752,9 @@ describe('lexicalMain', () => {
     await textNode.click()
     await expect(decoratorLocator).toBeHidden()
 
-    const closeTagInMultiSelect = page
-      .getByRole('button', { name: 'payload.jpg Edit payload.jpg' })
-      .getByLabel('Remove')
+    const closeTagInMultiSelect = page.getByRole('button', {
+      name: /^Remove payload\.jpg/,
+    })
     await closeTagInMultiSelect.click()
     await expect(decoratorLocator).toBeHidden()
 
@@ -1894,6 +1891,7 @@ describe('lexicalMain', () => {
         },
         title: 'Test Custom Cell',
       },
+      overrideAccess: true,
     })
 
     const url = new AdminUrlUtil(serverURL, lexicalCustomCellSlug)

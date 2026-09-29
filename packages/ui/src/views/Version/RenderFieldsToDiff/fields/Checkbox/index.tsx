@@ -1,5 +1,5 @@
 'use client'
-import type { CheckboxFieldDiffClientComponent } from 'payload'
+import type { CheckboxFieldDiffClientProps } from 'payload'
 
 import React from 'react'
 
@@ -31,7 +31,7 @@ const CheckboxIndicator: React.FC<{
   )
 }
 
-export const Checkbox: CheckboxFieldDiffClientComponent = ({
+export const Checkbox: React.FC<CheckboxFieldDiffClientProps> = ({
   comparisonValue: valueFrom,
   field,
   locale,

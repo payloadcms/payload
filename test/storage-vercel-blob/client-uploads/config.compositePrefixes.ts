@@ -19,37 +19,41 @@ dotenv.config({
 })
 
 export default buildConfigWithDefaults({
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname, '..'),
+  suite: 'storage-vercel-blob-client-uploads-compositePrefixes',
+  config: {
+    admin: {
+      importMap: {
+        baseDir: path.resolve(dirname, '..'),
+      },
+    },
+    collections: [Media, MediaContainer, MediaWithCompositePrefixes, Users],
+    storage: [
+      vercelBlobStorage({
+        clientUploads: {
+          access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
+        },
+        collections: {
+          [mediaSlug]: true,
+          [mediaWithCompositePrefixesSlug]: {
+            prefix: collectionPrefix,
+          },
+        },
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+        useCompositePrefixes: true,
+      }),
+    ],
+    typescript: {
+      outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
   },
-  collections: [Media, MediaContainer, MediaWithCompositePrefixes, Users],
-  onInit: async (payload) => {
+  seed: async (payload) => {
     await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
+      overrideAccess: true,
     })
-  },
-  storage: [
-    vercelBlobStorage({
-      clientUploads: {
-        access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),
-      },
-      collections: {
-        [mediaSlug]: true,
-        [mediaWithCompositePrefixesSlug]: {
-          prefix: collectionPrefix,
-        },
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      useCompositePrefixes: true,
-    }),
-  ],
-  typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })

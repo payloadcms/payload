@@ -5,7 +5,7 @@ import {
   type SerializedBlockNode,
   type SerializedInlineBlockNode,
 } from '@payloadcms/richtext-lexical'
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Page, type Response, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -39,6 +39,24 @@ let serverURL: string
 
 const { beforeAll, beforeEach, describe } = test
 
+const isFormStateResponse = ({ response }: { response: Response }): boolean => {
+  const request = response.request()
+
+  if (request.method() !== 'POST' || response.status() !== 200) {
+    return false
+  }
+
+  if (request.url().includes(`/admin/collections/${lexicalFullyFeaturedSlug}/`)) {
+    return true
+  }
+
+  return (
+    process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' &&
+    request.url().includes('/_serverFn/') &&
+    (request.postData() ?? '').includes('form-state')
+  )
+}
+
 // This test suite resets the database before each test to ensure a clean state and cannot be run in parallel.
 // Use this for tests that modify the database.
 describe('Lexical Fully Featured - database', () => {
@@ -46,7 +64,6 @@ describe('Lexical Fully Featured - database', () => {
   let url: AdminUrlUtil
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     const page = await browser.newPage()
@@ -56,8 +73,6 @@ describe('Lexical Fully Featured - database', () => {
   beforeEach(async ({ page }) => {
     await reInitializeDB({
       serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
     url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
@@ -91,6 +106,7 @@ describe('Lexical Fully Featured - database', () => {
       const uploadedImage = await payload.find({
         collection: 'uploads',
         where: { filename: { equals: expectedFileName || 'payload-1.jpg' } },
+        overrideAccess: true,
       })
       expect(uploadedImage.totalDocs).toBe(1)
     }
@@ -135,6 +151,7 @@ describe('Lexical Fully Featured - database', () => {
       const lexicalFullyFeatured = await payload.find({
         collection: lexicalFullyFeaturedSlug,
         limit: 1,
+        overrideAccess: true,
       })
       const richText = lexicalFullyFeatured?.docs?.[0]?.richText
 
@@ -240,6 +257,7 @@ describe('Lexical Fully Featured - database', () => {
           ],
         }),
       },
+      overrideAccess: true,
     })
 
     /**
@@ -334,10 +352,8 @@ describe('Lexical Fully Featured - database', () => {
 
     const emptyArrayBlock = regularBlocks.nth(1)
     const itemsField = emptyArrayBlock.locator('#field-items')
-    const emptyFormStateResponsePromise = page.waitForResponse(
-      (response) =>
-        response.request().method() === 'POST' &&
-        response.url().includes(`/admin/collections/${lexicalFullyFeaturedSlug}/`),
+    const emptyFormStateResponsePromise = page.waitForResponse((response) =>
+      isFormStateResponse({ response }),
     )
     await itemsField.getByRole('button', { name: 'Add Item' }).click()
     await expect(itemsField.locator('.array-field__row')).toHaveCount(1)
@@ -408,10 +424,8 @@ describe('Lexical Fully Featured - database', () => {
     const fallbackCheckbox = itemsField.locator('input[type="checkbox"]')
     await expect(fallbackCheckbox).toBeChecked()
 
-    const formStateResponsePromise = page.waitForResponse(
-      (response) =>
-        response.request().method() === 'POST' &&
-        response.url().includes(`/admin/collections/${lexicalFullyFeaturedSlug}/`),
+    const formStateResponsePromise = page.waitForResponse((response) =>
+      isFormStateResponse({ response }),
     )
     await fallbackCheckbox.click()
     await expect(fallbackCheckbox).not.toBeChecked()

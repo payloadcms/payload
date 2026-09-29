@@ -364,7 +364,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   return (
     <React.Fragment>
-      <div className="link-editor" data-theme="dark" ref={editorRef}>
+      <div className="link-editor" data-theme="dark" hidden={!isLink} ref={editorRef}>
         <div className="link-input">
           {linkNode?.__fields?.linkType === 'custom' ? <LinkIcon /> : <PageIcon />}
           {linkUrl && linkUrl.length > 0 ? (
