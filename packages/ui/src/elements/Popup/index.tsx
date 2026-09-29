@@ -229,7 +229,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
     const offset = 8
     // Additional gap used in side mode so the child popup has breathing room from its parent
     const sideOffset = 4
-
     let top: number
     let left: number
     let caretLeft: number

@@ -20,8 +20,10 @@ export function ListDrawerCreateNewDocButton({
   }
 
   return (
+    // Secondary: this drawer exists to pick an existing document, so creating one is the escape
+    // hatch rather than the main action - the primary slot belongs to `SelectMany`.
     <DocumentDrawerToggler
-      buttonStyle="primary"
+      buttonStyle="secondary"
       className={`${baseClass}__create-new-button`}
       key="create-new-button-toggler"
     >

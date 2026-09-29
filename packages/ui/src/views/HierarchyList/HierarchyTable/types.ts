@@ -11,6 +11,12 @@ export type RelatedGroup = {
 
 export type TableRow = {
   [key: string]: unknown
+  /**
+   * Where drilling into this hierarchy item should navigate. Set on folder rows so a click stays in
+   * whichever collection is being browsed - a folder opened from "Media by Folder" has to keep
+   * showing media, not switch to the folder collection's own view.
+   */
+  _browseHref?: string
   _collectionLabel: string
   _collectionSlug: string
   _hasChildren?: boolean

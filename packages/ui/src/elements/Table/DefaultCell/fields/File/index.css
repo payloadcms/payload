@@ -2,24 +2,35 @@
   .file {
     display: flex;
     flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--spacer-2-5);
+    flex: 1;
+    min-width: 0;
   }
 
+  /* The tile background and radius show through for files with no image preview, and keep the
+   * box aligned with the icons other first-column cells render. */
   .file__thumbnail {
-    display: inline-block;
-    max-width: var(--spacer-6);
-    height: var(--spacer-6);
-    border-radius: var(--radius-small);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-5);
+    max-width: var(--spacer-5);
+    height: var(--spacer-5);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    overflow: hidden;
+    flex-shrink: 0;
   }
 
+  /*
+   * `overflow: hidden` is required for the ellipsis, so the line box must be tall enough to
+   * contain the cell link's underline - the inherited body line-height crops it away.
+   */
   .file__filename {
-    align-self: center;
-
-    [dir='ltr'] & {
-      margin-left: calc(var(--spacer-4) - var(--spacer-1));
-    }
-
-    [dir='rtl'] & {
-      margin-right: calc(var(--spacer-4) - var(--spacer-1));
-    }
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: var(--text-body-large-line-height);
   }
 }
