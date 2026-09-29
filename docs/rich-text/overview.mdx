@@ -50,14 +50,6 @@ export const Pages: CollectionConfig = {
 }
 ```
 
-## Adapter presets
-
-Rich-text adapters can expose optional editor providers through `presets`. Each provider receives the usual `config`, `isRoot`, and `parentIsLocalized` arguments and returns an independently configured editor.
-
-Lexical provides `presets.llmInstructions` for authoring LLM instructions. It supports paragraphs, H2–H4 headings, basic text formatting, ordered and unordered lists, and a fixed toolbar. It uses its own feature set regardless of the root editor's features.
-
-Custom adapters can supply their own `presets.llmInstructions` provider; its returned editor must support both `converters.fromMarkdown` and `converters.toMarkdown`.
-
 ## Extending the lexical editor with Features
 
 Lexical has been designed with extensibility in mind. Whether you're aiming to introduce new functionalities or tweak the existing ones, Lexical makes it seamless for you to bring those changes to life.
