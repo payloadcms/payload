@@ -1813,6 +1813,7 @@ This affects three things:
 
 1. The top-level `sharp` config property has been removed. Passing a Sharp instance now happens through `sharpTransformer({ sharp })` instead.
 2. Per-collection Sharp options — `constructorOptions`, `formatOptions`, `resizeOptions`, `trimOptions`, and `withMetadata` — have been removed from `CollectionConfig['upload']`. They're now authored through `sharpTransformer({ collections })`.
+   - `imageSizes` has also been removed from `CollectionConfig['upload']`. Image sizes are now declared as `variants` on `sharpTransformer({ collections: { <slug>: { variants } } })`. The entries themselves (`name`, `width`, `height`, `generateImageName`, and so on) are unchanged. A collection that still sets `upload.imageSizes` fails the build.
 3. `sharp` is no longer a dependency of `payload` at all (previously a `devDependency`, not a runtime `dependency`). Install `@payloadcms/transformer-sharp` explicitly.
 
 ```sh
@@ -1841,7 +1842,7 @@ pnpm add @payloadcms/transformer-sharp
 +         collections: {
 +           media: {
 +             resizeOptions: { width: 2048, height: 2048 },
-+             imageSizes: [{ name: 'thumbnail', width: 400, height: 300 }],
++             variants: [{ name: 'thumbnail', width: 400, height: 300 }],
 +           },
 +         },
 +       }),
@@ -1850,9 +1851,9 @@ pnpm add @payloadcms/transformer-sharp
   })
 ```
 
-Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically. The codemod moves a top-level `sharp` dependency and inline collection Sharp options into `sharpTransformer({ collections })`, appends to an existing `upload.transformers` array if you already have one, and leaves anything it can't safely rewrite in place with a note — for example, a `collections` array built by a function call, or a collection defined outside the `buildConfig` call. Review those manually.
+Run `npx @payloadcms/codemod --transform migrate-sharp-to-transformer` to migrate automatically. The codemod moves a top-level `sharp` dependency and inline collection Sharp options into `sharpTransformer({ collections })` (writing `imageSizes` as `variants`), renames `imageSizes` to `variants` in configs that already use `sharpTransformer`, appends to an existing `upload.transformers` array if you already have one, and leaves anything it can't safely rewrite in place with a note — for example, a `collections` array built by a function call, or a collection defined outside the `buildConfig` call. Review those manually.
 
-`imageSizes`, `crop`, and `focalPoint` are still readable at `collection.upload.imageSizes`/`.crop`/`.focalPoint` — `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel, generated types, and the stored `sizes` shape on your documents are unchanged. This write-back is why `crop`/`focalPoint`/`imageSizes` are not in the list of removed options above — only the Sharp-specific processing options moved.
+Your `variants`, `crop`, and `focalPoint` are still readable at `collection.upload.imageSizes`/`.crop`/`.focalPoint` on the **sanitized** config (for example `req.payload.collections.media.config.upload.imageSizes`). `sharpTransformer` writes a projection of what you configure back onto the sanitized collection at startup, so the Admin Panel, generated types, and the stored `sizes` shape on your documents are unchanged. For a collection configured on `sharpTransformer`, set `crop` and `focalPoint` there too, because Sharp's values replace the collection's. `imageSizes` can't be set on the collection at all.
 
 If you inject a custom Sharp build or version, pass it the same way:
 
@@ -1861,7 +1862,7 @@ If you inject a custom Sharp build or version, pass it the same way:
 + sharpTransformer({ sharp: myCustomSharp })
 ```
 
-`sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `imageSizes`, as in Payload 3.x. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
+`sharpTransformer` can also resize images at request time (`/api/media/file/photo.png?width=400`). This is new in Payload 4 and **disabled by default**, so a migrated config keeps serving only the original file and your pre-generated `variants`, as in Payload 3.x. The codemod doesn't enable it. To opt in, pass `dynamic: true` or `dynamic: { collections: ['media'] }` — see [Dynamic (request-time) resizing](../upload/transformers#dynamic-request-time-resizing), and [Securing dynamic resizing](../upload/transformers#securing-dynamic-resizing) before enabling it on a publicly readable collection.
 
 ### Storage adapters always insert the `prefix` field now — `alwaysInsertFields` removed
 

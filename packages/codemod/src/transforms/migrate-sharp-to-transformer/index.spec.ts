@@ -106,6 +106,49 @@ export default buildConfig({
     )
   })
 
+  it('renames imageSizes to variants in an already-migrated sharpTransformer config', async () => {
+    const input = `import { sharpTransformer } from '@payloadcms/transformer-sharp'
+import { buildConfig } from 'payload'
+
+const imageSizes = [{ name: 'card', width: 600 }]
+
+export default buildConfig({
+  collections: [],
+  upload: {
+    transformers: [
+      sharpTransformer({
+        collections: {
+          media: { crop: false, imageSizes: [{ name: 'thumbnail', width: 400 }] },
+          posters: { imageSizes },
+        },
+      }),
+    ],
+  },
+})
+`
+    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
+
+    expect(result).toContain(
+      "media: { crop: false, variants: [{ name: 'thumbnail', width: 400 }] }",
+    )
+    expect(result).toContain('posters: { variants: imageSizes }')
+    expect(await runTransform({ source: result, transform: migrateSharpToTransformer })).toBe(
+      result,
+    )
+  })
+
+  it('renames imageSizes to variants in a sharpTransformer call outside buildConfig', async () => {
+    const input = `import { sharpTransformer } from '@payloadcms/transformer-sharp'
+
+export const transformers = [
+  sharpTransformer({ collections: { media: { imageSizes: [{ name: 'thumbnail' }] } } }),
+]
+`
+    const result = await runTransform({ source: input, transform: migrateSharpToTransformer })
+
+    expect(result).toContain("media: { variants: [{ name: 'thumbnail' }] }")
+  })
+
   it('moves shorthand Sharp options into sharpTransformer', async () => {
     const input = `import { buildConfig } from 'payload'
 
@@ -130,7 +173,7 @@ export default buildConfig({
     const [beforeTransformerCall, afterTransformerCall] = result.split('sharpTransformer(')
 
     expect(beforeTransformerCall).toContain("upload: {\n        staticDir: 'media',\n      },")
-    expect(afterTransformerCall).toContain('media: { imageSizes, focalPoint }')
+    expect(afterTransformerCall).toContain('media: { variants: imageSizes, focalPoint }')
   })
 
   it('reports a Sharp option it cannot move instead of leaving it behind silently', async () => {

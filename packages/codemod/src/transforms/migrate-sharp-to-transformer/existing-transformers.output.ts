@@ -12,6 +12,6 @@ export default buildConfig({
   ],
   upload: {
     abortOnLimit: true,
-    transformers: [customTransformer(), sharpTransformer({ collections: { media: { imageSizes: [{ name: 'square', height: 400, width: 400 }] } } })],
+    transformers: [customTransformer(), sharpTransformer({ collections: { media: { variants: [{ name: 'square', height: 400, width: 400 }] } } })],
   },
 })

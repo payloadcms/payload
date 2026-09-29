@@ -92,9 +92,9 @@ export function createPrepareLegacyUpload({
       : originalDimensions
 
     const focalPointEnabled = collectionUpload.focalPoint !== false
-    const imageSizes = collectionUpload.imageSizes
+    const variants = collectionUpload.variants
 
-    if (canProcessAsImage && Array.isArray(imageSizes) && sizeSourceDimensions) {
+    if (canProcessAsImage && Array.isArray(variants) && sizeSourceDimensions) {
       const focalPoint: FocalPoint | undefined =
         focalPointEnabled && uploadEdits?.focalPoint
           ? {
@@ -103,7 +103,7 @@ export function createPrepareLegacyUpload({
             }
           : undefined
 
-      const sizeResults = await mapWithBoundedConcurrency(imageSizes, async (rawConfig) => {
+      const sizeResults = await mapWithBoundedConcurrency(variants, async (rawConfig) => {
         const imageResizeConfig = sanitizeResizeConfig(rawConfig)
         const fieldPath = `sizes.${imageResizeConfig.name}` as const
 

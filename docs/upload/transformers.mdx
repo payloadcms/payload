@@ -218,7 +218,7 @@ export default buildConfig({
 
 ### Upload-time image processing
 
-Per-collection Sharp settings — `imageSizes`, `resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, `withMetadata`, `crop`, and `focalPoint` — are authored through `sharpTransformer({ collections })`, not on the collection's own `upload` config:
+Per-collection Sharp settings — `variants` (image sizes), `resizeOptions`, `formatOptions`, `trimOptions`, `constructorOptions`, `withMetadata`, `crop`, and `focalPoint` — are authored through `sharpTransformer({ collections })`, not on the collection's own `upload` config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -237,7 +237,7 @@ export default buildConfig({
       sharpTransformer({
         collections: {
           media: {
-            imageSizes: [
+            variants: [
               { name: 'thumbnail', width: 400, height: 300 },
               { name: 'card', width: 768, height: 1024 },
             ],
@@ -254,7 +254,7 @@ export default buildConfig({
 })
 ```
 
-At startup, `sharpTransformer` writes a Sharp-agnostic projection of `imageSizes` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config — so the Admin Panel, generated types, and the rest of core continue to see `collection.upload.imageSizes`/`.crop`/`.focalPoint` exactly as before. The `sizes` shape on your documents is unchanged.
+At startup, `sharpTransformer` writes a Sharp-agnostic projection of `variants` (name, `admin`, and `generateImageName` only), `crop`, and `focalPoint` back onto the collection's sanitized `upload` config, as `upload.imageSizes`/`.crop`/`.focalPoint`. So the Admin Panel, generated types, and the rest of core see the same sizes as before. The `sizes` shape on your documents is unchanged. `imageSizes` exists only on the sanitized config: setting it on the collection itself fails the build.
 
 See [Image Sizes](./overview#image-sizes) for what each Sharp-specific image size option does, and [Crop and Focal Point Selector](./overview#crop-and-focal-point-selector) for the Admin Panel behavior these settings control.
 

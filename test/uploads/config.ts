@@ -72,7 +72,7 @@ const dirname = getTestSuiteDir({ fallbackDir: path.dirname(filename), suitePath
 
 const sharpCollections: Record<string, SharpCollectionConfig> = {
   [adminThumbnailSizeSlug]: {
-    imageSizes: [
+    variants: [
       {
         name: 'small',
         height: 100,
@@ -86,7 +86,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     ],
   },
   [fileAccessMediaSlug]: {
-    imageSizes: [
+    variants: [
       {
         name: 'thumbnail',
         height: 100,
@@ -98,7 +98,12 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     formatOptions: {
       format: 'gif',
     },
-    imageSizes: [
+    resizeOptions: {
+      height: 200,
+      position: 'center',
+      width: 200,
+    },
+    variants: [
       {
         name: 'small',
         formatOptions: { format: 'gif', options: { quality: 90 } },
@@ -112,14 +117,9 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
         width: 1000,
       },
     ],
-    resizeOptions: {
-      height: 200,
-      position: 'center',
-      width: 200,
-    },
   },
   'filename-compound-index': {
-    imageSizes: [
+    variants: [
       {
         name: 'small',
         formatOptions: { format: 'gif', options: { quality: 90 } },
@@ -142,7 +142,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     },
   },
   'object-fit': {
-    imageSizes: [
+    variants: [
       {
         name: 'fitContain',
         fit: 'contain',
@@ -170,7 +170,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     ],
   },
   'with-meta-data': {
-    imageSizes: [
+    variants: [
       {
         name: 'sizeOne',
         height: 300,
@@ -180,7 +180,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     withMetadata: true,
   },
   'without-meta-data': {
-    imageSizes: [
+    variants: [
       {
         name: 'sizeTwo',
         height: 400,
@@ -190,7 +190,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     withMetadata: false,
   },
   'with-only-jpeg-meta-data': {
-    imageSizes: [
+    variants: [
       {
         name: 'sizeThree',
         height: 400,
@@ -208,7 +208,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
   },
   'crop-only': {
     focalPoint: false,
-    imageSizes: [
+    variants: [
       {
         name: 'focalTest',
         height: 300,
@@ -228,7 +228,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
   },
   'focal-only': {
     crop: false,
-    imageSizes: [
+    variants: [
       {
         name: 'focalTest',
         height: 300,
@@ -249,7 +249,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
   [imageSizesOnlySlug]: {
     crop: false,
     focalPoint: false,
-    imageSizes: [
+    variants: [
       {
         name: 'sizeOne',
         height: 300,
@@ -271,7 +271,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
       format: 'png',
       options: { quality: 90 },
     },
-    imageSizes: [
+    variants: [
       {
         name: 'maintainedAspectRatio',
         crop: 'center',
@@ -366,7 +366,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
       width: 200,
       height: 200,
     },
-    imageSizes: [
+    variants: [
       {
         name: 'squareSmall',
         width: 480,
@@ -398,7 +398,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     ],
   },
   [enlargeSlug]: {
-    imageSizes: [
+    variants: [
       {
         name: 'accidentalSameSize',
         height: 80,
@@ -446,7 +446,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     },
   },
   [reduceSlug]: {
-    imageSizes: [
+    variants: [
       {
         name: 'accidentalSameSize',
         height: 80,
@@ -474,7 +474,8 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     ],
   },
   'media-trim': {
-    imageSizes: [
+    trimOptions: 0,
+    variants: [
       {
         name: 'trimNumber',
         height: undefined,
@@ -497,10 +498,9 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
         width: 1024,
       },
     ],
-    trimOptions: 0,
   },
   [customFileNameMediaSlug]: {
-    imageSizes: [
+    variants: [
       {
         name: 'custom',
         height: 500,
@@ -516,7 +516,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
     },
   },
   [mediaWithImageSizeAdminPropsSlug]: {
-    imageSizes: [
+    variants: [
       {
         name: 'one',
         height: 200,
@@ -550,7 +550,7 @@ const sharpCollections: Record<string, SharpCollectionConfig> = {
   },
   [mediaWithFieldsSlug]: {
     crop: true,
-    imageSizes: [
+    variants: [
       {
         name: 'thumbnail',
         width: 300,

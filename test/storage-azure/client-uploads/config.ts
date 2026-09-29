@@ -80,7 +80,7 @@ export default buildConfigWithDefaults({
         sharpTransformer({
           collections: {
             [mediaHeaderOnlyWithSizesSlug]: {
-              imageSizes: [
+              variants: [
                 {
                   name: 'thumbnail',
                   height: 300,
