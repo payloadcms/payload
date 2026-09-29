@@ -64,6 +64,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
 
   return (
     <button
+      aria-pressed={typeof isSelected === 'boolean' ? isSelected : undefined}
       className={classes}
       onClick={onClick}
       onDoubleClick={onDoubleClick}

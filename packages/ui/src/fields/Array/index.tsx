@@ -1,9 +1,5 @@
 'use client'
-import type {
-  ArrayFieldClientComponent,
-  ArrayFieldClientProps,
-  ArrayField as ArrayFieldType,
-} from 'payload'
+import type { ArrayFieldClientProps, ArrayField as ArrayFieldType } from 'payload'
 
 import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
@@ -49,7 +45,7 @@ import './index.css'
 
 const baseClass = 'array-field'
 
-export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
+export const ArrayFieldComponent: React.FC<ArrayFieldClientProps> = (props) => {
   const {
     field,
     field: {

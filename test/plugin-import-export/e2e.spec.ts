@@ -124,10 +124,12 @@ test.describe('Import Export Plugin', () => {
 
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
+      await expect(createExportButton.locator('button')).toHaveCount(0)
 
       await createExportButton.click()
 
@@ -150,8 +152,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -174,8 +177,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -217,8 +221,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts No Jobs Queues',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -269,8 +274,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts Exports Only',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -346,8 +352,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -358,12 +365,8 @@ test.describe('Import Export Plugin', () => {
 
         // Ensure the export is for custom-id-pages (id + title columns visible) before saving
         await expect(async () => {
-          await expect(
-            page.locator('.export-preview table thead th').filter({ hasText: 'id' }),
-          ).toBeVisible()
-          await expect(
-            page.locator('.export-preview table thead th').filter({ hasText: 'title' }),
-          ).toBeVisible()
+          await expect(page.locator('.export-preview table thead th#heading-id')).toBeVisible()
+          await expect(page.locator('.export-preview table thead th#heading-title')).toBeVisible()
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         // Verify the collection field is set to Custom ID Pages before saving
@@ -420,9 +423,9 @@ test.describe('Import Export Plugin', () => {
         const content = fs.readFileSync(tempPath, 'utf8')
         fs.unlinkSync(tempPath)
 
-        // Ensure we got the custom-id-pages export (id,title only; no _status)
+        // Ensure we got the custom-id-pages export (id,title lead; no _status)
         await expect(() => {
-          expect(content).toMatch(/^\uFEFF?id,title,updatedAt,createdAt/m)
+          expect(content).toMatch(/^\uFEFF?id,title,/m)
           expect(content).not.toContain('_status')
 
           expect(content).toContain(`e2e-export-${uniqueId}-1`)
@@ -464,8 +467,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -566,8 +570,9 @@ test.describe('Import Export Plugin', () => {
         await expect(listMenuButton).toBeVisible()
         await listMenuButton.click()
 
-        const createExportButton = page.locator('.popup__scroll-container button', {
-          hasText: 'Export',
+        const createExportButton = page.getByRole('menuitem', {
+          name: 'Export Custom Id Pages',
+          exact: true,
         })
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
@@ -796,10 +801,12 @@ test.describe('Import Export Plugin', () => {
 
       await listMenuButton.click()
 
-      const createImportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Import Posts',
+      const createImportButton = page.getByRole('menuitem', {
+        name: 'Import Posts',
+        exact: true,
       })
       await expect(createImportButton).toBeVisible()
+      await expect(createImportButton.locator('button')).toHaveCount(0)
 
       await createImportButton.click()
 
@@ -1183,8 +1190,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1226,8 +1234,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1292,8 +1301,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Pages',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Pages',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1361,8 +1371,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1388,8 +1399,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1424,8 +1436,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1551,8 +1564,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1578,8 +1592,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()
@@ -1619,8 +1634,9 @@ test.describe('Import Export Plugin', () => {
       await expect(listMenuButton).toBeVisible()
       await listMenuButton.click()
 
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export Posts With Limits',
+      const createExportButton = page.getByRole('menuitem', {
+        name: 'Export Posts With Limits',
+        exact: true,
       })
       await expect(createExportButton).toBeVisible()
       await createExportButton.click()

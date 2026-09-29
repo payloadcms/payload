@@ -1,10 +1,10 @@
 'use client'
-import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
+import type { DateFieldClientProps, DateFieldValidation } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { getTranslation } from '@payloadcms/translations'
 import { transpose } from 'date-fns'
-import { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { DatePickerField } from '../../elements/DatePicker/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -23,7 +23,7 @@ import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'date-time-field'
 
-const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
+const DateTimeFieldComponent: React.FC<DateFieldClientProps> = (props) => {
   const {
     field,
     field: {
