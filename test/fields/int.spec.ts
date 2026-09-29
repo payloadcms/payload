@@ -5509,6 +5509,7 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
                   },
                 },
               ],
+              number: 5
             },
           },
           overrideAccess: true,
@@ -5541,6 +5542,26 @@ test.suite('Fields', { config: './config.ts', resetBetweenTests: false }, () => 
               {
                 'json.array.object.notexists': {
                   exists: false,
+                },
+              },
+              {
+                'json.number': {
+                  greater_than: 1,
+                },
+              },
+              {
+                'json.number': {
+                  greater_than_equal: 1,
+                },
+              },
+              {
+                'json.number': {
+                  less_than: 10,
+                },
+              },
+              {
+                'json.number': {
+                  less_than_equal: 10,
                 },
               },
             ],
