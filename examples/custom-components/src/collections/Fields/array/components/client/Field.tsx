@@ -1,9 +1,9 @@
 'use client'
-import type { ArrayFieldClientComponent } from 'payload'
+import type { ArrayFieldClientProps } from 'payload'
 
 import { ArrayField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomArrayFieldClient: ArrayFieldClientComponent = (props) => {
+export const CustomArrayFieldClient: React.FC<ArrayFieldClientProps> = (props) => {
   return <ArrayField {...props} />
 }

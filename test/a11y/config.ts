@@ -9,6 +9,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { UsersCollection, usersSlug } from './collections/Users/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -39,6 +40,10 @@ export default buildConfigWithDefaults({
     admin: {
       components: {
         views: {
+          CustomIDModals: {
+            Component: '/components/CustomIDModals/index.js#CustomIDModals',
+            path: '/custom-modal-ids',
+          },
           FocusIndicatorsView: {
             Component: '/components/FocusIndicatorsView.js#FocusIndicatorsView',
             path: '/focus-indicators',
@@ -64,7 +69,7 @@ export default buildConfigWithDefaults({
         baseDir: path.resolve(dirname),
       },
     },
-    collections: [FolderCollection, PostsCollection, MediaCollection],
+    collections: [UsersCollection, FolderCollection, PostsCollection, MediaCollection],
     editor: lexicalEditor({}),
     globals: [
       // ...add more globals here
@@ -91,10 +96,19 @@ export default buildConfigWithDefaults({
   },
   seed: async (payload) => {
     await payload.create({
-      collection: 'users',
+      collection: usersSlug,
       data: {
+        apiKey: 'a11y-modal-dialog-fixture-key-1234',
         email: devUser.email,
         password: devUser.password,
+      },
+      overrideAccess: true,
+    })
+
+    const parentFolder = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'Accessibility folder',
       },
       overrideAccess: true,
     })
@@ -102,7 +116,8 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: 'payload-folders',
       data: {
-        name: 'Accessibility folder',
+        name: 'Accessibility child folder',
+        '_h_payload-folders': parentFolder.id,
       },
       overrideAccess: true,
     })
@@ -142,6 +157,7 @@ export default buildConfigWithDefaults({
       id: firstPost.id,
       collection: postsSlug,
       data: {
+        _status: 'published',
         title: 'Example post one, third version',
       },
       draft: false,

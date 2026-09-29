@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback } from 'react'
+import React, { useCallback, useId } from 'react'
 
 import type { ColumnProps } from '../types.js'
 
@@ -35,6 +35,8 @@ export const Column: React.FC<ColumnProps> = ({
   totalDocs,
 }) => {
   const { t } = useTranslation()
+  const titleID = useId()
+  const createID = useId()
 
   const headerTitle = parentTitle || (parentId === null ? t('general:all') : '')
 
@@ -54,19 +56,22 @@ export const Column: React.FC<ColumnProps> = ({
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
-        <span className={`${baseClass}__header-title`}>{headerTitle}</span>
+        <h3 className={`${baseClass}__header-title`} id={titleID}>
+          {headerTitle}
+        </h3>
         {canCreate && (
           <Button
             buttonStyle="ghost"
             className={`${baseClass}__add-button`}
             disabled={disabled}
+            extraButtonProps={{ 'aria-labelledby': `${createID} ${titleID}` }}
             icon={<PlusIcon size={16} />}
             iconPosition="left"
             margin={false}
             onClick={handleCreateNew}
             size="medium"
           >
-            New {collectionLabel}
+            <span id={createID}>{t('general:newLabel', { label: collectionLabel })}</span>
           </Button>
         )}
       </div>

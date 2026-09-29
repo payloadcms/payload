@@ -99,7 +99,7 @@ describe('lexicalBlocks', () => {
         richTextField,
       })
 
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data:')
 
       // Select paragraph with text "123"
       // Now double-click to select entire line
@@ -144,10 +144,10 @@ describe('lexicalBlocks', () => {
       )
       await expect(editDrawer).toBeHidden()
 
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data: value2')
 
-      // press ctrl+B to bold the text previously selected (assuming it is still selected now, which it should be)
-      await page.keyboard.press('Meta+B')
+      // Bold the text selected before opening the drawer.
+      await page.keyboard.press('ControlOrMeta+B')
       // In case this is mac or windows
       await page.keyboard.press('Control+B')
 
@@ -156,7 +156,7 @@ describe('lexicalBlocks', () => {
       // save document and assert
       await saveDocAndAssert(page)
       await wait(300)
-      await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
+      await expect(newRSCBlock.getByTestId('block-rsc-data')).toHaveText('Data: value2')
 
       // Check if the API result is correct
       await assertLexicalDoc({
@@ -1664,7 +1664,7 @@ describe('lexicalBlocks', () => {
       await contentEditable.focus()
 
       // Undo the removal using keyboard shortcut
-      await page.keyboard.press('Control+Z')
+      await page.keyboard.press('ControlOrMeta+Z')
       await wait(500)
 
       // Wait for the block to be restored

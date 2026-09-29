@@ -4,9 +4,10 @@ import type { DragEvent as ReactDragEvent } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { eventFiles } from '@lexical/rich-text'
+import { useTranslation } from '@payloadcms/ui'
 import { $getNearestNodeFromDOMNode, $getNodeByKey, isHTMLElement } from 'lexical'
 import * as React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../../config/client/EditorConfigProvider.js'
@@ -19,6 +20,7 @@ import { setHandlePosition } from '../utils/setHandlePosition.js'
 import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
 import './index.css'
 import { setTargetLine } from './setTargetLine.js'
+import { useKeyboardReordering } from './useKeyboardReordering.js'
 
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu'
 const DRAG_DATA_FORMAT = 'application/x-lexical-drag-block'
@@ -69,6 +71,10 @@ function useDraggableBlockMenu(
   isEditable: boolean,
 ): React.ReactElement {
   const scrollerElem = anchorElem.parentElement
+  const instructionsID = useId()
+  const { t } = useTranslation()
+
+  useKeyboardReordering({ editor, instructionsID })
 
   const menuRef = useRef<HTMLButtonElement>(null)
   const targetLineRef = useRef<HTMLDivElement>(null)
@@ -428,6 +434,9 @@ function useDraggableBlockMenu(
 
   return createPortal(
     <React.Fragment>
+      <span className="sr-only" id={instructionsID}>
+        {t('general:moveUp')}: Alt + Shift + ↑. {t('general:moveDown')}: Alt + Shift + ↓.
+      </span>
       <button
         aria-label="Drag to move"
         className="icon draggable-block-menu"

@@ -19,5 +19,6 @@
   html[data-enhanced-contrast] [data-theme] {
     --diff-create-pill-color: var(--color-text-selected);
     --diff-delete-pill-color: var(--color-text);
+    --diff-delete-parent-color: var(--color-text);
   }
 }

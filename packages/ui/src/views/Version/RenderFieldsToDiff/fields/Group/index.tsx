@@ -1,5 +1,5 @@
 'use client'
-import type { GroupFieldDiffClientComponent } from 'payload'
+import type { GroupFieldDiffClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -14,7 +14,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'group-diff'
 
-export const Group: GroupFieldDiffClientComponent = ({
+export const Group: React.FC<GroupFieldDiffClientProps> = ({
   baseVersionField,
   comparisonValue: valueFrom,
   field,

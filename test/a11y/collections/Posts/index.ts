@@ -1,7 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
 import { MetaDescriptionField, MetaTitleField } from '@payloadcms/plugin-seo/fields'
-import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import {
+  BlocksFeature,
+  FixedToolbarFeature,
+  lexicalEditor,
+  TableFeature,
+} from '@payloadcms/richtext-lexical'
 import { createFolderField } from 'payload'
 
 import { mediaSlug } from '../Media/index.js'
@@ -118,8 +123,51 @@ export const PostsCollection: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+      defaultValue: {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'block',
+              fields: { blockType: 'callout', text: 'First callout' },
+              format: '',
+              version: 2,
+            },
+            {
+              type: 'block',
+              fields: { blockType: 'callout', text: 'Second callout' },
+              format: '',
+              version: 2,
+            },
+            { type: 'paragraph', children: [], direction: null, format: '', indent: 0, version: 1 },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      },
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          FixedToolbarFeature(),
+          TableFeature(),
+          BlocksFeature({
+            blocks: [
+              { slug: 'callout', fields: [{ name: 'text', type: 'text' }] },
+              {
+                slug: 'noHandle',
+                admin: {
+                  components: {
+                    Block: '/components/NoDragHandleBlock/index.js#NoDragHandleBlock',
+                  },
+                },
+                fields: [],
+                labels: { plural: 'No handle blocks', singular: 'No handle block' },
+              },
+            ],
+          }),
+        ],
       }),
     },
     {
