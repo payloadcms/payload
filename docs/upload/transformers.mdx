@@ -167,7 +167,7 @@ const externalResizeTransformer: UploadTransformer = {
 
 Ordinary file reads are unaffected by transformers: they use the same collection `read` access control that governs every other file request.
 
-A **dynamic-transform request** (one that at least one configured transformer is eligible for) additionally sets `req.fileTransform: true` for the duration of the single `access.read` call that decides whether the request may proceed. This lets a collection distinguish "someone is asking for a transformed variant of this file" from an ordinary read:
+A **dynamic-transform request** (one that at least one configured transformer is eligible for) additionally sets `req.fileTransform: true` for the duration of the `access.read` call that decides whether the request may proceed. This lets a collection distinguish "someone is asking for a transformed variant of this file" from an ordinary read:
 
 ```ts
 export const Media: CollectionConfig = {
@@ -180,7 +180,9 @@ export const Media: CollectionConfig = {
 }
 ```
 
-`req.fileTransform` is `true` only during that one access-control call. It is not set during `canTransform`, `transformFile`, or `handleRequest`. If access is denied, the pipeline never runs — `getSourceFile`, every transformer's `handleRequest`, and any external service a transformer would have called are all skipped entirely.
+`req.fileTransform` is `true` only during that one access-control call. It is not set during `canTransform`, `transformFile`, or `handleRequest`. If access is denied, the pipeline never runs — `canTransform`, `getSourceFile`, every transformer's `handleRequest`, and any external service a transformer would have called are all skipped entirely.
+
+Because `canTransform` can only run after access is granted, Payload first decides whether a request _could_ be a transform from each transformer's `mimeTypes` alone. `access.read` may therefore run a second time with `req.fileTransform` unset: when the transform-aware call is denied (the request is still served if it turns out to be an ordinary read), or when no transformer ends up applying to the request. Whichever way the request is finally served — transformed or original — the matching access mode must allow it.
 
 This access check runs before any transformer executes, and before Payload resolves which storage adapter or external provider would serve the source bytes. A denied request never reaches storage.
 
