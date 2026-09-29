@@ -238,11 +238,11 @@ const addDefaultDashboardWidgets = ({
   })
   dashboard.defaultLayout ??= [
     {
-      widgetSlug: 'collections',
+      widgetSlug: 'activity',
       width: 'full',
     } satisfies WidgetInstance,
     {
-      widgetSlug: 'activity',
+      widgetSlug: 'collections',
       width: 'full',
     } satisfies WidgetInstance,
   ]
