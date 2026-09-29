@@ -560,6 +560,24 @@ export const rsTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pretraga {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Додатна упутства',
+    collectionDescription:
+      'Додајте прилагођена упутства за колекцију {{label}} да бисте помогли LLM моделима да боље прилагоде одговоре на упите.',
+    collectionSystemDescription:
+      'Ова системска упутства потичу из конфигурационе датотеке колекције и увек су укључена.',
+    editInstructions: 'Уреди упутства за LLM',
+    global: 'Глобални документ',
+    globalDescription:
+      'Додајте прилагођена упутства за глобални документ {{label}} да бисте помогли LLM моделима да боље прилагоде одговоре на упите.',
+    globalSystemDescription:
+      'Ова системска упутства потичу из конфигурационе датотеке глобалног документа и увек су укључена.',
+    instructions: 'Упутства за LLM',
+    systemInstructions: 'Системска упутства (само за читање)',
+    targetCannotBeChanged: 'Циљ упутстава није могуће променити.',
+    targetRequired: 'Наведите тачно једно од поља collectionSlug или globalSlug.',
+    title: 'Наслов',
+  },
   localization: {
     cannotCopySameLocale: 'Не може се копирати на исту локацију.',
     copyFrom: 'Kopiraj iz',

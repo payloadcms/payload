@@ -562,6 +562,24 @@ export const viTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Tìm kiếm {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Hướng dẫn bổ sung',
+    collectionDescription:
+      'Thêm hướng dẫn tùy chỉnh cho bộ sưu tập {{label}} để giúp các LLM điều chỉnh câu trả lời cho lời nhắc phù hợp hơn.',
+    collectionSystemDescription:
+      'Các hướng dẫn hệ thống này được cung cấp từ tệp cấu hình của bộ sưu tập và luôn được bao gồm.',
+    editInstructions: 'Chỉnh sửa hướng dẫn LLM',
+    global: 'Tài liệu toàn cục',
+    globalDescription:
+      'Thêm hướng dẫn tùy chỉnh cho tài liệu toàn cục {{label}} để giúp các LLM điều chỉnh câu trả lời cho lời nhắc phù hợp hơn.',
+    globalSystemDescription:
+      'Các hướng dẫn hệ thống này được cung cấp từ tệp cấu hình của tài liệu toàn cục và luôn được bao gồm.',
+    instructions: 'Hướng dẫn LLM',
+    systemInstructions: 'Hướng dẫn hệ thống (chỉ đọc)',
+    targetCannotBeChanged: 'Không thể thay đổi đối tượng đích của hướng dẫn.',
+    targetRequired: 'Chỉ cung cấp một trong hai trường collectionSlug hoặc globalSlug.',
+    title: 'Tiêu đề',
+  },
   localization: {
     cannotCopySameLocale: 'Không thể sao chép vào cùng một vị trí',
     copyFrom: 'Sao chép từ',

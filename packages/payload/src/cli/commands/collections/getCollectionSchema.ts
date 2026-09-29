@@ -30,9 +30,10 @@ export const createGetCollectionSchemaCommand = defineCLICommand({
         }
       : { enabled: false }
 
-    const instructions = getLLMInstructions({
+    const instructions = await getLLMInstructions({
       slug,
       type: 'collection',
+      overrideAccess: true,
       req,
     })
     const result = { slug, schema, upload, ...(instructions ? { instructions } : {}) }

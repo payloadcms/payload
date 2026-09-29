@@ -565,6 +565,24 @@ export const idTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Cari {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Instruksi tambahan',
+    collectionDescription:
+      'Tambahkan instruksi khusus untuk koleksi {{label}} agar LLM dapat menyesuaikan respons terhadap prompt dengan lebih baik.',
+    collectionSystemDescription:
+      'Instruksi sistem ini berasal dari file konfigurasi koleksi dan selalu disertakan.',
+    editInstructions: 'Edit instruksi LLM',
+    global: 'Global',
+    globalDescription:
+      'Tambahkan instruksi khusus untuk global {{label}} agar LLM dapat menyesuaikan respons terhadap prompt dengan lebih baik.',
+    globalSystemDescription:
+      'Instruksi sistem ini berasal dari file konfigurasi global dan selalu disertakan.',
+    instructions: 'Instruksi LLM',
+    systemInstructions: 'Instruksi sistem (hanya baca)',
+    targetCannotBeChanged: 'Target instruksi tidak dapat diubah.',
+    targetRequired: 'Isi tepat satu dari field collectionSlug atau globalSlug.',
+    title: 'Judul',
+  },
   localization: {
     cannotCopySameLocale: 'Tidak dapat menyalin ke lokal yang sama',
     copyFrom: 'Salin dari',

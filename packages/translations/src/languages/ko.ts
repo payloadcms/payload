@@ -558,6 +558,23 @@ export const koTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: '{{label}} 검색',
   },
+  llmInstructions: {
+    additionalInstructions: '추가 지침',
+    collectionDescription:
+      'LLM이 프롬프트에 더 적합한 답변을 제공할 수 있도록 {{label}} 컬렉션에 사용자 지정 지침을 추가하세요.',
+    collectionSystemDescription:
+      '이 시스템 지침은 컬렉션의 구성 파일에서 제공되며 항상 포함됩니다.',
+    editInstructions: 'LLM 지침 편집',
+    global: '글로벌',
+    globalDescription:
+      'LLM이 프롬프트에 더 적합한 답변을 제공할 수 있도록 {{label}} 글로벌에 사용자 지정 지침을 추가하세요.',
+    globalSystemDescription: '이 시스템 지침은 글로벌의 구성 파일에서 제공되며 항상 포함됩니다.',
+    instructions: 'LLM 지침',
+    systemInstructions: '시스템 지침 (읽기 전용)',
+    targetCannotBeChanged: '지침의 대상을 변경할 수 없습니다.',
+    targetRequired: 'collectionSlug 또는 globalSlug 중 정확히 하나만 지정하세요.',
+    title: '제목',
+  },
   localization: {
     cannotCopySameLocale: '동일한 로캘에 복사할 수 없습니다.',
     copyFrom: '에서 복사하십시오.',

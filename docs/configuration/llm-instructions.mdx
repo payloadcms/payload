@@ -2,17 +2,17 @@
 title: LLM Instructions
 label: LLM Instructions
 order: 80
-desc: Configure shared instructions that guide AI agents working with your collections and globals.
+desc: Configure and manage shared instructions that guide AI agents working with your collections and globals.
 keywords: llm, ai, instructions, agents
 ---
 
-LLM instructions guide AI agents working with your collections and globals. Define Markdown instructions in your collection and global configs. The feature works without the MCP plugin.
+LLM instructions guide AI agents working with your collections and globals. Payload core manages configured Markdown instructions and additional instructions saved through the Admin Panel. The feature works without the MCP plugin.
 
-Both the [CLI](./cli) and [MCP plugin](../plugins/mcp) return these instructions alongside the writable schema. Only `getCollectionSchema` and `getGlobalSchema` include them, so agents should read the schema before creating or updating content. Instructions are omitted when none are configured.
+Both the [CLI](./cli) and [MCP plugin](../plugins/mcp) return configured instructions combined with saved additional instructions as Markdown. Only `getCollectionSchema` and `getGlobalSchema` include them, so agents should read the schema before creating or updating content. Instructions are omitted when both sources are empty.
 
 ## Configuration
 
-Set `llmInstructions` on a collection or global to provide read-only Markdown instructions:
+Set `llmInstructions` on a collection or global to provide read-only Markdown instructions. Use the root `llmInstructions` option to control instruction management:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -38,5 +38,24 @@ export default buildConfig({
       ],
     },
   ],
+  llmInstructions: {
+    access: ({ req }) => req.user?.roles?.includes('admin') ?? false,
+  },
 })
 ```
+
+## Editing instructions
+
+Open **Edit LLM instructions** from a collection's list menu or a global's edit menu. The hidden **LLM Instructions** collection has one configuration-owned entry per visible collection or global. Its **Additional instructions** tab saves editable instructions; **System instructions (read-only)** displays the configured Markdown and cannot be edited through the Admin Panel or API.
+
+## Editor
+
+Lexical uses a dedicated instructions editor with paragraphs, H2–H4 headings, bold, italic, underline, strikethrough, ordered and unordered lists, and a fixed toolbar. Its feature set is independent of the root editor's features. Set `llmInstructions.editor` to a separate rich-text adapter provider to override it. Custom editors must provide both `converters.fromMarkdown` and `converters.toMarkdown`; projects without a compatible editor use a plain-text field.
+
+## Access control
+
+Authenticated users can read saved instructions for collections and globals they have read access to. Editing also requires update access to the target and permission through `llmInstructions.access`, which defaults to users of the admin auth collection. Target access is evaluated at the entity level, as in the Admin Panel: a document filter counts as conditional access rather than being applied to instruction documents.
+
+## Disabling management
+
+Set the root `llmInstructions` option to `false` to disable the management collection and menu items. Configured collection and global instructions are still included in CLI and MCP schema responses.

@@ -557,6 +557,24 @@ export const etTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Otsi {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Lisajuhised',
+    collectionDescription:
+      'Lisage kogumile {{label}} kohandatud juhised, et aidata LLM-idel päringutele paremini kohandatud vastuseid anda.',
+    collectionSystemDescription:
+      'Need süsteemijuhised pärinevad kogumi konfiguratsioonifailist ja kaasatakse alati.',
+    editInstructions: 'Muuda LLM-i juhiseid',
+    global: 'Globaalne dokument',
+    globalDescription:
+      'Lisage globaalsele dokumendile {{label}} kohandatud juhised, et aidata LLM-idel päringutele paremini kohandatud vastuseid anda.',
+    globalSystemDescription:
+      'Need süsteemijuhised pärinevad globaalse dokumendi konfiguratsioonifailist ja kaasatakse alati.',
+    instructions: 'LLM-i juhised',
+    systemInstructions: 'Süsteemijuhised (kirjutuskaitstud)',
+    targetCannotBeChanged: 'Juhiste sihtmärki ei saa muuta.',
+    targetRequired: 'Määrake täpselt üks väljadest collectionSlug või globalSlug.',
+    title: 'Pealkiri',
+  },
   localization: {
     cannotCopySameLocale: 'Ei saa kopeerida samasse keelde',
     copyFrom: 'Kopeeri keelest',

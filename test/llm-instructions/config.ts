@@ -32,6 +32,9 @@ export default buildConfigWithDefaults({
       },
     ],
     globals: [HiddenSettings, { slug: 'site-settings', fields: [{ name: 'title', type: 'text' }] }],
+    llmInstructions: {
+      access: ({ req }) => req.user?.email === devUser.email,
+    },
     typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
   },
 })

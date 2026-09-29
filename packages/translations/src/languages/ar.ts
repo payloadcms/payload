@@ -550,6 +550,24 @@ export const arTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'البحث {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'تعليمات إضافية',
+    collectionDescription:
+      'أضف تعليمات مخصصة للمجموعة {{label}} لمساعدة نماذج LLM على تقديم استجابات أكثر ملاءمة للمطالبات.',
+    collectionSystemDescription:
+      'تأتي تعليمات النظام هذه من ملف إعدادات المجموعة ويتم تضمينها دائمًا.',
+    editInstructions: 'تعديل تعليمات LLM',
+    global: 'مستند عام',
+    globalDescription:
+      'أضف تعليمات مخصصة للمستند العام {{label}} لمساعدة نماذج LLM على تقديم استجابات أكثر ملاءمة للمطالبات.',
+    globalSystemDescription:
+      'تأتي تعليمات النظام هذه من ملف إعدادات المستند العام ويتم تضمينها دائمًا.',
+    instructions: 'تعليمات LLM',
+    systemInstructions: 'تعليمات النظام (للقراءة فقط)',
+    targetCannotBeChanged: 'لا يمكن تغيير هدف التعليمات.',
+    targetRequired: 'حدد حقلًا واحدًا فقط من collectionSlug أو globalSlug.',
+    title: 'العنوان',
+  },
   localization: {
     cannotCopySameLocale: 'لا يمكن النسخ إلى نفس الموقع',
     copyFrom: 'نسخ من',

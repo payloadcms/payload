@@ -561,6 +561,24 @@ export const daTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Søg {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Yderligere instruktioner',
+    collectionDescription:
+      "Tilføj tilpassede instruktioner til samlingen {{label}}, så LLM'er bedre kan tilpasse deres svar på prompts.",
+    collectionSystemDescription:
+      'Disse systeminstruktioner kommer fra samlingens konfigurationsfil og medtages altid.',
+    editInstructions: 'Rediger LLM-instruktioner',
+    global: 'Global',
+    globalDescription:
+      "Tilføj tilpassede instruktioner til globalen {{label}}, så LLM'er bedre kan tilpasse deres svar på prompts.",
+    globalSystemDescription:
+      'Disse systeminstruktioner kommer fra globalens konfigurationsfil og medtages altid.',
+    instructions: 'LLM-instruktioner',
+    systemInstructions: 'Systeminstruktioner (skrivebeskyttet)',
+    targetCannotBeChanged: 'Instruktionernes mål kan ikke ændres.',
+    targetRequired: 'Angiv præcis ét af felterne collectionSlug eller globalSlug.',
+    title: 'Titel',
+  },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til den samme lokalitet',
     copyFrom: 'Kopier fra',

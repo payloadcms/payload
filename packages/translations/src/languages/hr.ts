@@ -560,6 +560,24 @@ export const hrTranslations: DefaultTranslationsObject = {
     noResults: 'No results for "{{query}}"',
     searchLabel: 'Pretraži {{label}}',
   },
+  llmInstructions: {
+    additionalInstructions: 'Dodatne upute',
+    collectionDescription:
+      'Dodajte prilagođene upute za zbirku {{label}} kako biste pomogli LLM-ovima da bolje prilagode odgovore na upite.',
+    collectionSystemDescription:
+      'Ove sistemske upute dolaze iz konfiguracijske datoteke zbirke i uvijek su uključene.',
+    editInstructions: 'Uredi upute za LLM',
+    global: 'Globalni dokument',
+    globalDescription:
+      'Dodajte prilagođene upute za globalni dokument {{label}} kako biste pomogli LLM-ovima da bolje prilagode odgovore na upite.',
+    globalSystemDescription:
+      'Ove sistemske upute dolaze iz konfiguracijske datoteke globalnog dokumenta i uvijek su uključene.',
+    instructions: 'Upute za LLM',
+    systemInstructions: 'Sistemske upute (samo za čitanje)',
+    targetCannotBeChanged: 'Cilj uputa nije moguće promijeniti.',
+    targetRequired: 'Navedite točno jedno od polja collectionSlug ili globalSlug.',
+    title: 'Naslov',
+  },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',
     copyFrom: 'Kopiraj iz',
